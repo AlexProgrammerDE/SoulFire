@@ -24,7 +24,8 @@ import java.io.Serial;
  * this exception and insert a path recalculation action and return the best path.
  */
 public class OutOfLevelException extends RuntimeException {
-  @Serial private static final long serialVersionUID = 1L;
+  @Serial
+  private static final long serialVersionUID = 1L;
 
   public OutOfLevelException() {
     super();

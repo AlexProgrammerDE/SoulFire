@@ -22,14 +22,14 @@ import java.util.Locale;
 import java.util.function.Function;
 
 public record ComboProperty(
-    String namespace,
-    String key,
-    String uiName,
-    String[] cliFlags,
-    String description,
-    ComboOption[] options,
-    int defaultValue)
-    implements SingleProperty {
+  String namespace,
+  String key,
+  String uiName,
+  String[] cliFlags,
+  String description,
+  ComboOption[] options,
+  int defaultValue)
+  implements SingleProperty {
   public ComboProperty {
     if (options.length == 0) {
       throw new IllegalArgumentException("Options must not be empty!");
@@ -42,10 +42,10 @@ public record ComboProperty(
 
   public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
     return String.join(
-        " ",
-        Arrays.stream(enumValue.name().split("_"))
-            .map(ComboProperty::capitalizeString)
-            .toArray(String[]::new));
+      " ",
+      Arrays.stream(enumValue.name().split("_"))
+        .map(ComboProperty::capitalizeString)
+        .toArray(String[]::new));
   }
 
   public static String capitalizeString(String str) {
@@ -54,7 +54,7 @@ public record ComboProperty(
 
   public record ComboOption(String id, String displayName) {
     public static <T extends Enum<T>> ComboOption[] fromEnum(
-        T[] values, Function<T, String> mapper) {
+      T[] values, Function<T, String> mapper) {
       var options = new ComboOption[values.length];
 
       for (var i = 0; i < values.length; i++) {

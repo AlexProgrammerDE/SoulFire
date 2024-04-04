@@ -25,7 +25,7 @@ import net.lenni0451.reflect.stream.field.FieldWrapper;
 
 public class EventUtil {
   private static final FieldWrapper handlersWrapper =
-      RStream.of(LambdaManager.class).fields().by("handlers");
+    RStream.of(LambdaManager.class).fields().by("handlers");
 
   private EventUtil() {}
 

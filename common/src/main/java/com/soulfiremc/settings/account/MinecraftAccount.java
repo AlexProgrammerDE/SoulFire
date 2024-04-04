@@ -29,34 +29,34 @@ import lombok.NonNull;
  * Represents an authenticated MC account. This can be a premium, offline or bedrock account. Beware
  * that the profileId is not a valid online UUID for offline and bedrock accounts.
  *
- * @param authType The type of authentication
- * @param profileId Identifier that uniquely identifies the account
+ * @param authType      The type of authentication
+ * @param profileId     Identifier that uniquely identifies the account
  * @param lastKnownName The last known name of the account
- * @param accountData The data of the account (values depend on the authType)
+ * @param accountData   The data of the account (values depend on the authType)
  */
 public record MinecraftAccount(
-    @NonNull AuthType authType,
-    @NonNull UUID profileId,
-    @NonNull String lastKnownName,
-    @NonNull AccountData accountData) {
+  @NonNull AuthType authType,
+  @NonNull UUID profileId,
+  @NonNull String lastKnownName,
+  @NonNull AccountData accountData) {
   public static MinecraftAccount fromProto(MinecraftAccountProto account) {
     return new MinecraftAccount(
-        AuthType.valueOf(account.getType().name()),
-        UUID.fromString(account.getProfileId()),
-        account.getLastKnownName(),
-        switch (account.getAccountDataCase()) {
-          case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
-          case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
-          case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
-          case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
-        });
+      AuthType.valueOf(account.getType().name()),
+      UUID.fromString(account.getProfileId()),
+      account.getLastKnownName(),
+      switch (account.getAccountDataCase()) {
+        case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
+        case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
+        case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
+        case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
+      });
   }
 
   @Override
   public String toString() {
     return String.format(
-        "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)",
-        authType, profileId, lastKnownName);
+      "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)",
+      authType, profileId, lastKnownName);
   }
 
   public boolean isPremiumJava() {
@@ -69,10 +69,10 @@ public record MinecraftAccount(
 
   public MinecraftAccountProto toProto() {
     var builder =
-        MinecraftAccountProto.newBuilder()
-            .setType(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
-            .setProfileId(profileId.toString())
-            .setLastKnownName(lastKnownName);
+      MinecraftAccountProto.newBuilder()
+        .setType(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
+        .setProfileId(profileId.toString())
+        .setLastKnownName(lastKnownName);
 
     switch (accountData) {
       case BedrockData bedrockData -> {

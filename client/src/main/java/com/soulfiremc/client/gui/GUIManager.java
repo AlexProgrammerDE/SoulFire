@@ -46,7 +46,7 @@ public class GUIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
   private final Injector injector =
-      new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
+    new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager;
   private final ClientSettingsManager clientSettingsManager;
@@ -103,10 +103,10 @@ public class GUIManager {
   private void shutdownHook() {
     threadPool.shutdown();
     SwingUtilities.invokeLater(
-        () -> {
-          var frame = (GUIFrame) injector.getSingleton(GUIFrame.class);
-          frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-        });
+      () -> {
+        var frame = (GUIFrame) injector.getSingleton(GUIFrame.class);
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+      });
   }
 
   public void setAppTitle() {
@@ -120,8 +120,8 @@ public class GUIManager {
       Modules.openModule(xToolkit.getClass());
 
       var classNameVariable =
-          MethodHandles.privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
-              .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
+        MethodHandles.privateLookupIn(xToolkit.getClass(), MethodHandles.lookup())
+          .findStaticVarHandle(xToolkit.getClass(), "awtAppClassName", String.class);
 
       classNameVariable.set("SoulFire");
     } catch (Exception e) {
@@ -140,12 +140,12 @@ public class GUIManager {
     }
 
     threadPool.submit(
-        () -> {
-          try {
-            Desktop.getDesktop().browse(uri);
-          } catch (IOException e) {
-            log.error("Failed to open browser!", e);
-          }
-        });
+      () -> {
+        try {
+          Desktop.getDesktop().browse(uri);
+        } catch (IOException e) {
+          log.error("Failed to open browser!", e);
+        }
+      });
   }
 }

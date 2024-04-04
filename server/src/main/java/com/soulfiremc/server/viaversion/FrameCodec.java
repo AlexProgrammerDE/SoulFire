@@ -39,15 +39,15 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
     var index = in.readerIndex();
     var nByte = new AtomicInteger();
     var result =
-        in.forEachByte(
-            it -> {
-              nByte.getAndIncrement();
-              var hasNext = (it & 0x10000000) != 0;
-              if (nByte.get() > 3) {
-                throw getBadLength();
-              }
-              return hasNext;
-            });
+      in.forEachByte(
+        it -> {
+          nByte.getAndIncrement();
+          var hasNext = (it & 0x10000000) != 0;
+          if (nByte.get() > 3) {
+            throw getBadLength();
+          }
+          return hasNext;
+        });
     in.readerIndex(index);
     if (result == -1) {
       return; // not readable

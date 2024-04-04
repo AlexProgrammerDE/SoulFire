@@ -38,29 +38,32 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
-/** Java port of prismarine-physics. */
+/**
+ * Java port of prismarine-physics.
+ */
 public class BotMovementManager {
   private static final List<BlockType> WATER_TYPES = List.of(BlockType.WATER);
   private static final List<BlockType> LAVA_TYPES = List.of(BlockType.WATER);
   private static final List<BlockType> WATER_LIKE_TYPES =
-      List.of(
-          BlockType.WATER,
-          BlockType.SEAGRASS,
-          BlockType.TALL_SEAGRASS,
-          BlockType.KELP,
-          BlockType.KELP_PLANT,
-          BlockType.BUBBLE_COLUMN);
+    List.of(
+      BlockType.WATER,
+      BlockType.SEAGRASS,
+      BlockType.TALL_SEAGRASS,
+      BlockType.KELP,
+      BlockType.KELP_PLANT,
+      BlockType.BUBBLE_COLUMN);
   private final ClientEntity clientEntity;
-  @Getter private final PlayerMovementState movementState;
+  @Getter
+  private final PlayerMovementState movementState;
   private final PhysicsData physics;
   private final TagsState tagsState;
   private final SessionDataManager dataManager;
   private final ControlState controlState;
 
   public BotMovementManager(
-      SessionDataManager dataManager,
-      PlayerMovementState movementState,
-      ClientEntity clientEntity) {
+    SessionDataManager dataManager,
+    PlayerMovementState movementState,
+    ClientEntity clientEntity) {
     this.clientEntity = clientEntity;
     this.movementState = movementState;
     this.physics = clientEntity.physics();
@@ -70,7 +73,7 @@ public class BotMovementManager {
   }
 
   private static void consumeIntersectedBlocks(
-      LevelState world, AABB queryBB, BiConsumer<BlockState, Vector3i> consumer) {
+    LevelState world, AABB queryBB, BiConsumer<BlockState, Vector3i> consumer) {
     var startX = MathHelper.floorDouble(queryBB.minX - 1.0E-7) - 1;
     var endX = MathHelper.floorDouble(queryBB.maxX + 1.0E-7) + 1;
     var startY = MathHelper.floorDouble(queryBB.minY - 1.0E-7) - 1;
@@ -101,11 +104,11 @@ public class BotMovementManager {
 
   public static Vector3d collideBoundingBox(LevelState world, Vector3d targetVec, AABB queryBB) {
     return collideWith(
-        targetVec, queryBB, world.getCollisionBoxes(queryBB.expandTowards(targetVec)));
+      targetVec, queryBB, world.getCollisionBoxes(queryBB.expandTowards(targetVec)));
   }
 
   private static Vector3d collideWith(
-      Vector3d direction, AABB boundingBox, List<AABB> collisionBoxes) {
+    Vector3d direction, AABB boundingBox, List<AABB> collisionBoxes) {
     var dx = direction.getX();
     var dy = direction.getY();
     var dz = direction.getZ();
@@ -194,7 +197,7 @@ public class BotMovementManager {
     var lookZ = -cosYaw * cosPitch;
     var lookDir = new MutableVector3d(lookX, sinPitch, lookZ);
     return new LookingVectorData(
-        yaw, pitch, sinYaw, cosYaw, sinPitch, cosPitch, lookX, sinPitch, lookZ, lookDir);
+      yaw, pitch, sinYaw, cosYaw, sinPitch, cosPitch, lookX, sinPitch, lookZ, lookDir);
   }
 
   public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
@@ -229,7 +232,7 @@ public class BotMovementManager {
   public boolean isClimbable(LevelState world, Vector3i pos) {
     var blockType = world.getBlockStateAt(pos).blockType();
     return tagsState.isBlockInTag(blockType, BlockTags.CLIMBABLE)
-        || blockType == BlockType.POWDER_SNOW;
+      || blockType == BlockType.POWDER_SNOW;
   }
 
   public void tick() {
@@ -270,12 +273,12 @@ public class BotMovementManager {
         vel.y += 0.04;
       } else if (movementState.onGround && movementState.jumpTicks == 0) {
         var blockBelow =
-            world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+          world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
         vel.y =
-            (float) (0.42)
-                * ((blockBelow.blockType() == BlockType.HONEY_BLOCK)
-                    ? physics.honeyblockJumpSpeed
-                    : 1);
+          (float) (0.42)
+            * ((blockBelow.blockType() == BlockType.HONEY_BLOCK)
+            ? physics.honeyblockJumpSpeed
+            : 1);
         if (movementState.jumpBoost > 0) {
           vel.y += 0.1 * movementState.jumpBoost;
         }
@@ -321,10 +324,10 @@ public class BotMovementManager {
     }
 
     movementState.elytraFlying =
-        movementState.elytraFlying
-            && movementState.elytraEquipped
-            && !movementState.onGround
-            && movementState.levitation == 0;
+      movementState.elytraFlying
+        && movementState.elytraEquipped
+        && !movementState.onGround
+        && movementState.levitation == 0;
 
     if (movementState.fireworkRocketDuration > 0) {
       if (!movementState.elytraFlying) {
@@ -382,13 +385,13 @@ public class BotMovementManager {
       moveEntity(world, vel.x, vel.y, vel.z);
       vel.y *= typeSpeed;
       vel.y -=
-          (movementState.isInWater ? physics.waterGravity : physics.lavaGravity)
-              * gravityMultiplier;
+        (movementState.isInWater ? physics.waterGravity : physics.lavaGravity)
+          * gravityMultiplier;
       vel.x *= horizontalInertia;
       vel.z *= horizontalInertia;
 
       if (movementState.isCollidedHorizontally
-          && doesNotCollide(world, pos.offset(vel.x, vel.y + 0.6 - pos.y + lastY, vel.z))) {
+        && doesNotCollide(world, pos.offset(vel.x, vel.y + 0.6 - pos.y + lastY, vel.z))) {
         vel.y = physics.outOfLiquidImpulse; // jump out of liquid
       }
     } else if (movementState.elytraFlying) {
@@ -455,7 +458,7 @@ public class BotMovementManager {
       moveEntity(world, vel.x, vel.y, vel.z);
 
       if ((movementState.isCollidedHorizontally || controlState.jumping())
-          && isClimbable(world, pos.toImmutableInt())) {
+        && isClimbable(world, pos.toImmutableInt())) {
         vel.y = physics.climbSpeed; // climb ladder
       }
 
@@ -488,11 +491,11 @@ public class BotMovementManager {
 
     if (controlState.sprinting()) {
       playerSpeedAttribute
-          .modifiers()
-          .putIfAbsent(
-              physics.sprintingUUID,
-              new Attribute.Modifier(
-                  physics.sprintingUUID, physics.sprintSpeed, ModifierOperation.MULTIPLY_TOTAL));
+        .modifiers()
+        .putIfAbsent(
+          physics.sprintingUUID,
+          new Attribute.Modifier(
+            physics.sprintingUUID, physics.sprintSpeed, ModifierOperation.MULTIPLY_TOTAL));
     } else {
       // Client-side sprinting (don't rely on server-side sprinting)
       // setSprinting in LivingEntity.java
@@ -601,28 +604,28 @@ public class BotMovementManager {
 
     // Finally, apply block collisions (web, soulsand...)
     consumeIntersectedBlocks(
-        world,
-        resultingBB.deflate(0.001, 0.001, 0.001),
-        (block, cursor) -> {
-          if (block.blockType() == BlockType.COBWEB) {
-            movementState.isInWeb = true;
-          } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
-            var down = !block.properties().getBoolean("drag");
-            var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
-            var bubbleDrag =
-                aboveBlock.blockType() == BlockType.AIR
-                    ? physics.bubbleColumnSurfaceDrag
-                    : physics.bubbleColumnDrag;
-            if (down) {
-              vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
-            } else {
-              vel.y = Math.min(bubbleDrag.maxUp(), vel.y + bubbleDrag.up());
-            }
+      world,
+      resultingBB.deflate(0.001, 0.001, 0.001),
+      (block, cursor) -> {
+        if (block.blockType() == BlockType.COBWEB) {
+          movementState.isInWeb = true;
+        } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
+          var down = !block.properties().getBoolean("drag");
+          var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
+          var bubbleDrag =
+            aboveBlock.blockType() == BlockType.AIR
+              ? physics.bubbleColumnSurfaceDrag
+              : physics.bubbleColumnDrag;
+          if (down) {
+            vel.y = Math.max(bubbleDrag.maxDown(), vel.y - bubbleDrag.down());
+          } else {
+            vel.y = Math.min(bubbleDrag.maxUp(), vel.y + bubbleDrag.up());
           }
-        });
+        }
+      });
 
     var blockBelow =
-        world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+      world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
     if (blockBelow.blockType() == BlockType.SOUL_SAND) {
       vel.x *= physics.soulsandSpeed;
       vel.z *= physics.soulsandSpeed;
@@ -634,9 +637,9 @@ public class BotMovementManager {
 
   private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {
     var initialCollisionVec =
-        targetVec.lengthSquared() == 0.0
-            ? targetVec
-            : collideBoundingBox(world, targetVec, playerBB);
+      targetVec.lengthSquared() == 0.0
+        ? targetVec
+        : collideBoundingBox(world, targetVec, playerBB);
     var xChanged = targetVec.getX() != initialCollisionVec.getY();
     var yChanged = targetVec.getY() != initialCollisionVec.getY();
     var zChanged = targetVec.getZ() != initialCollisionVec.getZ();
@@ -645,22 +648,22 @@ public class BotMovementManager {
     // Step on block if height < stepHeight
     if (physics.stepHeight > 0 && collidedY && (xChanged || zChanged)) {
       var fullStep =
-          collideBoundingBox(
-              world,
-              Vector3d.from(targetVec.getX(), physics.stepHeight, targetVec.getZ()),
-              playerBB);
+        collideBoundingBox(
+          world,
+          Vector3d.from(targetVec.getX(), physics.stepHeight, targetVec.getZ()),
+          playerBB);
       var justStep =
-          collideBoundingBox(
-              world,
-              Vector3d.from(0.0, physics.stepHeight, 0.0),
-              playerBB.expandTowards(targetVec.getX(), 0.0, targetVec.getZ()));
+        collideBoundingBox(
+          world,
+          Vector3d.from(0.0, physics.stepHeight, 0.0),
+          playerBB.expandTowards(targetVec.getX(), 0.0, targetVec.getZ()));
       if (justStep.getY() < physics.stepHeight) {
         var justMove =
-            collideBoundingBox(
-                    world,
-                    Vector3d.from(targetVec.getX(), 0.0, targetVec.getZ()),
-                    playerBB.move(justStep))
-                .add(justStep);
+          collideBoundingBox(
+            world,
+            Vector3d.from(targetVec.getX(), 0.0, targetVec.getZ()),
+            playerBB.move(justStep))
+            .add(justStep);
         if (horizontalDistanceSqr(justMove) > horizontalDistanceSqr(fullStep)) {
           fullStep = justMove;
         }
@@ -668,10 +671,10 @@ public class BotMovementManager {
 
       if (horizontalDistanceSqr(fullStep) > horizontalDistanceSqr(initialCollisionVec)) {
         return fullStep.add(
-            collideBoundingBox(
-                world,
-                Vector3d.from(0.0, -fullStep.getY() + targetVec.getY(), 0.0),
-                playerBB.move(fullStep)));
+          collideBoundingBox(
+            world,
+            Vector3d.from(0.0, -fullStep.getY() + targetVec.getY(), 0.0),
+            playerBB.move(fullStep)));
       }
     }
 
@@ -736,7 +739,7 @@ public class BotMovementManager {
     var curlevel = getRenderedDepth(meta);
     var flow = new MutableVector3d(0, 0, 0);
     for (var combination :
-        new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
+      new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
       var dx = combination[0];
       var dz = combination[1];
       var adjBlockVec = block.add(dx, 0, dz);
@@ -761,13 +764,13 @@ public class BotMovementManager {
 
     if (meta.properties().getInt("level") >= 8) {
       for (var combination :
-          new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
+        new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
         var dx = combination[0];
         var dz = combination[1];
         var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
         var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
         if ((adjBlock.blockShapeGroup().hasNoCollisions())
-            || (adjUpBlock.blockShapeGroup().hasNoCollisions())) {
+          || (adjUpBlock.blockShapeGroup().hasNoCollisions())) {
           flow.normalize().translate(0, -6, 0);
         }
       }
@@ -780,18 +783,18 @@ public class BotMovementManager {
     var waterBlocks = new ArrayList<Pair<Vector3i, BlockState>>();
 
     consumeIntersectedBlocks(
-        world,
-        bb,
-        (block, cursor) -> {
-          if (WATER_TYPES.contains(block.blockType())
-              || WATER_LIKE_TYPES.contains(block.blockType())
-              || block.properties().getBoolean("waterlogged")) {
-            var waterLevel = cursor.getY() + 1 - getLiquidHeightPercent(block);
-            if (Math.ceil(bb.maxY) >= waterLevel) {
-              waterBlocks.add(Pair.of(cursor, block));
-            }
+      world,
+      bb,
+      (block, cursor) -> {
+        if (WATER_TYPES.contains(block.blockType())
+          || WATER_LIKE_TYPES.contains(block.blockType())
+          || block.properties().getBoolean("waterlogged")) {
+          var waterLevel = cursor.getY() + 1 - getLiquidHeightPercent(block);
+          if (Math.ceil(bb.maxY) >= waterLevel) {
+            waterBlocks.add(Pair.of(cursor, block));
           }
-        });
+        }
+      });
 
     return waterBlocks;
   }
@@ -827,14 +830,14 @@ public class BotMovementManager {
   }
 
   record LookingVectorData(
-      float yaw,
-      float pitch,
-      double sinYaw,
-      double cosYaw,
-      double sinPitch,
-      double cosPitch,
-      double lookX,
-      double lookY,
-      double lookZ,
-      MutableVector3d lookDir) {}
+    float yaw,
+    float pitch,
+    double sinYaw,
+    double cosYaw,
+    double sinPitch,
+    double cosPitch,
+    double lookX,
+    double lookY,
+    double lookZ,
+    MutableVector3d lookDir) {}
 }

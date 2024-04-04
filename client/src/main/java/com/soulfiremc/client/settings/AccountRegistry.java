@@ -42,40 +42,40 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AccountRegistry {
   private final ObjectSortedSet<EnabledWrapper<MinecraftAccount>> accounts =
-      new ObjectLinkedOpenCustomHashSet<>(
-          new Hash.Strategy<>() {
-            @Override
-            public int hashCode(EnabledWrapper<MinecraftAccount> obj) {
-              if (obj == null) {
-                return 0;
-              }
+    new ObjectLinkedOpenCustomHashSet<>(
+      new Hash.Strategy<>() {
+        @Override
+        public int hashCode(EnabledWrapper<MinecraftAccount> obj) {
+          if (obj == null) {
+            return 0;
+          }
 
-              return obj.value().profileId().hashCode();
-            }
+          return obj.value().profileId().hashCode();
+        }
 
-            @Override
-            public boolean equals(
-                EnabledWrapper<MinecraftAccount> obj1, EnabledWrapper<MinecraftAccount> obj2) {
-              if (obj1 == null || obj2 == null) {
-                return false;
-              }
+        @Override
+        public boolean equals(
+          EnabledWrapper<MinecraftAccount> obj1, EnabledWrapper<MinecraftAccount> obj2) {
+          if (obj1 == null || obj2 == null) {
+            return false;
+          }
 
-              return obj1.value().profileId().equals(obj2.value().profileId());
-            }
-          });
+          return obj1.value().profileId().equals(obj2.value().profileId());
+        }
+      });
   private final List<Runnable> loadHooks = new ArrayList<>();
   private final RPCClient rpcClient;
 
   public void loadFromString(String data, AuthType authType, SFProxy proxy) {
     try {
       var newAccounts =
-          data.lines()
-              .map(String::strip)
-              .filter(Predicate.not(String::isBlank))
-              .distinct()
-              .map(account -> fromStringSingle(account, authType, proxy))
-              .map(EnabledWrapper::defaultTrue)
-              .toList();
+        data.lines()
+          .map(String::strip)
+          .filter(Predicate.not(String::isBlank))
+          .distinct()
+          .map(account -> fromStringSingle(account, authType, proxy))
+          .map(EnabledWrapper::defaultTrue)
+          .toList();
 
       if (newAccounts.isEmpty()) {
         log.warn("No accounts found in the provided data!");
@@ -94,16 +94,16 @@ public class AccountRegistry {
   private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
     try {
       var request =
-          AuthRequest.newBuilder()
-              .setService(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
-              .setPayload(data);
+        AuthRequest.newBuilder()
+          .setService(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
+          .setPayload(data);
 
       if (proxy != null) {
         request.setProxy(proxy.toProto());
       }
 
       return MinecraftAccount.fromProto(
-          rpcClient.mcAuthServiceBlocking().login(request.build()).getAccount());
+        rpcClient.mcAuthServiceBlocking().login(request.build()).getAccount());
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);
@@ -129,8 +129,8 @@ public class AccountRegistry {
 
   public Optional<MinecraftAccount> getAccount(UUID profileId) {
     return accounts.stream()
-        .map(EnabledWrapper::value)
-        .filter(account -> account.profileId().equals(profileId))
-        .findFirst();
+      .map(EnabledWrapper::value)
+      .filter(account -> account.profileId().equals(profileId))
+      .findFirst();
   }
 }

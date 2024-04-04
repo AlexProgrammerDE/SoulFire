@@ -20,7 +20,9 @@ package com.soulfiremc.server.util;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
-/** Simple class to make waiting easier and less verbose. */
+/**
+ * Simple class to make waiting easier and less verbose.
+ */
 public class TimeUtil {
   private TimeUtil() {}
 

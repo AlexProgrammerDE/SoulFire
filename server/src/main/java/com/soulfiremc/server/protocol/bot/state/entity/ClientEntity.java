@@ -35,7 +35,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Represents the bot itself as an entity. */
+/**
+ * Represents the bot itself as an entity.
+ */
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
@@ -56,12 +58,12 @@ public class ClientEntity extends Entity {
   private int positionReminder = 0;
 
   public ClientEntity(
-      int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
+    int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
     super(entityId, uuid, EntityType.PLAYER);
     this.sessionDataManager = sessionDataManager;
     this.controlState = controlState;
     this.movementState =
-        new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
+      new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
     this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
     this.yaw = -180;
   }
@@ -94,8 +96,8 @@ public class ClientEntity extends Entity {
     var yawDiff = (double) (yaw - lastYaw);
     var pitchDiff = (double) (pitch - lastPitch);
     var sendPos =
-        MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
-            || ++positionReminder >= 20;
+      MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
+        || ++positionReminder >= 20;
     var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
     var sendOnGround = onGround != lastOnGround;
 
@@ -128,12 +130,12 @@ public class ClientEntity extends Entity {
   public double eyeHeight() {
     if (this.controlState.sneaking()) {
       return sessionDataManager
-              .connection()
-              .meta()
-              .protocolVersion()
-              .newerThanOrEqualTo(ProtocolVersion.v1_14)
-          ? 1.27F
-          : 1.54F;
+        .connection()
+        .meta()
+        .protocolVersion()
+        .newerThanOrEqualTo(ProtocolVersion.v1_14)
+        ? 1.27F
+        : 1.54F;
     } else {
       return 1.62F;
     }
@@ -153,7 +155,7 @@ public class ClientEntity extends Entity {
     lastPitch = pitch;
 
     sessionDataManager.sendPacket(
-        new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
+      new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
   }
 
   public void sendPos() {

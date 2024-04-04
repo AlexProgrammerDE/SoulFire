@@ -40,21 +40,21 @@ public class AutoJump implements InternalPlugin {
 
     var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
     ExecutorHelper.executeRandomDelaySeconds(
-        executor,
-        () -> {
-          var sessionDataManager = connection.sessionDataManager();
-          var level = sessionDataManager.getCurrentLevel();
-          var clientEntity = sessionDataManager.clientEntity();
-          if (level != null
-              && clientEntity != null
-              && level.isChunkLoaded(clientEntity.blockPos())
-              && clientEntity.onGround()) {
-            connection.logger().debug("[AutoJump] Jumping!");
-            clientEntity.jump();
-          }
-        },
-        settingsHolder.get(AutoJumpSettings.DELAY.min()),
-        settingsHolder.get(AutoJumpSettings.DELAY.max()));
+      executor,
+      () -> {
+        var sessionDataManager = connection.sessionDataManager();
+        var level = sessionDataManager.getCurrentLevel();
+        var clientEntity = sessionDataManager.clientEntity();
+        if (level != null
+          && clientEntity != null
+          && level.isChunkLoaded(clientEntity.blockPos())
+          && clientEntity.onGround()) {
+          connection.logger().debug("[AutoJump] Jumping!");
+          clientEntity.jump();
+        }
+      },
+      settingsHolder.get(AutoJumpSettings.DELAY.min()),
+      settingsHolder.get(AutoJumpSettings.DELAY.max()));
   }
 
   @EventHandler
@@ -72,31 +72,31 @@ public class AutoJump implements InternalPlugin {
   private static class AutoJumpSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-jump");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Enable Auto Jump",
-            new String[] {"--auto-jump"},
-            "Attempt to jump automatically in random intervals",
-            false);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable Auto Jump",
+        new String[] {"--auto-jump"},
+        "Attempt to jump automatically in random intervals",
+        false);
     public static final MinMaxPropertyLink DELAY =
-        new MinMaxPropertyLink(
-            BUILDER.ofInt(
-                "min-delay",
-                "Min delay (seconds)",
-                new String[] {"--jump-min-delay"},
-                "Minimum delay between jumps",
-                2,
-                0,
-                Integer.MAX_VALUE,
-                1),
-            BUILDER.ofInt(
-                "max-delay",
-                "Max delay (seconds)",
-                new String[] {"--jump-max-delay"},
-                "Maximum delay between jumps",
-                5,
-                0,
-                Integer.MAX_VALUE,
-                1));
+      new MinMaxPropertyLink(
+        BUILDER.ofInt(
+          "min-delay",
+          "Min delay (seconds)",
+          new String[] {"--jump-min-delay"},
+          "Minimum delay between jumps",
+          2,
+          0,
+          Integer.MAX_VALUE,
+          1),
+        BUILDER.ofInt(
+          "max-delay",
+          "Max delay (seconds)",
+          new String[] {"--jump-max-delay"},
+          "Maximum delay between jumps",
+          5,
+          0,
+          Integer.MAX_VALUE,
+          1));
   }
 }

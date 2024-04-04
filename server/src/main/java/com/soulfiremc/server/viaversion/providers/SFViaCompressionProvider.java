@@ -26,7 +26,7 @@ public class SFViaCompressionProvider extends CompressionProvider {
   @Override
   public void handlePlayCompression(UserConnection user, int threshold) {
     Objects.requireNonNull(user.get(StorableSession.class))
-        .session()
-        .setCompressionThreshold(threshold);
+      .session()
+      .setCompressionThreshold(threshold);
   }
 }

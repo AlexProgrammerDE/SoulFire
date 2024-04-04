@@ -27,33 +27,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DevSettings implements SettingsObject {
   public static final Property.Builder BUILDER =
-      Property.builder(BuiltinSettingsConstants.DEV_SETTINGS_ID);
+    Property.builder(BuiltinSettingsConstants.DEV_SETTINGS_ID);
   public static final BooleanProperty CORE_DEBUG =
-      BUILDER.ofBoolean(
-          "core-debug",
-          "Core debug",
-          new String[] {"--core-debug"},
-          "Enable core code debug logging",
-          false);
+    BUILDER.ofBoolean(
+      "core-debug",
+      "Core debug",
+      new String[] {"--core-debug"},
+      "Enable core code debug logging",
+      false);
   public static final BooleanProperty VIA_DEBUG =
-      BUILDER.ofBoolean(
-          "via-debug",
-          "Via debug",
-          new String[] {"--via-debug"},
-          "Enable Via* code debug logging",
-          false);
+    BUILDER.ofBoolean(
+      "via-debug",
+      "Via debug",
+      new String[] {"--via-debug"},
+      "Enable Via* code debug logging",
+      false);
   public static final BooleanProperty NETTY_DEBUG =
-      BUILDER.ofBoolean(
-          "netty-debug",
-          "Netty debug",
-          new String[] {"--netty-debug"},
-          "Enable Netty debug logging",
-          false);
+    BUILDER.ofBoolean(
+      "netty-debug",
+      "Netty debug",
+      new String[] {"--netty-debug"},
+      "Enable Netty debug logging",
+      false);
   public static final BooleanProperty GRPC_DEBUG =
-      BUILDER.ofBoolean(
-          "grpc-debug",
-          "gRPC debug",
-          new String[] {"--grpc-debug"},
-          "Enable gRPC debug logging",
-          false);
+    BUILDER.ofBoolean(
+      "grpc-debug",
+      "gRPC debug",
+      new String[] {"--grpc-debug"},
+      "Enable gRPC debug logging",
+      false);
 }

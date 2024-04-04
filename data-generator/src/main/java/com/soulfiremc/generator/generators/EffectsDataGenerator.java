@@ -30,8 +30,8 @@ public class EffectsDataGenerator implements IDataGenerator {
 
     effectDesc.addProperty("id", BuiltInRegistries.MOB_EFFECT.getId(effect));
     effectDesc.addProperty(
-        "key",
-        Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(effect)).toString());
+      "key",
+      Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(effect)).toString());
 
     if (effect.isBeneficial()) {
       effectDesc.addProperty("beneficial", true);

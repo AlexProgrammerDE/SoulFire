@@ -35,40 +35,40 @@ import reactor.core.publisher.Mono;
 public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   @Override
   public void check(
-      ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
+    ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
     try {
       ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.CHECK_PROXY);
 
       var url =
-          switch (request.getTarget()) {
-            case IPIFY -> ReactorHttpHelper.createURL("https://api.ipify.org");
-            case AWS -> ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
-            case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized target");
-          };
+        switch (request.getTarget()) {
+          case IPIFY -> ReactorHttpHelper.createURL("https://api.ipify.org");
+          case AWS -> ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
+          case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized target");
+        };
 
       var responses = new ArrayList<ProxyCheckResponseSingle>();
       for (var proxy : request.getProxyList().stream().map(SFProxy::fromProto).toList()) {
         var client = ReactorHttpHelper.createReactorClient(proxy, false);
         var stopWatch = Stopwatch.createStarted();
         var response =
-            client
-                .get()
-                .uri(url.toString())
-                .responseSingle(
-                    (r, b) -> {
-                      if (r.status().code() == 200) {
-                        return b.asString();
-                      }
+          client
+            .get()
+            .uri(url.toString())
+            .responseSingle(
+              (r, b) -> {
+                if (r.status().code() == 200) {
+                  return b.asString();
+                }
 
-                      return Mono.empty();
-                    })
-                .blockOptional();
+                return Mono.empty();
+              })
+            .blockOptional();
 
         var single =
-            ProxyCheckResponseSingle.newBuilder()
-                .setProxy(proxy.toProto())
-                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                .setValid(response.isPresent());
+          ProxyCheckResponseSingle.newBuilder()
+            .setProxy(proxy.toProto())
+            .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+            .setValid(response.isPresent());
 
         response.ifPresent(single::setRealIp);
 

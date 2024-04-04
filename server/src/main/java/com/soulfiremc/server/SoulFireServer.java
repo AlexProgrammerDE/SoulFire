@@ -100,18 +100,18 @@ import org.pf4j.PluginManager;
 @Getter
 public class SoulFireServer {
   public static final ComponentFlattener FLATTENER =
-      ComponentFlattener.basic().toBuilder()
-          .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
-          .build();
+    ComponentFlattener.basic().toBuilder()
+      .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
+      .build();
   public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
-      PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
+    PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
 
   private final Injector injector =
-      new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
+    new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Int2ObjectMap<AttackManager> attacks =
-      Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
+    Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
   private final RPCServer rpcServer;
   private final ServerSettingsRegistry settingsRegistry;
   private final SecretKey jwtSecretKey;
@@ -119,11 +119,11 @@ public class SoulFireServer {
   private final ShutdownManager shutdownManager;
 
   public SoulFireServer(
-      String host,
-      int port,
-      PluginManager pluginManager,
-      Instant startTime,
-      AuthSystem authSystem) {
+    String host,
+    int port,
+    PluginManager pluginManager,
+    Instant startTime,
+    AuthSystem authSystem) {
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
 
@@ -149,73 +149,73 @@ public class SoulFireServer {
 
     rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
     var rpcServerStart =
-        CompletableFuture.runAsync(
-            () -> {
-              try {
-                rpcServer.start();
-              } catch (IOException e) {
-                throw new CompletionException(e);
-              }
-            });
+      CompletableFuture.runAsync(
+        () -> {
+          try {
+            rpcServer.start();
+          } catch (IOException e) {
+            throw new CompletionException(e);
+          }
+        });
 
     log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
     var viaStart =
-        CompletableFuture.runAsync(
-            () -> {
-              // Init via
-              var platform = new SFViaPlatform(SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion"));
+      CompletableFuture.runAsync(
+        () -> {
+          // Init via
+          var platform = new SFViaPlatform(SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion"));
 
-              Via.init(
-                  ViaManagerImpl.builder()
-                      .platform(platform)
-                      .injector(platform.injector())
-                      .loader(new SFViaLoader())
-                      .build());
+          Via.init(
+            ViaManagerImpl.builder()
+              .platform(platform)
+              .injector(platform.injector())
+              .loader(new SFViaLoader())
+              .build());
 
-              platform.init();
+          platform.init();
 
-              // For ViaLegacy
-              Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
-              Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
-              ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
+          // For ViaLegacy
+          Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
+          Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
+          ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
 
-              Via.getManager()
-                  .addEnableListener(
-                      () -> {
-                        new SFViaRewind(SFPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
-                        new SFViaBackwards(SFPathConstants.CONFIG_FOLDER.resolve("ViaBackwards"))
-                            .init();
-                        new SFViaAprilFools(SFPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools"))
-                            .init();
-                        new SFViaLegacy(SFPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
-                        new SFViaBedrock(SFPathConstants.CONFIG_FOLDER.resolve("ViaBedrock"))
-                            .init();
-                      });
+          Via.getManager()
+            .addEnableListener(
+              () -> {
+                new SFViaRewind(SFPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
+                new SFViaBackwards(SFPathConstants.CONFIG_FOLDER.resolve("ViaBackwards"))
+                  .init();
+                new SFViaAprilFools(SFPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools"))
+                  .init();
+                new SFViaLegacy(SFPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
+                new SFViaBedrock(SFPathConstants.CONFIG_FOLDER.resolve("ViaBedrock"))
+                  .init();
+              });
 
-              var manager = (ViaManagerImpl) Via.getManager();
-              manager.init();
+          var manager = (ViaManagerImpl) Via.getManager();
+          manager.init();
 
-              manager.getPlatform().getConf().setCheckForUpdates(false);
+          manager.getPlatform().getConf().setCheckForUpdates(false);
 
-              manager.onServerLoaded();
-            });
+          manager.onServerLoaded();
+        });
 
     var newVersion = new AtomicReference<String>();
     var updateCheck =
-        CompletableFuture.runAsync(
-            () -> {
-              log.info("Checking for updates...");
-              newVersion.set(SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null));
-            });
+      CompletableFuture.runAsync(
+        () -> {
+          log.info("Checking for updates...");
+          newVersion.set(SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null));
+        });
 
     CompletableFuture.allOf(rpcServerStart, viaStart, updateCheck).join();
 
     if (newVersion.get() != null) {
       log.warn(
-          "SoulFire is outdated! Current version: {}, latest version: {}",
-          BuildData.VERSION,
-          newVersion.get());
+        "SoulFire is outdated! Current version: {}, latest version: {}",
+        BuildData.VERSION,
+        newVersion.get());
     } else {
       log.info("SoulFire is up to date!");
     }
@@ -228,42 +228,42 @@ public class SoulFireServer {
     }
 
     SoulFireAPI.postEvent(
-        new SettingsRegistryInitEvent(
-            settingsRegistry =
-                new ServerSettingsRegistry()
-                    // Needs Via loaded to have all protocol versions
-                    .addClass(BotSettings.class, "Bot Settings", true)
-                    .addClass(DevSettings.class, "Dev Settings", true)
-                    .addClass(AccountSettings.class, "Account Settings", true)
-                    .addClass(ProxySettings.class, "Proxy Settings", true)));
+      new SettingsRegistryInitEvent(
+        settingsRegistry =
+          new ServerSettingsRegistry()
+            // Needs Via loaded to have all protocol versions
+            .addClass(BotSettings.class, "Bot Settings", true)
+            .addClass(DevSettings.class, "Dev Settings", true)
+            .addClass(AccountSettings.class, "Account Settings", true)
+            .addClass(ProxySettings.class, "Proxy Settings", true)));
 
     log.info(
-        "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
+      "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
   private static void registerInternalServerExtensions() {
     var plugins =
-        new InternalPlugin[] {
-          new BotTicker(),
-          new ClientBrand(),
-          new ClientSettings(),
-          new AutoReconnect(),
-          new AutoRegister(),
-          new AutoRespawn(),
-          new AutoTotem(),
-          new AutoJump(),
-          new AutoArmor(),
-          new AutoEat(),
-          new ChatMessageLogger(),
-          new ServerListBypass(),
-          new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
-          SFFeatureFlags.MOD_SUPPORT
-              ? new ModLoaderSupport()
-              : null, // Needs to be before ForwardingBypass to not break it
-          new ForwardingBypass(),
-          new KillAura(),
-          SFFeatureFlags.POV_SERVER ? new POVServer() : null
-        };
+      new InternalPlugin[] {
+        new BotTicker(),
+        new ClientBrand(),
+        new ClientSettings(),
+        new AutoReconnect(),
+        new AutoRegister(),
+        new AutoRespawn(),
+        new AutoTotem(),
+        new AutoJump(),
+        new AutoArmor(),
+        new AutoEat(),
+        new ChatMessageLogger(),
+        new ServerListBypass(),
+        new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
+        SFFeatureFlags.MOD_SUPPORT
+          ? new ModLoaderSupport()
+          : null, // Needs to be before ForwardingBypass to not break it
+        new ForwardingBypass(),
+        new KillAura(),
+        SFFeatureFlags.POV_SERVER ? new POVServer() : null
+      };
 
     for (var plugin : plugins) {
       if (plugin == null) {
@@ -303,10 +303,10 @@ public class SoulFireServer {
 
   private String generateJWT(String subject) {
     return Jwts.builder()
-        .subject(subject)
-        .issuedAt(Date.from(Instant.now()))
-        .signWith(jwtSecretKey, Jwts.SIG.HS256)
-        .compact();
+      .subject(subject)
+      .issuedAt(Date.from(Instant.now()))
+      .signWith(jwtSecretKey, Jwts.SIG.HS256)
+      .compact();
   }
 
   private void shutdownHook() {
@@ -343,9 +343,9 @@ public class SoulFireServer {
 
   public CompletableFuture<?> stopAllAttacks() {
     return CompletableFuture.allOf(
-        Set.copyOf(attacks.keySet()).stream()
-            .map(this::stopAttack)
-            .toArray(CompletableFuture[]::new));
+      Set.copyOf(attacks.keySet()).stream()
+        .map(this::stopAttack)
+        .toArray(CompletableFuture[]::new));
   }
 
   public CompletableFuture<?> stopAttack(int id) {

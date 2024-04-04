@@ -49,28 +49,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataGenerators {
   private static final List<IDataGenerator> GENERATORS =
-      List.of(
-          new RegistryKeysDataGenerator(),
-          new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
-          new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
-          new BlocksDataGenerator(),
-          new BlocksJavaGenerator(),
-          new EffectsDataGenerator(),
-          new EnchantmentsDataGenerator(),
-          new EnchantmentsJavaGenerator(),
-          new EntitiesDataGenerator(),
-          new EntitiesJavaGenerator(),
-          new ItemsDataGenerator(),
-          new ItemsJavaGenerator(),
-          new AttributesDataGenerator(),
-          new AttributesJavaGenerator(),
-          new LanguageDataGenerator(),
-          new MapColorJavaGenerator(),
-          new TagsDataGenerator.BlockTagsDataGenerator(),
-          new TagsDataGenerator.ItemTagsDataGenerator(),
-          new TagsDataGenerator.EntityTypeTagsDataGenerator(),
-          new DefaultTagsDataGenerator(),
-          new WorldExporterGenerator());
+    List.of(
+      new RegistryKeysDataGenerator(),
+      new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
+      new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
+      new BlocksDataGenerator(),
+      new BlocksJavaGenerator(),
+      new EffectsDataGenerator(),
+      new EnchantmentsDataGenerator(),
+      new EnchantmentsJavaGenerator(),
+      new EntitiesDataGenerator(),
+      new EntitiesJavaGenerator(),
+      new ItemsDataGenerator(),
+      new ItemsJavaGenerator(),
+      new AttributesDataGenerator(),
+      new AttributesJavaGenerator(),
+      new LanguageDataGenerator(),
+      new MapColorJavaGenerator(),
+      new TagsDataGenerator.BlockTagsDataGenerator(),
+      new TagsDataGenerator.ItemTagsDataGenerator(),
+      new TagsDataGenerator.EntityTypeTagsDataGenerator(),
+      new DefaultTagsDataGenerator(),
+      new WorldExporterGenerator());
 
   private DataGenerators() {}
 
@@ -79,7 +79,7 @@ public class DataGenerators {
       Files.createDirectories(outputDirectory);
     } catch (IOException exception) {
       log.error(
-          "Failed to create data generator output directory at {}", outputDirectory, exception);
+        "Failed to create data generator output directory at {}", outputDirectory, exception);
       return false;
     }
 
@@ -95,28 +95,28 @@ public class DataGenerators {
 
         if (outputElement instanceof JsonElement jsonElement) {
           try (var writer =
-              Files.newBufferedWriter(
-                  outputFilePath,
-                  StandardOpenOption.CREATE,
-                  StandardOpenOption.TRUNCATE_EXISTING)) {
+                 Files.newBufferedWriter(
+                   outputFilePath,
+                   StandardOpenOption.CREATE,
+                   StandardOpenOption.TRUNCATE_EXISTING)) {
             var jsonWriter = new JsonWriter(writer);
             jsonWriter.setIndent("  ");
             Streams.write(jsonElement, jsonWriter);
           }
         } else if (outputElement instanceof String string) {
           try (var writer =
-              Files.newBufferedWriter(
-                  outputFilePath,
-                  StandardOpenOption.CREATE,
-                  StandardOpenOption.TRUNCATE_EXISTING)) {
+                 Files.newBufferedWriter(
+                   outputFilePath,
+                   StandardOpenOption.CREATE,
+                   StandardOpenOption.TRUNCATE_EXISTING)) {
             writer.write(string);
           }
         } else if (outputElement instanceof byte[] bytes) {
           try (var outputStream =
-              Files.newOutputStream(
-                  outputFilePath,
-                  StandardOpenOption.CREATE,
-                  StandardOpenOption.TRUNCATE_EXISTING)) {
+                 Files.newOutputStream(
+                   outputFilePath,
+                   StandardOpenOption.CREATE,
+                   StandardOpenOption.TRUNCATE_EXISTING)) {
             outputStream.write(bytes);
           }
         } else {

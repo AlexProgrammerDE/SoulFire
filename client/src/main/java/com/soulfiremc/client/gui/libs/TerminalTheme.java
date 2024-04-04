@@ -23,40 +23,40 @@ import java.awt.Color;
  * Represents a terminal theme. Defaults are from the <a
  * href="https://github.com/catppuccin/blackbox">catppuccin themes</a>.
  *
- * @param name The name of the theme
+ * @param name            The name of the theme
  * @param backgroundColor The background color of the theme
- * @param colors The ANSI colors of the theme
+ * @param colors          The ANSI colors of the theme
  */
 public record TerminalTheme(String name, Color backgroundColor, Color[] colors) {
   public static final TerminalTheme[] THEMES = {
     new TerminalTheme(
-        "Catppuccin-Frappe",
-        "#303446",
-        new String[] {
-          "#51576D", "#E78284", "#A6D189", "#E5C890", "#8CAAEE", "#F4B8E4", "#81C8BE", "#B5BFE2",
-          "#626880", "#E78284", "#A6D189", "#E5C890", "#8CAAEE", "#F4B8E4", "#81C8BE", "#A5ADCE"
-        }),
+      "Catppuccin-Frappe",
+      "#303446",
+      new String[] {
+        "#51576D", "#E78284", "#A6D189", "#E5C890", "#8CAAEE", "#F4B8E4", "#81C8BE", "#B5BFE2",
+        "#626880", "#E78284", "#A6D189", "#E5C890", "#8CAAEE", "#F4B8E4", "#81C8BE", "#A5ADCE"
+      }),
     new TerminalTheme(
-        "Catppuccin-Latte",
-        "#EFF1F5",
-        new String[] {
-          "#5C5F77", "#D20F39", "#40A02B", "#DF8E1D", "#1E66F5", "#EA76CB", "#179299", "#ACB0BE",
-          "#6C6F85", "#D20F39", "#40A02B", "#DF8E1D", "#1E66F5", "#EA76CB", "#179299", "#BCC0CC"
-        }),
+      "Catppuccin-Latte",
+      "#EFF1F5",
+      new String[] {
+        "#5C5F77", "#D20F39", "#40A02B", "#DF8E1D", "#1E66F5", "#EA76CB", "#179299", "#ACB0BE",
+        "#6C6F85", "#D20F39", "#40A02B", "#DF8E1D", "#1E66F5", "#EA76CB", "#179299", "#BCC0CC"
+      }),
     new TerminalTheme(
-        "Catppuccin-Macchiato",
-        "#24273A",
-        new String[] {
-          "#494D64", "#ED8796", "#A6DA95", "#EED49F", "#8AADF4", "#F5BDE6", "#8BD5CA", "#B8C0E0",
-          "#5B6078", "#ED8796", "#A6DA95", "#EED49F", "#8AADF4", "#F5BDE6", "#8BD5CA", "#A5ADCB"
-        }),
+      "Catppuccin-Macchiato",
+      "#24273A",
+      new String[] {
+        "#494D64", "#ED8796", "#A6DA95", "#EED49F", "#8AADF4", "#F5BDE6", "#8BD5CA", "#B8C0E0",
+        "#5B6078", "#ED8796", "#A6DA95", "#EED49F", "#8AADF4", "#F5BDE6", "#8BD5CA", "#A5ADCB"
+      }),
     new TerminalTheme(
-        "Catppuccin-Mocha",
-        "#303446",
-        new String[] {
-          "#45475A", "#F38BA8", "#A6E3A1", "#F9E2AF", "#89B4FA", "#F5C2E7", "#94E2D5", "#BAC2DE",
-          "#585B70", "#F38BA8", "#A6E3A1", "#F9E2AF", "#89B4FA", "#F5C2E7", "#94E2D5", "#A6ADC8"
-        })
+      "Catppuccin-Mocha",
+      "#303446",
+      new String[] {
+        "#45475A", "#F38BA8", "#A6E3A1", "#F9E2AF", "#89B4FA", "#F5C2E7", "#94E2D5", "#BAC2DE",
+        "#585B70", "#F38BA8", "#A6E3A1", "#F9E2AF", "#89B4FA", "#F5C2E7", "#94E2D5", "#A6ADC8"
+      })
   };
 
   public TerminalTheme(String name, String backgroundColor, String[] colors) {

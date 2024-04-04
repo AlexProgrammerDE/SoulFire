@@ -33,8 +33,12 @@ import lombok.Setter;
 public final class DownMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetToMineBlock;
-  @Getter @Setter private MovementMiningCost blockBreakCosts;
-  @Getter @Setter private int closestBlockToFallOn = Integer.MIN_VALUE;
+  @Getter
+  @Setter
+  private MovementMiningCost blockBreakCosts;
+  @Getter
+  @Setter
+  private int closestBlockToFallOn = Integer.MIN_VALUE;
 
   public DownMovement() {
     this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
@@ -68,16 +72,16 @@ public final class DownMovement extends GraphAction implements Cloneable {
     var rightDirectionSide = firstDirection.rightSide();
 
     results[0] =
-        new BlockSafetyData[] {
-          new BlockSafetyData(
-              firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-              oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-              leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-              rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
-        };
+      new BlockSafetyData[] {
+        new BlockSafetyData(
+          firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
+      };
 
     return results;
   }
@@ -93,12 +97,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
     var cost = 0D;
 
     cost +=
-        switch (closestBlockToFallOn) {
-          case -2 -> Costs.FALL_1;
-          case -3 -> Costs.FALL_2;
-          case -4 -> Costs.FALL_3;
-          default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
-        };
+      switch (closestBlockToFallOn) {
+        case -2 -> Costs.FALL_1;
+        case -3 -> Costs.FALL_2;
+        case -4 -> Costs.FALL_3;
+        default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
+      };
 
     cost += blockBreakCosts.miningCost();
     if (blockBreakCosts.willDrop()) {
@@ -110,12 +114,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
     var absoluteTargetFeetBlock =
-        previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
+      previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
     return new GraphInstructions(
-        new BotEntityState(absoluteTargetFeetBlock, levelState, inventory),
-        cost,
-        List.of(new BlockBreakAction(absoluteMinedBlock)));
+      new BotEntityState(absoluteTargetFeetBlock, levelState, inventory),
+      cost,
+      List.of(new BlockBreakAction(absoluteMinedBlock)));
   }
 
   @Override

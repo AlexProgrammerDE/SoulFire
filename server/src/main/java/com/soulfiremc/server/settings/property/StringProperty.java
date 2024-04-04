@@ -18,11 +18,11 @@
 package com.soulfiremc.server.settings.property;
 
 public record StringProperty(
-    String namespace,
-    String key,
-    String uiName,
-    String[] cliFlags,
-    String description,
-    String defaultValue,
-    boolean secret)
-    implements SingleProperty {}
+  String namespace,
+  String key,
+  String uiName,
+  String[] cliFlags,
+  String description,
+  String defaultValue,
+  boolean secret)
+  implements SingleProperty {}

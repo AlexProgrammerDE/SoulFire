@@ -31,37 +31,37 @@ import java.util.Map;
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
   private static final Gson GSON =
-      new GsonBuilder()
-          .registerTypeAdapter(
-              ResourceKey.class,
-              new TypeAdapter<ResourceKey>() {
-                @Override
-                public void write(JsonWriter out, ResourceKey value) throws IOException {
-                  out.value(value.toString());
-                }
+    new GsonBuilder()
+      .registerTypeAdapter(
+        ResourceKey.class,
+        new TypeAdapter<ResourceKey>() {
+          @Override
+          public void write(JsonWriter out, ResourceKey value) throws IOException {
+            out.value(value.toString());
+          }
 
-                @Override
-                public ResourceKey read(JsonReader in) throws IOException {
-                  var key = in.nextString();
-                  return ResourceKey.fromString(key);
-                }
-              })
-          .create();
+          @Override
+          public ResourceKey read(JsonReader in) throws IOException {
+            var key = in.nextString();
+            return ResourceKey.fromString(key);
+          }
+        })
+      .create();
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
     var array =
-        LOADED_DATA.computeIfAbsent(
-            dataFile,
-            file -> {
-              var data = new JsonArray();
-              try {
-                data =
-                    GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
-              } catch (Exception e) {
-                throw new RuntimeException("Failed to load data file " + file, e);
-              }
-              return data;
-            });
+      LOADED_DATA.computeIfAbsent(
+        dataFile,
+        file -> {
+          var data = new JsonArray();
+          try {
+            data =
+              GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+          } catch (Exception e) {
+            throw new RuntimeException("Failed to load data file " + file, e);
+          }
+          return data;
+        });
     for (var element : array) {
       if (element.getAsJsonObject().get("key").getAsString().equals(dataKey)) {
         return GSON.fromJson(element, clazz);

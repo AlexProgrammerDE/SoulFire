@@ -41,12 +41,12 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
       var provider = pluginWrapper.getDescriptor().getProvider();
 
       plugins.add(
-          ClientPlugin.newBuilder()
-              .setId(id)
-              .setDescription(description)
-              .setVersion(version)
-              .setProvider(provider)
-              .build());
+        ClientPlugin.newBuilder()
+          .setId(id)
+          .setDescription(description)
+          .setVersion(version)
+          .setProvider(provider)
+          .build());
     }
 
     return plugins;
@@ -54,16 +54,16 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
 
   @Override
   public void getUIClientData(
-      ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
+    ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SERVER_CONFIG);
 
     var username = ServerRPCConstants.CLIENT_ID_CONTEXT_KEY.get();
     responseObserver.onNext(
-        UIClientDataResponse.newBuilder()
-            .setUsername(username)
-            .addAllPlugins(getExtensions())
-            .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
-            .build());
+      UIClientDataResponse.newBuilder()
+        .setUsername(username)
+        .addAllPlugins(getExtensions())
+        .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
+        .build());
     responseObserver.onCompleted();
   }
 }

@@ -28,31 +28,31 @@ import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 public final class SFBedrockMicrosoftAuthService
-    implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
+  implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
   @Override
   public MinecraftAccount login(BedrockMicrosoftAuthData data, SFProxy proxyData)
-      throws IOException {
+    throws IOException {
     try {
       var fullBedrockSession =
-          MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
-              LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-              new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+        MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
+          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
+          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
 
       var mcChain = fullBedrockSession.getMcChain();
       var xblXsts = mcChain.getXblXsts();
       var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
       var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
       return new MinecraftAccount(
-          AuthType.MICROSOFT_BEDROCK,
-          mcChain.getId(),
-          mcChain.getDisplayName(),
-          new BedrockData(
-              mcChain.getMojangJwt(),
-              mcChain.getIdentityJwt(),
-              mcChain.getPublicKey(),
-              mcChain.getPrivateKey(),
-              deviceId,
-              playFabId));
+        AuthType.MICROSOFT_BEDROCK,
+        mcChain.getId(),
+        mcChain.getDisplayName(),
+        new BedrockData(
+          mcChain.getMojangJwt(),
+          mcChain.getIdentityJwt(),
+          mcChain.getPublicKey(),
+          mcChain.getPrivateKey(),
+          deviceId,
+          playFabId));
     } catch (Exception e) {
       throw new IOException(e);
     }

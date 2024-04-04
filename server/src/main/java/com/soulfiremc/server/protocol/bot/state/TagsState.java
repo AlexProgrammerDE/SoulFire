@@ -45,20 +45,20 @@ public class TagsState {
 
   public boolean isBlockInTag(BlockType blockType, ResourceKey tagKey) {
     return tags.getOrDefault(RegistryKeys.BLOCK, Map.of())
-        .getOrDefault(tagKey, IntSet.of())
-        .contains(blockType.id());
+      .getOrDefault(tagKey, IntSet.of())
+      .contains(blockType.id());
   }
 
   public boolean isItemInTag(ItemType itemType, ResourceKey tagKey) {
     return tags.getOrDefault(RegistryKeys.ITEM, Map.of())
-        .getOrDefault(tagKey, IntSet.of())
-        .contains(itemType.id());
+      .getOrDefault(tagKey, IntSet.of())
+      .contains(itemType.id());
   }
 
   public boolean isEntityInTag(EntityType entityType, ResourceKey tagKey) {
     return tags.getOrDefault(RegistryKeys.ENTITY_TYPE, Map.of())
-        .getOrDefault(tagKey, IntSet.of())
-        .contains(entityType.id());
+      .getOrDefault(tagKey, IntSet.of())
+      .contains(entityType.id());
   }
 
   public Map<String, Map<String, int[]>> exportTags() {

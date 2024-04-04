@@ -20,9 +20,11 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 
-/** A calculated action that the bot can take on a graph world representation. */
+/**
+ * A calculated action that the bot can take on a graph world representation.
+ */
 public abstract sealed class GraphAction
-    permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
+  permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
   public final Object actionLock = new Object();
   private int subscriptionCounter;
 

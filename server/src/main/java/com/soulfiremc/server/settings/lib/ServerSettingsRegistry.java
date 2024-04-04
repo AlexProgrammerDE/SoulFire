@@ -49,11 +49,11 @@ public class ServerSettingsRegistry {
 
   private static IntSetting createIntSetting(IntProperty property) {
     var builder =
-        IntSetting.newBuilder()
-            .setDef(property.defaultValue())
-            .setMin(property.minValue())
-            .setMax(property.maxValue())
-            .setStep(property.stepValue());
+      IntSetting.newBuilder()
+        .setDef(property.defaultValue())
+        .setMin(property.minValue())
+        .setMax(property.maxValue())
+        .setStep(property.stepValue());
 
     if (property.format() != null) {
       builder = builder.setFormat(property.format());
@@ -64,11 +64,11 @@ public class ServerSettingsRegistry {
 
   private static DoubleSetting createDoubleSetting(DoubleProperty property) {
     var builder =
-        DoubleSetting.newBuilder()
-            .setDef(property.defaultValue())
-            .setMin(property.minValue())
-            .setMax(property.maxValue())
-            .setStep(property.stepValue());
+      DoubleSetting.newBuilder()
+        .setDef(property.defaultValue())
+        .setMin(property.minValue())
+        .setMax(property.maxValue())
+        .setStep(property.stepValue());
 
     if (property.format() != null) {
       builder = builder.setFormat(property.format());
@@ -82,12 +82,12 @@ public class ServerSettingsRegistry {
   }
 
   public ServerSettingsRegistry addClass(
-      Class<? extends SettingsObject> clazz, String pageName, boolean hidden) {
+    Class<? extends SettingsObject> clazz, String pageName, boolean hidden) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
-          && Modifier.isFinal(field.getModifiers())
-          && Modifier.isStatic(field.getModifiers())
-          && Property.class.isAssignableFrom(field.getType())) {
+        && Modifier.isFinal(field.getModifiers())
+        && Modifier.isStatic(field.getModifiers())
+        && Property.class.isAssignableFrom(field.getType())) {
         field.setAccessible(true);
 
         try {
@@ -120,109 +120,105 @@ public class ServerSettingsRegistry {
       var entries = new ArrayList<ClientPluginSettingEntry>();
       for (var property : namespaceRegistry.properties) {
         switch (property) {
-          case BooleanProperty booleanProperty ->
-              entries.add(
-                  ClientPluginSettingEntry.newBuilder()
-                      .setSingle(
-                          fillSingleProperties(booleanProperty)
-                              .setType(
-                                  ClientPluginSettingType.newBuilder()
-                                      .setBool(
-                                          BoolSetting.newBuilder()
-                                              .setDef(booleanProperty.defaultValue())
-                                              .build())
-                                      .build())
-                              .build())
-                      .build());
-          case IntProperty intProperty ->
-              entries.add(
-                  ClientPluginSettingEntry.newBuilder()
-                      .setSingle(
-                          fillSingleProperties(intProperty)
-                              .setType(
-                                  ClientPluginSettingType.newBuilder()
-                                      .setInt(createIntSetting(intProperty))
-                                      .build())
-                              .build())
-                      .build());
-          case DoubleProperty doubleProperty ->
-              entries.add(
-                  ClientPluginSettingEntry.newBuilder()
-                      .setSingle(
-                          fillSingleProperties(doubleProperty)
-                              .setType(
-                                  ClientPluginSettingType.newBuilder()
-                                      .setDouble(createDoubleSetting(doubleProperty))
-                                      .build())
-                              .build())
-                      .build());
+          case BooleanProperty booleanProperty -> entries.add(
+            ClientPluginSettingEntry.newBuilder()
+              .setSingle(
+                fillSingleProperties(booleanProperty)
+                  .setType(
+                    ClientPluginSettingType.newBuilder()
+                      .setBool(
+                        BoolSetting.newBuilder()
+                          .setDef(booleanProperty.defaultValue())
+                          .build())
+                      .build())
+                  .build())
+              .build());
+          case IntProperty intProperty -> entries.add(
+            ClientPluginSettingEntry.newBuilder()
+              .setSingle(
+                fillSingleProperties(intProperty)
+                  .setType(
+                    ClientPluginSettingType.newBuilder()
+                      .setInt(createIntSetting(intProperty))
+                      .build())
+                  .build())
+              .build());
+          case DoubleProperty doubleProperty -> entries.add(
+            ClientPluginSettingEntry.newBuilder()
+              .setSingle(
+                fillSingleProperties(doubleProperty)
+                  .setType(
+                    ClientPluginSettingType.newBuilder()
+                      .setDouble(createDoubleSetting(doubleProperty))
+                      .build())
+                  .build())
+              .build());
           case MinMaxPropertyLink minMaxPropertyLink -> {
             var minProperty = minMaxPropertyLink.min();
             var maxProperty = minMaxPropertyLink.max();
             entries.add(
-                ClientPluginSettingEntry.newBuilder()
-                    .setMinMaxPair(
-                        ClientPluginSettingEntryMinMaxPair.newBuilder()
-                            .setMin(
-                                fillMultiProperties(minProperty)
-                                    .setIntSetting(createIntSetting(minProperty))
-                                    .build())
-                            .setMax(
-                                fillMultiProperties(maxProperty)
-                                    .setIntSetting(createIntSetting(maxProperty))
-                                    .build())
-                            .build())
-                    .build());
+              ClientPluginSettingEntry.newBuilder()
+                .setMinMaxPair(
+                  ClientPluginSettingEntryMinMaxPair.newBuilder()
+                    .setMin(
+                      fillMultiProperties(minProperty)
+                        .setIntSetting(createIntSetting(minProperty))
+                        .build())
+                    .setMax(
+                      fillMultiProperties(maxProperty)
+                        .setIntSetting(createIntSetting(maxProperty))
+                        .build())
+                    .build())
+                .build());
           }
-          case StringProperty stringProperty ->
-              entries.add(
-                  ClientPluginSettingEntry.newBuilder()
-                      .setSingle(
-                          fillSingleProperties(stringProperty)
-                              .setType(
-                                  ClientPluginSettingType.newBuilder()
-                                      .setString(
-                                          StringSetting.newBuilder()
-                                              .setDef(stringProperty.defaultValue())
-                                              .setSecret(stringProperty.secret())
-                                              .build())
-                                      .build())
-                              .build())
-                      .build());
+          case StringProperty stringProperty -> entries.add(
+            ClientPluginSettingEntry.newBuilder()
+              .setSingle(
+                fillSingleProperties(stringProperty)
+                  .setType(
+                    ClientPluginSettingType.newBuilder()
+                      .setString(
+                        StringSetting.newBuilder()
+                          .setDef(stringProperty.defaultValue())
+                          .setSecret(stringProperty.secret())
+                          .build())
+                      .build())
+                  .build())
+              .build());
           case ComboProperty comboProperty -> {
             var options = new ArrayList<ComboOption>();
             for (var option : comboProperty.options()) {
               options.add(
-                  ComboOption.newBuilder()
-                      .setId(option.id())
-                      .setDisplayName(option.displayName())
-                      .build());
+                ComboOption.newBuilder()
+                  .setId(option.id())
+                  .setDisplayName(option.displayName())
+                  .build());
             }
             entries.add(
-                ClientPluginSettingEntry.newBuilder()
-                    .setSingle(
-                        fillSingleProperties(comboProperty)
-                            .setType(
-                                ClientPluginSettingType.newBuilder()
-                                    .setCombo(
-                                        ComboSetting.newBuilder()
-                                            .setDef(comboProperty.defaultValue())
-                                            .addAllOptions(options)
-                                            .build())
-                                    .build())
+              ClientPluginSettingEntry.newBuilder()
+                .setSingle(
+                  fillSingleProperties(comboProperty)
+                    .setType(
+                      ClientPluginSettingType.newBuilder()
+                        .setCombo(
+                          ComboSetting.newBuilder()
+                            .setDef(comboProperty.defaultValue())
+                            .addAllOptions(options)
                             .build())
-                    .build());
+                        .build())
+                    .build())
+                .build());
           }
         }
       }
 
       list.add(
-          ClientPluginSettingsPage.newBuilder()
-              .setPageName(namespaceRegistry.pageName)
-              .setHidden(namespaceRegistry.hidden)
-              .setNamespace(namespaceEntry.getKey())
-              .addAllEntries(entries)
-              .build());
+        ClientPluginSettingsPage.newBuilder()
+          .setPageName(namespaceRegistry.pageName)
+          .setHidden(namespaceRegistry.hidden)
+          .setNamespace(namespaceEntry.getKey())
+          .addAllEntries(entries)
+          .build());
     }
 
     return list;
@@ -230,19 +226,19 @@ public class ServerSettingsRegistry {
 
   private ClientPluginSettingEntrySingle.Builder fillSingleProperties(SingleProperty property) {
     return ClientPluginSettingEntrySingle.newBuilder()
-        .setKey(property.key())
-        .setUiName(property.uiName())
-        .addAllCliFlags(Arrays.asList(property.cliFlags()))
-        .setDescription(property.description());
+      .setKey(property.key())
+      .setUiName(property.uiName())
+      .addAllCliFlags(Arrays.asList(property.cliFlags()))
+      .setDescription(property.description());
   }
 
   private ClientPluginSettingEntryMinMaxPairSingle.Builder fillMultiProperties(
-      SingleProperty property) {
+    SingleProperty property) {
     return ClientPluginSettingEntryMinMaxPairSingle.newBuilder()
-        .setKey(property.key())
-        .setUiName(property.uiName())
-        .addAllCliFlags(Arrays.asList(property.cliFlags()))
-        .setDescription(property.description());
+      .setKey(property.key())
+      .setUiName(property.uiName())
+      .addAllCliFlags(Arrays.asList(property.cliFlags()))
+      .setDescription(property.description());
   }
 
   private record NamespaceRegistry(String pageName, boolean hidden, List<Property> properties) {}

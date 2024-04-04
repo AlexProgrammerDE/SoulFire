@@ -79,7 +79,8 @@ public class BlockTags {
   public static final ResourceKey DIRT = ResourceKey.fromString("minecraft:dirt");
   public static final ResourceKey TERRACOTTA = ResourceKey.fromString("minecraft:terracotta");
   public static final ResourceKey CONCRETE_POWDER = ResourceKey.fromString("minecraft:concrete_powder");
-  public static final ResourceKey COMPLETES_FIND_TREE_TUTORIAL = ResourceKey.fromString("minecraft:completes_find_tree_tutorial");
+  public static final ResourceKey COMPLETES_FIND_TREE_TUTORIAL =
+    ResourceKey.fromString("minecraft:completes_find_tree_tutorial");
   public static final ResourceKey FLOWER_POTS = ResourceKey.fromString("minecraft:flower_pots");
   public static final ResourceKey ENDERMAN_HOLDABLE = ResourceKey.fromString("minecraft:enderman_holdable");
   public static final ResourceKey ICE = ResourceKey.fromString("minecraft:ice");
@@ -101,7 +102,8 @@ public class BlockTags {
   public static final ResourceKey DRAGON_IMMUNE = ResourceKey.fromString("minecraft:dragon_immune");
   public static final ResourceKey DRAGON_TRANSPARENT = ResourceKey.fromString("minecraft:dragon_transparent");
   public static final ResourceKey WITHER_IMMUNE = ResourceKey.fromString("minecraft:wither_immune");
-  public static final ResourceKey WITHER_SUMMON_BASE_BLOCKS = ResourceKey.fromString("minecraft:wither_summon_base_blocks");
+  public static final ResourceKey WITHER_SUMMON_BASE_BLOCKS =
+    ResourceKey.fromString("minecraft:wither_summon_base_blocks");
   public static final ResourceKey BEEHIVES = ResourceKey.fromString("minecraft:beehives");
   public static final ResourceKey CROPS = ResourceKey.fromString("minecraft:crops");
   public static final ResourceKey BEE_GROWABLES = ResourceKey.fromString("minecraft:bee_growables");
@@ -119,7 +121,8 @@ public class BlockTags {
   public static final ResourceKey STRIDER_WARM_BLOCKS = ResourceKey.fromString("minecraft:strider_warm_blocks");
   public static final ResourceKey CAMPFIRES = ResourceKey.fromString("minecraft:campfires");
   public static final ResourceKey GUARDED_BY_PIGLINS = ResourceKey.fromString("minecraft:guarded_by_piglins");
-  public static final ResourceKey PREVENT_MOB_SPAWNING_INSIDE = ResourceKey.fromString("minecraft:prevent_mob_spawning_inside");
+  public static final ResourceKey PREVENT_MOB_SPAWNING_INSIDE =
+    ResourceKey.fromString("minecraft:prevent_mob_spawning_inside");
   public static final ResourceKey FENCE_GATES = ResourceKey.fromString("minecraft:fence_gates");
   public static final ResourceKey UNSTABLE_BOTTOM_CENTER = ResourceKey.fromString("minecraft:unstable_bottom_center");
   public static final ResourceKey MUSHROOM_GROW_BLOCK = ResourceKey.fromString("minecraft:mushroom_grow_block");
@@ -128,24 +131,33 @@ public class BlockTags {
   public static final ResourceKey INFINIBURN_END = ResourceKey.fromString("minecraft:infiniburn_end");
   public static final ResourceKey BASE_STONE_OVERWORLD = ResourceKey.fromString("minecraft:base_stone_overworld");
   public static final ResourceKey STONE_ORE_REPLACEABLES = ResourceKey.fromString("minecraft:stone_ore_replaceables");
-  public static final ResourceKey DEEPSLATE_ORE_REPLACEABLES = ResourceKey.fromString("minecraft:deepslate_ore_replaceables");
+  public static final ResourceKey DEEPSLATE_ORE_REPLACEABLES =
+    ResourceKey.fromString("minecraft:deepslate_ore_replaceables");
   public static final ResourceKey BASE_STONE_NETHER = ResourceKey.fromString("minecraft:base_stone_nether");
-  public static final ResourceKey OVERWORLD_CARVER_REPLACEABLES = ResourceKey.fromString("minecraft:overworld_carver_replaceables");
-  public static final ResourceKey NETHER_CARVER_REPLACEABLES = ResourceKey.fromString("minecraft:nether_carver_replaceables");
+  public static final ResourceKey OVERWORLD_CARVER_REPLACEABLES =
+    ResourceKey.fromString("minecraft:overworld_carver_replaceables");
+  public static final ResourceKey NETHER_CARVER_REPLACEABLES =
+    ResourceKey.fromString("minecraft:nether_carver_replaceables");
   public static final ResourceKey CANDLE_CAKES = ResourceKey.fromString("minecraft:candle_cakes");
   public static final ResourceKey CAULDRONS = ResourceKey.fromString("minecraft:cauldrons");
   public static final ResourceKey CRYSTAL_SOUND_BLOCKS = ResourceKey.fromString("minecraft:crystal_sound_blocks");
-  public static final ResourceKey INSIDE_STEP_SOUND_BLOCKS = ResourceKey.fromString("minecraft:inside_step_sound_blocks");
-  public static final ResourceKey COMBINATION_STEP_SOUND_BLOCKS = ResourceKey.fromString("minecraft:combination_step_sound_blocks");
-  public static final ResourceKey CAMEL_SAND_STEP_SOUND_BLOCKS = ResourceKey.fromString("minecraft:camel_sand_step_sound_blocks");
-  public static final ResourceKey OCCLUDES_VIBRATION_SIGNALS = ResourceKey.fromString("minecraft:occludes_vibration_signals");
+  public static final ResourceKey INSIDE_STEP_SOUND_BLOCKS =
+    ResourceKey.fromString("minecraft:inside_step_sound_blocks");
+  public static final ResourceKey COMBINATION_STEP_SOUND_BLOCKS =
+    ResourceKey.fromString("minecraft:combination_step_sound_blocks");
+  public static final ResourceKey CAMEL_SAND_STEP_SOUND_BLOCKS =
+    ResourceKey.fromString("minecraft:camel_sand_step_sound_blocks");
+  public static final ResourceKey OCCLUDES_VIBRATION_SIGNALS =
+    ResourceKey.fromString("minecraft:occludes_vibration_signals");
   public static final ResourceKey DAMPENS_VIBRATIONS = ResourceKey.fromString("minecraft:dampens_vibrations");
-  public static final ResourceKey DRIPSTONE_REPLACEABLE_BLOCKS = ResourceKey.fromString("minecraft:dripstone_replaceable_blocks");
+  public static final ResourceKey DRIPSTONE_REPLACEABLE_BLOCKS =
+    ResourceKey.fromString("minecraft:dripstone_replaceable_blocks");
   public static final ResourceKey CAVE_VINES = ResourceKey.fromString("minecraft:cave_vines");
   public static final ResourceKey MOSS_REPLACEABLE = ResourceKey.fromString("minecraft:moss_replaceable");
   public static final ResourceKey LUSH_GROUND_REPLACEABLE = ResourceKey.fromString("minecraft:lush_ground_replaceable");
   public static final ResourceKey AZALEA_ROOT_REPLACEABLE = ResourceKey.fromString("minecraft:azalea_root_replaceable");
-  public static final ResourceKey SMALL_DRIPLEAF_PLACEABLE = ResourceKey.fromString("minecraft:small_dripleaf_placeable");
+  public static final ResourceKey SMALL_DRIPLEAF_PLACEABLE =
+    ResourceKey.fromString("minecraft:small_dripleaf_placeable");
   public static final ResourceKey BIG_DRIPLEAF_PLACEABLE = ResourceKey.fromString("minecraft:big_dripleaf_placeable");
   public static final ResourceKey SNOW = ResourceKey.fromString("minecraft:snow");
   public static final ResourceKey MINEABLE_WITH_AXE = ResourceKey.fromString("minecraft:mineable/axe");
@@ -157,39 +169,49 @@ public class BlockTags {
   public static final ResourceKey NEEDS_IRON_TOOL = ResourceKey.fromString("minecraft:needs_iron_tool");
   public static final ResourceKey NEEDS_STONE_TOOL = ResourceKey.fromString("minecraft:needs_stone_tool");
   public static final ResourceKey FEATURES_CANNOT_REPLACE = ResourceKey.fromString("minecraft:features_cannot_replace");
-  public static final ResourceKey LAVA_POOL_STONE_CANNOT_REPLACE = ResourceKey.fromString("minecraft:lava_pool_stone_cannot_replace");
+  public static final ResourceKey LAVA_POOL_STONE_CANNOT_REPLACE =
+    ResourceKey.fromString("minecraft:lava_pool_stone_cannot_replace");
   public static final ResourceKey GEODE_INVALID_BLOCKS = ResourceKey.fromString("minecraft:geode_invalid_blocks");
   public static final ResourceKey FROG_PREFER_JUMP_TO = ResourceKey.fromString("minecraft:frog_prefer_jump_to");
   public static final ResourceKey SCULK_REPLACEABLE = ResourceKey.fromString("minecraft:sculk_replaceable");
-  public static final ResourceKey SCULK_REPLACEABLE_WORLD_GEN = ResourceKey.fromString("minecraft:sculk_replaceable_world_gen");
-  public static final ResourceKey ANCIENT_CITY_REPLACEABLE = ResourceKey.fromString("minecraft:ancient_city_replaceable");
+  public static final ResourceKey SCULK_REPLACEABLE_WORLD_GEN =
+    ResourceKey.fromString("minecraft:sculk_replaceable_world_gen");
+  public static final ResourceKey ANCIENT_CITY_REPLACEABLE =
+    ResourceKey.fromString("minecraft:ancient_city_replaceable");
   public static final ResourceKey VIBRATION_RESONATORS = ResourceKey.fromString("minecraft:vibration_resonators");
   public static final ResourceKey ANIMALS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:animals_spawnable_on");
   public static final ResourceKey AXOLOTLS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:axolotls_spawnable_on");
   public static final ResourceKey GOATS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:goats_spawnable_on");
   public static final ResourceKey MOOSHROOMS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:mooshrooms_spawnable_on");
   public static final ResourceKey PARROTS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:parrots_spawnable_on");
-  public static final ResourceKey POLAR_BEARS_SPAWNABLE_ON_ALTERNATE = ResourceKey.fromString("minecraft:polar_bears_spawnable_on_alternate");
+  public static final ResourceKey POLAR_BEARS_SPAWNABLE_ON_ALTERNATE =
+    ResourceKey.fromString("minecraft:polar_bears_spawnable_on_alternate");
   public static final ResourceKey RABBITS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:rabbits_spawnable_on");
   public static final ResourceKey FOXES_SPAWNABLE_ON = ResourceKey.fromString("minecraft:foxes_spawnable_on");
   public static final ResourceKey WOLVES_SPAWNABLE_ON = ResourceKey.fromString("minecraft:wolves_spawnable_on");
   public static final ResourceKey FROGS_SPAWNABLE_ON = ResourceKey.fromString("minecraft:frogs_spawnable_on");
   public static final ResourceKey AZALEA_GROWS_ON = ResourceKey.fromString("minecraft:azalea_grows_on");
   public static final ResourceKey CONVERTABLE_TO_MUD = ResourceKey.fromString("minecraft:convertable_to_mud");
-  public static final ResourceKey MANGROVE_LOGS_CAN_GROW_THROUGH = ResourceKey.fromString("minecraft:mangrove_logs_can_grow_through");
-  public static final ResourceKey MANGROVE_ROOTS_CAN_GROW_THROUGH = ResourceKey.fromString("minecraft:mangrove_roots_can_grow_through");
+  public static final ResourceKey MANGROVE_LOGS_CAN_GROW_THROUGH =
+    ResourceKey.fromString("minecraft:mangrove_logs_can_grow_through");
+  public static final ResourceKey MANGROVE_ROOTS_CAN_GROW_THROUGH =
+    ResourceKey.fromString("minecraft:mangrove_roots_can_grow_through");
   public static final ResourceKey DEAD_BUSH_MAY_PLACE_ON = ResourceKey.fromString("minecraft:dead_bush_may_place_on");
   public static final ResourceKey SNAPS_GOAT_HORN = ResourceKey.fromString("minecraft:snaps_goat_horn");
   public static final ResourceKey REPLACEABLE_BY_TREES = ResourceKey.fromString("minecraft:replaceable_by_trees");
-  public static final ResourceKey SNOW_LAYER_CANNOT_SURVIVE_ON = ResourceKey.fromString("minecraft:snow_layer_cannot_survive_on");
-  public static final ResourceKey SNOW_LAYER_CAN_SURVIVE_ON = ResourceKey.fromString("minecraft:snow_layer_can_survive_on");
+  public static final ResourceKey SNOW_LAYER_CANNOT_SURVIVE_ON =
+    ResourceKey.fromString("minecraft:snow_layer_cannot_survive_on");
+  public static final ResourceKey SNOW_LAYER_CAN_SURVIVE_ON =
+    ResourceKey.fromString("minecraft:snow_layer_can_survive_on");
   public static final ResourceKey INVALID_SPAWN_INSIDE = ResourceKey.fromString("minecraft:invalid_spawn_inside");
   public static final ResourceKey SNIFFER_DIGGABLE_BLOCK = ResourceKey.fromString("minecraft:sniffer_diggable_block");
   public static final ResourceKey SNIFFER_EGG_HATCH_BOOST = ResourceKey.fromString("minecraft:sniffer_egg_hatch_boost");
   public static final ResourceKey TRAIL_RUINS_REPLACEABLE = ResourceKey.fromString("minecraft:trail_ruins_replaceable");
   public static final ResourceKey REPLACEABLE = ResourceKey.fromString("minecraft:replaceable");
-  public static final ResourceKey ENCHANTMENT_POWER_PROVIDER = ResourceKey.fromString("minecraft:enchantment_power_provider");
-  public static final ResourceKey ENCHANTMENT_POWER_TRANSMITTER = ResourceKey.fromString("minecraft:enchantment_power_transmitter");
+  public static final ResourceKey ENCHANTMENT_POWER_PROVIDER =
+    ResourceKey.fromString("minecraft:enchantment_power_provider");
+  public static final ResourceKey ENCHANTMENT_POWER_TRANSMITTER =
+    ResourceKey.fromString("minecraft:enchantment_power_transmitter");
   public static final ResourceKey MAINTAINS_FARMLAND = ResourceKey.fromString("minecraft:maintains_farmland");
 
   private BlockTags() {}

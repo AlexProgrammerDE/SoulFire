@@ -29,20 +29,20 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
 
     enchantmentDesc.addProperty("id", BuiltInRegistries.ENCHANTMENT.getId(enchantment));
     enchantmentDesc.addProperty(
-        "key",
-        Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).toString());
+      "key",
+      Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).toString());
 
     enchantmentDesc.addProperty("minLevel", enchantment.getMinLevel());
     enchantmentDesc.addProperty("maxLevel", enchantment.getMaxLevel());
 
     var incompatible = new JsonArray();
     BuiltInRegistries.ENCHANTMENT.stream()
-        .filter(other -> other != enchantment)
-        .filter(other -> !enchantment.isCompatibleWith(other))
-        .forEach(
-            other ->
-                incompatible.add(
-                    Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(other)).getPath()));
+      .filter(other -> other != enchantment)
+      .filter(other -> !enchantment.isCompatibleWith(other))
+      .forEach(
+        other ->
+          incompatible.add(
+            Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(other)).getPath()));
 
     enchantmentDesc.add("incompatible", incompatible);
 
@@ -77,7 +77,7 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
   public JsonArray generateDataJson() {
     var resultsArray = new JsonArray();
     BuiltInRegistries.ENCHANTMENT.stream()
-        .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantment)));
+      .forEach(enchantment -> resultsArray.add(generateEnchantment(enchantment)));
     return resultsArray;
   }
 }

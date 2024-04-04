@@ -30,9 +30,9 @@ public class VersionComparator {
 
     try {
       var currentVersionData =
-          Arrays.stream(currentVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
+        Arrays.stream(currentVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
       var checkVersionData =
-          Arrays.stream(checkVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
+        Arrays.stream(checkVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
 
       var i = 0;
       for (var version : checkVersionData) {

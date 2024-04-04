@@ -31,31 +31,31 @@ public class LogsUploadService {
 
   public static McLogsResponse upload(String text) {
     return ReactorHttpHelper.createReactorClient(null, true)
-        .headers(h -> h.set(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded"))
-        .post()
-        .uri(UPLOAD_URI)
-        .sendForm((request, form) -> form.attr("content", text))
-        .responseSingle(
-            (res, content) -> {
-              if (res.status().code() != 200) {
-                log.warn("Failed to upload: {}", res.status().code());
-                throw new RuntimeException("Failed to upload");
-              }
+      .headers(h -> h.set(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded"))
+      .post()
+      .uri(UPLOAD_URI)
+      .sendForm((request, form) -> form.attr("content", text))
+      .responseSingle(
+        (res, content) -> {
+          if (res.status().code() != 200) {
+            log.warn("Failed to upload: {}", res.status().code());
+            throw new RuntimeException("Failed to upload");
+          }
 
-              return content
-                  .asString()
-                  .map(
-                      responseText -> {
-                        var response = GsonInstance.GSON.fromJson(responseText, McLogsResponse.class);
-                        if (!response.success()) {
-                            log.warn("Failed to upload: {}", response.error());
-                            throw new RuntimeException("Failed to upload");
-                        }
+          return content
+            .asString()
+            .map(
+              responseText -> {
+                var response = GsonInstance.GSON.fromJson(responseText, McLogsResponse.class);
+                if (!response.success()) {
+                  log.warn("Failed to upload: {}", response.error());
+                  throw new RuntimeException("Failed to upload");
+                }
 
-                        return response;
-                      });
-            })
-        .block();
+                return response;
+              });
+        })
+      .block();
   }
 
   public record McLogsResponse(boolean success, String id, String url, String raw, String error) {}

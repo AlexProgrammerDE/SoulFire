@@ -26,11 +26,14 @@ public class EntityTypeTags {
   public static final ResourceKey BEEHIVE_INHABITORS = ResourceKey.fromString("minecraft:beehive_inhabitors");
   public static final ResourceKey ARROWS = ResourceKey.fromString("minecraft:arrows");
   public static final ResourceKey IMPACT_PROJECTILES = ResourceKey.fromString("minecraft:impact_projectiles");
-  public static final ResourceKey POWDER_SNOW_WALKABLE_MOBS = ResourceKey.fromString("minecraft:powder_snow_walkable_mobs");
+  public static final ResourceKey POWDER_SNOW_WALKABLE_MOBS =
+    ResourceKey.fromString("minecraft:powder_snow_walkable_mobs");
   public static final ResourceKey AXOLOTL_ALWAYS_HOSTILES = ResourceKey.fromString("minecraft:axolotl_always_hostiles");
   public static final ResourceKey AXOLOTL_HUNT_TARGETS = ResourceKey.fromString("minecraft:axolotl_hunt_targets");
-  public static final ResourceKey FREEZE_IMMUNE_ENTITY_TYPES = ResourceKey.fromString("minecraft:freeze_immune_entity_types");
-  public static final ResourceKey FREEZE_HURTS_EXTRA_TYPES = ResourceKey.fromString("minecraft:freeze_hurts_extra_types");
+  public static final ResourceKey FREEZE_IMMUNE_ENTITY_TYPES =
+    ResourceKey.fromString("minecraft:freeze_immune_entity_types");
+  public static final ResourceKey FREEZE_HURTS_EXTRA_TYPES =
+    ResourceKey.fromString("minecraft:freeze_hurts_extra_types");
   public static final ResourceKey CAN_BREATHE_UNDER_WATER = ResourceKey.fromString("minecraft:can_breathe_under_water");
   public static final ResourceKey FROG_FOOD = ResourceKey.fromString("minecraft:frog_food");
   public static final ResourceKey FALL_DAMAGE_IMMUNE = ResourceKey.fromString("minecraft:fall_damage_immune");

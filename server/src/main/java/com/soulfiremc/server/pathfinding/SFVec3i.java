@@ -99,8 +99,8 @@ public class SFVec3i {
 
   public double distance(SFVec3i goal) {
     return Math.sqrt(
-        MathHelper.square(goal.x - x)
-            + MathHelper.square(goal.y - y)
-            + MathHelper.square(goal.z - z));
+      MathHelper.square(goal.x - x)
+        + MathHelper.square(goal.y - y)
+        + MathHelper.square(goal.z - z));
   }
 }

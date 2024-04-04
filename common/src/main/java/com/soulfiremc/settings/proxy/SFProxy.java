@@ -23,11 +23,11 @@ import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 public record SFProxy(
-    @NonNull ProxyType type,
-    @NonNull String host,
-    int port,
-    @Nullable String username,
-    @Nullable String password) {
+  @NonNull ProxyType type,
+  @NonNull String host,
+  int port,
+  @Nullable String username,
+  @Nullable String password) {
   public SFProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");
@@ -46,11 +46,11 @@ public record SFProxy(
 
   public static SFProxy fromProto(ProxyProto proto) {
     return new SFProxy(
-        ProxyType.valueOf(proto.getType().name()),
-        proto.getHost(),
-        proto.getPort(),
-        proto.hasUsername() ? proto.getUsername() : null,
-        proto.hasPassword() ? proto.getPassword() : null);
+      ProxyType.valueOf(proto.getType().name()),
+      proto.getHost(),
+      proto.getPort(),
+      proto.hasUsername() ? proto.getUsername() : null,
+      proto.hasPassword() ? proto.getPassword() : null);
   }
 
   public InetSocketAddress getInetSocketAddress() {
@@ -59,10 +59,10 @@ public record SFProxy(
 
   public ProxyProto toProto() {
     var builder =
-        ProxyProto.newBuilder()
-            .setType(ProxyProto.Type.valueOf(type.name()))
-            .setHost(host)
-            .setPort(port);
+      ProxyProto.newBuilder()
+        .setType(ProxyProto.Type.valueOf(type.name()))
+        .setHost(host)
+        .setPort(port);
 
     if (username != null) {
       builder.setUsername(username);

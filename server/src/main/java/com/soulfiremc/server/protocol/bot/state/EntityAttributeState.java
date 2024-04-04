@@ -29,7 +29,7 @@ import lombok.Data;
 @Data
 public class EntityAttributeState {
   private final Map<AttributeType, AttributeState> attributeStore =
-      new Object2ObjectOpenHashMap<>();
+    new Object2ObjectOpenHashMap<>();
 
   public AttributeState getOrCreateAttribute(AttributeType type) {
     return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
@@ -38,10 +38,10 @@ public class EntityAttributeState {
   public void putItemModifiers(ItemType type) {
     for (var attribute : type.attributes()) {
       getOrCreateAttribute(attribute.type())
-          .modifiers()
-          .putAll(
-              attribute.modifiers().stream()
-                  .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+        .modifiers()
+        .putAll(
+          attribute.modifiers().stream()
+            .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
     }
   }
 

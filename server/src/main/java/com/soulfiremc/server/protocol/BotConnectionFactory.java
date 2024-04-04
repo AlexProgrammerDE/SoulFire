@@ -39,16 +39,16 @@ import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.slf4j.Logger;
 
 public record BotConnectionFactory(
-    AttackManager attackManager,
-    UUID botConnectionId,
-    ResolveUtil.ResolvedAddress resolvedAddress,
-    SettingsHolder settingsHolder,
-    Logger logger,
-    MinecraftProtocol protocol,
-    MinecraftAccount minecraftAccount,
-    ProtocolVersion protocolVersion,
-    SFProxy proxyData,
-    EventLoopGroup eventLoopGroup) {
+  AttackManager attackManager,
+  UUID botConnectionId,
+  ResolveUtil.ResolvedAddress resolvedAddress,
+  SettingsHolder settingsHolder,
+  Logger logger,
+  MinecraftProtocol protocol,
+  MinecraftAccount minecraftAccount,
+  ProtocolVersion protocolVersion,
+  SFProxy proxyData,
+  EventLoopGroup eventLoopGroup) {
   public BotConnection prepareConnection() {
     return prepareConnectionInternal(ProtocolState.LOGIN);
   }
@@ -56,32 +56,32 @@ public record BotConnectionFactory(
   public BotConnection prepareConnectionInternal(ProtocolState targetState) {
     var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
     var session =
-        new ViaClientSession(
-            resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
+      new ViaClientSession(
+        resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
     var botConnection =
-        new BotConnection(
-            UUID.randomUUID(),
-            this,
-            attackManager,
-            attackManager.soulFireServer(),
-            settingsHolder,
-            logger,
-            protocol,
-            session,
-            resolvedAddress,
-            new ExecutorManager("SoulFire-Attack-" + attackManager.id()),
-            meta,
-            LambdaManager.basic(new ASMGenerator())
-                .setExceptionHandler(EventExceptionHandler.INSTANCE)
-                .setEventFilter(
-                    (c, h) -> {
-                      if (SoulFireBotEvent.class.isAssignableFrom(c)) {
-                        return true;
-                      } else {
-                        throw new IllegalStateException(
-                            "This event handler only accepts bot events");
-                      }
-                    }));
+      new BotConnection(
+        UUID.randomUUID(),
+        this,
+        attackManager,
+        attackManager.soulFireServer(),
+        settingsHolder,
+        logger,
+        protocol,
+        session,
+        resolvedAddress,
+        new ExecutorManager("SoulFire-Attack-" + attackManager.id()),
+        meta,
+        LambdaManager.basic(new ASMGenerator())
+          .setExceptionHandler(EventExceptionHandler.INSTANCE)
+          .setEventFilter(
+            (c, h) -> {
+              if (SoulFireBotEvent.class.isAssignableFrom(c)) {
+                return true;
+              } else {
+                throw new IllegalStateException(
+                  "This event handler only accepts bot events");
+              }
+            }));
 
     var sessionDataManager = new SessionDataManager(botConnection);
     session.meta().sessionDataManager(sessionDataManager);

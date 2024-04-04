@@ -18,4 +18,4 @@
 package com.soulfiremc.server.protocol.bot.model;
 
 public record DimensionData(
-    String dimensionType, String worldName, long hashedSeed, boolean debug, boolean flat) {}
+  String dimensionType, String worldName, long hashedSeed, boolean debug, boolean flat) {}

@@ -29,35 +29,35 @@ public class BotTicker implements InternalPlugin {
   public static void onConnectionInit(BotConnectionInitEvent event) {
     var connection = event.connection();
     startTicker(
-        connection,
-        connection.executorManager().newScheduledExecutorService(connection, "Tick"),
-        new TickTimer(20));
+      connection,
+      connection.executorManager().newScheduledExecutorService(connection, "Tick"),
+      new TickTimer(20));
   }
 
   private static void startTicker(
-      BotConnection connection, ScheduledExecutorService executor, TickTimer tickTimer) {
+    BotConnection connection, ScheduledExecutorService executor, TickTimer tickTimer) {
     executor.scheduleWithFixedDelay(
-        () -> {
-          tickTimer.advanceTime();
+      () -> {
+        tickTimer.advanceTime();
 
-          MDC.put("connectionId", connection.connectionId().toString());
-          MDC.put("botName", connection.meta().accountName());
-          MDC.put("botUuid", connection.meta().accountProfileId().toString());
-          try {
-            connection.tick(tickTimer.ticks);
-          } catch (Throwable t) {
-            connection.logger().error("Exception ticking bot", t);
-          }
-          MDC.clear();
-        },
-        0,
-        50,
-        TimeUnit.MILLISECONDS); // 20 TPS
+        MDC.put("connectionId", connection.connectionId().toString());
+        MDC.put("botName", connection.meta().accountName());
+        MDC.put("botUuid", connection.meta().accountProfileId().toString());
+        try {
+          connection.tick(tickTimer.ticks);
+        } catch (Throwable t) {
+          connection.logger().error("Exception ticking bot", t);
+        }
+        MDC.clear();
+      },
+      0,
+      50,
+      TimeUnit.MILLISECONDS); // 20 TPS
   }
 
   @Override
   public void onLoad() {
     PluginHelper.registerAttackEventConsumer(
-        BotConnectionInitEvent.class, BotTicker::onConnectionInit);
+      BotConnectionInitEvent.class, BotTicker::onConnectionInit);
   }
 }

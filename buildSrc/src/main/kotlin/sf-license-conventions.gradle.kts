@@ -1,5 +1,5 @@
 plugins {
-    id("org.cadixdev.licenser")
+  id("org.cadixdev.licenser")
 }
 
 license.header(rootProject.file("file_header.txt"))

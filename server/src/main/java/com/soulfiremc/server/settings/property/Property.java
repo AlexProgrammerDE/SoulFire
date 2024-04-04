@@ -35,129 +35,129 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
 
   record Builder(String namespace) {
     public BooleanProperty ofBoolean(
-        String key, String uiName, String[] cliFlags, String description, boolean defaultValue) {
+      String key, String uiName, String[] cliFlags, String description, boolean defaultValue) {
       return new BooleanProperty(namespace, key, uiName, cliFlags, description, defaultValue);
     }
 
     public IntProperty ofInt(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        int defaultValue,
-        int minValue,
-        int maxValue,
-        int stepValue) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      int defaultValue,
+      int minValue,
+      int maxValue,
+      int stepValue) {
       return ofInt(
-          key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+        key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
     }
 
     public IntProperty ofInt(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        int defaultValue,
-        int minValue,
-        int maxValue,
-        int stepValue,
-        String format) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      int defaultValue,
+      int minValue,
+      int maxValue,
+      int stepValue,
+      String format) {
       return new IntProperty(
-          namespace,
-          key,
-          uiName,
-          cliFlags,
-          description,
-          defaultValue,
-          minValue,
-          maxValue,
-          stepValue,
-          format);
+        namespace,
+        key,
+        uiName,
+        cliFlags,
+        description,
+        defaultValue,
+        minValue,
+        maxValue,
+        stepValue,
+        format);
     }
 
     public DoubleProperty ofDouble(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        double defaultValue,
-        double minValue,
-        double maxValue,
-        double stepValue) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      double defaultValue,
+      double minValue,
+      double maxValue,
+      double stepValue) {
       return ofDouble(
-          key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+        key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
     }
 
     public DoubleProperty ofDouble(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        double defaultValue,
-        double minValue,
-        double maxValue,
-        double stepValue,
-        String format) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      double defaultValue,
+      double minValue,
+      double maxValue,
+      double stepValue,
+      String format) {
       return new DoubleProperty(
-          namespace,
-          key,
-          uiName,
-          cliFlags,
-          description,
-          defaultValue,
-          minValue,
-          maxValue,
-          stepValue,
-          format);
+        namespace,
+        key,
+        uiName,
+        cliFlags,
+        description,
+        defaultValue,
+        minValue,
+        maxValue,
+        stepValue,
+        format);
     }
 
     public StringProperty ofString(
-        String key, String uiName, String[] cliFlags, String description, String defaultValue) {
+      String key, String uiName, String[] cliFlags, String description, String defaultValue) {
       return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, false);
     }
 
     public StringProperty ofStringSecret(
-        String key, String uiName, String[] cliFlags, String description, String defaultValue) {
+      String key, String uiName, String[] cliFlags, String description, String defaultValue) {
       return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, true);
     }
 
     public ComboProperty ofCombo(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        ComboProperty.ComboOption[] values,
-        int defaultValue) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      ComboProperty.ComboOption[] values,
+      int defaultValue) {
       return new ComboProperty(namespace, key, uiName, cliFlags, description, values, defaultValue);
     }
 
     public <T extends Enum<T>> ComboProperty ofEnum(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        T[] values,
-        T defaultValue) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      T[] values,
+      T defaultValue) {
       return ofEnumMapped(
-          key, uiName, cliFlags, description, values, defaultValue, Object::toString);
+        key, uiName, cliFlags, description, values, defaultValue, Object::toString);
     }
 
     public <T extends Enum<T>> ComboProperty ofEnumMapped(
-        String key,
-        String uiName,
-        String[] cliFlags,
-        String description,
-        T[] values,
-        T defaultValue,
-        Function<T, String> mapper) {
+      String key,
+      String uiName,
+      String[] cliFlags,
+      String description,
+      T[] values,
+      T defaultValue,
+      Function<T, String> mapper) {
       return new ComboProperty(
-          namespace,
-          key,
-          uiName,
-          cliFlags,
-          description,
-          ComboProperty.ComboOption.fromEnum(values, mapper),
-          defaultValue.ordinal());
+        namespace,
+        key,
+        uiName,
+        cliFlags,
+        description,
+        ComboProperty.ComboOption.fromEnum(values, mapper),
+        defaultValue.ordinal());
     }
   }
 }

@@ -31,7 +31,7 @@ public class BrigadierHelper {
   }
 
   public static <T> RequiredArgumentBuilder<ConsoleSubject, T> argument(
-      String name, ArgumentType<T> type) {
+    String name, ArgumentType<T> type) {
     return RequiredArgumentBuilder.argument(name, type);
   }
 
@@ -40,7 +40,7 @@ public class BrigadierHelper {
   }
 
   public static RedirectModifier<ConsoleSubject> helpRedirect(
-      String help, RedirectModifier<ConsoleSubject> redirect) {
+    String help, RedirectModifier<ConsoleSubject> redirect) {
     return new RedirectHelpWrapper(redirect, help, false);
   }
 

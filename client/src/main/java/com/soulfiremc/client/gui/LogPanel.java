@@ -53,21 +53,21 @@ public class LogPanel extends JPanel {
     var request = LogRequest.newBuilder().setPrevious(300).build();
 
     guiManager
-        .threadPool()
-        .submit(
-            () -> {
-              try (var context = Context.current().withCancellation()) {
-                guiManager.rpcClient().contexts().add(context);
-                context.run(
-                    () ->
-                        guiManager
-                            .rpcClient()
-                            .logStubBlocking()
-                            .subscribe(request)
-                            .forEachRemaining(
-                                response -> messageLogPanel.log(response.getMessage() + "\n")));
-              }
-            });
+      .threadPool()
+      .submit(
+        () -> {
+          try (var context = Context.current().withCancellation()) {
+            guiManager.rpcClient().contexts().add(context);
+            context.run(
+              () ->
+                guiManager
+                  .rpcClient()
+                  .logStubBlocking()
+                  .subscribe(request)
+                  .forEachRemaining(
+                    response -> messageLogPanel.log(response.getMessage() + "\n")));
+          }
+        });
 
     var commands = new JTextField();
     commands.setFocusTraversalKeysEnabled(false);
@@ -102,9 +102,9 @@ public class LogPanel extends JPanel {
 
     public void initHistory() {
       commandHistory.addAll(
-          guiManager.clientCommandManager().getCommandHistory().stream()
-              .map(Map.Entry::getValue)
-              .toList());
+        guiManager.clientCommandManager().getCommandHistory().stream()
+          .map(Map.Entry::getValue)
+          .toList());
     }
 
     @Override
@@ -165,8 +165,8 @@ public class LogPanel extends JPanel {
           var command = commands.getText();
           if (tabQueue == null) {
             tabQueue =
-                new LinkedBlockingQueue<>(
-                    guiManager.clientCommandManager().getCompletionSuggestions(command));
+              new LinkedBlockingQueue<>(
+                guiManager.clientCommandManager().getCompletionSuggestions(command));
           }
 
           if (tabQueue.isEmpty()) {

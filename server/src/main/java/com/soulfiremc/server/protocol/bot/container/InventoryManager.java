@@ -42,10 +42,11 @@ import org.jetbrains.annotations.Nullable;
 public class InventoryManager {
   private final PlayerInventoryContainer playerInventory = new PlayerInventoryContainer(this);
   private final Int2ObjectMap<Container> containerData =
-      new Int2ObjectOpenHashMap<>(Map.of(0, playerInventory));
+    new Int2ObjectOpenHashMap<>(Map.of(0, playerInventory));
   private final Map<EquipmentSlot, ItemType> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
-  @ToString.Exclude private final SessionDataManager dataManager;
+  @ToString.Exclude
+  private final SessionDataManager dataManager;
   private Container openContainer;
   private int heldItemSlot = 0;
   private int lastStateId = -1;
@@ -96,7 +97,7 @@ public class InventoryManager {
   public void leftClickSlot(int slot) {
     if (!inventoryControlLock.isHeldByCurrentThread()) {
       throw new IllegalStateException(
-          "You need to lock the inventoryControlLock before calling this method!");
+        "You need to lock the inventoryControlLock before calling this method!");
     }
 
     if (openContainer == null) {
@@ -132,14 +133,14 @@ public class InventoryManager {
     changes.put(slot, slotItem);
 
     dataManager.sendPacket(
-        new ServerboundContainerClickPacket(
-            openContainer.id(),
-            lastStateId,
-            slot,
-            ContainerActionType.CLICK_ITEM,
-            ClickItemAction.LEFT_CLICK,
-            cursorItem,
-            changes));
+      new ServerboundContainerClickPacket(
+        openContainer.id(),
+        lastStateId,
+        slot,
+        ContainerActionType.CLICK_ITEM,
+        ClickItemAction.LEFT_CLICK,
+        cursorItem,
+        changes));
   }
 
   public void applyItemAttributes() {

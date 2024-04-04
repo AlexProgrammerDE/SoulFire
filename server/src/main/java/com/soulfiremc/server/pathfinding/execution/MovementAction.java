@@ -90,7 +90,7 @@ public final class MovementAction implements WorldAction {
 
     var botPosition = clientEntity.pos();
     if (targetMiddleBlock.getY() - MovementConstants.STEP_HEIGHT > botPosition.getY()
-        && shouldJump()) {
+      && shouldJump()) {
       clientEntity.controlState().jumping(true);
     }
   }

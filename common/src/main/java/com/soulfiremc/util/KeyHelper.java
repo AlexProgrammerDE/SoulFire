@@ -38,7 +38,7 @@ public class KeyHelper {
     try {
       var keyFactory = KeyFactory.getInstance("EC");
       return (ECPublicKey)
-          keyFactory.generatePublic(new X509EncodedKeySpec(decodeBase64String(key)));
+        keyFactory.generatePublic(new X509EncodedKeySpec(decodeBase64String(key)));
     } catch (GeneralSecurityException e) {
       throw new JsonParseException(e);
     }
@@ -48,7 +48,7 @@ public class KeyHelper {
     try {
       var keyFactory = KeyFactory.getInstance("EC");
       return (ECPrivateKey)
-          keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeBase64String(key)));
+        keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeBase64String(key)));
     } catch (GeneralSecurityException e) {
       throw new JsonParseException(e);
     }

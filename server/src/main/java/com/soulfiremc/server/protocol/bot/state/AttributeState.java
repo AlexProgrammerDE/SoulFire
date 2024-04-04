@@ -58,6 +58,6 @@ public class AttributeState {
 
   private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
     return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)
-        ::iterator;
+      ::iterator;
   }
 }

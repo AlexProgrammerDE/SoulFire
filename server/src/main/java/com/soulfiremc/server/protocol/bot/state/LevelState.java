@@ -49,7 +49,8 @@ public class LevelState {
   private final String infiniburn;
   private final String effects;
   private final byte ultrawarm;
-  @Getter private final int height;
+  @Getter
+  private final int height;
   private final int logicalHeight;
   private final byte natural;
   private final int minY;
@@ -64,14 +65,16 @@ public class LevelState {
   private final byte hasRaids;
   private final byte respawnAnchorWorks;
 
-  @Setter private long worldAge;
-  @Setter private long time;
+  @Setter
+  private long worldAge;
+  @Setter
+  private long time;
 
   public LevelState(
-      SessionDataManager sessionDataManager,
-      String dimensionName,
-      int dimensionId,
-      CompoundTag levelRegistry) {
+    SessionDataManager sessionDataManager,
+    String dimensionName,
+    int dimensionId,
+    CompoundTag levelRegistry) {
     this.sessionDataManager = sessionDataManager;
     this.dimensionName = dimensionName;
     this.dimensionId = dimensionId;
@@ -100,7 +103,7 @@ public class LevelState {
     this.hasSkylight = levelRegistry.<ByteTag>get("has_skylight").getValue();
     this.ambientLight = levelRegistry.<FloatTag>get("ambient_light").getValue();
     this.monsterSpawnBlockLightLimit =
-        levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
+      levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
     this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
     this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
 

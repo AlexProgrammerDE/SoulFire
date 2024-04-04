@@ -30,8 +30,10 @@ public class PlayerInventoryContainer extends Container {
    */
   private final ContainerSlot[] storage = getSlots(9, 44);
 
-  @Getter private final ContainerSlot[] armor = getSlots(5, 8);
-  @Getter private final ContainerSlot[] craftingGrid = getSlots(1, 4);
+  @Getter
+  private final ContainerSlot[] armor = getSlots(5, 8);
+  @Getter
+  private final ContainerSlot[] craftingGrid = getSlots(1, 4);
 
   public PlayerInventoryContainer(InventoryManager inventoryManager) {
     super(46, 0);

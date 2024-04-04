@@ -47,68 +47,68 @@ public class AutoReconnect implements InternalPlugin {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
     if (!settingsHolder.get(AutoReconnectSettings.ENABLED)
-        || connection.attackManager().attackState().isInactive()) {
+      || connection.attackManager().attackState().isInactive()) {
       return;
     }
 
     connection
-        .attackManager()
-        .executorManager()
-        .newScheduledExecutorService(connection, "Reconnect")
-        .schedule(
-            () -> {
-              var eventLoopGroup = connection.session().eventLoopGroup();
-              if (eventLoopGroup.isShuttingDown()
-                  || eventLoopGroup.isShutdown()
-                  || eventLoopGroup.isTerminated()) {
-                return;
-              }
+      .attackManager()
+      .executorManager()
+      .newScheduledExecutorService(connection, "Reconnect")
+      .schedule(
+        () -> {
+          var eventLoopGroup = connection.session().eventLoopGroup();
+          if (eventLoopGroup.isShuttingDown()
+            || eventLoopGroup.isShutdown()
+            || eventLoopGroup.isTerminated()) {
+            return;
+          }
 
-              connection.gracefulDisconnect().join();
-              var newConnection = connection.factory().prepareConnection();
+          connection.gracefulDisconnect().join();
+          var newConnection = connection.factory().prepareConnection();
 
-              connection
-                  .attackManager()
-                  .botConnections()
-                  .put(connection.connectionId(), newConnection);
+          connection
+            .attackManager()
+            .botConnections()
+            .put(connection.connectionId(), newConnection);
 
-              newConnection.connect();
-            },
-            RandomUtil.getRandomInt(
-                settingsHolder.get(AutoReconnectSettings.DELAY.min()),
-                settingsHolder.get(AutoReconnectSettings.DELAY.max())),
-            TimeUnit.SECONDS);
+          newConnection.connect();
+        },
+        RandomUtil.getRandomInt(
+          settingsHolder.get(AutoReconnectSettings.DELAY.min()),
+          settingsHolder.get(AutoReconnectSettings.DELAY.max())),
+        TimeUnit.SECONDS);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoReconnectSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-reconnect");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Enable Auto Reconnect",
-            new String[] {"--auto-reconnect"},
-            "Reconnect a bot when it times out/is kicked",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable Auto Reconnect",
+        new String[] {"--auto-reconnect"},
+        "Reconnect a bot when it times out/is kicked",
+        true);
     public static final MinMaxPropertyLink DELAY =
-        new MinMaxPropertyLink(
-            BUILDER.ofInt(
-                "min-delay",
-                "Min delay (seconds)",
-                new String[] {"--reconnect-min-delay"},
-                "Minimum delay between reconnects",
-                1,
-                0,
-                Integer.MAX_VALUE,
-                1),
-            BUILDER.ofInt(
-                "max-delay",
-                "Max delay (seconds)",
-                new String[] {"--reconnect-max-delay"},
-                "Maximum delay between reconnects",
-                5,
-                0,
-                Integer.MAX_VALUE,
-                1));
+      new MinMaxPropertyLink(
+        BUILDER.ofInt(
+          "min-delay",
+          "Min delay (seconds)",
+          new String[] {"--reconnect-min-delay"},
+          "Minimum delay between reconnects",
+          1,
+          0,
+          Integer.MAX_VALUE,
+          1),
+        BUILDER.ofInt(
+          "max-delay",
+          "Max delay (seconds)",
+          new String[] {"--reconnect-max-delay"},
+          "Maximum delay between reconnects",
+          5,
+          0,
+          Integer.MAX_VALUE,
+          1));
   }
 }

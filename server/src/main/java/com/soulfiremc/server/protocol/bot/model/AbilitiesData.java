@@ -18,9 +18,9 @@
 package com.soulfiremc.server.protocol.bot.model;
 
 public record AbilitiesData(
-    boolean invulnerable,
-    boolean flying,
-    boolean allowFlying,
-    boolean creativeModeBreak,
-    float flySpeed,
-    float walkSpeed) {}
+  boolean invulnerable,
+  boolean flying,
+  boolean allowFlying,
+  boolean creativeModeBreak,
+  float flySpeed,
+  float walkSpeed) {}

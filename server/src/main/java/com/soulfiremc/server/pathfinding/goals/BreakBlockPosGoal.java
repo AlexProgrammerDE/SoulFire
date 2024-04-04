@@ -45,7 +45,7 @@ public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
     }
 
     var breakCost =
-        entityState.inventory().getMiningCosts(graph.tagsState(), blockStateMeta).miningCost();
+      entityState.inventory().getMiningCosts(graph.tagsState(), blockStateMeta).miningCost();
 
     return distance + breakCost;
   }

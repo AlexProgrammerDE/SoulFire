@@ -22,14 +22,14 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 
 @SuppressWarnings("unused")
 public record EntityType(
-    int id,
-    ResourceKey key,
-    float width,
-    float height,
-    String category,
-    boolean friendly,
-    boolean summonable,
-    boolean attackable) {
+  int id,
+  ResourceKey key,
+  float width,
+  float height,
+  String category,
+  boolean friendly,
+  boolean summonable,
+  boolean attackable) {
   public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   public static final EntityType ALLAY = register("minecraft:allay");

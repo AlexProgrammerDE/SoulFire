@@ -244,7 +244,7 @@ public final class SessionDataManager {
   }
 
   public static void writeChunkSection(
-      ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
+    ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
     buf.writeShort(chunkSection.getBlockCount());
 
     codec.writeDataPalette(buf, chunkSection.getChunkData());
@@ -281,7 +281,7 @@ public final class SessionDataManager {
   public void onJoin(ClientboundLoginPacket packet) {
     // Set data from the packet
     loginData =
-        new LoginPacketData(packet.isHardcore(), packet.getWorldNames(), packet.getMaxPlayers());
+      new LoginPacketData(packet.isHardcore(), packet.getWorldNames(), packet.getMaxPlayers());
 
     enableRespawnScreen = packet.isEnableRespawnScreen();
     doLimitedCrafting = packet.isDoLimitedCrafting();
@@ -298,12 +298,12 @@ public final class SessionDataManager {
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
     currentDimension =
-        new DimensionData(
-            spawnInfo.getDimension(),
-            spawnInfo.getWorldName(),
-            spawnInfo.getHashedSeed(),
-            spawnInfo.isDebug(),
-            spawnInfo.isFlat());
+      new DimensionData(
+        spawnInfo.getDimension(),
+        spawnInfo.getWorldName(),
+        spawnInfo.getHashedSeed(),
+        spawnInfo.isDebug(),
+        spawnInfo.isFlat());
     gameMode = spawnInfo.getGameMode();
     previousGameMode = spawnInfo.getPreviousGamemode();
     lastDeathPos = spawnInfo.getLastDeathPos();
@@ -317,13 +317,13 @@ public final class SessionDataManager {
     var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
     var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
     var yaw =
-        relative.contains(PositionElement.YAW)
-            ? clientEntity.yaw() + packet.getYaw()
-            : packet.getYaw();
+      relative.contains(PositionElement.YAW)
+        ? clientEntity.yaw() + packet.getYaw()
+        : packet.getYaw();
     var pitch =
-        relative.contains(PositionElement.PITCH)
-            ? clientEntity.pitch() + packet.getPitch()
-            : packet.getPitch();
+      relative.contains(PositionElement.PITCH)
+        ? clientEntity.pitch() + packet.getPitch()
+        : packet.getPitch();
 
     clientEntity.setPosition(x, y, z);
     clientEntity.setRotation(yaw, pitch);
@@ -333,15 +333,15 @@ public final class SessionDataManager {
       joinedWorld = true;
 
       log.info(
-          "Joined server at position: X {} Y {} Z {}",
-          position.getX(),
-          position.getY(),
-          position.getZ());
+        "Joined server at position: X {} Y {} Z {}",
+        position.getX(),
+        position.getY(),
+        position.getZ());
 
       connection.eventBus().call(new BotJoinedEvent(connection));
     } else {
       log.debug(
-          "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
+        "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
     session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
@@ -389,7 +389,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onServerPlayData(ClientboundServerDataPacket packet) {
     serverPlayData =
-        new ServerPlayData(packet.getMotd(), packet.getIconBytes(), packet.isEnforcesSecureChat());
+      new ServerPlayData(packet.getMotd(), packet.getIconBytes(), packet.isEnforcesSecureChat());
   }
 
   @EventHandler
@@ -401,11 +401,11 @@ public final class SessionDataManager {
       log.debug("Received server brand \"{}\"", serverBrand);
     } else if (channelKey.equals(SFProtocolConstants.REGISTER_KEY)) {
       log.debug(
-          "Received register packet for channels: {}", String.join(", ", readChannels(packet)));
+        "Received register packet for channels: {}", String.join(", ", readChannels(packet)));
     } else if (channelKey.equals(SFProtocolConstants.UNREGISTER_KEY)) {
       log.debug(
-          "Received unregister packet for channels; {}",
-          String.join(", ", readChannels(packet)));
+        "Received unregister packet for channels; {}",
+        String.join(", ", readChannels(packet)));
     }
   }
 
@@ -435,7 +435,7 @@ public final class SessionDataManager {
   }
 
   private void onChat(
-      long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
+    long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
   }
 
@@ -492,21 +492,21 @@ public final class SessionDataManager {
   @EventHandler
   public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
     abilitiesData =
-        new AbilitiesData(
-            packet.isInvincible(),
-            packet.isFlying(),
-            packet.isCanFly(),
-            packet.isCreative(),
-            packet.getFlySpeed(),
-            packet.getWalkSpeed());
+      new AbilitiesData(
+        packet.isInvincible(),
+        packet.isFlying(),
+        packet.isCanFly(),
+        packet.isCreative(),
+        packet.getFlySpeed(),
+        packet.getWalkSpeed());
 
     var attributeState = clientEntity.attributeState();
     attributeState
-        .getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED)
-        .baseValue(abilitiesData.walkSpeed());
+      .getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED)
+      .baseValue(abilitiesData.walkSpeed());
     attributeState
-        .getOrCreateAttribute(AttributeType.GENERIC_FLYING_SPEED)
-        .baseValue(abilitiesData.flySpeed());
+      .getOrCreateAttribute(AttributeType.GENERIC_FLYING_SPEED)
+      .baseValue(abilitiesData.flySpeed());
 
     controlState.flying(abilitiesData.flying());
   }
@@ -535,7 +535,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onExperience(ClientboundSetExperiencePacket packet) {
     experienceData =
-        new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
+      new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
   }
 
   @EventHandler
@@ -558,7 +558,7 @@ public final class SessionDataManager {
 
     if (container == null) {
       log.warn(
-          "Received container content update for unknown container {}", packet.getContainerId());
+        "Received container content update for unknown container {}", packet.getContainerId());
       return;
     }
 
@@ -605,7 +605,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onOpenScreen(ClientboundOpenScreenPacket packet) {
     var container =
-        new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
+      new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
     inventoryManager.setContainer(packet.getContainerId(), container);
     inventoryManager.openContainer(container);
   }
@@ -638,8 +638,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onGameEvent(ClientboundGameEventPacket packet) {
     switch (packet.getNotification()) {
-      case INVALID_BED ->
-          log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
+      case INVALID_BED -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
       case START_RAIN -> weatherState.raining(true);
       case STOP_RAIN -> weatherState.raining(false);
       case CHANGE_GAMEMODE -> {
@@ -649,20 +648,16 @@ public final class SessionDataManager {
       case ENTER_CREDITS -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
         session.send(
-            new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
+          new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
       }
       case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
       case ARROW_HIT_PLAYER -> log.debug("Arrow hit player");
-      case RAIN_STRENGTH ->
-          weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
-      case THUNDER_STRENGTH ->
-          weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
+      case RAIN_STRENGTH -> weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
+      case THUNDER_STRENGTH -> weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
       case PUFFERFISH_STING_SOUND -> log.debug("Pufferfish sting sound");
       case AFFECTED_BY_ELDER_GUARDIAN -> log.debug("Affected by elder guardian");
-      case ENABLE_RESPAWN_SCREEN ->
-          enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
-      case LIMITED_CRAFTING ->
-          doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
+      case ENABLE_RESPAWN_SCREEN -> enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
+      case LIMITED_CRAFTING -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
     }
   }
 
@@ -711,7 +706,7 @@ public final class SessionDataManager {
 
       if (chunkData == null) {
         log.warn(
-            "Received biome update for unknown chunk: {} {}", biomeData.getX(), biomeData.getZ());
+          "Received biome update for unknown chunk: {} {}", biomeData.getX(), biomeData.getZ());
         return;
       }
 
@@ -721,7 +716,7 @@ public final class SessionDataManager {
           var section = chunkData.getSection(i);
           var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
           chunkData.setSection(
-              i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
+            i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
         }
       } catch (IOException e) {
         log.error("Failed to read chunk section", e);
@@ -754,9 +749,9 @@ public final class SessionDataManager {
 
     if (chunkData == null) {
       log.warn(
-          "Received section blocks update for unknown chunk: {} {}",
-          packet.getChunkX(),
-          packet.getChunkZ());
+        "Received section blocks update for unknown chunk: {} {}",
+        packet.getChunkX(),
+        packet.getChunkZ());
       return;
     }
 
@@ -796,15 +791,15 @@ public final class SessionDataManager {
   @EventHandler
   public void onBorderInit(ClientboundInitializeBorderPacket packet) {
     borderState =
-        new BorderState(
-            packet.getNewCenterX(),
-            packet.getNewCenterZ(),
-            packet.getOldSize(),
-            packet.getNewSize(),
-            packet.getLerpTime(),
-            packet.getNewAbsoluteMaxSize(),
-            packet.getWarningBlocks(),
-            packet.getWarningTime());
+      new BorderState(
+        packet.getNewCenterX(),
+        packet.getNewCenterZ(),
+        packet.getOldSize(),
+        packet.getNewSize(),
+        packet.getLerpTime(),
+        packet.getNewAbsoluteMaxSize(),
+        packet.getWarningBlocks(),
+        packet.getWarningTime());
   }
 
   @EventHandler
@@ -839,11 +834,11 @@ public final class SessionDataManager {
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
     var entityState =
-        new RawEntity(
-            packet.getEntityId(),
-            packet.getUuid(),
-            EntityType.getById(packet.getType().ordinal()),
-            packet.getData());
+      new RawEntity(
+        packet.getEntityId(),
+        packet.getUuid(),
+        EntityType.getById(packet.getType().ordinal()),
+        packet.getData());
 
     entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
     entityState.setRotation(packet.getYaw(), packet.getPitch());
@@ -901,24 +896,24 @@ public final class SessionDataManager {
       }
 
       var attribute =
-          state.attributeState().getOrCreateAttribute(attributeType).baseValue(entry.getValue());
+        state.attributeState().getOrCreateAttribute(attributeType).baseValue(entry.getValue());
 
       attribute.modifiers().clear();
       attribute
-          .modifiers()
-          .putAll(
-              entry.getModifiers().stream()
-                  .map(
-                      modifier ->
-                          new Attribute.Modifier(
-                              modifier.getUuid(),
-                              modifier.getAmount(),
-                              switch (modifier.getOperation()) {
-                                case ADD -> ModifierOperation.ADDITION;
-                                case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
-                                case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
-                              }))
-                  .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+        .modifiers()
+        .putAll(
+          entry.getModifiers().stream()
+            .map(
+              modifier ->
+                new Attribute.Modifier(
+                  modifier.getUuid(),
+                  modifier.getAmount(),
+                  switch (modifier.getOperation()) {
+                    case ADD -> ModifierOperation.ADDITION;
+                    case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
+                    case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
+                  }))
+            .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
     }
   }
 
@@ -944,15 +939,15 @@ public final class SessionDataManager {
     }
 
     state
-        .effectState()
-        .updateEffect(
-            packet.getEffect(),
-            packet.getAmplifier(),
-            packet.getDuration(),
-            packet.isAmbient(),
-            packet.isShowParticles(),
-            packet.isShowIcon(),
-            packet.getFactorData());
+      .effectState()
+      .updateEffect(
+        packet.getEffect(),
+        packet.getAmplifier(),
+        packet.getDuration(),
+        packet.isAmbient(),
+        packet.isShowParticles(),
+        packet.isShowIcon(),
+        packet.getFactorData());
   }
 
   @EventHandler
@@ -1023,7 +1018,7 @@ public final class SessionDataManager {
 
     if (state == null) {
       log.warn(
-          "Received entity position rotation packet for unknown entity {}", packet.getEntityId());
+        "Received entity position rotation packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -1062,7 +1057,7 @@ public final class SessionDataManager {
     sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.ACCEPTED));
     sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DOWNLOADED));
     sendPacket(
-        new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.SUCCESSFULLY_LOADED));
+      new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.SUCCESSFULLY_LOADED));
   }
 
   private boolean isValidResourcePackUrl(String url) {

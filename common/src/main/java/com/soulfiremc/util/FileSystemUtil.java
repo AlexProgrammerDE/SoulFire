@@ -39,7 +39,7 @@ public class FileSystemUtil {
   private FileSystemUtil() {}
 
   public static Map<Path, byte[]> getFilesInDirectory(final String assetPath)
-      throws IOException, URISyntaxException {
+    throws IOException, URISyntaxException {
     var resource = FileSystemUtil.class.getResource(assetPath);
     if (resource == null) {
       return Collections.emptyMap();
@@ -50,14 +50,14 @@ public class FileSystemUtil {
       return getFilesInPath(Paths.get(uri));
     } else if (uri.getScheme().equals("jar")) {
       return runInFileSystem(
-          uri,
-          fileSystem -> {
-            try {
-              return getFilesInPath(fileSystem.getPath(assetPath));
-            } catch (IOException e) {
-              throw new UncheckedIOException(e);
-            }
-          });
+        uri,
+        fileSystem -> {
+          try {
+            return getFilesInPath(fileSystem.getPath(assetPath));
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+        });
     } else {
       throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
     }
@@ -66,22 +66,22 @@ public class FileSystemUtil {
   private static Map<Path, byte[]> getFilesInPath(final Path path) throws IOException {
     try (var stream = Files.walk(path)) {
       return stream
-          .filter(Files::isRegularFile)
-          .sorted(Comparator.comparing(Path::toString))
-          .collect(
-              Collectors.toMap(
-                  f -> f,
-                  f -> {
-                    try {
-                      return Files.readAllBytes(f);
-                    } catch (IOException e) {
-                      throw new UncheckedIOException(e);
-                    }
-                  },
-                  (u, v) -> {
-                    throw new IllegalStateException("Duplicate key");
-                  },
-                  LinkedHashMap::new));
+        .filter(Files::isRegularFile)
+        .sorted(Comparator.comparing(Path::toString))
+        .collect(
+          Collectors.toMap(
+            f -> f,
+            f -> {
+              try {
+                return Files.readAllBytes(f);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            },
+            (u, v) -> {
+              throw new IllegalStateException("Duplicate key");
+            },
+            LinkedHashMap::new));
     }
   }
 

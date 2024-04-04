@@ -26,14 +26,14 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
  * inventory.
  *
  * @param blockPosition The position of the bot in block coordinates. This is the block the bottom
- *     of the bot is in, so the "feet" block.
- * @param levelState The level state of the world the bot is in.
- * @param inventory The inventory state of the bot.
+ *                      of the bot is in, so the "feet" block.
+ * @param levelState    The level state of the world the bot is in.
+ * @param inventory     The inventory state of the bot.
  */
 public record BotEntityState(
-    SFVec3i blockPosition, ProjectedLevelState levelState, ProjectedInventory inventory) {
+  SFVec3i blockPosition, ProjectedLevelState levelState, ProjectedInventory inventory) {
   public static BotEntityState initialState(
-      ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
+    ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
     return new BotEntityState(SFVec3i.fromDouble(clientEntity.pos()), levelState, inventory);
   }
 }

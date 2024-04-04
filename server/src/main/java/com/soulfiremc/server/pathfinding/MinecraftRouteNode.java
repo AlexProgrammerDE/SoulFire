@@ -29,19 +29,29 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
-  /** The world state of this node. */
+  /**
+   * The world state of this node.
+   */
   private final BotEntityState entityState;
 
-  /** The currently best known node to this node. */
+  /**
+   * The currently best known node to this node.
+   */
   private MinecraftRouteNode previous;
 
-  /** The action from the previous node that was used to get to this node. */
+  /**
+   * The action from the previous node that was used to get to this node.
+   */
   private List<WorldAction> previousActions;
 
-  /** The cost of the route from the start node to this node. */
+  /**
+   * The cost of the route from the start node to this node.
+   */
   private double sourceCost;
 
-  /** The estimated cost of the route from this node to the target. */
+  /**
+   * The estimated cost of the route from this node to the target.
+   */
   private double totalRouteScore;
 
   @Override

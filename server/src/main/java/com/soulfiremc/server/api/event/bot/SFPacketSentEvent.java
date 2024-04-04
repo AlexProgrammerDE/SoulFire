@@ -22,4 +22,4 @@ import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 
 public record SFPacketSentEvent(BotConnection connection, MinecraftPacket packet)
-    implements SoulFireBotEvent {}
+  implements SoulFireBotEvent {}

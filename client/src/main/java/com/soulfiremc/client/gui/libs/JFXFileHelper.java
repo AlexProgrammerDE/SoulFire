@@ -38,7 +38,7 @@ public class JFXFileHelper {
   private JFXFileHelper() {}
 
   public static Optional<Path> showOpenDialog(
-      @Nullable Path initialDirectory, Map<String, String> filterMap) {
+    @Nullable Path initialDirectory, Map<String, String> filterMap) {
     NFD_Init();
     try (var stack = stackPush()) {
       var filters = NFDFilterItem.malloc(filterMap.size());
@@ -61,7 +61,7 @@ public class JFXFileHelper {
   }
 
   public static Optional<Path> showSaveDialog(
-      Path initialDirectory, Map<String, String> filterMap, String defaultName) {
+    Path initialDirectory, Map<String, String> filterMap, String defaultName) {
     NFD_Init();
     try (var stack = stackPush()) {
       var filters = NFDFilterItem.malloc(filterMap.size());

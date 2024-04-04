@@ -35,7 +35,9 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   private final ShutdownManager shutdownManager;
   private final PlatformCommandManager commandManager;
 
-  /** Sets up {@code System.out} and {@code System.err} to redirect to log4j. */
+  /**
+   * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
+   */
   public static void setupStreams() {
     System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
     System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
@@ -64,15 +66,15 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
     }
 
     return super.buildReader(
-        builder
-            .appName("SoulFire")
-            .completer(
-                (reader, parsedLine, list) -> {
-                  for (var suggestion :
-                      commandManager.getCompletionSuggestions(parsedLine.line())) {
-                    list.add(new Candidate(suggestion));
-                  }
-                })
-            .history(history));
+      builder
+        .appName("SoulFire")
+        .completer(
+          (reader, parsedLine, list) -> {
+            for (var suggestion :
+              commandManager.getCompletionSuggestions(parsedLine.line())) {
+              list.add(new Candidate(suggestion));
+            }
+          })
+        .history(history));
   }
 }

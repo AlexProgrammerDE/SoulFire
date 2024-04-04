@@ -29,20 +29,20 @@ import net.kyori.adventure.text.Component;
  * This event is called when a chat message is received from the server.
  *
  * @param connection The bot connection instance.
- * @param timestamp The timestamp when the message was received.
- * @param message The message that was received.
- * @param sender The sender of the message or null if it's from the server.
+ * @param timestamp  The timestamp when the message was received.
+ * @param message    The message that was received.
+ * @param sender     The sender of the message or null if it's from the server.
  */
 public record ChatMessageReceiveEvent(
-    BotConnection connection, long timestamp, Component message, @Nullable ChatMessageSender sender)
-    implements SoulFireBotEvent {
+  BotConnection connection, long timestamp, Component message, @Nullable ChatMessageSender sender)
+  implements SoulFireBotEvent {
   public String parseToText() {
     return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
   }
 
   public record ChatMessageSender(UUID senderUUID, String senderName) {
     public static ChatMessageSender fromClientboundPlayerChatPacket(
-        ClientboundPlayerChatPacket packet) {
+      ClientboundPlayerChatPacket packet) {
       var senderUUID = packet.getSender();
       var senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
       return new ChatMessageSender(senderUUID, senderName);

@@ -18,7 +18,7 @@
 package com.soulfiremc.server.settings.property;
 
 public sealed interface SingleProperty extends Property
-    permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
+  permits BooleanProperty, ComboProperty, IntProperty, DoubleProperty, StringProperty {
   String uiName();
 
   String[] cliFlags();

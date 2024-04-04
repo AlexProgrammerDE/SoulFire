@@ -19,7 +19,9 @@ package com.soulfiremc.server.api.event;
 
 import com.soulfiremc.server.AttackManager;
 
-/** Represents an attack event of a SoulFire attack. */
+/**
+ * Represents an attack event of a SoulFire attack.
+ */
 public non-sealed interface SoulFireAttackEvent extends SoulFireEvent {
   AttackManager attackManager();
 }

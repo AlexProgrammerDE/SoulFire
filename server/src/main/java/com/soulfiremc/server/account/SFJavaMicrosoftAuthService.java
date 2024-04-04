@@ -28,21 +28,21 @@ import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 public final class SFJavaMicrosoftAuthService
-    implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
+  implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
   @Override
   public MinecraftAccount login(JavaMicrosoftAuthData data, SFProxy proxyData) throws IOException {
     try {
       var fullJavaSession =
-          MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
-              LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-              new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+        MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
+          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
+          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
       var mcProfile = fullJavaSession.getMcProfile();
       var mcToken = mcProfile.getMcToken();
       return new MinecraftAccount(
-          AuthType.MICROSOFT_JAVA,
-          mcProfile.getId(),
-          mcProfile.getName(),
-          new OnlineJavaData(mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
+        AuthType.MICROSOFT_JAVA,
+        mcProfile.getId(),
+        mcProfile.getName(),
+        new OnlineJavaData(mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
     } catch (Exception e) {
       throw new IOException(e);
     }

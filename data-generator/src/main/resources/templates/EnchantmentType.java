@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.data;
 
-import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.List;
@@ -29,25 +26,25 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record EnchantmentType(
-    int id,
-    ResourceKey key,
-    int minLevel,
-    int maxLevel,
-    List<String> incompatible,
-    String category,
-    String rarity,
-    boolean tradeable,
-    boolean discoverable,
-    boolean curse,
-    boolean treasureOnly) {
+  int id,
+  ResourceKey key,
+  int minLevel,
+  int maxLevel,
+  List<String> incompatible,
+  String category,
+  String rarity,
+  boolean tradeable,
+  boolean discoverable,
+  boolean curse,
+  boolean treasureOnly) {
   public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
-      new Object2ReferenceOpenHashMap<>();
+    new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
   public static EnchantmentType register(String key) {
     var instance =
-        GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
+      GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
 
     FROM_KEY.put(instance.key(), instance);
     return instance;

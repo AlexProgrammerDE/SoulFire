@@ -56,67 +56,67 @@ public class BlockCollisionShapesDataGenerator {
   private static String voxelShapeToString(VoxelShape voxelShape) {
     var list = new ArrayList<String>();
     voxelShape.forAllBoxes(
-        (x1, y1, z1, x2, y2, z2) ->
-            list.add(
-                String.join(
-                    ",",
-                    formatDouble(x1),
-                    formatDouble(y1),
-                    formatDouble(z1),
-                    formatDouble(x2),
-                    formatDouble(y2),
-                    formatDouble(z2))));
+      (x1, y1, z1, x2, y2, z2) ->
+        list.add(
+          String.join(
+            ",",
+            formatDouble(x1),
+            formatDouble(y1),
+            formatDouble(z1),
+            formatDouble(x2),
+            formatDouble(y2),
+            formatDouble(z2))));
 
     return String.join("|", list);
   }
 
   private static class BlockShapesCache {
     public final Object2IntMap<VoxelShape> uniqueBlockShapes =
-        new Object2IntLinkedOpenCustomHashMap<>(
-            new Hash.Strategy<>() {
-              @Override
-              public int hashCode(VoxelShape voxelShape) {
-                return voxelShapeToString(voxelShape).hashCode();
-              }
+      new Object2IntLinkedOpenCustomHashMap<>(
+        new Hash.Strategy<>() {
+          @Override
+          public int hashCode(VoxelShape voxelShape) {
+            return voxelShapeToString(voxelShape).hashCode();
+          }
 
-              @Override
-              public boolean equals(VoxelShape voxelShape, VoxelShape k1) {
-                if (voxelShape == k1) {
-                  return true;
-                } else if (voxelShape == null || k1 == null) {
-                  return false;
-                }
+          @Override
+          public boolean equals(VoxelShape voxelShape, VoxelShape k1) {
+            if (voxelShape == k1) {
+              return true;
+            } else if (voxelShape == null || k1 == null) {
+              return false;
+            }
 
-                return voxelShapeToString(voxelShape).equals(voxelShapeToString(k1));
-              }
-            });
+            return voxelShapeToString(voxelShape).equals(voxelShapeToString(k1));
+          }
+        });
     public final Map<Block, IntList> blockCollisionShapes = new LinkedHashMap<>();
     private int lastCollisionShapeId = 0;
 
     {
       BuiltInRegistries.BLOCK.forEach(
-          block -> {
-            IntList blockCollisionShapes = new IntArrayList();
+        block -> {
+          IntList blockCollisionShapes = new IntArrayList();
 
-            for (var blockState : block.getStateDefinition().getPossibleStates()) {
-              var blockShape =
-                  blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+          for (var blockState : block.getStateDefinition().getPossibleStates()) {
+            var blockShape =
+              blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 
-              // Revert block offset
-              var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-              var inverseBlockShapeCenter = blockShapeCenter.reverse();
-              blockShape =
-                  blockShape.move(
-                      inverseBlockShapeCenter.x,
-                      inverseBlockShapeCenter.y,
-                      inverseBlockShapeCenter.z);
+            // Revert block offset
+            var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+            var inverseBlockShapeCenter = blockShapeCenter.reverse();
+            blockShape =
+              blockShape.move(
+                inverseBlockShapeCenter.x,
+                inverseBlockShapeCenter.y,
+                inverseBlockShapeCenter.z);
 
-              blockCollisionShapes.add(
-                  uniqueBlockShapes.computeIfAbsent(blockShape, k -> lastCollisionShapeId++));
-            }
+            blockCollisionShapes.add(
+              uniqueBlockShapes.computeIfAbsent(blockShape, k -> lastCollisionShapeId++));
+          }
 
-            this.blockCollisionShapes.put(block, blockCollisionShapes);
-          });
+          this.blockCollisionShapes.put(block, blockCollisionShapes);
+        });
     }
 
     public String dumpBlockShapeIndices() {
@@ -132,9 +132,9 @@ public class BlockCollisionShapesDataGenerator {
             resultBuilder.append(blockCollisions.getInt(0));
           } else {
             resultBuilder.append(
-                String.join(
-                    ",",
-                    blockCollisions.intStream().mapToObj(String::valueOf).toArray(String[]::new)));
+              String.join(
+                ",",
+                blockCollisions.intStream().mapToObj(String::valueOf).toArray(String[]::new)));
           }
         }
 

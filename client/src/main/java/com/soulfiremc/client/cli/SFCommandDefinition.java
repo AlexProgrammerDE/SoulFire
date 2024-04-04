@@ -38,76 +38,77 @@ import picocli.CommandLine.Option;
 @Slf4j
 @RequiredArgsConstructor
 @Command(
-    name = "soulfire",
-    mixinStandardHelpOptions = true,
-    version = "SoulFire v" + BuildData.VERSION,
-    showDefaultValues = true,
-    description = BuildData.DESCRIPTION,
-    sortOptions = false)
+  name = "soulfire",
+  mixinStandardHelpOptions = true,
+  version = "SoulFire v" + BuildData.VERSION,
+  showDefaultValues = true,
+  description = BuildData.DESCRIPTION,
+  sortOptions = false)
 public class SFCommandDefinition implements Callable<Integer> {
   private final CLIManager cliManager;
-  @Setter private CommandLine commandLine;
+  @Setter
+  private CommandLine commandLine;
 
   @Option(
-      names = {"-s", "--start"},
-      description = "Whether to start the attack automatically")
+    names = {"-s", "--start"},
+    description = "Whether to start the attack automatically")
   private boolean start;
 
   @Option(
-      names = {"--account-file"},
-      description = "File to load accounts from")
+    names = {"--account-file"},
+    description = "File to load accounts from")
   private Path accountFile;
 
   @Option(
-      names = {"--account-type"},
-      description = "Type of accounts in the account file")
+    names = {"--account-type"},
+    description = "Type of accounts in the account file")
   private AuthType authType;
 
   @Option(
-      names = {"--proxy-file"},
-      description = "File to load proxies from")
+    names = {"--proxy-file"},
+    description = "File to load proxies from")
   private Path proxyFile;
 
   @Option(
-      names = {"--proxy-type"},
-      description = "Type of proxies in the proxy file")
+    names = {"--proxy-type"},
+    description = "Type of proxies in the proxy file")
   private ProxyType proxyType;
 
   @Option(
-      names = {"--profile-file"},
-      description = "File to load a profile from")
+    names = {"--profile-file"},
+    description = "File to load a profile from")
   private Path profileFile;
 
   @Option(
-      names = {"--generate-flags"},
-      description = "Create a list of flags",
-      hidden = true)
+    names = {"--generate-flags"},
+    description = "Create a list of flags",
+    hidden = true)
   private boolean generateFlags;
 
   @Override
   public Integer call() {
     if (generateFlags) {
       commandLine
-          .getCommandSpec()
-          .options()
-          .forEach(
-              option -> {
-                if (option.hidden()) {
-                  return;
-                }
+        .getCommandSpec()
+        .options()
+        .forEach(
+          option -> {
+            if (option.hidden()) {
+              return;
+            }
 
-                var name =
-                    Arrays.stream(option.names())
-                        .map(s -> String.format("`%s`", s))
-                        .collect(Collectors.joining(", "));
-                var defaultValue =
-                    option.defaultValueString() == null
-                        ? ""
-                        : String.format("`%s`", option.defaultValueString());
-                var description =
-                    option.description() == null ? "" : String.join(", ", option.description());
-                System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
-              });
+            var name =
+              Arrays.stream(option.names())
+                .map(s -> String.format("`%s`", s))
+                .collect(Collectors.joining(", "));
+            var defaultValue =
+              option.defaultValueString() == null
+                ? ""
+                : String.format("`%s`", option.defaultValueString());
+            var description =
+              option.description() == null ? "" : String.join(", ", option.description());
+            System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
+          });
       cliManager.shutdown();
       return 0;
     }
@@ -118,9 +119,9 @@ public class SFCommandDefinition implements Callable<Integer> {
     if (accountFile != null && authType != null) {
       try {
         cliManager
-            .clientSettingsManager()
-            .accountRegistry()
-            .loadFromString(Files.readString(accountFile), authType, null);
+          .clientSettingsManager()
+          .accountRegistry()
+          .loadFromString(Files.readString(accountFile), authType, null);
       } catch (IOException e) {
         log.error("Failed to load accounts!", e);
         return 1;
@@ -130,11 +131,11 @@ public class SFCommandDefinition implements Callable<Integer> {
     if (proxyFile != null) {
       try {
         cliManager
-            .clientSettingsManager()
-            .proxyRegistry()
-            .loadFromString(
-                Files.readString(proxyFile),
-                proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
+          .clientSettingsManager()
+          .proxyRegistry()
+          .loadFromString(
+            Files.readString(proxyFile),
+            proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
       } catch (IOException e) {
         log.error("Failed to load proxies!", e);
         return 1;
@@ -154,11 +155,11 @@ public class SFCommandDefinition implements Callable<Integer> {
       cliManager.clientCommandManager().execute("start-attack");
     } else {
       log.info(
-          "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
+        "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
 
     new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager())
-        .start();
+      .start();
 
     cliManager.shutdownManager().awaitShutdown();
 

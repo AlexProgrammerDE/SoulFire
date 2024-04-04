@@ -48,9 +48,9 @@ public class MapColorJavaGenerator implements IDataGenerator {
     }
 
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        "public static final MapColor[] COLORS = new MapColor[] {\n    "
-            + String.join(",\n    ", colorArray)
-            + "\n  };");
+      GeneratorConstants.VALUES_REPLACE,
+      "public static final MapColor[] COLORS = new MapColor[] {\n    "
+        + String.join(",\n    ", colorArray)
+        + "\n  };");
   }
 }

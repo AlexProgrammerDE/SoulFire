@@ -29,7 +29,7 @@ public record XZGoal(Vector2i goal) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
     return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
-        .distance(goal);
+      .distance(goal);
   }
 
   @Override

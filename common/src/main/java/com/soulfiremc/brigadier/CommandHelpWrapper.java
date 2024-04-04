@@ -22,8 +22,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 public record CommandHelpWrapper(
-    Command<ConsoleSubject> command, String help, boolean privateCommand)
-    implements Command<ConsoleSubject> {
+  Command<ConsoleSubject> command, String help, boolean privateCommand)
+  implements Command<ConsoleSubject> {
   @Override
   public int run(CommandContext<ConsoleSubject> context) throws CommandSyntaxException {
     return command.run(context);

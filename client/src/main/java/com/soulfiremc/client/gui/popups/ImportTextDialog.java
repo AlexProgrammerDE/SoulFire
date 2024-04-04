@@ -49,15 +49,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ImportTextDialog extends JDialog {
   public ImportTextDialog(
-      Path initialDirectory,
-      String loadText,
-      String typeText,
-      GUIManager guiManager,
-      GUIFrame frame,
-      Consumer<String> consumer) {
+    Path initialDirectory,
+    String loadText,
+    String typeText,
+    GUIManager guiManager,
+    GUIFrame frame,
+    Consumer<String> consumer) {
     super(frame, loadText, true);
     Consumer<String> threadSpawningConsumer =
-        text -> guiManager.threadPool().submit(() -> consumer.accept(text));
+      text -> guiManager.threadPool().submit(() -> consumer.accept(text));
 
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -68,13 +68,13 @@ public class ImportTextDialog extends JDialog {
     var loadFromFileButton = new JButton("Load from File");
 
     loadFromFileButton.addActionListener(
-        new ImportFileListener(
-            initialDirectory, Map.of(typeText, "txt"), threadSpawningConsumer, this));
+      new ImportFileListener(
+        initialDirectory, Map.of(typeText, "txt"), threadSpawningConsumer, this));
 
     var getFromClipboardButton = new JButton("Get from Clipboard");
 
     getFromClipboardButton.addActionListener(
-        new ImportClipboardListener(threadSpawningConsumer, this));
+      new ImportClipboardListener(threadSpawningConsumer, this));
 
     buttonPanel.add(loadFromFileButton);
     buttonPanel.add(getFromClipboardButton);
@@ -96,14 +96,14 @@ public class ImportTextDialog extends JDialog {
 
     var separatorPanel = new JPanel();
     var titledBorder =
-        BorderFactory.createTitledBorder(
-            new MatteBorder(
-                UIManager.getInt("Separator.stripeWidth"),
-                0,
-                0,
-                0,
-                UIManager.getColor("Separator.foreground")),
-            "OR");
+      BorderFactory.createTitledBorder(
+        new MatteBorder(
+          UIManager.getInt("Separator.stripeWidth"),
+          0,
+          0,
+          0,
+          UIManager.getColor("Separator.foreground")),
+        "OR");
     titledBorder.setTitleJustification(TitledBorder.CENTER);
     separatorPanel.setBorder(titledBorder);
     var separatorPanelLayout = new GridBagLayout();
@@ -142,36 +142,36 @@ public class ImportTextDialog extends JDialog {
   }
 
   private record ImportFileListener(
-      Path initialDirectory,
-      Map<String, String> filterMap,
-      Consumer<String> consumer,
-      ImportTextDialog dialog)
-      implements ActionListener {
+    Path initialDirectory,
+    Map<String, String> filterMap,
+    Consumer<String> consumer,
+    ImportTextDialog dialog)
+    implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
       dialog.dispose();
 
       JFXFileHelper.showOpenDialog(initialDirectory, filterMap)
-          .ifPresent(
-              file -> {
-                if (!Files.isReadable(file)) {
-                  log.error("File is not readable!");
-                  return;
-                }
+        .ifPresent(
+          file -> {
+            if (!Files.isReadable(file)) {
+              log.error("File is not readable!");
+              return;
+            }
 
-                log.info("Opening: {}", file.getFileName());
+            log.info("Opening: {}", file.getFileName());
 
-                try {
-                  consumer.accept(Files.readString(file));
-                } catch (Throwable e) {
-                  log.error("Failed to import text!", e);
-                }
-              });
+            try {
+              consumer.accept(Files.readString(file));
+            } catch (Throwable e) {
+              log.error("Failed to import text!", e);
+            }
+          });
     }
   }
 
   private record ImportClipboardListener(Consumer<String> consumer, ImportTextDialog dialog)
-      implements ActionListener {
+    implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
       dialog.dispose();
@@ -185,8 +185,8 @@ public class ImportTextDialog extends JDialog {
   }
 
   private record SubmitTextListener(
-      Consumer<String> consumer, ImportTextDialog dialog, JTextArea textArea)
-      implements ActionListener {
+    Consumer<String> consumer, ImportTextDialog dialog, JTextArea textArea)
+    implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
       dialog.dispose();

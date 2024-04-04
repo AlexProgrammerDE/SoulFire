@@ -61,7 +61,7 @@ public class ForwardingBypass implements InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
 
   public static void writePlayerKey(
-      ByteBuf buf, MinecraftCodecHelper codecHelper, IdentifiedKey playerKey) {
+    ByteBuf buf, MinecraftCodecHelper codecHelper, IdentifiedKey playerKey) {
     buf.writeLong(playerKey.expiryTemporal().toEpochMilli());
     codecHelper.writeByteArray(buf, playerKey.getSignedPublicKey().getEncoded());
     codecHelper.writeByteArray(buf, playerKey.getSignature());
@@ -74,19 +74,19 @@ public class ForwardingBypass implements InternalPlugin {
       if (player.meta().protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
         //noinspection NonStrictComparisonCanBeEquality
         return requested >= VelocityConstants.MODERN_LAZY_SESSION
-            ? VelocityConstants.MODERN_LAZY_SESSION
-            : VelocityConstants.MODERN_FORWARDING_DEFAULT;
+          ? VelocityConstants.MODERN_LAZY_SESSION
+          : VelocityConstants.MODERN_FORWARDING_DEFAULT;
       }
       if (player.getIdentifiedKey() != null) {
         // No enhanced switch on java 11
         return switch (player.getIdentifiedKey().getKeyRevision()) {
           case GENERIC_V1 -> VelocityConstants.MODERN_FORWARDING_WITH_KEY;
           case LINKED_V2 ->
-              // Since V2 is not backwards compatible, we have to throw the key if v2 and requested
-              // is v1
-              requested >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
-                  ? VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
-                  : VelocityConstants.MODERN_FORWARDING_DEFAULT;
+            // Since V2 is not backwards compatible, we have to throw the key if v2 and requested
+            // is v1
+            requested >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
+              ? VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2
+              : VelocityConstants.MODERN_FORWARDING_DEFAULT;
         };
       } else {
         return VelocityConstants.MODERN_FORWARDING_DEFAULT;
@@ -97,7 +97,7 @@ public class ForwardingBypass implements InternalPlugin {
   }
 
   private static ByteBuf createForwardingData(
-      String hmacSecret, String address, BotConnection player, int requestedVersion) {
+    String hmacSecret, String address, BotConnection player, int requestedVersion) {
     var forwarded = Unpooled.buffer(2048);
     try {
       var actualVersion = findForwardingVersion(requestedVersion, player);
@@ -111,7 +111,7 @@ public class ForwardingBypass implements InternalPlugin {
       // This serves as additional redundancy. The key normally is stored in the
       // login start to the server, but some setups require this.
       if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY
-          && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
+        && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
         var key = player.getIdentifiedKey();
         assert key != null;
         writePlayerKey(forwarded, codecHelper, key);
@@ -171,19 +171,17 @@ public class ForwardingBypass implements InternalPlugin {
     var uuid = connection.meta().accountProfileId();
 
     switch (settingsHolder.get(
-        ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
-      case LEGACY ->
-          event.packet(
-              handshake.withHostname(
-                  createLegacyForwardingAddress(uuid, getForwardedIp(), hostname)));
-      case BUNGEE_GUARD ->
-          event.packet(
-              handshake.withHostname(
-                  createBungeeGuardForwardingAddress(
-                      uuid,
-                      getForwardedIp(),
-                      hostname,
-                      settingsHolder.get(ForwardingBypassSettings.SECRET))));
+      ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
+      case LEGACY -> event.packet(
+        handshake.withHostname(
+          createLegacyForwardingAddress(uuid, getForwardedIp(), hostname)));
+      case BUNGEE_GUARD -> event.packet(
+        handshake.withHostname(
+          createBungeeGuardForwardingAddress(
+            uuid,
+            getForwardedIp(),
+            hostname,
+            settingsHolder.get(ForwardingBypassSettings.SECRET))));
     }
   }
 
@@ -199,8 +197,8 @@ public class ForwardingBypass implements InternalPlugin {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
     if (settingsHolder.get(
-            ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)
-        != ForwardingBypassSettings.ForwardingMode.MODERN) {
+      ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)
+      != ForwardingBypassSettings.ForwardingMode.MODERN) {
       log.warn("Received modern forwarding request packet, but forwarding mode is not modern!");
       return;
     }
@@ -214,11 +212,11 @@ public class ForwardingBypass implements InternalPlugin {
     }
 
     var forwardingData =
-        createForwardingData(
-            settingsHolder.get(ForwardingBypassSettings.SECRET),
-            getForwardedIp(),
-            connection,
-            requestedForwardingVersion);
+      createForwardingData(
+        settingsHolder.get(ForwardingBypassSettings.SECRET),
+        getForwardedIp(),
+        connection,
+        requestedForwardingVersion);
 
     var bytes = new byte[forwardingData.readableBytes()];
     forwardingData.readBytes(bytes);
@@ -234,60 +232,60 @@ public class ForwardingBypass implements InternalPlugin {
    * This is a modified version of the code from <a href="https://github.com/PaperMC/Velocity/blob/dev/3.0.0/proxy/src/main/java/com/velocitypowered/proxy/connection/backend/VelocityServerConnection.java#L171">Velocity</a>.
    */
   private String createLegacyForwardingAddress(
-      UUID botUniqueId,
-      String selfIp,
-      String initialHostname,
-      UnaryOperator<List<GameProfile.Property>> propertiesTransform) {
+    UUID botUniqueId,
+    String selfIp,
+    String initialHostname,
+    UnaryOperator<List<GameProfile.Property>> propertiesTransform) {
     // BungeeCord IP forwarding is simply a special injection after the "address" in the handshake,
     // separated by \0 (the null byte). In order, you send the original host, the player's IP, their
     // UUID (undashed), and if you are in online-mode, their login properties (from Mojang).
     var data =
-        new StringBuilder(initialHostname)
-            .append(LEGACY_FORWARDING_SEPARATOR)
-            .append(selfIp)
-            .append(LEGACY_FORWARDING_SEPARATOR)
-            .append(UUIDHelper.convertToNoDashes(botUniqueId))
-            .append(LEGACY_FORWARDING_SEPARATOR);
+      new StringBuilder(initialHostname)
+        .append(LEGACY_FORWARDING_SEPARATOR)
+        .append(selfIp)
+        .append(LEGACY_FORWARDING_SEPARATOR)
+        .append(UUIDHelper.convertToNoDashes(botUniqueId))
+        .append(LEGACY_FORWARDING_SEPARATOR);
     GsonInstance.GSON.toJson(propertiesTransform.apply(List.of()), data);
     return data.toString();
   }
 
   private String createLegacyForwardingAddress(
-      UUID botUniqueId, String selfIp, String initialHostname) {
+    UUID botUniqueId, String selfIp, String initialHostname) {
     return createLegacyForwardingAddress(
-        botUniqueId, selfIp, initialHostname, UnaryOperator.identity());
+      botUniqueId, selfIp, initialHostname, UnaryOperator.identity());
   }
 
   private String createBungeeGuardForwardingAddress(
-      UUID botUniqueId, String selfIp, String initialHostname, String forwardingSecret) {
+    UUID botUniqueId, String selfIp, String initialHostname, String forwardingSecret) {
     // Append forwarding secret as a BungeeGuard token.
     var property = new GameProfile.Property("bungeeguard-token", forwardingSecret, "");
     return createLegacyForwardingAddress(
-        botUniqueId,
-        selfIp,
-        initialHostname,
-        properties ->
-            ImmutableList.<GameProfile.Property>builder().addAll(properties).add(property).build());
+      botUniqueId,
+      selfIp,
+      initialHostname,
+      properties ->
+        ImmutableList.<GameProfile.Property>builder().addAll(properties).add(property).build());
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("forwarding-bypass");
     public static final ComboProperty FORWARDING_MODE =
-        BUILDER.ofEnum(
-            "forwarding-mode",
-            "Forwarding mode",
-            new String[] {"--forwarding-mode"},
-            "What type of forwarding to use",
-            ForwardingMode.values(),
-            ForwardingMode.NONE);
+      BUILDER.ofEnum(
+        "forwarding-mode",
+        "Forwarding mode",
+        new String[] {"--forwarding-mode"},
+        "What type of forwarding to use",
+        ForwardingMode.values(),
+        ForwardingMode.NONE);
     public static final StringProperty SECRET =
-        BUILDER.ofStringSecret(
-            "secret",
-            "Secret",
-            new String[] {"--secret"},
-            "Secret key used for forwarding. (Not needed for legacy mode)",
-            "forwarding secret");
+      BUILDER.ofStringSecret(
+        "secret",
+        "Secret",
+        new String[] {"--secret"},
+        "Secret key used for forwarding. (Not needed for legacy mode)",
+        "forwarding secret");
 
     @RequiredArgsConstructor
     enum ForwardingMode {

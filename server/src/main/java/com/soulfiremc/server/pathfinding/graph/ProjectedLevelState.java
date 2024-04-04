@@ -57,7 +57,7 @@ public class ProjectedLevelState {
   public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
     var blockChanges = this.blockChanges.clone();
     blockChanges.ensureCapacity(
-        blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
+      blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
 
     if (air != null) {
       for (var position : air) {

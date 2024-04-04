@@ -41,7 +41,7 @@ import javax.swing.SwingConstants;
 
 public class ServerSelectDialog extends JFrame {
   public ServerSelectDialog(
-      Runnable integratedServerRunnable, Consumer<RemoteServerData> remoteServerConsumer) {
+    Runnable integratedServerRunnable, Consumer<RemoteServerData> remoteServerConsumer) {
     setTitle("Connect to SoulFire Server");
 
     SFSwingUtils.setLogo(this);
@@ -58,11 +58,11 @@ public class ServerSelectDialog extends JFrame {
     leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     var integratedServerButton = new JButton("Use Integrated Server");
     integratedServerButton.addActionListener(
-        e -> {
-          Executors.newSingleThreadExecutor().execute(integratedServerRunnable);
-          setVisible(false);
-          dispose();
-        });
+      e -> {
+        Executors.newSingleThreadExecutor().execute(integratedServerRunnable);
+        setVisible(false);
+        dispose();
+      });
     leftPanel.add(integratedServerButton);
     mainPanel.add(leftPanel, gbc);
 
@@ -88,28 +88,28 @@ public class ServerSelectDialog extends JFrame {
     var tokenField = new JPasswordField(10);
     var submitButton = new JButton("Connect");
     submitButton.addActionListener(
-        e -> {
-          // Check if all fields are filled
-          if (addressField.getText().isEmpty() || tokenField.getPassword().length == 0) {
-            JOptionPane.showMessageDialog(
-                this, "Please fill in all fields.", "Invalid input", JOptionPane.WARNING_MESSAGE);
-          } else {
-            // Add action to handle using remote server
-            var address = addressField.getText();
-            var token = new String(tokenField.getPassword());
+      e -> {
+        // Check if all fields are filled
+        if (addressField.getText().isEmpty() || tokenField.getPassword().length == 0) {
+          JOptionPane.showMessageDialog(
+            this, "Please fill in all fields.", "Invalid input", JOptionPane.WARNING_MESSAGE);
+        } else {
+          // Add action to handle using remote server
+          var address = addressField.getText();
+          var token = new String(tokenField.getPassword());
 
-            Executors.newSingleThreadExecutor()
-                .execute(
-                    () ->
-                        remoteServerConsumer.accept(
-                            new RemoteServerData(
-                                ServerAddress.fromStringDefaultPort(
-                                    address, PortHelper.SF_DEFAULT_PORT),
-                                token)));
-            setVisible(false);
-            dispose();
-          }
-        });
+          Executors.newSingleThreadExecutor()
+            .execute(
+              () ->
+                remoteServerConsumer.accept(
+                  new RemoteServerData(
+                    ServerAddress.fromStringDefaultPort(
+                      address, PortHelper.SF_DEFAULT_PORT),
+                    token)));
+          setVisible(false);
+          dispose();
+        }
+      });
 
     rightPanel.add(addressLabel, gbcRight);
     gbcRight.gridy++;

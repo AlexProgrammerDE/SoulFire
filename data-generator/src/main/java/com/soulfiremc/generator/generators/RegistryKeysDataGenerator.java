@@ -34,16 +34,16 @@ public class RegistryKeysDataGenerator implements IDataGenerator {
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/RegistryKeys.java");
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        String.join(
-            "\n  ",
-            BuiltInRegistries.REGISTRY.stream().map(
-                    s ->
-                        "public static final ResourceKey "
-                            + s.key().location().getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                            + " = ResourceKey.fromString(\""
-                            + s.key().location()
-                            + "\");")
-                .toArray(String[]::new)));
+      GeneratorConstants.VALUES_REPLACE,
+      String.join(
+        "\n  ",
+        BuiltInRegistries.REGISTRY.stream().map(
+            s ->
+              "public static final ResourceKey "
+                + s.key().location().getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                + " = ResourceKey.fromString(\""
+                + s.key().location()
+                + "\");")
+          .toArray(String[]::new)));
   }
 }

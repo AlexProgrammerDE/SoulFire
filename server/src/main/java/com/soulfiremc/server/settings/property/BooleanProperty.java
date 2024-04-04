@@ -18,10 +18,10 @@
 package com.soulfiremc.server.settings.property;
 
 public record BooleanProperty(
-    String namespace,
-    String key,
-    String uiName,
-    String[] cliFlags,
-    String description,
-    boolean defaultValue)
-    implements SingleProperty {}
+  String namespace,
+  String key,
+  String uiName,
+  String[] cliFlags,
+  String description,
+  boolean defaultValue)
+  implements SingleProperty {}

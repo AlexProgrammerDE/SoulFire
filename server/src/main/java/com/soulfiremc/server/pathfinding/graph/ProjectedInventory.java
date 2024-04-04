@@ -40,15 +40,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProjectedInventory {
   private final int usableBlockItems;
-  @Getter private final SFItemStack[] usableToolsAndNull;
+  @Getter
+  private final SFItemStack[] usableToolsAndNull;
   private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
   public ProjectedInventory(PlayerInventoryContainer playerInventory) {
     this(
-        Arrays.stream(playerInventory.storage())
-            .map(ContainerSlot::item)
-            .filter(item -> item != null && item.getAmount() > 0)
-            .toList());
+      Arrays.stream(playerInventory.storage())
+        .map(ContainerSlot::item)
+        .filter(item -> item != null && item.getAmount() > 0)
+        .toList());
   }
 
   public ProjectedInventory(List<SFItemStack> items) {
@@ -87,6 +88,6 @@ public class ProjectedInventory {
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
     return sharedMiningCosts.computeIfAbsent(
-        blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));
+      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));
   }
 }

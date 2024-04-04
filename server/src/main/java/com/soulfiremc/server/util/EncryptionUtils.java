@@ -45,9 +45,9 @@ public class EncryptionUtils {
   ;
 
   public static final Pair<String, String> PEM_RSA_PUBLIC_KEY_DESCRIPTOR =
-      Pair.of("-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
+    Pair.of("-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
   public static final Pair<String, String> PEM_RSA_PRIVATE_KEY_DESCRIPTOR =
-      Pair.of("-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----");
+    Pair.of("-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----");
 
   public static final String SHA1_WITH_RSA = "SHA1withRSA";
   public static final String SHA256_WITH_RSA = "SHA256withRSA";
@@ -56,7 +56,7 @@ public class EncryptionUtils {
   private static final KeyFactory RSA_KEY_FACTORY;
 
   private static final Base64.Encoder MIME_SPECIAL_ENCODER =
-      Base64.getMimeEncoder(76, "\n".getBytes(StandardCharsets.UTF_8));
+    Base64.getMimeEncoder(76, "\n".getBytes(StandardCharsets.UTF_8));
 
   static {
     try {
@@ -67,11 +67,11 @@ public class EncryptionUtils {
 
     try {
       var bytes =
-          ByteStreams.toByteArray(
-              Objects.requireNonNull(
-                  EncryptionUtils.class
-                      .getClassLoader()
-                      .getResourceAsStream("yggdrasil_session_pubkey.der")));
+        ByteStreams.toByteArray(
+          Objects.requireNonNull(
+            EncryptionUtils.class
+              .getClassLoader()
+              .getResourceAsStream("yggdrasil_session_pubkey.der")));
       YGGDRASIL_SESSION_KEY = parseRsaPublicKey(bytes);
     } catch (IOException | NullPointerException err) {
       throw new RuntimeException(err);
@@ -86,13 +86,13 @@ public class EncryptionUtils {
    * Verifies a key signature.
    *
    * @param algorithm the signature algorithm
-   * @param base the public key to verify with
+   * @param base      the public key to verify with
    * @param signature the signature to verify against
-   * @param toVerify the byte array(s) of data to verify
+   * @param toVerify  the byte array(s) of data to verify
    * @return validity of the signature
    */
   public static boolean verifySignature(
-      String algorithm, PublicKey base, byte[] signature, byte[]... toVerify) {
+    String algorithm, PublicKey base, byte[] signature, byte[]... toVerify) {
     Preconditions.checkArgument(toVerify.length > 0);
     try {
       var construct = Signature.getInstance(algorithm);
@@ -110,8 +110,8 @@ public class EncryptionUtils {
    * Generates a signature for input data.
    *
    * @param algorithm the signature algorithm
-   * @param base the private key to sign with
-   * @param toSign the byte array(s) of data to sign
+   * @param base      the private key to sign with
+   * @param toSign    the byte array(s) of data to sign
    * @return the generated signature
    */
   public static byte[] generateSignature(String algorithm, PrivateKey base, byte[]... toSign) {
@@ -153,7 +153,7 @@ public class EncryptionUtils {
   /**
    * Parse a cer-encoded RSA key into its key bytes.
    *
-   * @param toParse the cer-encoded key String
+   * @param toParse     the cer-encoded key String
    * @param descriptors the type of key
    * @return the parsed key bytes
    */
@@ -184,11 +184,11 @@ public class EncryptionUtils {
     }
 
     return encoder.first()
-        + "\n"
-        + encodeUrlEncoded(toEncode.getEncoded())
-        + "\n"
-        + encoder.second()
-        + "\n";
+      + "\n"
+      + encodeUrlEncoded(toEncode.getEncoded())
+      + "\n"
+      + encoder.second()
+      + "\n";
   }
 
   /**
@@ -235,7 +235,7 @@ public class EncryptionUtils {
    * Decrypts an RSA message.
    *
    * @param keyPair the key pair to use
-   * @param bytes the bytes of the encrypted message
+   * @param bytes   the bytes of the encrypted message
    * @return the decrypted message
    * @throws GeneralSecurityException if the message couldn't be decoded
    */
@@ -249,7 +249,7 @@ public class EncryptionUtils {
    * Generates the server ID for the hasJoined endpoint.
    *
    * @param sharedSecret the shared secret between the client and the proxy
-   * @param key the RSA public key
+   * @param key          the RSA public key
    * @return the server ID
    */
   public static String generateServerId(byte[] sharedSecret, PublicKey key) {

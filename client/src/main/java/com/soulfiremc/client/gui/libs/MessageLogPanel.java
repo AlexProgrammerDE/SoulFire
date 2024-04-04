@@ -79,17 +79,17 @@ public class MessageLogPanel extends JPanel {
   private final JTextPane textComponent;
   private final Document document;
   private final ParserFactory factory =
-      new DefaultParserFactory.Builder()
-          .environment(Environment._7_BIT)
-          .textHandler(new DefaultTextHandler())
-          .functionFinder(new DefaultFunctionFinder())
-          .functionHandlers(
-              new C0ControlFunctionHandler(),
-              new C1ControlFunctionHandler(),
-              new ControlSequenceHandler(),
-              new IndependentControlFunctionHandler(),
-              new ControlStringHandler())
-          .build();
+    new DefaultParserFactory.Builder()
+      .environment(Environment._7_BIT)
+      .textHandler(new DefaultTextHandler())
+      .functionFinder(new DefaultFunctionFinder())
+      .functionHandlers(
+        new C0ControlFunctionHandler(),
+        new C1ControlFunctionHandler(),
+        new ControlSequenceHandler(),
+        new IndependentControlFunctionHandler(),
+        new ControlStringHandler())
+      .build();
   private TerminalTheme theme = ThemeUtil.getTerminal();
   private boolean clearText;
 
@@ -99,7 +99,7 @@ public class MessageLogPanel extends JPanel {
     this.textComponent = new JTextPane();
 
     textComponent.setFont(
-        new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
+      new Font(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, new JLabel().getFont().getSize()));
     textComponent.setEditable(true);
     textComponent.setBackground(theme.backgroundColor());
     StyleConstants.setForeground(defaultAttributes, theme.getDefaultTextColor());
@@ -124,10 +124,10 @@ public class MessageLogPanel extends JPanel {
     add(scrollText, BorderLayout.CENTER);
 
     var executorService =
-        Executors.newSingleThreadScheduledExecutor(
-            r -> Thread.ofPlatform().name("MessageLogPanel").daemon().unstarted(r));
+      Executors.newSingleThreadScheduledExecutor(
+        r -> Thread.ofPlatform().name("MessageLogPanel").daemon().unstarted(r));
     executorService.scheduleWithFixedDelay(
-        this::updateTextComponent, 100, 100, TimeUnit.MILLISECONDS);
+      this::updateTextComponent, 100, 100, TimeUnit.MILLISECONDS);
   }
 
   private void updateTextComponent() {
@@ -137,110 +137,94 @@ public class MessageLogPanel extends JPanel {
 
     try {
       SwingUtilities.invokeAndWait(
-          () -> {
-            noopDocumentFilter.filter(false);
-            if (clearText) {
-              textComponent.setText("");
-              clearText = false;
-            } else {
-              try {
-                var parser = factory.createParser(String.join("", toInsert));
+        () -> {
+          noopDocumentFilter.filter(false);
+          if (clearText) {
+            textComponent.setText("");
+            clearText = false;
+          } else {
+            try {
+              var parser = factory.createParser(String.join("", toInsert));
 
-                Fragment fragment;
-                while ((fragment = parser.parse()) != null) {
-                  if (fragment.getType() == FragmentType.TEXT) {
-                    var textFragment = (TextFragment) fragment;
-                    document.insertString(
-                        document.getLength(), textFragment.getText(), defaultAttributes);
-                  } else if (fragment.getType() == FragmentType.FUNCTION) {
-                    var functionFragment = (FunctionFragment) fragment;
-                    if (functionFragment.getFunction()
-                        == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
-                      var sgr = (int) functionFragment.getArguments().getFirst().getValue();
+              Fragment fragment;
+              while ((fragment = parser.parse()) != null) {
+                if (fragment.getType() == FragmentType.TEXT) {
+                  var textFragment = (TextFragment) fragment;
+                  document.insertString(
+                    document.getLength(), textFragment.getText(), defaultAttributes);
+                } else if (fragment.getType() == FragmentType.FUNCTION) {
+                  var functionFragment = (FunctionFragment) fragment;
+                  if (functionFragment.getFunction()
+                    == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
+                    var sgr = (int) functionFragment.getArguments().getFirst().getValue();
 
-                      switch (sgr) {
-                        case 0 -> {
-                          for (var attributes = defaultAttributes.getAttributeNames();
-                              attributes.hasMoreElements(); ) {
-                            var name = attributes.nextElement();
-                            defaultAttributes.removeAttribute(name);
-                          }
-                          StyleConstants.setForeground(
-                              defaultAttributes, theme.getDefaultTextColor());
+                    switch (sgr) {
+                      case 0 -> {
+                        for (var attributes = defaultAttributes.getAttributeNames();
+                             attributes.hasMoreElements(); ) {
+                          var name = attributes.nextElement();
+                          defaultAttributes.removeAttribute(name);
                         }
-                        case 1 -> StyleConstants.setBold(defaultAttributes, true);
-                        case 3 -> StyleConstants.setItalic(defaultAttributes, true);
-                        case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
-                        case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
-                        case 22 -> StyleConstants.setBold(defaultAttributes, false);
-                        case 23 -> StyleConstants.setItalic(defaultAttributes, false);
-                        case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
-                        case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
-                        case 30 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
-                        case 31 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
-                        case 32 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
-                        case 33 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
-                        case 34 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
-                        case 35 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
-                        case 36 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
-                        case 37, 39 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
-                        case 38 -> {
-                          var secondArgument =
-                              (int) functionFragment.getArguments().get(1).getValue();
-                          StyleConstants.setForeground(
-                              defaultAttributes,
-                              switch (secondArgument) {
-                                case 2 -> {
-                                  var r = (int) functionFragment.getArguments().get(2).getValue();
-                                  var g = (int) functionFragment.getArguments().get(3).getValue();
-                                  var b =
-                                      (int) functionFragment.getArguments().getLast().getValue();
-                                  yield new Color(r, g, b);
-                                }
-                                case 5 -> {
-                                  var id = (int) functionFragment.getArguments().get(2).getValue();
-                                  yield XtermPalette256.getColor(id);
-                                }
-                                default -> Color.decode("#FFFFFF");
-                              });
-                        }
-                        case 90 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
-                        case 91 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
-                        case 92 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
-                        case 93 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
-                        case 94 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
-                        case 95 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
-                        case 96 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
-                        case 97 ->
-                            StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
+                        StyleConstants.setForeground(
+                          defaultAttributes, theme.getDefaultTextColor());
                       }
-                    } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
-                      document.insertString(document.getLength(), "\n", defaultAttributes);
+                      case 1 -> StyleConstants.setBold(defaultAttributes, true);
+                      case 3 -> StyleConstants.setItalic(defaultAttributes, true);
+                      case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
+                      case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
+                      case 22 -> StyleConstants.setBold(defaultAttributes, false);
+                      case 23 -> StyleConstants.setItalic(defaultAttributes, false);
+                      case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
+                      case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
+                      case 30 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
+                      case 31 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
+                      case 32 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
+                      case 33 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
+                      case 34 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
+                      case 35 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
+                      case 36 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
+                      case 37, 39 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
+                      case 38 -> {
+                        var secondArgument =
+                          (int) functionFragment.getArguments().get(1).getValue();
+                        StyleConstants.setForeground(
+                          defaultAttributes,
+                          switch (secondArgument) {
+                            case 2 -> {
+                              var r = (int) functionFragment.getArguments().get(2).getValue();
+                              var g = (int) functionFragment.getArguments().get(3).getValue();
+                              var b =
+                                (int) functionFragment.getArguments().getLast().getValue();
+                              yield new Color(r, g, b);
+                            }
+                            case 5 -> {
+                              var id = (int) functionFragment.getArguments().get(2).getValue();
+                              yield XtermPalette256.getColor(id);
+                            }
+                            default -> Color.decode("#FFFFFF");
+                          });
+                      }
+                      case 90 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
+                      case 91 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
+                      case 92 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
+                      case 93 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
+                      case 94 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
+                      case 95 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
+                      case 96 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
+                      case 97 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
                     }
+                  } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
+                    document.insertString(document.getLength(), "\n", defaultAttributes);
                   }
                 }
-              } catch (BadLocationException e) {
-                log.debug("Failed to insert text!", e);
               }
-              toInsert.clear();
+            } catch (BadLocationException e) {
+              log.debug("Failed to insert text!", e);
             }
-            noopDocumentFilter.filter(true);
-          });
+            toInsert.clear();
+          }
+          noopDocumentFilter.filter(true);
+        });
     } catch (InterruptedException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
@@ -261,20 +245,20 @@ public class MessageLogPanel extends JPanel {
 
     var uploadItem = new JMenuItem("Upload logs");
     uploadItem.addActionListener(
-        event -> {
-          try {
-            var url = LogsUploadService.upload(textComponent.getText()).url();
-            JOptionPane.showMessageDialog(
-                this,
-                SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE);
-          } catch (Exception e) {
-            log.error("Failed to upload!", e);
-            JOptionPane.showMessageDialog(
-                this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
-          }
-        });
+      event -> {
+        try {
+          var url = LogsUploadService.upload(textComponent.getText()).url();
+          JOptionPane.showMessageDialog(
+            this,
+            SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+          log.error("Failed to upload!", e);
+          JOptionPane.showMessageDialog(
+            this, "Failed to upload!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      });
     popupMenu.add(uploadItem);
 
     var clearItem = new JMenuItem("Clear");
@@ -307,7 +291,7 @@ public class MessageLogPanel extends JPanel {
 
     @Override
     public void remove(DocumentFilter.FilterBypass fb, int offset, int length)
-        throws BadLocationException {
+      throws BadLocationException {
       if (filter) {
         return;
       }
@@ -317,8 +301,8 @@ public class MessageLogPanel extends JPanel {
 
     @Override
     public void insertString(
-        DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr)
-        throws BadLocationException {
+      DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr)
+      throws BadLocationException {
       if (filter) {
         return;
       }
@@ -328,8 +312,8 @@ public class MessageLogPanel extends JPanel {
 
     @Override
     public void replace(
-        DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
-        throws BadLocationException {
+      DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+      throws BadLocationException {
       if (filter) {
         return;
       }

@@ -63,9 +63,9 @@ public class MapDataState {
     for (var relativeX = 0; relativeX < width; ++relativeX) {
       for (var relativeY = 0; relativeY < height; ++relativeY) {
         setColor(
-            xOffset + relativeX,
-            yOffset + relativeY,
-            source.getData()[relativeX + relativeY * width]);
+          xOffset + relativeX,
+          yOffset + relativeY,
+          source.getData()[relativeX + relativeY * width]);
       }
     }
   }

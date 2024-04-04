@@ -27,8 +27,8 @@ public class SFViaVersionProvider implements VersionProvider {
   @Override
   public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
     return Objects.requireNonNull(connection.get(StorableSession.class), "Session provider is null")
-        .session()
-        .meta()
-        .protocolVersion();
+      .session()
+      .meta()
+      .protocolVersion();
   }
 }

@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.function.Function;
 
 public record SettingsHolder(
-    Object2ObjectMap<PropertyKey, Number> numberProperties,
-    Object2BooleanMap<PropertyKey> booleanProperties,
-    Object2ObjectMap<PropertyKey, String> stringProperties,
-    List<MinecraftAccount> accounts,
-    List<SFProxy> proxies) {
+  Object2ObjectMap<PropertyKey, Number> numberProperties,
+  Object2BooleanMap<PropertyKey> booleanProperties,
+  Object2ObjectMap<PropertyKey, String> stringProperties,
+  List<MinecraftAccount> accounts,
+  List<SFProxy> proxies) {
   public static SettingsHolder deserialize(AttackStartRequest request) {
     var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
     var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
@@ -70,19 +70,19 @@ public record SettingsHolder(
     }
 
     return new SettingsHolder(
-        numberProperties, booleanProperties, stringProperties, accounts, proxies);
+      numberProperties, booleanProperties, stringProperties, accounts, proxies);
   }
 
   public int get(IntProperty property) {
     return numberProperties
-        .getOrDefault(property.propertyKey(), property.defaultValue())
-        .intValue();
+      .getOrDefault(property.propertyKey(), property.defaultValue())
+      .intValue();
   }
 
   public double get(DoubleProperty property) {
     return numberProperties
-        .getOrDefault(property.propertyKey(), property.defaultValue())
-        .doubleValue();
+      .getOrDefault(property.propertyKey(), property.defaultValue())
+      .doubleValue();
   }
 
   public boolean get(BooleanProperty property) {
@@ -95,8 +95,8 @@ public record SettingsHolder(
 
   public <T> T get(ComboProperty property, Function<String, T> converter) {
     return converter.apply(
-        stringProperties.getOrDefault(
-            property.propertyKey(), property.options()[property.defaultValue()].id()));
+      stringProperties.getOrDefault(
+        property.propertyKey(), property.options()[property.defaultValue()].id()));
   }
 
   public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {

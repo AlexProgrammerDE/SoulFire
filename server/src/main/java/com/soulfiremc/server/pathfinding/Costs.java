@@ -56,12 +56,12 @@ public class Costs {
    * "quality" a bit, it is a good tradeoff for performance.
    */
   public static final BlockState SOLID_PLACED_BLOCK_STATE =
-      BlockState.forDefaultBlockType(BlockType.STONE);
+    BlockState.forDefaultBlockType(BlockType.STONE);
 
   private Costs() {}
 
   public static BlockMiningCosts calculateBlockBreakCost(
-      TagsState tagsState, ProjectedInventory inventory, BlockType blockType) {
+    TagsState tagsState, ProjectedInventory inventory, BlockType blockType) {
     var lowestMiningTicks = Integer.MAX_VALUE;
     SFItemStack bestItem = null;
     var correctToolUsed = false;
@@ -80,16 +80,16 @@ public class Costs {
     }
 
     return new BlockMiningCosts(
-        (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, correctToolUsed);
+      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, correctToolUsed);
   }
 
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
-      TagsState tagsState,
-      @Nullable EntityEffectState effectState,
-      boolean onGround,
-      @Nullable SFItemStack itemStack,
-      BlockType blockType) {
+    TagsState tagsState,
+    @Nullable EntityEffectState effectState,
+    boolean onGround,
+    @Nullable SFItemStack itemStack,
+    BlockType blockType) {
     float speedMultiplier;
     if (itemStack == null) {
       speedMultiplier = 1;
@@ -115,12 +115,12 @@ public class Costs {
       var digSlowdownAmplifier = getDigSlowdownAmplifier(effectState);
       if (digSlowdownAmplifier.isPresent()) {
         speedMultiplier *=
-            switch (digSlowdownAmplifier.getAsInt()) {
-              case 0 -> 0.3F;
-              case 1 -> 0.09F;
-              case 2 -> 0.0027F;
-              default -> 8.1E-4F;
-            };
+          switch (digSlowdownAmplifier.getAsInt()) {
+            case 0 -> 0.3F;
+            case 1 -> 0.09F;
+            case 2 -> 0.0027F;
+            default -> 8.1E-4F;
+          };
       }
     }
 
@@ -133,7 +133,7 @@ public class Costs {
     var damage = speedMultiplier / blockType.destroyTime();
 
     var correctToolUsed =
-        isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.type(), blockType);
+      isCorrectToolUsed(tagsState, itemStack == null ? null : itemStack.type(), blockType);
     damage /= correctToolUsed ? 30 : 100;
 
     // Insta mine
@@ -145,7 +145,7 @@ public class Costs {
   }
 
   private static boolean isCorrectToolUsed(
-      TagsState tagsState, ItemType itemType, BlockType blockType) {
+    TagsState tagsState, ItemType itemType, BlockType blockType) {
     if (!blockType.requiresCorrectToolForDrops()) {
       return true;
     }
@@ -163,15 +163,15 @@ public class Costs {
 
     if (hasteEffect.isPresent() && conduitPowerEffect.isPresent()) {
       return OptionalInt.of(
-          Math.max(hasteEffect.get().amplifier(), conduitPowerEffect.get().amplifier()));
+        Math.max(hasteEffect.get().amplifier(), conduitPowerEffect.get().amplifier()));
     } else {
       return hasteEffect
-          .map(effectData -> OptionalInt.of(effectData.amplifier()))
-          .orElseGet(
-              () ->
-                  conduitPowerEffect
-                      .map(effectData -> OptionalInt.of(effectData.amplifier()))
-                      .orElseGet(OptionalInt::empty));
+        .map(effectData -> OptionalInt.of(effectData.amplifier()))
+        .orElseGet(
+          () ->
+            conduitPowerEffect
+              .map(effectData -> OptionalInt.of(effectData.amplifier()))
+              .orElseGet(OptionalInt::empty));
     }
   }
 
@@ -179,12 +179,12 @@ public class Costs {
     var miningFatigueEffect = effectState.getEffect(Effect.MINING_FATIGUE);
 
     return miningFatigueEffect
-        .map(effectData -> OptionalInt.of(effectData.amplifier()))
-        .orElseGet(OptionalInt::empty);
+      .map(effectData -> OptionalInt.of(effectData.amplifier()))
+      .orElseGet(OptionalInt::empty);
   }
 
   public record BlockMiningCosts(
-      double miningCost, @Nullable SFItemStack usedTool, boolean willDrop) {}
+    double miningCost, @Nullable SFItemStack usedTool, boolean willDrop) {}
 
   public record TickResult(int ticks, boolean willDrop) {}
 }

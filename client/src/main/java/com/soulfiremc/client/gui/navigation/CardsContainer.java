@@ -34,10 +34,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CardsContainer extends JPanel {
-  @Getter private final List<NavigationItem> panels = new ArrayList<>();
+  @Getter
+  private final List<NavigationItem> panels = new ArrayList<>();
   private final Injector injector;
   private final GUIManager guiManager;
-  @Getter private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
+  @Getter
+  private final List<ClientPluginSettingsPage> pluginPages = new ArrayList<>();
   private final CardLayout cardLayout = new CardLayout();
 
   @PostConstruct
@@ -48,17 +50,17 @@ public class CardsContainer extends JPanel {
     setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
 
     pluginPages.addAll(
-        guiManager
-            .rpcClient()
-            .configStubBlocking()
-            .getUIClientData(ClientDataRequest.getDefaultInstance())
-            .getPluginSettingsList());
+      guiManager
+        .rpcClient()
+        .configStubBlocking()
+        .getUIClientData(ClientDataRequest.getDefaultInstance())
+        .getPluginSettingsList());
 
     // Add bot settings
     panels.add(
-        new GeneratedPanel(
-            guiManager.clientSettingsManager(),
-            getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
+      new GeneratedPanel(
+        guiManager.clientSettingsManager(),
+        getByNamespace(BuiltinSettingsConstants.BOT_SETTINGS_ID)));
     panels.add(injector.getSingleton(PluginListPanel.class));
     panels.add(injector.getSingleton(AccountPanel.class));
     panels.add(injector.getSingleton(ProxyPanel.class));
@@ -69,8 +71,8 @@ public class CardsContainer extends JPanel {
     // Add the main page cards
     for (var item : panels) {
       add(
-          NavigationWrapper.createBackWrapper(this, NavigationPanel.NAVIGATION_ID, item),
-          item.getNavigationId());
+        NavigationWrapper.createBackWrapper(this, NavigationPanel.NAVIGATION_ID, item),
+        item.getNavigationId());
     }
 
     // Add the plugin page cards
@@ -80,11 +82,11 @@ public class CardsContainer extends JPanel {
       }
 
       add(
-          NavigationWrapper.createBackWrapper(
-              this,
-              PluginListPanel.NAVIGATION_ID,
-              new GeneratedPanel(guiManager.clientSettingsManager(), item)),
-          item.getNamespace());
+        NavigationWrapper.createBackWrapper(
+          this,
+          PluginListPanel.NAVIGATION_ID,
+          new GeneratedPanel(guiManager.clientSettingsManager(), item)),
+        item.getNamespace());
     }
   }
 

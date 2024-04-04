@@ -42,44 +42,44 @@ public class AutoTotem implements InternalPlugin {
     }
 
     var executor =
-        connection.executorManager().newScheduledExecutorService(connection, "AutoTotem");
+      connection.executorManager().newScheduledExecutorService(connection, "AutoTotem");
     ExecutorHelper.executeRandomDelaySeconds(
-        executor,
-        () -> {
-          var sessionDataManager = connection.sessionDataManager();
-          var inventoryManager = sessionDataManager.inventoryManager();
-          var playerInventory = inventoryManager.playerInventory();
-          var offhandSlot = playerInventory.getOffhand();
+      executor,
+      () -> {
+        var sessionDataManager = connection.sessionDataManager();
+        var inventoryManager = sessionDataManager.inventoryManager();
+        var playerInventory = inventoryManager.playerInventory();
+        var offhandSlot = playerInventory.getOffhand();
 
-          // We only want to use totems if there are no items in the offhand
-          if (offhandSlot.item() != null) {
-            return;
+        // We only want to use totems if there are no items in the offhand
+        if (offhandSlot.item() != null) {
+          return;
+        }
+
+        for (var slot : playerInventory.storage()) {
+          if (slot.item() == null) {
+            continue;
           }
 
-          for (var slot : playerInventory.storage()) {
-            if (slot.item() == null) {
-              continue;
-            }
-
-            var item = slot.item();
-            if (item.type() == ItemType.TOTEM_OF_UNDYING) {
-              if (!inventoryManager.tryInventoryControl()) {
-                return;
-              }
-
-              try {
-                inventoryManager.leftClickSlot(slot.slot());
-                TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-                inventoryManager.leftClickSlot(offhandSlot.slot());
-              } finally {
-                inventoryManager.unlockInventoryControl();
-              }
+          var item = slot.item();
+          if (item.type() == ItemType.TOTEM_OF_UNDYING) {
+            if (!inventoryManager.tryInventoryControl()) {
               return;
             }
+
+            try {
+              inventoryManager.leftClickSlot(slot.slot());
+              TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+              inventoryManager.leftClickSlot(offhandSlot.slot());
+            } finally {
+              inventoryManager.unlockInventoryControl();
+            }
+            return;
           }
-        },
-        settingsHolder.get(AutoTotemSettings.DELAY.min()),
-        settingsHolder.get(AutoTotemSettings.DELAY.max()));
+        }
+      },
+      settingsHolder.get(AutoTotemSettings.DELAY.min()),
+      settingsHolder.get(AutoTotemSettings.DELAY.max()));
   }
 
   @EventHandler
@@ -97,31 +97,31 @@ public class AutoTotem implements InternalPlugin {
   private static class AutoTotemSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-totem");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Enable Auto Totem",
-            new String[] {"--auto-totem"},
-            "Always put available totems in the offhand slot",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable Auto Totem",
+        new String[] {"--auto-totem"},
+        "Always put available totems in the offhand slot",
+        true);
     public static final MinMaxPropertyLink DELAY =
-        new MinMaxPropertyLink(
-            BUILDER.ofInt(
-                "min-delay",
-                "Min delay (seconds)",
-                new String[] {"--totem-min-delay"},
-                "Minimum delay between using totems",
-                1,
-                0,
-                Integer.MAX_VALUE,
-                1),
-            BUILDER.ofInt(
-                "max-delay",
-                "Max delay (seconds)",
-                new String[] {"--totem-max-delay"},
-                "Maximum delay between using totems",
-                2,
-                0,
-                Integer.MAX_VALUE,
-                1));
+      new MinMaxPropertyLink(
+        BUILDER.ofInt(
+          "min-delay",
+          "Min delay (seconds)",
+          new String[] {"--totem-min-delay"},
+          "Minimum delay between using totems",
+          1,
+          0,
+          Integer.MAX_VALUE,
+          1),
+        BUILDER.ofInt(
+          "max-delay",
+          "Max delay (seconds)",
+          new String[] {"--totem-max-delay"},
+          "Maximum delay between using totems",
+          2,
+          0,
+          Integer.MAX_VALUE,
+          1));
   }
 }

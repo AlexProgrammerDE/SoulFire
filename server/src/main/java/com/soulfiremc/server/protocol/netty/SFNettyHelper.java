@@ -46,38 +46,34 @@ import java.util.function.BiFunction;
 
 public class SFNettyHelper {
   public static final TransportMethod TRANSPORT_METHOD =
-      switch (TransportHelper.determineTransportMethod()) {
-        case IO_URING ->
-            new TransportMethod(
-                IOUring.isTcpFastOpenClientSideAvailable(),
-                IOUringSocketChannel.class,
-                IOUringDatagramChannel.class,
-                IOUringEventLoopGroup::new);
-        case EPOLL ->
-            new TransportMethod(
-                Epoll.isTcpFastOpenClientSideAvailable(),
-                EpollSocketChannel.class,
-                EpollDatagramChannel.class,
-                EpollEventLoopGroup::new);
-        case KQUEUE ->
-            new TransportMethod(
-                KQueue.isTcpFastOpenClientSideAvailable(),
-                KQueueSocketChannel.class,
-                KQueueDatagramChannel.class,
-                KQueueEventLoopGroup::new);
-        case NIO ->
-            new TransportMethod(
-                false, NioSocketChannel.class, NioDatagramChannel.class, NioEventLoopGroup::new);
-      };
+    switch (TransportHelper.determineTransportMethod()) {
+      case IO_URING -> new TransportMethod(
+        IOUring.isTcpFastOpenClientSideAvailable(),
+        IOUringSocketChannel.class,
+        IOUringDatagramChannel.class,
+        IOUringEventLoopGroup::new);
+      case EPOLL -> new TransportMethod(
+        Epoll.isTcpFastOpenClientSideAvailable(),
+        EpollSocketChannel.class,
+        EpollDatagramChannel.class,
+        EpollEventLoopGroup::new);
+      case KQUEUE -> new TransportMethod(
+        KQueue.isTcpFastOpenClientSideAvailable(),
+        KQueueSocketChannel.class,
+        KQueueDatagramChannel.class,
+        KQueueEventLoopGroup::new);
+      case NIO -> new TransportMethod(
+        false, NioSocketChannel.class, NioDatagramChannel.class, NioEventLoopGroup::new);
+    };
 
   private SFNettyHelper() {}
 
   public static EventLoopGroup createEventLoopGroup(int threads, String name) {
     var group =
-        TRANSPORT_METHOD.eventLoopFactory.apply(
-            threads,
-            r ->
-                Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r));
+      TRANSPORT_METHOD.eventLoopFactory.apply(
+        threads,
+        r ->
+          Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r));
 
     Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
 
@@ -90,22 +86,21 @@ public class SFNettyHelper {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
           pipeline.addFirst(
-              "proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
+            "proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
         } else {
           pipeline.addFirst("proxy", new HttpProxyHandler(address));
         }
       }
       case SOCKS4 -> pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
-      case SOCKS5 ->
-          pipeline.addFirst(
-              "proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
+      case SOCKS5 -> pipeline.addFirst(
+        "proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
       default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
     }
   }
 
   public record TransportMethod(
-      boolean tcpFastOpenClientSideAvailable,
-      Class<? extends Channel> channelClass,
-      Class<? extends DatagramChannel> datagramChannelClass,
-      BiFunction<Integer, ThreadFactory, EventLoopGroup> eventLoopFactory) {}
+    boolean tcpFastOpenClientSideAvailable,
+    Class<? extends Channel> channelClass,
+    Class<? extends DatagramChannel> datagramChannelClass,
+    BiFunction<Integer, ThreadFactory, EventLoopGroup> eventLoopFactory) {}
 }

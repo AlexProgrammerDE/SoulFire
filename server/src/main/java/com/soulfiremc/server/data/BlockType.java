@@ -28,20 +28,20 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record BlockType(
-    int id,
-    ResourceKey key,
-    float destroyTime,
-    float explosionResistance,
-    boolean air,
-    boolean fallingBlock,
-    boolean replaceable,
-    boolean requiresCorrectToolForDrops,
-    boolean fluidSource,
-    OffsetData offsetData,
-    BlockStates statesData) {
+  int id,
+  ResourceKey key,
+  float destroyTime,
+  float explosionResistance,
+  boolean air,
+  boolean fallingBlock,
+  boolean replaceable,
+  boolean requiresCorrectToolForDrops,
+  boolean fluidSource,
+  OffsetData offsetData,
+  BlockStates statesData) {
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
   public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
-      new Object2ReferenceOpenHashMap<>();
+    new Object2ReferenceOpenHashMap<>();
 
   public static final BlockType AIR = register("minecraft:air");
   public static final BlockType STONE = register("minecraft:stone");
@@ -898,15 +898,18 @@ public record BlockType(
   public static final BlockType BLACKSTONE_SLAB = register("minecraft:blackstone_slab");
   public static final BlockType POLISHED_BLACKSTONE = register("minecraft:polished_blackstone");
   public static final BlockType POLISHED_BLACKSTONE_BRICKS = register("minecraft:polished_blackstone_bricks");
-  public static final BlockType CRACKED_POLISHED_BLACKSTONE_BRICKS = register("minecraft:cracked_polished_blackstone_bricks");
+  public static final BlockType CRACKED_POLISHED_BLACKSTONE_BRICKS =
+    register("minecraft:cracked_polished_blackstone_bricks");
   public static final BlockType CHISELED_POLISHED_BLACKSTONE = register("minecraft:chiseled_polished_blackstone");
   public static final BlockType POLISHED_BLACKSTONE_BRICK_SLAB = register("minecraft:polished_blackstone_brick_slab");
-  public static final BlockType POLISHED_BLACKSTONE_BRICK_STAIRS = register("minecraft:polished_blackstone_brick_stairs");
+  public static final BlockType POLISHED_BLACKSTONE_BRICK_STAIRS =
+    register("minecraft:polished_blackstone_brick_stairs");
   public static final BlockType POLISHED_BLACKSTONE_BRICK_WALL = register("minecraft:polished_blackstone_brick_wall");
   public static final BlockType GILDED_BLACKSTONE = register("minecraft:gilded_blackstone");
   public static final BlockType POLISHED_BLACKSTONE_STAIRS = register("minecraft:polished_blackstone_stairs");
   public static final BlockType POLISHED_BLACKSTONE_SLAB = register("minecraft:polished_blackstone_slab");
-  public static final BlockType POLISHED_BLACKSTONE_PRESSURE_PLATE = register("minecraft:polished_blackstone_pressure_plate");
+  public static final BlockType POLISHED_BLACKSTONE_PRESSURE_PLATE =
+    register("minecraft:polished_blackstone_pressure_plate");
   public static final BlockType POLISHED_BLACKSTONE_BUTTON = register("minecraft:polished_blackstone_button");
   public static final BlockType POLISHED_BLACKSTONE_WALL = register("minecraft:polished_blackstone_wall");
   public static final BlockType CHISELED_NETHER_BRICKS = register("minecraft:chiseled_nether_bricks");
@@ -1009,8 +1012,10 @@ public record BlockType(
   public static final BlockType WAXED_WEATHERED_CUT_COPPER = register("minecraft:waxed_weathered_cut_copper");
   public static final BlockType WAXED_EXPOSED_CUT_COPPER = register("minecraft:waxed_exposed_cut_copper");
   public static final BlockType WAXED_CUT_COPPER = register("minecraft:waxed_cut_copper");
-  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_STAIRS = register("minecraft:waxed_oxidized_cut_copper_stairs");
-  public static final BlockType WAXED_WEATHERED_CUT_COPPER_STAIRS = register("minecraft:waxed_weathered_cut_copper_stairs");
+  public static final BlockType WAXED_OXIDIZED_CUT_COPPER_STAIRS =
+    register("minecraft:waxed_oxidized_cut_copper_stairs");
+  public static final BlockType WAXED_WEATHERED_CUT_COPPER_STAIRS =
+    register("minecraft:waxed_weathered_cut_copper_stairs");
   public static final BlockType WAXED_EXPOSED_CUT_COPPER_STAIRS = register("minecraft:waxed_exposed_cut_copper_stairs");
   public static final BlockType WAXED_CUT_COPPER_STAIRS = register("minecraft:waxed_cut_copper_stairs");
   public static final BlockType WAXED_OXIDIZED_CUT_COPPER_SLAB = register("minecraft:waxed_oxidized_cut_copper_slab");
@@ -1105,11 +1110,11 @@ public record BlockType(
   public static BlockType register(String key) {
     var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class);
     instance =
-        instance.withStatesData(
-            BlockStates.fromJsonArray(
-                instance,
-                GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
-                    .getAsJsonArray("states")));
+      instance.withStatesData(
+        BlockStates.fromJsonArray(
+          instance,
+          GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
+            .getAsJsonArray("states")));
 
     FROM_ID.put(instance.id(), instance);
     FROM_KEY.put(instance.key(), instance);
@@ -1141,7 +1146,7 @@ public record BlockType(
   }
 
   public record OffsetData(
-      float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+    float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
     public enum OffsetType {
       XZ,
       XYZ

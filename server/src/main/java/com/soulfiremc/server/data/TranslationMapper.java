@@ -39,7 +39,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
   static {
     JsonObject translations;
     try (var stream =
-        TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
+           TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
       Objects.requireNonNull(stream, "en_us.json not found");
       translations = GsonInstance.GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
     } catch (IOException e) {
@@ -66,10 +66,10 @@ public class TranslationMapper implements Function<TranslatableComponent, String
     }
 
     var args =
-        component.arguments().stream()
-            .map(TranslationArgumentLike::asComponent)
-            .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
-            .toArray(String[]::new);
+      component.arguments().stream()
+        .map(TranslationArgumentLike::asComponent)
+        .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
+        .toArray(String[]::new);
     return String.format(translation, (Object[]) args);
   }
 }

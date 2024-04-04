@@ -44,80 +44,80 @@ public class AutoEat implements InternalPlugin {
 
     var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoEat");
     ExecutorHelper.executeRandomDelaySeconds(
-        executor,
-        () -> {
-          var sessionDataManager = connection.sessionDataManager();
+      executor,
+      () -> {
+        var sessionDataManager = connection.sessionDataManager();
 
-          var healthData = sessionDataManager.healthData();
-          if (healthData == null || healthData.food() >= 20) {
+        var healthData = sessionDataManager.healthData();
+        if (healthData == null || healthData.food() >= 20) {
+          return;
+        }
+
+        var inventoryManager = sessionDataManager.inventoryManager();
+        var playerInventory = inventoryManager.playerInventory();
+
+        var i = 0;
+        for (var slot : playerInventory.hotbar()) {
+          var hotbarSlot = i++;
+
+          if (slot.item() == null) {
+            continue;
+          }
+
+          var itemType = slot.item().type();
+          if (!ItemTypeHelper.isGoodEdibleFood(itemType)) {
+            continue;
+          }
+
+          if (!inventoryManager.tryInventoryControl()) {
             return;
           }
 
-          var inventoryManager = sessionDataManager.inventoryManager();
-          var playerInventory = inventoryManager.playerInventory();
+          try {
+            inventoryManager.heldItemSlot(hotbarSlot);
+            inventoryManager.sendHeldItemChange();
+            sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
 
-          var i = 0;
-          for (var slot : playerInventory.hotbar()) {
-            var hotbarSlot = i++;
+            // Wait before eating again
+            TimeUtil.waitTime(2, TimeUnit.SECONDS);
+            return;
+          } finally {
+            inventoryManager.unlockInventoryControl();
+          }
+        }
 
-            if (slot.item() == null) {
-              continue;
-            }
-
-            var itemType = slot.item().type();
-            if (!ItemTypeHelper.isGoodEdibleFood(itemType)) {
-              continue;
-            }
-
-            if (!inventoryManager.tryInventoryControl()) {
-              return;
-            }
-
-            try {
-              inventoryManager.heldItemSlot(hotbarSlot);
-              inventoryManager.sendHeldItemChange();
-              sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
-
-              // Wait before eating again
-              TimeUtil.waitTime(2, TimeUnit.SECONDS);
-              return;
-            } finally {
-              inventoryManager.unlockInventoryControl();
-            }
+        for (var slot : playerInventory.mainInventory()) {
+          if (slot.item() == null) {
+            continue;
           }
 
-          for (var slot : playerInventory.mainInventory()) {
-            if (slot.item() == null) {
-              continue;
-            }
+          var itemType = slot.item().type();
+          if (ItemTypeHelper.isGoodEdibleFood(itemType)) {
+            continue;
+          }
 
-            var itemType = slot.item().type();
-            if (ItemTypeHelper.isGoodEdibleFood(itemType)) {
-              continue;
-            }
+          if (!inventoryManager.tryInventoryControl()) {
+            return;
+          }
 
-            if (!inventoryManager.tryInventoryControl()) {
-              return;
-            }
-
-            try {
+          try {
+            inventoryManager.leftClickSlot(slot.slot());
+            inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
+            if (inventoryManager.cursorItem() != null) {
               inventoryManager.leftClickSlot(slot.slot());
-              inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
-              if (inventoryManager.cursorItem() != null) {
-                inventoryManager.leftClickSlot(slot.slot());
-              }
-
-              // Wait before eating again
-              TimeUtil.waitTime(2, TimeUnit.SECONDS);
-              sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
-              return;
-            } finally {
-              inventoryManager.unlockInventoryControl();
             }
+
+            // Wait before eating again
+            TimeUtil.waitTime(2, TimeUnit.SECONDS);
+            sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
+            return;
+          } finally {
+            inventoryManager.unlockInventoryControl();
           }
-        },
-        settingsHolder.get(AutoEatSettings.DELAY.min()),
-        settingsHolder.get(AutoEatSettings.DELAY.max()));
+        }
+      },
+      settingsHolder.get(AutoEatSettings.DELAY.min()),
+      settingsHolder.get(AutoEatSettings.DELAY.max()));
   }
 
   @EventHandler
@@ -135,31 +135,31 @@ public class AutoEat implements InternalPlugin {
   private static class AutoEatSettings implements SettingsObject {
     public static final Property.Builder BUILDER = Property.builder("auto-eat");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Enable Auto Eat",
-            new String[] {"--auto-eat"},
-            "Eat available food automatically when hungry",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable Auto Eat",
+        new String[] {"--auto-eat"},
+        "Eat available food automatically when hungry",
+        true);
     public static final MinMaxPropertyLink DELAY =
-        new MinMaxPropertyLink(
-            BUILDER.ofInt(
-                "min-delay",
-                "Min delay (seconds)",
-                new String[] {"--eat-min-delay"},
-                "Minimum delay between eating",
-                1,
-                0,
-                Integer.MAX_VALUE,
-                1),
-            BUILDER.ofInt(
-                "max-delay",
-                "Max delay (seconds)",
-                new String[] {"--eat-max-delay"},
-                "Maximum delay between eating",
-                2,
-                0,
-                Integer.MAX_VALUE,
-                1));
+      new MinMaxPropertyLink(
+        BUILDER.ofInt(
+          "min-delay",
+          "Min delay (seconds)",
+          new String[] {"--eat-min-delay"},
+          "Minimum delay between eating",
+          1,
+          0,
+          Integer.MAX_VALUE,
+          1),
+        BUILDER.ofInt(
+          "max-delay",
+          "Max delay (seconds)",
+          new String[] {"--eat-max-delay"},
+          "Maximum delay between eating",
+          2,
+          0,
+          Integer.MAX_VALUE,
+          1));
   }
 }

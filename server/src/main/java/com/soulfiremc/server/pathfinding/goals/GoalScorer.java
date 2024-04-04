@@ -20,13 +20,15 @@ package com.soulfiremc.server.pathfinding.goals;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
-/** A goal represents something that the user wants the bot to achieve. */
+/**
+ * A goal represents something that the user wants the bot to achieve.
+ */
 public interface GoalScorer {
   /**
    * Calculates the estimated score for a given block position to the goal. Usually this means the
    * distance from achieving the goal.
    *
-   * @param graph the graph to calculate the score for
+   * @param graph       the graph to calculate the score for
    * @param entityState the entity state to calculate the score for
    * @return the score for the given world state
    */

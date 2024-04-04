@@ -41,9 +41,9 @@ public class FakeVirtualHost implements InternalPlugin {
       }
 
       event.packet(
-          intentionPacket
-              .withHostname(settingsHolder.get(FakeVirtualHostSettings.HOSTNAME))
-              .withPort(settingsHolder.get(FakeVirtualHostSettings.PORT)));
+        intentionPacket
+          .withHostname(settingsHolder.get(FakeVirtualHostSettings.HOSTNAME))
+          .withPort(settingsHolder.get(FakeVirtualHostSettings.PORT)));
     }
   }
 
@@ -62,29 +62,29 @@ public class FakeVirtualHost implements InternalPlugin {
   private static class FakeVirtualHostSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("fake-virtual-host");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Fake virtual host",
-            new String[] {"--fake-virtual-host"},
-            "Whether to fake the virtual host or not",
-            false);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Fake virtual host",
+        new String[] {"--fake-virtual-host"},
+        "Whether to fake the virtual host or not",
+        false);
     public static final StringProperty HOSTNAME =
-        BUILDER.ofString(
-            "hostname",
-            "Hostname",
-            new String[] {"--fake-virtual-host-hostname"},
-            "The hostname to fake",
-            "localhost");
+      BUILDER.ofString(
+        "hostname",
+        "Hostname",
+        new String[] {"--fake-virtual-host-hostname"},
+        "The hostname to fake",
+        "localhost");
     public static final IntProperty PORT =
-        BUILDER.ofInt(
-            "port",
-            "Port",
-            new String[] {"--fake-virtual-host-port"},
-            "The port to fake",
-            25565,
-            1,
-            65535,
-            1,
-            "#");
+      BUILDER.ofInt(
+        "port",
+        "Port",
+        new String[] {"--fake-virtual-host-port"},
+        "The port to fake",
+        25565,
+        1,
+        65535,
+        1,
+        "#");
   }
 }

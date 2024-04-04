@@ -30,7 +30,8 @@ import java.util.List;
 import lombok.Getter;
 
 public class SFContextClassLoader extends ClassLoader {
-  @Getter private final List<ClassLoader> childClassLoaders = new ArrayList<>();
+  @Getter
+  private final List<ClassLoader> childClassLoaders = new ArrayList<>();
   private final Method findLoadedClassMethod;
   private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
   // Prevent infinite loop when plugins are looking for classes inside this class loader
@@ -40,7 +41,7 @@ public class SFContextClassLoader extends ClassLoader {
     super(createLibClassLoader());
     try {
       findLoadedClassMethod =
-          ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
+        ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
@@ -68,15 +69,15 @@ public class SFContextClassLoader extends ClassLoader {
   private static void deleteDirRecursively(Path dir) {
     try (var stream = Files.walk(dir)) {
       stream
-          .sorted(Comparator.reverseOrder())
-          .forEach(
-              file -> {
-                try {
-                  Files.delete(file);
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-              });
+        .sorted(Comparator.reverseOrder())
+        .forEach(
+          file -> {
+            try {
+              Files.delete(file);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          });
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -134,16 +135,16 @@ public class SFContextClassLoader extends ClassLoader {
   }
 
   private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve)
-      throws ClassNotFoundException {
+    throws ClassNotFoundException {
     try {
       return (Class<?>)
-          getMethodsClass()
-              .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
-              .invoke(null, classLoader, findLoadedClassMethod, new Object[] {name, resolve});
+        getMethodsClass()
+          .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
+          .invoke(null, classLoader, findLoadedClassMethod, new Object[] {name, resolve});
     } catch (ReflectiveOperationException e) {
       if (e.getCause() != null
-          && e.getCause().getCause() != null
-          && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
+        && e.getCause().getCause() != null
+        && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
         throw cnfe;
       } else {
         throw new RuntimeException(e);

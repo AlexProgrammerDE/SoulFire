@@ -51,7 +51,7 @@ public class DefaultTagsDataGenerator implements IDataGenerator {
 
       var rootObj = new JsonObject();
       var serialized =
-          TagNetworkSerialization.serializeTagsToNetwork(MCHelper.getServer().registries());
+        TagNetworkSerialization.serializeTagsToNetwork(MCHelper.getServer().registries());
 
       for (var entry : serialized.entrySet()) {
         var registry = entry.getKey();

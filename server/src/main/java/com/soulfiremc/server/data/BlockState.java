@@ -22,17 +22,17 @@ import java.util.List;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record BlockState(
+  int id,
+  BlockType blockType,
+  boolean defaultState,
+  BlockStateProperties properties,
+  BlockShapeGroup blockShapeGroup) {
+  public BlockState(
     int id,
-    BlockType blockType,
     boolean defaultState,
     BlockStateProperties properties,
-    BlockShapeGroup blockShapeGroup) {
-  public BlockState(
-      int id,
-      boolean defaultState,
-      BlockStateProperties properties,
-      BlockType blockType,
-      int stateIndex) {
+    BlockType blockType,
+    int stateIndex) {
     this(id, blockType, defaultState, properties, getBlockShapeGroup(blockType, stateIndex));
   }
 

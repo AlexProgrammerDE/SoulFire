@@ -26,19 +26,19 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record EnchantmentType(
-    int id,
-    ResourceKey key,
-    int minLevel,
-    int maxLevel,
-    List<String> incompatible,
-    String category,
-    String rarity,
-    boolean tradeable,
-    boolean discoverable,
-    boolean curse,
-    boolean treasureOnly) {
+  int id,
+  ResourceKey key,
+  int minLevel,
+  int maxLevel,
+  List<String> incompatible,
+  String category,
+  String rarity,
+  boolean tradeable,
+  boolean discoverable,
+  boolean curse,
+  boolean treasureOnly) {
   public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
-      new Object2ReferenceOpenHashMap<>();
+    new Object2ReferenceOpenHashMap<>();
 
   public static final EnchantmentType PROTECTION = register("minecraft:protection");
   public static final EnchantmentType FIRE_PROTECTION = register("minecraft:fire_protection");
@@ -82,7 +82,7 @@ public record EnchantmentType(
 
   public static EnchantmentType register(String key) {
     var instance =
-        GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
+      GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
 
     FROM_KEY.put(instance.key(), instance);
     return instance;

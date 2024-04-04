@@ -36,7 +36,8 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
   // https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
   private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
   private final int compressionLevel = 6; // TODO: make configurable
-  @Setter private int threshold;
+  @Setter
+  private int threshold;
   private VelocityCompressor compressor;
   private VelocityCompressor candidateCompressor;
 
@@ -117,7 +118,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> out)
-      throws Exception {
+    throws Exception {
     if (!input.isReadable() || !ctx.channel().isActive()) {
       return;
     }
@@ -131,14 +132,14 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     // 1.18 clients now accept compressed packets under threshold...?
     if (claimedUncompressedSize > UNCOMPRESSED_CAP) {
       throw new DecoderException(
-          "Badly compressed packet - size of "
-              + claimedUncompressedSize
-              + " is larger than maximum of "
-              + UNCOMPRESSED_CAP);
+        "Badly compressed packet - size of "
+          + claimedUncompressedSize
+          + " is larger than maximum of "
+          + UNCOMPRESSED_CAP);
     }
     var compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, input);
     var decompressed =
-        MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, claimedUncompressedSize);
+      MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, claimedUncompressedSize);
     try {
       var readerI = compatibleIn.readerIndex();
       try {
@@ -161,7 +162,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
   }
 
   private void testCandidateDecompression(
-      ByteBuf in, int readerIndex, int claimedUncompressedSize) {
+    ByteBuf in, int readerIndex, int claimedUncompressedSize) {
     if (candidateCompressor == null) {
       return;
     }

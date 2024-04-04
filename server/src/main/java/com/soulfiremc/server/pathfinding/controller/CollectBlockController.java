@@ -28,7 +28,7 @@ public class CollectBlockController {
   public void start(BotConnection botConnection) {}
 
   public void searchBlockWithinRadiusAndY(
-      BotConnection botConnection, BlockType blockType, int radius, int minY, int maxY) {
+    BotConnection botConnection, BlockType blockType, int radius, int minY, int maxY) {
     var radiusSquared = radius * radius;
 
     for (var x = -radius; x <= radius; x++) {

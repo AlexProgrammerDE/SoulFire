@@ -34,28 +34,28 @@ public class AboutPopup extends JDialog {
 
     content.add(SFSwingUtils.createHtmlPane("<b>SoulFire</b>"));
     content.add(
-        SFSwingUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+      SFSwingUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
     content.add(
-        SFSwingUtils.createHtmlPane(
-            "Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
+      SFSwingUtils.createHtmlPane(
+        "Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
     content.add(
-        SFSwingUtils.createHtmlPane(
-            "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
+      SFSwingUtils.createHtmlPane(
+        "GitHub: <b><a href='https://github.com/AlexProgrammerDE/SoulFire'>github.com/AlexProgrammerDE/SoulFire</a></b>"));
     content.add(
-        SFSwingUtils.createHtmlPane(
-            "Website: <b><a href='"
-                + BuildData.URL
-                + "'>"
-                + BuildData.URL.replace("https://", "")
-                + "</a></b>"));
+      SFSwingUtils.createHtmlPane(
+        "Website: <b><a href='"
+          + BuildData.URL
+          + "'>"
+          + BuildData.URL.replace("https://", "")
+          + "</a></b>"));
     content.add(
-        SFSwingUtils.createHtmlPane(
-            "Commit: <b><code>"
-                + BuildData.COMMIT.substring(0, 7)
-                + "</code></b> "
-                + "(<b><a href='https://github.com/AlexProgrammerDE/SoulFire/commit/"
-                + BuildData.COMMIT
-                + "'>Click to show</a></b>)"));
+      SFSwingUtils.createHtmlPane(
+        "Commit: <b><code>"
+          + BuildData.COMMIT.substring(0, 7)
+          + "</code></b> "
+          + "(<b><a href='https://github.com/AlexProgrammerDE/SoulFire/commit/"
+          + BuildData.COMMIT
+          + "'>Click to show</a></b>)"));
     content.setBorder(new EmptyBorder(10, 10, 10, 10));
 
     add(content);

@@ -1,6 +1,6 @@
 name: 💡 Feature Request
 description: Request a feature/enhancement
-labels: ["type: :bulb: enhancement"]
+labels: [ "type: :bulb: enhancement" ]
 
 body:
   - type: checkboxes
@@ -11,8 +11,8 @@ body:
 
         Tip: You can go to the [GitHub issue tab](https://github.com/AlexProgrammerDE/SoulFire/labels/type%3A%20%3Abulb%3A%20enhancement) for a list of open feature requests
       options:
-      - label: I have searched the existing feature requests
-        required: true
+        - label: I have searched the existing feature requests
+          required: true
   - type: textarea
     attributes:
       label: Describe your feature request

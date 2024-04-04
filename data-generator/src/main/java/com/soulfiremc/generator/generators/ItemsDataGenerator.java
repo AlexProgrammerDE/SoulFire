@@ -36,10 +36,10 @@ public class ItemsDataGenerator implements IDataGenerator {
   private static List<Item> calculateItemsToRepairWith(Item sourceItem) {
     var sourceItemStack = sourceItem.getDefaultInstance();
     return BuiltInRegistries.ITEM.stream()
-        .filter(
-            otherItem ->
-                sourceItem.isValidRepairItem(sourceItemStack, otherItem.getDefaultInstance()))
-        .collect(Collectors.toList());
+      .filter(
+        otherItem ->
+          sourceItem.isValidRepairItem(sourceItemStack, otherItem.getDefaultInstance()))
+      .collect(Collectors.toList());
   }
 
   public static JsonObject generateItem(Item item) {
@@ -91,10 +91,10 @@ public class ItemsDataGenerator implements IDataGenerator {
       }
 
       if (foodComponent.getEffects().stream()
-          .map(Pair::getFirst)
-          .map(MobEffectInstance::getEffect)
-          .map(MobEffect::getCategory)
-          .anyMatch(c -> c == MobEffectCategory.HARMFUL)) {
+        .map(Pair::getFirst)
+        .map(MobEffectInstance::getEffect)
+        .map(MobEffect::getCategory)
+        .anyMatch(c -> c == MobEffectCategory.HARMFUL)) {
         foodDesc.addProperty("possiblyHarmful", true);
       }
 
@@ -111,7 +111,7 @@ public class ItemsDataGenerator implements IDataGenerator {
 
       if (attributeSlot != null) {
         throw new IllegalStateException(
-            "Item " + item + " has attribute modifiers for multiple slots");
+          "Item " + item + " has attribute modifiers for multiple slots");
       }
 
       attributeSlot = slot;
@@ -119,8 +119,8 @@ public class ItemsDataGenerator implements IDataGenerator {
       for (var entry : attributeModifiers.asMap().entrySet()) {
         var attributeDesc = new JsonObject();
         attributeDesc.addProperty(
-            "name",
-            Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(entry.getKey())).getPath());
+          "name",
+          Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(entry.getKey())).getPath());
         var modifierArray = new JsonArray();
         for (var modifier : entry.getValue()) {
           var modifierDesc = new JsonObject();

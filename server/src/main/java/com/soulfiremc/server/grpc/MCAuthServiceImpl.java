@@ -47,15 +47,15 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
       ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.AUTHENTICATE_MC_ACCOUNT);
 
       var account =
-          (switch (request.getService()) {
-                case MICROSOFT_JAVA -> new SFJavaMicrosoftAuthService();
-                case MICROSOFT_BEDROCK -> new SFBedrockMicrosoftAuthService();
-                case THE_ALTENING -> new SFTheAlteningAuthService();
-                case EASY_MC -> new SFEasyMCAuthService();
-                case OFFLINE -> new SFOfflineAuthService();
-                case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
-              })
-              .createDataAndLogin(request.getPayload(), convertProxy(request));
+        (switch (request.getService()) {
+          case MICROSOFT_JAVA -> new SFJavaMicrosoftAuthService();
+          case MICROSOFT_BEDROCK -> new SFBedrockMicrosoftAuthService();
+          case THE_ALTENING -> new SFTheAlteningAuthService();
+          case EASY_MC -> new SFEasyMCAuthService();
+          case OFFLINE -> new SFOfflineAuthService();
+          case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
+        })
+          .createDataAndLogin(request.getPayload(), convertProxy(request));
 
       responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

@@ -51,101 +51,102 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
   private final Path dataFolder;
   private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaVersion"));
   private final ViaAPI<UserConnection> api =
-      new ViaAPIBase<>() {
-        @Override
-        public ProtocolVersion getPlayerProtocolVersion(final UserConnection player) {
-          return player.getProtocolInfo().protocolVersion();
-        }
+    new ViaAPIBase<>() {
+      @Override
+      public ProtocolVersion getPlayerProtocolVersion(final UserConnection player) {
+        return player.getProtocolInfo().protocolVersion();
+      }
 
-        @Override
-        public void sendRawPacket(final UserConnection player, final ByteBuf packet) {
-          player.scheduleSendRawPacket(packet);
-        }
-      };
-  @Getter private final ViaInjector injector = new SFViaInjector();
+      @Override
+      public void sendRawPacket(final UserConnection player, final ByteBuf packet) {
+        player.scheduleSendRawPacket(packet);
+      }
+    };
+  @Getter
+  private final ViaInjector injector = new SFViaInjector();
   private ViaVersionConfig config;
 
   public void init() {
     config =
-        new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
-          private static final List<String> UNSUPPORTED =
-              List.of(
-                  "checkforupdates",
-                  "bungee-ping-interval",
-                  "bungee-ping-save",
-                  "bungee-servers",
-                  "velocity-ping-interval",
-                  "velocity-ping-save",
-                  "velocity-servers",
-                  "block-protocols",
-                  "block-disconnect-msg",
-                  "reload-disconnect-msg",
-                  "max-pps",
-                  "max-pps-kick-msg",
-                  "tracking-period",
-                  "tracking-warning-pps",
-                  "tracking-max-warnings",
-                  "tracking-max-kick-msg",
-                  "blockconnection-method",
-                  "quick-move-action-fix",
-                  "item-cache",
-                  "change-1_9-hitbox",
-                  "change-1_14-hitbox",
-                  "use-new-deathmessages",
-                  "nms-player-ticking");
+      new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
+        private static final List<String> UNSUPPORTED =
+          List.of(
+            "checkforupdates",
+            "bungee-ping-interval",
+            "bungee-ping-save",
+            "bungee-servers",
+            "velocity-ping-interval",
+            "velocity-ping-save",
+            "velocity-servers",
+            "block-protocols",
+            "block-disconnect-msg",
+            "reload-disconnect-msg",
+            "max-pps",
+            "max-pps-kick-msg",
+            "tracking-period",
+            "tracking-warning-pps",
+            "tracking-max-warnings",
+            "tracking-max-kick-msg",
+            "blockconnection-method",
+            "quick-move-action-fix",
+            "item-cache",
+            "change-1_9-hitbox",
+            "change-1_14-hitbox",
+            "use-new-deathmessages",
+            "nms-player-ticking");
 
-          {
-            this.reload();
-          }
+        {
+          this.reload();
+        }
 
-          @Override
-          protected void handleConfig(Map<String, Object> config) {}
+        @Override
+        protected void handleConfig(Map<String, Object> config) {}
 
-          @Override
-          public List<String> getUnsupportedOptions() {
-            return UNSUPPORTED;
-          }
+        @Override
+        public List<String> getUnsupportedOptions() {
+          return UNSUPPORTED;
+        }
 
-          @Override
-          public boolean isCheckForUpdates() {
-            return false;
-          }
+        @Override
+        public boolean isCheckForUpdates() {
+          return false;
+        }
 
-          @Override
-          public String getBlockConnectionMethod() {
-            return "packet";
-          }
+        @Override
+        public String getBlockConnectionMethod() {
+          return "packet";
+        }
 
-          @Override
-          public boolean is1_12QuickMoveActionFix() {
-            return false;
-          }
+        @Override
+        public boolean is1_12QuickMoveActionFix() {
+          return false;
+        }
 
-          @Override
-          public boolean isItemCache() {
-            return false;
-          }
+        @Override
+        public boolean isItemCache() {
+          return false;
+        }
 
-          @Override
-          public boolean is1_9HitboxFix() {
-            return false;
-          }
+        @Override
+        public boolean is1_9HitboxFix() {
+          return false;
+        }
 
-          @Override
-          public boolean is1_14HitboxFix() {
-            return false;
-          }
+        @Override
+        public boolean is1_14HitboxFix() {
+          return false;
+        }
 
-          @Override
-          public boolean isShowNewDeathMessages() {
-            return false;
-          }
+        @Override
+        public boolean isShowNewDeathMessages() {
+          return false;
+        }
 
-          @Override
-          public boolean isNMSPlayerTicking() {
-            return false;
-          }
-        };
+        @Override
+        public boolean isNMSPlayerTicking() {
+          return false;
+        }
+      };
   }
 
   @Override
@@ -181,9 +182,9 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
   @Override
   public SFViaTask runRepeatingAsync(Runnable runnable, long period) {
     return new SFViaTask(
-        Via.getManager()
-            .getScheduler()
-            .scheduleRepeating(runnable, 0, period * 50, TimeUnit.MILLISECONDS));
+      Via.getManager()
+        .getScheduler()
+        .scheduleRepeating(runnable, 0, period * 50, TimeUnit.MILLISECONDS));
   }
 
   @Override
@@ -194,7 +195,7 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
   @Override
   public SFViaTask runSync(Runnable runnable, long delay) {
     return new SFViaTask(
-        Via.getManager().getScheduler().schedule(runnable, delay * 50, TimeUnit.MILLISECONDS));
+      Via.getManager().getScheduler().schedule(runnable, delay * 50, TimeUnit.MILLISECONDS));
   }
 
   @Override
@@ -205,8 +206,8 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
   @Override
   public ViaCommandSender[] getOnlinePlayers() {
     return Via.getManager().getConnectionManager().getConnectedClients().values().stream()
-        .map(UserCommandSender::new)
-        .toArray(ViaCommandSender[]::new);
+      .map(UserCommandSender::new)
+      .toArray(ViaCommandSender[]::new);
   }
 
   @Override

@@ -20,12 +20,12 @@ package com.soulfiremc.server.pathfinding.execution;
 import com.soulfiremc.server.protocol.BotConnection;
 
 public sealed interface WorldAction
-    permits BlockBreakAction,
-        BlockPlaceAction,
-        GapJumpAction,
-        JumpAndPlaceBelowAction,
-        MovementAction,
-        RecalculatePathAction {
+  permits BlockBreakAction,
+  BlockPlaceAction,
+  GapJumpAction,
+  JumpAndPlaceBelowAction,
+  MovementAction,
+  RecalculatePathAction {
   boolean isCompleted(BotConnection connection);
 
   void tick(BotConnection connection);

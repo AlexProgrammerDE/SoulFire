@@ -58,8 +58,8 @@ public class SFItemStack extends ItemStack {
           var enchantmentCompound = (CompoundTag) enchantment;
 
           this.enchantments.put(
-              ResourceKey.fromString(enchantmentCompound.<StringTag>get("id").getValue()),
-              enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue());
+            ResourceKey.fromString(enchantmentCompound.<StringTag>get("id").getValue()),
+            enchantmentCompound.<ShortTag>get("lvl").getValue().shortValue());
         }
       } else {
         this.enchantments = Object2ShortMaps.emptyMap();

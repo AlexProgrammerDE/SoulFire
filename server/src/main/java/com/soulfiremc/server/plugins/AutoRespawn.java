@@ -45,26 +45,26 @@ public class AutoRespawn implements InternalPlugin {
       }
 
       var message =
-          SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
+        SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
       connection
-          .logger()
-          .info(
-              "[AutoRespawn] Died with killer: {} and message: '{}'",
-              combatKillPacket.getPlayerId(),
-              message);
+        .logger()
+        .info(
+          "[AutoRespawn] Died with killer: {} and message: '{}'",
+          combatKillPacket.getPlayerId(),
+          message);
 
       connection
-          .executorManager()
-          .newScheduledExecutorService(connection, "Respawn")
-          .schedule(
-              () ->
-                  connection
-                      .session()
-                      .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
-              RandomUtil.getRandomInt(
-                  settingsHolder.get(AutoRespawnSettings.DELAY.min()),
-                  settingsHolder.get(AutoRespawnSettings.DELAY.max())),
-              TimeUnit.SECONDS);
+        .executorManager()
+        .newScheduledExecutorService(connection, "Respawn")
+        .schedule(
+          () ->
+            connection
+              .session()
+              .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
+          RandomUtil.getRandomInt(
+            settingsHolder.get(AutoRespawnSettings.DELAY.min()),
+            settingsHolder.get(AutoRespawnSettings.DELAY.max())),
+          TimeUnit.SECONDS);
     }
   }
 
@@ -83,31 +83,31 @@ public class AutoRespawn implements InternalPlugin {
   private static class AutoRespawnSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("auto-respawn");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Enable Auto Respawn",
-            new String[] {"--auto-respawn"},
-            "Respawn automatically after death",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable Auto Respawn",
+        new String[] {"--auto-respawn"},
+        "Respawn automatically after death",
+        true);
     public static final MinMaxPropertyLink DELAY =
-        new MinMaxPropertyLink(
-            BUILDER.ofInt(
-                "min-delay",
-                "Min delay (seconds)",
-                new String[] {"--respawn-min-delay"},
-                "Minimum delay between respawns",
-                1,
-                0,
-                Integer.MAX_VALUE,
-                1),
-            BUILDER.ofInt(
-                "max-delay",
-                "Max delay (seconds)",
-                new String[] {"--respawn-max-delay"},
-                "Maximum delay between respawns",
-                3,
-                0,
-                Integer.MAX_VALUE,
-                1));
+      new MinMaxPropertyLink(
+        BUILDER.ofInt(
+          "min-delay",
+          "Min delay (seconds)",
+          new String[] {"--respawn-min-delay"},
+          "Minimum delay between respawns",
+          1,
+          0,
+          Integer.MAX_VALUE,
+          1),
+        BUILDER.ofInt(
+          "max-delay",
+          "Max delay (seconds)",
+          new String[] {"--respawn-max-delay"},
+          "Maximum delay between respawns",
+          3,
+          0,
+          Integer.MAX_VALUE,
+          1));
   }
 }

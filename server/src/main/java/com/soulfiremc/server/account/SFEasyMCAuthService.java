@@ -33,44 +33,44 @@ import reactor.netty.ByteBufFlux;
 
 @Slf4j
 public final class SFEasyMCAuthService
-    implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
+  implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
   private static final URI AUTHENTICATE_ENDPOINT =
-      URI.create("https://api.easymc.io/v1/token/redeem");
+    URI.create("https://api.easymc.io/v1/token/redeem");
 
   @Override
   public MinecraftAccount login(EasyMCAuthData data, SFProxy proxyData) throws IOException {
     var request = new AuthenticationRequest(data.altToken);
     return ReactorHttpHelper.createReactorClient(proxyData, true)
-        .post()
-        .uri(AUTHENTICATE_ENDPOINT)
-        .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
-        .responseSingle(
-            (res, content) ->
-                content
-                    .asString()
-                    .map(
-                        responseText -> {
-                          var response =
-                              GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
+      .post()
+      .uri(AUTHENTICATE_ENDPOINT)
+      .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
+      .responseSingle(
+        (res, content) ->
+          content
+            .asString()
+            .map(
+              responseText -> {
+                var response =
+                  GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
 
-                          if (response.error() != null) {
-                            log.error("EasyMC has returned a error: {}", response.error());
-                            throw new RuntimeException(response.error());
-                          }
+                if (response.error() != null) {
+                  log.error("EasyMC has returned a error: {}", response.error());
+                  throw new RuntimeException(response.error());
+                }
 
-                          if (response.message() != null) {
-                            log.info(
-                                "EasyMC has a message for you (This is not a error): {}",
-                                response.message());
-                          }
+                if (response.message() != null) {
+                  log.info(
+                    "EasyMC has a message for you (This is not a error): {}",
+                    response.message());
+                }
 
-                          return new MinecraftAccount(
-                              AuthType.EASY_MC,
-                              UUID.fromString(response.uuid()),
-                              response.mcName(),
-                              new OnlineJavaData(response.session(), -1));
-                        }))
-        .block();
+                return new MinecraftAccount(
+                  AuthType.EASY_MC,
+                  UUID.fromString(response.uuid()),
+                  response.mcName(),
+                  new OnlineJavaData(response.session(), -1));
+              }))
+      .block();
   }
 
   @Override

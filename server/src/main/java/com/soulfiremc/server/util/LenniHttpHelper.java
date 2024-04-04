@@ -47,14 +47,14 @@ public class LenniHttpHelper {
 
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
     return MinecraftAuth.createHttpClient()
-        .setExecutor(client -> new ReactorLenniExecutor(proxyData, client));
+      .setExecutor(client -> new ReactorLenniExecutor(proxyData, client));
   }
 
   private static Map<String, List<String>> getAsMap(HttpHeaders headers) {
     return headers.entries().stream()
-        .collect(
-            Collectors.groupingBy(
-                Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+      .collect(
+        Collectors.groupingBy(
+          Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
   }
 
   private static class ReactorLenniExecutor extends RequestExecutor {
@@ -74,51 +74,51 @@ public class LenniHttpHelper {
         var requestHeaders = getHeaders(httpRequest, cookieManager);
 
         var base =
-            ReactorHttpHelper.createReactorClient(proxyData, false)
-                .followRedirect(
-                    switch (httpRequest.getFollowRedirects()) {
-                      case NOT_SET -> client.isFollowRedirects();
-                      case FOLLOW -> true;
-                      case IGNORE -> false;
-                    })
-                .responseTimeout(Duration.ofMillis(client.getReadTimeout()))
-                .headers(h -> requestHeaders.forEach((k, v) -> h.set(k, String.join("; ", v))))
-                .request(HttpMethod.valueOf(httpRequest.getMethod()))
-                .uri(httpRequest.getURL().toURI());
+          ReactorHttpHelper.createReactorClient(proxyData, false)
+            .followRedirect(
+              switch (httpRequest.getFollowRedirects()) {
+                case NOT_SET -> client.isFollowRedirects();
+                case FOLLOW -> true;
+                case IGNORE -> false;
+              })
+            .responseTimeout(Duration.ofMillis(client.getReadTimeout()))
+            .headers(h -> requestHeaders.forEach((k, v) -> h.set(k, String.join("; ", v))))
+            .request(HttpMethod.valueOf(httpRequest.getMethod()))
+            .uri(httpRequest.getURL().toURI());
 
         reactor.netty.http.client.HttpClient.ResponseReceiver<?> receiver;
         if (httpRequest instanceof HttpContentRequest contentRequest) {
           receiver =
-              base.send(
-                  ByteBufFlux.fromInbound(
-                      Flux.just(Objects.requireNonNull(contentRequest.getContent()).getAsBytes())));
+            base.send(
+              ByteBufFlux.fromInbound(
+                Flux.just(Objects.requireNonNull(contentRequest.getContent()).getAsBytes())));
         } else {
           receiver = base;
         }
 
         return receiver
-            .responseSingle(
-                (res, content) -> {
-                  try {
-                    var code = res.status().code();
-                    var url = new URLWrapper(Objects.requireNonNull(res.resourceUrl()));
-                    var urlObj = url.toURL();
-                    var responseHeaders = getAsMap(res.responseHeaders());
+          .responseSingle(
+            (res, content) -> {
+              try {
+                var code = res.status().code();
+                var url = new URLWrapper(Objects.requireNonNull(res.resourceUrl()));
+                var urlObj = url.toURL();
+                var responseHeaders = getAsMap(res.responseHeaders());
 
-                    HttpRequestUtils.updateCookies(cookieManager, url.toURL(), responseHeaders);
+                HttpRequestUtils.updateCookies(cookieManager, url.toURL(), responseHeaders);
 
-                    return content
-                        .asByteArray()
-                        .mapNotNull(bytes -> new HttpResponse(urlObj, code, bytes, responseHeaders))
-                        .switchIfEmpty(
-                            Mono.just(new HttpResponse(urlObj, code, null, responseHeaders)));
-                  } catch (Exception e) {
-                    log.error("Error while handling response", e);
-                    return Mono.error(e);
-                  }
-                })
-            .blockOptional()
-            .orElseThrow();
+                return content
+                  .asByteArray()
+                  .mapNotNull(bytes -> new HttpResponse(urlObj, code, bytes, responseHeaders))
+                  .switchIfEmpty(
+                    Mono.just(new HttpResponse(urlObj, code, null, responseHeaders)));
+              } catch (Exception e) {
+                log.error("Error while handling response", e);
+                return Mono.error(e);
+              }
+            })
+          .blockOptional()
+          .orElseThrow();
       } catch (Exception e) {
         throw new IOException(e);
       }

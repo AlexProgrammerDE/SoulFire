@@ -20,7 +20,8 @@ package com.soulfiremc.server.pathfinding;
 import java.io.Serial;
 
 public class AlreadyClosestException extends RuntimeException {
-  @Serial private static final long serialVersionUID = 1L;
+  @Serial
+  private static final long serialVersionUID = 1L;
 
   public AlreadyClosestException() {
     super("Could not find a path and this is already the closest we can get to the goal.");

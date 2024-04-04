@@ -50,9 +50,9 @@ public class PathfindingBenchmark {
   @Setup
   public void setup() {
     var byteArrayInputStream =
-        new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
+      new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
-        var reader = new InputStreamReader(gzipInputStream)) {
+         var reader = new InputStreamReader(gzipInputStream)) {
       log.info("Reading world data...");
       var worldData = GsonInstance.GSON.fromJson(reader, JsonObject.class);
       var definitions = worldData.getAsJsonArray("definitions");
@@ -90,10 +90,10 @@ public class PathfindingBenchmark {
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState()), new PosGoal(100, 80, 100));
 
       initialState =
-          new BotEntityState(
-              new SFVec3i(0, safeY, 0),
-              new ProjectedLevelState(accessor),
-              new ProjectedInventory(new PlayerInventoryContainer(null)));
+        new BotEntityState(
+          new SFVec3i(0, safeY, 0),
+          new ProjectedLevelState(accessor),
+          new ProjectedInventory(new PlayerInventoryContainer(null)));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {

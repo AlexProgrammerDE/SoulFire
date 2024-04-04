@@ -51,14 +51,14 @@ public class ResolveUtil {
   private ResolveUtil() {}
 
   public static Optional<ResolvedAddress> resolveAddress(
-      boolean isBedrock, SettingsHolder settingsHolder) {
+    boolean isBedrock, SettingsHolder settingsHolder) {
     var serverAddress =
-        ServerAddress.fromStringDefaultPort(
-            settingsHolder.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
+      ServerAddress.fromStringDefaultPort(
+        settingsHolder.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
 
     if (settingsHolder.get(BotSettings.RESOLVE_SRV)
-        && serverAddress.port() == MC_DEFAULT_PORT
-        && !isBedrock) {
+      && serverAddress.port() == MC_DEFAULT_PORT
+      && !isBedrock) {
       // SRVs can override address on Java, but not Bedrock.
       var resolved = resolveSrv(serverAddress);
       if (resolved.isPresent()) {
@@ -82,8 +82,8 @@ public class ResolveUtil {
         log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
 
         return resolveByHost(
-                ServerAddress.fromStringAndPort(attributeSplit[3], parsePort(attributeSplit[2])))
-            .map(e -> new ResolvedAddress(serverAddress, e));
+          ServerAddress.fromStringAndPort(attributeSplit[3], parsePort(attributeSplit[2])))
+          .map(e -> new ResolvedAddress(serverAddress, e));
       } else {
         log.debug("SRV lookup for \"{}\" returned no records.", name);
       }

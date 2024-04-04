@@ -29,9 +29,9 @@ public class AttributesDataGenerator implements IDataGenerator {
     var attributeDesc = new JsonObject();
 
     attributeDesc.addProperty(
-        "id", BuiltInRegistries.ATTRIBUTE.getId(attribute));
+      "id", BuiltInRegistries.ATTRIBUTE.getId(attribute));
     attributeDesc.addProperty(
-        "key", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).toString());
+      "key", Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(attribute)).toString());
 
     var rangedAttribute = (RangedAttribute) attribute;
     attributeDesc.addProperty("min", rangedAttribute.getMinValue());
@@ -52,7 +52,7 @@ public class AttributesDataGenerator implements IDataGenerator {
     var resultAttributesArray = new JsonArray();
 
     BuiltInRegistries.ATTRIBUTE.forEach(
-        attribute -> resultAttributesArray.add(generateAttribute(attribute)));
+      attribute -> resultAttributesArray.add(generateAttribute(attribute)));
     return resultAttributesArray;
   }
 }

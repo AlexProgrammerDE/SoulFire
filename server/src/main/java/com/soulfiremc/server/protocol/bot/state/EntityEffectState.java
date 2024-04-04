@@ -33,16 +33,16 @@ public class EntityEffectState {
   private final Map<Effect, InternalEffectState> effects = new EnumMap<>(Effect.class);
 
   public void updateEffect(
-      Effect effect,
-      int amplifier,
-      int duration,
-      boolean ambient,
-      boolean showParticles,
-      boolean showIcon,
-      CompoundTag factorData) {
+    Effect effect,
+    int amplifier,
+    int duration,
+    boolean ambient,
+    boolean showParticles,
+    boolean showIcon,
+    CompoundTag factorData) {
     effects.put(
-        effect,
-        new InternalEffectState(amplifier, ambient, showParticles, showIcon, factorData, duration));
+      effect,
+      new InternalEffectState(amplifier, ambient, showParticles, showIcon, factorData, duration));
   }
 
   public void removeEffect(Effect effect) {
@@ -57,14 +57,14 @@ public class EntityEffectState {
     }
 
     return Optional.of(
-        new EffectData(
-            effect,
-            state.amplifier(),
-            state.duration(),
-            state.ambient(),
-            state.showParticles(),
-            state.showIcon(),
-            state.factorData()));
+      new EffectData(
+        effect,
+        state.amplifier(),
+        state.duration(),
+        state.ambient(),
+        state.showParticles(),
+        state.showIcon(),
+        state.factorData()));
   }
 
   public void tick() {

@@ -46,16 +46,16 @@ public class SFViaLoader implements ViaPlatformLoader {
 
     // For ViaBedrock
     Via.getManager()
-        .getProviders()
-        .use(NettyPipelineProvider.class, new SFViaNettyPipelineProvider());
+      .getProviders()
+      .use(NettyPipelineProvider.class, new SFViaNettyPipelineProvider());
 
     // For Forge
     Protocol1_13To1_12_2.MAPPINGS
-        .getChannelMappings()
-        .put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
+      .getChannelMappings()
+      .put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
     Protocol1_13To1_12_2.MAPPINGS
-        .getChannelMappings()
-        .put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
+      .getChannelMappings()
+      .put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
     Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
     Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
     Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge

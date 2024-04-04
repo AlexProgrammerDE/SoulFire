@@ -22,4 +22,4 @@ import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import java.util.List;
 
 public record GraphInstructions(
-    BotEntityState targetState, double actionCost, List<WorldAction> actions) {}
+  BotEntityState targetState, double actionCost, List<WorldAction> actions) {}

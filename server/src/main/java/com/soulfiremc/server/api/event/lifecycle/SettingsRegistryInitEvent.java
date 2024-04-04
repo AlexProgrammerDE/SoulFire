@@ -21,4 +21,4 @@ import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 
 public record SettingsRegistryInitEvent(ServerSettingsRegistry settingsRegistry)
-    implements SoulFireGlobalEvent {}
+  implements SoulFireGlobalEvent {}

@@ -1,9 +1,10 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
-    <option name="myName" value="Project Default" />
+    <option name="myName" value="Project Default"/>
     <inspection_tool class="AutoCloseableResource" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreFromMethodCall" value="true" />
+      <option name="ignoreFromMethodCall" value="true"/>
     </inspection_tool>
-    <inspection_tool class="RedundantExplicitVariableType" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
+    <inspection_tool class="RedundantExplicitVariableType" enabled="true" level="WARNING" enabled_by_default="true"
+                     editorAttributes="WARNING_ATTRIBUTES"/>
   </profile>
 </component>

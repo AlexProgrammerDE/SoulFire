@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
-/** This class is for when we run around a wall, it decides what side we run on. */
+/**
+ * This class is for when we run around a wall, it decides what side we run on.
+ */
 public enum MovementSide {
   LEFT,
   RIGHT;

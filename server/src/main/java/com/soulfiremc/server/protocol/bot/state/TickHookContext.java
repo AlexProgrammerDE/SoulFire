@@ -24,10 +24,10 @@ import lombok.Getter;
 @Getter
 public class TickHookContext {
   public static final ThreadLocal<TickHookContext> INSTANCE =
-      ThreadLocal.withInitial(TickHookContext::new);
+    ThreadLocal.withInitial(TickHookContext::new);
 
   private final Multimap<HookType, Runnable> hooks =
-      MultimapBuilder.enumKeys(HookType.class).arrayListValues().build();
+    MultimapBuilder.enumKeys(HookType.class).arrayListValues().build();
 
   public void addHook(HookType type, Runnable hook) {
     hooks.put(type, hook);

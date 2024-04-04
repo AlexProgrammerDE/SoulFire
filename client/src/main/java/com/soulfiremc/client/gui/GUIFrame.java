@@ -49,64 +49,64 @@ public class GUIFrame extends JFrame {
     var cardContainer = injector.getSingleton(CardsContainer.class);
 
     var commandsHint =
-        new HintManager.Hint(
-            "Use \"help\" to get a list of all commands.",
-            (Component)
-                Objects.requireNonNull(logPanel.getClientProperty("log-panel-command-input")),
-            SwingConstants.TOP,
-            "hint.commandInput",
-            null);
+      new HintManager.Hint(
+        "Use \"help\" to get a list of all commands.",
+        (Component)
+          Objects.requireNonNull(logPanel.getClientProperty("log-panel-command-input")),
+        SwingConstants.TOP,
+        "hint.commandInput",
+        null);
 
     var controlsHint =
-        new HintManager.Hint(
-            "Here you can start, pause and stop a attack.",
-            injector.getSingleton(ControlPanel.class),
-            SwingConstants.TOP,
-            "hint.controls",
-            commandsHint);
+      new HintManager.Hint(
+        "Here you can start, pause and stop a attack.",
+        injector.getSingleton(ControlPanel.class),
+        SwingConstants.TOP,
+        "hint.controls",
+        commandsHint);
 
     var pluginsHint =
-        new HintManager.Hint(
-            "Click to configure plugins to make the attack more effective.",
-            (Component)
-                Objects.requireNonNull(cardContainer.getClientProperty("plugin-menu-button")),
-            SwingConstants.BOTTOM,
-            "hint.pluginsButton",
-            controlsHint);
+      new HintManager.Hint(
+        "Click to configure plugins to make the attack more effective.",
+        (Component)
+          Objects.requireNonNull(cardContainer.getClientProperty("plugin-menu-button")),
+        SwingConstants.BOTTOM,
+        "hint.pluginsButton",
+        controlsHint);
 
     var proxyHint =
-        new HintManager.Hint(
-            "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
-            (Component)
-                Objects.requireNonNull(cardContainer.getClientProperty("proxy-menu-button")),
-            SwingConstants.RIGHT,
-            "hint.proxyButton",
-            pluginsHint);
+      new HintManager.Hint(
+        "Click to import HTTP, SOCKS4 and SOCKS5 proxies",
+        (Component)
+          Objects.requireNonNull(cardContainer.getClientProperty("proxy-menu-button")),
+        SwingConstants.RIGHT,
+        "hint.proxyButton",
+        pluginsHint);
 
     var accountsHint =
-        new HintManager.Hint(
-            "Click to configure the bot offline-mode name format or bring your own accounts.",
-            (Component)
-                Objects.requireNonNull(cardContainer.getClientProperty("account-menu-button")),
-            SwingConstants.RIGHT,
-            "hint.accountsButton",
-            proxyHint);
+      new HintManager.Hint(
+        "Click to configure the bot offline-mode name format or bring your own accounts.",
+        (Component)
+          Objects.requireNonNull(cardContainer.getClientProperty("account-menu-button")),
+        SwingConstants.RIGHT,
+        "hint.accountsButton",
+        proxyHint);
 
     var settingsHint =
-        new HintManager.Hint(
-            "Click to configure host, port, version and more.",
-            (Component) Objects.requireNonNull(cardContainer.getClientProperty("bot-button")),
-            SwingConstants.BOTTOM,
-            "hint.settingsButton",
-            accountsHint);
+      new HintManager.Hint(
+        "Click to configure host, port, version and more.",
+        (Component) Objects.requireNonNull(cardContainer.getClientProperty("bot-button")),
+        SwingConstants.BOTTOM,
+        "hint.settingsButton",
+        accountsHint);
 
     var logsHint =
-        new HintManager.Hint(
-            "Here are all logs of the software displayed. You can select text and right click it to upload it to mclo.gs",
-            logPanel,
-            SwingConstants.LEFT,
-            "hint.logPanel",
-            settingsHint);
+      new HintManager.Hint(
+        "Here are all logs of the software displayed. You can select text and right click it to upload it to mclo.gs",
+        logPanel,
+        SwingConstants.LEFT,
+        "hint.logPanel",
+        settingsHint);
 
     HintManager.showHint(logsHint);
   }
@@ -136,18 +136,18 @@ public class GUIFrame extends JFrame {
     setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
 
     addWindowFocusListener(
-        new WindowFocusListener() {
-          @Override
-          public void windowGainedFocus(WindowEvent e) {
-            if (hintFocusListener != null) {
-              hintFocusListener.run();
-              hintFocusListener = null;
-            }
+      new WindowFocusListener() {
+        @Override
+        public void windowGainedFocus(WindowEvent e) {
+          if (hintFocusListener != null) {
+            hintFocusListener.run();
+            hintFocusListener = null;
           }
+        }
 
-          @Override
-          public void windowLostFocus(WindowEvent e) {}
-        });
+        @Override
+        public void windowLostFocus(WindowEvent e) {}
+      });
 
     setLocationRelativeTo(null);
   }
@@ -164,12 +164,12 @@ public class GUIFrame extends JFrame {
     // Ask whether the user wants hints
     if (GUIClientProps.getBoolean("firstRun", true)) {
       var result =
-          JOptionPane.showConfirmDialog(
-              this,
-              "Is this your first time using SoulFire? If yes, we can help you to get started with a few hints. :D",
-              "SoulFire First Run",
-              JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE);
+        JOptionPane.showConfirmDialog(
+          this,
+          "Is this your first time using SoulFire? If yes, we can help you to get started with a few hints. :D",
+          "SoulFire First Run",
+          JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE);
 
       if (result == JOptionPane.YES_OPTION) {
         GUIClientProps.setBoolean("firstTimeUser", true);

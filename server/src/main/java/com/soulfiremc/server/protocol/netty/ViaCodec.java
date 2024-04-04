@@ -84,7 +84,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
     if (PipelineUtil.containsCause(cause, CancelCodecException.class)
-        || PipelineUtil.containsCause(cause, CancelException.class)) {
+      || PipelineUtil.containsCause(cause, CancelException.class)) {
       return;
     }
 
@@ -96,12 +96,12 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     // Decoder exception
     if ((PipelineUtil.containsCause(cause, InformativeException.class)
-            && info.getProtocolInfo().getServerState() != State.HANDSHAKE)
-        || Via.getManager().debugHandler().enabled()) {
+      && info.getProtocolInfo().getServerState() != State.HANDSHAKE)
+      || Via.getManager().debugHandler().enabled()) {
       Objects.requireNonNull(info.get(StorableSession.class), "Storable Session missing")
-          .session()
-          .logger()
-          .error("A ViaVersion error has occurred:", cause);
+        .session()
+        .logger()
+        .error("A ViaVersion error has occurred:", cause);
     }
   }
 }

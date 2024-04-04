@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ToolSpeedType {
   public static float getBlockToolSpeed(
-      TagsState tagsState, ItemType itemType, BlockType blockType) {
+    TagsState tagsState, ItemType itemType, BlockType blockType) {
     if (tagsState.isItemInTag(itemType, ItemTags.SWORDS)) {
       if (blockType == BlockType.COBWEB) {
         return 15;
@@ -48,7 +48,7 @@ public class ToolSpeedType {
   }
 
   private static float getTierToolSpeed(
-      TagsState tagsState, ItemType itemType, BlockType blockType) {
+    TagsState tagsState, ItemType itemType, BlockType blockType) {
     var tierType = itemType.tierType();
     if (tierType != null) {
       var tagName = MineableType.getFromTool(tagsState, itemType);
@@ -62,13 +62,13 @@ public class ToolSpeedType {
   }
 
   public static boolean isRightToolFor(
-      TagsState tagsState, ItemType itemType, BlockType blockType) {
+    TagsState tagsState, ItemType itemType, BlockType blockType) {
     if (tagsState.isItemInTag(itemType, ItemTags.SWORDS)) {
       return blockType == BlockType.COBWEB;
     } else if (itemType == ItemType.SHEARS) {
       return blockType == BlockType.COBWEB
-          || blockType == BlockType.REDSTONE_WIRE
-          || blockType == BlockType.TRIPWIRE;
+        || blockType == BlockType.REDSTONE_WIRE
+        || blockType == BlockType.TRIPWIRE;
     } else {
       var tier = itemType.tierType();
       if (tier == null) {
@@ -85,8 +85,8 @@ public class ToolSpeedType {
       }
 
       return MineableType.getFromTool(tagsState, itemType)
-          .filter(type -> tagsState.isBlockInTag(blockType, type.blockTagKey()))
-          .isPresent();
+        .filter(type -> tagsState.isBlockInTag(blockType, type.blockTagKey()))
+        .isPresent();
     }
   }
 }

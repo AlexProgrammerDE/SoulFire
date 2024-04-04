@@ -33,38 +33,38 @@ import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
 public final class SFTheAlteningAuthService
-    implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
+  implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
   private static final URI AUTHENTICATE_ENDPOINT =
-      URI.create("http://authserver.thealtening.com/authenticate");
+    URI.create("http://authserver.thealtening.com/authenticate");
 
   private static final String PASSWORD =
-      "SoulFireIsCool"; // Password doesn't matter for The Altening
+    "SoulFireIsCool"; // Password doesn't matter for The Altening
 
   @Override
   public MinecraftAccount login(TheAlteningAuthData data, SFProxy proxyData) throws IOException {
     var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
     return ReactorHttpHelper.createReactorClient(proxyData, true)
-        .post()
-        .uri(AUTHENTICATE_ENDPOINT)
-        .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
-        .responseSingle(
-            (res, content) ->
-                content
-                    .asString()
-                    .map(
-                        responseText -> {
-                          var response =
-                              GsonInstance.GSON.fromJson(
-                                  responseText, AuthenticateRefreshResponse.class);
+      .post()
+      .uri(AUTHENTICATE_ENDPOINT)
+      .send(ByteBufFlux.fromString(Flux.just(GsonInstance.GSON.toJson(request))))
+      .responseSingle(
+        (res, content) ->
+          content
+            .asString()
+            .map(
+              responseText -> {
+                var response =
+                  GsonInstance.GSON.fromJson(
+                    responseText, AuthenticateRefreshResponse.class);
 
-                          return new MinecraftAccount(
-                              AuthType.THE_ALTENING,
-                              UUIDHelper.convertToDashed(response.selectedProfile().id()),
-                              response.selectedProfile().name(),
-                              new OnlineJavaData(response.accessToken(), -1));
-                        }))
-        .block();
+                return new MinecraftAccount(
+                  AuthType.THE_ALTENING,
+                  UUIDHelper.convertToDashed(response.selectedProfile().id()),
+                  response.selectedProfile().name(),
+                  new OnlineJavaData(response.accessToken(), -1));
+              }))
+      .block();
   }
 
   @Override

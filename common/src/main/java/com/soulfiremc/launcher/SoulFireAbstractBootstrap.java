@@ -44,7 +44,7 @@ import org.pf4j.PluginManager;
 public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();
   public static final PluginManager PLUGIN_MANAGER =
-      new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
+    new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
 
   static {
     System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -80,11 +80,11 @@ public abstract class SoulFireAbstractBootstrap {
 
   public static void injectExceptionHandler() {
     Thread.setDefaultUncaughtExceptionHandler(
-        (thread, throwable) -> {
-          log.error("Exception in thread {}", thread.getName());
-          //noinspection CallToPrintStackTrace
-          throwable.printStackTrace();
-        });
+      (thread, throwable) -> {
+        log.error("Exception in thread {}", thread.getName());
+        //noinspection CallToPrintStackTrace
+        throwable.printStackTrace();
+      });
   }
 
   private static void initPlugins(List<ClassLoader> classLoaders) {
@@ -119,23 +119,23 @@ public abstract class SoulFireAbstractBootstrap {
   private void injectMixinsAndRun(String[] args) {
     var mixinPaths = new HashSet<String>();
     PLUGIN_MANAGER
-        .getExtensions(MixinExtension.class)
-        .forEach(
-            mixinExtension -> {
-              for (var mixinPath : mixinExtension.getMixinPaths()) {
-                if (mixinPaths.add(mixinPath)) {
-                  log.info("Added mixin \"{}\"", mixinPath);
-                } else {
-                  log.warn("Mixin path \"{}\" is already added!", mixinPath);
-                }
-              }
-            });
+      .getExtensions(MixinExtension.class)
+      .forEach(
+        mixinExtension -> {
+          for (var mixinPath : mixinExtension.getMixinPaths()) {
+            if (mixinPaths.add(mixinPath)) {
+              log.info("Added mixin \"{}\"", mixinPath);
+            } else {
+              log.warn("Mixin path \"{}\" is already added!", mixinPath);
+            }
+          }
+        });
 
     var classLoaders = new ArrayList<ClassLoader>();
     classLoaders.add(SoulFireAbstractBootstrap.class.getClassLoader());
     PLUGIN_MANAGER
-        .getPlugins()
-        .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
+      .getPlugins()
+      .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
 
     var classProvider = new CustomClassProvider(classLoaders);
     var transformerManager = new TransformerManager(classProvider);

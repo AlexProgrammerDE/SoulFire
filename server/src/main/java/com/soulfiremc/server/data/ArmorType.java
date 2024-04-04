@@ -24,33 +24,33 @@ import lombok.Getter;
 @Getter
 public enum ArmorType {
   HELMET(
-      ItemType.LEATHER_HELMET,
-      ItemType.CHAINMAIL_HELMET,
-      ItemType.IRON_HELMET,
-      ItemType.GOLDEN_HELMET,
-      ItemType.DIAMOND_HELMET,
-      ItemType.NETHERITE_HELMET),
+    ItemType.LEATHER_HELMET,
+    ItemType.CHAINMAIL_HELMET,
+    ItemType.IRON_HELMET,
+    ItemType.GOLDEN_HELMET,
+    ItemType.DIAMOND_HELMET,
+    ItemType.NETHERITE_HELMET),
   CHESTPLATE(
-      ItemType.LEATHER_CHESTPLATE,
-      ItemType.CHAINMAIL_CHESTPLATE,
-      ItemType.IRON_CHESTPLATE,
-      ItemType.GOLDEN_CHESTPLATE,
-      ItemType.DIAMOND_CHESTPLATE,
-      ItemType.NETHERITE_CHESTPLATE),
+    ItemType.LEATHER_CHESTPLATE,
+    ItemType.CHAINMAIL_CHESTPLATE,
+    ItemType.IRON_CHESTPLATE,
+    ItemType.GOLDEN_CHESTPLATE,
+    ItemType.DIAMOND_CHESTPLATE,
+    ItemType.NETHERITE_CHESTPLATE),
   LEGGINGS(
-      ItemType.LEATHER_LEGGINGS,
-      ItemType.CHAINMAIL_LEGGINGS,
-      ItemType.IRON_LEGGINGS,
-      ItemType.GOLDEN_LEGGINGS,
-      ItemType.DIAMOND_LEGGINGS,
-      ItemType.NETHERITE_LEGGINGS),
+    ItemType.LEATHER_LEGGINGS,
+    ItemType.CHAINMAIL_LEGGINGS,
+    ItemType.IRON_LEGGINGS,
+    ItemType.GOLDEN_LEGGINGS,
+    ItemType.DIAMOND_LEGGINGS,
+    ItemType.NETHERITE_LEGGINGS),
   BOOTS(
-      ItemType.LEATHER_BOOTS,
-      ItemType.CHAINMAIL_BOOTS,
-      ItemType.IRON_BOOTS,
-      ItemType.GOLDEN_BOOTS,
-      ItemType.DIAMOND_BOOTS,
-      ItemType.NETHERITE_BOOTS);
+    ItemType.LEATHER_BOOTS,
+    ItemType.CHAINMAIL_BOOTS,
+    ItemType.IRON_BOOTS,
+    ItemType.GOLDEN_BOOTS,
+    ItemType.DIAMOND_BOOTS,
+    ItemType.NETHERITE_BOOTS);
 
   public static final ArmorType[] VALUES = values();
 

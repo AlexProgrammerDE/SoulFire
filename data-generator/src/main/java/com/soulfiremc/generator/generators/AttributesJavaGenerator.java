@@ -33,20 +33,20 @@ public class AttributesJavaGenerator implements IDataGenerator {
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/AttributeType.java");
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        String.join(
-            "\n  ",
-            BuiltInRegistries.ATTRIBUTE.stream()
-                .map(
-                    s -> {
-                      var key =
-                          Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s));
-                      return "public static final AttributeType "
-                          + key.getPath().toUpperCase(Locale.ROOT).replace(".", "_")
-                          + " = register(\""
-                          + key
-                          + "\");";
-                    })
-                .toArray(String[]::new)));
+      GeneratorConstants.VALUES_REPLACE,
+      String.join(
+        "\n  ",
+        BuiltInRegistries.ATTRIBUTE.stream()
+          .map(
+            s -> {
+              var key =
+                Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s));
+              return "public static final AttributeType "
+                + key.getPath().toUpperCase(Locale.ROOT).replace(".", "_")
+                + " = register(\""
+                + key
+                + "\");";
+            })
+          .toArray(String[]::new)));
   }
 }

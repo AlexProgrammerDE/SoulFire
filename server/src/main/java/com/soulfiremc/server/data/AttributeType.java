@@ -26,7 +26,7 @@ import lombok.With;
 @With(value = AccessLevel.PRIVATE)
 public record AttributeType(int id, ResourceKey key, double min, double max, double defaultValue) {
   public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY =
-      new Object2ReferenceOpenHashMap<>();
+    new Object2ReferenceOpenHashMap<>();
 
   public static final AttributeType GENERIC_ARMOR = register("minecraft:generic.armor");
   public static final AttributeType GENERIC_ARMOR_TOUGHNESS = register("minecraft:generic.armor_toughness");
@@ -45,7 +45,7 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
 
   public static AttributeType register(String key) {
     var instance =
-        GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
+      GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
 
     FROM_KEY.put(instance.key(), instance);
     return instance;

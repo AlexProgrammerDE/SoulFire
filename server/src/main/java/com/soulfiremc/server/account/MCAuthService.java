@@ -22,11 +22,11 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import java.io.IOException;
 
 public sealed interface MCAuthService<T>
-    permits SFBedrockMicrosoftAuthService,
-        SFEasyMCAuthService,
-        SFJavaMicrosoftAuthService,
-        SFOfflineAuthService,
-        SFTheAlteningAuthService {
+  permits SFBedrockMicrosoftAuthService,
+  SFEasyMCAuthService,
+  SFJavaMicrosoftAuthService,
+  SFOfflineAuthService,
+  SFTheAlteningAuthService {
   MinecraftAccount login(T data, SFProxy proxyData) throws IOException;
 
   T createData(String data);

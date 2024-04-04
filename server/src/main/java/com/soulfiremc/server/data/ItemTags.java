@@ -66,7 +66,8 @@ public class ItemTags {
   public static final ResourceKey FLOWERS = ResourceKey.fromString("minecraft:flowers");
   public static final ResourceKey PIGLIN_REPELLENTS = ResourceKey.fromString("minecraft:piglin_repellents");
   public static final ResourceKey PIGLIN_LOVED = ResourceKey.fromString("minecraft:piglin_loved");
-  public static final ResourceKey IGNORED_BY_PIGLIN_BABIES = ResourceKey.fromString("minecraft:ignored_by_piglin_babies");
+  public static final ResourceKey IGNORED_BY_PIGLIN_BABIES =
+    ResourceKey.fromString("minecraft:ignored_by_piglin_babies");
   public static final ResourceKey PIGLIN_FOOD = ResourceKey.fromString("minecraft:piglin_food");
   public static final ResourceKey FOX_FOOD = ResourceKey.fromString("minecraft:fox_food");
   public static final ResourceKey GOLD_ORES = ResourceKey.fromString("minecraft:gold_ores");
@@ -82,34 +83,40 @@ public class ItemTags {
   public static final ResourceKey CANDLES = ResourceKey.fromString("minecraft:candles");
   public static final ResourceKey DIRT = ResourceKey.fromString("minecraft:dirt");
   public static final ResourceKey TERRACOTTA = ResourceKey.fromString("minecraft:terracotta");
-  public static final ResourceKey COMPLETES_FIND_TREE_TUTORIAL = ResourceKey.fromString("minecraft:completes_find_tree_tutorial");
+  public static final ResourceKey COMPLETES_FIND_TREE_TUTORIAL =
+    ResourceKey.fromString("minecraft:completes_find_tree_tutorial");
   public static final ResourceKey BOATS = ResourceKey.fromString("minecraft:boats");
   public static final ResourceKey CHEST_BOATS = ResourceKey.fromString("minecraft:chest_boats");
   public static final ResourceKey FISHES = ResourceKey.fromString("minecraft:fishes");
   public static final ResourceKey SIGNS = ResourceKey.fromString("minecraft:signs");
   public static final ResourceKey MUSIC_DISCS = ResourceKey.fromString("minecraft:music_discs");
-  public static final ResourceKey CREEPER_DROP_MUSIC_DISCS = ResourceKey.fromString("minecraft:creeper_drop_music_discs");
+  public static final ResourceKey CREEPER_DROP_MUSIC_DISCS =
+    ResourceKey.fromString("minecraft:creeper_drop_music_discs");
   public static final ResourceKey COALS = ResourceKey.fromString("minecraft:coals");
   public static final ResourceKey ARROWS = ResourceKey.fromString("minecraft:arrows");
   public static final ResourceKey LECTERN_BOOKS = ResourceKey.fromString("minecraft:lectern_books");
   public static final ResourceKey BOOKSHELF_BOOKS = ResourceKey.fromString("minecraft:bookshelf_books");
   public static final ResourceKey BEACON_PAYMENT_ITEMS = ResourceKey.fromString("minecraft:beacon_payment_items");
   public static final ResourceKey STONE_TOOL_MATERIALS = ResourceKey.fromString("minecraft:stone_tool_materials");
-  public static final ResourceKey STONE_CRAFTING_MATERIALS = ResourceKey.fromString("minecraft:stone_crafting_materials");
+  public static final ResourceKey STONE_CRAFTING_MATERIALS =
+    ResourceKey.fromString("minecraft:stone_crafting_materials");
   public static final ResourceKey FREEZE_IMMUNE_WEARABLES = ResourceKey.fromString("minecraft:freeze_immune_wearables");
   public static final ResourceKey AXOLOTL_TEMPT_ITEMS = ResourceKey.fromString("minecraft:axolotl_tempt_items");
   public static final ResourceKey DAMPENS_VIBRATIONS = ResourceKey.fromString("minecraft:dampens_vibrations");
-  public static final ResourceKey CLUSTER_MAX_HARVESTABLES = ResourceKey.fromString("minecraft:cluster_max_harvestables");
+  public static final ResourceKey CLUSTER_MAX_HARVESTABLES =
+    ResourceKey.fromString("minecraft:cluster_max_harvestables");
   public static final ResourceKey COMPASSES = ResourceKey.fromString("minecraft:compasses");
   public static final ResourceKey HANGING_SIGNS = ResourceKey.fromString("minecraft:hanging_signs");
   public static final ResourceKey CREEPER_IGNITERS = ResourceKey.fromString("minecraft:creeper_igniters");
-  public static final ResourceKey NOTEBLOCK_TOP_INSTRUMENTS = ResourceKey.fromString("minecraft:noteblock_top_instruments");
+  public static final ResourceKey NOTEBLOCK_TOP_INSTRUMENTS =
+    ResourceKey.fromString("minecraft:noteblock_top_instruments");
   public static final ResourceKey TRIMMABLE_ARMOR = ResourceKey.fromString("minecraft:trimmable_armor");
   public static final ResourceKey TRIM_MATERIALS = ResourceKey.fromString("minecraft:trim_materials");
   public static final ResourceKey TRIM_TEMPLATES = ResourceKey.fromString("minecraft:trim_templates");
   public static final ResourceKey SNIFFER_FOOD = ResourceKey.fromString("minecraft:sniffer_food");
   public static final ResourceKey DECORATED_POT_SHERDS = ResourceKey.fromString("minecraft:decorated_pot_sherds");
-  public static final ResourceKey DECORATED_POT_INGREDIENTS = ResourceKey.fromString("minecraft:decorated_pot_ingredients");
+  public static final ResourceKey DECORATED_POT_INGREDIENTS =
+    ResourceKey.fromString("minecraft:decorated_pot_ingredients");
   public static final ResourceKey SWORDS = ResourceKey.fromString("minecraft:swords");
   public static final ResourceKey AXES = ResourceKey.fromString("minecraft:axes");
   public static final ResourceKey HOES = ResourceKey.fromString("minecraft:hoes");
@@ -117,7 +124,8 @@ public class ItemTags {
   public static final ResourceKey SHOVELS = ResourceKey.fromString("minecraft:shovels");
   public static final ResourceKey TOOLS = ResourceKey.fromString("minecraft:tools");
   public static final ResourceKey BREAKS_DECORATED_POTS = ResourceKey.fromString("minecraft:breaks_decorated_pots");
-  public static final ResourceKey VILLAGER_PLANTABLE_SEEDS = ResourceKey.fromString("minecraft:villager_plantable_seeds");
+  public static final ResourceKey VILLAGER_PLANTABLE_SEEDS =
+    ResourceKey.fromString("minecraft:villager_plantable_seeds");
 
   private ItemTags() {}
 }

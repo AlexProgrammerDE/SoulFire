@@ -1,6 +1,6 @@
 name: 🐞 Bug
 description: File a bug/issue report
-labels: ["type: :bug: bug"]
+labels: [ "type: :bug: bug" ]
 
 body:
   - type: checkboxes
@@ -11,8 +11,8 @@ body:
 
         Tip: You can go to the [GitHub issue tab](https://github.com/AlexProgrammerDE/SoulFire/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+%3Abug%3A+bug%22) for a list of open issues
       options:
-      - label: I have searched the existing issues
-        required: true
+        - label: I have searched the existing issues
+          required: true
   - type: textarea
     attributes:
       label: Describe your issue

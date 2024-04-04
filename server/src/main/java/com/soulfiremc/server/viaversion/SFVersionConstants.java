@@ -25,7 +25,7 @@ import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 public class SFVersionConstants {
   public static final ProtocolVersion CURRENT_PROTOCOL_VERSION =
-      ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
+    ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
 
   private SFVersionConstants() {}
 

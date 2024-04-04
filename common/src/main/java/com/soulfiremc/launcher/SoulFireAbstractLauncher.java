@@ -28,9 +28,9 @@ public abstract class SoulFireAbstractLauncher {
 
     try {
       SF_CONTEXT_CLASS_LOADER
-          .loadClass(getBootstrapClassName())
-          .getDeclaredMethod("bootstrap", String[].class, List.class)
-          .invoke(null, args, SF_CONTEXT_CLASS_LOADER.childClassLoaders());
+        .loadClass(getBootstrapClassName())
+        .getDeclaredMethod("bootstrap", String[].class, List.class)
+        .invoke(null, args, SF_CONTEXT_CLASS_LOADER.childClassLoaders());
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }

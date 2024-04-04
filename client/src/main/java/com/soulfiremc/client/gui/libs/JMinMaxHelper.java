@@ -30,17 +30,17 @@ public class JMinMaxHelper {
    */
   public static void applyLink(JSpinner min, JSpinner max) {
     min.addChangeListener(
-        e -> {
-          if ((int) min.getValue() > (int) max.getValue()) {
-            max.setValue(min.getValue());
-          }
-        });
+      e -> {
+        if ((int) min.getValue() > (int) max.getValue()) {
+          max.setValue(min.getValue());
+        }
+      });
 
     max.addChangeListener(
-        e -> {
-          if ((int) min.getValue() > (int) max.getValue()) {
-            min.setValue(max.getValue());
-          }
-        });
+      e -> {
+        if ((int) min.getValue() > (int) max.getValue()) {
+          min.setValue(max.getValue());
+        }
+      });
   }
 }

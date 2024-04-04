@@ -79,7 +79,7 @@ public class PlayerMovementState {
     speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
     slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
     dolphinsGrace =
-        effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
+      effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
     slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
     levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
 

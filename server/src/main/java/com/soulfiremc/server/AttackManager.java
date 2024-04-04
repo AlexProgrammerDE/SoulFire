@@ -72,44 +72,45 @@ public class AttackManager {
   private final int id = ID_COUNTER.getAndIncrement();
   private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
   private final LambdaManager eventBus =
-      LambdaManager.basic(new ASMGenerator())
-          .setExceptionHandler(EventExceptionHandler.INSTANCE)
-          .setEventFilter(
-              (c, h) -> {
-                if (SoulFireAttackEvent.class.isAssignableFrom(c)) {
-                  return true;
-                } else {
-                  throw new IllegalStateException("This event handler only accepts attack events");
-                }
-              });
+    LambdaManager.basic(new ASMGenerator())
+      .setExceptionHandler(EventExceptionHandler.INSTANCE)
+      .setEventFilter(
+        (c, h) -> {
+          if (SoulFireAttackEvent.class.isAssignableFrom(c)) {
+            return true;
+          } else {
+            throw new IllegalStateException("This event handler only accepts attack events");
+          }
+        });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final ExecutorManager executorManager = new ExecutorManager("SoulFire-Attack-" + id);
   private final SoulFireServer soulFireServer;
   private final SettingsHolder settingsHolder;
-  @Setter private AttackState attackState = AttackState.STOPPED;
+  @Setter
+  private AttackState attackState = AttackState.STOPPED;
 
   private static MinecraftAccount getAccount(
-      SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
+    SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
     if (accounts.isEmpty()) {
       return SFOfflineAuthService.createAccount(
-          String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
+        String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
     }
 
     return accounts.removeFirst();
   }
 
   private static Optional<SFProxy> getProxy(
-      int accountsPerProxy, Object2IntMap<SFProxy> proxyUseMap) {
+    int accountsPerProxy, Object2IntMap<SFProxy> proxyUseMap) {
     if (proxyUseMap.isEmpty()) {
       return Optional.empty(); // No proxies available
     }
 
     var selectedProxy =
-        proxyUseMap.object2IntEntrySet().stream()
-            .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
-            .min(Comparator.comparingInt(Map.Entry::getValue))
-            .orElseThrow(
-                () -> new IllegalStateException("No proxies available!")); // Should never happen
+      proxyUseMap.object2IntEntrySet().stream()
+        .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
+        .min(Comparator.comparingInt(Map.Entry::getValue))
+        .orElseThrow(
+          () -> new IllegalStateException("No proxies available!")); // Should never happen
 
     // Always present
     selectedProxy.setValue(selectedProxy.getIntValue() + 1);
@@ -131,20 +132,20 @@ public class AttackManager {
 
     var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
-        settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
+      settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
 
     var proxies = new ArrayList<>(settingsHolder.proxies());
     var availableProxiesCount = proxies.size(); // How many proxies are available?
     var maxBots =
-        botsPerProxy > 0
-            ? botsPerProxy * availableProxiesCount
-            : botAmount; // How many bots can be used at max
+      botsPerProxy > 0
+        ? botsPerProxy * availableProxiesCount
+        : botAmount; // How many bots can be used at max
 
     if (botAmount > maxBots) {
       logger.warn("You have specified {} bots, but only {} are available.", botAmount, maxBots);
       logger.warn(
-          "You need {} more proxies to run this amount of bots.",
-          (botAmount - maxBots) / botsPerProxy);
+        "You need {} more proxies to run this amount of bots.",
+        (botAmount - maxBots) / botsPerProxy);
       logger.warn("Continuing with {} bots.", maxBots);
       botAmount = maxBots;
     }
@@ -154,9 +155,9 @@ public class AttackManager {
 
     if (availableAccounts > 0 && botAmount > availableAccounts) {
       logger.warn(
-          "You have specified {} bots, but only {} accounts are available.",
-          botAmount,
-          availableAccounts);
+        "You have specified {} bots, but only {} accounts are available.",
+        botAmount,
+        availableAccounts);
       logger.warn("Continuing with {} bots.", availableAccounts);
       botAmount = availableAccounts;
     }
@@ -172,10 +173,10 @@ public class AttackManager {
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
-        SFNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
+      SFNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
 
     var protocolVersion =
-        settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+      settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
     var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder);
 
@@ -191,72 +192,72 @@ public class AttackManager {
       protocol.setUseDefaultListeners(false);
 
       factories.add(
-          new BotConnectionFactory(
-              this,
-              UUID.randomUUID(),
-              targetAddress.orElseThrow(
-                  () -> new IllegalStateException("Could not resolve address")),
-              settingsHolder,
-              LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
-              protocol,
-              minecraftAccount,
-              protocolVersion,
-              proxyData,
-              attackEventLoopGroup));
+        new BotConnectionFactory(
+          this,
+          UUID.randomUUID(),
+          targetAddress.orElseThrow(
+            () -> new IllegalStateException("Could not resolve address")),
+          settingsHolder,
+          LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
+          protocol,
+          minecraftAccount,
+          protocolVersion,
+          proxyData,
+          attackEventLoopGroup));
     }
 
     if (availableProxiesCount == 0) {
       logger.info("Starting attack at {} with {} bots", address, factories.size());
     } else {
       logger.info(
-          "Starting attack at {} with {} bots and {} proxies",
-          address,
-          factories.size(),
-          availableProxiesCount);
+        "Starting attack at {} with {} bots and {} proxies",
+        address,
+        factories.size(),
+        availableProxiesCount);
     }
 
     eventBus.call(new AttackStartEvent(this));
 
     // Used for concurrent bot connecting
     var connectService =
-        executorManager.newFixedExecutorService(
-            settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
+      executorManager.newFixedExecutorService(
+        settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
 
     return CompletableFuture.runAsync(
-        () -> {
-          while (!factories.isEmpty()) {
-            var factory = factories.poll();
-            if (factory == null) {
-              break;
-            }
-
-            logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
-            connectService.execute(
-                () -> {
-                  if (attackState.isStopped()) {
-                    return;
-                  }
-
-                  TimeUtil.waitCondition(attackState::isPaused);
-
-                  logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
-                  var botConnection = factory.prepareConnection();
-                  botConnections.put(botConnection.connectionId(), botConnection);
-
-                  try {
-                    botConnection.connect().get();
-                  } catch (Throwable e) {
-                    logger.error("Error while connecting", e);
-                  }
-                });
-
-            TimeUtil.waitTime(
-                RandomUtil.getRandomInt(
-                    settingsHolder.get(BotSettings.JOIN_DELAY.min()),
-                    settingsHolder.get(BotSettings.JOIN_DELAY.max())),
-                TimeUnit.MILLISECONDS);
+      () -> {
+        while (!factories.isEmpty()) {
+          var factory = factories.poll();
+          if (factory == null) {
+            break;
           }
-        });
+
+          logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
+          connectService.execute(
+            () -> {
+              if (attackState.isStopped()) {
+                return;
+              }
+
+              TimeUtil.waitCondition(attackState::isPaused);
+
+              logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
+              var botConnection = factory.prepareConnection();
+              botConnections.put(botConnection.connectionId(), botConnection);
+
+              try {
+                botConnection.connect().get();
+              } catch (Throwable e) {
+                logger.error("Error while connecting", e);
+              }
+            });
+
+          TimeUtil.waitTime(
+            RandomUtil.getRandomInt(
+              settingsHolder.get(BotSettings.JOIN_DELAY.min()),
+              settingsHolder.get(BotSettings.JOIN_DELAY.max())),
+            TimeUnit.MILLISECONDS);
+        }
+      });
   }
 
   public CompletableFuture<?> stop() {

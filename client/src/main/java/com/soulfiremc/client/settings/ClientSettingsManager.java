@@ -45,15 +45,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
-      Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
+    Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();
-  @Getter private final AccountRegistry accountRegistry;
-  @Getter private final ProxyRegistry proxyRegistry = new ProxyRegistry();
+  @Getter
+  private final AccountRegistry accountRegistry;
+  @Getter
+  private final ProxyRegistry proxyRegistry = new ProxyRegistry();
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
     providers
-        .computeIfAbsent(property.namespace(), k -> new LinkedHashMap<>())
-        .put(property.key(), provider);
+      .computeIfAbsent(property.namespace(), k -> new LinkedHashMap<>())
+      .put(property.key(), provider);
   }
 
   public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
@@ -63,11 +65,11 @@ public class ClientSettingsManager {
   public void loadProfile(Path path) throws IOException {
     var profileDataStructure = ProfileDataStructure.deserialize(Files.readString(path));
     profileDataStructure.handleProperties(
-        (propertyKey, jsonElement) -> {
-          for (var listener : listeners.get(propertyKey)) {
-            listener.accept(jsonElement);
-          }
-        });
+      (propertyKey, jsonElement) -> {
+        for (var listener : listeners.get(propertyKey)) {
+          listener.accept(jsonElement);
+        }
+      });
 
     accountRegistry.setAccounts(profileDataStructure.accounts());
     accountRegistry.callLoadHooks();
@@ -95,10 +97,10 @@ public class ClientSettingsManager {
     }
 
     return new ProfileDataStructure(
-            settingsData,
-            accountRegistry.accounts().stream().toList(),
-            proxyRegistry.proxies().stream().toList())
-        .serialize();
+      settingsData,
+      accountRegistry.accounts().stream().toList(),
+      proxyRegistry.proxies().stream().toList())
+      .serialize();
   }
 
   public AttackStartRequest exportSettingsProto() {
@@ -120,56 +122,56 @@ public class ClientSettingsManager {
         var primitive = value.getAsJsonPrimitive();
         if (primitive.isBoolean()) {
           namespaceSettings.add(
-              SettingsEntry.newBuilder()
-                  .setKey(key)
-                  .setBoolValue(primitive.getAsBoolean())
-                  .build());
+            SettingsEntry.newBuilder()
+              .setKey(key)
+              .setBoolValue(primitive.getAsBoolean())
+              .build());
         } else if (primitive.isNumber()) {
           var number = primitive.getAsNumber();
           if (number instanceof Integer) {
             namespaceSettings.add(
-                SettingsEntry.newBuilder().setKey(key).setIntValue(number.intValue()).build());
+              SettingsEntry.newBuilder().setKey(key).setIntValue(number.intValue()).build());
           } else if (number instanceof Double) {
             namespaceSettings.add(
-                SettingsEntry.newBuilder()
-                    .setKey(key)
-                    .setDoubleValue(number.doubleValue())
-                    .build());
+              SettingsEntry.newBuilder()
+                .setKey(key)
+                .setDoubleValue(number.doubleValue())
+                .build());
           } else {
             log.warn("Skipping unsupported number setting: {}#{}", namespace, key);
           }
         } else if (primitive.isString()) {
           namespaceSettings.add(
-              SettingsEntry.newBuilder()
-                  .setKey(key)
-                  .setStringValue(primitive.getAsString())
-                  .build());
+            SettingsEntry.newBuilder()
+              .setKey(key)
+              .setStringValue(primitive.getAsString())
+              .build());
         } else {
           log.warn("Skipping unsupported primitive setting: {}#{}", namespace, key);
         }
       }
 
       namespaces.add(
-          SettingsNamespace.newBuilder()
-              .setNamespace(namespace)
-              .addAllEntries(namespaceSettings)
-              .build());
+        SettingsNamespace.newBuilder()
+          .setNamespace(namespace)
+          .addAllEntries(namespaceSettings)
+          .build());
     }
 
     return AttackStartRequest.newBuilder()
-        .addAllSettings(namespaces)
-        .addAllAccounts(
-            accountRegistry.accounts().stream()
-                .filter(EnabledWrapper::enabled)
-                .map(EnabledWrapper::value)
-                .map(MinecraftAccount::toProto)
-                .toList())
-        .addAllProxies(
-            proxyRegistry.proxies().stream()
-                .filter(EnabledWrapper::enabled)
-                .map(EnabledWrapper::value)
-                .map(SFProxy::toProto)
-                .toList())
-        .build();
+      .addAllSettings(namespaces)
+      .addAllAccounts(
+        accountRegistry.accounts().stream()
+          .filter(EnabledWrapper::enabled)
+          .map(EnabledWrapper::value)
+          .map(MinecraftAccount::toProto)
+          .toList())
+      .addAllProxies(
+        proxyRegistry.proxies().stream()
+          .filter(EnabledWrapper::enabled)
+          .map(EnabledWrapper::value)
+          .map(SFProxy::toProto)
+          .toList())
+      .build();
   }
 }

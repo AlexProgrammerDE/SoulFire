@@ -46,13 +46,14 @@ public class ClientBrand implements InternalPlugin {
 
       var buf = Unpooled.buffer();
       connection
-          .session()
-          .getCodecHelper()
-          .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
+        .session()
+        .getCodecHelper()
+        .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
 
       connection
-          .session()
-          .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), ByteBufUtil.getBytes(buf)));
+        .session()
+        .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(),
+          ByteBufUtil.getBytes(buf)));
     }
   }
 
@@ -71,18 +72,18 @@ public class ClientBrand implements InternalPlugin {
   private static class ClientBrandSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("client-brand");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Send client brand",
-            new String[] {"--send-client-brand"},
-            "Send client brand to the server",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Send client brand",
+        new String[] {"--send-client-brand"},
+        "Send client brand to the server",
+        true);
     public static final StringProperty CLIENT_BRAND =
-        BUILDER.ofString(
-            "client-brand",
-            "Client brand",
-            new String[] {"--client-brand"},
-            "The client brand to send to the server",
-            "vanilla");
+      BUILDER.ofString(
+        "client-brand",
+        "Client brand",
+        new String[] {"--client-brand"},
+        "The client brand to send to the server",
+        "vanilla");
   }
 }

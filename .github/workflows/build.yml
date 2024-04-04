@@ -1,5 +1,5 @@
 name: Java CI with Gradle
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   build:
@@ -95,7 +95,7 @@ jobs:
       - name: Package with jpackage
         run: |
           $projectVersion = Select-String -Path gradle.properties -Pattern '^maven_version=' | ForEach-Object { $_.ToString().Split('=')[1] }
-          $projectVersionStripped = $projectVersion -replace '-SNAPSHOT', '' 
+          $projectVersionStripped = $projectVersion -replace '-SNAPSHOT', ''
           jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-windows.cfg"
       - name: Upload installer
         uses: actions/upload-artifact@v4

@@ -54,9 +54,9 @@ public class ProxyPanel extends NavigationItem {
     proxySettingsPanel.setLayout(new GridBagLayout());
 
     GeneratedPanel.addComponents(
-        proxySettingsPanel,
-        cardsContainer.getByNamespace(BuiltinSettingsConstants.PROXY_SETTINGS_ID),
-        guiManager.clientSettingsManager());
+      proxySettingsPanel,
+      cardsContainer.getByNamespace(BuiltinSettingsConstants.PROXY_SETTINGS_ID),
+      guiManager.clientSettingsManager());
 
     GBC.create(this).grid(0, 0).fill(GBC.HORIZONTAL).weightx(1).add(proxySettingsPanel);
 
@@ -66,86 +66,86 @@ public class ProxyPanel extends NavigationItem {
 
     var columnNames = new String[] {"IP", "Port", "Username", "Password", "Type", "Enabled"};
     var model =
-        new DefaultTableModel(columnNames, 0) {
-          final Class<?>[] columnTypes =
-              new Class<?>[] {
-                Object.class,
-                Integer.class,
-                Object.class,
-                Object.class,
-                ProxyType.class,
-                Boolean.class
-              };
+      new DefaultTableModel(columnNames, 0) {
+        final Class<?>[] columnTypes =
+          new Class<?>[] {
+            Object.class,
+            Integer.class,
+            Object.class,
+            Object.class,
+            ProxyType.class,
+            Boolean.class
+          };
 
-          @Override
-          public Class<?> getColumnClass(int columnIndex) {
-            return columnTypes[columnIndex];
-          }
-        };
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+          return columnTypes[columnIndex];
+        }
+      };
 
     var proxyList = new JTable(model);
 
     var proxyRegistry = guiManager.clientSettingsManager().proxyRegistry();
     proxyRegistry.addLoadHook(
-        () -> {
-          model.getDataVector().removeAllElements();
+      () -> {
+        model.getDataVector().removeAllElements();
 
-          var proxies = proxyRegistry.proxies();
-          var dataVector = new Object[proxies.size()][];
-          var i = 0;
-          for (var proxy : proxies) {
-            dataVector[i++] =
-                new Object[] {
-                  proxy.value().host(),
-                  proxy.value().port(),
-                  proxy.value().username(),
-                  proxy.value().password(),
-                  proxy.value().type(),
-                  proxy.enabled()
-                };
-          }
+        var proxies = proxyRegistry.proxies();
+        var dataVector = new Object[proxies.size()][];
+        var i = 0;
+        for (var proxy : proxies) {
+          dataVector[i++] =
+            new Object[] {
+              proxy.value().host(),
+              proxy.value().port(),
+              proxy.value().username(),
+              proxy.value().password(),
+              proxy.value().type(),
+              proxy.enabled()
+            };
+        }
 
-          model.setDataVector(dataVector, columnNames);
+        model.setDataVector(dataVector, columnNames);
 
-          proxyList
-              .getColumnModel()
-              .getColumn(4)
-              .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(ProxyType.class)));
+        proxyList
+          .getColumnModel()
+          .getColumn(4)
+          .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(ProxyType.class)));
 
-          model.fireTableDataChanged();
-        });
+        model.fireTableDataChanged();
+      });
 
     Runnable reconstructFromTable =
-        () -> {
-          var proxies = new ArrayList<EnabledWrapper<SFProxy>>();
+      () -> {
+        var proxies = new ArrayList<EnabledWrapper<SFProxy>>();
 
-          var rowCount = proxyList.getRowCount();
-          var columnCount = proxyList.getColumnCount();
-          for (var row = 0; row < rowCount; row++) {
-            var rowData = new Object[columnCount];
-            for (var column = 0; column < columnCount; column++) {
-              rowData[column] = proxyList.getValueAt(row, column);
-            }
-
-            var host = (String) rowData[0];
-            var port = (int) rowData[1];
-            var username = (String) rowData[2];
-            var password = (String) rowData[3];
-            var type = (ProxyType) rowData[4];
-            var enabled = (boolean) rowData[5];
-
-            proxies.add(
-                new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
+        var rowCount = proxyList.getRowCount();
+        var columnCount = proxyList.getColumnCount();
+        for (var row = 0; row < rowCount; row++) {
+          var rowData = new Object[columnCount];
+          for (var column = 0; column < columnCount; column++) {
+            rowData[column] = proxyList.getValueAt(row, column);
           }
 
-          proxyRegistry.setProxies(proxies);
-        };
+          var host = (String) rowData[0];
+          var port = (int) rowData[1];
+          var username = (String) rowData[2];
+          var password = (String) rowData[3];
+          var type = (ProxyType) rowData[4];
+          var enabled = (boolean) rowData[5];
+
+          proxies.add(
+            new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
+        }
+
+        proxyRegistry.setProxies(proxies);
+      };
     proxyList.addPropertyChangeListener(
-        evt -> {
-          if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
-            reconstructFromTable.run();
-          }
-        });
+      evt -> {
+        if ("tableCellEditor".equals(evt.getPropertyName()) && !proxyList.isEditing()) {
+          reconstructFromTable.run();
+        }
+      });
 
     var scrollPane = new JScrollPane(proxyList);
 
@@ -155,26 +155,26 @@ public class ProxyPanel extends NavigationItem {
     var addButton = new JButton("+");
     addButton.setToolTipText("Add proxies to the list");
     addButton.addMouseListener(
-        new MouseAdapter() {
-          public void mousePressed(MouseEvent e) {
-            var menu = new JPopupMenu();
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
-            menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
-            menu.add(createURLProxyLoadButton(guiManager, parent));
-            menu.show(e.getComponent(), e.getX(), e.getY());
-          }
-        });
+      new MouseAdapter() {
+        public void mousePressed(MouseEvent e) {
+          var menu = new JPopupMenu();
+          menu.add(createProxyLoadButton(guiManager, parent, ProxyType.HTTP));
+          menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS4));
+          menu.add(createProxyLoadButton(guiManager, parent, ProxyType.SOCKS5));
+          menu.add(createURLProxyLoadButton(guiManager, parent));
+          menu.show(e.getComponent(), e.getX(), e.getY());
+        }
+      });
     var removeButton = new JButton("-");
     removeButton.setToolTipText("Remove selected proxies from the list");
     removeButton.addActionListener(
-        e -> {
-          var selectedRows = proxyList.getSelectedRows();
-          for (var i = selectedRows.length - 1; i >= 0; i--) {
-            model.removeRow(selectedRows[i]);
-          }
-          reconstructFromTable.run();
-        });
+      e -> {
+        var selectedRows = proxyList.getSelectedRows();
+        for (var i = selectedRows.length - 1; i >= 0; i--) {
+          model.removeRow(selectedRows[i]);
+        }
+        reconstructFromTable.run();
+      });
 
     toolBar.add(addButton);
     toolBar.add(removeButton);
@@ -183,22 +183,22 @@ public class ProxyPanel extends NavigationItem {
   }
 
   private static JMenuItem createProxyLoadButton(
-      GUIManager guiManager, GUIFrame parent, ProxyType type) {
+    GUIManager guiManager, GUIFrame parent, ProxyType type) {
     var button = new JMenuItem(type.toString());
 
     button.addActionListener(
-        e ->
-            new ImportTextDialog(
-                SFPathConstants.WORKING_DIRECTORY,
-                String.format("Load %s proxies", type),
-                String.format("%s list file", type),
-                guiManager,
-                parent,
-                text ->
-                    guiManager
-                        .clientSettingsManager()
-                        .proxyRegistry()
-                        .loadFromString(text, ProxyParser.typeParser(type))));
+      e ->
+        new ImportTextDialog(
+          SFPathConstants.WORKING_DIRECTORY,
+          String.format("Load %s proxies", type),
+          String.format("%s list file", type),
+          guiManager,
+          parent,
+          text ->
+            guiManager
+              .clientSettingsManager()
+              .proxyRegistry()
+              .loadFromString(text, ProxyParser.typeParser(type))));
 
     return button;
   }
@@ -207,18 +207,18 @@ public class ProxyPanel extends NavigationItem {
     var button = new JMenuItem("URI");
 
     button.addActionListener(
-        e ->
-            new ImportTextDialog(
-                SFPathConstants.WORKING_DIRECTORY,
-                "Load URI proxies",
-                "URI list file",
-                guiManager,
-                parent,
-                text ->
-                    guiManager
-                        .clientSettingsManager()
-                        .proxyRegistry()
-                        .loadFromString(text, ProxyParser.uriParser())));
+      e ->
+        new ImportTextDialog(
+          SFPathConstants.WORKING_DIRECTORY,
+          "Load URI proxies",
+          "URI list file",
+          guiManager,
+          parent,
+          text ->
+            guiManager
+              .clientSettingsManager()
+              .proxyRegistry()
+              .loadFromString(text, ProxyParser.uriParser())));
 
     return button;
   }

@@ -34,38 +34,38 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProxyRegistry {
   private final ObjectSortedSet<EnabledWrapper<SFProxy>> proxies =
-      new ObjectLinkedOpenCustomHashSet<>(
-          new Hash.Strategy<>() {
-            @Override
-            public int hashCode(EnabledWrapper<SFProxy> obj) {
-              if (obj == null) {
-                return 0;
-              }
+    new ObjectLinkedOpenCustomHashSet<>(
+      new Hash.Strategy<>() {
+        @Override
+        public int hashCode(EnabledWrapper<SFProxy> obj) {
+          if (obj == null) {
+            return 0;
+          }
 
-              return obj.value().hashCode();
-            }
+          return obj.value().hashCode();
+        }
 
-            @Override
-            public boolean equals(EnabledWrapper<SFProxy> obj1, EnabledWrapper<SFProxy> obj2) {
-              if (obj1 == null || obj2 == null) {
-                return false;
-              }
+        @Override
+        public boolean equals(EnabledWrapper<SFProxy> obj1, EnabledWrapper<SFProxy> obj2) {
+          if (obj1 == null || obj2 == null) {
+            return false;
+          }
 
-              return obj1.value().equals(obj2.value());
-            }
-          });
+          return obj1.value().equals(obj2.value());
+        }
+      });
   private final List<Runnable> loadHooks = new ArrayList<>();
 
   public void loadFromString(String data, ProxyParser proxyParser) {
     try {
       var newProxies =
-          data.lines()
-              .map(String::strip)
-              .filter(Predicate.not(String::isBlank))
-              .distinct()
-              .map(proxyParser::parse)
-              .map(EnabledWrapper::defaultTrue)
-              .toList();
+        data.lines()
+          .map(String::strip)
+          .filter(Predicate.not(String::isBlank))
+          .distinct()
+          .map(proxyParser::parse)
+          .map(EnabledWrapper::defaultTrue)
+          .toList();
 
       if (newProxies.isEmpty()) {
         log.warn("No proxies found in the provided data!");

@@ -24,7 +24,8 @@ performance.
 
 > [!WARNING]
 > This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection
-> provider, and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or your
+> provider, and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or
+> your
 > legal guardians) criminally liable; the developers of SoulFire are not responsible for your own actions.
 
 ---
@@ -58,7 +59,8 @@ SoulFire supports many versions of Minecraft, including releases, april fools sn
 classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
 and that includes every single subversion, not just a few specific versions.
 
-You can find an up-to-date list of supported versions in the [documentation](https://soulfiremc.com/docs/usage/versions).
+You can find an up-to-date list of supported versions in
+the [documentation](https://soulfiremc.com/docs/usage/versions).
 
 ### How does this work?
 

@@ -23,13 +23,13 @@ import com.soulfiremc.settings.account.service.OfflineJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 
 public final class SFOfflineAuthService
-    implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
+  implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
   public static MinecraftAccount createAccount(String username) {
     return new MinecraftAccount(
-        AuthType.OFFLINE,
-        OfflineJavaData.getOfflineUUID(username),
-        username,
-        new OfflineJavaData());
+      AuthType.OFFLINE,
+      OfflineJavaData.getOfflineUUID(username),
+      username,
+      new OfflineJavaData());
   }
 
   @Override

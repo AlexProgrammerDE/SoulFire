@@ -34,7 +34,8 @@ public class RegistryKeys {
   public static final ResourceKey CUSTOM_STAT = ResourceKey.fromString("minecraft:custom_stat");
   public static final ResourceKey CHUNK_STATUS = ResourceKey.fromString("minecraft:chunk_status");
   public static final ResourceKey RULE_TEST = ResourceKey.fromString("minecraft:rule_test");
-  public static final ResourceKey RULE_BLOCK_ENTITY_MODIFIER = ResourceKey.fromString("minecraft:rule_block_entity_modifier");
+  public static final ResourceKey RULE_BLOCK_ENTITY_MODIFIER =
+    ResourceKey.fromString("minecraft:rule_block_entity_modifier");
   public static final ResourceKey POS_RULE_TEST = ResourceKey.fromString("minecraft:pos_rule_test");
   public static final ResourceKey MENU = ResourceKey.fromString("minecraft:menu");
   public static final ResourceKey RECIPE_TYPE = ResourceKey.fromString("minecraft:recipe_type");
@@ -53,34 +54,54 @@ public class RegistryKeys {
   public static final ResourceKey LOOT_POOL_ENTRY_TYPE = ResourceKey.fromString("minecraft:loot_pool_entry_type");
   public static final ResourceKey LOOT_FUNCTION_TYPE = ResourceKey.fromString("minecraft:loot_function_type");
   public static final ResourceKey LOOT_CONDITION_TYPE = ResourceKey.fromString("minecraft:loot_condition_type");
-  public static final ResourceKey LOOT_NUMBER_PROVIDER_TYPE = ResourceKey.fromString("minecraft:loot_number_provider_type");
+  public static final ResourceKey LOOT_NUMBER_PROVIDER_TYPE =
+    ResourceKey.fromString("minecraft:loot_number_provider_type");
   public static final ResourceKey LOOT_NBT_PROVIDER_TYPE = ResourceKey.fromString("minecraft:loot_nbt_provider_type");
-  public static final ResourceKey LOOT_SCORE_PROVIDER_TYPE = ResourceKey.fromString("minecraft:loot_score_provider_type");
+  public static final ResourceKey LOOT_SCORE_PROVIDER_TYPE =
+    ResourceKey.fromString("minecraft:loot_score_provider_type");
   public static final ResourceKey FLOAT_PROVIDER_TYPE = ResourceKey.fromString("minecraft:float_provider_type");
   public static final ResourceKey INT_PROVIDER_TYPE = ResourceKey.fromString("minecraft:int_provider_type");
   public static final ResourceKey HEIGHT_PROVIDER_TYPE = ResourceKey.fromString("minecraft:height_provider_type");
   public static final ResourceKey BLOCK_PREDICATE_TYPE = ResourceKey.fromString("minecraft:block_predicate_type");
   public static final ResourceKey WORLDGEN_WITH_CARVER = ResourceKey.fromString("minecraft:worldgen/carver");
   public static final ResourceKey WORLDGEN_WITH_FEATURE = ResourceKey.fromString("minecraft:worldgen/feature");
-  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PLACEMENT = ResourceKey.fromString("minecraft:worldgen/structure_placement");
-  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PIECE = ResourceKey.fromString("minecraft:worldgen/structure_piece");
-  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_TYPE = ResourceKey.fromString("minecraft:worldgen/structure_type");
-  public static final ResourceKey WORLDGEN_WITH_PLACEMENT_MODIFIER_TYPE = ResourceKey.fromString("minecraft:worldgen/placement_modifier_type");
-  public static final ResourceKey WORLDGEN_WITH_BLOCK_STATE_PROVIDER_TYPE = ResourceKey.fromString("minecraft:worldgen/block_state_provider_type");
-  public static final ResourceKey WORLDGEN_WITH_FOLIAGE_PLACER_TYPE = ResourceKey.fromString("minecraft:worldgen/foliage_placer_type");
-  public static final ResourceKey WORLDGEN_WITH_TRUNK_PLACER_TYPE = ResourceKey.fromString("minecraft:worldgen/trunk_placer_type");
-  public static final ResourceKey WORLDGEN_WITH_ROOT_PLACER_TYPE = ResourceKey.fromString("minecraft:worldgen/root_placer_type");
-  public static final ResourceKey WORLDGEN_WITH_TREE_DECORATOR_TYPE = ResourceKey.fromString("minecraft:worldgen/tree_decorator_type");
-  public static final ResourceKey WORLDGEN_WITH_FEATURE_SIZE_TYPE = ResourceKey.fromString("minecraft:worldgen/feature_size_type");
-  public static final ResourceKey WORLDGEN_WITH_BIOME_SOURCE = ResourceKey.fromString("minecraft:worldgen/biome_source");
-  public static final ResourceKey WORLDGEN_WITH_CHUNK_GENERATOR = ResourceKey.fromString("minecraft:worldgen/chunk_generator");
-  public static final ResourceKey WORLDGEN_WITH_MATERIAL_CONDITION = ResourceKey.fromString("minecraft:worldgen/material_condition");
-  public static final ResourceKey WORLDGEN_WITH_MATERIAL_RULE = ResourceKey.fromString("minecraft:worldgen/material_rule");
-  public static final ResourceKey WORLDGEN_WITH_DENSITY_FUNCTION_TYPE = ResourceKey.fromString("minecraft:worldgen/density_function_type");
+  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PLACEMENT =
+    ResourceKey.fromString("minecraft:worldgen/structure_placement");
+  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PIECE =
+    ResourceKey.fromString("minecraft:worldgen/structure_piece");
+  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/structure_type");
+  public static final ResourceKey WORLDGEN_WITH_PLACEMENT_MODIFIER_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/placement_modifier_type");
+  public static final ResourceKey WORLDGEN_WITH_BLOCK_STATE_PROVIDER_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/block_state_provider_type");
+  public static final ResourceKey WORLDGEN_WITH_FOLIAGE_PLACER_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/foliage_placer_type");
+  public static final ResourceKey WORLDGEN_WITH_TRUNK_PLACER_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/trunk_placer_type");
+  public static final ResourceKey WORLDGEN_WITH_ROOT_PLACER_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/root_placer_type");
+  public static final ResourceKey WORLDGEN_WITH_TREE_DECORATOR_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/tree_decorator_type");
+  public static final ResourceKey WORLDGEN_WITH_FEATURE_SIZE_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/feature_size_type");
+  public static final ResourceKey WORLDGEN_WITH_BIOME_SOURCE =
+    ResourceKey.fromString("minecraft:worldgen/biome_source");
+  public static final ResourceKey WORLDGEN_WITH_CHUNK_GENERATOR =
+    ResourceKey.fromString("minecraft:worldgen/chunk_generator");
+  public static final ResourceKey WORLDGEN_WITH_MATERIAL_CONDITION =
+    ResourceKey.fromString("minecraft:worldgen/material_condition");
+  public static final ResourceKey WORLDGEN_WITH_MATERIAL_RULE =
+    ResourceKey.fromString("minecraft:worldgen/material_rule");
+  public static final ResourceKey WORLDGEN_WITH_DENSITY_FUNCTION_TYPE =
+    ResourceKey.fromString("minecraft:worldgen/density_function_type");
   public static final ResourceKey BLOCK_TYPE = ResourceKey.fromString("minecraft:block_type");
-  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PROCESSOR = ResourceKey.fromString("minecraft:worldgen/structure_processor");
-  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_POOL_ELEMENT = ResourceKey.fromString("minecraft:worldgen/structure_pool_element");
-  public static final ResourceKey WORLDGEN_WITH_POOL_ALIAS_BINDING = ResourceKey.fromString("minecraft:worldgen/pool_alias_binding");
+  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_PROCESSOR =
+    ResourceKey.fromString("minecraft:worldgen/structure_processor");
+  public static final ResourceKey WORLDGEN_WITH_STRUCTURE_POOL_ELEMENT =
+    ResourceKey.fromString("minecraft:worldgen/structure_pool_element");
+  public static final ResourceKey WORLDGEN_WITH_POOL_ALIAS_BINDING =
+    ResourceKey.fromString("minecraft:worldgen/pool_alias_binding");
   public static final ResourceKey CAT_VARIANT = ResourceKey.fromString("minecraft:cat_variant");
   public static final ResourceKey FROG_VARIANT = ResourceKey.fromString("minecraft:frog_variant");
   public static final ResourceKey BANNER_PATTERN = ResourceKey.fromString("minecraft:banner_pattern");

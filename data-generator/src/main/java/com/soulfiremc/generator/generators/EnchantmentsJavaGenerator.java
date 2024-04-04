@@ -33,19 +33,19 @@ public class EnchantmentsJavaGenerator implements IDataGenerator {
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/EnchantmentType.java");
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        String.join(
-            "\n  ",
-            BuiltInRegistries.ENCHANTMENT.stream()
-                .map(
-                    s -> {
-                      var key = Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(s));
-                      return "public static final EnchantmentType "
-                          + key.getPath().toUpperCase(Locale.ROOT)
-                          + " = register(\""
-                          + key
-                          + "\");";
-                    })
-                .toArray(String[]::new)));
+      GeneratorConstants.VALUES_REPLACE,
+      String.join(
+        "\n  ",
+        BuiltInRegistries.ENCHANTMENT.stream()
+          .map(
+            s -> {
+              var key = Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(s));
+              return "public static final EnchantmentType "
+                + key.getPath().toUpperCase(Locale.ROOT)
+                + " = register(\""
+                + key
+                + "\");";
+            })
+          .toArray(String[]::new)));
   }
 }

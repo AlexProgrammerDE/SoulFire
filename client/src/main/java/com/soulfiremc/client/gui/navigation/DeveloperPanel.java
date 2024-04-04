@@ -30,9 +30,9 @@ public class DeveloperPanel extends NavigationItem {
     setLayout(new GridBagLayout());
 
     GeneratedPanel.addComponents(
-        this,
-        cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID),
-        guiManager.clientSettingsManager());
+      this,
+      cardsContainer.getByNamespace(BuiltinSettingsConstants.DEV_SETTINGS_ID),
+      guiManager.clientSettingsManager());
   }
 
   @Override

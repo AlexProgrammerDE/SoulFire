@@ -44,8 +44,9 @@ import org.jetbrains.annotations.NotNull;
 // The main difference is that it uses native equals and hashcode methods
 // It also does not support null keys, if you provide one, the map will behave unexpectedly
 public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2ObjectMap<K, V>
-    implements Serializable, Cloneable, Hash {
-  @Serial private static final long serialVersionUID = 0L;
+  implements Serializable, Cloneable, Hash {
+  @Serial
+  private static final long serialVersionUID = 0L;
   private static final boolean ASSERTS = false;
   protected final transient int minN;
   protected final float loadFactor;
@@ -108,10 +109,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   private void tryCapacity(final long capacity) {
     final var needed =
-        (int)
-            Math.min(
-                1 << 30,
-                Math.max(2, HashCommon.nextPowerOfTwo((long) Math.ceil(capacity / loadFactor))));
+      (int)
+        Math.min(
+          1 << 30,
+          Math.max(2, HashCommon.nextPowerOfTwo((long) Math.ceil(capacity / loadFactor))));
     if (needed > elements) {
       rehash(needed);
     }
@@ -134,7 +135,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       ensureCapacity(m.size()); // The resulting map will be sized for m.size() elements
     } else {
       tryCapacity(
-          size() + m.size()); // The resulting map will be tentatively sized for size() + m.size()
+        size() + m.size()); // The resulting map will be tentatively sized for size() + m.size()
     }
     // elements
     super.putAll(m);
@@ -283,7 +284,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   @Override
   public V computeIfAbsent(
-      final K key, final Object2ObjectFunction<? super K, ? extends V> mappingFunction) {
+    final K key, final Object2ObjectFunction<? super K, ? extends V> mappingFunction) {
     java.util.Objects.requireNonNull(mappingFunction);
     final var pos = find(key);
     if (pos >= 0) {
@@ -299,8 +300,8 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   @Override
   public V computeIfPresent(
-      final K k,
-      final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    final K k,
+    final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     java.util.Objects.requireNonNull(remappingFunction);
     final var pos = find(k);
     if (pos < 0) {
@@ -319,8 +320,8 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   @Override
   public V compute(
-      final K k,
-      final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    final K k,
+    final java.util.function.BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     java.util.Objects.requireNonNull(remappingFunction);
     final var pos = find(k);
     final var newValue = remappingFunction.apply((k), pos >= 0 ? (value[pos]) : null);
@@ -339,9 +340,9 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
   @Override
   public V merge(
-      final K k,
-      final V v,
-      final java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    final K k,
+    final V v,
+    final java.util.function.BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
     throw new UnsupportedOperationException();
   }
 
@@ -500,7 +501,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       }
       var e = (Map.Entry<K, V>) o;
       return (equalsVec((key[index]), ((e.getKey()))))
-          && java.util.Objects.equals(value[index], (e.getValue()));
+        && java.util.Objects.equals(value[index], (e.getValue()));
     }
 
     @Override
@@ -633,7 +634,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   }
 
   private final class EntryIterator extends MapIterator<Consumer<? super Entry<K, V>>>
-      implements ObjectIterator<Entry<K, V>> {
+    implements ObjectIterator<Entry<K, V>> {
     private MapEntry entry;
 
     @Override
@@ -655,7 +656,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   }
 
   private final class FastEntryIterator extends MapIterator<Consumer<? super Entry<K, V>>>
-      implements ObjectIterator<Entry<K, V>> {
+    implements ObjectIterator<Entry<K, V>> {
     private final MapEntry entry = new MapEntry();
 
     @Override
@@ -767,10 +768,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   }
 
   private final class EntrySpliterator
-      extends MapSpliterator<Consumer<? super Entry<K, V>>, EntrySpliterator>
-      implements ObjectSpliterator<Entry<K, V>> {
+    extends MapSpliterator<Consumer<? super Entry<K, V>>, EntrySpliterator>
+    implements ObjectSpliterator<Entry<K, V>> {
     private static final int POST_SPLIT_CHARACTERISTICS =
-        ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS & ~java.util.Spliterator.SIZED;
+      ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS & ~java.util.Spliterator.SIZED;
 
     EntrySpliterator() {}
 
@@ -781,8 +782,8 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     @Override
     public int characteristics() {
       return hasSplit
-          ? POST_SPLIT_CHARACTERISTICS
-          : ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS;
+        ? POST_SPLIT_CHARACTERISTICS
+        : ObjectSpliterators.SET_SPLITERATOR_CHARACTERISTICS;
     }
 
     @Override
@@ -797,7 +798,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   }
 
   private final class MapEntrySet extends AbstractObjectSet<Entry<K, V>>
-      implements FastEntrySet<K, V> {
+    implements FastEntrySet<K, V> {
     @Override
     public @NotNull ObjectIterator<Entry<K, V>> iterator() {
       return new EntryIterator();

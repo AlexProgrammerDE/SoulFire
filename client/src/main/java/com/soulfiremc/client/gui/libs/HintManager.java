@@ -82,7 +82,7 @@ public class HintManager {
   }
 
   public record Hint(
-      String message, Component owner, int position, String prefsKey, Hint nextHint) {}
+    String message, Component owner, int position, String prefsKey, Hint nextHint) {}
 
   // ---- class HintPanel ----------------------------------------------------
 
@@ -128,17 +128,17 @@ public class HintManager {
 
     private void updateBalloonBorder() {
       var direction =
-          switch (hint.position) {
-            case SwingConstants.LEFT -> SwingConstants.RIGHT;
-            case SwingConstants.TOP -> SwingConstants.BOTTOM;
-            case SwingConstants.RIGHT -> SwingConstants.LEFT;
-            case SwingConstants.BOTTOM -> SwingConstants.TOP;
-            default -> throw new IllegalArgumentException();
-          };
+        switch (hint.position) {
+          case SwingConstants.LEFT -> SwingConstants.RIGHT;
+          case SwingConstants.TOP -> SwingConstants.BOTTOM;
+          case SwingConstants.RIGHT -> SwingConstants.LEFT;
+          case SwingConstants.BOTTOM -> SwingConstants.TOP;
+          default -> throw new IllegalArgumentException();
+        };
 
       setBorder(
-          new BalloonBorder(
-              direction, FlatUIUtils.getUIColor("PopupMenu.borderColor", Color.gray)));
+        new BalloonBorder(
+          direction, FlatUIUtils.getUIColor("PopupMenu.borderColor", Color.gray)));
     }
 
     void showHint() {
@@ -153,20 +153,20 @@ public class HintManager {
 
       // create a popup panel that has a drop shadow
       popup =
-          new JPanel(new BorderLayout()) {
-            @Override
-            public void updateUI() {
-              super.updateUI();
+        new JPanel(new BorderLayout()) {
+          @Override
+          public void updateUI() {
+            super.updateUI();
 
-              // use invokeLater because at this time the UI delegates
-              // of child components are not yet updated
-              EventQueue.invokeLater(
-                  () -> {
-                    validate();
-                    setSize(getPreferredSize());
-                  });
-            }
-          };
+            // use invokeLater because at this time the UI delegates
+            // of child components are not yet updated
+            EventQueue.invokeLater(
+              () -> {
+                validate();
+                setSize(getPreferredSize());
+              });
+          }
+        };
       popup.setOpaque(false);
       popup.add(this);
 
@@ -222,12 +222,12 @@ public class HintManager {
 
       // ======== this ========
       setLayout(
-          new MigLayout(
-              "insets dialog,hidemode 3",
-              // columns
-              "[::200,fill]",
-              // rows
-              "[]para[]"));
+        new MigLayout(
+          "insets dialog,hidemode 3",
+          // columns
+          "[::200,fill]",
+          // rows
+          "[]para[]"));
 
       // ---- hintLabel ----
       hintLabel.setText("hint");
@@ -273,12 +273,12 @@ public class HintManager {
       }
 
       shadowBorder =
-          UIManager.getLookAndFeel() instanceof FlatLaf
-              ? new FlatDropShadowBorder(
-                  UIManager.getColor("Popup.dropShadowColor"),
-                  new Insets(SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2),
-                  FlatUIUtils.getUIFloat("Popup.dropShadowOpacity", 0.5f))
-              : null;
+        UIManager.getLookAndFeel() instanceof FlatLaf
+          ? new FlatDropShadowBorder(
+          UIManager.getColor("Popup.dropShadowColor"),
+          new Insets(SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2, SHADOW_SIZE2),
+          FlatUIUtils.getUIFloat("Popup.dropShadowOpacity", 0.5f))
+          : null;
     }
 
     @Override

@@ -30,8 +30,8 @@ public record OnlineJavaData(String authToken, long tokenExpireAt) implements Ac
 
   public MinecraftAccountProto.OnlineJavaData toProto() {
     return MinecraftAccountProto.OnlineJavaData.newBuilder()
-        .setAuthToken(authToken)
-        .setTokenExpireAt(tokenExpireAt)
-        .build();
+      .setAuthToken(authToken)
+      .setTokenExpireAt(tokenExpireAt)
+      .build();
   }
 }

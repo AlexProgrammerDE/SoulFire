@@ -38,9 +38,12 @@ import lombok.extern.slf4j.Slf4j;
 public final class UpMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetFeetBlock;
-  @Getter private MovementMiningCost[] blockBreakCosts;
-  @Getter private boolean[] unsafeToBreak;
-  @Getter private boolean[] noNeedToBreak;
+  @Getter
+  private MovementMiningCost[] blockBreakCosts;
+  @Getter
+  private boolean[] unsafeToBreak;
+  @Getter
+  private boolean[] noNeedToBreak;
 
   public UpMovement() {
     this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
@@ -74,16 +77,16 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
     results[requiredFreeBlocks.indexOf(aboveHead)] =
-        new BlockSafetyData[] {
-          new BlockSafetyData(
-              aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
-          new BlockSafetyData(
-              oppositeDirection.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-              leftDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-              rightDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS)
-        };
+      new BlockSafetyData[] {
+        new BlockSafetyData(
+          aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
+        new BlockSafetyData(
+          oppositeDirection.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          leftDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          rightDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS)
+      };
 
     return results;
   }
@@ -117,13 +120,13 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(
-        new JumpAndPlaceBelowAction(
-            previousEntityState.blockPosition(),
-            new BotActionManager.BlockPlaceData(
-                previousEntityState.blockPosition().sub(0, 1, 0), Direction.UP)));
+      new JumpAndPlaceBelowAction(
+        previousEntityState.blockPosition(),
+        new BotActionManager.BlockPlaceData(
+          previousEntityState.blockPosition().sub(0, 1, 0), Direction.UP)));
 
     return new GraphInstructions(
-        new BotEntityState(absoluteTargetFeetBlock, levelState, inventory), cost, actions);
+      new BotEntityState(absoluteTargetFeetBlock, levelState, inventory), cost, actions);
   }
 
   @Override
@@ -142,7 +145,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       var c = (UpMovement) super.clone();
 
       c.blockBreakCosts =
-          this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
+        this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
       c.unsafeToBreak = this.unsafeToBreak == null ? null : new boolean[this.unsafeToBreak.length];
       c.noNeedToBreak = this.noNeedToBreak == null ? null : new boolean[this.noNeedToBreak.length];
 

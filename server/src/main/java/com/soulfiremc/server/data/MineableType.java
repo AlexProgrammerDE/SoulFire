@@ -29,10 +29,10 @@ public enum MineableType {
   AXE(ItemTags.AXES, BlockTags.MINEABLE_WITH_AXE),
   HOE(ItemTags.HOES, BlockTags.MINEABLE_WITH_HOE);
 
-  private final ResourceKey itemTagKey;
-  @Getter private final ResourceKey blockTagKey;
-
   public static MineableType[] VALUES = values();
+  private final ResourceKey itemTagKey;
+  @Getter
+  private final ResourceKey blockTagKey;
 
   public static Optional<MineableType> getFromTool(TagsState tagsState, ItemType itemType) {
     for (var mineableType : VALUES) {

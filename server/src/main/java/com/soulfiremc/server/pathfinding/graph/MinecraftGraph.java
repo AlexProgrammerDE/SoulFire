@@ -50,8 +50,8 @@ import net.kyori.adventure.util.TriState;
 @Slf4j
 public record MinecraftGraph(TagsState tagsState) {
   private static final Object2ObjectFunction<
-          ? super SFVec3i, ? extends ObjectList<BlockSubscription>>
-      CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
+    ? super SFVec3i, ? extends ObjectList<BlockSubscription>>
+    CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final BlockSubscription[][] SUBSCRIPTION_VALUES;
@@ -66,23 +66,23 @@ public record MinecraftGraph(TagsState tagsState) {
         if (diagonal) {
           for (var side : MovementSide.VALUES) {
             actions.add(
-                registerMovement(
-                    blockSubscribers,
-                    new SimpleMovement(direction, side, modifier),
-                    actions.size()));
+              registerMovement(
+                blockSubscribers,
+                new SimpleMovement(direction, side, modifier),
+                actions.size()));
           }
         } else {
           actions.add(
-              registerMovement(
-                  blockSubscribers, new SimpleMovement(direction, null, modifier), actions.size()));
+            registerMovement(
+              blockSubscribers, new SimpleMovement(direction, null, modifier), actions.size()));
         }
       }
     }
 
     for (var direction : ParkourDirection.VALUES) {
       actions.add(
-          registerParkourMovement(
-              blockSubscribers, new ParkourMovement(direction), actions.size()));
+        registerParkourMovement(
+          blockSubscribers, new ParkourMovement(direction), actions.size()));
     }
 
     actions.add(registerDownMovement(blockSubscribers, new DownMovement(), actions.size()));
@@ -94,9 +94,9 @@ public record MinecraftGraph(TagsState tagsState) {
     SUBSCRIPTION_VALUES = new BlockSubscription[blockSubscribers.size()][];
 
     var entrySetDescending =
-        blockSubscribers.object2ObjectEntrySet().stream()
-            .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
-            .toList();
+      blockSubscribers.object2ObjectEntrySet().stream()
+        .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+        .toList();
     for (var i = 0; i < entrySetDescending.size(); i++) {
       var entry = entrySetDescending.get(i);
       SUBSCRIPTION_KEYS[i] = entry.getKey();
@@ -105,16 +105,16 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private static SimpleMovement registerMovement(
-      Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-      SimpleMovement movement,
-      int movementIndex) {
+    Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    SimpleMovement movement,
+    int movementIndex) {
     {
       var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
       }
     }
 
@@ -129,13 +129,13 @@ public record MinecraftGraph(TagsState tagsState) {
         for (var block : savedBlock) {
           movement.subscribe();
           blockSubscribers
-              .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-              .add(
-                  new BlockSubscription(
-                      movementIndex,
-                      SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
-                      i,
-                      block.type()));
+            .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+            .add(
+              new BlockSubscription(
+                movementIndex,
+                SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+                i,
+                block.type()));
         }
       }
     }
@@ -143,18 +143,18 @@ public record MinecraftGraph(TagsState tagsState) {
     {
       movement.subscribe();
       blockSubscribers
-          .computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
+        .computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
+        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
     }
 
     {
       for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
-            .add(
-                new BlockSubscription(
-                    movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+          .computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
+          .add(
+            new BlockSubscription(
+              movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
       }
     }
 
@@ -162,10 +162,10 @@ public record MinecraftGraph(TagsState tagsState) {
       for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
-            .add(
-                new BlockSubscription(
-                    movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
+          .computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
+          .add(
+            new BlockSubscription(
+              movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
       }
     }
 
@@ -173,54 +173,54 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private static ParkourMovement registerParkourMovement(
-      Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-      ParkourMovement movement,
-      int movementIndex) {
+    Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    ParkourMovement movement,
+    int movementIndex) {
     {
       var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
       }
     }
 
     {
       movement.subscribe();
       blockSubscribers
-          .computeIfAbsent(movement.requiredUnsafeBlock(), CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+        .computeIfAbsent(movement.requiredUnsafeBlock(), CREATE_MISSING_FUNCTION)
+        .add(new BlockSubscription(movementIndex, SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
     }
 
     {
       movement.subscribe();
       blockSubscribers
-          .computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
+        .computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
+        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
     }
 
     return movement;
   }
 
   private static DownMovement registerDownMovement(
-      Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-      DownMovement movement,
-      int movementIndex) {
+    Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    DownMovement movement,
+    int movementIndex) {
     {
       for (var safetyBlock : movement.listSafetyCheckBlocks()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
-            .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
+          .computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
       }
     }
 
     {
       movement.subscribe();
       blockSubscribers
-          .computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
+        .computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
+        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
     }
 
     {
@@ -234,13 +234,13 @@ public record MinecraftGraph(TagsState tagsState) {
         for (var block : savedBlock) {
           movement.subscribe();
           blockSubscribers
-              .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-              .add(
-                  new BlockSubscription(
-                      movementIndex,
-                      SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
-                      i,
-                      block.type()));
+            .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+            .add(
+              new BlockSubscription(
+                movementIndex,
+                SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+                i,
+                block.type()));
         }
       }
     }
@@ -249,16 +249,16 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private static UpMovement registerUpMovement(
-      Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-      UpMovement movement,
-      int movementIndex) {
+    Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
+    UpMovement movement,
+    int movementIndex) {
     {
       var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-            .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-            .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
       }
     }
 
@@ -273,13 +273,13 @@ public record MinecraftGraph(TagsState tagsState) {
         for (var block : savedBlock) {
           movement.subscribe();
           blockSubscribers
-              .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-              .add(
-                  new BlockSubscription(
-                      movementIndex,
-                      SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
-                      i,
-                      block.type()));
+            .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
+            .add(
+              new BlockSubscription(
+                movementIndex,
+                SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+                i,
+                block.type()));
         }
       }
     }
@@ -289,11 +289,11 @@ public record MinecraftGraph(TagsState tagsState) {
 
   private static TriState isBlockFree(BlockState blockState) {
     return TriState.byBoolean(
-        blockState.blockShapeGroup().hasNoCollisions() && !blockState.blockType().fluidSource());
+      blockState.blockShapeGroup().hasNoCollisions() && !blockState.blockType().fluidSource());
   }
 
   public void insertActions(
-      BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> alreadySeen) {
+    BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> alreadySeen) {
     log.debug("Inserting actions for node: {}", node.blockPosition());
     calculateActions(node, generateTemplateActions(node), callback, alreadySeen);
   }
@@ -308,17 +308,17 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private void calculateActions(
-      BotEntityState node,
-      GraphAction[] actions,
-      Consumer<GraphInstructions> callback,
-      Predicate<SFVec3i> alreadySeen) {
+    BotEntityState node,
+    GraphAction[] actions,
+    Consumer<GraphInstructions> callback,
+    Predicate<SFVec3i> alreadySeen) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
       processSubscription(node, actions, callback, i);
     }
   }
 
   private void processSubscription(
-      BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+    BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
     var key = SUBSCRIPTION_KEYS[i];
     var value = SUBSCRIPTION_VALUES[i];
 
@@ -344,7 +344,7 @@ public record MinecraftGraph(TagsState tagsState) {
       }
 
       switch (processSubscriptionAction(
-          key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
+        key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
         case CONTINUE -> {
           if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
             continue;
@@ -358,35 +358,31 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private SubscriptionSingleResult processSubscriptionAction(
-      SFVec3i key,
-      BlockSubscription subscriber,
-      GraphAction action,
-      ObjectReference<TriState> isFreeReference,
-      BlockState blockState,
-      SFVec3i absolutePositionBlock,
-      BotEntityState node) {
+    SFVec3i key,
+    BlockSubscription subscriber,
+    GraphAction action,
+    ObjectReference<TriState> isFreeReference,
+    BlockState blockState,
+    SFVec3i absolutePositionBlock,
+    BotEntityState node) {
     return switch (action) {
-      case SimpleMovement simpleMovement ->
-          processMovementSubscription(
-              subscriber, isFreeReference, blockState, absolutePositionBlock, node, simpleMovement);
-      case ParkourMovement ignored ->
-          processParkourSubscription(subscriber, isFreeReference, blockState);
-      case DownMovement downMovement ->
-          processDownSubscription(
-              key, subscriber, blockState, absolutePositionBlock, node, downMovement);
-      case UpMovement upMovement ->
-          processUpSubscription(
-              subscriber, isFreeReference, blockState, absolutePositionBlock, node, upMovement);
+      case SimpleMovement simpleMovement -> processMovementSubscription(
+        subscriber, isFreeReference, blockState, absolutePositionBlock, node, simpleMovement);
+      case ParkourMovement ignored -> processParkourSubscription(subscriber, isFreeReference, blockState);
+      case DownMovement downMovement -> processDownSubscription(
+        key, subscriber, blockState, absolutePositionBlock, node, downMovement);
+      case UpMovement upMovement -> processUpSubscription(
+        subscriber, isFreeReference, blockState, absolutePositionBlock, node, upMovement);
     };
   }
 
   private SubscriptionSingleResult processMovementSubscription(
-      BlockSubscription subscriber,
-      ObjectReference<TriState> isFreeReference,
-      BlockState blockState,
-      SFVec3i absolutePositionBlock,
-      BotEntityState node,
-      SimpleMovement simpleMovement) {
+    BlockSubscription subscriber,
+    ObjectReference<TriState> isFreeReference,
+    BlockState blockState,
+    SFVec3i absolutePositionBlock,
+    BotEntityState node,
+    SimpleMovement simpleMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (isFreeReference.value == TriState.NOT_SET) {
@@ -404,12 +400,12 @@ public record MinecraftGraph(TagsState tagsState) {
 
         // Search for a way to break this block
         if (!simpleMovement.allowBlockActions()
-            // Narrow this down to blocks that can be broken
-            || !BlockTypeHelper.isDiggable(blockState.blockType())
-            // Check if we previously found out this block is unsafe to break
-            || simpleMovement.unsafeToBreak()[subscriber.blockArrayIndex]
-            // Narrows the list down to a reasonable size
-            || !BlockItems.hasItemType(blockState.blockType())) {
+          // Narrow this down to blocks that can be broken
+          || !BlockTypeHelper.isDiggable(blockState.blockType())
+          // Check if we previously found out this block is unsafe to break
+          || simpleMovement.unsafeToBreak()[subscriber.blockArrayIndex]
+          // Narrows the list down to a reasonable size
+          || !BlockItems.hasItemType(blockState.blockType())) {
           // No way to break this block
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
@@ -417,10 +413,10 @@ public record MinecraftGraph(TagsState tagsState) {
         var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         simpleMovement.blockBreakCosts()[subscriber.blockArrayIndex] =
-            new MovementMiningCost(
-                absolutePositionBlock,
-                cacheableMiningCost.miningCost(),
-                cacheableMiningCost.willDrop());
+          new MovementMiningCost(
+            absolutePositionBlock,
+            cacheableMiningCost.miningCost(),
+            cacheableMiningCost.willDrop());
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -435,11 +431,10 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         var unsafe =
-            switch (subscriber.safetyType) {
-              case FALLING_AND_FLUIDS ->
-                  blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-              case FLUIDS -> blockState.blockType().fluidSource();
-            };
+          switch (subscriber.safetyType) {
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidSource();
+          };
 
         if (!unsafe) {
           // All good, we can continue
@@ -467,8 +462,8 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         if (!simpleMovement.allowBlockActions()
-            || node.inventory().hasNoBlocks()
-            || !blockState.blockType().replaceable()) {
+          || node.inventory().hasNoBlocks()
+          || !blockState.blockType().replaceable()) {
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
 
@@ -489,8 +484,8 @@ public record MinecraftGraph(TagsState tagsState) {
 
         // Fixup the position to be the block we are placing against instead of relative
         simpleMovement.blockPlaceData(
-            new BotActionManager.BlockPlaceData(
-                absolutePositionBlock, subscriber.blockToPlaceAgainst.blockFace()));
+          new BotActionManager.BlockPlaceData(
+            absolutePositionBlock, subscriber.blockToPlaceAgainst.blockFace()));
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
@@ -513,9 +508,9 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private SubscriptionSingleResult processParkourSubscription(
-      BlockSubscription subscriber,
-      ObjectReference<TriState> isFreeReference,
-      BlockState blockState) {
+    BlockSubscription subscriber,
+    ObjectReference<TriState> isFreeReference,
+    BlockState blockState) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (isFreeReference.value == TriState.NOT_SET) {
@@ -552,17 +547,17 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private SubscriptionSingleResult processDownSubscription(
-      SFVec3i key,
-      BlockSubscription subscriber,
-      BlockState blockState,
-      SFVec3i absolutePositionBlock,
-      BotEntityState node,
-      DownMovement downMovement) {
+    SFVec3i key,
+    BlockSubscription subscriber,
+    BlockState blockState,
+    SFVec3i absolutePositionBlock,
+    BotEntityState node,
+    DownMovement downMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (!BlockTypeHelper.isDiggable(blockState.blockType())
-            // Narrows the list down to a reasonable size
-            || !BlockItems.hasItemType(blockState.blockType())) {
+          // Narrows the list down to a reasonable size
+          || !BlockItems.hasItemType(blockState.blockType())) {
           // No way to break this block
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
@@ -570,10 +565,10 @@ public record MinecraftGraph(TagsState tagsState) {
         var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         downMovement.blockBreakCosts(
-            new MovementMiningCost(
-                absolutePositionBlock,
-                cacheableMiningCost.miningCost(),
-                cacheableMiningCost.willDrop()));
+          new MovementMiningCost(
+            absolutePositionBlock,
+            cacheableMiningCost.miningCost(),
+            cacheableMiningCost.willDrop()));
         yield SubscriptionSingleResult.CONTINUE;
       }
       case DOWN_SAFETY_CHECK -> {
@@ -593,11 +588,10 @@ public record MinecraftGraph(TagsState tagsState) {
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
         var unsafe =
-            switch (subscriber.safetyType) {
-              case FALLING_AND_FLUIDS ->
-                  blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-              case FLUIDS -> blockState.blockType().fluidSource();
-            };
+          switch (subscriber.safetyType) {
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidSource();
+          };
 
         if (unsafe) {
           // We know already WE MUST dig the block below for this action
@@ -613,12 +607,12 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private SubscriptionSingleResult processUpSubscription(
-      BlockSubscription subscriber,
-      ObjectReference<TriState> isFreeReference,
-      BlockState blockState,
-      SFVec3i absolutePositionBlock,
-      BotEntityState node,
-      UpMovement upMovement) {
+    BlockSubscription subscriber,
+    ObjectReference<TriState> isFreeReference,
+    BlockState blockState,
+    SFVec3i absolutePositionBlock,
+    BotEntityState node,
+    UpMovement upMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (isFreeReference.value == TriState.NOT_SET) {
@@ -633,8 +627,8 @@ public record MinecraftGraph(TagsState tagsState) {
 
         // Search for a way to break this block
         if (!BlockTypeHelper.isDiggable(blockState.blockType())
-            || upMovement.unsafeToBreak()[subscriber.blockArrayIndex]
-            || !BlockItems.hasItemType(blockState.blockType())) {
+          || upMovement.unsafeToBreak()[subscriber.blockArrayIndex]
+          || !BlockItems.hasItemType(blockState.blockType())) {
           // No way to break this block
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
@@ -642,10 +636,10 @@ public record MinecraftGraph(TagsState tagsState) {
         var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         upMovement.blockBreakCosts()[subscriber.blockArrayIndex] =
-            new MovementMiningCost(
-                absolutePositionBlock,
-                cacheableMiningCost.miningCost(),
-                cacheableMiningCost.willDrop());
+          new MovementMiningCost(
+            absolutePositionBlock,
+            cacheableMiningCost.miningCost(),
+            cacheableMiningCost.willDrop());
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -660,11 +654,10 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         var unsafe =
-            switch (subscriber.safetyType) {
-              case FALLING_AND_FLUIDS ->
-                  blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-              case FLUIDS -> blockState.blockType().fluidSource();
-            };
+          switch (subscriber.safetyType) {
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidSource();
+          };
 
         if (!unsafe) {
           // All good, we can continue
@@ -705,11 +698,11 @@ public record MinecraftGraph(TagsState tagsState) {
   }
 
   private record BlockSubscription(
-      int actionIndex,
-      SubscriptionType type,
-      int blockArrayIndex,
-      BotActionManager.BlockPlaceData blockToPlaceAgainst,
-      BlockSafetyData.BlockSafetyType safetyType) {
+    int actionIndex,
+    SubscriptionType type,
+    int blockArrayIndex,
+    BotActionManager.BlockPlaceData blockToPlaceAgainst,
+    BlockSafetyData.BlockSafetyType safetyType) {
     BlockSubscription(int movementIndex, SubscriptionType type) {
       this(movementIndex, type, -1, null, null);
     }
@@ -719,17 +712,17 @@ public record MinecraftGraph(TagsState tagsState) {
     }
 
     BlockSubscription(
-        int movementIndex,
-        SubscriptionType type,
-        BotActionManager.BlockPlaceData blockToPlaceAgainst) {
+      int movementIndex,
+      SubscriptionType type,
+      BotActionManager.BlockPlaceData blockToPlaceAgainst) {
       this(movementIndex, type, -1, blockToPlaceAgainst, null);
     }
 
     BlockSubscription(
-        int movementIndex,
-        SubscriptionType subscriptionType,
-        int i,
-        BlockSafetyData.BlockSafetyType type) {
+      int movementIndex,
+      SubscriptionType subscriptionType,
+      int i,
+      BlockSafetyData.BlockSafetyType type) {
       this(movementIndex, subscriptionType, i, null, type);
     }
   }

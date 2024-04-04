@@ -32,11 +32,11 @@ public class BlockTypeHelper {
 
   public static boolean isHurtOnTouchSide(BlockType type) {
     return type == BlockType.CACTUS
-        || type == BlockType.SWEET_BERRY_BUSH
-        || type == BlockType.WITHER_ROSE
-        || type == BlockType.FIRE
-        || type == BlockType.SOUL_FIRE
-        || type == BlockType.LAVA;
+      || type == BlockType.SWEET_BERRY_BUSH
+      || type == BlockType.WITHER_ROSE
+      || type == BlockType.FIRE
+      || type == BlockType.SOUL_FIRE
+      || type == BlockType.LAVA;
   }
 
   public static boolean isHurtWhenStoodOn(BlockType type) {

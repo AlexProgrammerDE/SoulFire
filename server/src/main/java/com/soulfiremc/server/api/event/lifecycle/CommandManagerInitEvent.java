@@ -27,4 +27,4 @@ import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
  * @param commandManager The command manager.
  */
 public record CommandManagerInitEvent(ServerCommandManager commandManager)
-    implements SoulFireGlobalEvent {}
+  implements SoulFireGlobalEvent {}

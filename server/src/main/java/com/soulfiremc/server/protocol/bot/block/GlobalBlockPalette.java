@@ -40,8 +40,10 @@ public class GlobalBlockPalette {
     INSTANCE = new GlobalBlockPalette(stateMap);
   }
 
-  @Getter private final int maxStates;
-  @Getter private final int blockBitsPerEntry;
+  @Getter
+  private final int maxStates;
+  @Getter
+  private final int blockBitsPerEntry;
   private final BlockState[] stateIdToBlockState;
 
   public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {

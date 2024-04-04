@@ -86,11 +86,12 @@ import org.cloudburstmc.math.vector.Vector3d;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager {
-  @Getter private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
+  private static final Path HISTORY_FILE = SFPathConstants.DATA_FOLDER.resolve(".command_history");
+  @Getter
+  private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
   private final List<Map.Entry<Instant, String>> commandHistory =
-      Collections.synchronizedList(new ArrayList<>());
-  private static final Path HISTORY_FILE = SFPathConstants.DATA_FOLDER.resolve(".command_history");
+    Collections.synchronizedList(new ArrayList<>());
 
   private static String getCurrentUsername() {
     var currentUser = ServerRPCConstants.USER_CONTEXT_KEY.get();
@@ -108,586 +109,586 @@ public class ServerCommandManager implements PlatformCommandManager {
 
     // Help
     dispatcher.register(
-        literal("help")
-            .executes(
-                help(
-                    "Prints a list of all available commands",
-                    c -> {
-                      c.getSource().sendInfo("Available commands:");
-                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
-                        c.getSource().sendInfo("{} -> {}", command.command(), command.help());
-                      }
+      literal("help")
+        .executes(
+          help(
+            "Prints a list of all available commands",
+            c -> {
+              c.getSource().sendInfo("Available commands:");
+              for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
+                c.getSource().sendInfo("{} -> {}", command.command(), command.help());
+              }
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
     dispatcher.register(
-        literal("help-markdown")
-            .executes(
-                privateCommand(
-                    c -> {
-                      for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
-                        c.getSource()
-                            .sendInfo(
-                                String.format("| `%s` | %s |", command.command(), command.help()));
-                      }
+      literal("help-markdown")
+        .executes(
+          privateCommand(
+            c -> {
+              for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
+                c.getSource()
+                  .sendInfo(
+                    String.format("| `%s` | %s |", command.command(), command.help()));
+              }
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
 
     // Administration
     dispatcher.register(
-        literal("generate-token")
-            .executes(
-                help(
-                    "Generate a JWT for other clients to connect to the server",
-                    c -> {
-                      c.getSource()
-                          .sendInfo(
-                              "JWT (This gives full SF access, make sure you only give this to trusted users): {}",
-                              soulFireServer.generateRemoteUserJWT());
+      literal("generate-token")
+        .executes(
+          help(
+            "Generate a JWT for other clients to connect to the server",
+            c -> {
+              c.getSource()
+                .sendInfo(
+                  "JWT (This gives full SF access, make sure you only give this to trusted users): {}",
+                  soulFireServer.generateRemoteUserJWT());
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
     dispatcher.register(
-        literal("whoami")
-            .executes(
-                help(
-                    "See who you are",
-                    c -> {
-                      c.getSource().sendInfo("Username: {}", getCurrentUsername());
+      literal("whoami")
+        .executes(
+          help(
+            "See who you are",
+            c -> {
+              c.getSource().sendInfo("Username: {}", getCurrentUsername());
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
 
     // History commands
     dispatcher.register(
-        literal("reload-history")
-            .executes(
-                help(
-                    "Refreshes the loaded command history from the data file",
-                    c -> {
-                      loadCommandHistory();
+      literal("reload-history")
+        .executes(
+          help(
+            "Refreshes the loaded command history from the data file",
+            c -> {
+              loadCommandHistory();
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
     dispatcher.register(
-        literal("clear-history")
-            .executes(
-                help(
-                    "Wipes the command history data",
-                    c -> {
-                      clearCommandHistory();
+      literal("clear-history")
+        .executes(
+          help(
+            "Wipes the command history data",
+            c -> {
+              clearCommandHistory();
 
-                      return Command.SINGLE_SUCCESS;
-                    })));
+              return Command.SINGLE_SUCCESS;
+            })));
 
     // Pathfinding
     dispatcher.register(
-        literal("walk")
+      literal("walk")
+        .then(
+          literal("radius")
             .then(
-                literal("radius")
-                    .then(
-                        argument("radius", IntegerArgumentType.integer())
-                            .executes(
-                                help(
-                                    "Makes all connected bots walk to a random xz position within the radius",
-                                    c -> {
-                                      var radius = IntegerArgumentType.getInteger(c, "radius");
+              argument("radius", IntegerArgumentType.integer())
+                .executes(
+                  help(
+                    "Makes all connected bots walk to a random xz position within the radius",
+                    c -> {
+                      var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                                      return forEveryBot(
-                                          c,
-                                          bot -> {
-                                            var random = ThreadLocalRandom.current();
-                                            var pos = bot.sessionDataManager().clientEntity().pos();
-                                            var x =
-                                                random.nextInt(
-                                                    pos.getFloorX() - radius,
-                                                    pos.getFloorX() + radius);
-                                            var z =
-                                                random.nextInt(
-                                                    pos.getFloorZ() - radius,
-                                                    pos.getFloorZ() + radius);
+                      return forEveryBot(
+                        c,
+                        bot -> {
+                          var random = ThreadLocalRandom.current();
+                          var pos = bot.sessionDataManager().clientEntity().pos();
+                          var x =
+                            random.nextInt(
+                              pos.getFloorX() - radius,
+                              pos.getFloorX() + radius);
+                          var z =
+                            random.nextInt(
+                              pos.getFloorZ() - radius,
+                              pos.getFloorZ() + radius);
 
-                                            executePathfinding(bot, new XZGoal(x, z));
+                          executePathfinding(bot, new XZGoal(x, z));
 
-                                            return Command.SINGLE_SUCCESS;
-                                          });
-                                    }))))
-            .then(
-                argument("y", IntegerArgumentType.integer())
-                    .executes(
-                        help(
-                            "Makes all connected bots walk to the y coordinates",
-                            c -> {
-                              var y = IntegerArgumentType.getInteger(c, "y");
-                              return executePathfinding(c, new YGoal(y));
-                            })))
-            .then(
-                argument("x", IntegerArgumentType.integer())
-                    .then(
-                        argument("z", IntegerArgumentType.integer())
-                            .executes(
-                                help(
-                                    "Makes all connected bots walk to the xz coordinates",
-                                    c -> {
-                                      var x = IntegerArgumentType.getInteger(c, "x");
-                                      var z = IntegerArgumentType.getInteger(c, "z");
-
-                                      return executePathfinding(c, new XZGoal(x, z));
-                                    }))))
-            .then(
-                argument("x", IntegerArgumentType.integer())
-                    .then(
-                        argument("y", IntegerArgumentType.integer())
-                            .then(
-                                argument("z", IntegerArgumentType.integer())
-                                    .executes(
-                                        help(
-                                            "Makes all connected bots walk to the xyz coordinates",
-                                            c -> {
-                                              var x = IntegerArgumentType.getInteger(c, "x");
-                                              var y = IntegerArgumentType.getInteger(c, "y");
-                                              var z = IntegerArgumentType.getInteger(c, "z");
-
-                                              return executePathfinding(c, new PosGoal(x, y, z));
-                                            }))))));
-    dispatcher.register(
-        literal("stop-path")
+                          return Command.SINGLE_SUCCESS;
+                        });
+                    }))))
+        .then(
+          argument("y", IntegerArgumentType.integer())
             .executes(
-                help(
-                    "Makes all connected bots stop pathfinding",
-                    c ->
-                        forEveryBot(
-                            c,
-                            bot -> {
-                              EventUtil.runAndAssertChanged(
-                                  bot.eventBus(),
-                                  () ->
-                                      bot.eventBus()
-                                          .unregisterAll(
-                                              BotPreTickEvent.class,
-                                              (clazz, o) -> {
-                                                if (PathExecutor.class.isAssignableFrom(clazz)) {
-                                                  ((PathExecutor) o.orElseThrow()).cancel();
-                                                  return true;
-                                                }
+              help(
+                "Makes all connected bots walk to the y coordinates",
+                c -> {
+                  var y = IntegerArgumentType.getInteger(c, "y");
+                  return executePathfinding(c, new YGoal(y));
+                })))
+        .then(
+          argument("x", IntegerArgumentType.integer())
+            .then(
+              argument("z", IntegerArgumentType.integer())
+                .executes(
+                  help(
+                    "Makes all connected bots walk to the xz coordinates",
+                    c -> {
+                      var x = IntegerArgumentType.getInteger(c, "x");
+                      var z = IntegerArgumentType.getInteger(c, "z");
 
-                                                return false;
-                                              }));
+                      return executePathfinding(c, new XZGoal(x, z));
+                    }))))
+        .then(
+          argument("x", IntegerArgumentType.integer())
+            .then(
+              argument("y", IntegerArgumentType.integer())
+                .then(
+                  argument("z", IntegerArgumentType.integer())
+                    .executes(
+                      help(
+                        "Makes all connected bots walk to the xyz coordinates",
+                        c -> {
+                          var x = IntegerArgumentType.getInteger(c, "x");
+                          var y = IntegerArgumentType.getInteger(c, "y");
+                          var z = IntegerArgumentType.getInteger(c, "z");
 
-                              bot.sessionDataManager().controlState().resetAll();
+                          return executePathfinding(c, new PosGoal(x, y, z));
+                        }))))));
+    dispatcher.register(
+      literal("stop-path")
+        .executes(
+          help(
+            "Makes all connected bots stop pathfinding",
+            c ->
+              forEveryBot(
+                c,
+                bot -> {
+                  EventUtil.runAndAssertChanged(
+                    bot.eventBus(),
+                    () ->
+                      bot.eventBus()
+                        .unregisterAll(
+                          BotPreTickEvent.class,
+                          (clazz, o) -> {
+                            if (PathExecutor.class.isAssignableFrom(clazz)) {
+                              ((PathExecutor) o.orElseThrow()).cancel();
+                              return true;
+                            }
 
-                              c.getSource()
-                                  .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
-                              return Command.SINGLE_SUCCESS;
-                            }))));
+                            return false;
+                          }));
+
+                  bot.sessionDataManager().controlState().resetAll();
+
+                  c.getSource()
+                    .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
+                  return Command.SINGLE_SUCCESS;
+                }))));
 
     // Movement controls
     dispatcher.register(
-        literal("lookat")
+      literal("lookat")
+        .then(
+          argument("x", DoubleArgumentType.doubleArg())
             .then(
-                argument("x", DoubleArgumentType.doubleArg())
-                    .then(
-                        argument("y", DoubleArgumentType.doubleArg())
-                            .then(
-                                argument("z", DoubleArgumentType.doubleArg())
-                                    .executes(
-                                        help(
-                                            "Makes all connected bots look at the block at the xyz coordinates",
-                                            c -> {
-                                              var x = DoubleArgumentType.getDouble(c, "x");
-                                              var y = DoubleArgumentType.getDouble(c, "y");
-                                              var z = DoubleArgumentType.getDouble(c, "z");
-
-                                              return forEveryBot(
-                                                  c,
-                                                  bot -> {
-                                                    bot.sessionDataManager()
-                                                        .clientEntity()
-                                                        .lookAt(
-                                                            RotationOrigin.EYES,
-                                                            Vector3d.from(x, y, z));
-                                                    return Command.SINGLE_SUCCESS;
-                                                  });
-                                            }))))));
-    dispatcher.register(
-        literal("move")
-            .then(
-                literal("forward")
+              argument("y", DoubleArgumentType.doubleArg())
+                .then(
+                  argument("z", DoubleArgumentType.doubleArg())
                     .executes(
-                        help(
-                            "Toggle walking forward for all connected bots",
-                            c ->
-                                forEveryBot(
-                                    c,
-                                    bot -> {
-                                      var controlState = bot.sessionDataManager().controlState();
+                      help(
+                        "Makes all connected bots look at the block at the xyz coordinates",
+                        c -> {
+                          var x = DoubleArgumentType.getDouble(c, "x");
+                          var y = DoubleArgumentType.getDouble(c, "y");
+                          var z = DoubleArgumentType.getDouble(c, "z");
 
-                                      controlState.forward(!controlState.forward());
-                                      controlState.backward(false);
-                                      return Command.SINGLE_SUCCESS;
-                                    }))))
-            .then(
-                literal("backward")
-                    .executes(
-                        help(
-                            "Toggle walking backward for all connected bots",
-                            c ->
-                                forEveryBot(
-                                    c,
-                                    bot -> {
-                                      var controlState = bot.sessionDataManager().controlState();
-
-                                      controlState.backward(!controlState.backward());
-                                      controlState.forward(false);
-                                      return Command.SINGLE_SUCCESS;
-                                    }))))
-            .then(
-                literal("left")
-                    .executes(
-                        help(
-                            "Toggle walking left for all connected bots",
-                            c ->
-                                forEveryBot(
-                                    c,
-                                    bot -> {
-                                      var controlState = bot.sessionDataManager().controlState();
-
-                                      controlState.left(!controlState.left());
-                                      controlState.right(false);
-                                      return Command.SINGLE_SUCCESS;
-                                    }))))
-            .then(
-                literal("right")
-                    .executes(
-                        help(
-                            "Toggle walking right for all connected bots",
-                            c ->
-                                forEveryBot(
-                                    c,
-                                    bot -> {
-                                      var controlState = bot.sessionDataManager().controlState();
-
-                                      controlState.right(!controlState.right());
-                                      controlState.left(false);
-                                      return Command.SINGLE_SUCCESS;
-                                    })))));
-    dispatcher.register(
-        literal("jump")
-            .executes(
-                help(
-                    "Toggle jumping for all connected bots",
-                    c ->
-                        forEveryBot(
+                          return forEveryBot(
                             c,
                             bot -> {
-                              var controlState = bot.sessionDataManager().controlState();
+                              bot.sessionDataManager()
+                                .clientEntity()
+                                .lookAt(
+                                  RotationOrigin.EYES,
+                                  Vector3d.from(x, y, z));
+                              return Command.SINGLE_SUCCESS;
+                            });
+                        }))))));
+    dispatcher.register(
+      literal("move")
+        .then(
+          literal("forward")
+            .executes(
+              help(
+                "Toggle walking forward for all connected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var controlState = bot.sessionDataManager().controlState();
 
-                              controlState.jumping(!controlState.jumping());
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("sneak")
+                      controlState.forward(!controlState.forward());
+                      controlState.backward(false);
+                      return Command.SINGLE_SUCCESS;
+                    }))))
+        .then(
+          literal("backward")
             .executes(
-                help(
-                    "Toggle sneaking for all connected bots",
-                    c ->
-                        forEveryBot(
-                            c,
-                            bot -> {
-                              bot.botControl().toggleSneak();
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("reset")
+              help(
+                "Toggle walking backward for all connected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var controlState = bot.sessionDataManager().controlState();
+
+                      controlState.backward(!controlState.backward());
+                      controlState.forward(false);
+                      return Command.SINGLE_SUCCESS;
+                    }))))
+        .then(
+          literal("left")
             .executes(
-                help(
-                    "Resets the movement of all connected bots",
-                    c ->
-                        forEveryBot(
-                            c,
-                            bot -> {
-                              bot.sessionDataManager().controlState().resetAll();
-                              return Command.SINGLE_SUCCESS;
-                            }))));
+              help(
+                "Toggle walking left for all connected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var controlState = bot.sessionDataManager().controlState();
+
+                      controlState.left(!controlState.left());
+                      controlState.right(false);
+                      return Command.SINGLE_SUCCESS;
+                    }))))
+        .then(
+          literal("right")
+            .executes(
+              help(
+                "Toggle walking right for all connected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var controlState = bot.sessionDataManager().controlState();
+
+                      controlState.right(!controlState.right());
+                      controlState.left(false);
+                      return Command.SINGLE_SUCCESS;
+                    })))));
+    dispatcher.register(
+      literal("jump")
+        .executes(
+          help(
+            "Toggle jumping for all connected bots",
+            c ->
+              forEveryBot(
+                c,
+                bot -> {
+                  var controlState = bot.sessionDataManager().controlState();
+
+                  controlState.jumping(!controlState.jumping());
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("sneak")
+        .executes(
+          help(
+            "Toggle sneaking for all connected bots",
+            c ->
+              forEveryBot(
+                c,
+                bot -> {
+                  bot.botControl().toggleSneak();
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("reset")
+        .executes(
+          help(
+            "Resets the movement of all connected bots",
+            c ->
+              forEveryBot(
+                c,
+                bot -> {
+                  bot.sessionDataManager().controlState().resetAll();
+                  return Command.SINGLE_SUCCESS;
+                }))));
 
     // Attack controls
     dispatcher.register(
-        literal("stop-attack")
-            .executes(
-                help(
-                    "Stops the ongoing attacks",
-                    c ->
-                        forEveryAttack(
-                            c,
-                            attackManager -> {
-                              soulFireServer.stopAttack(attackManager.id());
-                              return Command.SINGLE_SUCCESS;
-                            }))));
+      literal("stop-attack")
+        .executes(
+          help(
+            "Stops the ongoing attacks",
+            c ->
+              forEveryAttack(
+                c,
+                attackManager -> {
+                  soulFireServer.stopAttack(attackManager.id());
+                  return Command.SINGLE_SUCCESS;
+                }))));
 
     // Utility commands
     dispatcher.register(
-        literal("online")
-            .executes(
-                help(
-                    "Shows connected bots in attacks",
-                    c ->
-                        forEveryAttackEnsureHasBots(
-                            c,
-                            attackManager -> {
-                              var online = new ArrayList<String>();
-                              for (var bot : attackManager.botConnections().values()) {
-                                if (bot.isOnline()) {
-                                  online.add(bot.meta().accountName());
-                                }
-                              }
+      literal("online")
+        .executes(
+          help(
+            "Shows connected bots in attacks",
+            c ->
+              forEveryAttackEnsureHasBots(
+                c,
+                attackManager -> {
+                  var online = new ArrayList<String>();
+                  for (var bot : attackManager.botConnections().values()) {
+                    if (bot.isOnline()) {
+                      online.add(bot.meta().accountName());
+                    }
+                  }
 
-                              c.getSource()
-                                  .sendInfo(
-                                      online.size() + " bots online: " + String.join(", ", online));
-                              return Command.SINGLE_SUCCESS;
-                            }))));
+                  c.getSource()
+                    .sendInfo(
+                      online.size() + " bots online: " + String.join(", ", online));
+                  return Command.SINGLE_SUCCESS;
+                }))));
     dispatcher.register(
-        literal("say")
-            .then(
-                argument("message", StringArgumentType.greedyString())
-                    .executes(
-                        help(
-                            "Makes all connected bots send a message in chat or execute a command",
-                            c -> {
-                              var message = StringArgumentType.getString(c, "message");
-
-                              return forEveryBot(
-                                  c,
-                                  bot -> {
-                                    if (!bot.isOnline()) {
-                                      return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    bot.botControl().sendMessage(message);
-
-                                    return Command.SINGLE_SUCCESS;
-                                  });
-                            }))));
-    dispatcher.register(
-        literal("stats")
+      literal("say")
+        .then(
+          argument("message", StringArgumentType.greedyString())
             .executes(
-                help(
-                    "Shows network stats",
-                    c ->
-                        forEveryAttackEnsureHasBots(
-                            c,
-                            attackManager -> {
-                              c.getSource()
-                                  .sendInfo(
-                                      "Total bots: {}", attackManager.botConnections().size());
-                              long readTraffic = 0;
-                              long writeTraffic = 0;
-                              for (var bot : attackManager.botConnections().values()) {
-                                var trafficShapingHandler = bot.getTrafficHandler();
+              help(
+                "Makes all connected bots send a message in chat or execute a command",
+                c -> {
+                  var message = StringArgumentType.getString(c, "message");
 
-                                if (trafficShapingHandler == null) {
-                                  continue;
-                                }
+                  return forEveryBot(
+                    c,
+                    bot -> {
+                      if (!bot.isOnline()) {
+                        return Command.SINGLE_SUCCESS;
+                      }
 
-                                readTraffic +=
-                                    trafficShapingHandler.trafficCounter().cumulativeReadBytes();
-                                writeTraffic +=
-                                    trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
-                              }
-
-                              c.getSource()
-                                  .sendInfo(
-                                      "Total read traffic: {}",
-                                      FileUtils.byteCountToDisplaySize(readTraffic));
-                              c.getSource()
-                                  .sendInfo(
-                                      "Total write traffic: {}",
-                                      FileUtils.byteCountToDisplaySize(writeTraffic));
-
-                              long currentReadTraffic = 0;
-                              long currentWriteTraffic = 0;
-                              for (var bot : attackManager.botConnections().values()) {
-                                var trafficShapingHandler = bot.getTrafficHandler();
-
-                                if (trafficShapingHandler == null) {
-                                  continue;
-                                }
-
-                                currentReadTraffic +=
-                                    trafficShapingHandler.trafficCounter().lastReadThroughput();
-                                currentWriteTraffic +=
-                                    trafficShapingHandler.trafficCounter().lastWriteThroughput();
-                              }
-
-                              c.getSource()
-                                  .sendInfo(
-                                      "Current read traffic: {}/s",
-                                      FileUtils.byteCountToDisplaySize(currentReadTraffic));
-                              c.getSource()
-                                  .sendInfo(
-                                      "Current write traffic: {}/s",
-                                      FileUtils.byteCountToDisplaySize(currentWriteTraffic));
-
-                              return Command.SINGLE_SUCCESS;
-                            }))));
-    dispatcher.register(
-        literal("export-map")
-            .executes(
-                help(
-                    "Exports images of all map items. Can be a held item or in a item-frame.",
-                    c -> exportMap(c, bot -> bot.sessionDataManager().mapDataStates().keySet())))
-            .then(
-                argument("map_id", IntegerArgumentType.integer())
-                    .executes(
-                        help(
-                            "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
-                            c -> {
-                              var mapId = IntegerArgumentType.getInteger(c, "map_id");
-                              return exportMap(c, bot -> IntSet.of(mapId));
-                            }))));
-    dispatcher.register(
-        literal("generate-versions")
-            .executes(
-                help(
-                    "Create a table of all supported protocol versions",
-                    c -> {
-                      var yesEmoji = "✅";
-                      var noEmoji = "❌";
-
-                      var builder = new StringBuilder("\n");
-                      ProtocolVersionList.getProtocolsNewToOld()
-                          .forEach(
-                              version -> {
-                                var nativeVersion =
-                                    SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
-                                        ? yesEmoji
-                                        : noEmoji;
-                                var bedrockVersion =
-                                    SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                                var javaVersion =
-                                    !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                                var snapshotVersion =
-                                    SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
-                                var legacyVersion =
-                                    SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
-
-                                builder.append(
-                                    String.format(
-                                        "| %s | %s | %s | %s | %s | %s |\n",
-                                        version.getName(),
-                                        nativeVersion,
-                                        javaVersion,
-                                        snapshotVersion,
-                                        legacyVersion,
-                                        bedrockVersion));
-                              });
-                      log.info(builder.toString());
+                      bot.botControl().sendMessage(message);
 
                       return Command.SINGLE_SUCCESS;
-                    })));
+                    });
+                }))));
+    dispatcher.register(
+      literal("stats")
+        .executes(
+          help(
+            "Shows network stats",
+            c ->
+              forEveryAttackEnsureHasBots(
+                c,
+                attackManager -> {
+                  c.getSource()
+                    .sendInfo(
+                      "Total bots: {}", attackManager.botConnections().size());
+                  long readTraffic = 0;
+                  long writeTraffic = 0;
+                  for (var bot : attackManager.botConnections().values()) {
+                    var trafficShapingHandler = bot.getTrafficHandler();
+
+                    if (trafficShapingHandler == null) {
+                      continue;
+                    }
+
+                    readTraffic +=
+                      trafficShapingHandler.trafficCounter().cumulativeReadBytes();
+                    writeTraffic +=
+                      trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
+                  }
+
+                  c.getSource()
+                    .sendInfo(
+                      "Total read traffic: {}",
+                      FileUtils.byteCountToDisplaySize(readTraffic));
+                  c.getSource()
+                    .sendInfo(
+                      "Total write traffic: {}",
+                      FileUtils.byteCountToDisplaySize(writeTraffic));
+
+                  long currentReadTraffic = 0;
+                  long currentWriteTraffic = 0;
+                  for (var bot : attackManager.botConnections().values()) {
+                    var trafficShapingHandler = bot.getTrafficHandler();
+
+                    if (trafficShapingHandler == null) {
+                      continue;
+                    }
+
+                    currentReadTraffic +=
+                      trafficShapingHandler.trafficCounter().lastReadThroughput();
+                    currentWriteTraffic +=
+                      trafficShapingHandler.trafficCounter().lastWriteThroughput();
+                  }
+
+                  c.getSource()
+                    .sendInfo(
+                      "Current read traffic: {}/s",
+                      FileUtils.byteCountToDisplaySize(currentReadTraffic));
+                  c.getSource()
+                    .sendInfo(
+                      "Current write traffic: {}/s",
+                      FileUtils.byteCountToDisplaySize(currentWriteTraffic));
+
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("export-map")
+        .executes(
+          help(
+            "Exports images of all map items. Can be a held item or in a item-frame.",
+            c -> exportMap(c, bot -> bot.sessionDataManager().mapDataStates().keySet())))
+        .then(
+          argument("map_id", IntegerArgumentType.integer())
+            .executes(
+              help(
+                "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
+                c -> {
+                  var mapId = IntegerArgumentType.getInteger(c, "map_id");
+                  return exportMap(c, bot -> IntSet.of(mapId));
+                }))));
+    dispatcher.register(
+      literal("generate-versions")
+        .executes(
+          help(
+            "Create a table of all supported protocol versions",
+            c -> {
+              var yesEmoji = "✅";
+              var noEmoji = "❌";
+
+              var builder = new StringBuilder("\n");
+              ProtocolVersionList.getProtocolsNewToOld()
+                .forEach(
+                  version -> {
+                    var nativeVersion =
+                      SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
+                        ? yesEmoji
+                        : noEmoji;
+                    var bedrockVersion =
+                      SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                    var javaVersion =
+                      !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
+                    var snapshotVersion =
+                      SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
+                    var legacyVersion =
+                      SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
+
+                    builder.append(
+                      String.format(
+                        "| %s | %s | %s | %s | %s | %s |\n",
+                        version.getName(),
+                        nativeVersion,
+                        javaVersion,
+                        snapshotVersion,
+                        legacyVersion,
+                        bedrockVersion));
+                  });
+              log.info(builder.toString());
+
+              return Command.SINGLE_SUCCESS;
+            })));
 
     // Context commands
     dispatcher.register(
-        literal("bot")
-            .then(
-                argument("bot_names", StringArgumentType.string())
-                    .suggests(
-                        (c, b) -> {
-                          forEveryBot(
-                              c,
-                              bot -> {
-                                b.suggest(bot.meta().accountName());
+      literal("bot")
+        .then(
+          argument("bot_names", StringArgumentType.string())
+            .suggests(
+              (c, b) -> {
+                forEveryBot(
+                  c,
+                  bot -> {
+                    b.suggest(bot.meta().accountName());
 
-                                return Command.SINGLE_SUCCESS;
-                              },
-                              false);
+                    return Command.SINGLE_SUCCESS;
+                  },
+                  false);
 
-                          return b.buildFuture();
-                        })
-                    .forward(
-                        dispatcher.getRoot(),
-                        helpRedirect(
-                            "Instead of running a command for all bots, run it for a specific list of bots. Use a comma to separate the names",
-                            c -> {
-                              c.getSource()
-                                  .extraData
-                                  .put("bot_names", StringArgumentType.getString(c, "bot_names"));
-                              return Collections.singleton(c.getSource());
-                            }),
-                        false)));
+                return b.buildFuture();
+              })
+            .forward(
+              dispatcher.getRoot(),
+              helpRedirect(
+                "Instead of running a command for all bots, run it for a specific list of bots. Use a comma to separate the names",
+                c -> {
+                  c.getSource()
+                    .extraData
+                    .put("bot_names", StringArgumentType.getString(c, "bot_names"));
+                  return Collections.singleton(c.getSource());
+                }),
+              false)));
     dispatcher.register(
-        literal("attack")
-            .then(
-                argument("attack_ids", StringArgumentType.string())
-                    .suggests(
-                        (c, b) -> {
-                          forEveryAttack(
-                              c,
-                              attackManager -> {
-                                b.suggest(attackManager.id());
+      literal("attack")
+        .then(
+          argument("attack_ids", StringArgumentType.string())
+            .suggests(
+              (c, b) -> {
+                forEveryAttack(
+                  c,
+                  attackManager -> {
+                    b.suggest(attackManager.id());
 
-                                return Command.SINGLE_SUCCESS;
-                              },
-                              false);
+                    return Command.SINGLE_SUCCESS;
+                  },
+                  false);
 
-                          return b.buildFuture();
-                        })
-                    .forward(
-                        dispatcher.getRoot(),
-                        helpRedirect(
-                            "Instead of running a command for all attacks, run it for a specific list of attacks. Use a comma to separate the ids",
-                            c -> {
-                              c.getSource()
-                                  .extraData
-                                  .put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
-                              return Collections.singleton(c.getSource());
-                            }),
-                        false)));
+                return b.buildFuture();
+              })
+            .forward(
+              dispatcher.getRoot(),
+              helpRedirect(
+                "Instead of running a command for all attacks, run it for a specific list of attacks. Use a comma to separate the ids",
+                c -> {
+                  c.getSource()
+                    .extraData
+                    .put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
+                  return Collections.singleton(c.getSource());
+                }),
+              false)));
 
     SoulFireAPI.postEvent(new CommandManagerInitEvent(this));
   }
 
   private int exportMap(
-      CommandContext<ConsoleSubject> context, Function<BotConnection, IntSet> idProvider) {
+    CommandContext<ConsoleSubject> context, Function<BotConnection, IntSet> idProvider) {
     // Inside here to capture a time for the file name
     var currentTime = System.currentTimeMillis();
     return forEveryBot(
-        context,
-        bot -> {
-          for (var mapId : idProvider.apply(bot).toIntArray()) {
-            var mapDataState = bot.sessionDataManager().mapDataStates().get(mapId);
-            if (mapDataState == null) {
-              context.getSource().sendInfo("Map not found!");
-              return Command.SINGLE_SUCCESS;
-            }
-
-            var image = mapDataState.toBufferedImage();
-            var fileName =
-                "map_" + currentTime + "_" + mapId + "_" + bot.meta().accountName() + ".png";
-            try {
-              Files.createDirectories(SFPathConstants.MAPS_FOLDER);
-              var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
-              ImageIO.write(image, "png", file.toFile());
-              context.getSource().sendInfo("Exported map to {}", file);
-            } catch (IOException e) {
-              context.getSource().sendError("Failed to export map!", e);
-            }
+      context,
+      bot -> {
+        for (var mapId : idProvider.apply(bot).toIntArray()) {
+          var mapDataState = bot.sessionDataManager().mapDataStates().get(mapId);
+          if (mapDataState == null) {
+            context.getSource().sendInfo("Map not found!");
+            return Command.SINGLE_SUCCESS;
           }
 
-          return Command.SINGLE_SUCCESS;
-        });
+          var image = mapDataState.toBufferedImage();
+          var fileName =
+            "map_" + currentTime + "_" + mapId + "_" + bot.meta().accountName() + ".png";
+          try {
+            Files.createDirectories(SFPathConstants.MAPS_FOLDER);
+            var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
+            ImageIO.write(image, "png", file.toFile());
+            context.getSource().sendInfo("Exported map to {}", file);
+          } catch (IOException e) {
+            context.getSource().sendError("Failed to export map!", e);
+          }
+        }
+
+        return Command.SINGLE_SUCCESS;
+      });
   }
 
   public int forEveryAttack(
-      CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
 
   private int forEveryAttack(
-      CommandContext<ConsoleSubject> context,
-      ToIntFunction<AttackManager> consumer,
-      boolean printMessages) {
+    CommandContext<ConsoleSubject> context,
+    ToIntFunction<AttackManager> consumer,
+    boolean printMessages) {
     if (soulFireServer.attacks().isEmpty()) {
       if (printMessages) {
         context.getSource().sendWarn("No attacks found!");
@@ -699,16 +700,16 @@ public class ServerCommandManager implements PlatformCommandManager {
     var resultCode = Command.SINGLE_SUCCESS;
     for (var attackManager : soulFireServer.attacks().values()) {
       if (context.getSource().extraData.containsKey("attack_ids")
-          && Arrays.stream(context.getSource().extraData.get("attack_ids").split(","))
-              .mapToInt(Integer::parseInt)
-              .noneMatch(i -> i == attackManager.id())) {
+        && Arrays.stream(context.getSource().extraData.get("attack_ids").split(","))
+        .mapToInt(Integer::parseInt)
+        .noneMatch(i -> i == attackManager.id())) {
         continue;
       }
 
       if (printMessages) {
         context
-            .getSource()
-            .sendInfo("--- Running command for attack " + attackManager.id() + " ---");
+          .getSource()
+          .sendInfo("--- Running command for attack " + attackManager.id() + " ---");
       }
 
       var result = consumer.applyAsInt(attackManager);
@@ -721,106 +722,106 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryAttackEnsureHasBots(
-      CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
 
   private int forEveryAttackEnsureHasBots(
-      CommandContext<ConsoleSubject> context,
-      ToIntFunction<AttackManager> consumer,
-      boolean printMessages) {
+    CommandContext<ConsoleSubject> context,
+    ToIntFunction<AttackManager> consumer,
+    boolean printMessages) {
     return forEveryAttack(
-        context,
-        attackManager -> {
-          if (attackManager.botConnections().isEmpty()) {
-            if (printMessages) {
-              context.getSource().sendWarn("No bots found in attack " + attackManager.id() + "!");
-            }
-            return 3;
+      context,
+      attackManager -> {
+        if (attackManager.botConnections().isEmpty()) {
+          if (printMessages) {
+            context.getSource().sendWarn("No bots found in attack " + attackManager.id() + "!");
           }
+          return 3;
+        }
 
-          return consumer.applyAsInt(attackManager);
-        },
-        printMessages);
+        return consumer.applyAsInt(attackManager);
+      },
+      printMessages);
   }
 
   public int forEveryBot(
-      CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
+    CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
     return forEveryBot(context, consumer, true);
   }
 
   private int forEveryBot(
-      CommandContext<ConsoleSubject> context,
-      ToIntFunction<BotConnection> consumer,
-      boolean printMessages) {
+    CommandContext<ConsoleSubject> context,
+    ToIntFunction<BotConnection> consumer,
+    boolean printMessages) {
     return forEveryAttackEnsureHasBots(
-        context,
-        attackManager -> {
-          var resultCode = Command.SINGLE_SUCCESS;
-          for (var bot : attackManager.botConnections().values()) {
-            if (context.getSource().extraData.containsKey("bot_names")
-                && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
-                    .noneMatch(s -> s.equals(bot.meta().accountName()))) {
-              continue;
-            }
-
-            if (printMessages) {
-              context
-                  .getSource()
-                  .sendInfo("--- Running command for bot " + bot.meta().accountName() + " ---");
-            }
-
-            var result = consumer.applyAsInt(bot);
-            if (result != Command.SINGLE_SUCCESS) {
-              resultCode = result;
-            }
+      context,
+      attackManager -> {
+        var resultCode = Command.SINGLE_SUCCESS;
+        for (var bot : attackManager.botConnections().values()) {
+          if (context.getSource().extraData.containsKey("bot_names")
+            && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
+            .noneMatch(s -> s.equals(bot.meta().accountName()))) {
+            continue;
           }
 
-          return resultCode;
-        },
-        printMessages);
+          if (printMessages) {
+            context
+              .getSource()
+              .sendInfo("--- Running command for bot " + bot.meta().accountName() + " ---");
+          }
+
+          var result = consumer.applyAsInt(bot);
+          if (result != Command.SINGLE_SUCCESS) {
+            resultCode = result;
+          }
+        }
+
+        return resultCode;
+      },
+      printMessages);
   }
 
   public int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
     return forEveryBot(
-        context,
-        bot -> {
-          executePathfinding(bot, goalScorer);
-          return Command.SINGLE_SUCCESS;
-        });
+      context,
+      bot -> {
+        executePathfinding(bot, goalScorer);
+        return Command.SINGLE_SUCCESS;
+      });
   }
 
   public void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
     var logger = bot.logger();
     var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
     executorService.execute(
-        () -> {
-          var sessionDataManager = bot.sessionDataManager();
-          var clientEntity = sessionDataManager.clientEntity();
-          var routeFinder =
-              new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
+      () -> {
+        var sessionDataManager = bot.sessionDataManager();
+        var clientEntity = sessionDataManager.clientEntity();
+        var routeFinder =
+          new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
 
-          Boolean2ObjectFunction<List<WorldAction>> findPath =
-              requiresRepositioning -> {
-                var start =
-                    BotEntityState.initialState(
-                        clientEntity,
-                        new ProjectedLevelState(
-                            Objects.requireNonNull(
-                                    sessionDataManager.getCurrentLevel(), "Level is null!")
-                                .chunks()
-                                .immutableCopy()),
-                        new ProjectedInventory(
-                            sessionDataManager.inventoryManager().playerInventory()));
-                logger.info("Starting calculations at: {}", start);
-                var actions = routeFinder.findRoute(start, requiresRepositioning);
-                logger.info("Calculated path with {} actions: {}", actions.size(), actions);
-                return actions;
-              };
+        Boolean2ObjectFunction<List<WorldAction>> findPath =
+          requiresRepositioning -> {
+            var start =
+              BotEntityState.initialState(
+                clientEntity,
+                new ProjectedLevelState(
+                  Objects.requireNonNull(
+                      sessionDataManager.getCurrentLevel(), "Level is null!")
+                    .chunks()
+                    .immutableCopy()),
+                new ProjectedInventory(
+                  sessionDataManager.inventoryManager().playerInventory()));
+            logger.info("Starting calculations at: {}", start);
+            var actions = routeFinder.findRoute(start, requiresRepositioning);
+            logger.info("Calculated path with {} actions: {}", actions.size(), actions);
+            return actions;
+          };
 
-          var pathExecutor = new PathExecutor(bot, findPath.get(true), findPath, executorService);
-          pathExecutor.register();
-        });
+        var pathExecutor = new PathExecutor(bot, findPath.get(true), findPath, executorService);
+        pathExecutor.register();
+      });
   }
 
   @Override
@@ -882,7 +883,7 @@ public class ServerCommandManager implements PlatformCommandManager {
         Files.createDirectories(HISTORY_FILE.getParent());
         var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
         Files.writeString(
-            HISTORY_FILE, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+          HISTORY_FILE, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
       } catch (IOException e) {
         log.error("Failed to create command history file!", e);
       }
@@ -903,26 +904,26 @@ public class ServerCommandManager implements PlatformCommandManager {
   @Override
   public List<String> getCompletionSuggestions(String command) {
     return dispatcher
-        .getCompletionSuggestions(dispatcher.parse(command, new ConsoleSubject()))
-        .join()
-        .getList()
-        .stream()
-        .map(Suggestion::getText)
-        .toList();
+      .getCompletionSuggestions(dispatcher.parse(command, new ConsoleSubject()))
+      .join()
+      .getList()
+      .stream()
+      .map(Suggestion::getText)
+      .toList();
   }
 
   private HelpData[] getAllUsage(
-      final CommandNode<ConsoleSubject> node, final ConsoleSubject source) {
+    final CommandNode<ConsoleSubject> node, final ConsoleSubject source) {
     final var result = new ArrayList<HelpData>();
     getAllUsage(node, source, result, "");
     return result.toArray(new HelpData[0]);
   }
 
   private void getAllUsage(
-      final CommandNode<ConsoleSubject> node,
-      final ConsoleSubject source,
-      final ArrayList<HelpData> result,
-      final String prefix) {
+    final CommandNode<ConsoleSubject> node,
+    final ConsoleSubject source,
+    final ArrayList<HelpData> result,
+    final String prefix) {
     if (!node.canUse(source)) {
       return;
     }
@@ -938,25 +939,25 @@ public class ServerCommandManager implements PlatformCommandManager {
       var redirectHelpWrapper = (RedirectHelpWrapper) node.getRedirectModifier();
       if (!redirectHelpWrapper.privateCommand()) {
         final var redirect =
-            node.getRedirect() == dispatcher.getRoot()
-                ? "..."
-                : "-> " + node.getRedirect().getUsageText();
+          node.getRedirect() == dispatcher.getRoot()
+            ? "..."
+            : "-> " + node.getRedirect().getUsageText();
         result.add(
-            new HelpData(
-                prefix.isEmpty()
-                    ? node.getUsageText() + ARGUMENT_SEPARATOR + redirect
-                    : prefix + ARGUMENT_SEPARATOR + redirect,
-                redirectHelpWrapper.help()));
+          new HelpData(
+            prefix.isEmpty()
+              ? node.getUsageText() + ARGUMENT_SEPARATOR + redirect
+              : prefix + ARGUMENT_SEPARATOR + redirect,
+            redirectHelpWrapper.help()));
       }
     } else if (!node.getChildren().isEmpty()) {
       for (final var child : node.getChildren()) {
         getAllUsage(
-            child,
-            source,
-            result,
-            prefix.isEmpty()
-                ? child.getUsageText()
-                : prefix + ARGUMENT_SEPARATOR + child.getUsageText());
+          child,
+          source,
+          result,
+          prefix.isEmpty()
+            ? child.getUsageText()
+            : prefix + ARGUMENT_SEPARATOR + child.getUsageText());
       }
     }
   }

@@ -21,10 +21,10 @@ import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 
 public record EffectData(
-    Effect effect,
-    int amplifier,
-    int duration,
-    boolean ambient,
-    boolean showParticles,
-    boolean showIcon,
-    CompoundTag factorData) {}
+  Effect effect,
+  int amplifier,
+  int duration,
+  boolean ambient,
+  boolean showParticles,
+  boolean showIcon,
+  CompoundTag factorData) {}

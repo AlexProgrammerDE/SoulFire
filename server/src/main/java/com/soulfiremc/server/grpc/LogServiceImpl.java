@@ -48,7 +48,8 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SUBSCRIBE_LOGS);
 
     sendPreviousLogs(request.getPrevious(), responseObserver);
-    SoulFireAPI.registerListener(SystemLogEvent.class, new LogEventListener((ServerCallStreamObserver<LogResponse>) responseObserver));
+    SoulFireAPI.registerListener(SystemLogEvent.class,
+      new LogEventListener((ServerCallStreamObserver<LogResponse>) responseObserver));
   }
 
   private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {
@@ -58,7 +59,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   }
 
   private record LogEventListener(ServerCallStreamObserver<LogResponse> responseObserver)
-      implements Consumer<SystemLogEvent> {
+    implements Consumer<SystemLogEvent> {
     @Override
     public void accept(SystemLogEvent event) {
       if (responseObserver.isCancelled()) {

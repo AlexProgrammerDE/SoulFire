@@ -36,21 +36,24 @@ public class IdentifiedKey {
   private final Revision revision;
   private final PublicKey publicKey;
   private final byte[] signature;
-  @Getter private final Instant expiryTemporal;
+  @Getter
+  private final Instant expiryTemporal;
   private @MonotonicNonNull Boolean isSignatureValid;
   private @MonotonicNonNull UUID holder;
 
   public IdentifiedKey(Revision revision, byte[] keyBits, long expiry, byte[] signature) {
     this(
-        revision,
-        EncryptionUtils.parseRsaPublicKey(keyBits),
-        Instant.ofEpochMilli(expiry),
-        signature);
+      revision,
+      EncryptionUtils.parseRsaPublicKey(keyBits),
+      Instant.ofEpochMilli(expiry),
+      signature);
   }
 
-  /** Creates an Identified key from data. */
+  /**
+   * Creates an Identified key from data.
+   */
   public IdentifiedKey(
-      Revision revision, PublicKey publicKey, Instant expiryTemporal, byte[] signature) {
+    Revision revision, PublicKey publicKey, Instant expiryTemporal, byte[] signature) {
     this.revision = revision;
     this.publicKey = publicKey;
     this.expiryTemporal = expiryTemporal;
@@ -77,7 +80,9 @@ public class IdentifiedKey {
     return revision;
   }
 
-  /** Sets the uuid for this key. Returns false if incorrect. */
+  /**
+   * Sets the uuid for this key. Returns false if incorrect.
+   */
   public boolean internalAddHolder(UUID holder) {
     if (holder == null) {
       return false;
@@ -107,10 +112,10 @@ public class IdentifiedKey {
       var expires = expiryTemporal.toEpochMilli();
       var toVerify = (expires + pemKey).getBytes(StandardCharsets.US_ASCII);
       return EncryptionUtils.verifySignature(
-          EncryptionUtils.SHA1_WITH_RSA,
-          EncryptionUtils.getYggdrasilSessionKey(),
-          signature,
-          toVerify);
+        EncryptionUtils.SHA1_WITH_RSA,
+        EncryptionUtils.getYggdrasilSessionKey(),
+        signature,
+        toVerify);
     } else {
       if (verify == null) {
         return null;
@@ -123,17 +128,17 @@ public class IdentifiedKey {
       fixedDataSet.putLong(expiryTemporal.toEpochMilli());
       fixedDataSet.put(keyBytes);
       return EncryptionUtils.verifySignature(
-          EncryptionUtils.SHA1_WITH_RSA,
-          EncryptionUtils.getYggdrasilSessionKey(),
-          signature,
-          toVerify);
+        EncryptionUtils.SHA1_WITH_RSA,
+        EncryptionUtils.getYggdrasilSessionKey(),
+        signature,
+        toVerify);
     }
   }
 
   public boolean verifyDataSignature(byte[] signature, byte[]... toVerify) {
     try {
       return EncryptionUtils.verifySignature(
-          EncryptionUtils.SHA256_WITH_RSA, publicKey, signature, toVerify);
+        EncryptionUtils.SHA256_WITH_RSA, publicKey, signature, toVerify);
     } catch (IllegalArgumentException e) {
       return false;
     }

@@ -36,25 +36,25 @@ import reactor.netty.ByteBufFlux;
 
 public class SFSessionService {
   private static final URI MOJANG_JOIN_URI =
-      URI.create("https://sessionserver.mojang.com/session/minecraft/join");
+    URI.create("https://sessionserver.mojang.com/session/minecraft/join");
 
   @SuppressWarnings("HttpUrlsUsage")
   private static final URI THE_ALTENING_JOIN_URI =
-      URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
+    URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
 
   private static final URI EASYMC_JOIN_URI =
-      URI.create("https://sessionserver.easymc.io/session/minecraft/join");
+    URI.create("https://sessionserver.easymc.io/session/minecraft/join");
   private final URI joinEndpoint;
   private final SFProxy proxyData;
 
   public SFSessionService(AuthType authType, SFProxy proxyData) {
     this.joinEndpoint =
-        switch (authType) {
-          case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
-          case THE_ALTENING -> THE_ALTENING_JOIN_URI;
-          case EASY_MC -> EASYMC_JOIN_URI;
-          default -> throw new IllegalStateException("Unexpected value: " + authType);
-        };
+      switch (authType) {
+        case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
+        case THE_ALTENING -> THE_ALTENING_JOIN_URI;
+        case EASY_MC -> EASYMC_JOIN_URI;
+        default -> throw new IllegalStateException("Unexpected value: " + authType);
+      };
     this.proxyData = proxyData;
   }
 
@@ -72,25 +72,25 @@ public class SFSessionService {
 
   public void joinServer(UUID profileId, String authenticationToken, String serverId) {
     ReactorHttpHelper.createReactorClient(proxyData, true)
-        .post()
-        .uri(joinEndpoint)
-        .send(
-            ByteBufFlux.fromString(
-                Flux.just(
-                    GsonInstance.GSON.toJson(
-                        new SFSessionService.JoinServerRequest(
-                            authenticationToken,
-                            UUIDHelper.convertToNoDashes(profileId),
-                            serverId)))))
-        .responseSingle(
-            (res, content) -> {
-              if (res.status().code() != 204) {
-                throw new RuntimeException("Failed to join server: " + res.status().code());
-              }
+      .post()
+      .uri(joinEndpoint)
+      .send(
+        ByteBufFlux.fromString(
+          Flux.just(
+            GsonInstance.GSON.toJson(
+              new SFSessionService.JoinServerRequest(
+                authenticationToken,
+                UUIDHelper.convertToNoDashes(profileId),
+                serverId)))))
+      .responseSingle(
+        (res, content) -> {
+          if (res.status().code() != 204) {
+            throw new RuntimeException("Failed to join server: " + res.status().code());
+          }
 
-              return content.asString();
-            })
-        .block();
+          return content.asString();
+        })
+      .block();
   }
 
   @SuppressWarnings("unused") // Used by GSON

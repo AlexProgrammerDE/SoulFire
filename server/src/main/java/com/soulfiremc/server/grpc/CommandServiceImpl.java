@@ -35,7 +35,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
   @Override
   public void executeCommand(
-      CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+    CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_EXECUTION);
 
     var code = serverCommandManager.execute(request.getCommand());
@@ -46,30 +46,30 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
 
   @Override
   public void tabCompleteCommand(
-      CommandCompletionRequest request,
-      StreamObserver<CommandCompletionResponse> responseObserver) {
+    CommandCompletionRequest request,
+    StreamObserver<CommandCompletionResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_COMPLETION);
 
     var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
 
     responseObserver.onNext(
-        CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+      CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
     responseObserver.onCompleted();
   }
 
   @Override
   public void getCommandHistory(
-      CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
+    CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_HISTORY);
 
     var history = serverCommandManager.getCommandHistory();
     var builder = CommandHistoryResponse.newBuilder();
     for (var entry : history) {
       builder
-          .addEntriesBuilder()
-          .setTimestamp(entry.getKey().getEpochSecond())
-          .setCommand(entry.getValue())
-          .build();
+        .addEntriesBuilder()
+        .setTimestamp(entry.getKey().getEpochSecond())
+        .setCommand(entry.getValue())
+        .build();
     }
 
     responseObserver.onNext(builder.build());

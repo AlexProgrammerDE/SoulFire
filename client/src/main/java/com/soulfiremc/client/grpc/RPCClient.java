@@ -51,15 +51,15 @@ public class RPCClient {
 
   public RPCClient(String host, int port, String jwt) {
     this(
-        GrpcClients.builder(String.format("https://%s:%d", host, port))
-            .serializationFormat(GrpcSerializationFormats.PROTO)
-            .compressor(new Codec.Gzip())
-            .callCredentials(new JwtCredential(jwt))
-            .maxRequestMessageLength(Integer.MAX_VALUE)
-            .maxResponseMessageLength(Integer.MAX_VALUE)
-            // Allow long-lasting streams from the server
-            .responseTimeout(Duration.ZERO)
-            .setHeader(HttpHeaderNames.USER_AGENT, "SoulFireJavaClient/" + BuildData.VERSION));
+      GrpcClients.builder(String.format("https://%s:%d", host, port))
+        .serializationFormat(GrpcSerializationFormats.PROTO)
+        .compressor(new Codec.Gzip())
+        .callCredentials(new JwtCredential(jwt))
+        .maxRequestMessageLength(Integer.MAX_VALUE)
+        .maxResponseMessageLength(Integer.MAX_VALUE)
+        // Allow long-lasting streams from the server
+        .responseTimeout(Duration.ZERO)
+        .setHeader(HttpHeaderNames.USER_AGENT, "SoulFireJavaClient/" + BuildData.VERSION));
   }
 
   public RPCClient(GrpcClientBuilder clientBuilder) {
@@ -75,6 +75,6 @@ public class RPCClient {
     configStubBlocking = clientBuilder.build(ConfigServiceGrpc.ConfigServiceBlockingStub.class);
     mcAuthServiceBlocking = clientBuilder.build(MCAuthServiceGrpc.MCAuthServiceBlockingStub.class);
     proxyCheckServiceBlocking =
-        clientBuilder.build(ProxyCheckServiceGrpc.ProxyCheckServiceBlockingStub.class);
+      clientBuilder.build(ProxyCheckServiceGrpc.ProxyCheckServiceBlockingStub.class);
   }
 }

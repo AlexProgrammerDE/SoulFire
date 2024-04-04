@@ -19,7 +19,9 @@ package com.soulfiremc.server.api.event;
 
 import com.soulfiremc.server.protocol.BotConnection;
 
-/** Represents a bot event of a SoulFire bot in an attack. */
+/**
+ * Represents a bot event of a SoulFire bot in an attack.
+ */
 public non-sealed interface SoulFireBotEvent extends SoulFireEvent {
   BotConnection connection();
 }

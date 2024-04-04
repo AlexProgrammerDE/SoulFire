@@ -38,44 +38,44 @@ public class ReactorHttpHelper {
   }
 
   public static HttpClient createReactorClient(
-      SFProxy proxyData, boolean withBody) {
+    SFProxy proxyData, boolean withBody) {
     var base =
-        HttpClient.create()
-            .responseTimeout(Duration.ofSeconds(5))
-            .headers(
-                h -> {
-                  h.set(HttpHeaderNames.ACCEPT, "application/json");
-                  if (withBody) {
-                    h.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
-                  }
+      HttpClient.create()
+        .responseTimeout(Duration.ofSeconds(5))
+        .headers(
+          h -> {
+            h.set(HttpHeaderNames.ACCEPT, "application/json");
+            if (withBody) {
+              h.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+            }
 
-                  h.set(HttpHeaderNames.ACCEPT_LANGUAGE, "en-US,en");
-                  h.set(HttpHeaderNames.USER_AGENT, "SoulFire/" + BuildData.VERSION);
-                });
+            h.set(HttpHeaderNames.ACCEPT_LANGUAGE, "en-US,en");
+            h.set(HttpHeaderNames.USER_AGENT, "SoulFire/" + BuildData.VERSION);
+          });
 
     return proxyData == null
-        ? base
-        : base.proxy(
-            p -> {
-              var spec =
-                  p.type(
-                          switch (proxyData.type()) {
-                            case HTTP -> ProxyProvider.Proxy.HTTP;
-                            case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
-                            case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
-                          })
-                      .host(proxyData.host())
-                      .port(proxyData.port())
-                      .nonProxyHosts("localhost")
-                      .connectTimeoutMillis(20_000);
+      ? base
+      : base.proxy(
+      p -> {
+        var spec =
+          p.type(
+              switch (proxyData.type()) {
+                case HTTP -> ProxyProvider.Proxy.HTTP;
+                case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
+                case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
+              })
+            .host(proxyData.host())
+            .port(proxyData.port())
+            .nonProxyHosts("localhost")
+            .connectTimeoutMillis(20_000);
 
-              if (proxyData.username() != null) {
-                spec.username(proxyData.username());
-              }
+        if (proxyData.username() != null) {
+          spec.username(proxyData.username());
+        }
 
-              if (proxyData.password() != null) {
-                spec.password(s -> proxyData.password());
-              }
-            });
+        if (proxyData.password() != null) {
+          spec.password(s -> proxyData.password());
+        }
+      });
   }
 }

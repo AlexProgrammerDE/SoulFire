@@ -40,15 +40,15 @@ import org.fusesource.jansi.AnsiConsole;
 @Slf4j
 public class ChatMessageLogger implements InternalPlugin {
   private static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
-      ANSIComponentSerializer.builder()
-          .flattener(SoulFireServer.FLATTENER)
-          .colorLevel(
-              switch (AnsiConsole.out().getColors()) {
-                case Colors16 -> ColorLevel.INDEXED_16;
-                case Colors256 -> ColorLevel.INDEXED_256;
-                case TrueColor -> ColorLevel.TRUE_COLOR;
-              })
-          .build();
+    ANSIComponentSerializer.builder()
+      .flattener(SoulFireServer.FLATTENER)
+      .colorLevel(
+        switch (AnsiConsole.out().getColors()) {
+          case Colors16 -> ColorLevel.INDEXED_16;
+          case Colors256 -> ColorLevel.INDEXED_256;
+          case TrueColor -> ColorLevel.TRUE_COLOR;
+        })
+      .build();
   private static final ExpiringSet<String> CHAT_MESSAGES = new ExpiringSet<>(5, TimeUnit.SECONDS);
 
   public static void onMessage(ChatMessageReceiveEvent event) {
@@ -57,9 +57,9 @@ public class ChatMessageLogger implements InternalPlugin {
     }
 
     var sender =
-        Optional.ofNullable(event.sender())
-            .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
-            .orElse("Server");
+      Optional.ofNullable(event.sender())
+        .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
+        .orElse("Server");
     var message = Component.text("<" + sender + "> ").append(event.message());
 
     var ansiMessage = ANSI_MESSAGE_SERIALIZER.serialize(message);
@@ -87,18 +87,18 @@ public class ChatMessageLogger implements InternalPlugin {
   public void onLoad() {
     SoulFireAPI.registerListeners(ChatMessageLogger.class);
     PluginHelper.registerBotEventConsumer(
-        ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
+      ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ChatMessageSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
     public static final BooleanProperty ENABLED =
-        BUILDER.ofBoolean(
-            "enabled",
-            "Log chat to terminal",
-            new String[] {"--log-chat"},
-            "Log all received chat messages to the terminal",
-            true);
+      BUILDER.ofBoolean(
+        "enabled",
+        "Log chat to terminal",
+        new String[] {"--log-chat"},
+        "Log all received chat messages to the terminal",
+        true);
   }
 }

@@ -28,31 +28,31 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record BlockType(
-    int id,
-    ResourceKey key,
-    float destroyTime,
-    float explosionResistance,
-    boolean air,
-    boolean fallingBlock,
-    boolean replaceable,
-    boolean requiresCorrectToolForDrops,
-    boolean fluidSource,
-    OffsetData offsetData,
-    BlockStates statesData) {
+  int id,
+  ResourceKey key,
+  float destroyTime,
+  float explosionResistance,
+  boolean air,
+  boolean fallingBlock,
+  boolean replaceable,
+  boolean requiresCorrectToolForDrops,
+  boolean fluidSource,
+  OffsetData offsetData,
+  BlockStates statesData) {
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
   public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
-      new Object2ReferenceOpenHashMap<>();
+    new Object2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
 
   public static BlockType register(String key) {
     var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class);
     instance =
-        instance.withStatesData(
-            BlockStates.fromJsonArray(
-                instance,
-                GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
-                    .getAsJsonArray("states")));
+      instance.withStatesData(
+        BlockStates.fromJsonArray(
+          instance,
+          GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
+            .getAsJsonArray("states")));
 
     FROM_ID.put(instance.id(), instance);
     FROM_KEY.put(instance.key(), instance);
@@ -84,7 +84,7 @@ public record BlockType(
   }
 
   public record OffsetData(
-      float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
+    float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
     public enum OffsetType {
       XZ,
       XYZ

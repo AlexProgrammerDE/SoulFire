@@ -32,19 +32,19 @@ public class BlocksJavaGenerator implements IDataGenerator {
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/BlockType.java");
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        String.join(
-            "\n  ",
-            BuiltInRegistries.BLOCK.stream()
-                .map(
-                    s -> {
-                      var key = BuiltInRegistries.BLOCK.getKey(s);
-                      return "public static final BlockType "
-                          + key.getPath().toUpperCase(Locale.ROOT)
-                          + " = register(\""
-                          + key
-                          + "\");";
-                    })
-                .toArray(String[]::new)));
+      GeneratorConstants.VALUES_REPLACE,
+      String.join(
+        "\n  ",
+        BuiltInRegistries.BLOCK.stream()
+          .map(
+            s -> {
+              var key = BuiltInRegistries.BLOCK.getKey(s);
+              return "public static final BlockType "
+                + key.getPath().toUpperCase(Locale.ROOT)
+                + " = register(\""
+                + key
+                + "\");";
+            })
+          .toArray(String[]::new)));
   }
 }

@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GUIClientProps {
   private static final Path SETTINGS_PATH =
-      SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
+    SFPathConstants.DATA_FOLDER.resolve("gui-data.properties");
   private static final Properties SETTINGS = new Properties();
 
   private GUIClientProps() {}
@@ -51,8 +51,8 @@ public class GUIClientProps {
   public static void saveSettings() {
     try (var os = Files.newOutputStream(SETTINGS_PATH)) {
       SETTINGS.store(
-          new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)),
-          "SoulFire GUI Settings");
+        new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8)),
+        "SoulFire GUI Settings");
     } catch (IOException e) {
       log.error("Failed to save settings!", e);
     }

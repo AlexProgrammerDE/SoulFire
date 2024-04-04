@@ -33,43 +33,43 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
 
   static {
     try (var inputStream =
-        BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
+           BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockshapes.txt")) {
       if (inputStream == null) {
         throw new IllegalStateException("blockshapes.txt not found!");
       }
 
       new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-          .lines()
-          .forEach(
-              line -> {
-                var parts = line.split("\\|");
+        .lines()
+        .forEach(
+          line -> {
+            var parts = line.split("\\|");
 
-                var id = Integer.parseInt(parts[0]);
-                var blockShapes = new ObjectArrayList<BlockShape>();
+            var id = Integer.parseInt(parts[0]);
+            var blockShapes = new ObjectArrayList<BlockShape>();
 
-                if (parts.length > 1) {
-                  for (var i = 1; i < parts.length; i++) {
-                    var part = parts[i];
-                    var subParts = part.split(",");
-                    var shape =
-                        new BlockShape(
-                            Double.parseDouble(subParts[0]),
-                            Double.parseDouble(subParts[1]),
-                            Double.parseDouble(subParts[2]),
-                            Double.parseDouble(subParts[3]),
-                            Double.parseDouble(subParts[4]),
-                            Double.parseDouble(subParts[5]));
-                    blockShapes.add(shape);
-                  }
-                }
+            if (parts.length > 1) {
+              for (var i = 1; i < parts.length; i++) {
+                var part = parts[i];
+                var subParts = part.split(",");
+                var shape =
+                  new BlockShape(
+                    Double.parseDouble(subParts[0]),
+                    Double.parseDouble(subParts[1]),
+                    Double.parseDouble(subParts[2]),
+                    Double.parseDouble(subParts[3]),
+                    Double.parseDouble(subParts[4]),
+                    Double.parseDouble(subParts[5]));
+                blockShapes.add(shape);
+              }
+            }
 
-                FROM_ID.put(
-                    id,
-                    new BlockShapeGroup(
-                        id,
-                        blockShapes,
-                        blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0)));
-              });
+            FROM_ID.put(
+              id,
+              new BlockShapeGroup(
+                id,
+                blockShapes,
+                blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0)));
+          });
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
@@ -85,8 +85,8 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
     var collisionBoxes = new ObjectArrayList<AABB>(blockShapes.size());
     for (var shape : blockShapes) {
       var shapeBB =
-          new AABB(
-              shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
+        new AABB(
+          shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
 
       // Apply random offset if needed
       shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));

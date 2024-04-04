@@ -23,14 +23,14 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public record ItemType(
-    int id,
-    ResourceKey key,
-    int stackSize,
-    DepletionData depletionData,
-    FoodProperties foodProperties,
-    EquipmentSlot attributeSlot,
-    List<Attribute> attributes,
-    TierType tierType) {
+  int id,
+  ResourceKey key,
+  int stackSize,
+  DepletionData depletionData,
+  FoodProperties foodProperties,
+  EquipmentSlot attributeSlot,
+  List<Attribute> attributes,
+  TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
@@ -64,10 +64,10 @@ public record ItemType(
   public record DepletionData(List<String> repairWith, int maxDamage) {}
 
   public record FoodProperties(
-      int nutrition,
-      float saturationModifier,
-      boolean fastFood,
-      boolean isMeat,
-      boolean canAlwaysEat,
-      boolean possiblyHarmful) {}
+    int nutrition,
+    float saturationModifier,
+    boolean fastFood,
+    boolean isMeat,
+    boolean canAlwaysEat,
+    boolean possiblyHarmful) {}
 }

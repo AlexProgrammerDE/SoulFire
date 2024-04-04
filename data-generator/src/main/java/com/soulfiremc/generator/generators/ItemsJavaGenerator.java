@@ -32,19 +32,19 @@ public class ItemsJavaGenerator implements IDataGenerator {
   public String generateDataJson() {
     var base = ResourceHelper.getResource("/templates/ItemType.java");
     return base.replace(
-        GeneratorConstants.VALUES_REPLACE,
-        String.join(
-            "\n  ",
-            BuiltInRegistries.ITEM.stream()
-                .map(
-                    s -> {
-                      var key = BuiltInRegistries.ITEM.getKey(s);
-                      return "public static final ItemType "
-                          + key.getPath().toUpperCase(Locale.ROOT)
-                          + " = register(\""
-                          + key
-                          + "\");";
-                    })
-                .toArray(String[]::new)));
+      GeneratorConstants.VALUES_REPLACE,
+      String.join(
+        "\n  ",
+        BuiltInRegistries.ITEM.stream()
+          .map(
+            s -> {
+              var key = BuiltInRegistries.ITEM.getKey(s);
+              return "public static final ItemType "
+                + key.getPath().toUpperCase(Locale.ROOT)
+                + " = register(\""
+                + key
+                + "\");";
+            })
+          .toArray(String[]::new)));
   }
 }

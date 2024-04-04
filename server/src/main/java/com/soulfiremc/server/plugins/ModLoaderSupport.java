@@ -47,7 +47,7 @@ public class ModLoaderSupport implements InternalPlugin {
   private static final ResourceKey FML_MP_KEY = ResourceKey.fromString("fml:mp");
   private static final ResourceKey FML_FORGE_KEY = ResourceKey.fromString("fml:forge");
   private static final ResourceKey FML2_LOGIN_WRAPPER_KEY =
-      ResourceKey.fromString("fml:loginwrapper");
+    ResourceKey.fromString("fml:loginwrapper");
   private static final ResourceKey FML2_HANDSHAKE_KEY = ResourceKey.fromString("fml:handshake");
   private static final char HOSTNAME_SEPARATOR = '\0';
 
@@ -81,7 +81,7 @@ public class ModLoaderSupport implements InternalPlugin {
     var hostname = handshake.getHostname();
 
     switch (settingsHolder.get(
-        ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
+      ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
       case FML -> event.packet(handshake.withHostname(createFMLAddress(hostname)));
       case FML2 -> event.packet(handshake.withHostname(createFML2Address(hostname)));
     }
@@ -94,20 +94,20 @@ public class ModLoaderSupport implements InternalPlugin {
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
       var channelKey = ResourceKey.fromString(pluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
-          == ModLoaderSettings.ModLoaderMode.FML) {
+        == ModLoaderSettings.ModLoaderMode.FML) {
         handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
       var channelKey = ResourceKey.fromString(loginPluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
-          == ModLoaderSettings.ModLoaderMode.FML2) {
+        == ModLoaderSettings.ModLoaderMode.FML2) {
         handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
       }
     }
   }
 
   private void handleFMLPluginMessage(
-      BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    BotConnection botConnection, ResourceKey channelKey, byte[] data) {
     if (!channelKey.equals(FML_HS_KEY)) {
       return;
     }
@@ -124,15 +124,15 @@ public class ModLoaderSupport implements InternalPlugin {
         }
 
         botConnection
-            .botControl()
-            .registerPluginChannels(
-                FML_HS_KEY, FML_FML_KEY, FML_MP_KEY, FML_FML_KEY, FML_FORGE_KEY);
+          .botControl()
+          .registerPluginChannels(
+            FML_HS_KEY, FML_FML_KEY, FML_MP_KEY, FML_FML_KEY, FML_FORGE_KEY);
         sendFMLClientHello(botConnection, fmlProtocolVersion);
         sendFMLModList(botConnection, List.of());
       }
       case 2 -> // ModList
-          // WAITINGSERVERDATA
-          sendFMLHandshakeAck(botConnection, (byte) 2);
+        // WAITINGSERVERDATA
+        sendFMLHandshakeAck(botConnection, (byte) 2);
       case 3 -> { // RegistryData
         var hasMore = buffer.readBoolean();
         if (!hasMore) {
@@ -144,15 +144,15 @@ public class ModLoaderSupport implements InternalPlugin {
         var phase = buffer.readByte();
         switch (phase) {
           case 2 -> // WAITINGCACK
-              // PENDINGCOMPLETE
-              sendFMLHandshakeAck(botConnection, (byte) 4);
+            // PENDINGCOMPLETE
+            sendFMLHandshakeAck(botConnection, (byte) 4);
           case 3 -> // COMPLETE
-              // COMPLETE
-              sendFMLHandshakeAck(botConnection, (byte) 5);
+            // COMPLETE
+            sendFMLHandshakeAck(botConnection, (byte) 5);
         }
       }
       case -2 -> // HandshakeReset
-          log.debug("FML handshake reset");
+        log.debug("FML handshake reset");
     }
   }
 
@@ -186,7 +186,7 @@ public class ModLoaderSupport implements InternalPlugin {
   }
 
   private void handleFML2PluginMessage(
-      BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    BotConnection botConnection, ResourceKey channelKey, byte[] data) {
     if (!channelKey.equals(FML2_LOGIN_WRAPPER_KEY)) {
       return;
     }
@@ -215,7 +215,7 @@ public class ModLoaderSupport implements InternalPlugin {
   }
 
   private void sendFML2HandshakeResponse(
-      BotConnection botConnection, int packetId, byte[] packetContent) {
+    BotConnection botConnection, int packetId, byte[] packetContent) {
     var helper = botConnection.session().getCodecHelper();
     var innerBuffer = Unpooled.buffer();
     helper.writeVarInt(innerBuffer, packetId);
@@ -233,13 +233,13 @@ public class ModLoaderSupport implements InternalPlugin {
   private static class ModLoaderSettings implements SettingsObject {
     private static final Property.Builder BUILDER = Property.builder("mod-loader");
     public static final ComboProperty FORGE_MODE =
-        BUILDER.ofEnum(
-            "mod-loader-mode",
-            "Mod Loader mode",
-            new String[] {"--mod-loader-mode"},
-            "What mod loader to use",
-            ModLoaderMode.values(),
-            ModLoaderMode.NONE);
+      BUILDER.ofEnum(
+        "mod-loader-mode",
+        "Mod Loader mode",
+        new String[] {"--mod-loader-mode"},
+        "What mod loader to use",
+        ModLoaderMode.values(),
+        ModLoaderMode.NONE);
 
     @RequiredArgsConstructor
     enum ModLoaderMode {

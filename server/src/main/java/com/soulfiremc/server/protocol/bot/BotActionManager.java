@@ -44,18 +44,19 @@ import org.cloudburstmc.math.vector.Vector3i;
 @Data
 @RequiredArgsConstructor
 public class BotActionManager {
-  @ToString.Exclude private final SessionDataManager dataManager;
+  @ToString.Exclude
+  private final SessionDataManager dataManager;
   private int sequenceNumber = 0;
 
   private static Optional<Vector3f> rayCastToBlock(
-      BlockState blockState, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
+    BlockState blockState, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
     var intersections = new ArrayList<Vector3f>();
 
     for (var shape : blockState.getCollisionBoxes(targetBlock)) {
       shape
-          .getIntersection(eyePosition, headRotation)
-          .map(Vector3d::toFloat)
-          .ifPresent(intersections::add);
+        .getIntersection(eyePosition, headRotation)
+        .map(Vector3d::toFloat)
+        .ifPresent(intersections::add);
     }
 
     if (intersections.isEmpty()) {
@@ -67,7 +68,7 @@ public class BotActionManager {
 
     for (var intersection : intersections) {
       double distance =
-          intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
+        intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
 
       if (distance < closestDistance) {
         closestIntersection = intersection;
@@ -124,11 +125,11 @@ public class BotActionManager {
     }
 
     var rayCast =
-        rayCastToBlock(
-            levelState.getBlockStateAt(againstBlock),
-            eyePosition,
-            clientEntity.rotationVector(),
-            againstBlock);
+      rayCastToBlock(
+        levelState.getBlockStateAt(againstBlock),
+        eyePosition,
+        clientEntity.rotationVector(),
+        againstBlock);
     if (rayCast.isEmpty()) {
       return;
     }
@@ -137,31 +138,31 @@ public class BotActionManager {
     var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
     dataManager.sendPacket(
-        new ServerboundUseItemOnPacket(
-            againstBlock,
-            againstFace,
-            hand,
-            rayCastPosition.getX(),
-            rayCastPosition.getY(),
-            rayCastPosition.getZ(),
-            insideBlock,
-            sequenceNumber));
+      new ServerboundUseItemOnPacket(
+        againstBlock,
+        againstFace,
+        hand,
+        rayCastPosition.getX(),
+        rayCastPosition.getY(),
+        rayCastPosition.getZ(),
+        insideBlock,
+        sequenceNumber));
   }
 
   public void sendStartBreakBlock(Vector3i blockPos) {
     incrementSequenceNumber();
     var blockFace = getBlockFaceLookedAt(blockPos);
     dataManager.sendPacket(
-        new ServerboundPlayerActionPacket(
-            PlayerAction.START_DIGGING, blockPos, blockFace, sequenceNumber));
+      new ServerboundPlayerActionPacket(
+        PlayerAction.START_DIGGING, blockPos, blockFace, sequenceNumber));
   }
 
   public void sendEndBreakBlock(Vector3i blockPos) {
     incrementSequenceNumber();
     var blockFace = getBlockFaceLookedAt(blockPos);
     dataManager.sendPacket(
-        new ServerboundPlayerActionPacket(
-            PlayerAction.FINISH_DIGGING, blockPos, blockFace, sequenceNumber));
+      new ServerboundPlayerActionPacket(
+        PlayerAction.FINISH_DIGGING, blockPos, blockFace, sequenceNumber));
   }
 
   public Direction getBlockFaceLookedAt(Vector3i blockPos) {
@@ -171,7 +172,7 @@ public class BotActionManager {
     var blockPosDouble = blockPos.toDouble();
     var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
     var intersection =
-        blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
+      blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
     if (intersection.isEmpty()) {
       return null;
     }
@@ -182,7 +183,7 @@ public class BotActionManager {
 
     // Check side the intersection is the closest to
     if (relativeIntersection.getX() > relativeIntersection.getY()
-        && relativeIntersection.getX() > relativeIntersection.getZ()) {
+      && relativeIntersection.getX() > relativeIntersection.getZ()) {
       return intersectionFloat.getX() > blockPosFloat.getX() ? Direction.EAST : Direction.WEST;
     } else if (relativeIntersection.getY() > relativeIntersection.getZ()) {
       return intersectionFloat.getY() > blockPosFloat.getY() ? Direction.UP : Direction.DOWN;

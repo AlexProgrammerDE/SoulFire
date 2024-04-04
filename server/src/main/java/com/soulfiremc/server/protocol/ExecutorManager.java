@@ -36,13 +36,13 @@ public class ExecutorManager {
   private boolean shutdown = false;
 
   public ScheduledExecutorService newScheduledExecutorService(
-      BotConnection botConnection, String threadName) {
+    BotConnection botConnection, String threadName) {
     if (shutdown) {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
     var executor =
-        Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
+      Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
 
     executors.add(executor);
 
@@ -62,13 +62,13 @@ public class ExecutorManager {
   }
 
   public ExecutorService newFixedExecutorService(
-      int threadAmount, BotConnection botConnection, String threadName) {
+    int threadAmount, BotConnection botConnection, String threadName) {
     if (shutdown) {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
     var executor =
-        Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
+      Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
 
     executors.add(executor);
 
@@ -95,14 +95,14 @@ public class ExecutorManager {
       }
 
       return Thread.ofPlatform()
-          .name(threadPrefix + "-" + usedThreadName)
-          .daemon()
-          .unstarted(
-              () -> {
-                BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
-                runnable.run();
-                BOT_CONNECTION_THREAD_LOCAL.remove();
-              });
+        .name(threadPrefix + "-" + usedThreadName)
+        .daemon()
+        .unstarted(
+          () -> {
+            BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
+            runnable.run();
+            BOT_CONNECTION_THREAD_LOCAL.remove();
+          });
     };
   }
 

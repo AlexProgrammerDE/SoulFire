@@ -77,24 +77,27 @@ public class ViaClientSession extends TcpSession {
   public static final String COMPRESSION_NAME = "compression";
   public static final String ENCRYPTION_NAME = "encryption";
 
-  @Getter private final Logger logger;
+  @Getter
+  private final Logger logger;
   private final InetSocketAddress targetAddress;
   private final String bindAddress;
   private final int bindPort;
   private final SFProxy proxy;
   private final PacketCodecHelper codecHelper;
-  @Getter private final EventLoopGroup eventLoopGroup;
-  @Getter private final BotConnectionMeta meta;
+  @Getter
+  private final EventLoopGroup eventLoopGroup;
+  @Getter
+  private final BotConnectionMeta meta;
   private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
   private boolean delimiterBlockProcessing = false;
 
   public ViaClientSession(
-      InetSocketAddress targetAddress,
-      Logger logger,
-      PacketProtocol protocol,
-      SFProxy proxy,
-      EventLoopGroup eventLoopGroup,
-      BotConnectionMeta meta) {
+    InetSocketAddress targetAddress,
+    Logger logger,
+    PacketProtocol protocol,
+    SFProxy proxy,
+    EventLoopGroup eventLoopGroup,
+    BotConnectionMeta meta) {
     super(null, -1, protocol);
     this.logger = logger;
     this.targetAddress = targetAddress;
@@ -124,23 +127,23 @@ public class ViaClientSession extends TcpSession {
         }
 
         bootstrap.channelFactory(
-            RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
+          RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
       } else {
         bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
       }
 
       bootstrap
-          .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout() * 1000)
-          .option(ChannelOption.IP_TOS, 0x18);
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout() * 1000)
+        .option(ChannelOption.IP_TOS, 0x18);
 
       if (isBedrock) {
         bootstrap
-            .option(
-                RakChannelOption.RAK_PROTOCOL_VERSION,
-                ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
-            .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
-            .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
-            .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
+          .option(
+            RakChannelOption.RAK_PROTOCOL_VERSION,
+            ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
+          .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
+          .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
+          .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
       } else {
         bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
@@ -150,71 +153,71 @@ public class ViaClientSession extends TcpSession {
       }
 
       bootstrap.handler(
-          new ChannelInitializer<>() {
-            @Override
-            public void initChannel(Channel channel) {
-              var protocol = getPacketProtocol();
-              protocol.newClientSession(ViaClientSession.this);
+        new ChannelInitializer<>() {
+          @Override
+          public void initChannel(Channel channel) {
+            var protocol = getPacketProtocol();
+            protocol.newClientSession(ViaClientSession.this);
 
-              var pipeline = channel.pipeline();
+            var pipeline = channel.pipeline();
 
-              refreshReadTimeoutHandler(channel);
-              refreshWriteTimeoutHandler(channel);
+            refreshReadTimeoutHandler(channel);
+            refreshWriteTimeoutHandler(channel);
 
-              if (proxy != null) {
-                SFNettyHelper.addProxy(pipeline, proxy);
-              }
-
-              // This monitors the traffic
-              var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
-              pipeline.addLast("traffic", trafficHandler);
-              setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
-
-              // This does the extra magic
-              var userConnection = new UserConnectionImpl(channel, true);
-              userConnection.put(new StorableSession(ViaClientSession.this));
-
-              if (isBedrock && meta.minecraftAccount().isPremiumBedrock()) {
-                var bedrockData = (BedrockData) meta.minecraftAccount().accountData();
-                userConnection.put(
-                    new AuthChainData(
-                        bedrockData.mojangJwt(),
-                        bedrockData.identityJwt(),
-                        bedrockData.publicKey(),
-                        bedrockData.privateKey(),
-                        bedrockData.deviceId(),
-                        bedrockData.playFabId()));
-              }
-
-              setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
-
-              var protocolPipeline = new ProtocolPipelineImpl(userConnection);
-
-              if (SFVersionConstants.isLegacy(version)) {
-                protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
-                pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
-              } else if (isBedrock) {
-                protocolPipeline.add(BedrockBaseProtocol.INSTANCE);
-                pipeline.addLast("vb-disconnect", new DisconnectHandler());
-                pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
-              }
-
-              if (isBedrock) {
-                pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
-                pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
-              } else {
-                pipeline.addLast(SIZER_NAME, new FrameCodec());
-              }
-
-              // Inject Via codec
-              pipeline.addLast("via-codec", new ViaCodec(userConnection));
-
-              pipeline.addLast("codec", new SFTcpPacketCodec(ViaClientSession.this));
-              pipeline.addLast("manager", ViaClientSession.this);
-
-              addHAProxySupport(pipeline);
+            if (proxy != null) {
+              SFNettyHelper.addProxy(pipeline, proxy);
             }
-          });
+
+            // This monitors the traffic
+            var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
+            pipeline.addLast("traffic", trafficHandler);
+            setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
+
+            // This does the extra magic
+            var userConnection = new UserConnectionImpl(channel, true);
+            userConnection.put(new StorableSession(ViaClientSession.this));
+
+            if (isBedrock && meta.minecraftAccount().isPremiumBedrock()) {
+              var bedrockData = (BedrockData) meta.minecraftAccount().accountData();
+              userConnection.put(
+                new AuthChainData(
+                  bedrockData.mojangJwt(),
+                  bedrockData.identityJwt(),
+                  bedrockData.publicKey(),
+                  bedrockData.privateKey(),
+                  bedrockData.deviceId(),
+                  bedrockData.playFabId()));
+            }
+
+            setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
+
+            var protocolPipeline = new ProtocolPipelineImpl(userConnection);
+
+            if (SFVersionConstants.isLegacy(version)) {
+              protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
+              pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
+            } else if (isBedrock) {
+              protocolPipeline.add(BedrockBaseProtocol.INSTANCE);
+              pipeline.addLast("vb-disconnect", new DisconnectHandler());
+              pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
+            }
+
+            if (isBedrock) {
+              pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
+              pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
+            } else {
+              pipeline.addLast(SIZER_NAME, new FrameCodec());
+            }
+
+            // Inject Via codec
+            pipeline.addLast("via-codec", new ViaCodec(userConnection));
+
+            pipeline.addLast("codec", new SFTcpPacketCodec(ViaClientSession.this));
+            pipeline.addLast("manager", ViaClientSession.this);
+
+            addHAProxySupport(pipeline);
+          }
+        });
 
       bootstrap.remoteAddress(targetAddress);
       bootstrap.localAddress(bindAddress, bindPort);
@@ -225,11 +228,11 @@ public class ViaClientSession extends TcpSession {
       }
 
       future.addListener(
-          (futureListener) -> {
-            if (!futureListener.isSuccess()) {
-              exceptionCaught(null, futureListener.cause());
-            }
-          });
+        (futureListener) -> {
+          if (!futureListener.isSuccess()) {
+            exceptionCaught(null, futureListener.cause());
+          }
+        });
     } catch (Throwable t) {
       exceptionCaught(null, t);
     }
@@ -252,8 +255,8 @@ public class ViaClientSession extends TcpSession {
       var handler = channel.pipeline().get(COMPRESSION_NAME);
       if (handler == null) {
         channel
-            .pipeline()
-            .addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
+          .pipeline()
+          .addBefore("via-codec", COMPRESSION_NAME, new CompressionCodec(threshold));
       } else {
         ((CompressionCodec) handler).threshold(threshold);
       }
@@ -281,30 +284,30 @@ public class ViaClientSession extends TcpSession {
     InetSocketAddress clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
     if (getFlag(BuiltinFlags.ENABLE_CLIENT_PROXY_PROTOCOL, false) && clientAddress != null) {
       pipeline.addFirst(
-          "proxy-protocol-packet-sender",
-          new ChannelInboundHandlerAdapter() {
-            @Override
-            public void channelActive(ChannelHandlerContext ctx) throws Exception {
-              var proxiedProtocol =
-                  clientAddress.getAddress() instanceof Inet4Address
-                      ? HAProxyProxiedProtocol.TCP4
-                      : HAProxyProxiedProtocol.TCP6;
-              var remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-              ctx.channel()
-                  .writeAndFlush(
-                      new HAProxyMessage(
-                          HAProxyProtocolVersion.V2,
-                          HAProxyCommand.PROXY,
-                          proxiedProtocol,
-                          clientAddress.getAddress().getHostAddress(),
-                          remoteAddress.getAddress().getHostAddress(),
-                          clientAddress.getPort(),
-                          remoteAddress.getPort()));
-              ctx.pipeline().remove(this);
-              ctx.pipeline().remove("proxy-protocol-encoder");
-              super.channelActive(ctx);
-            }
-          });
+        "proxy-protocol-packet-sender",
+        new ChannelInboundHandlerAdapter() {
+          @Override
+          public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            var proxiedProtocol =
+              clientAddress.getAddress() instanceof Inet4Address
+                ? HAProxyProxiedProtocol.TCP4
+                : HAProxyProxiedProtocol.TCP6;
+            var remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+            ctx.channel()
+              .writeAndFlush(
+                new HAProxyMessage(
+                  HAProxyProtocolVersion.V2,
+                  HAProxyCommand.PROXY,
+                  proxiedProtocol,
+                  clientAddress.getAddress().getHostAddress(),
+                  remoteAddress.getAddress().getHostAddress(),
+                  clientAddress.getPort(),
+                  remoteAddress.getPort()));
+            ctx.pipeline().remove(this);
+            ctx.pipeline().remove("proxy-protocol-encoder");
+            super.channelActive(ctx);
+          }
+        });
       pipeline.addFirst("proxy-protocol-encoder", HAProxyMessageEncoder.INSTANCE);
     }
   }
@@ -364,16 +367,16 @@ public class ViaClientSession extends TcpSession {
 
     final var toSend = sendingEvent.getPacket();
     channel
-        .writeAndFlush(toSend)
-        .addListener(
-            (ChannelFutureListener)
-                future -> {
-                  if (future.isSuccess()) {
-                    callPacketSent(toSend);
-                  } else {
-                    packetExceptionCaught(null, future.cause(), packet);
-                  }
-                });
+      .writeAndFlush(toSend)
+      .addListener(
+        (ChannelFutureListener)
+          future -> {
+            if (future.isSuccess()) {
+              callPacketSent(toSend);
+            } else {
+              packetExceptionCaught(null, future.cause(), packet);
+            }
+          });
   }
 
   @Override

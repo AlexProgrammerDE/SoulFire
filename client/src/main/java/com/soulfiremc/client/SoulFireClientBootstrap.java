@@ -49,36 +49,36 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
     var runHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
 
     Consumer<RemoteServerData> remoteServerConsumer =
-        remoteServerData -> {
-          var rpcClient =
-              new RPCClient(
-                  remoteServerData.serverAddress().host(),
-                  remoteServerData.serverAddress().port(),
-                  remoteServerData.token());
+      remoteServerData -> {
+        var rpcClient =
+          new RPCClient(
+            remoteServerData.serverAddress().host(),
+            remoteServerData.serverAddress().port(),
+            remoteServerData.token());
 
-          if (runHeadless) {
-            log.info("Starting CLI");
-            var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
-            cliManager.initCLI(args);
-          } else {
-            log.info("Starting GUI");
-            var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
-            guiManager.initGUI();
-          }
-        };
+        if (runHeadless) {
+          log.info("Starting CLI");
+          var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
+          cliManager.initCLI(args);
+        } else {
+          log.info("Starting GUI");
+          var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
+          guiManager.initGUI();
+        }
+      };
     Runnable runIntegratedServer =
-        () -> {
-          var host = getRPCHost("localhost");
-          var port = getRandomRPCPort();
+      () -> {
+        var host = getRPCHost("localhost");
+        var port = getRandomRPCPort();
 
-          log.info("Starting integrated server on {}:{}", host, port);
-          var soulFire =
-              new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
+        log.info("Starting integrated server on {}:{}", host, port);
+        var soulFire =
+          new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
 
-          var jwtToken = soulFire.generateIntegratedUserJWT();
-          remoteServerConsumer.accept(
-              new RemoteServerData(ServerAddress.fromStringAndPort(host, port), jwtToken));
-        };
+        var jwtToken = soulFire.generateIntegratedUserJWT();
+        remoteServerConsumer.accept(
+          new RemoteServerData(ServerAddress.fromStringAndPort(host, port), jwtToken));
+      };
     if (runHeadless) {
       var host = System.getProperty("sf.remoteHost");
       if (host == null) {
@@ -94,7 +94,7 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
         log.info("Using remote server on {}:{}", host, port);
 
         remoteServerConsumer.accept(
-            new RemoteServerData(ServerAddress.fromStringAndPort(host, port), token));
+          new RemoteServerData(ServerAddress.fromStringAndPort(host, port), token));
       }
     } else {
       GUIManager.loadGUIProperties();
@@ -104,7 +104,7 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
         runIntegratedServer.run();
       } else {
         SwingUtilities.invokeLater(
-            () -> new ServerSelectDialog(runIntegratedServer, remoteServerConsumer));
+          () -> new ServerSelectDialog(runIntegratedServer, remoteServerConsumer));
       }
     }
   }

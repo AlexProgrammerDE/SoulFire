@@ -47,9 +47,9 @@ public class ThemeUtil {
     var current = GUIClientProps.getString("terminal", TerminalTheme.THEMES[0].name());
 
     return Stream.of(TerminalTheme.THEMES)
-        .filter(theme -> theme.name().equals(current))
-        .findFirst()
-        .orElse(TerminalTheme.THEMES[0]);
+      .filter(theme -> theme.name().equals(current))
+      .findFirst()
+      .orElse(TerminalTheme.THEMES[0]);
   }
 
   /**
@@ -64,10 +64,10 @@ public class ThemeUtil {
 
     try {
       var theme =
-          Class.forName(themeSettings)
-              .asSubclass(BasicLookAndFeel.class)
-              .getDeclaredConstructor()
-              .newInstance();
+        Class.forName(themeSettings)
+          .asSubclass(BasicLookAndFeel.class)
+          .getDeclaredConstructor()
+          .newInstance();
 
       FlatAnimatedLafChange.showSnapshot();
 
