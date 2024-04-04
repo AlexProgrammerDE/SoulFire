@@ -79,8 +79,8 @@ public class BlocksDataGenerator implements IDataGenerator {
       var propertiesDesc = new JsonObject();
       for (var property : state.getProperties()) {
         var value = state.getValue(property);
-        if (value instanceof Number number) {
-          propertiesDesc.addProperty(property.getName(), number);
+        if (value instanceof Integer integer) {
+          propertiesDesc.addProperty(property.getName(), integer);
         } else if (value instanceof Boolean bool) {
           propertiesDesc.addProperty(property.getName(), bool);
         } else {

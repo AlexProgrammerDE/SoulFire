@@ -20,6 +20,8 @@ package com.soulfiremc.server.data;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.ToString;
@@ -27,12 +29,12 @@ import lombok.ToString;
 @ToString
 public class BlockStateProperties {
   private final Object2BooleanMap<String> booleanProperties;
-  private final Object2ObjectMap<String, Number> numberProperties;
+  private final Object2IntMap<String> intProperties;
   private final Object2ObjectMap<String, String> stringProperties;
 
   public BlockStateProperties(JsonObject properties) {
     this.booleanProperties = new Object2BooleanOpenHashMap<>();
-    this.numberProperties = new Object2ObjectOpenHashMap<>();
+    this.intProperties = new Object2IntOpenHashMap<>();
     this.stringProperties = new Object2ObjectOpenHashMap<>();
 
     if (properties == null) {
@@ -46,7 +48,8 @@ public class BlockStateProperties {
       if (value.isBoolean()) {
         booleanProperties.put(key, value.getAsBoolean());
       } else if (value.isNumber()) {
-        numberProperties.put(key, value.getAsNumber());
+        // All numeric values are int properties
+        intProperties.put(key, value.getAsInt());
       } else {
         stringProperties.put(key, value.getAsString());
       }
@@ -57,8 +60,8 @@ public class BlockStateProperties {
     return booleanProperties.getBoolean(key);
   }
 
-  public Number getNumber(String key) {
-    return numberProperties.get(key);
+  public int getInt(String key) {
+    return intProperties.getInt(key);
   }
 
   public String getString(String key) {
