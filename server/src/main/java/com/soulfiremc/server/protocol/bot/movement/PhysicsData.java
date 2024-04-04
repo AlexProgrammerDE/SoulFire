@@ -24,9 +24,6 @@ import lombok.Data;
 public class PhysicsData {
   public double gravity = 0.08;
   public float airdrag = 0.98F;
-  public double yawSpeed = 3.0;
-  public double pitchSpeed = 3.0;
-  public double playerSpeed = 0.1;
   public double sprintSpeed = 0.3F;
   public double sneakSpeed = 0.3;
   public double stepHeight = 0.6F;
@@ -36,9 +33,6 @@ public class PhysicsData {
   public double honeyblockJumpSpeed = 0.4;
   public double climbMaxSpeed = 0.15;
   public double climbSpeed = 0.2;
-  public float playerWidth = 0.6F;
-  public float playerHeight = 1.8F;
-  public float playerSneakHeight = 1.5F;
   public float waterSpeed = 0.8F;
   public float lavaSpeed = 0.5F;
   public float liquidSpeed = 0.02F;

@@ -81,13 +81,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         case FALL_1 -> Costs.FALL_1;
         case FALL_2 -> Costs.FALL_2;
         case FALL_3 -> Costs.FALL_3;
-        case JUMP -> Costs.JUMP;
+        case JUMP_UP_BLOCK -> Costs.JUMP_UP_BLOCK;
       };
 
     this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
     this.allowBlockActions =
       !diagonal
-        && (modifier == MovementModifier.JUMP
+        && (modifier == MovementModifier.JUMP_UP_BLOCK
         || modifier == MovementModifier.NORMAL
         || modifier == MovementModifier.FALL_1);
 
@@ -108,7 +108,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       + switch (modifier) {
       case NORMAL -> 0;
       case FALL_1 -> 1;
-      case FALL_2, JUMP -> 2;
+      case FALL_2, JUMP_UP_BLOCK -> 2;
       case FALL_3 -> 3;
     };
   }
@@ -116,7 +116,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   public List<SFVec3i> listRequiredFreeBlocks() {
     var requiredFreeBlocks = new ObjectArrayList<SFVec3i>(freeCapacity());
 
-    if (modifier == MovementModifier.JUMP) {
+    if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       // Make head block free (maybe head block is a slab)
       requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
 
@@ -223,7 +223,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var leftDirectionSide = blockDirection.leftSide();
     var rightDirectionSide = blockDirection.rightSide();
 
-    if (modifier == MovementModifier.JUMP) {
+    if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
       results[requiredFreeBlocks.indexOf(aboveHead)] =
         new BlockSafetyData[] {
@@ -319,7 +319,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Right side
           new BotActionManager.BlockPlaceData(
             rightDirectionSide.offset(floorBlock), leftDirectionSide.direction()));
-      case JUMP, FALL_1 -> // 4 - no scaffolding
+      case JUMP_UP_BLOCK, FALL_1 -> // 4 - no scaffolding
         List.of(
           // Below
           new BotActionManager.BlockPlaceData(floorBlock.sub(0, 1, 0), Direction.UP),

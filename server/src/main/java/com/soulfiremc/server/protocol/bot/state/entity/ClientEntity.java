@@ -196,6 +196,6 @@ public class ClientEntity extends Entity {
 
   @Override
   public float height() {
-    return this.controlState.sneaking() ? physics.playerSneakHeight : physics.playerHeight;
+    return this.controlState.sneaking() ? 1.5F : 1.8F;
   }
 }

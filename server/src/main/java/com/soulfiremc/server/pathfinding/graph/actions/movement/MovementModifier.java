@@ -26,7 +26,7 @@ public enum MovementModifier {
   FALL_1,
   FALL_2,
   FALL_3,
-  JUMP;
+  JUMP_UP_BLOCK;
 
   public static final MovementModifier[] VALUES = values();
 
@@ -36,11 +36,11 @@ public enum MovementModifier {
       case FALL_1 -> vector.add(0, -1, 0);
       case FALL_2 -> vector.add(0, -2, 0);
       case FALL_3 -> vector.add(0, -3, 0);
-      case JUMP -> vector.add(0, 1, 0);
+      case JUMP_UP_BLOCK -> vector.add(0, 1, 0);
     };
   }
 
   public SFVec3i offsetIfJump(SFVec3i vector) {
-    return this == MovementModifier.JUMP ? vector.add(0, 1, 0) : vector;
+    return this == MovementModifier.JUMP_UP_BLOCK ? vector.add(0, 1, 0) : vector;
   }
 }
