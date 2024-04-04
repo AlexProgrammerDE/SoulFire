@@ -74,7 +74,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     this.cost =
       (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT)
-        // Add mdoifier costs
+        // Add modifier costs
         // Jump up block gets a tiny bit extra (you can move midair)
         // But that's fine since we also want to slightly discourage jumping up
         + switch (modifier) {
