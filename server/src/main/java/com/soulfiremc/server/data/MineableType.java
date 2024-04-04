@@ -17,56 +17,26 @@
  */
 package com.soulfiremc.server.data;
 
+import com.soulfiremc.server.protocol.bot.state.TagsState;
 import java.util.Optional;
-import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum MineableType {
-  PICKAXE(
-      Set.of(
-          ItemType.WOODEN_PICKAXE,
-          ItemType.STONE_PICKAXE,
-          ItemType.IRON_PICKAXE,
-          ItemType.GOLDEN_PICKAXE,
-          ItemType.DIAMOND_PICKAXE,
-          ItemType.NETHERITE_PICKAXE),
-      BlockTags.MINEABLE_WITH_PICKAXE),
-  SHOVEL(
-      Set.of(
-          ItemType.WOODEN_SHOVEL,
-          ItemType.STONE_SHOVEL,
-          ItemType.IRON_SHOVEL,
-          ItemType.GOLDEN_SHOVEL,
-          ItemType.DIAMOND_SHOVEL,
-          ItemType.NETHERITE_SHOVEL),
-      BlockTags.MINEABLE_WITH_SHOVEL),
-  AXE(
-      Set.of(
-          ItemType.WOODEN_AXE,
-          ItemType.STONE_AXE,
-          ItemType.IRON_AXE,
-          ItemType.GOLDEN_AXE,
-          ItemType.DIAMOND_AXE,
-          ItemType.NETHERITE_AXE),
-      BlockTags.MINEABLE_WITH_AXE),
-  HOE(
-      Set.of(
-          ItemType.WOODEN_HOE,
-          ItemType.STONE_HOE,
-          ItemType.IRON_HOE,
-          ItemType.GOLDEN_HOE,
-          ItemType.DIAMOND_HOE,
-          ItemType.NETHERITE_HOE),
-      BlockTags.MINEABLE_WITH_HOE);
+  PICKAXE(ItemTags.PICKAXES, BlockTags.MINEABLE_WITH_PICKAXE),
+  SHOVEL(ItemTags.SHOVELS, BlockTags.MINEABLE_WITH_SHOVEL),
+  AXE(ItemTags.AXES, BlockTags.MINEABLE_WITH_AXE),
+  HOE(ItemTags.HOES, BlockTags.MINEABLE_WITH_HOE);
 
-  private final Set<ItemType> tools;
-  @Getter private final ResourceKey tagKey;
+  private final ResourceKey itemTagKey;
+  @Getter private final ResourceKey blockTagKey;
 
-  public static Optional<MineableType> getFromTool(ItemType itemType) {
-    for (var mineableType : MineableType.values()) {
-      if (mineableType.tools.contains(itemType)) {
+  public static MineableType[] VALUES = values();
+
+  public static Optional<MineableType> getFromTool(TagsState tagsState, ItemType itemType) {
+    for (var mineableType : VALUES) {
+      if (tagsState.isItemInTag(itemType, mineableType.itemTagKey)) {
         return Optional.of(mineableType);
       }
     }

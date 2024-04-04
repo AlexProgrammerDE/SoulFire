@@ -310,7 +310,7 @@ public class POVServer implements InternalPlugin {
 
                 session.send(new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
               });
-      server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256); // default
+      server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
 
       server.addListener(
           new ServerAdapter() {

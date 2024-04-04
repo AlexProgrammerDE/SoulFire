@@ -19,7 +19,6 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.ItemType;
-import com.soulfiremc.server.data.TierType;
 
 public class ItemTypeHelper {
   private ItemTypeHelper() {}
@@ -29,7 +28,7 @@ public class ItemTypeHelper {
   }
 
   public static boolean isTool(ItemType type) {
-    return TierType.getTier(type).isPresent() || type == ItemType.SHEARS;
+    return type.tierType() != null || type == ItemType.SHEARS;
   }
 
   public static boolean isUnsafeToPlace(ItemType type) {

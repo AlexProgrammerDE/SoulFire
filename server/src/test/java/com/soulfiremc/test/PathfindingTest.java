@@ -39,6 +39,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 public class PathfindingTest {
+  // TODO: Implement default tagstate for testing
   private static final MinecraftGraph DEFAULT_GRAPH = new MinecraftGraph(new TagsState());
 
   @Test

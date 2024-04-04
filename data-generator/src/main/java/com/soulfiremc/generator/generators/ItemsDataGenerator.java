@@ -29,6 +29,8 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.Tiers;
 
 public class ItemsDataGenerator implements IDataGenerator {
   private static List<Item> calculateItemsToRepairWith(Item sourceItem) {
@@ -47,6 +49,10 @@ public class ItemsDataGenerator implements IDataGenerator {
     itemDesc.addProperty("key", BuiltInRegistries.ITEM.getKey(item).toString());
 
     itemDesc.addProperty("maxStackSize", item.getMaxStackSize());
+
+    if (item instanceof TieredItem tieredItem) {
+      itemDesc.addProperty("tierType", ((Tiers) tieredItem.getTier()).name());
+    }
 
     if (item.canBeDepleted()) {
       var depletionData = new JsonObject();

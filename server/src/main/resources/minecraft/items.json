@@ -4124,6 +4124,7 @@
     "id": 814,
     "key": "minecraft:wooden_sword",
     "maxStackSize": 1,
+    "tierType": "WOOD",
     "depletionData": {
       "repairWith": [
         "oak_planks",
@@ -4168,6 +4169,7 @@
     "id": 815,
     "key": "minecraft:wooden_shovel",
     "maxStackSize": 1,
+    "tierType": "WOOD",
     "depletionData": {
       "repairWith": [
         "oak_planks",
@@ -4212,6 +4214,7 @@
     "id": 816,
     "key": "minecraft:wooden_pickaxe",
     "maxStackSize": 1,
+    "tierType": "WOOD",
     "depletionData": {
       "repairWith": [
         "oak_planks",
@@ -4256,6 +4259,7 @@
     "id": 817,
     "key": "minecraft:wooden_axe",
     "maxStackSize": 1,
+    "tierType": "WOOD",
     "depletionData": {
       "repairWith": [
         "oak_planks",
@@ -4300,6 +4304,7 @@
     "id": 818,
     "key": "minecraft:wooden_hoe",
     "maxStackSize": 1,
+    "tierType": "WOOD",
     "depletionData": {
       "repairWith": [
         "oak_planks",
@@ -4344,6 +4349,7 @@
     "id": 819,
     "key": "minecraft:stone_sword",
     "maxStackSize": 1,
+    "tierType": "STONE",
     "depletionData": {
       "repairWith": [
         "cobbled_deepslate",
@@ -4380,6 +4386,7 @@
     "id": 820,
     "key": "minecraft:stone_shovel",
     "maxStackSize": 1,
+    "tierType": "STONE",
     "depletionData": {
       "repairWith": [
         "cobbled_deepslate",
@@ -4416,6 +4423,7 @@
     "id": 821,
     "key": "minecraft:stone_pickaxe",
     "maxStackSize": 1,
+    "tierType": "STONE",
     "depletionData": {
       "repairWith": [
         "cobbled_deepslate",
@@ -4452,6 +4460,7 @@
     "id": 822,
     "key": "minecraft:stone_axe",
     "maxStackSize": 1,
+    "tierType": "STONE",
     "depletionData": {
       "repairWith": [
         "cobbled_deepslate",
@@ -4488,6 +4497,7 @@
     "id": 823,
     "key": "minecraft:stone_hoe",
     "maxStackSize": 1,
+    "tierType": "STONE",
     "depletionData": {
       "repairWith": [
         "cobbled_deepslate",
@@ -4524,6 +4534,7 @@
     "id": 824,
     "key": "minecraft:golden_sword",
     "maxStackSize": 1,
+    "tierType": "GOLD",
     "depletionData": {
       "repairWith": [
         "gold_ingot"
@@ -4558,6 +4569,7 @@
     "id": 825,
     "key": "minecraft:golden_shovel",
     "maxStackSize": 1,
+    "tierType": "GOLD",
     "depletionData": {
       "repairWith": [
         "gold_ingot"
@@ -4592,6 +4604,7 @@
     "id": 826,
     "key": "minecraft:golden_pickaxe",
     "maxStackSize": 1,
+    "tierType": "GOLD",
     "depletionData": {
       "repairWith": [
         "gold_ingot"
@@ -4626,6 +4639,7 @@
     "id": 827,
     "key": "minecraft:golden_axe",
     "maxStackSize": 1,
+    "tierType": "GOLD",
     "depletionData": {
       "repairWith": [
         "gold_ingot"
@@ -4660,6 +4674,7 @@
     "id": 828,
     "key": "minecraft:golden_hoe",
     "maxStackSize": 1,
+    "tierType": "GOLD",
     "depletionData": {
       "repairWith": [
         "gold_ingot"
@@ -4694,6 +4709,7 @@
     "id": 829,
     "key": "minecraft:iron_sword",
     "maxStackSize": 1,
+    "tierType": "IRON",
     "depletionData": {
       "repairWith": [
         "iron_ingot"
@@ -4728,6 +4744,7 @@
     "id": 830,
     "key": "minecraft:iron_shovel",
     "maxStackSize": 1,
+    "tierType": "IRON",
     "depletionData": {
       "repairWith": [
         "iron_ingot"
@@ -4762,6 +4779,7 @@
     "id": 831,
     "key": "minecraft:iron_pickaxe",
     "maxStackSize": 1,
+    "tierType": "IRON",
     "depletionData": {
       "repairWith": [
         "iron_ingot"
@@ -4796,6 +4814,7 @@
     "id": 832,
     "key": "minecraft:iron_axe",
     "maxStackSize": 1,
+    "tierType": "IRON",
     "depletionData": {
       "repairWith": [
         "iron_ingot"
@@ -4830,6 +4849,7 @@
     "id": 833,
     "key": "minecraft:iron_hoe",
     "maxStackSize": 1,
+    "tierType": "IRON",
     "depletionData": {
       "repairWith": [
         "iron_ingot"
@@ -4864,6 +4884,7 @@
     "id": 834,
     "key": "minecraft:diamond_sword",
     "maxStackSize": 1,
+    "tierType": "DIAMOND",
     "depletionData": {
       "repairWith": [
         "diamond"
@@ -4898,6 +4919,7 @@
     "id": 835,
     "key": "minecraft:diamond_shovel",
     "maxStackSize": 1,
+    "tierType": "DIAMOND",
     "depletionData": {
       "repairWith": [
         "diamond"
@@ -4932,6 +4954,7 @@
     "id": 836,
     "key": "minecraft:diamond_pickaxe",
     "maxStackSize": 1,
+    "tierType": "DIAMOND",
     "depletionData": {
       "repairWith": [
         "diamond"
@@ -4966,6 +4989,7 @@
     "id": 837,
     "key": "minecraft:diamond_axe",
     "maxStackSize": 1,
+    "tierType": "DIAMOND",
     "depletionData": {
       "repairWith": [
         "diamond"
@@ -5000,6 +5024,7 @@
     "id": 838,
     "key": "minecraft:diamond_hoe",
     "maxStackSize": 1,
+    "tierType": "DIAMOND",
     "depletionData": {
       "repairWith": [
         "diamond"
@@ -5034,6 +5059,7 @@
     "id": 839,
     "key": "minecraft:netherite_sword",
     "maxStackSize": 1,
+    "tierType": "NETHERITE",
     "depletionData": {
       "repairWith": [
         "netherite_ingot"
@@ -5068,6 +5094,7 @@
     "id": 840,
     "key": "minecraft:netherite_shovel",
     "maxStackSize": 1,
+    "tierType": "NETHERITE",
     "depletionData": {
       "repairWith": [
         "netherite_ingot"
@@ -5102,6 +5129,7 @@
     "id": 841,
     "key": "minecraft:netherite_pickaxe",
     "maxStackSize": 1,
+    "tierType": "NETHERITE",
     "depletionData": {
       "repairWith": [
         "netherite_ingot"
@@ -5136,6 +5164,7 @@
     "id": 842,
     "key": "minecraft:netherite_axe",
     "maxStackSize": 1,
+    "tierType": "NETHERITE",
     "depletionData": {
       "repairWith": [
         "netherite_ingot"
@@ -5170,6 +5199,7 @@
     "id": 843,
     "key": "minecraft:netherite_hoe",
     "maxStackSize": 1,
+    "tierType": "NETHERITE",
     "depletionData": {
       "repairWith": [
         "netherite_ingot"

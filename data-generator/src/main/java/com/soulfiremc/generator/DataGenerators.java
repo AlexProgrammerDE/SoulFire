@@ -25,6 +25,7 @@ import com.soulfiremc.generator.generators.AttributesJavaGenerator;
 import com.soulfiremc.generator.generators.BlockCollisionShapesDataGenerator;
 import com.soulfiremc.generator.generators.BlocksDataGenerator;
 import com.soulfiremc.generator.generators.BlocksJavaGenerator;
+import com.soulfiremc.generator.generators.DefaultTagsDataGenerator;
 import com.soulfiremc.generator.generators.EffectsDataGenerator;
 import com.soulfiremc.generator.generators.EnchantmentsDataGenerator;
 import com.soulfiremc.generator.generators.EnchantmentsJavaGenerator;
@@ -68,6 +69,7 @@ public class DataGenerators {
           new TagsDataGenerator.BlockTagsDataGenerator(),
           new TagsDataGenerator.ItemTagsDataGenerator(),
           new TagsDataGenerator.EntityTypeTagsDataGenerator(),
+          new DefaultTagsDataGenerator(),
           new WorldExporterGenerator());
 
   private DataGenerators() {}

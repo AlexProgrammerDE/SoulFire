@@ -29,7 +29,8 @@ public record ItemType(
     DepletionData depletionData,
     FoodProperties foodProperties,
     EquipmentSlot attributeSlot,
-    List<Attribute> attributes) {
+    List<Attribute> attributes,
+    TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   // VALUES REPLACE
