@@ -110,23 +110,6 @@ public class Costs {
   public static final BlockState SOLID_PLACED_BLOCK_STATE =
     BlockState.forDefaultBlockType(BlockType.STONE);
 
-  public static void main(String[] args) {
-    var y = 0d;
-    for (var i = 0; i < 32; i++) {
-      var acceleration = getAcceleration(i);
-      System.out.println(i + " acc: " + getAcceleration(i) + " y: " + y);
-      y += acceleration;
-    }
-  }
-
-  public static double getAcceleration(double ticks) {
-    if (ticks == 0) {
-      return 0.42;
-    }
-
-    return (getAcceleration(ticks - 1) - 0.08) * 0.98;
-  }
-
   private Costs() {}
 
   public static BlockMiningCosts calculateBlockBreakCost(

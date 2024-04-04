@@ -74,8 +74,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     this.cost =
       (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT)
-        // Add additional "discouraged" costs to prevent the bot from
-        // doing too much parkour
+        // Add mdoifier costs
+        // Jump up block gets a tiny bit extra (you can move midair)
+        // But that's fine since we also want to slightly discourage jumping up
         + switch (modifier) {
         case NORMAL -> 0;
         case FALL_1 -> Costs.FALL_1;
@@ -86,10 +87,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
     this.allowBlockActions =
-      !diagonal
-        && (modifier == MovementModifier.JUMP_UP_BLOCK
-        || modifier == MovementModifier.NORMAL
-        || modifier == MovementModifier.FALL_1);
+      !diagonal && switch (modifier) {
+        case JUMP_UP_BLOCK, NORMAL, FALL_1 -> true;
+        default -> false;
+      };
 
     if (allowBlockActions) {
       blockBreakCosts = new MovementMiningCost[freeCapacity()];
