@@ -709,9 +709,8 @@ public final class SessionDataManager {
     for (var biomeData : packet.getChunkBiomeData()) {
       var chunkData = level.chunks().getChunk(biomeData.getX(), biomeData.getZ());
 
+      // Vanilla silently ignores updates for unknown chunks
       if (chunkData == null) {
-        log.warn(
-          "Received biome update for unknown chunk: {} {}", biomeData.getX(), biomeData.getZ());
         return;
       }
 
@@ -752,11 +751,8 @@ public final class SessionDataManager {
 
     var chunkData = level.chunks().getChunk(packet.getChunkX(), packet.getChunkZ());
 
+    // Vanilla silently ignores updates for unknown chunks
     if (chunkData == null) {
-      log.warn(
-        "Received section blocks update for unknown chunk: {} {}",
-        packet.getChunkX(),
-        packet.getChunkZ());
       return;
     }
 
