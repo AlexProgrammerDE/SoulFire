@@ -26,11 +26,15 @@ import com.soulfiremc.server.account.SFJavaMicrosoftAuthService;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.account.SFTheAlteningAuthService;
 import com.soulfiremc.settings.proxy.SFProxy;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   private static @Nullable SFProxy convertProxy(AuthRequest request) {
@@ -43,9 +47,9 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
 
   @Override
   public void login(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
-    try {
-      ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.AUTHENTICATE_MC_ACCOUNT);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.AUTHENTICATE_MC_ACCOUNT);
 
+    try {
       var account =
         (switch (request.getService()) {
           case MICROSOFT_JAVA -> new SFJavaMicrosoftAuthService();
@@ -59,8 +63,9 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
 
       responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();
-    } catch (Exception e) {
-      responseObserver.onError(e);
+    } catch (Throwable t) {
+      log.error("Error authenticating account", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
 }

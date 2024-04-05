@@ -292,7 +292,8 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // Init client entity
-    clientEntity = new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, getCurrentLevel());
+    clientEntity =
+      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, getCurrentLevel());
     clientEntity.showReducedDebug(packet.isReducedDebugInfo());
     entityTrackerState.addEntity(clientEntity);
   }

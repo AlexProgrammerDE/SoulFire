@@ -22,12 +22,16 @@ import com.soulfiremc.grpc.generated.ClientPlugin;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.UIClientDataResponse;
 import com.soulfiremc.server.SoulFireServer;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
@@ -57,13 +61,18 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
     ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SERVER_CONFIG);
 
-    var username = ServerRPCConstants.CLIENT_ID_CONTEXT_KEY.get();
-    responseObserver.onNext(
-      UIClientDataResponse.newBuilder()
-        .setUsername(username)
-        .addAllPlugins(getExtensions())
-        .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
-        .build());
-    responseObserver.onCompleted();
+    try {
+      var username = ServerRPCConstants.CLIENT_ID_CONTEXT_KEY.get();
+      responseObserver.onNext(
+        UIClientDataResponse.newBuilder()
+          .setUsername(username)
+          .addAllPlugins(getExtensions())
+          .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
+          .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting client data", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 }

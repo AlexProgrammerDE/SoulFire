@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server.grpc;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+
 public interface AuthenticatedUser {
   String getUsername();
 
@@ -24,7 +27,8 @@ public interface AuthenticatedUser {
 
   default void canAccessOrThrow(Resource resource) {
     if (!canAccess(resource)) {
-      throw new IllegalStateException("User does not have access to resource: " + resource);
+      throw new StatusRuntimeException(
+        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
     }
   }
 }

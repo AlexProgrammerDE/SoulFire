@@ -96,7 +96,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var actions = new ObjectArrayList<WorldAction>();
     var inventory = previousEntityState.inventory();
     var levelState = previousEntityState.levelState();
-    var cost = Costs.JUMP_UP_AND_PLACE_BELOW;
+    var cost = Costs.TOWER_COST;
 
     for (var breakCost : blockBreakCosts) {
       if (breakCost == null) {

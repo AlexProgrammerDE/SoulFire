@@ -43,6 +43,23 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Costs {
   /**
+   * The distance in blocks between two points that are directly next to each other.
+   */
+  public static final double STRAIGHT = 1;
+  /**
+   * The distance in blocks between two points that are diagonal to each other.
+   * Calculated using the Pythagorean theorem.
+   */
+  public static final double DIAGONAL = Math.sqrt(2);
+  /**
+   * We don't want a bot that frequently tries to break blocks instead of walking around them.
+   */
+  public static final double BREAK_BLOCK_ADDITION = 2;
+  /**
+   * We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
+   */
+  public static final double PLACE_BLOCK = 5;
+  /**
    * A normal server runs at 20 ticks per second.
    */
   public static final double TICKS_PER_SECOND = 20;
@@ -55,18 +72,10 @@ public class Costs {
    */
   public static final double TICKS_PER_BLOCK = TICKS_PER_SECOND / BLOCKS_PER_SECOND;
   /**
-   * The distance in blocks between two points that are directly next to each other.
-   */
-  public static final double STRAIGHT = 1;
-  /**
-   * The distance in blocks between two points that are diagonal to each other.
-   * Calculated using the Pythagorean theorem.
-   */
-  public static final double DIAGONAL = Math.sqrt(2);
-  /**
    * It takes ~9 ticks for a player to jump up, decelerate and then land one block higher.
    */
   public static final double JUMP_UP_BLOCK = 9 / TICKS_PER_BLOCK;
+  public static final double TOWER_COST = JUMP_UP_BLOCK + PLACE_BLOCK;
   /**
    * It takes ~8 ticks for a player to jump up, decelerate and then land on the same y level.
    */
@@ -87,15 +96,6 @@ public class Costs {
    * Falling 3 blocks takes ~9.48 ticks.
    */
   public static final double FALL_3 = 9.48 / TICKS_PER_BLOCK;
-  /**
-   * We don't want a bot that frequently tries to break blocks instead of walking around them.
-   */
-  public static final double BREAK_BLOCK_ADDITION = 2;
-  /**
-   * We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
-   */
-  public static final double PLACE_BLOCK = 5;
-  public static final double JUMP_UP_AND_PLACE_BELOW = JUMP_UP_BLOCK + PLACE_BLOCK;
   /**
    * Sliding around a corner is roughly like walking two blocks.
    * That's why even through the distance from A to B diagonally is DIAGONAL, the cost is actually 2.

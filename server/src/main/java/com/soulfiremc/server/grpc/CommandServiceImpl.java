@@ -25,10 +25,14 @@ import com.soulfiremc.grpc.generated.CommandRequest;
 import com.soulfiremc.grpc.generated.CommandResponse;
 import com.soulfiremc.grpc.generated.CommandServiceGrpc;
 import com.soulfiremc.server.ServerCommandManager;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
   private final ServerCommandManager serverCommandManager;
@@ -38,10 +42,15 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_EXECUTION);
 
-    var code = serverCommandManager.execute(request.getCommand());
+    try {
+      var code = serverCommandManager.execute(request.getCommand());
 
-    responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
-    responseObserver.onCompleted();
+      responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error executing command", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
@@ -50,11 +59,16 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     StreamObserver<CommandCompletionResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_COMPLETION);
 
-    var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
+    try {
+      var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
 
-    responseObserver.onNext(
-      CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
-    responseObserver.onCompleted();
+      responseObserver.onNext(
+        CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error tab completing", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
@@ -62,17 +76,22 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_HISTORY);
 
-    var history = serverCommandManager.getCommandHistory();
-    var builder = CommandHistoryResponse.newBuilder();
-    for (var entry : history) {
-      builder
-        .addEntriesBuilder()
-        .setTimestamp(entry.getKey().getEpochSecond())
-        .setCommand(entry.getValue())
-        .build();
-    }
+    try {
+      var history = serverCommandManager.getCommandHistory();
+      var builder = CommandHistoryResponse.newBuilder();
+      for (var entry : history) {
+        builder
+          .addEntriesBuilder()
+          .setTimestamp(entry.getKey().getEpochSecond())
+          .setCommand(entry.getValue())
+          .build();
+      }
 
-    responseObserver.onNext(builder.build());
-    responseObserver.onCompleted();
+      responseObserver.onNext(builder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting history", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 }

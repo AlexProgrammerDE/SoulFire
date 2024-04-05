@@ -22,6 +22,8 @@ import com.soulfiremc.grpc.generated.LogResponse;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.system.SystemLogEvent;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
@@ -29,7 +31,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
@@ -47,9 +51,14 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SUBSCRIBE_LOGS);
 
-    sendPreviousLogs(request.getPrevious(), responseObserver);
-    SoulFireAPI.registerListener(SystemLogEvent.class,
-      new LogEventListener((ServerCallStreamObserver<LogResponse>) responseObserver));
+    try {
+      sendPreviousLogs(request.getPrevious(), responseObserver);
+      SoulFireAPI.registerListener(SystemLogEvent.class,
+        new LogEventListener((ServerCallStreamObserver<LogResponse>) responseObserver));
+    } catch (Throwable t) {
+      log.error("Error subscribing to logs", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {

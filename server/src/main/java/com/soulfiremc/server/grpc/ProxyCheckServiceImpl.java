@@ -24,21 +24,25 @@ import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.ReactorHttpHelper;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   @Override
   public void check(
     ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
-    try {
-      ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.CHECK_PROXY);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.CHECK_PROXY);
 
+    try {
       var url =
         switch (request.getTarget()) {
           case IPIFY -> ReactorHttpHelper.createURL("https://api.ipify.org");
@@ -77,8 +81,9 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
 
       responseObserver.onNext(ProxyCheckResponse.newBuilder().addAllResponse(responses).build());
       responseObserver.onCompleted();
-    } catch (Exception e) {
-      responseObserver.onError(e);
+    } catch (Throwable t) {
+      log.error("Error checking proxy", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
 }

@@ -62,7 +62,8 @@ public class ClientEntity extends Entity {
   private int positionReminder = 0;
 
   public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection, SessionDataManager sessionDataManager, ControlState controlState, LevelState level) {
+    int entityId, UUID uuid, BotConnection connection, SessionDataManager sessionDataManager, ControlState controlState,
+    LevelState level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
     this.sessionDataManager = sessionDataManager;

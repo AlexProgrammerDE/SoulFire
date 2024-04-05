@@ -26,10 +26,14 @@ import com.soulfiremc.grpc.generated.AttackStopRequest;
 import com.soulfiremc.grpc.generated.AttackStopResponse;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   private final SoulFireServer soulFireServer;
@@ -39,11 +43,16 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
     AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.START_ATTACK);
 
-    var settingsHolder = SettingsHolder.deserialize(request);
+    try {
+      var settingsHolder = SettingsHolder.deserialize(request);
 
-    var id = soulFireServer.startAttack(settingsHolder);
-    responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
-    responseObserver.onCompleted();
+      var id = soulFireServer.startAttack(settingsHolder);
+      responseObserver.onNext(AttackStartResponse.newBuilder().setId(id).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error starting attack", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
@@ -52,14 +61,19 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
     StreamObserver<AttackStateToggleResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.TOGGLE_ATTACK);
 
-    soulFireServer.toggleAttackState(
-      request.getId(),
-      switch (request.getNewState()) {
-        case PAUSE -> true;
-        case RESUME, UNRECOGNIZED -> false;
-      });
-    responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
-    responseObserver.onCompleted();
+    try {
+      soulFireServer.toggleAttackState(
+        request.getId(),
+        switch (request.getNewState()) {
+          case PAUSE -> true;
+          case RESUME, UNRECOGNIZED -> false;
+        });
+      responseObserver.onNext(AttackStateToggleResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error toggling attack state", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
@@ -67,8 +81,13 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
     AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.STOP_ATTACK);
 
-    soulFireServer.stopAttack(request.getId());
-    responseObserver.onNext(AttackStopResponse.newBuilder().build());
-    responseObserver.onCompleted();
+    try {
+      soulFireServer.stopAttack(request.getId());
+      responseObserver.onNext(AttackStopResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error stopping attack", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 }
