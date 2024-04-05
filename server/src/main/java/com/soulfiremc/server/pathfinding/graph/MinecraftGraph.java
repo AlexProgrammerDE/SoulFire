@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
@@ -289,7 +290,7 @@ public record MinecraftGraph(TagsState tagsState) {
 
   private static TriState isBlockFree(BlockState blockState) {
     return TriState.byBoolean(
-      blockState.blockShapeGroup().hasNoCollisions() && !blockState.blockType().fluidSource());
+      blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY);
   }
 
   public void insertActions(
@@ -432,8 +433,8 @@ public record MinecraftGraph(TagsState tagsState) {
 
         var unsafe =
           switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidSource();
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
           };
 
         if (!unsafe) {
@@ -589,8 +590,8 @@ public record MinecraftGraph(TagsState tagsState) {
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
         var unsafe =
           switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidSource();
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
           };
 
         if (unsafe) {
@@ -655,8 +656,8 @@ public record MinecraftGraph(TagsState tagsState) {
 
         var unsafe =
           switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidSource() || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidSource();
+            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
+            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
           };
 
         if (!unsafe) {

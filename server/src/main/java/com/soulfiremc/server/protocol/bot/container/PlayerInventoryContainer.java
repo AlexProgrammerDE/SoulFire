@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
+import com.soulfiremc.server.data.EquipmentSlot;
 import lombok.Getter;
 
 @Getter
@@ -38,6 +39,17 @@ public class PlayerInventoryContainer extends Container {
   public PlayerInventoryContainer(InventoryManager inventoryManager) {
     super(46, 0);
     this.inventoryManager = inventoryManager;
+  }
+
+  public ContainerSlot getFromEquipmentSlot(EquipmentSlot slot) {
+    return switch (slot) {
+      case MAINHAND -> getHeldItem();
+      case OFFHAND -> getOffhand();
+      case HEAD -> getHelmet();
+      case CHEST -> getChestplate();
+      case LEGS -> getLeggings();
+      case FEET -> getBoots();
+    };
   }
 
   public ContainerSlot getHeldItem() {

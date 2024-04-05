@@ -57,7 +57,6 @@ public class BotMovementManager {
   private final PlayerMovementState movementState;
   private final PhysicsData physics;
   private final TagsState tagsState;
-  private final SessionDataManager dataManager;
   private final ControlState controlState;
 
   public BotMovementManager(
@@ -67,7 +66,6 @@ public class BotMovementManager {
     this.clientEntity = clientEntity;
     this.movementState = movementState;
     this.physics = clientEntity.physics();
-    this.dataManager = dataManager;
     this.tagsState = dataManager.tagsState();
     this.controlState = dataManager.controlState();
   }
@@ -236,11 +234,7 @@ public class BotMovementManager {
   }
 
   public void tick() {
-    var world = dataManager.getCurrentLevel();
-    if (world == null) {
-      return;
-    }
-
+    var world = clientEntity.level();
     var vel = movementState.vel;
 
     {
@@ -477,7 +471,7 @@ public class BotMovementManager {
 
   private float getFlyingSpeed() {
     if (movementState.flying) {
-      var abilitiesData = dataManager.abilitiesData();
+      var abilitiesData = clientEntity.abilities();
       var flySpeed = abilitiesData == null ? 0.05F : abilitiesData.flySpeed();
       return controlState.sprinting() ? flySpeed * 2.0F : flySpeed;
     } else {

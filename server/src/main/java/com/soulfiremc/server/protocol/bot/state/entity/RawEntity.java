@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.protocol.bot.state.LevelState;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,12 +30,13 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class RawEntity extends Entity {
   private final ObjectData data;
-  private float yaw;
-  private float headYaw;
-  private float pitch;
 
-  public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data) {
-    super(entityId, uuid, type);
+  public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data,
+                   LevelState level,
+                   double x, double y, double z,
+                   float yaw, float pitch, float headYaw,
+                   double motionX, double motionY, double motionZ) {
+    super(entityId, uuid, type, level, x, y, z, yaw, pitch, headYaw, motionX, motionY, motionZ);
     this.data = data;
   }
 }

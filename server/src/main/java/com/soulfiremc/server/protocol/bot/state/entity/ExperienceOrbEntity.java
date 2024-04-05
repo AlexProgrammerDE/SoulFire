@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.protocol.bot.state.LevelState;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,8 +28,8 @@ import lombok.Getter;
 public class ExperienceOrbEntity extends Entity {
   private final int expValue;
 
-  public ExperienceOrbEntity(int entityId, int expValue) {
-    super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB);
+  public ExperienceOrbEntity(int entityId, int expValue, LevelState level, double x, double y, double z) {
+    super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB, level, x, y, z, 0, 0, 0, 0, 0, 0);
     this.expValue = expValue;
   }
 }

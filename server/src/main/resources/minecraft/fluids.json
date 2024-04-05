@@ -1,0 +1,22 @@
+[
+  {
+    "id": 0,
+    "key": "minecraft:empty"
+  },
+  {
+    "id": 1,
+    "key": "minecraft:flowing_water"
+  },
+  {
+    "id": 2,
+    "key": "minecraft:water"
+  },
+  {
+    "id": 3,
+    "key": "minecraft:flowing_lava"
+  },
+  {
+    "id": 4,
+    "key": "minecraft:lava"
+  }
+]

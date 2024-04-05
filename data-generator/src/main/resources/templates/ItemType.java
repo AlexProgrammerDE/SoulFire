@@ -36,7 +36,9 @@ public record ItemType(
   // VALUES REPLACE
 
   public static ItemType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+    var instance =
+      GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+
     FROM_ID.put(instance.id(), instance);
     return instance;
   }

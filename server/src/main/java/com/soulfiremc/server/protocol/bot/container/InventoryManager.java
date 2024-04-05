@@ -23,8 +23,10 @@ import com.github.steveice10.mc.protocol.data.game.inventory.ContainerActionType
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSetCarriedItemPacket;
+import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -35,7 +37,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.jetbrains.annotations.Nullable;
 
 @Data
 @RequiredArgsConstructor
@@ -47,6 +48,8 @@ public class InventoryManager {
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
   @ToString.Exclude
   private final SessionDataManager dataManager;
+  @ToString.Exclude
+  private final BotConnection connection;
   private Container openContainer;
   private int heldItemSlot = 0;
   private int lastStateId = -1;
@@ -78,15 +81,15 @@ public class InventoryManager {
   }
 
   public void sendHeldItemChange() {
-    dataManager.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
+    connection.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
   }
 
   public void closeInventory() {
     if (openContainer != null) {
-      dataManager.sendPacket(new ServerboundContainerClosePacket(openContainer.id()));
+      connection.sendPacket(new ServerboundContainerClosePacket(openContainer.id()));
       openContainer = null;
     } else {
-      dataManager.sendPacket(new ServerboundContainerClosePacket(0));
+      connection.sendPacket(new ServerboundContainerClosePacket(0));
     }
   }
 
@@ -132,7 +135,7 @@ public class InventoryManager {
     Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
     changes.put(slot, slotItem);
 
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundContainerClickPacket(
         openContainer.id(),
         lastStateId,
@@ -144,15 +147,16 @@ public class InventoryManager {
   }
 
   public void applyItemAttributes() {
-    applyIfMatches(playerInventory.getHeldItem().item(), EquipmentSlot.MAINHAND);
-    applyIfMatches(playerInventory.getOffhand().item(), EquipmentSlot.OFFHAND);
-    applyIfMatches(playerInventory.getHelmet().item(), EquipmentSlot.HEAD);
-    applyIfMatches(playerInventory.getChestplate().item(), EquipmentSlot.CHEST);
-    applyIfMatches(playerInventory.getLeggings().item(), EquipmentSlot.LEGS);
-    applyIfMatches(playerInventory.getBoots().item(), EquipmentSlot.FEET);
+    applyIfMatches(EquipmentSlot.MAINHAND);
+    applyIfMatches(EquipmentSlot.OFFHAND);
+    applyIfMatches(EquipmentSlot.HEAD);
+    applyIfMatches(EquipmentSlot.CHEST);
+    applyIfMatches(EquipmentSlot.LEGS);
+    applyIfMatches(EquipmentSlot.FEET);
   }
 
-  private void applyIfMatches(@Nullable SFItemStack item, EquipmentSlot equipmentSlot) {
+  private void applyIfMatches(EquipmentSlot equipmentSlot) {
+    var item = playerInventory.getFromEquipmentSlot(equipmentSlot).item();
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {
@@ -176,5 +180,26 @@ public class InventoryManager {
     }
 
     lastInEquipment.put(equipmentSlot, item == null ? null : item.type());
+  }
+
+  public boolean hasEnchantment(EnchantmentType enchantmentType) {
+    return getEnchantmentLevel(enchantmentType) > 0;
+  }
+
+  public int getEnchantmentLevel(EnchantmentType enchantmentType) {
+    var highestLevel = 0;
+    for (var equipmentSlot : enchantmentType.slots()) {
+      var item = playerInventory.getFromEquipmentSlot(equipmentSlot).item();
+      if (item == null) {
+        continue;
+      }
+
+      var level = item.getEnchantmentLevel(enchantmentType);
+      if (level > highestLevel) {
+        highestLevel = level;
+      }
+    }
+
+    return highestLevel;
   }
 }

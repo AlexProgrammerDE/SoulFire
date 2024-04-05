@@ -1,0 +1,64 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.data;
+
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import lombok.AccessLevel;
+import lombok.With;
+
+@SuppressWarnings("unused")
+@With(value = AccessLevel.PRIVATE)
+public record FluidType(int id, ResourceKey key) {
+  public static final Object2ReferenceMap<ResourceKey, FluidType> FROM_KEY =
+    new Object2ReferenceOpenHashMap<>();
+
+  public static final FluidType EMPTY = register("minecraft:empty");
+  public static final FluidType FLOWING_WATER = register("minecraft:flowing_water");
+  public static final FluidType WATER = register("minecraft:water");
+  public static final FluidType FLOWING_LAVA = register("minecraft:flowing_lava");
+  public static final FluidType LAVA = register("minecraft:lava");
+
+  public static FluidType register(String key) {
+    var instance =
+      GsonDataHelper.fromJson("/minecraft/fluids.json", key, FluidType.class);
+
+    FROM_KEY.put(instance.key(), instance);
+    return instance;
+  }
+
+  public static FluidType getByKey(ResourceKey key) {
+    return FROM_KEY.get(key);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof FluidType other)) {
+      return false;
+    }
+    return id == other.id;
+  }
+
+  @Override
+  public int hashCode() {
+    return id;
+  }
+}

@@ -106,7 +106,6 @@ import com.github.steveice10.opennbt.tag.builtin.IntTag;
 import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
-import com.github.steveice10.packetlib.packet.Packet;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
@@ -188,8 +187,8 @@ public final class SessionDataManager {
   private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
-  private final InventoryManager inventoryManager = new InventoryManager(this);
-  private final BotActionManager botActionManager = new BotActionManager(this);
+  private final InventoryManager inventoryManager;
+  private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
   private ClientEntity clientEntity;
@@ -223,6 +222,8 @@ public final class SessionDataManager {
     this.soulFireServer = connection.soulFireServer();
     this.session = connection.session();
     this.connection = connection;
+    this.inventoryManager = new InventoryManager(this, connection);
+    this.botActionManager = new BotActionManager(this, connection);
   }
 
   private static String toPlainText(Component component) {
@@ -265,7 +266,7 @@ public final class SessionDataManager {
       var name = dimension.<StringTag>get("name").getValue();
       int id = dimension.<IntTag>get("id").getValue();
 
-      levels.put(name, new LevelState(this, name, id, dimension.get("element")));
+      levels.put(name, new LevelState(tagsState, name, id, dimension.get("element")));
     }
     CompoundTag biomeRegistry = registry.get("minecraft:worldgen/biome");
     for (var type : biomeRegistry.<ListTag>get("value").getValue()) {
@@ -291,7 +292,7 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // Init client entity
-    clientEntity = new ClientEntity(packet.getEntityId(), botProfile.getId(), this, controlState);
+    clientEntity = new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, getCurrentLevel());
     clientEntity.showReducedDebug(packet.isReducedDebugInfo());
     entityTrackerState.addEntity(clientEntity);
   }
@@ -364,6 +365,9 @@ public final class SessionDataManager {
   @EventHandler
   public void onRespawn(ClientboundRespawnPacket packet) {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
+
+    // We are now possibly in a new dimension
+    clientEntity.level(getCurrentLevel());
 
     log.info("Respawned");
   }
@@ -838,21 +842,26 @@ public final class SessionDataManager {
         packet.getEntityId(),
         packet.getUuid(),
         EntityType.getById(packet.getType().ordinal()),
-        packet.getData());
-
-    entityState.setPosition(packet.getX(), packet.getY(), packet.getZ());
-    entityState.setRotation(packet.getYaw(), packet.getPitch());
-    entityState.setHeadRotation(packet.getHeadYaw());
-    entityState.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+        packet.getData(),
+        getCurrentLevel(),
+        packet.getX(),
+        packet.getY(),
+        packet.getZ(),
+        packet.getYaw(),
+        packet.getPitch(),
+        packet.getHeadYaw(),
+        packet.getMotionX(),
+        packet.getMotionY(),
+        packet.getMotionZ());
 
     entityTrackerState.addEntity(entityState);
   }
 
   @EventHandler
   public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
-    var experienceOrbState = new ExperienceOrbEntity(packet.getEntityId(), packet.getExp());
-
-    experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
+    var experienceOrbState =
+      new ExperienceOrbEntity(packet.getEntityId(), packet.getExp(), getCurrentLevel(), packet.getX(), packet.getY(),
+        packet.getZ());
 
     entityTrackerState.addEntity(experienceOrbState);
   }
@@ -1044,19 +1053,19 @@ public final class SessionDataManager {
   @EventHandler
   public void onResourcePack(ClientboundResourcePackPushPacket packet) {
     if (!isValidResourcePackUrl(packet.getUrl())) {
-      sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.INVALID_URL));
+      connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.INVALID_URL));
       return;
     }
 
     var version = connection.meta().protocolVersion();
     if (SFVersionConstants.isBedrock(version)) {
-      sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DECLINED));
+      connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DECLINED));
       return;
     }
 
-    sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.ACCEPTED));
-    sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DOWNLOADED));
-    sendPacket(
+    connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.ACCEPTED));
+    connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DOWNLOADED));
+    connection.sendPacket(
       new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.SUCCESSFULLY_LOADED));
   }
 
@@ -1151,9 +1160,5 @@ public final class SessionDataManager {
         }
       }
     }
-  }
-
-  public void sendPacket(Packet packet) {
-    session.send(packet);
   }
 }

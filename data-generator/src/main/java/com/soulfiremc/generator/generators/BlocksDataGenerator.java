@@ -49,9 +49,9 @@ public class BlocksDataGenerator implements IDataGenerator {
     if (defaultState.requiresCorrectToolForDrops()) {
       blockDesc.addProperty("requiresCorrectToolForDrops", true);
     }
-    if (defaultState.getFluidState().isSource()) {
-      blockDesc.addProperty("fluidSource", true);
-    }
+
+    blockDesc.addProperty("fluidType",
+      BuiltInRegistries.FLUID.getKey(defaultState.getFluidState().getType()).toString());
 
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();

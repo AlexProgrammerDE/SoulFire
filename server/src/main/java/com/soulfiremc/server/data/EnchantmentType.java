@@ -36,7 +36,8 @@ public record EnchantmentType(
   boolean tradeable,
   boolean discoverable,
   boolean curse,
-  boolean treasureOnly) {
+  boolean treasureOnly,
+  List<EquipmentSlot> slots) {
   public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 

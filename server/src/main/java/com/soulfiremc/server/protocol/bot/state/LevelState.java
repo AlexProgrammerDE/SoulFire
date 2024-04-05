@@ -26,7 +26,6 @@ import com.github.steveice10.opennbt.tag.builtin.LongTag;
 import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.nbt.MCUniform;
 import com.soulfiremc.server.protocol.bot.nbt.MCUniformInt;
@@ -41,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class LevelState {
-  private final SessionDataManager sessionDataManager;
+  private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final String dimensionName;
   private final int dimensionId;
@@ -71,11 +70,11 @@ public class LevelState {
   private long time;
 
   public LevelState(
-    SessionDataManager sessionDataManager,
+    TagsState tagsState,
     String dimensionName,
     int dimensionId,
     CompoundTag levelRegistry) {
-    this.sessionDataManager = sessionDataManager;
+    this.tagsState = tagsState;
     this.dimensionName = dimensionName;
     this.dimensionId = dimensionId;
     Object lightLevel = levelRegistry.get("monster_spawn_light_level");

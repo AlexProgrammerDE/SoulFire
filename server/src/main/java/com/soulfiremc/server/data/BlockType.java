@@ -18,10 +18,15 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import java.io.IOException;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.With;
 
@@ -36,9 +41,20 @@ public record BlockType(
   boolean fallingBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
-  boolean fluidSource,
+  FluidType fluidType,
   OffsetData offsetData,
   BlockStates statesData) {
+  public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
+    @Override
+    public void write(JsonWriter out, FluidType value) throws IOException {
+      out.value(value.key().toString());
+    }
+
+    @Override
+    public FluidType read(JsonReader in) throws IOException {
+      return FluidType.getByKey(ResourceKey.fromString(in.nextString()));
+    }
+  };
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
   public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
@@ -1108,7 +1124,10 @@ public record BlockType(
   public static final BlockType TRIAL_SPAWNER = register("minecraft:trial_spawner");
 
   public static BlockType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class);
+    var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class, Map.of(
+      FluidType.class,
+      CUSTOM_FLUID_TYPE
+    ));
     instance =
       instance.withStatesData(
         BlockStates.fromJsonArray(

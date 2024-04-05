@@ -21,36 +21,62 @@ import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
+import com.soulfiremc.server.protocol.bot.state.LevelState;
 import com.soulfiremc.server.util.MathHelper;
 import java.util.UUID;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @Slf4j
-@Data
+@Getter
+@Setter
 public abstract class Entity {
+  public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
   private final EntityMetadataState metadataState = new EntityMetadataState();
   private final EntityAttributeState attributeState = new EntityAttributeState();
   private final EntityEffectState effectState = new EntityEffectState();
   private final int entityId;
   private final UUID uuid;
   private final EntityType entityType;
+  protected LevelState level;
   protected double x;
   protected double y;
   protected double z;
   protected float yaw;
-  protected float headYaw;
   protected float pitch;
+  protected float headYaw;
   protected double motionX;
   protected double motionY;
   protected double motionZ;
   protected boolean onGround;
+
+  public Entity(int entityId, UUID uuid, EntityType entityType,
+                LevelState level,
+                double x, double y, double z,
+                float yaw, float pitch, float headYaw,
+                double motionX, double motionY, double motionZ) {
+    this.entityId = entityId;
+    this.uuid = uuid;
+    this.entityType = entityType;
+    this.level = level;
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.yaw = yaw;
+    this.pitch = pitch;
+    this.headYaw = headYaw;
+    this.motionX = motionX;
+    this.motionY = motionY;
+    this.motionZ = motionZ;
+  }
 
   public void setPosition(double x, double y, double z) {
     this.x = x;
@@ -92,6 +118,14 @@ public abstract class Entity {
       case EYES -> eyePosition();
       case FEET -> pos();
     };
+  }
+
+  public boolean isEyeInFluid(ResourceKey fluid) {
+    var eyePos = eyePosition();
+    var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
+    var breathingCoords = breathingPos.toInt();
+
+    return level.tagsState().isFluidInTag(level.getBlockStateAt(breathingCoords).blockType().fluidType(), fluid);
   }
 
   /**

@@ -30,6 +30,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ResourceKey;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
@@ -57,6 +58,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 @Slf4j
 @RequiredArgsConstructor
 public class BotControlAPI {
+  private final BotConnection connection;
   private final SessionDataManager dataManager;
   private final SecureRandom secureRandom = new SecureRandom();
   @Getter
@@ -79,7 +81,7 @@ public class BotControlAPI {
     dataManager.controlState().flying(newFly);
 
     // Let the server know we are flying
-    dataManager.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
+    connection.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
 
     return newFly;
   }
@@ -89,7 +91,7 @@ public class BotControlAPI {
     dataManager.controlState().sprinting(newSprint);
 
     // Let the server know we are sprinting
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundPlayerCommandPacket(
         dataManager.clientEntity().entityId(),
         newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
@@ -102,7 +104,7 @@ public class BotControlAPI {
     dataManager.controlState().sneaking(newSneak);
 
     // Let the server know we are sneaking
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundPlayerCommandPacket(
         dataManager.clientEntity().entityId(),
         newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
@@ -117,12 +119,12 @@ public class BotControlAPI {
       // We only sign chat at the moment because commands require the entire command tree to be
       // handled
       // Command signing is signing every string parameter in the command because of reporting /msg
-      dataManager.sendPacket(
+      connection.sendPacket(
         new ServerboundChatCommandPacket(
           command, now.toEpochMilli(), 0L, Collections.emptyList(), 0, new BitSet()));
     } else {
       var salt = secureRandom.nextLong();
-      dataManager.sendPacket(
+      connection.sendPacket(
         new ServerboundChatPacket(message, now.toEpochMilli(), salt, null, 0, new BitSet()));
     }
   }
@@ -149,7 +151,7 @@ public class BotControlAPI {
   }
 
   public void sendPluginMessage(ResourceKey channel, byte[] data) {
-    dataManager.sendPacket(new ServerboundCustomPayloadPacket(channel.toString(), data));
+    connection.sendPacket(new ServerboundCustomPayloadPacket(channel.toString(), data));
   }
 
   public Vector3d getEntityVisiblePoint(Entity entity) {
@@ -200,7 +202,7 @@ public class BotControlAPI {
     var packet =
       new ServerboundInteractPacket(
         entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
-    dataManager.sendPacket(packet);
+    connection.sendPacket(packet);
     if (swingArm) {
       swingArm();
     }
@@ -308,7 +310,7 @@ public class BotControlAPI {
 
   public void swingArm() {
     var swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
-    dataManager.sendPacket(swingPacket);
+    connection.sendPacket(swingPacket);
   }
 
   public float getHitItemCooldownTicks() {

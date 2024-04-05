@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 
@@ -110,6 +111,31 @@ public class TagsDataGenerator {
         String.join(
           "\n  ",
           generateTag(EntityTypeTags.class).stream()
+            .map(
+              s ->
+                "public static final ResourceKey "
+                  + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
+                  + " = ResourceKey.fromString(\""
+                  + s
+                  + "\");")
+            .toArray(String[]::new)));
+    }
+  }
+
+  public static class FluidTagsDataGenerator implements IDataGenerator {
+    @Override
+    public String getDataName() {
+      return "FluidTags.java";
+    }
+
+    @Override
+    public String generateDataJson() {
+      var base = ResourceHelper.getResource("/templates/FluidTags.java");
+      return base.replace(
+        GeneratorConstants.VALUES_REPLACE,
+        String.join(
+          "\n  ",
+          generateTag(FluidTags.class).stream()
             .map(
               s ->
                 "public static final ResourceKey "

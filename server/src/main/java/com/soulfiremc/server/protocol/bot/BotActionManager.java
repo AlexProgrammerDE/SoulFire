@@ -27,6 +27,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -46,6 +47,8 @@ import org.cloudburstmc.math.vector.Vector3i;
 public class BotActionManager {
   @ToString.Exclude
   private final SessionDataManager dataManager;
+  @ToString.Exclude
+  private final BotConnection connection;
   private int sequenceNumber = 0;
 
   private static Optional<Vector3f> rayCastToBlock(
@@ -98,7 +101,7 @@ public class BotActionManager {
 
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
-    dataManager.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber));
+    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber));
   }
 
   public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
@@ -137,7 +140,7 @@ public class BotActionManager {
     var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
     var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundUseItemOnPacket(
         againstBlock,
         againstFace,
@@ -152,7 +155,7 @@ public class BotActionManager {
   public void sendStartBreakBlock(Vector3i blockPos) {
     incrementSequenceNumber();
     var blockFace = getBlockFaceLookedAt(blockPos);
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundPlayerActionPacket(
         PlayerAction.START_DIGGING, blockPos, blockFace, sequenceNumber));
   }
@@ -160,7 +163,7 @@ public class BotActionManager {
   public void sendEndBreakBlock(Vector3i blockPos) {
     incrementSequenceNumber();
     var blockFace = getBlockFaceLookedAt(blockPos);
-    dataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundPlayerActionPacket(
         PlayerAction.FINISH_DIGGING, blockPos, blockFace, sequenceNumber));
   }
@@ -193,7 +196,7 @@ public class BotActionManager {
   }
 
   public void sendBreakBlockAnimation() {
-    dataManager.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
+    connection.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
   }
 
   public record BlockPlaceData(SFVec3i againstPos, Direction blockFace) {}

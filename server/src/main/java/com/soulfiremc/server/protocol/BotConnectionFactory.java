@@ -85,7 +85,7 @@ public record BotConnectionFactory(
 
     var sessionDataManager = new SessionDataManager(botConnection);
     session.meta().sessionDataManager(sessionDataManager);
-    session.meta().botControlAPI(new BotControlAPI(sessionDataManager));
+    session.meta().botControlAPI(new BotControlAPI(botConnection, sessionDataManager));
 
     session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
     session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));

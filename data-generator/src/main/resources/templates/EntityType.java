@@ -35,7 +35,9 @@ public record EntityType(
   // VALUES REPLACE
 
   public static EntityType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
+    var instance =
+      GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
+
     FROM_ID.put(instance.id(), instance);
     return instance;
   }

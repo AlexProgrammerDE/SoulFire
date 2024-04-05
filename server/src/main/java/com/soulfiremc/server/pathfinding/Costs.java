@@ -21,12 +21,15 @@ import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EnchantmentType;
+import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.ToolSpeedType;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.util.MathHelper;
 import java.util.OptionalInt;
 import org.jetbrains.annotations.Nullable;
@@ -118,7 +121,7 @@ public class Costs {
     SFItemStack bestItem = null;
     var correctToolUsed = false;
     for (var slot : inventory.usableToolsAndNull()) {
-      var miningTicks = getRequiredMiningTicks(tagsState, null, true, slot, blockType);
+      var miningTicks = getRequiredMiningTicks(tagsState, null, null, true, slot, blockType);
       if (miningTicks.ticks() < lowestMiningTicks) {
         lowestMiningTicks = miningTicks.ticks();
         bestItem = slot;
@@ -138,7 +141,8 @@ public class Costs {
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     TagsState tagsState,
-    @Nullable EntityEffectState effectState,
+    @Nullable ClientEntity entity,
+    @Nullable InventoryManager inventoryManager,
     boolean onGround,
     @Nullable SFItemStack itemStack,
     BlockType blockType) {
@@ -158,13 +162,13 @@ public class Costs {
       }
     }
 
-    if (effectState != null) {
-      var digSpeedAmplifier = getDigSpeedAmplifier(effectState);
+    if (entity != null) {
+      var digSpeedAmplifier = getDigSpeedAmplifier(entity.effectState());
       if (digSpeedAmplifier.isPresent()) {
         speedMultiplier *= 1.0F + (float) (digSpeedAmplifier.getAsInt() + 1) * 0.2F;
       }
 
-      var digSlowdownAmplifier = getDigSlowdownAmplifier(effectState);
+      var digSlowdownAmplifier = getDigSlowdownAmplifier(entity.effectState());
       if (digSlowdownAmplifier.isPresent()) {
         speedMultiplier *=
           switch (digSlowdownAmplifier.getAsInt()) {
@@ -174,9 +178,12 @@ public class Costs {
             default -> 8.1E-4F;
           };
       }
-    }
 
-    // TODO: Add support for digging underwater without aqua affinity
+      if (inventoryManager != null && entity.isEyeInFluid(FluidTags.WATER)
+        && !inventoryManager.hasEnchantment(EnchantmentType.AQUA_AFFINITY)) {
+        speedMultiplier /= 5.0F;
+      }
+    }
 
     if (!onGround) {
       speedMultiplier /= 5.0F;

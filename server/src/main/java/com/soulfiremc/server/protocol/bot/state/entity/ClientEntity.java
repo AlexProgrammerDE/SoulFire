@@ -23,11 +23,14 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
+import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.movement.BotMovementManager;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
 import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
+import com.soulfiremc.server.protocol.bot.state.LevelState;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.util.UUID;
@@ -43,6 +46,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class ClientEntity extends Entity {
   private final PhysicsData physics = new PhysicsData();
+  private final BotConnection connection;
   private final SessionDataManager sessionDataManager;
   private final ControlState controlState;
   private final PlayerMovementState movementState;
@@ -58,14 +62,14 @@ public class ClientEntity extends Entity {
   private int positionReminder = 0;
 
   public ClientEntity(
-    int entityId, UUID uuid, SessionDataManager sessionDataManager, ControlState controlState) {
-    super(entityId, uuid, EntityType.PLAYER);
+    int entityId, UUID uuid, BotConnection connection, SessionDataManager sessionDataManager, ControlState controlState, LevelState level) {
+    super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
+    this.connection = connection;
     this.sessionDataManager = sessionDataManager;
     this.controlState = controlState;
     this.movementState =
       new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
     this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
-    this.yaw = -180;
   }
 
   @Override
@@ -76,8 +80,7 @@ public class ClientEntity extends Entity {
     movementState.updateData();
 
     // Tick physics movement
-    var level = sessionDataManager.getCurrentLevel();
-    if (level != null && level.isChunkLoaded(this.blockPos())) {
+    if (level.isChunkLoaded(this.blockPos())) {
       botMovementManager.tick();
     }
 
@@ -129,8 +132,7 @@ public class ClientEntity extends Entity {
   @Override
   public double eyeHeight() {
     if (this.controlState.sneaking()) {
-      return sessionDataManager
-        .connection()
+      return connection
         .meta()
         .protocolVersion()
         .newerThanOrEqualTo(ProtocolVersion.v1_14)
@@ -154,7 +156,7 @@ public class ClientEntity extends Entity {
     lastYaw = yaw;
     lastPitch = pitch;
 
-    sessionDataManager.sendPacket(
+    connection.sendPacket(
       new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
   }
 
@@ -168,7 +170,7 @@ public class ClientEntity extends Entity {
     lastZ = z;
     positionReminder = 0;
 
-    sessionDataManager.sendPacket(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
+    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
   }
 
   public void sendRot() {
@@ -179,7 +181,7 @@ public class ClientEntity extends Entity {
     lastYaw = yaw;
     lastPitch = pitch;
 
-    sessionDataManager.sendPacket(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
   }
 
   public void sendOnGround() {
@@ -187,7 +189,11 @@ public class ClientEntity extends Entity {
 
     lastOnGround = onGround;
 
-    sessionDataManager.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+    connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+  }
+
+  public AbilitiesData abilities() {
+    return sessionDataManager.abilitiesData();
   }
 
   public void jump() {

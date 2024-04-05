@@ -19,11 +19,15 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Arrays;
 import java.util.Objects;
+import lombok.SneakyThrows;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
+  @SneakyThrows
   public static JsonObject generateEnchantment(Enchantment enchantment) {
     var enchantmentDesc = new JsonObject();
 
@@ -64,6 +68,13 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
     if (enchantment.isTreasureOnly()) {
       enchantmentDesc.addProperty("treasureOnly", true);
     }
+
+    var slotsField = Enchantment.class.getDeclaredField("slots");
+    slotsField.setAccessible(true);
+    var slots = (EquipmentSlot[]) slotsField.get(enchantment);
+    var slotsArray = new JsonArray();
+    Arrays.stream(slots).map(Enum::name).forEach(slotsArray::add);
+    enchantmentDesc.add("slots", slotsArray);
 
     return enchantmentDesc;
   }

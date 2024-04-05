@@ -26,5 +26,6 @@ public class Main implements ModInitializer {
   public static final Logger LOGGER = LoggerFactory.getLogger("soulfire-data-generator");
   public static MinecraftServer SERVER;
 
+  @Override
   public void onInitialize() {}
 }

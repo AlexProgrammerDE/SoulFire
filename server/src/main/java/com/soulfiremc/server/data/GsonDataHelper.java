@@ -27,11 +27,12 @@ import com.soulfiremc.util.ResourceHelper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
-  private static final Gson GSON =
-    new GsonBuilder()
+  private static final Function<Map<Class<?>, TypeAdapter<?>>, Gson> GSON_FACTORY = (typeAdapters) -> {
+    var builder = new GsonBuilder()
       .registerTypeAdapter(
         ResourceKey.class,
         new TypeAdapter<ResourceKey>() {
@@ -45,10 +46,22 @@ public class GsonDataHelper {
             var key = in.nextString();
             return ResourceKey.fromString(key);
           }
-        })
-      .create();
+        });
+
+    for (var entry : typeAdapters.entrySet()) {
+      builder.registerTypeAdapter(entry.getKey(), entry.getValue());
+    }
+
+    return builder.create();
+  };
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
+    return fromJson(dataFile, dataKey, clazz, Map.of());
+  }
+
+  public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz,
+                               Map<Class<?>, TypeAdapter<?>> typeAdapters) {
+    var gson = GSON_FACTORY.apply(typeAdapters);
     var array =
       LOADED_DATA.computeIfAbsent(
         dataFile,
@@ -56,7 +69,7 @@ public class GsonDataHelper {
           var data = new JsonArray();
           try {
             data =
-              GSON.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+              gson.fromJson(ResourceHelper.getResource(file), JsonArray.class);
           } catch (Exception e) {
             throw new RuntimeException("Failed to load data file " + file, e);
           }
@@ -64,7 +77,7 @@ public class GsonDataHelper {
         });
     for (var element : array) {
       if (element.getAsJsonObject().get("key").getAsString().equals(dataKey)) {
-        return GSON.fromJson(element, clazz);
+        return gson.fromJson(element, clazz);
       }
     }
 

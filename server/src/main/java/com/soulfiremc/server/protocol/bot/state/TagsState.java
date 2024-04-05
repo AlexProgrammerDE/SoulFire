@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.RegistryKeys;
 import com.soulfiremc.server.data.ResourceKey;
@@ -59,6 +60,12 @@ public class TagsState {
     return tags.getOrDefault(RegistryKeys.ENTITY_TYPE, Map.of())
       .getOrDefault(tagKey, IntSet.of())
       .contains(entityType.id());
+  }
+
+  public boolean isFluidInTag(FluidType fluidType, ResourceKey tagKey) {
+    return tags.getOrDefault(RegistryKeys.FLUID, Map.of())
+      .getOrDefault(tagKey, IntSet.of())
+      .contains(fluidType.id());
   }
 
   public Map<String, Map<String, int[]>> exportTags() {

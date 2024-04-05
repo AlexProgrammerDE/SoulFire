@@ -12,7 +12,13 @@
     "category": "ARMOR",
     "rarity": "COMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 1,
@@ -27,7 +33,13 @@
     "category": "ARMOR",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 2,
@@ -38,7 +50,13 @@
     "category": "ARMOR_FEET",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 3,
@@ -53,7 +71,13 @@
     "category": "ARMOR",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 4,
@@ -68,7 +92,13 @@
     "category": "ARMOR",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 5,
@@ -79,7 +109,13 @@
     "category": "ARMOR_HEAD",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 6,
@@ -90,7 +126,13 @@
     "category": "ARMOR_HEAD",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 7,
@@ -101,7 +143,13 @@
     "category": "ARMOR_CHEST",
     "rarity": "VERY_RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 8,
@@ -114,7 +162,13 @@
     "category": "ARMOR_FEET",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 9,
@@ -128,7 +182,10 @@
     "rarity": "RARE",
     "tradeable": true,
     "discoverable": true,
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "FEET"
+    ]
   },
   {
     "id": 10,
@@ -141,7 +198,13 @@
     "tradeable": true,
     "discoverable": true,
     "curse": true,
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "HEAD",
+      "CHEST",
+      "LEGS",
+      "FEET"
+    ]
   },
   {
     "id": 11,
@@ -151,7 +214,10 @@
     "incompatible": [],
     "category": "ARMOR_FEET",
     "rarity": "VERY_RARE",
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "FEET"
+    ]
   },
   {
     "id": 12,
@@ -161,7 +227,10 @@
     "incompatible": [],
     "category": "ARMOR_LEGS",
     "rarity": "VERY_RARE",
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "LEGS"
+    ]
   },
   {
     "id": 13,
@@ -175,7 +244,10 @@
     "category": "WEAPON",
     "rarity": "COMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 14,
@@ -189,7 +261,10 @@
     "category": "WEAPON",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 15,
@@ -203,7 +278,10 @@
     "category": "WEAPON",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 16,
@@ -214,7 +292,10 @@
     "category": "WEAPON",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 17,
@@ -225,7 +306,10 @@
     "category": "WEAPON",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 18,
@@ -238,7 +322,10 @@
     "category": "WEAPON",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 19,
@@ -249,7 +336,10 @@
     "category": "WEAPON",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 20,
@@ -260,7 +350,10 @@
     "category": "DIGGER",
     "rarity": "COMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 21,
@@ -275,7 +368,10 @@
     "category": "DIGGER",
     "rarity": "VERY_RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 22,
@@ -286,7 +382,10 @@
     "category": "BREAKABLE",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 23,
@@ -299,7 +398,10 @@
     "category": "DIGGER",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 24,
@@ -310,7 +412,10 @@
     "category": "BOW",
     "rarity": "COMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 25,
@@ -321,7 +426,10 @@
     "category": "BOW",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 26,
@@ -332,7 +440,10 @@
     "category": "BOW",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 27,
@@ -345,7 +456,10 @@
     "category": "BOW",
     "rarity": "VERY_RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 28,
@@ -358,7 +472,10 @@
     "category": "FISHING_ROD",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 29,
@@ -369,7 +486,10 @@
     "category": "FISHING_ROD",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 30,
@@ -382,7 +502,10 @@
     "category": "TRIDENT",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 31,
@@ -393,7 +516,10 @@
     "category": "TRIDENT",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 32,
@@ -407,7 +533,10 @@
     "category": "TRIDENT",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 33,
@@ -420,7 +549,10 @@
     "category": "TRIDENT",
     "rarity": "VERY_RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 34,
@@ -433,7 +565,10 @@
     "category": "CROSSBOW",
     "rarity": "RARE",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 35,
@@ -444,7 +579,10 @@
     "category": "CROSSBOW",
     "rarity": "UNCOMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 36,
@@ -457,7 +595,10 @@
     "category": "CROSSBOW",
     "rarity": "COMMON",
     "tradeable": true,
-    "discoverable": true
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
   },
   {
     "id": 37,
@@ -471,7 +612,15 @@
     "rarity": "RARE",
     "tradeable": true,
     "discoverable": true,
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "MAINHAND",
+      "OFFHAND",
+      "FEET",
+      "LEGS",
+      "CHEST",
+      "HEAD"
+    ]
   },
   {
     "id": 38,
@@ -484,6 +633,14 @@
     "tradeable": true,
     "discoverable": true,
     "curse": true,
-    "treasureOnly": true
+    "treasureOnly": true,
+    "slots": [
+      "MAINHAND",
+      "OFFHAND",
+      "FEET",
+      "LEGS",
+      "CHEST",
+      "HEAD"
+    ]
   }
 ]

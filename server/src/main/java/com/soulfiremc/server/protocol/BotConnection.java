@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol;
 
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
+import com.github.steveice10.packetlib.packet.Packet;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -113,5 +114,9 @@ public record BotConnection(
 
   public IdentifiedKey getIdentifiedKey() {
     throw new UnsupportedOperationException("Not implemented yet!");
+  }
+
+  public void sendPacket(Packet packet) {
+    session.send(packet);
   }
 }
