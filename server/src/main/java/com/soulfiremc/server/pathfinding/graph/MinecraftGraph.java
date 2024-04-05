@@ -431,11 +431,7 @@ public record MinecraftGraph(TagsState tagsState) {
           yield SubscriptionSingleResult.CONTINUE;
         }
 
-        var unsafe =
-          switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
-          };
+        var unsafe = subscriber.safetyType.isUnsafeBlock(blockState);
 
         if (!unsafe) {
           // All good, we can continue
@@ -588,11 +584,7 @@ public record MinecraftGraph(TagsState tagsState) {
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
-        var unsafe =
-          switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
-          };
+        var unsafe = subscriber.safetyType.isUnsafeBlock(blockState);
 
         if (unsafe) {
           // We know already WE MUST dig the block below for this action
@@ -654,11 +646,7 @@ public record MinecraftGraph(TagsState tagsState) {
           yield SubscriptionSingleResult.CONTINUE;
         }
 
-        var unsafe =
-          switch (subscriber.safetyType) {
-            case FALLING_AND_FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY || blockState.blockType().fallingBlock();
-            case FLUIDS -> blockState.blockType().fluidType() != FluidType.EMPTY;
-          };
+        var unsafe = subscriber.safetyType.isUnsafeBlock(blockState);
 
         if (!unsafe) {
           // All good, we can continue

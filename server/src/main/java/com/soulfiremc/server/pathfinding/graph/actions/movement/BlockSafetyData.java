@@ -17,11 +17,25 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
+import com.soulfiremc.server.data.BlockState;
+import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 
 public record BlockSafetyData(SFVec3i position, BlockSafetyType type) {
   public enum BlockSafetyType {
-    FALLING_AND_FLUIDS,
-    FLUIDS
+    FALLING_AND_FLUIDS {
+      @Override
+      public boolean isUnsafeBlock(BlockState state) {
+        return state.blockType().fluidType() != FluidType.EMPTY || state.blockType().fallingBlock();
+      }
+    },
+    FLUIDS {
+      @Override
+      public boolean isUnsafeBlock(BlockState state) {
+        return state.blockType().fluidType() != FluidType.EMPTY;
+      }
+    };
+
+    public abstract boolean isUnsafeBlock(BlockState state);
   }
 }
