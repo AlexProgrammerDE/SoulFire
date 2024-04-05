@@ -42,7 +42,7 @@ import javax.swing.SwingConstants;
 public class ServerSelectDialog extends JFrame {
   public ServerSelectDialog(
     Runnable integratedServerRunnable, Consumer<RemoteServerData> remoteServerConsumer) {
-    setTitle("Connect to SoulFire Server");
+    setTitle("Connect to a SoulFire Server");
 
     SFSwingUtils.setLogo(this);
 
@@ -56,6 +56,10 @@ public class ServerSelectDialog extends JFrame {
     var leftPanel = new JPanel();
     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
     leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    var forBeginnersLabel = new JLabel("Run SoulFire locally:");
+    leftPanel.add(forBeginnersLabel);
+
     var integratedServerButton = new JButton("Use Integrated Server");
     integratedServerButton.addActionListener(
       e -> {
