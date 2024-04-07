@@ -20,5 +20,5 @@ package com.soulfiremc.generator.util;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public interface BlockSettingsAccessor {
-  BlockBehaviour.OffsetType soulfiregetOffsetType();
+  BlockBehaviour.OffsetType soulfire$getOffsetType();
 }

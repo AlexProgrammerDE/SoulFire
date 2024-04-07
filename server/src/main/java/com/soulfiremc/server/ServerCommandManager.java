@@ -811,7 +811,8 @@ public class ServerCommandManager implements PlatformCommandManager {
       printMessages);
   }
 
-  public int executePathfinding(CommandContext<ConsoleSubject> context, Function<BotConnection, GoalScorer> goalScorerFactory) {
+  public int executePathfinding(CommandContext<ConsoleSubject> context,
+                                Function<BotConnection, GoalScorer> goalScorerFactory) {
     return forEveryBot(
       context,
       bot -> {

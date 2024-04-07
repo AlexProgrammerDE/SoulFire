@@ -81,7 +81,7 @@ public class BlocksDataGenerator implements IDataGenerator {
       offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
 
       var blockSettings = ((BlockAccessor) block).properties();
-      var offsetType = ((BlockSettingsAccessor) blockSettings).soulfiregetOffsetType();
+      var offsetType = ((BlockSettingsAccessor) blockSettings).soulfire$getOffsetType();
       offsetData.addProperty("offsetType", offsetType.name());
 
       blockDesc.add("offsetData", offsetData);
