@@ -37,6 +37,7 @@ import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence
@@ -165,7 +166,7 @@ public class BotActionManager {
         PlayerAction.FINISH_DIGGING, blockPos, blockFace, sequenceNumber));
   }
 
-  public Direction getBlockFaceLookedAt(Vector3i blockPos) {
+  public @NotNull Direction getBlockFaceLookedAt(Vector3i blockPos) {
     var clientEntity = dataManager.clientEntity();
     var eyePosition = clientEntity.eyePosition();
     var headRotation = clientEntity.rotationVector();
@@ -174,7 +175,7 @@ public class BotActionManager {
     var intersection =
       blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
     if (intersection.isEmpty()) {
-      return null;
+      throw new IllegalStateException("Block is not in line of sight");
     }
 
     var intersectionFloat = intersection.get();
