@@ -101,10 +101,6 @@ public class ServerCommandManager implements PlatformCommandManager {
     }
   }
 
-  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
-    PathExecutor.executePathfinding(bot, goalScorer, new CompletableFuture<>());
-  }
-
   @PostConstruct
   public void postConstruct() {
     loadCommandHistory();
@@ -197,24 +193,20 @@ public class ServerCommandManager implements PlatformCommandManager {
                     c -> {
                       var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                      return forEveryBot(
-                        c,
-                        bot -> {
-                          var random = ThreadLocalRandom.current();
-                          var pos = bot.sessionDataManager().clientEntity().pos();
-                          var x =
-                            random.nextInt(
-                              pos.getFloorX() - radius,
-                              pos.getFloorX() + radius);
-                          var z =
-                            random.nextInt(
-                              pos.getFloorZ() - radius,
-                              pos.getFloorZ() + radius);
+                      return executePathfinding(c, bot -> {
+                        var random = ThreadLocalRandom.current();
+                        var pos = bot.sessionDataManager().clientEntity().pos();
+                        var x =
+                          random.nextInt(
+                            pos.getFloorX() - radius,
+                            pos.getFloorX() + radius);
+                        var z =
+                          random.nextInt(
+                            pos.getFloorZ() - radius,
+                            pos.getFloorZ() + radius);
 
-                          executePathfinding(bot, new XZGoal(x, z));
-
-                          return Command.SINGLE_SUCCESS;
-                        });
+                        return new XZGoal(x, z);
+                      });
                     }))))
         .then(
           argument("y", IntegerArgumentType.integer())
@@ -223,7 +215,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                 "Makes all connected bots walk to the y coordinates",
                 c -> {
                   var y = IntegerArgumentType.getInteger(c, "y");
-                  return executePathfinding(c, new YGoal(y));
+                  return executePathfinding(c, bot -> new YGoal(y));
                 })))
         .then(
           argument("x", IntegerArgumentType.integer())
@@ -236,7 +228,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                       var x = IntegerArgumentType.getInteger(c, "x");
                       var z = IntegerArgumentType.getInteger(c, "z");
 
-                      return executePathfinding(c, new XZGoal(x, z));
+                      return executePathfinding(c, bot -> new XZGoal(x, z));
                     }))))
         .then(
           argument("x", IntegerArgumentType.integer())
@@ -252,7 +244,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                           var y = IntegerArgumentType.getInteger(c, "y");
                           var z = IntegerArgumentType.getInteger(c, "z");
 
-                          return executePathfinding(c, new PosGoal(x, y, z));
+                          return executePathfinding(c, bot -> new PosGoal(x, y, z));
                         }))))));
     dispatcher.register(
       literal("collect")
@@ -276,13 +268,11 @@ public class ServerCommandManager implements PlatformCommandManager {
                       c,
                       bot -> {
                         bot.executorManager().newExecutorService(bot, "Pathfinding")
-                          .submit(() -> {
-                            new CollectBlockController(
-                              resolvable.resolve(bot.sessionDataManager().tagsState()),
-                              amount,
-                              searchRadius
-                            ).start(bot);
-                          });
+                          .submit(() -> new CollectBlockController(
+                            resolvable.resolve(bot.sessionDataManager().tagsState()),
+                            amount,
+                            searchRadius
+                          ).start(bot));
 
                         return Command.SINGLE_SUCCESS;
                       });
@@ -821,11 +811,11 @@ public class ServerCommandManager implements PlatformCommandManager {
       printMessages);
   }
 
-  public int executePathfinding(CommandContext<ConsoleSubject> context, GoalScorer goalScorer) {
+  public int executePathfinding(CommandContext<ConsoleSubject> context, Function<BotConnection, GoalScorer> goalScorerFactory) {
     return forEveryBot(
       context,
       bot -> {
-        executePathfinding(bot, goalScorer);
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new CompletableFuture<>());
         return Command.SINGLE_SUCCESS;
       });
   }
