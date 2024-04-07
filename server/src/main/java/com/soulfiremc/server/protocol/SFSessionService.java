@@ -22,6 +22,7 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
+import io.netty.handler.codec.http.HttpStatusClass;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -84,7 +85,7 @@ public class SFSessionService {
                 serverId)))))
       .responseSingle(
         (res, content) -> {
-          if (res.status().code() != 204) {
+          if (res.status().codeClass() != HttpStatusClass.SUCCESS) {
             throw new RuntimeException("Failed to join server: " + res.status().code());
           }
 

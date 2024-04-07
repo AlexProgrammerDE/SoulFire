@@ -20,6 +20,7 @@ package com.soulfiremc.client.gui.libs;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpStatusClass;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,7 @@ public class LogsUploadService {
       .sendForm((request, form) -> form.attr("content", text))
       .responseSingle(
         (res, content) -> {
-          if (res.status().code() != 200) {
+          if (res.status().codeClass() != HttpStatusClass.SUCCESS) {
             log.warn("Failed to upload: {}", res.status().code());
             throw new RuntimeException("Failed to upload");
           }

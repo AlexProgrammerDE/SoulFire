@@ -27,6 +27,7 @@ import com.soulfiremc.util.ReactorHttpHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import io.netty.handler.codec.http.HttpStatusClass;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -60,7 +61,7 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
             .uri(url.toString())
             .responseSingle(
               (r, b) -> {
-                if (r.status().code() == 200) {
+                if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
                   return b.asString();
                 }
 

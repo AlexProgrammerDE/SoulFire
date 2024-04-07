@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
+import io.netty.handler.codec.http.HttpStatusClass;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -61,7 +62,7 @@ public class SFUpdateChecker {
         .uri(UPDATE_URL)
         .responseSingle(
           (res, content) -> {
-            if (res.status().code() != 200) {
+            if (res.status().codeClass() != HttpStatusClass.SUCCESS) {
               log.warn("Failed to check for updates: {}", res.status().code());
               return Mono.empty();
             }
