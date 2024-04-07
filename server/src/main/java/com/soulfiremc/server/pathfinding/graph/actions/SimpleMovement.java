@@ -26,13 +26,13 @@ import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
 import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
@@ -213,10 +213,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     var blockDirection =
       switch (direction) {
-        case NORTH -> BlockDirection.NORTH;
-        case SOUTH -> BlockDirection.SOUTH;
-        case EAST -> BlockDirection.EAST;
-        case WEST -> BlockDirection.WEST;
+        case NORTH -> SkyDirection.NORTH;
+        case SOUTH -> SkyDirection.SOUTH;
+        case EAST -> SkyDirection.EAST;
+        case WEST -> SkyDirection.WEST;
         default -> throw new IllegalStateException("Unexpected value: " + direction);
       };
 
@@ -291,10 +291,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     var blockDirection =
       switch (direction) {
-        case NORTH -> BlockDirection.NORTH;
-        case SOUTH -> BlockDirection.SOUTH;
-        case EAST -> BlockDirection.EAST;
-        case WEST -> BlockDirection.WEST;
+        case NORTH -> SkyDirection.NORTH;
+        case SOUTH -> SkyDirection.SOUTH;
+        case EAST -> SkyDirection.EAST;
+        case WEST -> SkyDirection.WEST;
         default -> throw new IllegalStateException("Unexpected value: " + direction);
       };
 

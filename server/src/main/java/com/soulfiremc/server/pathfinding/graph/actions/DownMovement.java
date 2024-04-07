@@ -22,9 +22,9 @@ import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -66,7 +66,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
     var results = new BlockSafetyData[1][];
 
-    var firstDirection = BlockDirection.NORTH;
+    var firstDirection = SkyDirection.NORTH;
     var oppositeDirection = firstDirection.opposite();
     var leftDirectionSide = firstDirection.leftSide();
     var rightDirectionSide = firstDirection.rightSide();

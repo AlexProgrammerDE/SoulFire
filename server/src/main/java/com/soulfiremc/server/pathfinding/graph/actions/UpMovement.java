@@ -25,9 +25,9 @@ import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
@@ -70,7 +70,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var requiredFreeBlocks = listRequiredFreeBlocks();
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
-    var firstDirection = BlockDirection.NORTH;
+    var firstDirection = SkyDirection.NORTH;
     var oppositeDirection = firstDirection.opposite();
     var leftDirectionSide = firstDirection.leftSide();
     var rightDirectionSide = firstDirection.rightSide();

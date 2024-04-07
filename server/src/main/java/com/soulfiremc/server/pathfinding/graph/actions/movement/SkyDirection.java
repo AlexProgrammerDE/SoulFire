@@ -24,13 +24,13 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum BlockDirection {
+public enum SkyDirection {
   NORTH(Direction.NORTH),
   SOUTH(Direction.SOUTH),
   EAST(Direction.EAST),
   WEST(Direction.WEST);
 
-  public static final BlockDirection[] VALUES = values();
+  public static final SkyDirection[] VALUES = values();
   private final Direction direction;
 
   @SuppressWarnings("DuplicatedCode")
@@ -43,7 +43,7 @@ public enum BlockDirection {
     };
   }
 
-  public BlockDirection opposite() {
+  public SkyDirection opposite() {
     return switch (this) {
       case NORTH -> SOUTH;
       case SOUTH -> NORTH;
@@ -52,7 +52,7 @@ public enum BlockDirection {
     };
   }
 
-  public BlockDirection leftSide() {
+  public SkyDirection leftSide() {
     return switch (this) {
       case NORTH -> WEST;
       case SOUTH -> EAST;
@@ -61,7 +61,7 @@ public enum BlockDirection {
     };
   }
 
-  public BlockDirection rightSide() {
+  public SkyDirection rightSide() {
     return switch (this) {
       case NORTH -> EAST;
       case SOUTH -> WEST;
