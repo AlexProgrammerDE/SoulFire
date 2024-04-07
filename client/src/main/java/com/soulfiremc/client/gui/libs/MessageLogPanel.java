@@ -139,91 +139,96 @@ public class MessageLogPanel extends JPanel {
       SwingUtilities.invokeAndWait(
         () -> {
           noopDocumentFilter.filter(false);
-          if (clearText) {
-            textComponent.setText("");
-            clearText = false;
-          } else {
-            try {
-              var parser = factory.createParser(String.join("", toInsert));
+          try {
+            if (clearText) {
+              textComponent.setText("");
+              clearText = false;
+            } else {
+              try {
+                var parser = factory.createParser(String.join("", toInsert));
 
-              Fragment fragment;
-              while ((fragment = parser.parse()) != null) {
-                if (fragment.getType() == FragmentType.TEXT) {
-                  var textFragment = (TextFragment) fragment;
-                  document.insertString(
-                    document.getLength(), textFragment.getText(), defaultAttributes);
-                } else if (fragment.getType() == FragmentType.FUNCTION) {
-                  var functionFragment = (FunctionFragment) fragment;
-                  if (functionFragment.getFunction()
-                    == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
-                    var sgr = (int) functionFragment.getArguments().getFirst().getValue();
+                Fragment fragment;
+                while ((fragment = parser.parse()) != null) {
+                  if (fragment.getType() == FragmentType.TEXT) {
+                    var textFragment = (TextFragment) fragment;
+                    document.insertString(
+                      document.getLength(), textFragment.getText(), defaultAttributes);
+                  } else if (fragment.getType() == FragmentType.FUNCTION) {
+                    var functionFragment = (FunctionFragment) fragment;
+                    if (functionFragment.getFunction()
+                      == ControlSequenceFunction.SGR_SELECT_GRAPHIC_RENDITION) {
+                      var sgr = (int) functionFragment.getArguments().getFirst().getValue();
 
-                    switch (sgr) {
-                      case 0 -> {
-                        for (var attributes = defaultAttributes.getAttributeNames();
-                             attributes.hasMoreElements(); ) {
-                          var name = attributes.nextElement();
-                          defaultAttributes.removeAttribute(name);
+                      switch (sgr) {
+                        case 0 -> {
+                          for (var attributes = defaultAttributes.copyAttributes().getAttributeNames();
+                               attributes.hasMoreElements(); ) {
+                            var name = attributes.nextElement();
+                            defaultAttributes.removeAttribute(name);
+                          }
+                          StyleConstants.setForeground(
+                            defaultAttributes, theme.getDefaultTextColor());
                         }
-                        StyleConstants.setForeground(
-                          defaultAttributes, theme.getDefaultTextColor());
+                        case 1 -> StyleConstants.setBold(defaultAttributes, true);
+                        case 3 -> StyleConstants.setItalic(defaultAttributes, true);
+                        case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
+                        case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
+                        case 22 -> StyleConstants.setBold(defaultAttributes, false);
+                        case 23 -> StyleConstants.setItalic(defaultAttributes, false);
+                        case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
+                        case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
+                        case 30 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
+                        case 31 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
+                        case 32 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
+                        case 33 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
+                        case 34 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
+                        case 35 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
+                        case 36 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
+                        case 37, 39 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
+                        case 38 -> {
+                          var secondArgument =
+                            (int) functionFragment.getArguments().get(1).getValue();
+                          StyleConstants.setForeground(
+                            defaultAttributes,
+                            switch (secondArgument) {
+                              case 2 -> {
+                                var r = (int) functionFragment.getArguments().get(2).getValue();
+                                var g = (int) functionFragment.getArguments().get(3).getValue();
+                                var b =
+                                  (int) functionFragment.getArguments().getLast().getValue();
+                                yield new Color(r, g, b);
+                              }
+                              case 5 -> {
+                                var id = (int) functionFragment.getArguments().get(2).getValue();
+                                yield XtermPalette256.getColor(id);
+                              }
+                              default -> Color.decode("#FFFFFF");
+                            });
+                        }
+                        case 90 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
+                        case 91 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
+                        case 92 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
+                        case 93 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
+                        case 94 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
+                        case 95 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
+                        case 96 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
+                        case 97 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
                       }
-                      case 1 -> StyleConstants.setBold(defaultAttributes, true);
-                      case 3 -> StyleConstants.setItalic(defaultAttributes, true);
-                      case 4 -> StyleConstants.setUnderline(defaultAttributes, true);
-                      case 9 -> StyleConstants.setStrikeThrough(defaultAttributes, true);
-                      case 22 -> StyleConstants.setBold(defaultAttributes, false);
-                      case 23 -> StyleConstants.setItalic(defaultAttributes, false);
-                      case 24 -> StyleConstants.setUnderline(defaultAttributes, false);
-                      case 29 -> StyleConstants.setStrikeThrough(defaultAttributes, false);
-                      case 30 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(0));
-                      case 31 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(1));
-                      case 32 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(2));
-                      case 33 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(3));
-                      case 34 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(4));
-                      case 35 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(5));
-                      case 36 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(6));
-                      case 37, 39 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(7));
-                      case 38 -> {
-                        var secondArgument =
-                          (int) functionFragment.getArguments().get(1).getValue();
-                        StyleConstants.setForeground(
-                          defaultAttributes,
-                          switch (secondArgument) {
-                            case 2 -> {
-                              var r = (int) functionFragment.getArguments().get(2).getValue();
-                              var g = (int) functionFragment.getArguments().get(3).getValue();
-                              var b =
-                                (int) functionFragment.getArguments().getLast().getValue();
-                              yield new Color(r, g, b);
-                            }
-                            case 5 -> {
-                              var id = (int) functionFragment.getArguments().get(2).getValue();
-                              yield XtermPalette256.getColor(id);
-                            }
-                            default -> Color.decode("#FFFFFF");
-                          });
-                      }
-                      case 90 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(8));
-                      case 91 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(9));
-                      case 92 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(10));
-                      case 93 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(11));
-                      case 94 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(12));
-                      case 95 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(13));
-                      case 96 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(14));
-                      case 97 -> StyleConstants.setForeground(defaultAttributes, theme.getANSIColor(15));
+                    } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
+                      document.insertString(document.getLength(), "\n", defaultAttributes);
                     }
-                  } else if (functionFragment.getFunction() == C0ControlFunction.LF_LINE_FEED) {
-                    document.insertString(document.getLength(), "\n", defaultAttributes);
                   }
                 }
+              } catch (BadLocationException e) {
+                log.debug("Failed to insert text!", e);
               }
-            } catch (BadLocationException e) {
-              log.debug("Failed to insert text!", e);
+              toInsert.clear();
             }
-            toInsert.clear();
+          } catch (Throwable t) {
+            log.error("Failed to update text component!", t);
+          } finally {
+            noopDocumentFilter.filter(true);
           }
-          noopDocumentFilter.filter(true);
         });
     } catch (InterruptedException | InvocationTargetException e) {
       throw new RuntimeException(e);
