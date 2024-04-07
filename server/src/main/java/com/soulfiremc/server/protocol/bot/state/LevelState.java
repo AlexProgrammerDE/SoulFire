@@ -118,7 +118,7 @@ public class LevelState {
   }
 
   public boolean isOutSideBuildHeight(SFVec3i block) {
-    return isOutSideBuildHeight( block.y);
+    return isOutSideBuildHeight(block.y);
   }
 
   public boolean isOutSideBuildHeight(double y) {
