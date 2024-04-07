@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.util.TriState;
 
 @Slf4j
-public record MinecraftGraph(TagsState tagsState) {
+public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolean canPlaceBlocks) {
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends ObjectList<BlockSubscription>>
     CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
@@ -400,7 +400,8 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         // Search for a way to break this block
-        if (!simpleMovement.allowBlockActions()
+        if (!canBreakBlocks
+          || !simpleMovement.allowBlockActions()
           // Narrow this down to blocks that can be broken
           || !BlockTypeHelper.isDiggable(blockState.blockType())
           // Check if we previously found out this block is unsafe to break
@@ -458,7 +459,8 @@ public record MinecraftGraph(TagsState tagsState) {
           yield SubscriptionSingleResult.CONTINUE;
         }
 
-        if (!simpleMovement.allowBlockActions()
+        if (!canPlaceBlocks
+          || !simpleMovement.allowBlockActions()
           || node.inventory().hasNoBlocks()
           || !blockState.blockType().replaceable()) {
           yield SubscriptionSingleResult.IMPOSSIBLE;
@@ -550,6 +552,11 @@ public record MinecraftGraph(TagsState tagsState) {
     SFVec3i absolutePositionBlock,
     BotEntityState node,
     DownMovement downMovement) {
+    // Going down requires breaking a block below
+    if (!canBreakBlocks) {
+      return SubscriptionSingleResult.IMPOSSIBLE;
+    }
+
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (!BlockTypeHelper.isDiggable(blockState.blockType())
@@ -606,6 +613,11 @@ public record MinecraftGraph(TagsState tagsState) {
     SFVec3i absolutePositionBlock,
     BotEntityState node,
     UpMovement upMovement) {
+    // Towering requires placing a block below
+    if (!canPlaceBlocks) {
+      return SubscriptionSingleResult.IMPOSSIBLE;
+    }
+
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
         if (isFreeReference.value == TriState.NOT_SET) {
@@ -619,7 +631,8 @@ public record MinecraftGraph(TagsState tagsState) {
         }
 
         // Search for a way to break this block
-        if (!BlockTypeHelper.isDiggable(blockState.blockType())
+        if (!canBreakBlocks
+          || !BlockTypeHelper.isDiggable(blockState.blockType())
           || upMovement.unsafeToBreak()[subscriber.blockArrayIndex]
           || !BlockItems.hasItemType(blockState.blockType())) {
           // No way to break this block

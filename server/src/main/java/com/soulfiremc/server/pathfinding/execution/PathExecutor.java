@@ -65,7 +65,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     var sessionDataManager = bot.sessionDataManager();
     var clientEntity = sessionDataManager.clientEntity();
     var routeFinder =
-      new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
+      new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState(), true, true), goalScorer);
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {

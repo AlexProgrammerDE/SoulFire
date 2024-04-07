@@ -87,7 +87,7 @@ public class PathfindingBenchmark {
         }
       }
 
-      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState()), new PosGoal(100, 80, 100));
+      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(), true, true), new PosGoal(100, 80, 100));
 
       initialState =
         new BotEntityState(
