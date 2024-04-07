@@ -26,6 +26,7 @@ import com.soulfiremc.server.protocol.BotConnection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,38 +41,42 @@ public class CollectBlockController {
   private int collectedAmount;
 
   public static Optional<Vector3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker,
-                                                             int maxRadius) {
+                                                             int iterations) {
     var clientEntity = botConnection.sessionDataManager().clientEntity();
     var clientPosition = clientEntity.pos().toInt();
     var level = clientEntity.level();
     var checkedPositions = new HashSet<Vector3i>();
+    var blockCheckQueue = new LinkedBlockingQueue<Vector3i>();
+    blockCheckQueue.add(clientPosition);
 
-    for (var layer = 1; layer <= maxRadius; layer++) {
-      var layerSquared = layer * layer;
+    while (iterations-- > 0) {
+      for (var i = 0; i < blockCheckQueue.size(); i++) {
+        var blockPos = blockCheckQueue.poll();
+        if (blockPos == null) {
+          break;
+        }
 
-      for (var y = -layer; y <= layer; y++) {
-        if (level.isOutSideBuildHeight(clientPosition.getY() + y)) {
+        var blockState = level.getBlockStateAt(blockPos);
+        if (checker.test(blockState)) {
+          return Optional.of(blockPos);
+        }
+
+        if (blockState.blockType() == BlockType.VOID_AIR) {
           continue;
         }
 
-        for (var x = -layer; x <= layer; x++) {
-          for (var z = -layer; z <= layer; z++) {
-            // Make sure we are within the circle
-            if (x * x + y * y + z * z > layerSquared) {
-              continue;
-            }
-
-            var blockPos = clientPosition.add(x, y, z);
-            if (checkedPositions.contains(blockPos)) {
-              continue;
-            }
-
-            checkedPositions.add(blockPos);
-            var blockState = level.getBlockStateAt(blockPos);
-            if (checker.test(blockState)) {
-              return Optional.of(blockPos);
-            }
+        for (var offset : BlockFace.VALUES) {
+          var nextPos = offset.offset(blockPos);
+          if (level.isOutSideBuildHeight(nextPos.getY())) {
+            continue;
           }
+
+          if (checkedPositions.contains(nextPos)) {
+            continue;
+          }
+
+          checkedPositions.add(nextPos);
+          blockCheckQueue.add(nextPos);
         }
       }
     }
