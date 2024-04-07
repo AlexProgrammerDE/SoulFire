@@ -40,12 +40,9 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var levelState = connection.sessionDataManager().getCurrentLevel();
-    if (levelState == null) {
-      return false;
-    }
+    var level = connection.sessionDataManager().currentLevel();
 
-    return BlockTypeHelper.isFullBlock(levelState.getBlockStateAt(blockPosition));
+    return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPosition));
   }
 
   @Override

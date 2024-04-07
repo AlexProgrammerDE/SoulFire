@@ -45,11 +45,11 @@ public class EntityTypeTags {
   public static final ResourceKey DEFLECTS_TRIDENTS = register("minecraft:deflects_tridents");
   public static final ResourceKey CAN_TURN_IN_BOATS = register("minecraft:can_turn_in_boats");
 
+  private EntityTypeTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private EntityTypeTags() {}
 }

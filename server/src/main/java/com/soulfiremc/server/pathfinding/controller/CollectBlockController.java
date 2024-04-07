@@ -39,28 +39,6 @@ public class CollectBlockController {
   private final int maxRadius;
   private int collectedAmount;
 
-  public void start(BotConnection bot) {
-    while (collectedAmount < requestedAmount) {
-      log.info("Searching for block to collect");
-      var blockPos =
-        searchWithinRadiusLayered(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius)
-          .orElseThrow(
-            () -> new IllegalStateException("Could not find matching block within radius " + maxRadius));
-
-      log.info("Found block to collect at {}", blockPos);
-
-      var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new BreakBlockPosGoal(SFVec3i.fromInt(blockPos)), pathFuture);
-
-      try {
-        pathFuture.get();
-        collectedAmount++;
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to break block at " + blockPos, e);
-      }
-    }
-  }
-
   public static Optional<Vector3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker,
                                                              int maxRadius) {
     var clientEntity = botConnection.sessionDataManager().clientEntity();
@@ -99,5 +77,27 @@ public class CollectBlockController {
     }
 
     return Optional.empty();
+  }
+
+  public void start(BotConnection bot) {
+    while (collectedAmount < requestedAmount) {
+      log.info("Searching for block to collect");
+      var blockPos =
+        searchWithinRadiusLayered(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius)
+          .orElseThrow(
+            () -> new IllegalStateException("Could not find matching block within radius " + maxRadius));
+
+      log.info("Found block to collect at {}", blockPos);
+
+      var pathFuture = new CompletableFuture<Void>();
+      PathExecutor.executePathfinding(bot, new BreakBlockPosGoal(SFVec3i.fromInt(blockPos)), pathFuture);
+
+      try {
+        pathFuture.get();
+        collectedAmount++;
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to break block at " + blockPos, e);
+      }
+    }
   }
 }

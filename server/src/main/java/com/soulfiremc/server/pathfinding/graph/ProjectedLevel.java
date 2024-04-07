@@ -30,31 +30,31 @@ import lombok.RequiredArgsConstructor;
  * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
 @RequiredArgsConstructor
-public class ProjectedLevelState {
+public class ProjectedLevel {
   private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
   private final BlockAccessor accessor;
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
 
-  public ProjectedLevelState(BlockAccessor accessor) {
+  public ProjectedLevel(BlockAccessor accessor) {
     this(accessor, new Vec2ObjectOpenHashMap<>());
   }
 
-  public ProjectedLevelState withChangeToSolidBlock(SFVec3i position) {
+  public ProjectedLevel withChangeToSolidBlock(SFVec3i position) {
     var blockChanges = this.blockChanges.clone();
     blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
 
-    return new ProjectedLevelState(accessor, blockChanges);
+    return new ProjectedLevel(accessor, blockChanges);
   }
 
-  public ProjectedLevelState withChangeToAir(SFVec3i position) {
+  public ProjectedLevel withChangeToAir(SFVec3i position) {
     var blockChanges = this.blockChanges.clone();
     blockChanges.put(position, AIR_BLOCK_STATE);
 
-    return new ProjectedLevelState(accessor, blockChanges);
+    return new ProjectedLevel(accessor, blockChanges);
   }
 
-  public ProjectedLevelState withChanges(SFVec3i[] air, SFVec3i solid) {
+  public ProjectedLevel withChanges(SFVec3i[] air, SFVec3i solid) {
     var blockChanges = this.blockChanges.clone();
     blockChanges.ensureCapacity(
       blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
@@ -73,7 +73,7 @@ public class ProjectedLevelState {
       blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
     }
 
-    return new ProjectedLevelState(accessor, blockChanges);
+    return new ProjectedLevel(accessor, blockChanges);
   }
 
   public BlockState getBlockStateAt(SFVec3i position) {

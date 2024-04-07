@@ -95,7 +95,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   public GraphInstructions getInstructions(BotEntityState previousEntityState) {
     var actions = new ObjectArrayList<WorldAction>();
     var inventory = previousEntityState.inventory();
-    var levelState = previousEntityState.levelState();
+    var level = previousEntityState.level();
     var cost = Costs.TOWER_COST;
 
     for (var breakCost : blockBreakCosts) {
@@ -109,12 +109,12 @@ public final class UpMovement extends GraphAction implements Cloneable {
         inventory = inventory.withOneMoreBlock();
       }
 
-      levelState = levelState.withChangeToAir(breakCost.block());
+      level = level.withChangeToAir(breakCost.block());
     }
 
     // Change values for block we're going to place and stand on
     inventory = inventory.withOneLessBlock();
-    levelState = levelState.withChangeToSolidBlock(previousEntityState.blockPosition());
+    level = level.withChangeToSolidBlock(previousEntityState.blockPosition());
 
     var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
 
@@ -126,7 +126,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
           previousEntityState.blockPosition().sub(0, 1, 0), Direction.UP)));
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, levelState, inventory), cost, actions);
+      new BotEntityState(absoluteTargetFeetBlock, level, inventory), cost, actions);
   }
 
   @Override

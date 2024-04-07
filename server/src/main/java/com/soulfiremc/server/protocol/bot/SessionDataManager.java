@@ -135,7 +135,7 @@ import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.state.BorderState;
 import com.soulfiremc.server.protocol.bot.state.ChunkData;
 import com.soulfiremc.server.protocol.bot.state.EntityTrackerState;
-import com.soulfiremc.server.protocol.bot.state.LevelState;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.MapDataState;
 import com.soulfiremc.server.protocol.bot.state.PlayerListState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
@@ -161,6 +161,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -169,6 +170,7 @@ import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -183,7 +185,7 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
-  private final Map<String, LevelState> levels = new ConcurrentHashMap<>();
+  private final Map<String, Level> levels = new ConcurrentHashMap<>();
   private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
@@ -266,7 +268,7 @@ public final class SessionDataManager {
       var name = dimension.<StringTag>get("name").getValue();
       int id = dimension.<IntTag>get("id").getValue();
 
-      levels.put(name, new LevelState(tagsState, name, id, dimension.get("element")));
+      levels.put(name, new Level(tagsState, name, id, dimension.get("element")));
     }
     CompoundTag biomeRegistry = registry.get("minecraft:worldgen/biome");
     for (var type : biomeRegistry.<ListTag>get("value").getValue()) {
@@ -293,7 +295,7 @@ public final class SessionDataManager {
 
     // Init client entity
     clientEntity =
-      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, getCurrentLevel());
+      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
     clientEntity.showReducedDebug(packet.isReducedDebugInfo());
     entityTrackerState.addEntity(clientEntity);
   }
@@ -368,7 +370,7 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // We are now possibly in a new dimension
-    clientEntity.level(getCurrentLevel());
+    clientEntity.level(currentLevel());
 
     log.info("Respawned");
   }
@@ -545,12 +547,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onLevelTime(ClientboundSetTimePacket packet) {
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received time update while not in a level");
-      return;
-    }
+    var level = currentLevel();
 
     level.worldAge(packet.getWorldAge());
     level.time(packet.getTime());
@@ -674,12 +671,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
     var helper = session.getCodecHelper();
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received section update while not in a level");
-      return;
-    }
+    var level = currentLevel();
 
     var data = packet.getChunkData();
     var buf = Unpooled.wrappedBuffer(data);
@@ -697,14 +689,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onChunkData(ClientboundChunksBiomesPacket packet) {
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received section update while not in a level");
-      return;
-    }
-
     var codec = session.getCodecHelper();
+    var level = currentLevel();
 
     for (var biomeData : packet.getChunkBiomeData()) {
       var chunkData = level.chunks().getChunk(biomeData.getX(), biomeData.getZ());
@@ -730,25 +716,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received section update while not in a level");
-      return;
-    }
-
+    var level = currentLevel();
     level.chunks().removeChunk(packet.getX(), packet.getZ());
   }
 
   @EventHandler
   public void onSectionBlockUpdate(ClientboundSectionBlocksUpdatePacket packet) {
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received section update while not in a level");
-      return;
-    }
-
+    var level = currentLevel();
     var chunkData = level.chunks().getChunk(packet.getChunkX(), packet.getChunkZ());
 
     // Vanilla silently ignores updates for unknown chunks
@@ -767,13 +741,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onBlockUpdate(ClientboundBlockUpdatePacket packet) {
-    var level = getCurrentLevel();
-
-    if (level == null) {
-      log.warn("Received section update while not in a level");
-      return;
-    }
-
+    var level = currentLevel();
     var entry = packet.getEntry();
 
     var vector3i = entry.getPosition();
@@ -840,7 +808,7 @@ public final class SessionDataManager {
         packet.getUuid(),
         EntityType.getById(packet.getType().ordinal()),
         packet.getData(),
-        getCurrentLevel(),
+        currentLevel(),
         packet.getX(),
         packet.getY(),
         packet.getZ(),
@@ -857,7 +825,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
     var experienceOrbState =
-      new ExperienceOrbEntity(packet.getEntityId(), packet.getExp(), getCurrentLevel(), packet.getX(), packet.getY(),
+      new ExperienceOrbEntity(packet.getEntityId(), packet.getExp(), currentLevel(), packet.getX(), packet.getY(),
         packet.getZ());
 
     entityTrackerState.addEntity(experienceOrbState);
@@ -1111,12 +1079,8 @@ public final class SessionDataManager {
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 
-  public LevelState getCurrentLevel() {
-    if (currentDimension == null) {
-      return null;
-    }
-
-    return levels.get(currentDimension.dimensionType());
+  public @NotNull Level currentLevel() {
+    return Objects.requireNonNull(levels.get(currentDimension.dimensionType()));
   }
 
   public void tick() {

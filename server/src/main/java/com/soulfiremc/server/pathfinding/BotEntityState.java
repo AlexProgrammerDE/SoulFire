@@ -18,7 +18,7 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
+import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 
 /**
@@ -27,13 +27,13 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
  *
  * @param blockPosition The position of the bot in block coordinates. This is the block the bottom
  *                      of the bot is in, so the "feet" block.
- * @param levelState    The level state of the world the bot is in.
+ * @param level         The level state of the world the bot is in.
  * @param inventory     The inventory state of the bot.
  */
 public record BotEntityState(
-  SFVec3i blockPosition, ProjectedLevelState levelState, ProjectedInventory inventory) {
+  SFVec3i blockPosition, ProjectedLevel level, ProjectedInventory inventory) {
   public static BotEntityState initialState(
-    ClientEntity clientEntity, ProjectedLevelState levelState, ProjectedInventory inventory) {
-    return new BotEntityState(SFVec3i.fromDouble(clientEntity.pos()), levelState, inventory);
+    ClientEntity clientEntity, ProjectedLevel level, ProjectedInventory inventory) {
+    return new BotEntityState(SFVec3i.fromDouble(clientEntity.pos()), level, inventory);
   }
 }

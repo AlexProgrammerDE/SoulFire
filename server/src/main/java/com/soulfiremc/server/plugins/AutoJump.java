@@ -43,11 +43,9 @@ public class AutoJump implements InternalPlugin {
       executor,
       () -> {
         var sessionDataManager = connection.sessionDataManager();
-        var level = sessionDataManager.getCurrentLevel();
         var clientEntity = sessionDataManager.clientEntity();
-        if (level != null
-          && clientEntity != null
-          && level.isChunkLoaded(clientEntity.blockPos())
+        if (clientEntity != null
+          && clientEntity.level().isChunkLoaded(clientEntity.blockPos())
           && clientEntity.onGround()) {
           connection.logger().debug("[AutoJump] Jumping!");
           clientEntity.jump();

@@ -735,7 +735,7 @@ public class POVServer implements InternalPlugin {
                     new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
                   for (var chunkEntry :
-                    Objects.requireNonNull(sessionDataManager.getCurrentLevel())
+                    sessionDataManager.currentLevel()
                       .chunks()
                       .getChunks()
                       .long2ObjectEntrySet()) {

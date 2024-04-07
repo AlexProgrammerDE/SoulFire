@@ -30,7 +30,7 @@ import com.soulfiremc.server.protocol.bot.movement.BotMovementManager;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
 import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
-import com.soulfiremc.server.protocol.bot.state.LevelState;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public class ClientEntity extends Entity {
 
   public ClientEntity(
     int entityId, UUID uuid, BotConnection connection, SessionDataManager sessionDataManager, ControlState controlState,
-    LevelState level) {
+    Level level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
     this.sessionDataManager = sessionDataManager;

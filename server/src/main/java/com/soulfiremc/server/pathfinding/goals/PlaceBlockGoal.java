@@ -35,6 +35,6 @@ public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalS
 
   @Override
   public boolean isFinished(BotEntityState entityState) {
-    return entityState.levelState().isChanged(goal);
+    return entityState.level().isChanged(goal);
   }
 }

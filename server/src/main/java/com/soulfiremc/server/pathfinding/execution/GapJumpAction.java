@@ -37,12 +37,9 @@ public final class GapJumpAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var clientEntity = connection.sessionDataManager().clientEntity();
     var botPosition = clientEntity.pos();
-    var levelState = connection.sessionDataManager().getCurrentLevel();
-    if (levelState == null) {
-      return false;
-    }
+    var level = connection.sessionDataManager().currentLevel();
 
-    var blockMeta = levelState.getBlockStateAt(blockPosition);
+    var blockMeta = level.getBlockStateAt(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
     if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
       // We want to be on the same Y level
@@ -58,12 +55,9 @@ public final class GapJumpAction implements WorldAction {
     var clientEntity = connection.sessionDataManager().clientEntity();
     clientEntity.controlState().resetAll();
 
-    var levelState = connection.sessionDataManager().getCurrentLevel();
-    if (levelState == null) {
-      return;
-    }
+    var level = connection.sessionDataManager().currentLevel();
 
-    var blockMeta = levelState.getBlockStateAt(blockPosition);
+    var blockMeta = level.getBlockStateAt(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
 
     var previousYaw = clientEntity.yaw();

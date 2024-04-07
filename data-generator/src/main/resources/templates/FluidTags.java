@@ -26,11 +26,11 @@ public class FluidTags {
 
   // VALUES REPLACE
 
+  private FluidTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private FluidTags() {}
 }

@@ -15,23 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.data;
+package com.soulfiremc.server.pathfinding.execution;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@SuppressWarnings("unused")
-public class FluidTags {
-  public static final List<ResourceKey> TAGS = new ArrayList<>();
-
-  public static final ResourceKey WATER = register("minecraft:water");
-  public static final ResourceKey LAVA = register("minecraft:lava");
-
-  private FluidTags() {}
-
-  public static ResourceKey register(String key) {
-    var resourceKey = ResourceKey.fromString(key);
-    TAGS.add(resourceKey);
-    return resourceKey;
+public final class UnrecoverablePathErrorException extends Exception {
+  public UnrecoverablePathErrorException() {
+    super(
+      "Something went wrong while executing the path! This path is unrecoverable! Trying to recalculate the path...");
   }
 }

@@ -26,7 +26,7 @@ import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
-import com.soulfiremc.server.protocol.bot.state.LevelState;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import java.util.UUID;
 import lombok.Getter;
@@ -46,7 +46,7 @@ public abstract class Entity {
   private final int entityId;
   private final UUID uuid;
   private final EntityType entityType;
-  protected LevelState level;
+  protected Level level;
   protected double x;
   protected double y;
   protected double z;
@@ -59,7 +59,7 @@ public abstract class Entity {
   protected boolean onGround;
 
   public Entity(int entityId, UUID uuid, EntityType entityType,
-                LevelState level,
+                Level level,
                 double x, double y, double z,
                 float yaw, float pitch, float headYaw,
                 double motionX, double motionY, double motionZ) {

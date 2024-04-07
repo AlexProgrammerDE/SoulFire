@@ -19,7 +19,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.ObjectData;
 import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.protocol.bot.state.LevelState;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class RawEntity extends Entity {
   private final ObjectData data;
 
   public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data,
-                   LevelState level,
+                   Level level,
                    double x, double y, double z,
                    float yaw, float pitch, float headYaw,
                    double motionX, double motionY, double motionZ) {

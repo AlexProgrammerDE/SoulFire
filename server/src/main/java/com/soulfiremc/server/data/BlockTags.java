@@ -174,7 +174,8 @@ public class BlockTags {
   public static final ResourceKey GOATS_SPAWNABLE_ON = register("minecraft:goats_spawnable_on");
   public static final ResourceKey MOOSHROOMS_SPAWNABLE_ON = register("minecraft:mooshrooms_spawnable_on");
   public static final ResourceKey PARROTS_SPAWNABLE_ON = register("minecraft:parrots_spawnable_on");
-  public static final ResourceKey POLAR_BEARS_SPAWNABLE_ON_ALTERNATE = register("minecraft:polar_bears_spawnable_on_alternate");
+  public static final ResourceKey POLAR_BEARS_SPAWNABLE_ON_ALTERNATE =
+    register("minecraft:polar_bears_spawnable_on_alternate");
   public static final ResourceKey RABBITS_SPAWNABLE_ON = register("minecraft:rabbits_spawnable_on");
   public static final ResourceKey FOXES_SPAWNABLE_ON = register("minecraft:foxes_spawnable_on");
   public static final ResourceKey WOLVES_SPAWNABLE_ON = register("minecraft:wolves_spawnable_on");
@@ -182,7 +183,8 @@ public class BlockTags {
   public static final ResourceKey AZALEA_GROWS_ON = register("minecraft:azalea_grows_on");
   public static final ResourceKey CONVERTABLE_TO_MUD = register("minecraft:convertable_to_mud");
   public static final ResourceKey MANGROVE_LOGS_CAN_GROW_THROUGH = register("minecraft:mangrove_logs_can_grow_through");
-  public static final ResourceKey MANGROVE_ROOTS_CAN_GROW_THROUGH = register("minecraft:mangrove_roots_can_grow_through");
+  public static final ResourceKey MANGROVE_ROOTS_CAN_GROW_THROUGH =
+    register("minecraft:mangrove_roots_can_grow_through");
   public static final ResourceKey DEAD_BUSH_MAY_PLACE_ON = register("minecraft:dead_bush_may_place_on");
   public static final ResourceKey SNAPS_GOAT_HORN = register("minecraft:snaps_goat_horn");
   public static final ResourceKey REPLACEABLE_BY_TREES = register("minecraft:replaceable_by_trees");
@@ -197,11 +199,11 @@ public class BlockTags {
   public static final ResourceKey ENCHANTMENT_POWER_TRANSMITTER = register("minecraft:enchantment_power_transmitter");
   public static final ResourceKey MAINTAINS_FARMLAND = register("minecraft:maintains_farmland");
 
+  private BlockTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private BlockTags() {}
 }

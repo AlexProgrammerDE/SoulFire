@@ -26,7 +26,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
+import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
@@ -92,7 +92,7 @@ public class PathfindingBenchmark {
       initialState =
         new BotEntityState(
           new SFVec3i(0, safeY, 0),
-          new ProjectedLevelState(accessor),
+          new ProjectedLevel(accessor),
           new ProjectedInventory(new PlayerInventoryContainer(null)));
 
       log.info("Done loading! Testing...");

@@ -124,11 +124,11 @@ public class ItemTags {
   public static final ResourceKey BREAKS_DECORATED_POTS = register("minecraft:breaks_decorated_pots");
   public static final ResourceKey VILLAGER_PLANTABLE_SEEDS = register("minecraft:villager_plantable_seeds");
 
+  private ItemTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private ItemTags() {}
 }

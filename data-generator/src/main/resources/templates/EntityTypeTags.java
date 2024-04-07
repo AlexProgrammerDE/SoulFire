@@ -26,11 +26,11 @@ public class EntityTypeTags {
 
   // VALUES REPLACE
 
+  private EntityTypeTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private EntityTypeTags() {}
 }

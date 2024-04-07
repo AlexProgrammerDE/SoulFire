@@ -24,7 +24,7 @@ import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
-import com.soulfiremc.server.protocol.bot.state.LevelState;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
@@ -71,7 +71,7 @@ public class BotMovementManager {
   }
 
   private static void consumeIntersectedBlocks(
-    LevelState world, AABB queryBB, BiConsumer<BlockState, Vector3i> consumer) {
+    Level world, AABB queryBB, BiConsumer<BlockState, Vector3i> consumer) {
     var startX = MathHelper.floorDouble(queryBB.minX - 1.0E-7) - 1;
     var endX = MathHelper.floorDouble(queryBB.maxX + 1.0E-7) + 1;
     var startY = MathHelper.floorDouble(queryBB.minY - 1.0E-7) - 1;
@@ -100,7 +100,7 @@ public class BotMovementManager {
     return vec.getX() * vec.getX() + vec.getZ() * vec.getZ();
   }
 
-  public static Vector3d collideBoundingBox(LevelState world, Vector3d targetVec, AABB queryBB) {
+  public static Vector3d collideBoundingBox(Level world, Vector3d targetVec, AABB queryBB) {
     return collideWith(
       targetVec, queryBB, world.getCollisionBoxes(queryBB.expandTowards(targetVec)));
   }
@@ -198,7 +198,7 @@ public class BotMovementManager {
       yaw, pitch, sinYaw, cosYaw, sinPitch, cosPitch, lookX, sinPitch, lookZ, lookDir);
   }
 
-  public static boolean isMaterialInBB(LevelState world, AABB queryBB, List<BlockType> types) {
+  public static boolean isMaterialInBB(Level world, AABB queryBB, List<BlockType> types) {
     var minX = MathHelper.floorDouble(queryBB.minX);
     var minY = MathHelper.floorDouble(queryBB.minY);
     var minZ = MathHelper.floorDouble(queryBB.minZ);
@@ -227,7 +227,7 @@ public class BotMovementManager {
     pos.z = (bb.minZ + bb.maxZ) / 2;
   }
 
-  public boolean isClimbable(LevelState world, Vector3i pos) {
+  public boolean isClimbable(Level world, Vector3i pos) {
     var blockType = world.getBlockStateAt(pos).blockType();
     return tagsState.isBlockInTag(blockType, BlockTags.CLIMBABLE)
       || blockType == BlockType.POWDER_SNOW;
@@ -339,7 +339,7 @@ public class BotMovementManager {
     moveEntityWithHeading(world, strafe, forward);
   }
 
-  public void moveEntityWithHeading(LevelState world, float strafe, float forward) {
+  public void moveEntityWithHeading(Level world, float strafe, float forward) {
     var vel = movementState.vel;
     var pos = movementState.pos;
 
@@ -499,7 +499,7 @@ public class BotMovementManager {
     return (float) clientEntity.attributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
   }
 
-  public void moveEntity(LevelState world, double dx, double dy, double dz) {
+  public void moveEntity(Level world, double dx, double dy, double dz) {
     var vel = movementState.vel;
     var pos = movementState.pos;
 
@@ -629,7 +629,7 @@ public class BotMovementManager {
     }
   }
 
-  private Vector3d collide(LevelState world, AABB playerBB, Vector3d targetVec) {
+  private Vector3d collide(Level world, AABB playerBB, Vector3d targetVec) {
     var initialCollisionVec =
       targetVec.lengthSquared() == 0.0
         ? targetVec
@@ -699,7 +699,7 @@ public class BotMovementManager {
     vel.z += forward * cos + strafe * sin;
   }
 
-  public boolean doesNotCollide(LevelState world, MutableVector3d pos) {
+  public boolean doesNotCollide(Level world, MutableVector3d pos) {
     var pBB = clientEntity.boundingBox(pos.toImmutable());
     return world.getCollisionBoxes(pBB).isEmpty() && getWaterInBB(world, pBB).isEmpty();
   }
@@ -729,7 +729,7 @@ public class BotMovementManager {
     return level >= 8 ? 0 : level;
   }
 
-  public Vector3i getFlow(LevelState world, BlockState meta, Vector3i block) {
+  public Vector3i getFlow(Level world, BlockState meta, Vector3i block) {
     var curlevel = getRenderedDepth(meta);
     var flow = new MutableVector3d(0, 0, 0);
     for (var combination :
@@ -773,7 +773,7 @@ public class BotMovementManager {
     return flow.normalize().toImmutableInt();
   }
 
-  public List<Pair<Vector3i, BlockState>> getWaterInBB(LevelState world, AABB bb) {
+  public List<Pair<Vector3i, BlockState>> getWaterInBB(Level world, AABB bb) {
     var waterBlocks = new ArrayList<Pair<Vector3i, BlockState>>();
 
     consumeIntersectedBlocks(
@@ -793,7 +793,7 @@ public class BotMovementManager {
     return waterBlocks;
   }
 
-  public boolean isInWaterApplyCurrent(LevelState world, AABB bb, MutableVector3d vel) {
+  public boolean isInWaterApplyCurrent(Level world, AABB bb, MutableVector3d vel) {
     var acceleration = new MutableVector3d(0, 0, 0);
     var waterBlocks = getWaterInBB(world, bb);
     var isInWater = !waterBlocks.isEmpty();

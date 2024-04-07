@@ -24,12 +24,11 @@ import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
+import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import java.util.List;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -50,7 +49,18 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   private boolean cancelled = false;
   private boolean registered = false;
 
-  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer, CompletableFuture<Void> pathCompletionFuture) {
+  public PathExecutor(
+    BotConnection connection,
+    Boolean2ObjectFunction<List<WorldAction>> findPath,
+    CompletableFuture<Void> pathCompletionFuture) {
+    this.executorService = connection.executorManager().newExecutorService(connection, "PathExecutor");
+    this.connection = connection;
+    this.findPath = findPath;
+    this.pathCompletionFuture = pathCompletionFuture;
+  }
+
+  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer,
+                                        CompletableFuture<Void> pathCompletionFuture) {
     var logger = bot.logger();
     var sessionDataManager = bot.sessionDataManager();
     var clientEntity = sessionDataManager.clientEntity();
@@ -62,9 +72,8 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         var start =
           BotEntityState.initialState(
             clientEntity,
-            new ProjectedLevelState(
-              Objects.requireNonNull(
-                  sessionDataManager.getCurrentLevel(), "Level is null!")
+            new ProjectedLevel(
+              sessionDataManager.currentLevel()
                 .chunks()
                 .immutableCopy()),
             new ProjectedInventory(
@@ -77,16 +86,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     var pathExecutor = new PathExecutor(bot, findPath, pathCompletionFuture);
     pathExecutor.submitForPathCalculation(true);
-  }
-
-  public PathExecutor(
-    BotConnection connection,
-    Boolean2ObjectFunction<List<WorldAction>> findPath,
-    CompletableFuture<Void> pathCompletionFuture) {
-    this.executorService = connection.executorManager().newExecutorService(connection, "PathExecutor");
-    this.connection = connection;
-    this.findPath = findPath;
-    this.pathCompletionFuture = pathCompletionFuture;
   }
 
   public void submitForPathCalculation(boolean isInitial) {

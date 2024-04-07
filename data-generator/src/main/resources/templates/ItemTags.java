@@ -26,11 +26,11 @@ public class ItemTags {
 
   // VALUES REPLACE
 
+  private ItemTags() {}
+
   public static ResourceKey register(String key) {
     var resourceKey = ResourceKey.fromString(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }
-
-  private ItemTags() {}
 }

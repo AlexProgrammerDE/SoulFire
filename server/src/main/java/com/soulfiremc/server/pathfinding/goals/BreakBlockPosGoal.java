@@ -30,6 +30,6 @@ public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
 
   @Override
   public boolean isFinished(BotEntityState entityState) {
-    return BlockTypeHelper.isEmptyBlock(entityState.levelState().getBlockStateAt(goal).blockType());
+    return BlockTypeHelper.isEmptyBlock(entityState.level().getBlockStateAt(goal).blockType());
   }
 }

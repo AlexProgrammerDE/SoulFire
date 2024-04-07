@@ -350,7 +350,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   @Override
   public GraphInstructions getInstructions(BotEntityState previousEntityState) {
     var inventory = previousEntityState.inventory();
-    var levelState = previousEntityState.levelState();
+    var level = previousEntityState.level();
     var cost = this.cost;
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
@@ -388,13 +388,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     if (blockToBreakArray != null || blockToPlacePosition != null) {
-      levelState = levelState.withChanges(blockToBreakArray, blockToPlacePosition);
+      level = level.withChanges(blockToBreakArray, blockToPlacePosition);
     }
 
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, levelState, inventory), cost, actions);
+      new BotEntityState(absoluteTargetFeetBlock, level, inventory), cost, actions);
   }
 
   @Override

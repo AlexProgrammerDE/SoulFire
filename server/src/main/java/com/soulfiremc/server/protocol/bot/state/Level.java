@@ -39,7 +39,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-public class LevelState {
+public class Level {
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final String dimensionName;
@@ -69,7 +69,7 @@ public class LevelState {
   @Setter
   private long time;
 
-  public LevelState(
+  public Level(
     TagsState tagsState,
     String dimensionName,
     int dimensionId,

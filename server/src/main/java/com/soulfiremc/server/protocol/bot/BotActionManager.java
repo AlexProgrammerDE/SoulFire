@@ -111,10 +111,7 @@ public class BotActionManager {
   public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
     incrementSequenceNumber();
     var clientEntity = dataManager.clientEntity();
-    var levelState = dataManager.getCurrentLevel();
-    if (levelState == null) {
-      return;
-    }
+    var level = dataManager.currentLevel();
 
     var eyePosition = clientEntity.eyePosition();
 
@@ -129,7 +126,7 @@ public class BotActionManager {
 
     var rayCast =
       rayCastToBlock(
-        levelState.getBlockStateAt(againstBlock),
+        level.getBlockStateAt(againstBlock),
         eyePosition,
         clientEntity.rotationVector(),
         againstBlock);
@@ -138,7 +135,7 @@ public class BotActionManager {
     }
 
     var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
-    var insideBlock = !levelState.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
+    var insideBlock = !level.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
     connection.sendPacket(
       new ServerboundUseItemOnPacket(

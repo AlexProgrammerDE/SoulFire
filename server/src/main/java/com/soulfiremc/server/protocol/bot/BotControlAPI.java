@@ -288,10 +288,7 @@ public class BotControlAPI {
   }
 
   public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
-    var level = dataManager.getCurrentLevel();
-    if (level == null) {
-      return false;
-    }
+    var level = dataManager.currentLevel();
 
     var eye = dataManager.clientEntity().eyePosition();
     var distance = eye.distance(vec);
@@ -304,7 +301,7 @@ public class BotControlAPI {
     }
 
     var segment = new Segment(eye, vec);
-    var boxes = dataManager.getCurrentLevel().getCollisionBoxes(new AABB(eye, vec));
+    var boxes = level.getCollisionBoxes(new AABB(eye, vec));
     return !segment.intersects(boxes);
   }
 

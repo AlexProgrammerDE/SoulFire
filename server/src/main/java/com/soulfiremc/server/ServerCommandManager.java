@@ -101,6 +101,10 @@ public class ServerCommandManager implements PlatformCommandManager {
     }
   }
 
+  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
+    PathExecutor.executePathfinding(bot, goalScorer, new CompletableFuture<>());
+  }
+
   @PostConstruct
   public void postConstruct() {
     loadCommandHistory();
@@ -824,10 +828,6 @@ public class ServerCommandManager implements PlatformCommandManager {
         executePathfinding(bot, goalScorer);
         return Command.SINGLE_SUCCESS;
       });
-  }
-
-  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
-    PathExecutor.executePathfinding(bot, goalScorer, new CompletableFuture<>());
   }
 
   @Override

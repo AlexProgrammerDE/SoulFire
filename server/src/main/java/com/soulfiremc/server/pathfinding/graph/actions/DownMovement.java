@@ -108,16 +108,16 @@ public final class DownMovement extends GraphAction implements Cloneable {
     if (blockBreakCosts.willDrop()) {
       inventory = inventory.withOneMoreBlock();
     }
-    var levelState = previousEntityState.levelState();
+    var level = previousEntityState.level();
 
-    levelState = levelState.withChangeToAir(blockBreakCosts.block());
+    level = level.withChangeToAir(blockBreakCosts.block());
 
     var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
     var absoluteTargetFeetBlock =
       previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, levelState, inventory),
+      new BotEntityState(absoluteTargetFeetBlock, level, inventory),
       cost,
       List.of(new BlockBreakAction(absoluteMinedBlock)));
   }

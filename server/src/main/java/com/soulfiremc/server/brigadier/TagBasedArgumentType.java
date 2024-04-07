@@ -42,6 +42,37 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
   private final List<ResourceKey> directKeys;
   private final List<ResourceKey> tagKeys;
 
+  public static boolean isAllowedInUnquotedString(final char c) {
+    return c >= '0' && c <= '9'
+      || c >= 'A' && c <= 'Z'
+      || c >= 'a' && c <= 'z'
+      || c == '#' || c == ':'
+      || c == '_';
+  }
+
+  public static String readUnquotedStringCustom(StringReader stringReader) {
+    final var start = stringReader.getCursor();
+    while (stringReader.canRead() && isAllowedInUnquotedString(stringReader.peek())) {
+      stringReader.skip();
+    }
+
+    return stringReader.getString().substring(start, stringReader.getCursor());
+  }
+
+  public static String readStringCustom(StringReader stringReader) throws CommandSyntaxException {
+    if (!stringReader.canRead()) {
+      return "";
+    }
+
+    final var next = stringReader.peek();
+    if (StringReader.isQuotedStringStart(next)) {
+      stringReader.skip();
+      return stringReader.readStringUntil(next);
+    }
+
+    return readUnquotedStringCustom(stringReader);
+  }
+
   @Override
   public R parse(StringReader stringReader) throws CommandSyntaxException {
     final var start = stringReader.getCursor();
@@ -98,36 +129,5 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
           .map(ResourceKey::path)
           .map(s -> TAG_PREFIX + s))
       .toList();
-  }
-
-  public static boolean isAllowedInUnquotedString(final char c) {
-    return c >= '0' && c <= '9'
-      || c >= 'A' && c <= 'Z'
-      || c >= 'a' && c <= 'z'
-      || c == '#' || c == ':'
-      || c == '_';
-  }
-
-  public static String readUnquotedStringCustom(StringReader stringReader) {
-    final var start = stringReader.getCursor();
-    while (stringReader.canRead() && isAllowedInUnquotedString(stringReader.peek())) {
-      stringReader.skip();
-    }
-
-    return stringReader.getString().substring(start, stringReader.getCursor());
-  }
-
-  public static String readStringCustom(StringReader stringReader) throws CommandSyntaxException {
-    if (!stringReader.canRead()) {
-      return "";
-    }
-
-    final var next = stringReader.peek();
-    if (StringReader.isQuotedStringStart(next)) {
-      stringReader.skip();
-      return stringReader.readStringUntil(next);
-    }
-
-    return readUnquotedStringCustom(stringReader);
   }
 }

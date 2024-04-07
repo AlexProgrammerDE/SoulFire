@@ -23,6 +23,7 @@ import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.VectorHelper;
 import java.util.concurrent.TimeUnit;
@@ -42,12 +43,9 @@ public final class BlockBreakAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var levelState = connection.sessionDataManager().getCurrentLevel();
-    if (levelState == null) {
-      return false;
-    }
+    var level = connection.sessionDataManager().currentLevel();
 
-    return levelState.getBlockStateAt(blockPosition).blockType().air();
+    return BlockTypeHelper.isEmptyBlock(level.getBlockStateAt(blockPosition).blockType());
   }
 
   @Override
@@ -56,13 +54,9 @@ public final class BlockBreakAction implements WorldAction {
     var clientEntity = sessionDataManager.clientEntity();
     sessionDataManager.controlState().resetAll();
 
-    var levelState = sessionDataManager.getCurrentLevel();
+    var level = sessionDataManager.currentLevel();
     var inventoryManager = sessionDataManager.inventoryManager();
     var playerInventory = inventoryManager.playerInventory();
-
-    if (levelState == null) {
-      return;
-    }
 
     if (!didLook) {
       didLook = true;
@@ -71,7 +65,7 @@ public final class BlockBreakAction implements WorldAction {
       clientEntity.lookAt(
         RotationOrigin.EYES,
         VectorHelper.topMiddleOfBlock(
-          blockPosition.toVector3d(), levelState.getBlockStateAt(blockPosition)));
+          blockPosition.toVector3d(), level.getBlockStateAt(blockPosition)));
       if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
         clientEntity.sendRot();
       }
@@ -91,7 +85,7 @@ public final class BlockBreakAction implements WorldAction {
           sawEmpty = true;
         }
 
-        var optionalBlockType = levelState.getBlockStateAt(blockPosition).blockType();
+        var optionalBlockType = level.getBlockStateAt(blockPosition).blockType();
         if (optionalBlockType == BlockType.VOID_AIR) {
           log.warn("Block at {} is not in view range!", blockPosition);
           return;
@@ -183,7 +177,7 @@ public final class BlockBreakAction implements WorldAction {
     }
 
     if (remainingTicks == -1) {
-      var optionalBlockType = levelState.getBlockStateAt(blockPosition).blockType();
+      var optionalBlockType = level.getBlockStateAt(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
         log.warn("Block at {} is not in view range!", blockPosition);
         return;

@@ -29,7 +29,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
+import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
@@ -54,7 +54,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     var route = routeFinder.findRoute(initialState, false);
@@ -78,7 +78,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     assertThrowsExactly(
@@ -97,7 +97,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     var route = routeFinder.findRoute(initialState, false);
@@ -117,7 +117,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     if (height > 1) {
@@ -141,7 +141,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     if (height > 1) {
@@ -165,7 +165,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     if (height > 3) {
@@ -189,7 +189,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     if (height > 3) {
@@ -213,7 +213,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of()));
 
     // TODO: Allow longer jumps
@@ -236,7 +236,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE))));
 
     var route = routeFinder.findRoute(initialState, false);
@@ -254,7 +254,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(
           List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))));
 
@@ -278,7 +278,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     var route = routeFinder.findRoute(initialState, false);
@@ -300,7 +300,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     var route = routeFinder.findRoute(initialState, false);
@@ -322,7 +322,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     if (unsafe) {
@@ -351,7 +351,7 @@ public class PathfindingTest {
     var initialState =
       new BotEntityState(
         new SFVec3i(0, 1, 0),
-        new ProjectedLevelState(accessor),
+        new ProjectedLevel(accessor),
         new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
 
     if (level > 1) {
