@@ -24,6 +24,7 @@ import java.util.List;
 public class EntityTypeTags {
   public static final List<ResourceKey> TAGS = new ArrayList<>();
 
+  //@formatter:off
   public static final ResourceKey SKELETONS = register("minecraft:skeletons");
   public static final ResourceKey ZOMBIES = register("minecraft:zombies");
   public static final ResourceKey RAIDERS = register("minecraft:raiders");
@@ -44,6 +45,7 @@ public class EntityTypeTags {
   public static final ResourceKey DEFLECTS_ARROWS = register("minecraft:deflects_arrows");
   public static final ResourceKey DEFLECTS_TRIDENTS = register("minecraft:deflects_tridents");
   public static final ResourceKey CAN_TURN_IN_BOATS = register("minecraft:can_turn_in_boats");
+  //@formatter:on
 
   private EntityTypeTags() {}
 

@@ -42,7 +42,7 @@ public record BlockType(
   boolean fallingBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
-  ResourceKey fluidType,
+  FluidType fluidType,
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) {
@@ -61,7 +61,9 @@ public record BlockType(
   public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static BlockType register(String key) {
     var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class, Map.of(

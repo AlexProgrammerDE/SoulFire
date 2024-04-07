@@ -28,6 +28,7 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
   public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   public static final AttributeType GENERIC_ARMOR = register("minecraft:generic.armor");
   public static final AttributeType GENERIC_ARMOR_TOUGHNESS = register("minecraft:generic.armor_toughness");
   public static final AttributeType GENERIC_ATTACK_DAMAGE = register("minecraft:generic.attack_damage");
@@ -42,6 +43,7 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
   public static final AttributeType GENERIC_MAX_HEALTH = register("minecraft:generic.max_health");
   public static final AttributeType GENERIC_MOVEMENT_SPEED = register("minecraft:generic.movement_speed");
   public static final AttributeType ZOMBIE_SPAWN_REINFORCEMENTS = register("minecraft:zombie.spawn_reinforcements");
+  //@formatter:on
 
   public static AttributeType register(String key) {
     var instance =

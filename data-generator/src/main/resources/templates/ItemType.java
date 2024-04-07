@@ -33,7 +33,9 @@ public record ItemType(
   TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static ItemType register(String key) {
     var instance =

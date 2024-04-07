@@ -32,6 +32,7 @@ public record EntityType(
   boolean attackable) {
   public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   public static final EntityType ALLAY = register("minecraft:allay");
   public static final EntityType AREA_EFFECT_CLOUD = register("minecraft:area_effect_cloud");
   public static final EntityType ARMOR_STAND = register("minecraft:armor_stand");
@@ -158,9 +159,12 @@ public record EntityType(
   public static final EntityType ZOMBIFIED_PIGLIN = register("minecraft:zombified_piglin");
   public static final EntityType PLAYER = register("minecraft:player");
   public static final EntityType FISHING_BOBBER = register("minecraft:fishing_bobber");
+  //@formatter:on
 
   public static EntityType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
+    var instance =
+      GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
+
     FROM_ID.put(instance.id(), instance);
     return instance;
   }

@@ -24,7 +24,9 @@ import java.util.List;
 public class ItemTags {
   public static final List<ResourceKey> TAGS = new ArrayList<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   private ItemTags() {}
 

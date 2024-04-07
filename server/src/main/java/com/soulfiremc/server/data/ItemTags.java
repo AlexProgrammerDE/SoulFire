@@ -24,6 +24,7 @@ import java.util.List;
 public class ItemTags {
   public static final List<ResourceKey> TAGS = new ArrayList<>();
 
+  //@formatter:off
   public static final ResourceKey WOOL = register("minecraft:wool");
   public static final ResourceKey PLANKS = register("minecraft:planks");
   public static final ResourceKey STONE_BRICKS = register("minecraft:stone_bricks");
@@ -123,6 +124,7 @@ public class ItemTags {
   public static final ResourceKey TOOLS = register("minecraft:tools");
   public static final ResourceKey BREAKS_DECORATED_POTS = register("minecraft:breaks_decorated_pots");
   public static final ResourceKey VILLAGER_PLANTABLE_SEEDS = register("minecraft:villager_plantable_seeds");
+  //@formatter:on
 
   private ItemTags() {}
 

@@ -32,7 +32,9 @@ public record EntityType(
   boolean attackable) {
   public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static EntityType register(String key) {
     var instance =

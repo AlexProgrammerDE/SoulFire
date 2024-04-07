@@ -33,6 +33,7 @@ public record ItemType(
   TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   public static final ItemType AIR = register("minecraft:air");
   public static final ItemType STONE = register("minecraft:stone");
   public static final ItemType GRANITE = register("minecraft:granite");
@@ -158,10 +159,8 @@ public record ItemType(
   public static final ItemType WAXED_OXIDIZED_CUT_COPPER = register("minecraft:waxed_oxidized_cut_copper");
   public static final ItemType WAXED_CUT_COPPER_STAIRS = register("minecraft:waxed_cut_copper_stairs");
   public static final ItemType WAXED_EXPOSED_CUT_COPPER_STAIRS = register("minecraft:waxed_exposed_cut_copper_stairs");
-  public static final ItemType WAXED_WEATHERED_CUT_COPPER_STAIRS =
-    register("minecraft:waxed_weathered_cut_copper_stairs");
-  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_STAIRS =
-    register("minecraft:waxed_oxidized_cut_copper_stairs");
+  public static final ItemType WAXED_WEATHERED_CUT_COPPER_STAIRS = register("minecraft:waxed_weathered_cut_copper_stairs");
+  public static final ItemType WAXED_OXIDIZED_CUT_COPPER_STAIRS = register("minecraft:waxed_oxidized_cut_copper_stairs");
   public static final ItemType WAXED_CUT_COPPER_SLAB = register("minecraft:waxed_cut_copper_slab");
   public static final ItemType WAXED_EXPOSED_CUT_COPPER_SLAB = register("minecraft:waxed_exposed_cut_copper_slab");
   public static final ItemType WAXED_WEATHERED_CUT_COPPER_SLAB = register("minecraft:waxed_weathered_cut_copper_slab");
@@ -730,8 +729,7 @@ public record ItemType(
   public static final ItemType CRIMSON_BUTTON = register("minecraft:crimson_button");
   public static final ItemType WARPED_BUTTON = register("minecraft:warped_button");
   public static final ItemType STONE_PRESSURE_PLATE = register("minecraft:stone_pressure_plate");
-  public static final ItemType POLISHED_BLACKSTONE_PRESSURE_PLATE =
-    register("minecraft:polished_blackstone_pressure_plate");
+  public static final ItemType POLISHED_BLACKSTONE_PRESSURE_PLATE = register("minecraft:polished_blackstone_pressure_plate");
   public static final ItemType LIGHT_WEIGHTED_PRESSURE_PLATE = register("minecraft:light_weighted_pressure_plate");
   public static final ItemType HEAVY_WEIGHTED_PRESSURE_PLATE = register("minecraft:heavy_weighted_pressure_plate");
   public static final ItemType OAK_PRESSURE_PLATE = register("minecraft:oak_pressure_plate");
@@ -1262,10 +1260,8 @@ public record ItemType(
   public static final ItemType CHISELED_POLISHED_BLACKSTONE = register("minecraft:chiseled_polished_blackstone");
   public static final ItemType POLISHED_BLACKSTONE_BRICKS = register("minecraft:polished_blackstone_bricks");
   public static final ItemType POLISHED_BLACKSTONE_BRICK_SLAB = register("minecraft:polished_blackstone_brick_slab");
-  public static final ItemType POLISHED_BLACKSTONE_BRICK_STAIRS =
-    register("minecraft:polished_blackstone_brick_stairs");
-  public static final ItemType CRACKED_POLISHED_BLACKSTONE_BRICKS =
-    register("minecraft:cracked_polished_blackstone_bricks");
+  public static final ItemType POLISHED_BLACKSTONE_BRICK_STAIRS = register("minecraft:polished_blackstone_brick_stairs");
+  public static final ItemType CRACKED_POLISHED_BLACKSTONE_BRICKS = register("minecraft:cracked_polished_blackstone_bricks");
   public static final ItemType RESPAWN_ANCHOR = register("minecraft:respawn_anchor");
   public static final ItemType CANDLE = register("minecraft:candle");
   public static final ItemType WHITE_CANDLE = register("minecraft:white_candle");
@@ -1295,40 +1291,23 @@ public record ItemType(
   public static final ItemType FROGSPAWN = register("minecraft:frogspawn");
   public static final ItemType ECHO_SHARD = register("minecraft:echo_shard");
   public static final ItemType BRUSH = register("minecraft:brush");
-  public static final ItemType NETHERITE_UPGRADE_SMITHING_TEMPLATE =
-    register("minecraft:netherite_upgrade_smithing_template");
-  public static final ItemType SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:sentry_armor_trim_smithing_template");
-  public static final ItemType DUNE_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:dune_armor_trim_smithing_template");
-  public static final ItemType COAST_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:coast_armor_trim_smithing_template");
-  public static final ItemType WILD_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:wild_armor_trim_smithing_template");
-  public static final ItemType WARD_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:ward_armor_trim_smithing_template");
-  public static final ItemType EYE_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:eye_armor_trim_smithing_template");
-  public static final ItemType VEX_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:vex_armor_trim_smithing_template");
-  public static final ItemType TIDE_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:tide_armor_trim_smithing_template");
-  public static final ItemType SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:snout_armor_trim_smithing_template");
-  public static final ItemType RIB_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:rib_armor_trim_smithing_template");
-  public static final ItemType SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:spire_armor_trim_smithing_template");
-  public static final ItemType WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:wayfinder_armor_trim_smithing_template");
-  public static final ItemType SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:shaper_armor_trim_smithing_template");
-  public static final ItemType SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:silence_armor_trim_smithing_template");
-  public static final ItemType RAISER_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:raiser_armor_trim_smithing_template");
-  public static final ItemType HOST_ARMOR_TRIM_SMITHING_TEMPLATE =
-    register("minecraft:host_armor_trim_smithing_template");
+  public static final ItemType NETHERITE_UPGRADE_SMITHING_TEMPLATE = register("minecraft:netherite_upgrade_smithing_template");
+  public static final ItemType SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:sentry_armor_trim_smithing_template");
+  public static final ItemType DUNE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:dune_armor_trim_smithing_template");
+  public static final ItemType COAST_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:coast_armor_trim_smithing_template");
+  public static final ItemType WILD_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:wild_armor_trim_smithing_template");
+  public static final ItemType WARD_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:ward_armor_trim_smithing_template");
+  public static final ItemType EYE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:eye_armor_trim_smithing_template");
+  public static final ItemType VEX_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:vex_armor_trim_smithing_template");
+  public static final ItemType TIDE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:tide_armor_trim_smithing_template");
+  public static final ItemType SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:snout_armor_trim_smithing_template");
+  public static final ItemType RIB_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:rib_armor_trim_smithing_template");
+  public static final ItemType SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:spire_armor_trim_smithing_template");
+  public static final ItemType WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:wayfinder_armor_trim_smithing_template");
+  public static final ItemType SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:shaper_armor_trim_smithing_template");
+  public static final ItemType SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:silence_armor_trim_smithing_template");
+  public static final ItemType RAISER_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:raiser_armor_trim_smithing_template");
+  public static final ItemType HOST_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:host_armor_trim_smithing_template");
   public static final ItemType ANGLER_POTTERY_SHERD = register("minecraft:angler_pottery_sherd");
   public static final ItemType ARCHER_POTTERY_SHERD = register("minecraft:archer_pottery_sherd");
   public static final ItemType ARMS_UP_POTTERY_SHERD = register("minecraft:arms_up_pottery_sherd");
@@ -1367,9 +1346,12 @@ public record ItemType(
   public static final ItemType WAXED_OXIDIZED_COPPER_BULB = register("minecraft:waxed_oxidized_copper_bulb");
   public static final ItemType TRIAL_SPAWNER = register("minecraft:trial_spawner");
   public static final ItemType TRIAL_KEY = register("minecraft:trial_key");
+  //@formatter:on
 
   public static ItemType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+    var instance =
+      GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+
     FROM_ID.put(instance.id(), instance);
     return instance;
   }

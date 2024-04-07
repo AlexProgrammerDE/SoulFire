@@ -41,7 +41,9 @@ public record EnchantmentType(
   public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static EnchantmentType register(String key) {
     var instance =

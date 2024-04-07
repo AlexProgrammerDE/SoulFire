@@ -19,7 +19,9 @@ package com.soulfiremc.data;
 
 @SuppressWarnings("unused")
 public class RegistryKeys {
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   private RegistryKeys() {}
 }

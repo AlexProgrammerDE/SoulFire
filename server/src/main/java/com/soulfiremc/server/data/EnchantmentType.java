@@ -41,6 +41,7 @@ public record EnchantmentType(
   public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   public static final EnchantmentType PROTECTION = register("minecraft:protection");
   public static final EnchantmentType FIRE_PROTECTION = register("minecraft:fire_protection");
   public static final EnchantmentType FEATHER_FALLING = register("minecraft:feather_falling");
@@ -80,6 +81,7 @@ public record EnchantmentType(
   public static final EnchantmentType PIERCING = register("minecraft:piercing");
   public static final EnchantmentType MENDING = register("minecraft:mending");
   public static final EnchantmentType VANISHING_CURSE = register("minecraft:vanishing_curse");
+  //@formatter:on
 
   public static EnchantmentType register(String key) {
     var instance =

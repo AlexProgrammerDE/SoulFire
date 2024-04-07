@@ -28,7 +28,9 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
   public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static AttributeType register(String key) {
     var instance =

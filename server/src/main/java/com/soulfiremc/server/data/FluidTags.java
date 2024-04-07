@@ -24,8 +24,10 @@ import java.util.List;
 public class FluidTags {
   public static final List<ResourceKey> TAGS = new ArrayList<>();
 
+  //@formatter:off
   public static final ResourceKey WATER = register("minecraft:water");
   public static final ResourceKey LAVA = register("minecraft:lava");
+  //@formatter:on
 
   private FluidTags() {}
 

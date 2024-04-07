@@ -28,7 +28,9 @@ public record FluidType(int id, ResourceKey key) {
   public static final Object2ReferenceMap<ResourceKey, FluidType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
 
+  //@formatter:off
   // VALUES REPLACE
+  //@formatter:on
 
   public static FluidType register(String key) {
     var instance =

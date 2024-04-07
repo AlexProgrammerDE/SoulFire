@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("unused")
 public record MapColor(int id, int col) {
+  //@formatter:off
   public static final MapColor[] COLORS = new MapColor[] {
     new MapColor(0, 0),
     new MapColor(1, 8368696),
@@ -87,6 +88,7 @@ public record MapColor(int id, int col) {
     null,
     null
   };
+  //@formatter:on
   private static final MapColor EMPTY = COLORS[0];
 
   public static int getColorFromPackedId(int packedId) {
