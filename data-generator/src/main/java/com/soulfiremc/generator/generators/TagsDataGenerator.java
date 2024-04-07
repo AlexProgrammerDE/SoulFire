@@ -65,7 +65,7 @@ public class TagsDataGenerator {
               s ->
                 "public static final ResourceKey "
                   + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = ResourceKey.fromString(\""
+                  + " = register(\""
                   + s
                   + "\");")
             .toArray(String[]::new)));
@@ -90,7 +90,7 @@ public class TagsDataGenerator {
               s ->
                 "public static final ResourceKey "
                   + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = ResourceKey.fromString(\""
+                  + " = register(\""
                   + s
                   + "\");")
             .toArray(String[]::new)));
@@ -115,7 +115,7 @@ public class TagsDataGenerator {
               s ->
                 "public static final ResourceKey "
                   + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = ResourceKey.fromString(\""
+                  + " = register(\""
                   + s
                   + "\");")
             .toArray(String[]::new)));
@@ -140,7 +140,7 @@ public class TagsDataGenerator {
               s ->
                 "public static final ResourceKey "
                   + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = ResourceKey.fromString(\""
+                  + " = register(\""
                   + s
                   + "\");")
             .toArray(String[]::new)));

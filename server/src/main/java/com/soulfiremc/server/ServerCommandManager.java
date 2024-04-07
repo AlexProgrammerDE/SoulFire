@@ -42,22 +42,20 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
+import com.soulfiremc.server.brigadier.BlockTagResolvable;
+import com.soulfiremc.server.brigadier.TagBasedArgumentType;
+import com.soulfiremc.server.data.BlockTags;
+import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.grpc.ServerRPCConstants;
-import com.soulfiremc.server.pathfinding.BotEntityState;
-import com.soulfiremc.server.pathfinding.RouteFinder;
+import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
-import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevelState;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
-import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,7 +67,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -253,6 +251,39 @@ public class ServerCommandManager implements PlatformCommandManager {
                           return executePathfinding(c, new PosGoal(x, y, z));
                         }))))));
     dispatcher.register(
+      literal("collect")
+        .then(argument("block", new TagBasedArgumentType<BlockTagResolvable>(
+          key -> tags -> block -> block.key().equals(key),
+          key -> tags -> block -> tags.isBlockInTag(block, key),
+          BlockType.FROM_KEY.keySet().stream().toList(),
+          BlockTags.TAGS
+        ))
+          .then(argument("amount", IntegerArgumentType.integer(1))
+            .then(argument("searchRadius", IntegerArgumentType.integer(1))
+              .executes(
+                help(
+                  "Makes all connected bots collect a block by name or tag",
+                  c -> {
+                    var resolvable = c.getArgument("block", BlockTagResolvable.class);
+                    var amount = IntegerArgumentType.getInteger(c, "amount");
+                    var searchRadius = IntegerArgumentType.getInteger(c, "searchRadius");
+
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        bot.executorManager().newExecutorService(bot, "Pathfinding")
+                          .submit(() -> {
+                            new CollectBlockController(
+                              resolvable.resolve(bot.sessionDataManager().tagsState()),
+                              amount,
+                              searchRadius
+                            ).start(bot);
+                          });
+
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  }))))));
+    dispatcher.register(
       literal("stop-path")
         .executes(
           help(
@@ -261,7 +292,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               forEveryBot(
                 c,
                 bot -> {
-                  EventUtil.runAndAssertChanged(
+                  var changed = EventUtil.runAndCountChanged(
                     bot.eventBus(),
                     () ->
                       bot.eventBus()
@@ -278,8 +309,12 @@ public class ServerCommandManager implements PlatformCommandManager {
 
                   bot.sessionDataManager().controlState().resetAll();
 
-                  c.getSource()
-                    .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
+                  if (changed == 0) {
+                    c.getSource().sendWarn("No pathfinding was running!");
+                  } else {
+                    c.getSource()
+                      .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
+                  }
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -791,37 +826,8 @@ public class ServerCommandManager implements PlatformCommandManager {
       });
   }
 
-  public void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
-    var logger = bot.logger();
-    var executorService = bot.executorManager().newExecutorService(bot, "PathfindingManager");
-    executorService.execute(
-      () -> {
-        var sessionDataManager = bot.sessionDataManager();
-        var clientEntity = sessionDataManager.clientEntity();
-        var routeFinder =
-          new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState()), goalScorer);
-
-        Boolean2ObjectFunction<List<WorldAction>> findPath =
-          requiresRepositioning -> {
-            var start =
-              BotEntityState.initialState(
-                clientEntity,
-                new ProjectedLevelState(
-                  Objects.requireNonNull(
-                      sessionDataManager.getCurrentLevel(), "Level is null!")
-                    .chunks()
-                    .immutableCopy()),
-                new ProjectedInventory(
-                  sessionDataManager.inventoryManager().playerInventory()));
-            logger.info("Starting calculations at: {}", start);
-            var actions = routeFinder.findRoute(start, requiresRepositioning);
-            logger.info("Calculated path with {} actions: {}", actions.size(), actions);
-            return actions;
-          };
-
-        var pathExecutor = new PathExecutor(bot, findPath.get(true), findPath, executorService);
-        pathExecutor.register();
-      });
+  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer) {
+    PathExecutor.executePathfinding(bot, goalScorer, new CompletableFuture<>());
   }
 
   @Override

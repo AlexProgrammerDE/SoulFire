@@ -117,6 +117,14 @@ public class LevelState {
     return this.getMinBuildHeight() + this.height;
   }
 
+  public boolean isOutSideBuildHeight(SFVec3i block) {
+    return isOutSideBuildHeight( block.y);
+  }
+
+  public boolean isOutSideBuildHeight(double y) {
+    return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
+  }
+
   public void setBlockId(Vector3i block, int state) {
     var chunkData = chunks.getChunk(block);
 
@@ -133,11 +141,15 @@ public class LevelState {
   }
 
   public BlockState getBlockStateAt(Vector3i block) {
-    return chunks.getBlockStateAt(block.getX(), block.getY(), block.getZ());
+    return getBlockStateAt(block.getX(), block.getY(), block.getZ());
   }
 
   public BlockState getBlockStateAt(SFVec3i block) {
-    return chunks.getBlockStateAt(block.x, block.y, block.z);
+    return getBlockStateAt(block.x, block.y, block.z);
+  }
+
+  public BlockState getBlockStateAt(int x, int y, int z) {
+    return chunks.getBlockStateAt(x, y, z);
   }
 
   public List<AABB> getCollisionBoxes(AABB aabb) {

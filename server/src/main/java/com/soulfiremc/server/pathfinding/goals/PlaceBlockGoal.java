@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
@@ -31,8 +30,7 @@ public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalS
 
   @Override
   public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-    // We normally stand right next to the block, not inside, so we need to subtract 1.
-    return entityState.blockPosition().distance(goal) - 1 + Costs.PLACE_BLOCK;
+    return entityState.blockPosition().distance(goal);
   }
 
   @Override

@@ -17,10 +17,21 @@
  */
 package com.soulfiremc.server.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("unused")
 public class FluidTags {
-  public static final ResourceKey WATER = ResourceKey.fromString("minecraft:water");
-  public static final ResourceKey LAVA = ResourceKey.fromString("minecraft:lava");
+  public static final List<ResourceKey> TAGS = new ArrayList<>();
+
+  public static final ResourceKey WATER = register("minecraft:water");
+  public static final ResourceKey LAVA = register("minecraft:lava");
+
+  public static ResourceKey register(String key) {
+    var resourceKey = ResourceKey.fromString(key);
+    TAGS.add(resourceKey);
+    return resourceKey;
+  }
 
   private FluidTags() {}
 }

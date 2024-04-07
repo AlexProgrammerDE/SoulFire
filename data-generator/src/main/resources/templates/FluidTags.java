@@ -17,9 +17,20 @@
  */
 package com.soulfiremc.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("unused")
 public class FluidTags {
+  public static final List<ResourceKey> TAGS = new ArrayList<>();
+
   // VALUES REPLACE
+
+  public static ResourceKey register(String key) {
+    var resourceKey = ResourceKey.fromString(key);
+    TAGS.add(resourceKey);
+    return resourceKey;
+  }
 
   private FluidTags() {}
 }

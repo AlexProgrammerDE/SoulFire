@@ -18,14 +18,20 @@
 package com.soulfiremc.server.protocol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @RequiredArgsConstructor
@@ -42,7 +48,8 @@ public class ExecutorManager {
     }
 
     var executor =
-      Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName));
+      new DelegatedScheduledExecutorService(
+        Executors.newSingleThreadScheduledExecutor(getThreadFactory(botConnection, threadName)), botConnection);
 
     executors.add(executor);
 
@@ -54,7 +61,9 @@ public class ExecutorManager {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    var executor = Executors.newSingleThreadExecutor(getThreadFactory(botConnection, threadName));
+    var executor =
+      new DelegatingExecutorService(Executors.newSingleThreadExecutor(getThreadFactory(botConnection, threadName)),
+        botConnection);
 
     executors.add(executor);
 
@@ -68,7 +77,8 @@ public class ExecutorManager {
     }
 
     var executor =
-      Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName));
+      new DelegatingExecutorService(
+        Executors.newFixedThreadPool(threadAmount, getThreadFactory(botConnection, threadName)), botConnection);
 
     executors.add(executor);
 
@@ -80,7 +90,9 @@ public class ExecutorManager {
       throw new IllegalStateException("Cannot create new executor after shutdown!");
     }
 
-    var executor = Executors.newCachedThreadPool(getThreadFactory(botConnection, threadName));
+    var executor =
+      new DelegatingExecutorService(Executors.newCachedThreadPool(getThreadFactory(botConnection, threadName)),
+        botConnection);
 
     executors.add(executor);
 
@@ -88,22 +100,16 @@ public class ExecutorManager {
   }
 
   private ThreadFactory getThreadFactory(BotConnection botConnection, String threadName) {
-    return runnable -> {
-      var usedThreadName = threadName;
-      if (runnable instanceof NamedRunnable named) {
-        usedThreadName = named.name();
-      }
-
-      return Thread.ofPlatform()
-        .name(threadPrefix + "-" + usedThreadName)
-        .daemon()
-        .unstarted(
-          () -> {
-            BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
-            runnable.run();
-            BOT_CONNECTION_THREAD_LOCAL.remove();
-          });
-    };
+    return runnable -> Thread.ofPlatform()
+      .name(threadPrefix + "-" + threadName)
+      .daemon()
+      .unstarted(
+        () -> {
+          BOT_CONNECTION_THREAD_LOCAL.set(botConnection);
+          // Does not directly call the submitted task, the ThreadPoolExecutor wraps the task
+          runnable.run();
+          BOT_CONNECTION_THREAD_LOCAL.remove();
+        });
   }
 
   public void shutdownAll() {
@@ -111,10 +117,133 @@ public class ExecutorManager {
     executors.forEach(ExecutorService::shutdownNow);
   }
 
-  private record NamedRunnable(Runnable runnable, String name) implements Runnable {
+  @RequiredArgsConstructor
+  private static class DelegatingExecutorService implements ExecutorService {
+    private final ExecutorService delegated;
+    private final BotConnection botConnection;
+
     @Override
-    public void run() {
-      runnable.run();
+    public void shutdown() {
+      delegated.shutdown();
+    }
+
+    @NotNull
+    @Override
+    public List<Runnable> shutdownNow() {
+      return delegated.shutdownNow();
+    }
+
+    @Override
+    public boolean isShutdown() {
+      return delegated.isShutdown();
+    }
+
+    @Override
+    public boolean isTerminated() {
+      return delegated.isTerminated();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+      return delegated.awaitTermination(timeout, unit);
+    }
+
+    @NotNull
+    @Override
+    public <T> Future<T> submit(@NotNull Callable<T> task) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @NotNull
+    @Override
+    public <T> Future<T> submit(@NotNull Runnable task, T result) {
+      return delegated.submit(wrapCommand(task), result);
+    }
+
+    @NotNull
+    @Override
+    public Future<?> submit(@NotNull Runnable task) {
+      return delegated.submit(wrapCommand(task));
+    }
+
+    @NotNull
+    @Override
+    public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @NotNull
+    @Override
+    public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks, long timeout,
+                                         @NotNull TimeUnit unit) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @NotNull
+    @Override
+    public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void close() {
+      delegated.shutdown();
+    }
+
+    @Override
+    public void execute(@NotNull Runnable command) {
+      delegated.execute(wrapCommand(command));
+    }
+
+    protected Runnable wrapCommand(Runnable command) {
+      return () -> {
+        try {
+          command.run();
+        } catch (Throwable t) {
+          botConnection.logger().error("Error in executor", t);
+        }
+      };
+    }
+  }
+
+  private static class DelegatedScheduledExecutorService extends DelegatingExecutorService
+    implements ScheduledExecutorService {
+    private final ScheduledExecutorService delegated;
+
+    public DelegatedScheduledExecutorService(ScheduledExecutorService delegated, BotConnection botConnection) {
+      super(delegated, botConnection);
+      this.delegated = delegated;
+    }
+
+    @NotNull
+    @Override
+    public ScheduledFuture<?> schedule(@NotNull Runnable command, long delay, @NotNull TimeUnit unit) {
+      return delegated.schedule(wrapCommand(command), delay, unit);
+    }
+
+    @NotNull
+    @Override
+    public <V> ScheduledFuture<V> schedule(@NotNull Callable<V> callable, long delay, @NotNull TimeUnit unit) {
+      throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @NotNull
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(@NotNull Runnable command, long initialDelay, long period,
+                                                  @NotNull TimeUnit unit) {
+      return delegated.scheduleAtFixedRate(wrapCommand(command), initialDelay, period, unit);
+    }
+
+    @NotNull
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(@NotNull Runnable command, long initialDelay, long delay,
+                                                     @NotNull TimeUnit unit) {
+      return delegated.scheduleWithFixedDelay(wrapCommand(command), initialDelay, delay, unit);
     }
   }
 }

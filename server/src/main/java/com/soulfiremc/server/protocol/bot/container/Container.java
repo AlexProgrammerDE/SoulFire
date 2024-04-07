@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
+import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -70,5 +72,16 @@ public class Container {
     }
 
     return properties.getOrDefault(property, 0);
+  }
+
+  public Stream<ContainerSlot> stream() {
+    return Stream.of(slots);
+  }
+
+  public int countItems(ItemType itemType) {
+    return stream()
+      .filter(slot -> slot.item() != null && slot.item().type() == itemType)
+      .mapToInt(slot -> slot.item().getAmount())
+      .sum();
   }
 }

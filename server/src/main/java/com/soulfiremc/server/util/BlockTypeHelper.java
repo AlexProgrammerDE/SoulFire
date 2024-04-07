@@ -59,4 +59,9 @@ public class BlockTypeHelper {
   public static boolean isDiggable(BlockType type) {
     return type.destroyTime() != -1;
   }
+
+  public static boolean isEmptyBlock(BlockType type) {
+    // Void air stands for unloaded blocks, so we do not know what is there
+    return type.air() && type != BlockType.VOID_AIR;
+  }
 }

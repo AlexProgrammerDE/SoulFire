@@ -30,13 +30,18 @@ public class EventUtil {
   private EventUtil() {}
 
   public static void runAndAssertChanged(LambdaManager manager, Runnable runnable) {
+    if (runAndCountChanged(manager, runnable) == 0) {
+      throw new IllegalStateException("No handlers were added or removed");
+    }
+  }
+
+  public static int runAndCountChanged(LambdaManager manager, Runnable runnable) {
     var handlers = handlersWrapper.<Map<?, List<?>>>get(manager);
     var initialHandlers = countTotalHandlers(handlers);
     runnable.run();
     var finalHandlers = countTotalHandlers(handlers);
-    if (initialHandlers == finalHandlers) {
-      throw new IllegalStateException("No handlers changed!");
-    }
+
+    return finalHandlers - initialHandlers;
   }
 
   private static int countTotalHandlers(Map<?, List<?>> handlers) {
