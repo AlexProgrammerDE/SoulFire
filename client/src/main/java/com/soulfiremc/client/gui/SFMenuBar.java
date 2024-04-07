@@ -86,8 +86,35 @@ public class SFMenuBar extends JMenuBar {
     this.guiFrame = guiFrame;
 
     var fileMenu = new JMenu("File");
-    var loadProfile = new JMenuItem("Load Profile");
-    loadProfile.addActionListener(
+    var loadProfile = new JMenu("Load Profile");
+    try {
+      Files.list(SFPathConstants.PROFILES_FOLDER)
+        .filter(Files::isRegularFile)
+        .filter(path -> path.toString().endsWith(".json"))
+        .forEach(
+          profile -> {
+            var profileItem = new JMenuItem(profile.getFileName().toString());
+            profileItem.addActionListener(
+              e -> {
+                try {
+                  guiManager.clientSettingsManager().loadProfile(profile);
+                  log.info("Loaded profile: {}", profile.getFileName());
+                } catch (IOException ex) {
+                  log.warn("Failed to load profile: {}", profile.getFileName(), ex);
+                }
+              });
+            loadProfile.add(profileItem);
+          });
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    if (loadProfile.getItemCount() > 0) {
+      loadProfile.addSeparator();
+    }
+
+    var fromFile = new JMenuItem("From File");
+    fromFile.addActionListener(
       e ->
         JFXFileHelper.showOpenDialog(
             SFPathConstants.PROFILES_FOLDER, Map.of("SoulFire profile", "json"))
@@ -100,6 +127,7 @@ public class SFMenuBar extends JMenuBar {
                 log.warn("Failed to load profile!", ex);
               }
             }));
+    loadProfile.add(fromFile);
 
     fileMenu.add(loadProfile);
     var saveProfile = new JMenuItem("Save Profile");
