@@ -26,6 +26,7 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.With;
@@ -42,6 +43,7 @@ public record BlockType(
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
   ResourceKey fluidType,
+  List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) {
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
