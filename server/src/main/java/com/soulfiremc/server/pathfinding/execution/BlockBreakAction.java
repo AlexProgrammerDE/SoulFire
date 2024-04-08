@@ -24,6 +24,7 @@ import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.BlockTypeHelper;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -31,6 +32,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockBreakAction implements WorldAction {
+  @Getter
   private final SFVec3i blockPosition;
   private final SideHint sideHint;
   boolean finishedDigging = false;

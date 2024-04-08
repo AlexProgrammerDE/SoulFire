@@ -19,8 +19,12 @@ package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import java.util.List;
 
 // TODO: Extract into having more fine behaviour control
 public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalScorer {
@@ -29,12 +33,18 @@ public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalS
   }
 
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-    return entityState.blockPosition().distance(goal);
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+    return state.blockPosition().distance(goal);
   }
 
   @Override
-  public boolean isFinished(BotEntityState entityState) {
-    return entityState.level().isChanged(goal);
+  public boolean isFinished(MinecraftRouteNode current) {
+    for (var action : current.actions()) {
+      if (action instanceof BlockPlaceAction placeBlockAction && placeBlockAction.blockPosition().equals(goal)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

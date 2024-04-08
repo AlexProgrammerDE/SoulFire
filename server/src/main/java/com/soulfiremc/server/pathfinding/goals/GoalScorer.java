@@ -18,7 +18,10 @@
 package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import java.util.List;
 
 /**
  * A goal represents something that the user wants the bot to achieve.
@@ -28,17 +31,20 @@ public interface GoalScorer {
    * Calculates the estimated score for a given block position to the goal. Usually this means the
    * distance from achieving the goal.
    *
-   * @param graph       the graph to calculate the score for
-   * @param entityState the entity state to calculate the score for
+   * @param graph    the graph to calculate the score for
+   * @param state    the current state of the bot
+   * @param actions  the actions that have been executed to reach the current state
+   * @param previous the previous route node
    * @return the score for the given world state
    */
-  double computeScore(MinecraftGraph graph, BotEntityState entityState);
+  double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions,
+                      MinecraftRouteNode previous);
 
   /**
    * Checks if the given world state indicates that the goal is reached.
    *
-   * @param entityState the current entity state
+   * @param current the node to check
    * @return true if the goal is reached, false otherwise
    */
-  boolean isFinished(BotEntityState entityState);
+  boolean isFinished(MinecraftRouteNode current);
 }

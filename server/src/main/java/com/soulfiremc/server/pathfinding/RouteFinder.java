@@ -40,7 +40,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var actions = new ObjectArrayList<WorldAction>();
     var previousElement = current;
     do {
-      var previousActions = new ObjectArrayList<>(previousElement.previousActions());
+      var previousActions = new ObjectArrayList<>(previousElement.actions());
 
       // So they get executed in the right order
       Collections.reverse(previousActions);
@@ -82,7 +82,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
 
     {
-      var startScore = scorer.computeScore(graph, from);
+      var startScore = scorer.computeScore(graph, from, List.of(), null);
       log.debug("Start score (Usually distance): {}", startScore);
 
       var start =
@@ -103,7 +103,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       log.debug("Looking at node: {}", current.entityState().blockPosition());
 
       // If we found our destination, we can stop looking
-      if (scorer.isFinished(current.entityState())) {
+      if (scorer.isFinished(current)) {
         log.info("Found path: {}", current);
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
@@ -124,7 +124,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               // and add the distance from the current element to the next element
               var newSourceCost = current.sourceCost() + actionCost;
               var newTotalRouteScore =
-                newSourceCost + scorer.computeScore(graph, actionTargetState);
+                newSourceCost + scorer.computeScore(graph, actionTargetState, worldActions, current);
 
               // The first time we see this node
               if (v == null) {
@@ -144,7 +144,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               // If we found a better route to this node, update it
               if (newSourceCost < v.sourceCost()) {
                 v.previous(current);
-                v.previousActions(worldActions);
+                v.actions(worldActions);
                 v.sourceCost(newSourceCost);
                 v.totalRouteScore(newTotalRouteScore);
 

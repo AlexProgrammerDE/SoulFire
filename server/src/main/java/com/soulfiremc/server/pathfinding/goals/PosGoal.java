@@ -18,8 +18,11 @@
 package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import java.util.List;
 
 public record PosGoal(SFVec3i goal) implements GoalScorer {
   public PosGoal(int x, int y, int z) {
@@ -27,12 +30,12 @@ public record PosGoal(SFVec3i goal) implements GoalScorer {
   }
 
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-    return entityState.blockPosition().distance(goal);
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+    return state.blockPosition().distance(goal);
   }
 
   @Override
-  public boolean isFinished(BotEntityState entityState) {
-    return entityState.blockPosition().equals(goal);
+  public boolean isFinished(MinecraftRouteNode current) {
+    return current.entityState().blockPosition().equals(goal);
   }
 }

@@ -18,7 +18,10 @@
 package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import java.util.List;
 import org.cloudburstmc.math.vector.Vector2i;
 
 public record XZGoal(Vector2i goal) implements GoalScorer {
@@ -27,13 +30,13 @@ public record XZGoal(Vector2i goal) implements GoalScorer {
   }
 
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z)
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+    return Vector2i.from(state.blockPosition().x, state.blockPosition().z)
       .distance(goal);
   }
 
   @Override
-  public boolean isFinished(BotEntityState entityState) {
-    return Vector2i.from(entityState.blockPosition().x, entityState.blockPosition().z).equals(goal);
+  public boolean isFinished(MinecraftRouteNode current) {
+    return Vector2i.from(current.entityState().blockPosition().x, current.entityState().blockPosition().z).equals(goal);
   }
 }

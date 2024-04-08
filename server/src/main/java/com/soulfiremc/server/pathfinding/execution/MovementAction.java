@@ -50,7 +50,7 @@ public final class MovementAction implements WorldAction {
     } else {
       var distance = botPosition.distance(targetMiddleBlock);
       // Close enough to be able to bridge up
-      return distance <= 0.1;
+      return distance <= 0.15;
     }
   }
 
@@ -94,7 +94,7 @@ public final class MovementAction implements WorldAction {
       return true;
     }
 
-    if (noJumpTicks < 4) {
+    if (noJumpTicks < 2) {
       noJumpTicks++;
       return false;
     } else {

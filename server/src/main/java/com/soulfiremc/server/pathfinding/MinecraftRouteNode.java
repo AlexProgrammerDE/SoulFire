@@ -42,7 +42,7 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The action from the previous node that was used to get to this node.
    */
-  private List<WorldAction> previousActions;
+  private List<WorldAction> actions;
 
   /**
    * The cost of the route from the start node to this node.

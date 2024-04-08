@@ -18,16 +18,19 @@
 package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
+import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import java.util.List;
 
 public record YGoal(int y) implements GoalScorer {
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState entityState) {
-    return Math.abs(entityState.blockPosition().y - y);
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+    return Math.abs(state.blockPosition().y - y);
   }
 
   @Override
-  public boolean isFinished(BotEntityState entityState) {
-    return entityState.blockPosition().y == y;
+  public boolean isFinished(MinecraftRouteNode current) {
+    return current.entityState().blockPosition().y == y;
   }
 }

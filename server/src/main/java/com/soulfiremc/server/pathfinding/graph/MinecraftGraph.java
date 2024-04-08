@@ -111,7 +111,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     int movementIndex) {
     {
       var blockId = 0;
-      for (var freeBlock : movement.listRequiredFreeBlocks()) {
+      for (var freeBlock : movement.requiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
           .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
@@ -255,7 +255,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     int movementIndex) {
     {
       var blockId = 0;
-      for (var freeBlock : movement.listRequiredFreeBlocks()) {
+      for (var freeBlock : movement.requiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
           .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)

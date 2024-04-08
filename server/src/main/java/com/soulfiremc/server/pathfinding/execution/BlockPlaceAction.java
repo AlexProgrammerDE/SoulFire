@@ -22,12 +22,14 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockPlaceAction implements WorldAction {
+  @Getter
   private final SFVec3i blockPosition;
   private final BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
   private boolean putOnHotbar = false;

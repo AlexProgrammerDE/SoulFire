@@ -53,6 +53,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   @Getter
   private final boolean allowBlockActions;
   @Getter
+  private final List<Pair<SFVec3i, BlockBreakAction.SideHint>> requiredFreeBlocks;
+  @Getter
   private MovementMiningCost[] blockBreakCosts;
   @Getter
   private boolean[] unsafeToBreak;
@@ -93,10 +95,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         default -> false;
       };
 
+    this.requiredFreeBlocks = listRequiredFreeBlocks();
     if (allowBlockActions) {
-      blockBreakCosts = new MovementMiningCost[freeCapacity()];
-      unsafeToBreak = new boolean[freeCapacity()];
-      noNeedToBreak = new boolean[freeCapacity()];
+      blockBreakCosts = new MovementMiningCost[requiredFreeBlocks.size()];
+      unsafeToBreak = new boolean[requiredFreeBlocks.size()];
+      noNeedToBreak = new boolean[requiredFreeBlocks.size()];
     } else {
       blockBreakCosts = null;
       unsafeToBreak = null;
@@ -104,24 +107,20 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private int freeCapacity() {
-    return 2
-      + (diagonal ? 2 : 0)
-      + switch (modifier) {
-      case NORMAL -> 0;
-      case FALL_1 -> 1;
-      case FALL_2, JUMP_UP_BLOCK -> 2;
-      case FALL_3 -> 3;
-    };
+  private int freeBlockIndex(SFVec3i block) {
+    for (var i = 0; i < requiredFreeBlocks.size(); i++) {
+      if (requiredFreeBlocks.get(i).left().equals(block)) {
+        return i;
+      }
+    }
+
+    throw new IllegalArgumentException("Block not found in required free blocks");
   }
 
-  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>(freeCapacity());
+  private List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
-      // Make head block free (maybe head block is a slab)
-      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0), BlockBreakAction.SideHint.BOTTOM));
-
       // Make block above the head block free for jump
       requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
     }
@@ -225,10 +224,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return new BlockSafetyData[0][];
     }
 
-    var requiredFreeBlocks = listRequiredFreeBlocks()
-      .stream()
-      .map(Pair::left)
-      .toList();
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
     var blockDirection =
@@ -246,7 +241,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
-      results[requiredFreeBlocks.indexOf(aboveHead)] =
+      results[freeBlockIndex(aboveHead)] =
         new BlockSafetyData[] {
           new BlockSafetyData(
             aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
@@ -263,7 +258,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
       // Apply jump shift to target diagonal and offset for body part
       var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
-      var index = requiredFreeBlocks.indexOf(block);
+      var index = freeBlockIndex(block);
 
       if (bodyOffset == BodyPart.HEAD) {
         results[index] =
@@ -291,7 +286,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     // Require free blocks to fall into the target position
     if (modifier == MovementModifier.FALL_1) {
       var fallFree = MovementModifier.FALL_1.offset(targetEdge);
-      results[requiredFreeBlocks.indexOf(fallFree)] =
+      results[freeBlockIndex(fallFree)] =
         new BlockSafetyData[] {
           new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
           new BlockSafetyData(

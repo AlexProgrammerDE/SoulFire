@@ -41,9 +41,6 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
     var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
 
-    // Make head block free (maybe head block is a slab)
-    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0), BlockBreakAction.SideHint.BOTTOM));
-
     // Make block above the head block free for jump
     requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
 

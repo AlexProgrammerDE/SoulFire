@@ -40,6 +40,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetFeetBlock;
   @Getter
+  private final List<Pair<SFVec3i, BlockBreakAction.SideHint>> requiredFreeBlocks;
+  @Getter
   private MovementMiningCost[] blockBreakCosts;
   @Getter
   private boolean[] unsafeToBreak;
@@ -49,17 +51,24 @@ public final class UpMovement extends GraphAction implements Cloneable {
   public UpMovement() {
     this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
 
-    this.blockBreakCosts = new MovementMiningCost[freeCapacity()];
-    this.unsafeToBreak = new boolean[freeCapacity()];
-    this.noNeedToBreak = new boolean[freeCapacity()];
+    this.requiredFreeBlocks = listRequiredFreeBlocks();
+    this.blockBreakCosts = new MovementMiningCost[requiredFreeBlocks.size()];
+    this.unsafeToBreak = new boolean[requiredFreeBlocks.size()];
+    this.noNeedToBreak = new boolean[requiredFreeBlocks.size()];
   }
 
-  private int freeCapacity() {
-    return 1;
+  private int freeBlockIndex(SFVec3i block) {
+    for (var i = 0; i < requiredFreeBlocks.size(); i++) {
+      if (requiredFreeBlocks.get(i).left().equals(block)) {
+        return i;
+      }
+    }
+
+    throw new IllegalArgumentException("Block not found in required free blocks");
   }
 
-  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>(freeCapacity());
+  private List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
 
     // The one above the head to jump
     requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
@@ -68,10 +77,6 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
-    var requiredFreeBlocks = listRequiredFreeBlocks()
-      .stream()
-      .map(Pair::left)
-      .toList();
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
     var firstDirection = SkyDirection.NORTH;
@@ -80,7 +85,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var rightDirectionSide = firstDirection.rightSide();
 
     var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
-    results[requiredFreeBlocks.indexOf(aboveHead)] =
+    results[freeBlockIndex(aboveHead)] =
       new BlockSafetyData[] {
         new BlockSafetyData(
           aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),

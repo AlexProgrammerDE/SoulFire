@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
@@ -44,39 +43,15 @@ public class ProjectedLevel {
   }
 
   public ProjectedLevel withChangeToSolidBlock(SFVec3i position) {
-    var blockChanges = this.blockChanges.clone();
-    blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
-
-    return new ProjectedLevel(accessor, blockChanges);
+    return this;
   }
 
   public ProjectedLevel withChangeToAir(SFVec3i position) {
-    var blockChanges = this.blockChanges.clone();
-    blockChanges.put(position, AIR_BLOCK_STATE);
-
-    return new ProjectedLevel(accessor, blockChanges);
+    return this;
   }
 
   public ProjectedLevel withChanges(SFVec3i[] air, SFVec3i solid) {
-    var blockChanges = this.blockChanges.clone();
-    blockChanges.ensureCapacity(
-      blockChanges.size() + (air != null ? air.length : 0) + (solid != null ? 1 : 0));
-
-    if (air != null) {
-      for (var position : air) {
-        if (position == null) {
-          continue;
-        }
-
-        blockChanges.put(position, AIR_BLOCK_STATE);
-      }
-    }
-
-    if (solid != null) {
-      blockChanges.put(solid, Costs.SOLID_PLACED_BLOCK_STATE);
-    }
-
-    return new ProjectedLevel(accessor, blockChanges);
+    return this;
   }
 
   public BlockState getBlockStateAt(SFVec3i position) {
