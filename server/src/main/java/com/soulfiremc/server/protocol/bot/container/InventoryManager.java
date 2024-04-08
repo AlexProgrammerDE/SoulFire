@@ -97,6 +97,10 @@ public class InventoryManager {
     openContainer = playerInventory();
   }
 
+  public void leftClickSlot(ContainerSlot slot) {
+    leftClickSlot(slot.slot());
+  }
+
   public void leftClickSlot(int slot) {
     if (!inventoryControlLock.isHeldByCurrentThread()) {
       throw new IllegalStateException(
@@ -156,7 +160,7 @@ public class InventoryManager {
   }
 
   private void applyIfMatches(EquipmentSlot equipmentSlot) {
-    var item = playerInventory.getFromEquipmentSlot(equipmentSlot).item();
+    var item = playerInventory.getEquipmentSlot(equipmentSlot).item();
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {
@@ -189,7 +193,7 @@ public class InventoryManager {
   public int getEnchantmentLevel(EnchantmentType enchantmentType) {
     var highestLevel = 0;
     for (var equipmentSlot : enchantmentType.slots()) {
-      var item = playerInventory.getFromEquipmentSlot(equipmentSlot).item();
+      var item = playerInventory.getEquipmentSlot(equipmentSlot).item();
       if (item == null) {
         continue;
       }

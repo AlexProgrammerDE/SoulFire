@@ -23,10 +23,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.TimeUtil;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -38,9 +35,7 @@ public final class BlockBreakAction implements WorldAction {
   private final SideHint sideHint;
   boolean finishedDigging = false;
   private boolean didLook = false;
-  private boolean putOnHotbar = false;
-  private boolean calculatedBestItemStack = false;
-  private SFItemStack bestItemStack = null;
+  private boolean putInHand = false;
   private int remainingTicks = -1;
 
   @Override
@@ -72,105 +67,12 @@ public final class BlockBreakAction implements WorldAction {
       }
     }
 
-    if (!calculatedBestItemStack) {
-      SFItemStack itemStack = null;
-      var bestCost = Integer.MAX_VALUE;
-      var sawEmpty = false;
-      for (var slot : playerInventory.storage()) {
-        var item = slot.item();
-        if (item == null) {
-          if (sawEmpty) {
-            continue;
-          }
-
-          sawEmpty = true;
-        }
-
-        var optionalBlockType = level.getBlockStateAt(blockPosition).blockType();
-        if (optionalBlockType == BlockType.VOID_AIR) {
-          log.warn("Block at {} is not in view range!", blockPosition);
-          return;
-        }
-
-        var cost =
-          Costs.getRequiredMiningTicks(
-              sessionDataManager.tagsState(),
-              sessionDataManager.clientEntity(),
-              sessionDataManager.inventoryManager(),
-              clientEntity.onGround(),
-              item,
-              optionalBlockType)
-            .ticks();
-
-        if (cost < bestCost || (item == null && cost == bestCost)) {
-          bestCost = cost;
-          itemStack = item;
-        }
+    if (!putInHand) {
+      if (ItemPlaceHelper.placeBestToolInHand(sessionDataManager, blockPosition)) {
+        putInHand = true;
       }
 
-      bestItemStack = itemStack;
-      calculatedBestItemStack = true;
-    }
-
-    if (!putOnHotbar && bestItemStack != null) {
-      var heldSlot = playerInventory.getHeldItem();
-      if (heldSlot.item() != null) {
-        var item = heldSlot.item();
-        if (item.equalsShape(bestItemStack)) {
-          putOnHotbar = true;
-          return;
-        }
-      }
-
-      for (var hotbarSlot : playerInventory.hotbar()) {
-        if (hotbarSlot.item() == null) {
-          continue;
-        }
-
-        var item = hotbarSlot.item();
-        if (!item.equalsShape(bestItemStack)) {
-          continue;
-        }
-
-        inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
-        inventoryManager.sendHeldItemChange();
-        putOnHotbar = true;
-        return;
-      }
-
-      for (var slot : playerInventory.mainInventory()) {
-        if (slot.item() == null) {
-          continue;
-        }
-
-        var item = slot.item();
-        if (!item.equalsShape(bestItemStack)) {
-          continue;
-        }
-
-        if (!inventoryManager.tryInventoryControl()) {
-          return;
-        }
-
-        try {
-          inventoryManager.leftClickSlot(slot.slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-          if (inventoryManager.cursorItem() != null) {
-            inventoryManager.leftClickSlot(slot.slot());
-            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          }
-        } finally {
-          inventoryManager.unlockInventoryControl();
-        }
-
-        putOnHotbar = true;
-        return;
-      }
-
-      throw new IllegalStateException("Failed to find item stack");
+      return;
     }
 
     if (finishedDigging) {

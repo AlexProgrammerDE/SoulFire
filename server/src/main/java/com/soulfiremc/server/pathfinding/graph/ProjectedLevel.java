@@ -24,16 +24,19 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 /**
  * An immutable representation of the world state. This takes a world state and projects changes
  * onto it. This way we calculate the way we can do actions after a block was broken/placed.
  */
+@ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 public class ProjectedLevel {
   private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
 
   private final BlockAccessor accessor;
+  @ToString.Include
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
 
   public ProjectedLevel(BlockAccessor accessor) {

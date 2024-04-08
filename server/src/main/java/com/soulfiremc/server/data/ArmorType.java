@@ -59,4 +59,13 @@ public enum ArmorType {
   ArmorType(ItemType... itemTypes) {
     this.itemTypes = Arrays.asList(itemTypes);
   }
+
+  public EquipmentSlot toEquipmentSlot() {
+    return switch (this) {
+      case HELMET -> EquipmentSlot.HEAD;
+      case CHESTPLATE -> EquipmentSlot.CHEST;
+      case LEGGINGS -> EquipmentSlot.LEGS;
+      case BOOTS -> EquipmentSlot.FEET;
+    };
+  }
 }

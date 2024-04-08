@@ -18,6 +18,8 @@
 package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.EquipmentSlot;
+import java.util.Optional;
+import java.util.function.Predicate;
 import lombok.Getter;
 
 @Getter
@@ -41,7 +43,7 @@ public class PlayerInventoryContainer extends Container {
     this.inventoryManager = inventoryManager;
   }
 
-  public ContainerSlot getFromEquipmentSlot(EquipmentSlot slot) {
+  public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {
     return switch (slot) {
       case MAINHAND -> getHeldItem();
       case OFFHAND -> getOffhand();
@@ -54,6 +56,10 @@ public class PlayerInventoryContainer extends Container {
 
   public ContainerSlot getHeldItem() {
     return hotbarSlot(inventoryManager.heldItemSlot());
+  }
+
+  public boolean isHeldItem(ContainerSlot slot) {
+    return slot == getHeldItem();
   }
 
   public ContainerSlot hotbarSlot(int slot) {
@@ -106,5 +112,30 @@ public class PlayerInventoryContainer extends Container {
 
   public boolean isMainInventory(int slot) {
     return slot >= 9 && slot <= 35;
+  }
+
+  public Optional<ContainerSlot> findMatchingSlotForAction(Predicate<ContainerSlot> predicate) {
+    var heldItem = getHeldItem();
+    if (predicate.test(heldItem)) {
+      return Optional.of(heldItem);
+    }
+
+    for (var hotbarSlot : hotbar()) {
+      if (hotbarSlot == heldItem) {
+        continue;
+      }
+
+      if (predicate.test(hotbarSlot)) {
+        return Optional.of(hotbarSlot);
+      }
+    }
+
+    for (var slot : mainInventory()) {
+      if (predicate.test(slot)) {
+        return Optional.of(slot);
+      }
+    }
+
+    return Optional.empty();
   }
 }

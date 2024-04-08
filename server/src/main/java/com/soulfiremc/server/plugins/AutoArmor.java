@@ -23,16 +23,13 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.data.ArmorType;
-import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.TimeUtil;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -41,10 +38,10 @@ import net.lenni0451.lambdaevents.EventHandler;
 public class AutoArmor implements InternalPlugin {
   private static void putOn(
     InventoryManager inventoryManager,
-    PlayerInventoryContainer inventory,
-    ContainerSlot targetSlot,
     ArmorType armorType) {
-    var bestItem =
+    var inventory = inventoryManager.playerInventory();
+
+    var bestItemSlotOptional =
       Arrays.stream(inventory.storage())
         .filter(
           s -> {
@@ -64,39 +61,44 @@ public class AutoArmor implements InternalPlugin {
             return firstIndex > secondIndex ? first : second;
           });
 
-    if (bestItem.isEmpty() || bestItem.get().item() == null) {
+    if (bestItemSlotOptional.isEmpty()) {
       return;
     }
 
-    if (targetSlot.item() != null) {
-      var targetIndex = armorType.itemTypes().indexOf(targetSlot.item().type());
-      var bestIndex = armorType.itemTypes().indexOf(bestItem.get().item().type());
+    var bestItemSlot = bestItemSlotOptional.get();
+    var bestItem = bestItemSlot.item();
+    if (bestItem == null) {
+      return;
+    }
+
+    var equipmentSlot = inventory.getEquipmentSlot(armorType.toEquipmentSlot());
+    var equipmentSlotItem = equipmentSlot.item();
+    if (equipmentSlotItem != null) {
+      var targetIndex = armorType.itemTypes().indexOf(equipmentSlotItem.type());
+      var bestIndex = armorType.itemTypes().indexOf(bestItem.type());
 
       if (targetIndex >= bestIndex) {
         return;
       }
     }
 
-    bestItem.ifPresent(
-      bestItemSlot -> {
-        if (!inventoryManager.tryInventoryControl()) {
-          return;
-        }
+    if (!inventoryManager.tryInventoryControl()) {
+      return;
+    }
 
-        try {
-          inventoryManager.leftClickSlot(bestItemSlot.slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          inventoryManager.leftClickSlot(targetSlot.slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+    try {
+      inventoryManager.leftClickSlot(bestItemSlot);
+      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+      inventoryManager.leftClickSlot(equipmentSlot);
+      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-          if (inventoryManager.cursorItem() != null) {
-            inventoryManager.leftClickSlot(bestItemSlot.slot());
-            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          }
-        } finally {
-          inventoryManager.unlockInventoryControl();
-        }
-      });
+      if (inventoryManager.cursorItem() != null) {
+        inventoryManager.leftClickSlot(bestItemSlot);
+        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+      }
+    } finally {
+      inventoryManager.unlockInventoryControl();
+    }
   }
 
   public static void onJoined(BotJoinedEvent event) {
@@ -110,19 +112,8 @@ public class AutoArmor implements InternalPlugin {
     ExecutorHelper.executeRandomDelaySeconds(
       executor,
       () -> {
-        var sessionDataManager = connection.sessionDataManager();
-        var inventoryManager = sessionDataManager.inventoryManager();
-        var playerInventory = inventoryManager.playerInventory();
-
-        var armorTypes =
-          Map.of(
-            ArmorType.HELMET, playerInventory.getHelmet(),
-            ArmorType.CHESTPLATE, playerInventory.getChestplate(),
-            ArmorType.LEGGINGS, playerInventory.getLeggings(),
-            ArmorType.BOOTS, playerInventory.getBoots());
-
-        for (var entry : armorTypes.entrySet()) {
-          putOn(inventoryManager, playerInventory, entry.getValue(), entry.getKey());
+        for (var type : ArmorType.VALUES) {
+          putOn(connection.sessionDataManager().inventoryManager(), type);
         }
       },
       settingsHolder.get(AutoArmorSettings.DELAY.min()),

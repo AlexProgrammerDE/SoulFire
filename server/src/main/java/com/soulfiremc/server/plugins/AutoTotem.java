@@ -56,26 +56,29 @@ public class AutoTotem implements InternalPlugin {
           return;
         }
 
-        for (var slot : playerInventory.storage()) {
-          if (slot.item() == null) {
-            continue;
-          }
+        var totemSlot = playerInventory.findMatchingSlotForAction(
+          slot -> slot.item() != null && slot.item().type() == ItemType.TOTEM_OF_UNDYING);
+        if (totemSlot.isEmpty()) {
+          return;
+        }
 
-          var item = slot.item();
-          if (item.type() == ItemType.TOTEM_OF_UNDYING) {
-            if (!inventoryManager.tryInventoryControl()) {
-              return;
-            }
+        var slot = totemSlot.get();
+        if (!inventoryManager.tryInventoryControl()) {
+          return;
+        }
 
-            try {
-              inventoryManager.leftClickSlot(slot.slot());
-              TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-              inventoryManager.leftClickSlot(offhandSlot.slot());
-            } finally {
-              inventoryManager.unlockInventoryControl();
-            }
-            return;
+        try {
+          inventoryManager.leftClickSlot(slot);
+          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+          inventoryManager.leftClickSlot(offhandSlot);
+          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+          if (inventoryManager.cursorItem() != null) {
+            inventoryManager.leftClickSlot(slot);
+            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
           }
+        } finally {
+          inventoryManager.unlockInventoryControl();
         }
       },
       settingsHolder.get(AutoTotemSettings.DELAY.min()),

@@ -56,64 +56,35 @@ public class AutoEat implements InternalPlugin {
         var inventoryManager = sessionDataManager.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
 
-        var i = 0;
-        for (var slot : playerInventory.hotbar()) {
-          var hotbarSlot = i++;
-
-          if (slot.item() == null) {
-            continue;
-          }
-
-          var itemType = slot.item().type();
-          if (!ItemTypeHelper.isGoodEdibleFood(itemType)) {
-            continue;
-          }
-
-          if (!inventoryManager.tryInventoryControl()) {
-            return;
-          }
-
-          try {
-            inventoryManager.heldItemSlot(hotbarSlot);
-            inventoryManager.sendHeldItemChange();
-            sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
-
-            // Wait before eating again
-            TimeUtil.waitTime(2, TimeUnit.SECONDS);
-            return;
-          } finally {
-            inventoryManager.unlockInventoryControl();
-          }
+        var edibleSlot = playerInventory.findMatchingSlotForAction(
+          slot -> slot.item() != null && ItemTypeHelper.isGoodEdibleFood(slot.item().type()));
+        if (edibleSlot.isEmpty()) {
+          return;
         }
 
-        for (var slot : playerInventory.mainInventory()) {
-          if (slot.item() == null) {
-            continue;
-          }
+        var slot = edibleSlot.get();
+        if (!inventoryManager.tryInventoryControl()) {
+          return;
+        }
 
-          var itemType = slot.item().type();
-          if (ItemTypeHelper.isGoodEdibleFood(itemType)) {
-            continue;
-          }
-
-          if (!inventoryManager.tryInventoryControl()) {
-            return;
-          }
-
-          try {
-            inventoryManager.leftClickSlot(slot.slot());
-            inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
+        try {
+          if (!playerInventory.isHeldItem(slot) && playerInventory.isHotbar(slot)) {
+            inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(slot));
+            inventoryManager.sendHeldItemChange();
+          } else if (playerInventory.isMainInventory(slot)) {
+            inventoryManager.leftClickSlot(slot);
+            inventoryManager.leftClickSlot(playerInventory.getHeldItem());
             if (inventoryManager.cursorItem() != null) {
-              inventoryManager.leftClickSlot(slot.slot());
+              inventoryManager.leftClickSlot(slot);
             }
-
-            // Wait before eating again
-            TimeUtil.waitTime(2, TimeUnit.SECONDS);
-            sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
-            return;
-          } finally {
-            inventoryManager.unlockInventoryControl();
           }
+
+          sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
+
+          // Wait before eating again
+          TimeUtil.waitTime(2, TimeUnit.SECONDS);
+        } finally {
+          inventoryManager.unlockInventoryControl();
         }
       },
       settingsHolder.get(AutoEatSettings.DELAY.min()),

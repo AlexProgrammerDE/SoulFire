@@ -78,9 +78,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
                 .immutableCopy()),
             new ProjectedInventory(
               sessionDataManager.inventoryManager().playerInventory()));
+
         logger.info("Starting calculations at: {}", start);
         var actions = routeFinder.findRoute(start, requiresRepositioning);
         logger.info("Calculated path with {} actions: {}", actions.size(), actions);
+
         return actions;
       };
 

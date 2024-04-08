@@ -18,15 +18,10 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
-import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ItemTypeHelper;
-import com.soulfiremc.server.util.TimeUtil;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,87 +46,11 @@ public final class BlockPlaceAction implements WorldAction {
     sessionDataManager.controlState().resetAll();
 
     if (!putOnHotbar) {
-      var inventoryManager = sessionDataManager.inventoryManager();
-      var playerInventory = inventoryManager.playerInventory();
-
-      SFItemStack leastHardItem = null;
-      var leastDestroyTime = 0F;
-      for (var slot : playerInventory.storage()) {
-        if (slot.item() == null) {
-          continue;
-        }
-
-        var item = slot.item();
-        var blockType = BlockItems.getBlockType(item.type());
-        if (blockType.isEmpty()) {
-          continue;
-        }
-
-        var destroyTime = blockType.get().destroyTime();
-        if (leastHardItem == null || destroyTime < leastDestroyTime) {
-          leastHardItem = item;
-          leastDestroyTime = destroyTime;
-        }
-      }
-
-      var heldSlot = playerInventory.getHeldItem();
-      if (heldSlot.item() != null) {
-        var item = heldSlot.item();
-        if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-          putOnHotbar = true;
-          return;
-        }
-      }
-
-      for (var hotbarSlot : playerInventory.hotbar()) {
-        if (hotbarSlot.item() == null) {
-          continue;
-        }
-
-        var item = hotbarSlot.item();
-        if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-          continue;
-        }
-
-        inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(hotbarSlot));
-        inventoryManager.sendHeldItemChange();
+      if (ItemPlaceHelper.placeBestBlockInHand(sessionDataManager)) {
         putOnHotbar = true;
-        return;
       }
 
-      for (var slot : playerInventory.mainInventory()) {
-        if (slot.item() == null) {
-          continue;
-        }
-
-        var item = slot.item();
-        if (!ItemTypeHelper.isSafeFullBlockItem(item.type())) {
-          continue;
-        }
-
-        if (!inventoryManager.tryInventoryControl()) {
-          return;
-        }
-
-        try {
-          inventoryManager.leftClickSlot(slot.slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          inventoryManager.leftClickSlot(playerInventory.getHeldItem().slot());
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-          if (inventoryManager.cursorItem() != null) {
-            inventoryManager.leftClickSlot(slot.slot());
-            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          }
-        } finally {
-          inventoryManager.unlockInventoryControl();
-        }
-
-        putOnHotbar = true;
-        return;
-      }
-
-      throw new IllegalStateException("Failed to find item stack");
+      return;
     }
 
     if (finishedPlacing) {
