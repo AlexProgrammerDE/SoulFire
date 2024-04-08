@@ -61,7 +61,7 @@ public class SFVec3i {
   @Override
   public int hashCode() {
     if (!hashCodeSet) {
-      hashCode = (x * 211 + y) * 97 + z;
+      hashCode = (int) longHash(x, y, z);
       hashCodeSet = true;
     }
 
@@ -102,5 +102,14 @@ public class SFVec3i {
       MathHelper.square(goal.x - x)
         + MathHelper.square(goal.y - y)
         + MathHelper.square(goal.z - z));
+  }
+
+  // Long hash as seen in baritone
+  public static long longHash(int x, int y, int z) {
+    long hash = 3241;
+    hash = 3457689L * hash + x;
+    hash = 8734625L * hash + y;
+    hash = 2873465L * hash + z;
+    return hash;
   }
 }

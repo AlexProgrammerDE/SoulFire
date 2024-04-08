@@ -54,6 +54,24 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return actions;
   }
 
+  private static MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {
+    MinecraftRouteNode bestNode = null;
+    var smallestScore = Double.MAX_VALUE;
+
+    for (var node : values) {
+      // Our implementation calculates the score from this node to the start,
+      // so we need to get it by subtracting the source cost
+      var targetScore = node.totalRouteScore() - node.sourceCost();
+
+      if (targetScore < smallestScore) {
+        smallestScore = targetScore;
+        bestNode = node;
+      }
+    }
+
+    return bestNode;
+  }
+
   public List<WorldAction> findRoute(BotEntityState from, boolean requiresRepositioning) {
     var stopwatch = Stopwatch.createStarted();
 
@@ -61,7 +79,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var routeIndex = new Vec2ObjectOpenHashMap<SFVec3i, MinecraftRouteNode>();
 
     // Store block positions that we need to look at
-    var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>(1);
+    var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
 
     {
       var startScore = scorer.computeScore(graph, from);
@@ -86,6 +104,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
       // If we found our destination, we can stop looking
       if (scorer.isFinished(current.entityState())) {
+        log.info("Found path: {}", current);
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
@@ -139,7 +158,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         };
 
       try {
-        graph.insertActions(current.entityState(), callback, routeIndex::containsKey);
+        graph.insertActions(current.entityState(), callback);
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.entityState().blockPosition());
         stopwatch.stop();
@@ -172,23 +191,5 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     stopwatch.stop();
     log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
     throw new NoRouteFoundException();
-  }
-
-  private MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {
-    MinecraftRouteNode bestNode = null;
-    var smallestScore = Double.MAX_VALUE;
-
-    for (var node : values) {
-      // Our implementation calculates the score from this node to the start,
-      // so we need to get it by subtracting the source cost
-      var targetScore = node.totalRouteScore() - node.sourceCost();
-
-      if (targetScore < smallestScore) {
-        smallestScore = targetScore;
-        bestNode = node;
-      }
-    }
-
-    return bestNode;
   }
 }

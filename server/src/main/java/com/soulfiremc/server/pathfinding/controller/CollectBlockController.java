@@ -101,7 +101,8 @@ public class CollectBlockController {
         pathFuture.get();
         collectedAmount++;
       } catch (Exception e) {
-        throw new RuntimeException("Failed to break block at " + blockPos, e);
+        log.error("Got exception while executing path, aborting", e);
+        return;
       }
     }
   }

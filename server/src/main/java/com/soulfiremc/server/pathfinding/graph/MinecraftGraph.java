@@ -45,7 +45,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.util.TriState;
 
@@ -295,9 +294,9 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
   }
 
   public void insertActions(
-    BotEntityState node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> alreadySeen) {
+    BotEntityState node, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node.blockPosition());
-    calculateActions(node, generateTemplateActions(node), callback, alreadySeen);
+    calculateActions(node, generateTemplateActions(node), callback);
   }
 
   private GraphAction[] generateTemplateActions(BotEntityState node) {
@@ -312,8 +311,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
   private void calculateActions(
     BotEntityState node,
     GraphAction[] actions,
-    Consumer<GraphInstructions> callback,
-    Predicate<SFVec3i> alreadySeen) {
+    Consumer<GraphInstructions> callback) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
       processSubscription(node, actions, callback, i);
     }

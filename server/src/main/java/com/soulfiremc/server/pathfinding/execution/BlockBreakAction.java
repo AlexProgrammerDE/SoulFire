@@ -52,9 +52,6 @@ public final class BlockBreakAction implements WorldAction {
     sessionDataManager.controlState().resetAll();
 
     var level = sessionDataManager.currentLevel();
-    var inventoryManager = sessionDataManager.inventoryManager();
-    var playerInventory = inventoryManager.playerInventory();
-
     if (!didLook) {
       didLook = true;
       var previousYaw = clientEntity.yaw();
