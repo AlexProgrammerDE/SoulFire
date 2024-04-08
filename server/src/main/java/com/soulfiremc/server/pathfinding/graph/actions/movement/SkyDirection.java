@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -67,6 +68,15 @@ public enum SkyDirection {
       case SOUTH -> WEST;
       case EAST -> SOUTH;
       case WEST -> NORTH;
+    };
+  }
+
+  public BlockBreakAction.SideHint toSideHint() {
+    return switch (this) {
+      case NORTH -> BlockBreakAction.SideHint.NORTH;
+      case SOUTH -> BlockBreakAction.SideHint.SOUTH;
+      case EAST -> BlockBreakAction.SideHint.EAST;
+      case WEST -> BlockBreakAction.SideHint.WEST;
     };
   }
 }

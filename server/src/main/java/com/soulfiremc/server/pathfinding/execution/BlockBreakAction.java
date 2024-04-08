@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -25,15 +26,16 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.VectorHelper;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cloudburstmc.math.vector.Vector3d;
 
 @Slf4j
 @RequiredArgsConstructor
 public final class BlockBreakAction implements WorldAction {
   private final SFVec3i blockPosition;
+  private final SideHint sideHint;
   boolean finishedDigging = false;
   private boolean didLook = false;
   private boolean putOnHotbar = false;
@@ -64,8 +66,7 @@ public final class BlockBreakAction implements WorldAction {
       var previousPitch = clientEntity.pitch();
       clientEntity.lookAt(
         RotationOrigin.EYES,
-        VectorHelper.topMiddleOfBlock(
-          blockPosition.toVector3d(), level.getBlockStateAt(blockPosition)));
+        sideHint.getMiddleOfFace(blockPosition));
       if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
         clientEntity.sendRot();
       }
@@ -192,9 +193,9 @@ public final class BlockBreakAction implements WorldAction {
             sessionDataManager.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
           .ticks();
-      sessionDataManager.botActionManager().sendStartBreakBlock(blockPosition.toVector3i());
+      sessionDataManager.botActionManager().sendStartBreakBlock(blockPosition.toVector3i(), sideHint.toDirection());
     } else if (--remainingTicks == 0) {
-      sessionDataManager.botActionManager().sendEndBreakBlock(blockPosition.toVector3i());
+      sessionDataManager.botActionManager().sendEndBreakBlock(blockPosition.toVector3i(), sideHint.toDirection());
       finishedDigging = true;
     } else {
       sessionDataManager.botActionManager().sendBreakBlockAnimation();
@@ -210,5 +211,36 @@ public final class BlockBreakAction implements WorldAction {
   @Override
   public String toString() {
     return "BlockBreakAction -> " + blockPosition.formatXYZ();
+  }
+
+  public enum SideHint {
+    TOP,
+    BOTTOM,
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST;
+
+    public Direction toDirection() {
+      return switch (this) {
+        case TOP -> Direction.UP;
+        case BOTTOM -> Direction.DOWN;
+        case NORTH -> Direction.NORTH;
+        case SOUTH -> Direction.SOUTH;
+        case EAST -> Direction.EAST;
+        case WEST -> Direction.WEST;
+      };
+    }
+
+    public Vector3d getMiddleOfFace(SFVec3i block) {
+      return switch (this) {
+        case TOP -> block.toVector3d().add(0.5, 1, 0.5);
+        case BOTTOM -> block.toVector3d().add(0.5, 0, 0.5);
+        case NORTH -> block.toVector3d().add(0.5, 0.5, 0);
+        case SOUTH -> block.toVector3d().add(0.5, 0.5, 1);
+        case EAST -> block.toVector3d().add(1, 0.5, 0.5);
+        case WEST -> block.toVector3d().add(0, 0.5, 0.5);
+      };
+    }
   }
 }

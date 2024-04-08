@@ -23,6 +23,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
 import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
@@ -114,8 +115,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
@@ -182,8 +183,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
@@ -258,8 +259,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         movement.subscribe();
         blockSubscribers
-          .computeIfAbsent(freeBlock, CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++));
+          .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
+          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
@@ -418,7 +419,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
           new MovementMiningCost(
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
-            cacheableMiningCost.willDrop());
+            cacheableMiningCost.willDrop(),
+            subscriber.sideHint);
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -472,7 +474,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
       }
       case MOVEMENT_AGAINST_PLACE_SOLID -> {
         // We already found one, no need to check for more
-        if (simpleMovement.blockPlaceData() != null) {
+        if (simpleMovement.blockPlaceAgainstData() != null) {
           yield SubscriptionSingleResult.CONTINUE;
         }
 
@@ -482,8 +484,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
         }
 
         // Fixup the position to be the block we are placing against instead of relative
-        simpleMovement.blockPlaceData(
-          new BotActionManager.BlockPlaceData(
+        simpleMovement.blockPlaceAgainstData(
+          new BotActionManager.BlockPlaceAgainstData(
             absolutePositionBlock, subscriber.blockToPlaceAgainst.blockFace()));
         yield SubscriptionSingleResult.CONTINUE;
       }
@@ -572,7 +574,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
           new MovementMiningCost(
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
-            cacheableMiningCost.willDrop()));
+            cacheableMiningCost.willDrop(),
+            subscriber.sideHint));
         yield SubscriptionSingleResult.CONTINUE;
       }
       case DOWN_SAFETY_CHECK -> {
@@ -645,7 +648,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
           new MovementMiningCost(
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
-            cacheableMiningCost.willDrop());
+            cacheableMiningCost.willDrop(),
+            subscriber.sideHint);
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -703,21 +707,22 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     int actionIndex,
     SubscriptionType type,
     int blockArrayIndex,
-    BotActionManager.BlockPlaceData blockToPlaceAgainst,
+    BlockBreakAction.SideHint sideHint,
+    BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
     BlockSafetyData.BlockSafetyType safetyType) {
     BlockSubscription(int movementIndex, SubscriptionType type) {
-      this(movementIndex, type, -1, null, null);
+      this(movementIndex, type, -1, null, null, null);
     }
 
-    BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex) {
-      this(movementIndex, type, blockArrayIndex, null, null);
+    BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex, BlockBreakAction.SideHint sideHint) {
+      this(movementIndex, type, blockArrayIndex, sideHint, null, null);
     }
 
     BlockSubscription(
       int movementIndex,
       SubscriptionType type,
-      BotActionManager.BlockPlaceData blockToPlaceAgainst) {
-      this(movementIndex, type, -1, blockToPlaceAgainst, null);
+      BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst) {
+      this(movementIndex, type, -1, null, blockToPlaceAgainst, null);
     }
 
     BlockSubscription(
@@ -725,7 +730,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
       SubscriptionType subscriptionType,
       int i,
       BlockSafetyData.BlockSafetyType type) {
-      this(movementIndex, subscriptionType, i, null, type);
+      this(movementIndex, subscriptionType, i, null, null, type);
     }
   }
 }

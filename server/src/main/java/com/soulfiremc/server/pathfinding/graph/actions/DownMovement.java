@@ -119,7 +119,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     return new GraphInstructions(
       new BotEntityState(absoluteTargetFeetBlock, level, inventory),
       cost,
-      List.of(new BlockBreakAction(absoluteMinedBlock)));
+      List.of(new BlockBreakAction(absoluteMinedBlock, BlockBreakAction.SideHint.TOP)));
   }
 
   @Override

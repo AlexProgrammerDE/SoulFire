@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public final class BlockPlaceAction implements WorldAction {
   private final SFVec3i blockPosition;
-  private final BotActionManager.BlockPlaceData blockPlaceData;
+  private final BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
   private boolean putOnHotbar = false;
   private boolean finishedPlacing = false;
 
@@ -138,7 +138,7 @@ public final class BlockPlaceAction implements WorldAction {
       return;
     }
 
-    connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceData);
+    connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
     finishedPlacing = true;
   }
 

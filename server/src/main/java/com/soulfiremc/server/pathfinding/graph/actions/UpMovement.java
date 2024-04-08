@@ -29,6 +29,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -57,17 +58,20 @@ public final class UpMovement extends GraphAction implements Cloneable {
     return 1;
   }
 
-  public List<SFVec3i> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>(freeCapacity());
+  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>(freeCapacity());
 
     // The one above the head to jump
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
+    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
 
     return requiredFreeBlocks;
   }
 
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
-    var requiredFreeBlocks = listRequiredFreeBlocks();
+    var requiredFreeBlocks = listRequiredFreeBlocks()
+      .stream()
+      .map(Pair::left)
+      .toList();
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
     var firstDirection = SkyDirection.NORTH;
@@ -104,7 +108,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
 
       cost += breakCost.miningCost();
-      actions.add(new BlockBreakAction(breakCost.block()));
+      actions.add(new BlockBreakAction(breakCost.block(), breakCost.sideHint()));
       if (breakCost.willDrop()) {
         inventory = inventory.withOneMoreBlock();
       }
@@ -122,7 +126,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     actions.add(
       new JumpAndPlaceBelowAction(
         previousEntityState.blockPosition(),
-        new BotActionManager.BlockPlaceData(
+        new BotActionManager.BlockPlaceAgainstData(
           previousEntityState.blockPosition().sub(0, 1, 0), Direction.UP)));
 
     return new GraphInstructions(

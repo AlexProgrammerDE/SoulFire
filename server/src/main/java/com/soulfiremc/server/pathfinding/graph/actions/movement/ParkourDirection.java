@@ -36,4 +36,13 @@ public enum ParkourDirection {
       case WEST -> vector.add(-1, 0, 0);
     };
   }
+
+  public SkyDirection toSkyDirection() {
+    return switch (this) {
+      case NORTH -> SkyDirection.NORTH;
+      case SOUTH -> SkyDirection.SOUTH;
+      case EAST -> SkyDirection.EAST;
+      case WEST -> SkyDirection.WEST;
+    };
+  }
 }

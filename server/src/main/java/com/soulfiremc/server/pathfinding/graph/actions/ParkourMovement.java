@@ -20,9 +20,11 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 
@@ -36,28 +38,29 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
   }
 
-  public List<SFVec3i> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
 
     // Make head block free (maybe head block is a slab)
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
+    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0), BlockBreakAction.SideHint.BOTTOM));
 
     // Make block above the head block free for jump
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
+    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
 
     var oneFurther = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
+    var blockDigDirection = direction.toSkyDirection().opposite().toSideHint();
 
     // Room for jumping
-    requiredFreeBlocks.add(oneFurther);
-    requiredFreeBlocks.add(oneFurther.add(0, 1, 0));
-    requiredFreeBlocks.add(oneFurther.add(0, 2, 0));
+    requiredFreeBlocks.add(Pair.of(oneFurther, blockDigDirection));
+    requiredFreeBlocks.add(Pair.of(oneFurther.add(0, 1, 0), blockDigDirection));
+    requiredFreeBlocks.add(Pair.of(oneFurther.add(0, 2, 0), blockDigDirection));
 
     var twoFurther = direction.offset(oneFurther);
 
     // Room for jumping
-    requiredFreeBlocks.add(twoFurther);
-    requiredFreeBlocks.add(twoFurther.add(0, 1, 0));
-    requiredFreeBlocks.add(twoFurther.add(0, 2, 0));
+    requiredFreeBlocks.add(Pair.of(twoFurther, blockDigDirection));
+    requiredFreeBlocks.add(Pair.of(twoFurther.add(0, 1, 0), blockDigDirection));
+    requiredFreeBlocks.add(Pair.of(twoFurther.add(0, 2, 0), blockDigDirection));
 
     return requiredFreeBlocks;
   }

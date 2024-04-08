@@ -37,7 +37,6 @@ import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence
@@ -105,8 +104,8 @@ public class BotActionManager {
     connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber));
   }
 
-  public void placeBlock(Hand hand, BlockPlaceData blockPlaceData) {
-    placeBlock(hand, blockPlaceData.againstPos().toVector3i(), blockPlaceData.blockFace());
+  public void placeBlock(Hand hand, BlockPlaceAgainstData blockPlaceAgainstData) {
+    placeBlock(hand, blockPlaceAgainstData.againstPos().toVector3i(), blockPlaceAgainstData.blockFace());
   }
 
   public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
@@ -150,52 +149,23 @@ public class BotActionManager {
         sequenceNumber));
   }
 
-  public void sendStartBreakBlock(Vector3i blockPos) {
+  public void sendStartBreakBlock(Vector3i blockPos, Direction direction) {
     incrementSequenceNumber();
-    var blockFace = getBlockFaceLookedAt(blockPos);
     connection.sendPacket(
       new ServerboundPlayerActionPacket(
-        PlayerAction.START_DIGGING, blockPos, blockFace, sequenceNumber));
+        PlayerAction.START_DIGGING, blockPos, direction, sequenceNumber));
   }
 
-  public void sendEndBreakBlock(Vector3i blockPos) {
+  public void sendEndBreakBlock(Vector3i blockPos, Direction direction) {
     incrementSequenceNumber();
-    var blockFace = getBlockFaceLookedAt(blockPos);
     connection.sendPacket(
       new ServerboundPlayerActionPacket(
-        PlayerAction.FINISH_DIGGING, blockPos, blockFace, sequenceNumber));
-  }
-
-  public @NotNull Direction getBlockFaceLookedAt(Vector3i blockPos) {
-    var clientEntity = dataManager.clientEntity();
-    var eyePosition = clientEntity.eyePosition();
-    var headRotation = clientEntity.rotationVector();
-    var blockPosDouble = blockPos.toDouble();
-    var blockBoundingBox = new AABB(blockPosDouble, blockPosDouble.add(1, 1, 1));
-    var intersection =
-      blockBoundingBox.getIntersection(eyePosition, headRotation).map(Vector3d::toFloat);
-    if (intersection.isEmpty()) {
-      throw new IllegalStateException("Block is not in line of sight");
-    }
-
-    var intersectionFloat = intersection.get();
-    var blockPosFloat = blockPos.toFloat();
-    var relativeIntersection = intersectionFloat.sub(blockPosFloat);
-
-    // Check side the intersection is the closest to
-    if (relativeIntersection.getX() > relativeIntersection.getY()
-      && relativeIntersection.getX() > relativeIntersection.getZ()) {
-      return intersectionFloat.getX() > blockPosFloat.getX() ? Direction.EAST : Direction.WEST;
-    } else if (relativeIntersection.getY() > relativeIntersection.getZ()) {
-      return intersectionFloat.getY() > blockPosFloat.getY() ? Direction.UP : Direction.DOWN;
-    } else {
-      return intersectionFloat.getZ() > blockPosFloat.getZ() ? Direction.SOUTH : Direction.NORTH;
-    }
+        PlayerAction.FINISH_DIGGING, blockPos, direction, sequenceNumber));
   }
 
   public void sendBreakBlockAnimation() {
     connection.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
   }
 
-  public record BlockPlaceData(SFVec3i againstPos, Direction blockFace) {}
+  public record BlockPlaceAgainstData(SFVec3i againstPos, Direction blockFace) {}
 }

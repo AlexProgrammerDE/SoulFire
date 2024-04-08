@@ -25,7 +25,6 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
  */
 public abstract sealed class GraphAction
   permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
-  public final Object actionLock = new Object();
   private int subscriptionCounter;
 
   public void subscribe() {

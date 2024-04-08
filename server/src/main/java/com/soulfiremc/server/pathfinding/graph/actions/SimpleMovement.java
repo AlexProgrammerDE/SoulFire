@@ -34,6 +34,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -59,7 +60,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private boolean[] noNeedToBreak;
   @Setter
   @Getter
-  private BotActionManager.BlockPlaceData blockPlaceData;
+  private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
   private double cost;
   @Getter
   private boolean appliedCornerCost = false;
@@ -114,15 +115,15 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     };
   }
 
-  public List<SFVec3i> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>(freeCapacity());
+  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>(freeCapacity());
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       // Make head block free (maybe head block is a slab)
-      requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0));
+      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0), BlockBreakAction.SideHint.BOTTOM));
 
       // Make block above the head block free for jump
-      requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0));
+      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
     }
 
     // Add the blocks that are required to be free for diagonal movement
@@ -131,27 +132,40 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
         // Apply jump shift to target edge and offset for body part
-        requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
+        requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toSideHint()));
       }
     }
 
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
     for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+      BlockBreakAction.SideHint sideHint;
+      if (diagonal) {
+        sideHint = getCornerDirection(side.opposite()).opposite().toSideHint();
+      } else {
+        sideHint = switch (direction) {
+          case NORTH -> BlockBreakAction.SideHint.NORTH;
+          case SOUTH -> BlockBreakAction.SideHint.SOUTH;
+          case EAST -> BlockBreakAction.SideHint.EAST;
+          case WEST -> BlockBreakAction.SideHint.WEST;
+          default -> throw new IllegalStateException("Unexpected value: " + direction);
+        };
+      }
+
       // Apply jump shift to target diagonal and offset for body part
-      requiredFreeBlocks.add(bodyOffset.offset(modifier.offsetIfJump(targetEdge)));
+      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), sideHint));
     }
 
     // Require free blocks to fall into the target position
     switch (modifier) {
-      case FALL_1 -> requiredFreeBlocks.add(MovementModifier.FALL_1.offset(targetEdge));
+      case FALL_1 -> requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
       case FALL_2 -> {
-        requiredFreeBlocks.add(MovementModifier.FALL_1.offset(targetEdge));
-        requiredFreeBlocks.add(MovementModifier.FALL_2.offset(targetEdge));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockBreakAction.SideHint.TOP));
       }
       case FALL_3 -> {
-        requiredFreeBlocks.add(MovementModifier.FALL_1.offset(targetEdge));
-        requiredFreeBlocks.add(MovementModifier.FALL_2.offset(targetEdge));
-        requiredFreeBlocks.add(MovementModifier.FALL_3.offset(targetEdge));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_3.offset(targetEdge), BlockBreakAction.SideHint.TOP));
       }
     }
 
@@ -159,26 +173,29 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   private SFVec3i getCorner(MovementSide side) {
+    return getCornerDirection(side).offset(FEET_POSITION_RELATIVE_BLOCK);
+  }
+
+  private SkyDirection getCornerDirection(MovementSide side) {
     return (switch (direction) {
       case NORTH_EAST -> switch (side) {
-        case LEFT -> MovementDirection.NORTH;
-        case RIGHT -> MovementDirection.EAST;
+        case LEFT -> SkyDirection.NORTH;
+        case RIGHT -> SkyDirection.EAST;
       };
       case NORTH_WEST -> switch (side) {
-        case LEFT -> MovementDirection.NORTH;
-        case RIGHT -> MovementDirection.WEST;
+        case LEFT -> SkyDirection.NORTH;
+        case RIGHT -> SkyDirection.WEST;
       };
       case SOUTH_EAST -> switch (side) {
-        case LEFT -> MovementDirection.SOUTH;
-        case RIGHT -> MovementDirection.EAST;
+        case LEFT -> SkyDirection.SOUTH;
+        case RIGHT -> SkyDirection.EAST;
       };
       case SOUTH_WEST -> switch (side) {
-        case LEFT -> MovementDirection.SOUTH;
-        case RIGHT -> MovementDirection.WEST;
+        case LEFT -> SkyDirection.SOUTH;
+        case RIGHT -> SkyDirection.WEST;
       };
       default -> throw new IllegalStateException("Unexpected value: " + direction);
-    })
-      .offset(FEET_POSITION_RELATIVE_BLOCK);
+    });
   }
 
   public List<SFVec3i> listAddCostIfSolidBlocks() {
@@ -208,7 +225,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return new BlockSafetyData[0][];
     }
 
-    var requiredFreeBlocks = listRequiredFreeBlocks();
+    var requiredFreeBlocks = listRequiredFreeBlocks()
+      .stream()
+      .map(Pair::left)
+      .toList();
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
     var blockDirection =
@@ -284,7 +304,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return results;
   }
 
-  public List<BotActionManager.BlockPlaceData> possibleBlocksToPlaceAgainst() {
+  public List<BotActionManager.BlockPlaceAgainstData> possibleBlocksToPlaceAgainst() {
     if (!allowBlockActions) {
       return List.of();
     }
@@ -307,31 +327,31 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       case NORMAL -> // 5
         List.of(
           // Below
-          new BotActionManager.BlockPlaceData(floorBlock.sub(0, 1, 0), Direction.UP),
+          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), Direction.UP),
           // In front
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             blockDirection.offset(floorBlock), oppositeDirection.direction()),
           // Scaffolding
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             oppositeDirection.offset(floorBlock), blockDirection.direction()),
           // Left side
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
           // Right side
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             rightDirectionSide.offset(floorBlock), leftDirectionSide.direction()));
       case JUMP_UP_BLOCK, FALL_1 -> // 4 - no scaffolding
         List.of(
           // Below
-          new BotActionManager.BlockPlaceData(floorBlock.sub(0, 1, 0), Direction.UP),
+          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), Direction.UP),
           // In front
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             blockDirection.offset(floorBlock), oppositeDirection.direction()),
           // Left side
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
           // Right side
-          new BotActionManager.BlockPlaceData(
+          new BotActionManager.BlockPlaceAgainstData(
             rightDirectionSide.offset(floorBlock), leftDirectionSide.direction()));
       default -> throw new IllegalStateException("Unexpected value: " + modifier);
     };
@@ -344,7 +364,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   @Override
   public boolean impossibleToComplete() {
-    return requiresAgainstBlock && blockPlaceData == null;
+    return requiresAgainstBlock && blockPlaceAgainstData == null;
   }
 
   @Override
@@ -367,7 +387,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
 
         cost += breakCost.miningCost();
-        actions.add(new BlockBreakAction(breakCost.block()));
+        actions.add(new BlockBreakAction(breakCost.block(), breakCost.sideHint()));
         if (breakCost.willDrop()) {
           inventory = inventory.withOneMoreBlock();
         }
@@ -381,7 +401,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     if (requiresAgainstBlock) {
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       cost += Costs.PLACE_BLOCK;
-      actions.add(new BlockPlaceAction(floorBlock, blockPlaceData));
+      actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
       inventory = inventory.withOneLessBlock();
 
       blockToPlacePosition = floorBlock;
