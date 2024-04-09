@@ -131,6 +131,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   public void preparePath(List<WorldAction> worldActions) {
+    this.worldActionQueue.clear();
     this.worldActionQueue.addAll(worldActions);
     this.totalMovements = worldActions.size();
   }
