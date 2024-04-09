@@ -514,7 +514,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   long readTraffic = 0;
                   long writeTraffic = 0;
                   for (var bot : attackManager.botConnections().values()) {
-                    var trafficShapingHandler = bot.getTrafficHandler();
+                    var trafficShapingHandler = bot.trafficHandler();
 
                     if (trafficShapingHandler == null) {
                       continue;
@@ -538,7 +538,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   long currentReadTraffic = 0;
                   long currentWriteTraffic = 0;
                   for (var bot : attackManager.botConnections().values()) {
-                    var trafficShapingHandler = bot.getTrafficHandler();
+                    var trafficShapingHandler = bot.trafficHandler();
 
                     if (trafficShapingHandler == null) {
                       continue;

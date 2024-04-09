@@ -32,6 +32,7 @@ import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.TimeUtil;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +50,7 @@ public record BotConnection(
   ViaClientSession session,
   ResolveUtil.ResolvedAddress resolvedAddress,
   ExecutorManager executorManager,
+  List<Runnable> shutdownHooks,
   BotConnectionMeta meta,
   LambdaManager eventBus) {
   public CompletableFuture<?> connect() {
@@ -92,13 +94,16 @@ public record BotConnection(
     }
   }
 
-  public GlobalTrafficShapingHandler getTrafficHandler() {
+  public GlobalTrafficShapingHandler trafficHandler() {
     return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
   }
 
   public CompletableFuture<?> gracefulDisconnect() {
     return CompletableFuture.runAsync(
       () -> {
+        // Run all shutdown hooks
+        shutdownHooks.forEach(Runnable::run);
+
         session.disconnect("Disconnect");
 
         // Give the server one second to handle the disconnect
@@ -112,7 +117,7 @@ public record BotConnection(
       });
   }
 
-  public IdentifiedKey getIdentifiedKey() {
+  public IdentifiedKey identifiedKey() {
     throw new UnsupportedOperationException("Not implemented yet!");
   }
 

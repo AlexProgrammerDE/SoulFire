@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,7 +73,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return bestNode;
   }
 
-  public List<WorldAction> findRoute(SFVec3i from, boolean requiresRepositioning) {
+  public List<WorldAction> findRoute(SFVec3i from, boolean requiresRepositioning,
+                                     CompletableFuture<Void> pathCompletionFuture) {
     var stopwatch = Stopwatch.createStarted();
 
     // Store block positions and the best route to them
@@ -99,6 +101,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     }
 
     while (!openSet.isEmpty()) {
+      if (pathCompletionFuture.isDone()) {
+        stopwatch.stop();
+        log.info("Cancelled pathfinding after {}ms", stopwatch.elapsed().toMillis());
+        return List.of();
+      }
+
       var current = openSet.dequeue();
       log.debug("Looking at node: {}", current.blockPosition());
 

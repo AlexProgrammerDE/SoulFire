@@ -34,6 +34,7 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ public record BotConnectionFactory(
         session,
         resolvedAddress,
         new ExecutorManager("SoulFire-Attack-" + attackManager.id()),
+        new CopyOnWriteArrayList<>(),
         meta,
         LambdaManager.basic(new ASMGenerator())
           .setExceptionHandler(EventExceptionHandler.INSTANCE)

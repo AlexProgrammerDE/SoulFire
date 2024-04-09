@@ -77,9 +77,9 @@ public class ForwardingBypass implements InternalPlugin {
           ? VelocityConstants.MODERN_LAZY_SESSION
           : VelocityConstants.MODERN_FORWARDING_DEFAULT;
       }
-      if (player.getIdentifiedKey() != null) {
+      if (player.identifiedKey() != null) {
         // No enhanced switch on java 11
-        return switch (player.getIdentifiedKey().getKeyRevision()) {
+        return switch (player.identifiedKey().getKeyRevision()) {
           case GENERIC_V1 -> VelocityConstants.MODERN_FORWARDING_WITH_KEY;
           case LINKED_V2 ->
             // Since V2 is not backwards compatible, we have to throw the key if v2 and requested
@@ -112,7 +112,7 @@ public class ForwardingBypass implements InternalPlugin {
       // login start to the server, but some setups require this.
       if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY
         && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
-        var key = player.getIdentifiedKey();
+        var key = player.identifiedKey();
         assert key != null;
         writePlayerKey(forwarded, codecHelper, key);
 

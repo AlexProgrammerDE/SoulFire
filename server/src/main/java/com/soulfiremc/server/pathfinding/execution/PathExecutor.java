@@ -45,8 +45,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   private int totalMovements;
   private int ticks = 0;
   private int movementNumber = 1;
-  // Should be true when this path should no longer be executed and not recalculated
-  private boolean cancelled = false;
   private boolean registered = false;
 
   public PathExecutor(
@@ -61,6 +59,13 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
   public static void executePathfinding(BotConnection bot, GoalScorer goalScorer,
                                         CompletableFuture<Void> pathCompletionFuture) {
+    // Cancel the path if the bot is disconnected
+    bot.shutdownHooks().add(() -> {
+      if (!pathCompletionFuture.isDone()) {
+        pathCompletionFuture.cancel(true);
+      }
+    });
+
     var logger = bot.logger();
     var sessionDataManager = bot.sessionDataManager();
     var clientEntity = sessionDataManager.clientEntity();
@@ -80,7 +85,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
           new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState(), level, inventory, true, true), goalScorer);
 
         logger.info("Starting calculations at: {}", start);
-        var actions = routeFinder.findRoute(start, requiresRepositioning);
+        var actions = routeFinder.findRoute(start, requiresRepositioning, pathCompletionFuture);
         logger.info("Calculated path with {} actions: {}", actions.size(), actions);
 
         return actions;
@@ -90,26 +95,30 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     pathExecutor.submitForPathCalculation(true);
   }
 
+  public boolean isDone() {
+    return pathCompletionFuture.isDone();
+  }
+
   public void submitForPathCalculation(boolean isInitial) {
     unregister();
     connection.sessionDataManager().controlState().resetAll();
 
     executorService.submit(() -> {
       try {
-        if (cancelled) {
+        if (isDone()) {
           return;
         }
 
         if (!isInitial) {
           connection.logger().info("Waiting for one second for bot to finish falling...");
           TimeUtil.waitTime(1, TimeUnit.SECONDS);
-          if (cancelled) {
+          if (isDone()) {
             return;
           }
         }
 
         var newActions = findPath.get(isInitial);
-        if (cancelled) {
+        if (isDone()) {
           return;
         }
 
@@ -144,7 +153,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     // This method should not be called if the path is cancelled
-    if (!registered || cancelled) {
+    if (!registered || isDone()) {
       return;
     }
 
@@ -206,7 +215,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   public synchronized void register() {
-    if (cancelled) {
+    if (isDone()) {
       return;
     }
 
@@ -234,9 +243,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   public void cancel() {
-    cancelled = true;
+    if (!isDone()) {
+      pathCompletionFuture.cancel(true);
+    }
+
     unregister();
-    pathCompletionFuture.completeExceptionally(new IllegalStateException("Path was cancelled"));
   }
 
   public void recalculatePath() {
