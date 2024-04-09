@@ -46,14 +46,18 @@ import com.soulfiremc.server.brigadier.BlockTagResolvable;
 import com.soulfiremc.server.brigadier.TagBasedArgumentType;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.grpc.ServerRPCConstants;
 import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
+import com.soulfiremc.server.pathfinding.controller.FollowEntityController;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.PrimitiveHelper;
+import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -277,6 +281,58 @@ public class ServerCommandManager implements PlatformCommandManager {
                         return Command.SINGLE_SUCCESS;
                       });
                   }))))));
+    dispatcher.register(
+      literal("follow")
+        .then(argument("entity", StringArgumentType.string())
+          .then(argument("maxRadius", IntegerArgumentType.integer(1))
+            .executes(
+              help(
+                "Makes all connected bots follow an entity by id",
+                c -> {
+                  var entityName = StringArgumentType.getString(c, "entity");
+                  var maxRadius = IntegerArgumentType.getInteger(c, "maxRadius");
+
+                  return forEveryBot(
+                    c,
+                    bot -> {
+                      var dataManager = bot.sessionDataManager();
+
+                      var parsedUniqueId = UUIDHelper.tryParseUniqueId(entityName);
+                      var entityId = -1;
+                      for (var entity : dataManager.entityTrackerState().getEntities()) {
+                        if (entity.entityType() != EntityType.PLAYER) {
+                          continue;
+                        }
+
+                        var connectedUsers = dataManager.playerListState();
+                        var entry = connectedUsers.entries().get(entity.uuid());
+                        if (entry != null
+                          && ((parsedUniqueId.isPresent() && entry.getProfileId().equals(parsedUniqueId.get()))
+                          || (entry.getProfile() != null && entry.getProfile().getName().equalsIgnoreCase(entityName)))
+                        ) {
+                          entityId = entity.entityId();
+                          break;
+                        }
+                      }
+
+                      if (entityId == -1) {
+                        var parsedEntityId = PrimitiveHelper.parseInt(entityName);
+                        if (parsedEntityId.isEmpty()) {
+                          c.getSource().sendWarn("Invalid entity specified!");
+                          return Command.SINGLE_SUCCESS;
+                        }
+                      }
+
+                      var finalEntityId = entityId;
+                      bot.executorManager().newExecutorService(bot, "Pathfinding")
+                        .submit(() -> new FollowEntityController(
+                          finalEntityId,
+                          maxRadius
+                        ).start(bot));
+
+                      return Command.SINGLE_SUCCESS;
+                    });
+                })))));
     dispatcher.register(
       literal("stop-path")
         .executes(

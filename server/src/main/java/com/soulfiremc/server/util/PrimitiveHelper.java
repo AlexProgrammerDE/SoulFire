@@ -18,6 +18,7 @@
 package com.soulfiremc.server.util;
 
 import java.util.Arrays;
+import java.util.OptionalInt;
 
 public class PrimitiveHelper {
   private PrimitiveHelper() {}
@@ -46,5 +47,13 @@ public class PrimitiveHelper {
 
     result[index] = Arrays.copyOfRange(data, last, data.length);
     return result;
+  }
+
+  public static OptionalInt parseInt(String s) {
+    try {
+      return OptionalInt.of(Integer.parseInt(s));
+    } catch (NumberFormatException e) {
+      return OptionalInt.empty();
+    }
   }
 }
