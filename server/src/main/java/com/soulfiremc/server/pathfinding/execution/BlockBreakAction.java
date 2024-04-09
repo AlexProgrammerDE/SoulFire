@@ -100,9 +100,11 @@ public final class BlockBreakAction implements WorldAction {
             sessionDataManager.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
           .ticks();
-      sessionDataManager.botActionManager().sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
+      sessionDataManager.botActionManager()
+        .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
     } else if (--remainingTicks == 0) {
-      sessionDataManager.botActionManager().sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
+      sessionDataManager.botActionManager()
+        .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
       finishedDigging = true;
     } else {
       sessionDataManager.botActionManager().sendBreakBlockAnimation();

@@ -16,12 +16,23 @@ tasks.withType<AbstractArchiveTask> {
 }
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireClientJava8Launcher"
+
 task("runSFClient", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
 
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
+
+  jvmArgs = listOf(
+    "-Xmx2G",
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+UseG1GC",
+    "-XX:G1NewSizePercent=20",
+    "-XX:G1ReservePercent=20",
+    "-XX:MaxGCPauseMillis=50",
+    "-XX:G1HeapRegionSize=32M"
+  )
 
   outputs.upToDateWhen { false }
 }
@@ -33,7 +44,16 @@ task("runSFClientLocal", JavaExec::class) {
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
 
-  jvmArgs = listOf("-Dsf.disableServerSelect=true")
+  jvmArgs = listOf(
+    "-Xmx2G",
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+UseG1GC",
+    "-XX:G1NewSizePercent=20",
+    "-XX:G1ReservePercent=20",
+    "-XX:MaxGCPauseMillis=50",
+    "-XX:G1HeapRegionSize=32M",
+    "-Dsf.disableServerSelect=true"
+  )
 
   outputs.upToDateWhen { false }
 }

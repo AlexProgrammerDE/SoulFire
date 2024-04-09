@@ -49,9 +49,8 @@ public final class MovementAction implements WorldAction {
       // We want to be on the same Y level
       return false;
     } else {
-      var distance = botPosition.distance(targetMiddleBlock);
-      // Close enough to be able to bridge up
-      return distance <= 0.15;
+      var halfDiagonal = clientEntity.boundingBox().diagonalXZLength() / 2;
+      return botPosition.distance(targetMiddleBlock) < halfDiagonal;
     }
   }
 

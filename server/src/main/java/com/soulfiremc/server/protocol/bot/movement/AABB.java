@@ -179,4 +179,10 @@ public class AABB {
 
     return Optional.of(origin.add(direction.mul(tMin)));
   }
+
+  public double diagonalXZLength() {
+    var x = this.maxX - this.minX;
+    var z = this.maxZ - this.minZ;
+    return Math.sqrt(x * x + z * z);
+  }
 }

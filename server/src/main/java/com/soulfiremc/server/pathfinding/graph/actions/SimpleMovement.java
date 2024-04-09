@@ -131,7 +131,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
-        requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toBlockFace()));
+        requiredFreeBlocks.add(
+          Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toBlockFace()));
       }
     }
 

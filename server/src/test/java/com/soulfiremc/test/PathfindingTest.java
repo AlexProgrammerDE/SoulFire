@@ -66,8 +66,8 @@ public class PathfindingTest {
     var routeFinder =
       new RouteFinder(
         new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
-      true, true),
+          new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+          true, true),
         // This is impossible to reach
         new PosGoal(3, 1, 0));
 
@@ -229,7 +229,8 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
     var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))),
+      new ProjectedLevel(accessor),
+      new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))),
       true, true), new PosGoal(0, 21, 0));
 
     var initialState = new SFVec3i(0, 1, 0);
@@ -250,7 +251,8 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
     var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      new ProjectedLevel(accessor),
+      new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
       true, true), new PosGoal(0, 0, 0));
 
     var initialState = new SFVec3i(0, 1, 0);
@@ -270,7 +272,8 @@ public class PathfindingTest {
 
     // TODO: Fix stacking up
     var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      new ProjectedLevel(accessor),
+      new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
       true, true), new PosGoal(2, 1, 0));
 
     var initialState = new SFVec3i(0, 1, 0);
@@ -290,7 +293,8 @@ public class PathfindingTest {
     }
 
     var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      new ProjectedLevel(accessor),
+      new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
       true, true), new PosGoal(0, 0, 0));
 
     var initialState = new SFVec3i(0, 1, 0);
@@ -317,7 +321,8 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -level, 0, BlockType.STONE);
 
     var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      new ProjectedLevel(accessor),
+      new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
       true, true), new PosGoal(0, 0, 0));
 
     var initialState = new SFVec3i(0, 1, 0);

@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 
 /**
  * Represents the state of the bot in the level. This means the positions and in the future also
@@ -32,8 +31,4 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
  */
 public record BotEntityState(
   SFVec3i blockPosition, ProjectedLevel level, ProjectedInventory inventory) {
-  public static BotEntityState initialState(
-    ClientEntity clientEntity, ProjectedLevel level, ProjectedInventory inventory) {
-    return new BotEntityState(SFVec3i.fromDouble(clientEntity.pos()), level, inventory);
-  }
 }

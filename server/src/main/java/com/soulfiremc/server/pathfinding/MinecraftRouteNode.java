@@ -62,6 +62,8 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
 
   private boolean predicatedStateValid;
 
+  private boolean predicting;
+
   public MinecraftRouteNode(SFVec3i blockPosition, MinecraftRouteNode parent, List<WorldAction> actions,
                             double sourceCost, double totalRouteScore) {
     this.blockPosition = blockPosition;
@@ -88,6 +90,13 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   }
 
   public void predictState() {
+    if (predicting) {
+      // Prevent recursion
+      return;
+    }
+
+    predicting = true;
+
     if (!parent.predicatedStateValid) {
       predicatedStateValid = false;
     } else {
@@ -104,6 +113,8 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     for (var child : children) {
       child.predictState();
     }
+
+    predicting = false;
   }
 
   public void parent(MinecraftRouteNode parent) {

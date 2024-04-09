@@ -41,6 +41,7 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 public class ProjectedInventory {
+  @Getter
   @ToString.Include
   private final int usableBlockItems;
   @Getter

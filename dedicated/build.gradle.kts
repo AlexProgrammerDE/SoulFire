@@ -24,6 +24,16 @@ task("runSFDedicated", JavaExec::class) {
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
 
+  jvmArgs = listOf(
+    "-Xmx2G",
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+UseG1GC",
+    "-XX:G1NewSizePercent=20",
+    "-XX:G1ReservePercent=20",
+    "-XX:MaxGCPauseMillis=50",
+    "-XX:G1HeapRegionSize=32M"
+  )
+
   outputs.upToDateWhen { false }
 }
 
