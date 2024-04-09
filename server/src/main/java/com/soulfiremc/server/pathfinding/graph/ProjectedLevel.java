@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
-import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
@@ -33,8 +32,6 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 public class ProjectedLevel {
-  private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
-
   private final BlockAccessor accessor;
   @ToString.Include
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
@@ -52,7 +49,7 @@ public class ProjectedLevel {
 
   public ProjectedLevel withChangeToAir(SFVec3i position) {
     var blockChanges = this.blockChanges.clone();
-    blockChanges.put(position, AIR_BLOCK_STATE);
+    blockChanges.put(position, Costs.AIR_BLOCK_STATE);
 
     return new ProjectedLevel(accessor, blockChanges);
   }

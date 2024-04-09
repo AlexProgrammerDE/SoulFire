@@ -104,6 +104,8 @@ public class Costs {
    */
   public static final double CORNER_SLIDE = 2 - DIAGONAL;
 
+  public static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
+
   /**
    * For performance reasons, we do not want to calculate new costs for every possible block placed.
    * This is the state every placed block on the graph has. This allows the inventory to just store
