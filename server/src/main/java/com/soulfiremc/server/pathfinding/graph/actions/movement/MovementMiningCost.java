@@ -19,5 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
+import lombok.NonNull;
 
-public record MovementMiningCost(SFVec3i block, double miningCost, boolean willDrop, BlockFace blockBreakSideHint) {}
+public record MovementMiningCost(@NonNull SFVec3i block, double miningCost, boolean willDrop, @NonNull BlockFace blockBreakSideHint) {}

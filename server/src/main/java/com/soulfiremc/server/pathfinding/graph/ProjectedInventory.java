@@ -90,6 +90,10 @@ public class ProjectedInventory {
     return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
   }
 
+  public boolean isValid() {
+    return usableBlockItems >= 0;
+  }
+
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
     return sharedMiningCosts.computeIfAbsent(
       blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));

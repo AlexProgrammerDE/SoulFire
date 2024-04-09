@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +26,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
 @AllArgsConstructor
 public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
@@ -37,7 +37,7 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The currently best known node to this node.
    */
-  private MinecraftRouteNode previous;
+  private MinecraftRouteNode parent;
 
   /**
    * The actions from the previous node to this node that were used to get to this node.
@@ -47,12 +47,73 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The cost of the route from the start node to this node.
    */
+  @Setter
   private double sourceCost;
 
   /**
    * The estimated cost of the route from this node to the target.
    */
+  @Setter
   private double totalRouteScore;
+
+  private List<MinecraftRouteNode> children;
+
+  private BotEntityState predictedState;
+
+  private boolean predicatedStateValid;
+
+  public MinecraftRouteNode(SFVec3i blockPosition, MinecraftRouteNode parent, List<WorldAction> actions,
+                            double sourceCost, double totalRouteScore) {
+    this.blockPosition = blockPosition;
+    this.parent = parent;
+    this.actions = actions;
+    this.sourceCost = sourceCost;
+    this.totalRouteScore = totalRouteScore;
+    this.children = new ArrayList<>();
+
+    predictState();
+  }
+
+  public MinecraftRouteNode(SFVec3i blockPosition, BotEntityState entityState, List<WorldAction> actions,
+                            double sourceCost, double totalRouteScore) {
+    this.blockPosition = blockPosition;
+    this.parent = null;
+    this.actions = actions;
+    this.sourceCost = sourceCost;
+    this.totalRouteScore = totalRouteScore;
+    this.children = new ArrayList<>();
+
+    this.predictedState = entityState;
+    this.predicatedStateValid = true;
+  }
+
+  public void predictState() {
+    var currentEntityState = parent.predictedState;
+    for (var action : actions) {
+      currentEntityState = action.simulate(currentEntityState);
+    }
+
+    predictedState = currentEntityState;
+    if (predictedState.inventory().isValid()) {
+      predicatedStateValid = true;
+    }
+
+    // Update children whose state depends on this node
+    for (var child : children) {
+      child.predictState();
+    }
+  }
+
+  public void parent(MinecraftRouteNode parent) {
+    this.parent.children.remove(this);
+    this.parent = parent;
+    this.parent.children.add(this);
+  }
+
+  public void actions(List<WorldAction> actions) {
+    this.actions = actions;
+    predictState();
+  }
 
   @Override
   public int compareTo(MinecraftRouteNode other) {

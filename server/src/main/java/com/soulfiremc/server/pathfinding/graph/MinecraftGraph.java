@@ -219,9 +219,10 @@ public record MinecraftGraph(TagsState tagsState,
 
     {
       movement.subscribe();
+      var freeBlock = movement.blockToBreak();
       blockSubscribers
-        .computeIfAbsent(movement.blockToBreak(), CREATE_MISSING_FUNCTION)
-        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE));
+        .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
+        .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, 0, freeBlock.value()));
     }
 
     {
@@ -344,7 +345,7 @@ public record MinecraftGraph(TagsState tagsState,
       }
 
       switch (processSubscriptionAction(
-        key, subscriber, action, isFreeReference, blockState, absolutePositionBlock, node)) {
+        key, subscriber, action, isFreeReference, blockState, absolutePositionBlock)) {
         case CONTINUE -> {
           if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
             continue;
@@ -363,16 +364,15 @@ public record MinecraftGraph(TagsState tagsState,
     GraphAction action,
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
-    SFVec3i absolutePositionBlock,
-    SFVec3i node) {
+    SFVec3i absolutePositionBlock) {
     return switch (action) {
       case SimpleMovement simpleMovement -> processMovementSubscription(
-        subscriber, isFreeReference, blockState, absolutePositionBlock, node, simpleMovement);
+        subscriber, isFreeReference, blockState, absolutePositionBlock, simpleMovement);
       case ParkourMovement ignored -> processParkourSubscription(subscriber, isFreeReference, blockState);
       case DownMovement downMovement -> processDownSubscription(
-        key, subscriber, blockState, absolutePositionBlock, node, downMovement);
+        key, subscriber, blockState, absolutePositionBlock, downMovement);
       case UpMovement upMovement -> processUpSubscription(
-        subscriber, isFreeReference, blockState, absolutePositionBlock, node, upMovement);
+        subscriber, isFreeReference, blockState, absolutePositionBlock, upMovement);
     };
   }
 
@@ -381,7 +381,6 @@ public record MinecraftGraph(TagsState tagsState,
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    SFVec3i node,
     SimpleMovement simpleMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
@@ -550,7 +549,6 @@ public record MinecraftGraph(TagsState tagsState,
     BlockSubscription subscriber,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    SFVec3i node,
     DownMovement downMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
@@ -564,7 +562,7 @@ public record MinecraftGraph(TagsState tagsState,
 
         var cacheableMiningCost = inventory.getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
-        downMovement.blockBreakCosts(
+        downMovement.breakCost(
           new MovementMiningCost(
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
@@ -608,7 +606,6 @@ public record MinecraftGraph(TagsState tagsState,
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    SFVec3i node,
     UpMovement upMovement) {
     // Towering requires placing a block below
     if (!canPlaceBlocks) {
