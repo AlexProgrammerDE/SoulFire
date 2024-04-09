@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -26,6 +25,7 @@ import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
@@ -102,10 +102,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
+  public GraphInstructions getInstructions(SFVec3i node) {
     var actions = new ObjectArrayList<WorldAction>();
-    var inventory = previousEntityState.inventory();
-    var level = previousEntityState.level();
     var cost = Costs.TOWER_COST;
 
     for (var breakCost : blockBreakCosts) {
@@ -115,34 +113,25 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
       cost += breakCost.miningCost();
       actions.add(new BlockBreakAction(breakCost));
-      if (breakCost.willDrop()) {
-        inventory = inventory.withOneMoreBlock();
-      }
-
-      level = level.withChangeToAir(breakCost.block());
     }
 
-    // Change values for block we're going to place and stand on
-    inventory = inventory.withOneLessBlock();
-    level = level.withChangeToSolidBlock(previousEntityState.blockPosition());
-
-    var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(
       new JumpAndPlaceBelowAction(
-        previousEntityState.blockPosition(),
+        node,
         new BotActionManager.BlockPlaceAgainstData(
-          previousEntityState.blockPosition().sub(0, 1, 0), Direction.UP)));
+          node.sub(0, 1, 0), Direction.UP)));
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, level, inventory), cost, actions);
+      absoluteTargetFeetBlock, cost, actions);
   }
 
   @Override
-  public UpMovement copy(BotEntityState previousEntityState) {
+  public UpMovement copy(MinecraftGraph graph, SFVec3i node) {
     // Skip calculations since we have no blocks to place
-    if (previousEntityState.inventory().hasNoBlocks()) {
+    if (graph.inventory().hasNoBlocks()) {
       return null;
     }
 

@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
@@ -43,15 +44,17 @@ public class ProjectedLevel {
   }
 
   public ProjectedLevel withChangeToSolidBlock(SFVec3i position) {
-    return this;
+    var blockChanges = this.blockChanges.clone();
+    blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
+
+    return new ProjectedLevel(accessor, blockChanges);
   }
 
   public ProjectedLevel withChangeToAir(SFVec3i position) {
-    return this;
-  }
+    var blockChanges = this.blockChanges.clone();
+    blockChanges.put(position, AIR_BLOCK_STATE);
 
-  public ProjectedLevel withChanges(SFVec3i[] air, SFVec3i solid) {
-    return this;
+    return new ProjectedLevel(accessor, blockChanges);
   }
 
   public BlockState getBlockStateAt(SFVec3i position) {

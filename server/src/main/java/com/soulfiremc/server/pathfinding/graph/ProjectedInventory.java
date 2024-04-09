@@ -83,11 +83,11 @@ public class ProjectedInventory {
   }
 
   public ProjectedInventory withOneLessBlock() {
-    return this;
+    return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
   }
 
   public ProjectedInventory withOneMoreBlock() {
-    return this;
+    return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
   }
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {

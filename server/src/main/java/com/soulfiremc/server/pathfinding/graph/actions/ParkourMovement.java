@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -73,20 +73,17 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-    var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
+  public GraphInstructions getInstructions(SFVec3i node) {
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     return new GraphInstructions(
-      new BotEntityState(
-        absoluteTargetFeetBlock,
-        previousEntityState.level(),
-        previousEntityState.inventory()),
+      absoluteTargetFeetBlock,
       Costs.ONE_GAP_JUMP,
       List.of(new GapJumpAction(absoluteTargetFeetBlock)));
   }
 
   @Override
-  public ParkourMovement copy(BotEntityState previousEntityState) {
+  public ParkourMovement copy(MinecraftGraph graph, SFVec3i node) {
     return this.clone();
   }
 

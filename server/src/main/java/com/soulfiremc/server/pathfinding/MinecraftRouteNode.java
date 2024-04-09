@@ -32,7 +32,7 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The world state of this node.
    */
-  private final BotEntityState entityState;
+  private final SFVec3i blockPosition;
 
   /**
    * The currently best known node to this node.

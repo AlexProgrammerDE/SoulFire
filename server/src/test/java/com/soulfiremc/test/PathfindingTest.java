@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ItemType;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.NoRouteFoundException;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -40,7 +39,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class PathfindingTest {
   // TODO: Implement default tagstate for testing
-  private static final MinecraftGraph DEFAULT_GRAPH = new MinecraftGraph(new TagsState(), true, true);
 
   @Test
   public void testPathfindingStraight() {
@@ -49,15 +47,11 @@ public class PathfindingTest {
     accessor.setBlockAt(1, 0, 0, BlockType.STONE);
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(2, 1, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
-
-    var route = routeFinder.findRoute(initialState, false);
+    var route = routeFinder.findRoute(new SFVec3i(0, 1, 0), false);
 
     assertEquals(2, route.size());
   }
@@ -71,15 +65,14 @@ public class PathfindingTest {
 
     var routeFinder =
       new RouteFinder(
-        DEFAULT_GRAPH,
+        new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true),
         // This is impossible to reach
         new PosGoal(3, 1, 0));
 
     var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+      new SFVec3i(0, 1, 0);
 
     assertThrowsExactly(
       NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
@@ -92,13 +85,11 @@ public class PathfindingTest {
     accessor.setBlockAt(1, 0, 1, BlockType.STONE);
     accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 2));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(2, 1, 2));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     var route = routeFinder.findRoute(initialState, false);
 
@@ -112,13 +103,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, height + 1, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(1, height + 1, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (height > 1) {
       assertThrowsExactly(
@@ -136,13 +125,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, height + 1, 1));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(1, height + 1, 1));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (height > 1) {
       assertThrowsExactly(
@@ -160,13 +147,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, -height, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, -height + 1, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(1, -height + 1, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (height > 3) {
       assertThrowsExactly(
@@ -184,13 +169,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(1, -height + 1, 1));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(1, -height + 1, 1));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (height > 3) {
       assertThrowsExactly(
@@ -208,13 +191,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(gapLength + 1, 1, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
+      true, true), new PosGoal(gapLength + 1, 1, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of()));
+    var initialState = new SFVec3i(0, 1, 0);
 
     // TODO: Allow longer jumps
     if (gapLength > 1) {
@@ -231,13 +212,11 @@ public class PathfindingTest {
     var accessor = new TestBlockAccessor();
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 2, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE))),
+      true, true), new PosGoal(0, 2, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(1, route.size());
@@ -249,14 +228,11 @@ public class PathfindingTest {
     var accessor = new TestBlockAccessor();
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 21, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))),
+      true, true), new PosGoal(0, 21, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(
-          List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (amount < 20) {
       assertThrowsExactly(
@@ -273,13 +249,11 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
     accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      true, true), new PosGoal(0, 0, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(1, route.size());
@@ -295,13 +269,11 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     // TODO: Fix stacking up
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(2, 1, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      true, true), new PosGoal(2, 1, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     var route = routeFinder.findRoute(initialState, false);
     assertEquals(3, route.size());
@@ -317,13 +289,11 @@ public class PathfindingTest {
       accessor.setBlockAt(1, 0, 0, BlockType.LAVA);
     }
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      true, true), new PosGoal(0, 0, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (unsafe) {
       assertThrowsExactly(
@@ -346,13 +316,11 @@ public class PathfindingTest {
 
     accessor.setBlockAt(0, -level, 0, BlockType.STONE);
 
-    var routeFinder = new RouteFinder(DEFAULT_GRAPH, new PosGoal(0, 0, 0));
+    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+      new ProjectedLevel(accessor), new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))),
+      true, true), new PosGoal(0, 0, 0));
 
-    var initialState =
-      new BotEntityState(
-        new SFVec3i(0, 1, 0),
-        new ProjectedLevel(accessor),
-        new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE))));
+    var initialState = new SFVec3i(0, 1, 0);
 
     if (level > 1) {
       assertThrowsExactly(

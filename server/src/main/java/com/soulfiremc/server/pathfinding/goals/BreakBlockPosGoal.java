@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.goals;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -27,8 +26,8 @@ import java.util.List;
 
 public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions) {
-    return state.blockPosition().distance(goal);
+  public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
+    return blockPosition.distance(goal);
   }
 
   @Override

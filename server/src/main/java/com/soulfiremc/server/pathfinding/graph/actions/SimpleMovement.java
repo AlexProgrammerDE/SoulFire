@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -27,6 +26,7 @@ import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
@@ -364,57 +364,40 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-    var inventory = previousEntityState.inventory();
-    var level = previousEntityState.level();
+  public GraphInstructions getInstructions(SFVec3i node) {
     var cost = this.cost;
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
-    var blockToBreakArray = blocksToBreak > 0 ? new SFVec3i[blocksToBreak] : null;
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
-    SFVec3i blockToPlacePosition = null;
 
     var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
     if (blockBreakCosts != null) {
-      for (var i = 0; i < blockBreakCosts.length; i++) {
-        var breakCost = blockBreakCosts[i];
+      for (var breakCost : blockBreakCosts) {
         if (breakCost == null) {
           continue;
         }
 
         cost += breakCost.miningCost();
         actions.add(new BlockBreakAction(breakCost));
-        if (breakCost.willDrop()) {
-          inventory = inventory.withOneMoreBlock();
-        }
-
-        blockToBreakArray[i] = breakCost.block();
       }
     }
 
-    var absoluteTargetFeetBlock = previousEntityState.blockPosition().add(targetFeetBlock);
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     if (requiresAgainstBlock) {
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       cost += Costs.PLACE_BLOCK;
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
-      inventory = inventory.withOneLessBlock();
-
-      blockToPlacePosition = floorBlock;
-    }
-
-    if (blockToBreakArray != null || blockToPlacePosition != null) {
-      level = level.withChanges(blockToBreakArray, blockToPlacePosition);
     }
 
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, level, inventory), cost, actions);
+      absoluteTargetFeetBlock, cost, actions);
   }
 
   @Override
-  public SimpleMovement copy(BotEntityState previousEntityState) {
+  public SimpleMovement copy(MinecraftGraph graph, SFVec3i node) {
     return this.clone();
   }
 

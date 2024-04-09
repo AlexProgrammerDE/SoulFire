@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
@@ -92,8 +92,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(BotEntityState previousEntityState) {
-    var inventory = previousEntityState.inventory();
+  public GraphInstructions getInstructions(SFVec3i node) {
     var cost = 0D;
 
     cost +=
@@ -105,24 +104,17 @@ public final class DownMovement extends GraphAction implements Cloneable {
       };
 
     cost += blockBreakCosts.miningCost();
-    if (blockBreakCosts.willDrop()) {
-      inventory = inventory.withOneMoreBlock();
-    }
-    var level = previousEntityState.level();
 
-    level = level.withChangeToAir(blockBreakCosts.block());
-
-    var absoluteTargetFeetBlock =
-      previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
+    var absoluteTargetFeetBlock = node.add(0, closestBlockToFallOn + 1, 0);
 
     return new GraphInstructions(
-      new BotEntityState(absoluteTargetFeetBlock, level, inventory),
+      absoluteTargetFeetBlock,
       cost,
       List.of(new BlockBreakAction(blockBreakCosts)));
   }
 
   @Override
-  public DownMovement copy(BotEntityState previousEntityState) {
+  public DownMovement copy(MinecraftGraph graph, SFVec3i node) {
     return this.clone();
   }
 

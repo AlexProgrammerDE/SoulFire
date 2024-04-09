@@ -20,7 +20,6 @@ package com.soulfiremc.jmh;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ResourceKey;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
@@ -45,7 +44,7 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Benchmark)
 public class PathfindingBenchmark {
   private RouteFinder routeFinder;
-  private BotEntityState initialState;
+  private SFVec3i initialState;
 
   @Setup
   public void setup() {
@@ -87,13 +86,10 @@ public class PathfindingBenchmark {
         }
       }
 
-      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(), true, true), new PosGoal(100, 80, 100));
-
-      initialState =
-        new BotEntityState(
-          new SFVec3i(0, safeY, 0),
-          new ProjectedLevel(accessor),
-          new ProjectedInventory(new PlayerInventoryContainer(null)));
+      initialState = new SFVec3i(0, safeY, 0);
+      routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+        new ProjectedLevel(accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),
+        true, true), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {

@@ -19,8 +19,8 @@ package com.soulfiremc.server.pathfinding.execution;
 
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
@@ -64,20 +64,20 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     var logger = bot.logger();
     var sessionDataManager = bot.sessionDataManager();
     var clientEntity = sessionDataManager.clientEntity();
-    var routeFinder =
-      new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState(), true, true), goalScorer);
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
+        var level = new ProjectedLevel(
+          sessionDataManager.currentLevel()
+            .chunks()
+            .immutableCopy());
+        var inventory =
+          new ProjectedInventory(
+            sessionDataManager.inventoryManager().playerInventory());
         var start =
-          BotEntityState.initialState(
-            clientEntity,
-            new ProjectedLevel(
-              sessionDataManager.currentLevel()
-                .chunks()
-                .immutableCopy()),
-            new ProjectedInventory(
-              sessionDataManager.inventoryManager().playerInventory()));
+          SFVec3i.fromDouble(clientEntity.pos());
+        var routeFinder =
+          new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState(), level, inventory, true, true), goalScorer);
 
         logger.info("Starting calculations at: {}", start);
         var actions = routeFinder.findRoute(start, requiresRepositioning);

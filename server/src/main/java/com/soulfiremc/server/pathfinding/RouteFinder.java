@@ -72,7 +72,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return bestNode;
   }
 
-  public List<WorldAction> findRoute(BotEntityState from, boolean requiresRepositioning) {
+  public List<WorldAction> findRoute(SFVec3i from, boolean requiresRepositioning) {
     var stopwatch = Stopwatch.createStarted();
 
     // Store block positions and the best route to them
@@ -90,17 +90,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           from,
           null,
           requiresRepositioning
-            ? List.of(new MovementAction(from.blockPosition(), false))
+            ? List.of(new MovementAction(from, false))
             : List.of(),
           0,
           startScore);
-      routeIndex.put(from.blockPosition(), start);
+      routeIndex.put(from, start);
       openSet.enqueue(start);
     }
 
     while (!openSet.isEmpty()) {
       var current = openSet.dequeue();
-      log.debug("Looking at node: {}", current.entityState().blockPosition());
+      log.debug("Looking at node: {}", current.blockPosition());
 
       // If we found our destination, we can stop looking
       if (scorer.isFinished(current)) {
@@ -115,27 +115,27 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         instructions -> {
           var actionCost = instructions.actionCost();
           var worldActions = instructions.actions();
-          var actionTargetState = instructions.targetState();
+          var actionTargetBlockPosition = instructions.blockPosition();
           routeIndex.compute(
-            actionTargetState.blockPosition(),
+            actionTargetBlockPosition,
             (k, v) -> {
               // Calculate new distance from start to this connection,
               // Get distance from the current element
               // and add the distance from the current element to the next element
               var newSourceCost = current.sourceCost() + actionCost;
               var newTotalRouteScore =
-                newSourceCost + scorer.computeScore(graph, actionTargetState, worldActions);
+                newSourceCost + scorer.computeScore(graph, actionTargetBlockPosition, worldActions);
 
               // The first time we see this node
               if (v == null) {
                 var node =
                   new MinecraftRouteNode(
-                    actionTargetState,
+                    actionTargetBlockPosition,
                     current,
                     worldActions,
                     newSourceCost,
                     newTotalRouteScore);
-                log.debug("Found a new node: {}", actionTargetState.blockPosition());
+                log.debug("Found a new node: {}", actionTargetBlockPosition);
                 openSet.enqueue(node);
 
                 return node;
@@ -149,7 +149,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 v.totalRouteScore(newTotalRouteScore);
 
                 log.debug(
-                  "Found a better route to node: {}", actionTargetState.blockPosition());
+                  "Found a better route to node: {}", actionTargetBlockPosition);
                 openSet.enqueue(v);
               }
 
@@ -158,9 +158,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         };
 
       try {
-        graph.insertActions(current.entityState(), callback);
+        graph.insertActions(current.blockPosition(), callback);
       } catch (OutOfLevelException e) {
-        log.debug("Found a node out of the level: {}", current.entityState().blockPosition());
+        log.debug("Found a node out of the level: {}", current.blockPosition());
         stopwatch.stop();
         log.info(
           "Took {}ms to find route to reach the edge of view distance",
@@ -174,7 +174,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         var recalculateTrace =
           getActionTrace(
             new MinecraftRouteNode(
-              bestNode.entityState(),
+              bestNode.blockPosition(),
               bestNode,
               List.of(new RecalculatePathAction()),
               bestNode.sourceCost(),

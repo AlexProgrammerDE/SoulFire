@@ -21,7 +21,6 @@ import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
@@ -48,7 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.util.TriState;
 
 @Slf4j
-public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolean canPlaceBlocks) {
+public record MinecraftGraph(TagsState tagsState,
+                             ProjectedLevel level, ProjectedInventory inventory,
+                             boolean canBreakBlocks, boolean canPlaceBlocks) {
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends ObjectList<BlockSubscription>>
     CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
@@ -293,22 +294,22 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
   }
 
   public void insertActions(
-    BotEntityState node, Consumer<GraphInstructions> callback) {
-    log.debug("Inserting actions for node: {}", node.blockPosition());
+    SFVec3i node, Consumer<GraphInstructions> callback) {
+    log.debug("Inserting actions for node: {}", node);
     calculateActions(node, generateTemplateActions(node), callback);
   }
 
-  private GraphAction[] generateTemplateActions(BotEntityState node) {
+  private GraphAction[] generateTemplateActions(SFVec3i node) {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-      actions[i] = ACTIONS_TEMPLATE[i].copy(node);
+      actions[i] = ACTIONS_TEMPLATE[i].copy(this, node);
     }
 
     return actions;
   }
 
   private void calculateActions(
-    BotEntityState node,
+    SFVec3i node,
     GraphAction[] actions,
     Consumer<GraphInstructions> callback) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
@@ -317,7 +318,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
   }
 
   private void processSubscription(
-    BotEntityState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+    SFVec3i node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
     var key = SUBSCRIPTION_KEYS[i];
     var value = SUBSCRIPTION_VALUES[i];
 
@@ -334,8 +335,8 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
 
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
-        absolutePositionBlock = node.blockPosition().add(key);
-        blockState = node.level().getBlockStateAt(absolutePositionBlock);
+        absolutePositionBlock = node.add(key);
+        blockState = level.getBlockStateAt(absolutePositionBlock);
 
         if (blockState.blockType() == BlockType.VOID_AIR) {
           throw new OutOfLevelException();
@@ -363,7 +364,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    BotEntityState node) {
+    SFVec3i node) {
     return switch (action) {
       case SimpleMovement simpleMovement -> processMovementSubscription(
         subscriber, isFreeReference, blockState, absolutePositionBlock, node, simpleMovement);
@@ -380,7 +381,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    BotEntityState node,
+    SFVec3i node,
     SimpleMovement simpleMovement) {
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
@@ -410,7 +411,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
 
-        var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
+        var cacheableMiningCost = inventory.getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         simpleMovement.blockBreakCosts()[subscriber.blockArrayIndex] =
           new MovementMiningCost(
@@ -460,7 +461,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
 
         if (!canPlaceBlocks
           || !simpleMovement.allowBlockActions()
-          || node.inventory().hasNoBlocks()
+          || inventory.hasNoBlocks()
           || !blockState.blockType().replaceable()) {
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
@@ -549,23 +550,19 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     BlockSubscription subscriber,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    BotEntityState node,
+    SFVec3i node,
     DownMovement downMovement) {
-    // Going down requires breaking a block below
-    if (!canBreakBlocks) {
-      return SubscriptionSingleResult.IMPOSSIBLE;
-    }
-
     return switch (subscriber.type) {
       case MOVEMENT_FREE -> {
-        if (!BlockTypeHelper.isDiggable(blockState.blockType())
+        if (!canBreakBlocks
+          || !BlockTypeHelper.isDiggable(blockState.blockType())
           // Narrows the list down to a reasonable size
           || !BlockItems.hasItemType(blockState.blockType())) {
           // No way to break this block
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
 
-        var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
+        var cacheableMiningCost = inventory.getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         downMovement.blockBreakCosts(
           new MovementMiningCost(
@@ -611,7 +608,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     ObjectReference<TriState> isFreeReference,
     BlockState blockState,
     SFVec3i absolutePositionBlock,
-    BotEntityState node,
+    SFVec3i node,
     UpMovement upMovement) {
     // Towering requires placing a block below
     if (!canPlaceBlocks) {
@@ -639,7 +636,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
 
-        var cacheableMiningCost = node.inventory().getMiningCosts(tagsState, blockState);
+        var cacheableMiningCost = inventory.getMiningCosts(tagsState, blockState);
         // We can mine this block, lets add costs and continue
         upMovement.blockBreakCosts()[subscriber.blockArrayIndex] =
           new MovementMiningCost(
