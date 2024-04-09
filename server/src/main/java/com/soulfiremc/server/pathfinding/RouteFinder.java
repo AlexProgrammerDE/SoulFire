@@ -134,14 +134,18 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                     worldActions,
                     newSourceCost,
                     newTotalRouteScore);
+
                 log.debug("Found a new node: {}", actionTargetBlockPosition);
-                openSet.enqueue(node);
+
+                if (node.predicatedStateValid()) {
+                  openSet.enqueue(node);
+                }
 
                 return node;
               }
 
               // If we found a better route to this node, update it
-              if (newSourceCost < v.sourceCost()) {
+              if (!v.predicatedStateValid() || newSourceCost < v.sourceCost()) {
                 v.parent(current);
                 v.actions(worldActions);
                 v.sourceCost(newSourceCost);
@@ -149,7 +153,10 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                 log.debug(
                   "Found a better route to node: {}", actionTargetBlockPosition);
-                openSet.enqueue(v);
+
+                if (v.predicatedStateValid()) {
+                  openSet.enqueue(v);
+                }
               }
 
               return v;

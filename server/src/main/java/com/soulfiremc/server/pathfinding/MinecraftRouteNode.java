@@ -88,14 +88,16 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   }
 
   public void predictState() {
-    var currentEntityState = parent.predictedState;
-    for (var action : actions) {
-      currentEntityState = action.simulate(currentEntityState);
-    }
+    if (!parent.predicatedStateValid) {
+      predicatedStateValid = false;
+    } else {
+      var currentEntityState = parent.predictedState;
+      for (var action : actions) {
+        currentEntityState = action.simulate(currentEntityState);
+      }
 
-    predictedState = currentEntityState;
-    if (predictedState.inventory().isValid()) {
-      predicatedStateValid = true;
+      predictedState = currentEntityState;
+      predicatedStateValid = predictedState.inventory().isValid();
     }
 
     // Update children whose state depends on this node
