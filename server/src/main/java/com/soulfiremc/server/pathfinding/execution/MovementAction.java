@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
+import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.MovementConstants;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
@@ -107,6 +108,13 @@ public final class MovementAction implements WorldAction {
   public int getAllowedTicks() {
     // 5-seconds max to walk to a block
     return 5 * 20;
+  }
+
+  @Override
+  public BotEntityState simulate(BotEntityState state) {
+    return new BotEntityState(blockPosition,
+      state.level(),
+      state.inventory());
   }
 
   @Override

@@ -19,9 +19,11 @@ package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import lombok.Getter;
@@ -34,10 +36,15 @@ public final class BlockBreakAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockFace blockBreakSideHint;
+  private final boolean willDrop;
   boolean finishedDigging = false;
   private boolean didLook = false;
   private boolean putInHand = false;
   private int remainingTicks = -1;
+
+  public BlockBreakAction(MovementMiningCost movementMiningCost) {
+    this(movementMiningCost.block(), movementMiningCost.blockBreakSideHint(), movementMiningCost.willDrop());
+  }
 
   @Override
   public boolean isCompleted(BotConnection connection) {
@@ -106,6 +113,13 @@ public final class BlockBreakAction implements WorldAction {
   public int getAllowedTicks() {
     // 20-seconds max to break a block
     return 20 * 20;
+  }
+
+  @Override
+  public BotEntityState simulate(BotEntityState state) {
+    return new BotEntityState(state.blockPosition(),
+      state.level().withChangeToAir(blockPosition),
+      willDrop ? state.inventory().withOneMoreBlock() : state.inventory());
   }
 
   @Override

@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
+import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
@@ -28,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public final class JumpAndPlaceBelowAction implements WorldAction {
-  private final SFVec3i blockPosition;
+  private final SFVec3i blockPlacePosition;
   private final BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
   private boolean putOnHotbar = false;
   private boolean finishedPlacing = false;
@@ -37,7 +38,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.sessionDataManager().currentLevel();
 
-    return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPosition));
+    return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPlacePosition));
   }
 
   @Override
@@ -58,7 +59,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
       return;
     }
 
-    if (clientEntity.y() < blockPosition.y + 1) {
+    if (clientEntity.y() < blockPlacePosition.y + 1) {
       // Make sure we are so high that we can place the block
       sessionDataManager.controlState().jumping(true);
       return;
@@ -77,7 +78,14 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   }
 
   @Override
+  public BotEntityState simulate(BotEntityState state) {
+    return new BotEntityState(blockPlacePosition.add(0, 1, 0),
+      state.level().withChangeToSolidBlock(blockPlacePosition),
+      state.inventory().withOneLessBlock());
+  }
+
+  @Override
   public String toString() {
-    return "JumpAndPlaceBelowAction -> " + blockPosition.formatXYZ();
+    return "JumpAndPlaceBelowAction -> " + blockPlacePosition.add(0, 1, 0).formatXYZ();
   }
 }

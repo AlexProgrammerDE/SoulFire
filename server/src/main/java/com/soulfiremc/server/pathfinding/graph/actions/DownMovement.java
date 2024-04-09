@@ -21,7 +21,6 @@ import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
-import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
@@ -113,14 +112,13 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     level = level.withChangeToAir(blockBreakCosts.block());
 
-    var absoluteMinedBlock = previousEntityState.blockPosition().add(targetToMineBlock);
     var absoluteTargetFeetBlock =
       previousEntityState.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
     return new GraphInstructions(
       new BotEntityState(absoluteTargetFeetBlock, level, inventory),
       cost,
-      List.of(new BlockBreakAction(absoluteMinedBlock, BlockFace.TOP)));
+      List.of(new BlockBreakAction(blockBreakCosts)));
   }
 
   @Override

@@ -114,7 +114,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
 
       cost += breakCost.miningCost();
-      actions.add(new BlockBreakAction(breakCost.block(), breakCost.blockBreakSideHint()));
+      actions.add(new BlockBreakAction(breakCost));
       if (breakCost.willDrop()) {
         inventory = inventory.withOneMoreBlock();
       }
