@@ -35,7 +35,6 @@ public class FollowEntityController {
 
   public void start(BotConnection bot) {
     while (true) {
-      log.info("Searching for entity");
       var entity = bot.sessionDataManager().entityTrackerState().getEntity(entityId);
       if (entity == null) {
         log.info("Entity not found, aborting");

@@ -33,6 +33,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -51,7 +52,7 @@ public class PathfindingTest {
       new ProjectedLevel(accessor), new ProjectedInventory(List.of()),
       true, true), new PosGoal(2, 1, 0));
 
-    var route = routeFinder.findRoute(new SFVec3i(0, 1, 0), false);
+    var route = routeFinder.findRoute(new SFVec3i(0, 1, 0), false, new CompletableFuture<>());
 
     assertEquals(2, route.size());
   }
@@ -75,7 +76,7 @@ public class PathfindingTest {
       new SFVec3i(0, 1, 0);
 
     assertThrowsExactly(
-      NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+      NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
   }
 
   @Test
@@ -91,7 +92,7 @@ public class PathfindingTest {
 
     var initialState = new SFVec3i(0, 1, 0);
 
-    var route = routeFinder.findRoute(initialState, false);
+    var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
 
     assertEquals(2, route.size());
   }
@@ -111,9 +112,9 @@ public class PathfindingTest {
 
     if (height > 1) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -133,9 +134,9 @@ public class PathfindingTest {
 
     if (height > 1) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -155,9 +156,9 @@ public class PathfindingTest {
 
     if (height > 3) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -177,9 +178,9 @@ public class PathfindingTest {
 
     if (height > 3) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -200,9 +201,9 @@ public class PathfindingTest {
     // TODO: Allow longer jumps
     if (gapLength > 1) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -218,7 +219,7 @@ public class PathfindingTest {
 
     var initialState = new SFVec3i(0, 1, 0);
 
-    var route = routeFinder.findRoute(initialState, false);
+    var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
     assertEquals(1, route.size());
   }
 
@@ -237,9 +238,9 @@ public class PathfindingTest {
 
     if (amount < 20) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(20, route.size());
     }
   }
@@ -257,7 +258,7 @@ public class PathfindingTest {
 
     var initialState = new SFVec3i(0, 1, 0);
 
-    var route = routeFinder.findRoute(initialState, false);
+    var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
     assertEquals(1, route.size());
   }
 
@@ -278,7 +279,7 @@ public class PathfindingTest {
 
     var initialState = new SFVec3i(0, 1, 0);
 
-    var route = routeFinder.findRoute(initialState, false);
+    var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
     assertEquals(3, route.size());
   }
 
@@ -301,9 +302,9 @@ public class PathfindingTest {
 
     if (unsafe) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }
@@ -329,9 +330,9 @@ public class PathfindingTest {
 
     if (level > 1) {
       assertThrowsExactly(
-        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false));
+        NoRouteFoundException.class, () -> routeFinder.findRoute(initialState, false, new CompletableFuture<>()));
     } else {
-      var route = routeFinder.findRoute(initialState, false);
+      var route = routeFinder.findRoute(initialState, false, new CompletableFuture<>());
       assertEquals(1, route.size());
     }
   }

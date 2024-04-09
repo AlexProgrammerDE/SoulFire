@@ -33,6 +33,7 @@ import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -99,6 +100,6 @@ public class PathfindingBenchmark {
 
   @Benchmark
   public void calculatePath() {
-    routeFinder.findRoute(initialState, true);
+    routeFinder.findRoute(initialState, true, new CompletableFuture<>());
   }
 }
