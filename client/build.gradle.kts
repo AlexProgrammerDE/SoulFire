@@ -4,7 +4,6 @@ import com.github.jk1.license.render.CsvReportRenderer
 import com.github.jk1.license.render.InventoryHtmlReportRenderer
 
 plugins {
-  application
   `sf-project-conventions`
   alias(libs.plugins.license.report)
 }
@@ -17,10 +16,26 @@ tasks.withType<AbstractArchiveTask> {
 }
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireClientJava8Launcher"
+task("runSFClient", JavaExec::class) {
+  group = "application"
+  description = "Runs the SoulFire client"
 
-application {
-  applicationName = "SoulFire"
   mainClass = projectMainClass
+  classpath = sourceSets["main"].runtimeClasspath
+
+  outputs.upToDateWhen { false }
+}
+
+task("runSFClientLocal", JavaExec::class) {
+  group = "application"
+  description = "Runs the SoulFire client"
+
+  mainClass = projectMainClass
+  classpath = sourceSets["main"].runtimeClasspath
+
+  jvmArgs = listOf("-Dsf.disableServerSelect=true")
+
+  outputs.upToDateWhen { false }
 }
 
 dependencies {
@@ -66,26 +81,6 @@ fun Manifest.applySFAttributes() {
 }
 
 tasks {
-  distTar {
-    onlyIf { false }
-  }
-  distZip {
-    onlyIf { false }
-  }
-  startScripts {
-    onlyIf { false }
-  }
-  // So the run task doesn't get marked as up to date, ever.
-  run.get().apply {
-    outputs.upToDateWhen { false }
-  }
-  create("runSFClient") {
-    group = "application"
-    description = "Runs the SoulFire client"
-    dependsOn("run")
-
-    outputs.upToDateWhen { false }
-  }
   jar {
     archiveClassifier = "unshaded"
 
