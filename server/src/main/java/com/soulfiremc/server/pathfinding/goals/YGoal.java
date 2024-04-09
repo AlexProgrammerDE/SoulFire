@@ -25,7 +25,7 @@ import java.util.List;
 
 public record YGoal(int y) implements GoalScorer {
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions) {
     return Math.abs(state.blockPosition().y - y);
   }
 

@@ -23,7 +23,6 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
 import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
@@ -418,7 +417,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
             cacheableMiningCost.willDrop(),
-            subscriber.sideHint);
+            subscriber.blockBreakSideHint);
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -573,7 +572,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
             cacheableMiningCost.willDrop(),
-            subscriber.sideHint));
+            subscriber.blockBreakSideHint));
         yield SubscriptionSingleResult.CONTINUE;
       }
       case DOWN_SAFETY_CHECK -> {
@@ -647,7 +646,7 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
             absolutePositionBlock,
             cacheableMiningCost.miningCost(),
             cacheableMiningCost.willDrop(),
-            subscriber.sideHint);
+            subscriber.blockBreakSideHint);
         yield SubscriptionSingleResult.CONTINUE;
       }
       case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -705,15 +704,15 @@ public record MinecraftGraph(TagsState tagsState, boolean canBreakBlocks, boolea
     int actionIndex,
     SubscriptionType type,
     int blockArrayIndex,
-    BlockBreakAction.SideHint sideHint,
+    BlockFace blockBreakSideHint,
     BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
     BlockSafetyData.BlockSafetyType safetyType) {
     BlockSubscription(int movementIndex, SubscriptionType type) {
       this(movementIndex, type, -1, null, null, null);
     }
 
-    BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex, BlockBreakAction.SideHint sideHint) {
-      this(movementIndex, type, blockArrayIndex, sideHint, null, null);
+    BlockSubscription(int movementIndex, SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+      this(movementIndex, type, blockArrayIndex, blockBreakSideHint, null, null);
     }
 
     BlockSubscription(

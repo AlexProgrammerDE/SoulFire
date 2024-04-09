@@ -24,6 +24,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
@@ -40,7 +41,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetFeetBlock;
   @Getter
-  private final List<Pair<SFVec3i, BlockBreakAction.SideHint>> requiredFreeBlocks;
+  private final List<Pair<SFVec3i, BlockFace>> requiredFreeBlocks;
   @Getter
   private MovementMiningCost[] blockBreakCosts;
   @Getter
@@ -67,11 +68,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
     throw new IllegalArgumentException("Block not found in required free blocks");
   }
 
-  private List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
+  private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
 
     // The one above the head to jump
-    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
+    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
 
     return requiredFreeBlocks;
   }
@@ -113,7 +114,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
 
       cost += breakCost.miningCost();
-      actions.add(new BlockBreakAction(breakCost.block(), breakCost.sideHint()));
+      actions.add(new BlockBreakAction(breakCost.block(), breakCost.blockBreakSideHint()));
       if (breakCost.willDrop()) {
         inventory = inventory.withOneMoreBlock();
       }

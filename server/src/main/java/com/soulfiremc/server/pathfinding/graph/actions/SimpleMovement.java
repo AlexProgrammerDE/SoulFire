@@ -25,6 +25,7 @@ import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
 import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
@@ -53,7 +54,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   @Getter
   private final boolean allowBlockActions;
   @Getter
-  private final List<Pair<SFVec3i, BlockBreakAction.SideHint>> requiredFreeBlocks;
+  private final List<Pair<SFVec3i, BlockFace>> requiredFreeBlocks;
   @Getter
   private MovementMiningCost[] blockBreakCosts;
   @Getter
@@ -117,54 +118,54 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     throw new IllegalArgumentException("Block not found in required free blocks");
   }
 
-  private List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
+  private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       // Make block above the head block free for jump
-      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
+      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
     }
 
     // Add the blocks that are required to be free for diagonal movement
     if (diagonal) {
       var corner = getCorner(side);
 
-      for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+      for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
-        requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toSideHint()));
+        requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toBlockFace()));
       }
     }
 
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-    for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
-      BlockBreakAction.SideHint sideHint;
+    for (var bodyOffset : BodyPart.VALUES) {
+      BlockFace blockBreakSideHint;
       if (diagonal) {
-        sideHint = getCornerDirection(side.opposite()).opposite().toSideHint();
+        blockBreakSideHint = getCornerDirection(side.opposite()).opposite().toBlockFace();
       } else {
-        sideHint = switch (direction) {
-          case NORTH -> BlockBreakAction.SideHint.NORTH;
-          case SOUTH -> BlockBreakAction.SideHint.SOUTH;
-          case EAST -> BlockBreakAction.SideHint.EAST;
-          case WEST -> BlockBreakAction.SideHint.WEST;
+        blockBreakSideHint = switch (direction) {
+          case NORTH -> BlockFace.NORTH;
+          case SOUTH -> BlockFace.SOUTH;
+          case EAST -> BlockFace.EAST;
+          case WEST -> BlockFace.WEST;
           default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
       }
 
       // Apply jump shift to target diagonal and offset for body part
-      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), sideHint));
+      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), blockBreakSideHint));
     }
 
     // Require free blocks to fall into the target position
     switch (modifier) {
-      case FALL_1 -> requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+      case FALL_1 -> requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
       case FALL_2 -> {
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
       }
       case FALL_3 -> {
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockBreakAction.SideHint.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockBreakAction.SideHint.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_3.offset(targetEdge), BlockBreakAction.SideHint.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_3.offset(targetEdge), BlockFace.TOP));
       }
     }
 
@@ -206,7 +207,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     // If these blocks are solid, the bot moves slower because the bot is running around a corner
     var corner = getCorner(side.opposite());
-    for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+    for (var bodyOffset : BodyPart.VALUES) {
       // Apply jump shift to target edge and offset for body part
       list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
     }
@@ -255,7 +256,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-    for (var bodyOffset : BodyPart.BODY_PARTS_REVERSE) {
+    for (var bodyOffset : BodyPart.VALUES) {
       // Apply jump shift to target diagonal and offset for body part
       var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
       var index = freeBlockIndex(block);
@@ -382,7 +383,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
 
         cost += breakCost.miningCost();
-        actions.add(new BlockBreakAction(breakCost.block(), breakCost.sideHint()));
+        actions.add(new BlockBreakAction(breakCost.block(), breakCost.blockBreakSideHint()));
         if (breakCost.willDrop()) {
           inventory = inventory.withOneMoreBlock();
         }

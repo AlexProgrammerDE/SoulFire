@@ -20,8 +20,8 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import it.unimi.dsi.fastutil.Pair;
@@ -38,14 +38,14 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
   }
 
-  public List<Pair<SFVec3i, BlockBreakAction.SideHint>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockBreakAction.SideHint>>();
+  public List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
 
     // Make block above the head block free for jump
-    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockBreakAction.SideHint.BOTTOM));
+    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
 
     var oneFurther = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-    var blockDigDirection = direction.toSkyDirection().opposite().toSideHint();
+    var blockDigDirection = direction.toSkyDirection().opposite().toBlockFace();
 
     // Room for jumping
     requiredFreeBlocks.add(Pair.of(oneFurther, blockDigDirection));

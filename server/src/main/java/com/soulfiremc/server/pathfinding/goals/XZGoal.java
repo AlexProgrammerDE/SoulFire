@@ -30,7 +30,7 @@ public record XZGoal(Vector2i goal) implements GoalScorer {
   }
 
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions) {
     return Vector2i.from(state.blockPosition().x, state.blockPosition().z)
       .distance(goal);
   }

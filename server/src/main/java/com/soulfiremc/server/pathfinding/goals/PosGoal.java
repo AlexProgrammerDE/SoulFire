@@ -30,7 +30,7 @@ public record PosGoal(SFVec3i goal) implements GoalScorer {
   }
 
   @Override
-  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions, MinecraftRouteNode previous) {
+  public double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions) {
     return state.blockPosition().distance(goal);
   }
 

@@ -34,11 +34,9 @@ public interface GoalScorer {
    * @param graph    the graph to calculate the score for
    * @param state    the current state of the bot
    * @param actions  the actions that have been executed to reach the current state
-   * @param previous the previous route node
    * @return the score for the given world state
    */
-  double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions,
-                      MinecraftRouteNode previous);
+  double computeScore(MinecraftGraph graph, BotEntityState state, List<WorldAction> actions);
 
   /**
    * Checks if the given world state indicates that the goal is reached.

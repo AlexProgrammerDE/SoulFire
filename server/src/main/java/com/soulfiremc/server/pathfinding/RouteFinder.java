@@ -82,7 +82,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
 
     {
-      var startScore = scorer.computeScore(graph, from, List.of(), null);
+      var startScore = scorer.computeScore(graph, from, List.of());
       log.debug("Start score (Usually distance): {}", startScore);
 
       var start =
@@ -124,7 +124,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               // and add the distance from the current element to the next element
               var newSourceCost = current.sourceCost() + actionCost;
               var newTotalRouteScore =
-                newSourceCost + scorer.computeScore(graph, actionTargetState, worldActions, current);
+                newSourceCost + scorer.computeScore(graph, actionTargetState, worldActions);
 
               // The first time we see this node
               if (v == null) {

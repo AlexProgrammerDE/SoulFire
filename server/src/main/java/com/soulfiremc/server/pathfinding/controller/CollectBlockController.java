@@ -22,6 +22,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.protocol.BotConnection;
 import java.util.HashSet;
 import java.util.Optional;

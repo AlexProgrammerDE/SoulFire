@@ -18,6 +18,6 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 
-public record MovementMiningCost(SFVec3i block, double miningCost, boolean willDrop, BlockBreakAction.SideHint sideHint) {}
+public record MovementMiningCost(SFVec3i block, double miningCost, boolean willDrop, BlockFace blockBreakSideHint) {}
