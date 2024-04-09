@@ -104,7 +104,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
       // If we found our destination, we can stop looking
       if (scorer.isFinished(current)) {
-        log.info("Found path: {}", current);
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 

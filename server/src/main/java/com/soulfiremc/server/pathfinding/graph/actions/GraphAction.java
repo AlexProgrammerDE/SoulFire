@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
 /**
  * A calculated action that the bot can take on a graph world representation.
@@ -46,5 +45,5 @@ public abstract sealed class GraphAction
 
   public abstract GraphInstructions getInstructions(SFVec3i node);
 
-  public abstract GraphAction copy(MinecraftGraph graph, SFVec3i node);
+  public abstract GraphAction copy();
 }

@@ -22,7 +22,6 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -83,7 +82,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public ParkourMovement copy(MinecraftGraph graph, SFVec3i node) {
+  public ParkourMovement copy() {
     return this.clone();
   }
 

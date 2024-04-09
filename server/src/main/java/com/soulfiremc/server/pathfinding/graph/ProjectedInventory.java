@@ -78,10 +78,6 @@ public class ProjectedInventory {
     this.sharedMiningCosts = new ConcurrentHashMap<>();
   }
 
-  public boolean hasNoBlocks() {
-    return usableBlockItems <= 0;
-  }
-
   public ProjectedInventory withOneLessBlock() {
     return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
   }

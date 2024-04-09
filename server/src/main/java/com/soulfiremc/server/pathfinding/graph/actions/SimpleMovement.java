@@ -26,7 +26,6 @@ import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
@@ -397,7 +396,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SimpleMovement copy(MinecraftGraph graph, SFVec3i node) {
+  public SimpleMovement copy() {
     return this.clone();
   }
 

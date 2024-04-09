@@ -22,7 +22,6 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
@@ -116,7 +115,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public DownMovement copy(MinecraftGraph graph, SFVec3i node) {
+  public DownMovement copy() {
     return this.clone();
   }
 

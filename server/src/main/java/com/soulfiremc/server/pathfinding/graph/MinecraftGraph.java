@@ -297,13 +297,13 @@ public record MinecraftGraph(TagsState tagsState,
   public void insertActions(
     SFVec3i node, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
-    calculateActions(node, generateTemplateActions(node), callback);
+    calculateActions(node, generateTemplateActions(), callback);
   }
 
-  private GraphAction[] generateTemplateActions(SFVec3i node) {
+  private GraphAction[] generateTemplateActions() {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-      actions[i] = ACTIONS_TEMPLATE[i].copy(this, node);
+      actions[i] = ACTIONS_TEMPLATE[i].copy();
     }
 
     return actions;
@@ -460,7 +460,6 @@ public record MinecraftGraph(TagsState tagsState,
 
         if (!canPlaceBlocks
           || !simpleMovement.allowBlockActions()
-          || inventory.hasNoBlocks()
           || !blockState.blockType().replaceable()) {
           yield SubscriptionSingleResult.IMPOSSIBLE;
         }
