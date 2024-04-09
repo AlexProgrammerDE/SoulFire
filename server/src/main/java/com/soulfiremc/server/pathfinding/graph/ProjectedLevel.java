@@ -65,8 +65,4 @@ public class ProjectedLevel {
 
     return accessor.getBlockStateAt(position.x, position.y, position.z);
   }
-
-  public boolean isChanged(SFVec3i position) {
-    return blockChanges.containsKey(position);
-  }
 }
