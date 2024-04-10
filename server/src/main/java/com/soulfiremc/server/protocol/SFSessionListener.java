@@ -27,20 +27,17 @@ import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 
 public class SFSessionListener extends SessionAdapter {
-  private final SessionDataManager bus;
   private final BotConnection botConnection;
   private final LambdaManager busInvoker;
 
-  public SFSessionListener(SessionDataManager bus, BotConnection botConnection) {
-    this.bus = bus;
+  public SFSessionListener(BotConnection botConnection) {
     this.botConnection = botConnection;
     this.busInvoker = LambdaManager.basic(new ASMGenerator());
-    busInvoker.register(bus);
+    busInvoker.register(botConnection.dataManager());
   }
 
   @Override
@@ -87,7 +84,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void disconnected(DisconnectedEvent event) {
     try {
-      bus.onDisconnectEvent(event);
+      botConnection.dataManager().onDisconnectEvent(event);
     } catch (Throwable t) {
       botConnection.logger().error("Error while handling disconnect event!", t);
     }

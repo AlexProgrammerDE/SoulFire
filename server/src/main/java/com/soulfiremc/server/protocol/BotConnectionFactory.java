@@ -51,7 +51,6 @@ public record BotConnectionFactory(
       new BotConnection(
         this,
         attackManager,
-        attackManager.soulFireServer(),
         settingsHolder,
         logger,
         protocol,
@@ -68,7 +67,7 @@ public record BotConnectionFactory(
     session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
 
     session.addListener(new SFBaseListener(botConnection, targetState));
-    session.addListener(new SFSessionListener(botConnection.dataManager(), botConnection));
+    session.addListener(new SFSessionListener(botConnection));
 
     attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 

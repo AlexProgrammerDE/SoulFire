@@ -144,7 +144,6 @@ import com.soulfiremc.server.protocol.bot.state.WeatherState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -179,8 +178,7 @@ import org.slf4j.Logger;
 public final class SessionDataManager {
   private final SettingsHolder settingsHolder;
   private final Logger log;
-  private final SoulFireServer soulFireServer;
-  private final ViaClientSession session;
+  private final MinecraftCodecHelper codecHelper;
   private final BotConnection connection;
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
@@ -221,8 +219,7 @@ public final class SessionDataManager {
   public SessionDataManager(BotConnection connection) {
     this.settingsHolder = connection.settingsHolder();
     this.log = connection.logger();
-    this.soulFireServer = connection.soulFireServer();
-    this.session = connection.session();
+    this.codecHelper = connection.session().getCodecHelper();
     this.connection = connection;
     this.inventoryManager = new InventoryManager(this, connection);
     this.botActionManager = new BotActionManager(this, connection);
@@ -348,8 +345,8 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
-    session.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
-    session.send(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
+    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
+    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
   }
 
   @EventHandler
@@ -389,7 +386,7 @@ public final class SessionDataManager {
       isDead = true;
     } else {
       log.info("Died, respawning due to game rule");
-      session.send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+      connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
     }
   }
 
@@ -404,7 +401,7 @@ public final class SessionDataManager {
     var channelKey = ResourceKey.fromString(packet.getChannel());
     log.debug("Received plugin message on channel {}", channelKey);
     if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
-      serverBrand = session.getCodecHelper().readString(Unpooled.wrappedBuffer(packet.getData()));
+      serverBrand = codecHelper.readString(Unpooled.wrappedBuffer(packet.getData()));
       log.debug("Received server brand \"{}\"", serverBrand);
     } else if (channelKey.equals(SFProtocolConstants.REGISTER_KEY)) {
       log.debug(
@@ -649,7 +646,7 @@ public final class SessionDataManager {
       }
       case ENTER_CREDITS -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
-        session.send(
+        connection.sendPacket(
           new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
       }
       case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
@@ -670,7 +667,6 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onChunkData(ClientboundLevelChunkWithLightPacket packet) {
-    var helper = session.getCodecHelper();
     var level = currentLevel();
 
     var data = packet.getChunkData();
@@ -680,7 +676,7 @@ public final class SessionDataManager {
 
     try {
       for (var i = 0; i < chunkData.getSectionCount(); i++) {
-        chunkData.setSection(i, readChunkSection(buf, helper));
+        chunkData.setSection(i, readChunkSection(buf));
       }
     } catch (IOException e) {
       log.error("Failed to read chunk section", e);
@@ -689,7 +685,6 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onChunkData(ClientboundChunksBiomesPacket packet) {
-    var codec = session.getCodecHelper();
     var level = currentLevel();
 
     for (var biomeData : packet.getChunkBiomeData()) {
@@ -704,7 +699,7 @@ public final class SessionDataManager {
       try {
         for (var i = 0; chunkData.getSectionCount() > i; i++) {
           var section = chunkData.getSection(i);
-          var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
+          var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
           chunkData.setSection(
             i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
         }
@@ -1071,11 +1066,11 @@ public final class SessionDataManager {
     log.error("Cause: {}", cause.getMessage());
   }
 
-  public ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codec) throws IOException {
+  public ChunkSection readChunkSection(ByteBuf buf) throws IOException {
     int blockCount = buf.readShort();
 
-    var chunkPalette = codec.readDataPalette(buf, PaletteType.CHUNK);
-    var biomePalette = codec.readDataPalette(buf, PaletteType.BIOME);
+    var chunkPalette = codecHelper.readDataPalette(buf, PaletteType.CHUNK);
+    var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 

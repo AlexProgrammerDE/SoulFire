@@ -21,7 +21,6 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.soulfiremc.server.AttackManager;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -68,7 +67,6 @@ public final class BotConnection {
   private final BotScheduler scheduler = new BotScheduler(this);
   private final BotConnectionFactory factory;
   private final AttackManager attackManager;
-  private final SoulFireServer soulFireServer;
   private final SettingsHolder settingsHolder;
   private final Logger logger;
   private final MinecraftProtocol protocol;
@@ -86,7 +84,6 @@ public final class BotConnection {
   public BotConnection(
     BotConnectionFactory factory,
     AttackManager attackManager,
-    SoulFireServer soulFireServer,
     SettingsHolder settingsHolder,
     Logger logger,
     MinecraftProtocol protocol,
@@ -98,7 +95,6 @@ public final class BotConnection {
     EventLoopGroup eventLoopGroup) {
     this.factory = factory;
     this.attackManager = attackManager;
-    this.soulFireServer = soulFireServer;
     this.settingsHolder = settingsHolder;
     this.logger = logger;
     this.protocol = protocol;
