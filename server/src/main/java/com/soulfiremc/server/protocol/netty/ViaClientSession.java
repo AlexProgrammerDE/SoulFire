@@ -26,7 +26,7 @@ import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpSession;
-import com.soulfiremc.server.protocol.BotConnectionMeta;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.FrameCodec;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -87,7 +87,7 @@ public class ViaClientSession extends TcpSession {
   @Getter
   private final EventLoopGroup eventLoopGroup;
   @Getter
-  private final BotConnectionMeta meta;
+  private final BotConnection botConnection;
   private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
   private boolean delimiterBlockProcessing = false;
 
@@ -97,7 +97,7 @@ public class ViaClientSession extends TcpSession {
     PacketProtocol protocol,
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
-    BotConnectionMeta meta) {
+    BotConnection botConnection) {
     super(null, -1, protocol);
     this.logger = logger;
     this.targetAddress = targetAddress;
@@ -106,7 +106,7 @@ public class ViaClientSession extends TcpSession {
     this.proxy = proxy;
     this.codecHelper = protocol.createHelper();
     this.eventLoopGroup = eventLoopGroup;
-    this.meta = meta;
+    this.botConnection = botConnection;
   }
 
   @Override
@@ -116,7 +116,7 @@ public class ViaClientSession extends TcpSession {
     }
 
     try {
-      var version = meta.protocolVersion();
+      var version = botConnection.protocolVersion();
       var isBedrock = SFVersionConstants.isBedrock(version);
       var bootstrap = new Bootstrap();
 
@@ -177,8 +177,8 @@ public class ViaClientSession extends TcpSession {
             var userConnection = new UserConnectionImpl(channel, true);
             userConnection.put(new StorableSession(ViaClientSession.this));
 
-            if (isBedrock && meta.minecraftAccount().isPremiumBedrock()) {
-              var bedrockData = (BedrockData) meta.minecraftAccount().accountData();
+            if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
+              var bedrockData = (BedrockData) botConnection.minecraftAccount().accountData();
               userConnection.put(
                 new AuthChainData(
                   bedrockData.mojangJwt(),

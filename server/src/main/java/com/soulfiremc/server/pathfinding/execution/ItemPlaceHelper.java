@@ -31,8 +31,8 @@ import com.soulfiremc.server.util.TimeUtil;
 import java.util.concurrent.TimeUnit;
 
 public class ItemPlaceHelper {
-  public static boolean placeBestBlockInHand(SessionDataManager sessionDataManager) {
-    var inventoryManager = sessionDataManager.inventoryManager();
+  public static boolean placeBestBlockInHand(SessionDataManager dataManager) {
+    var inventoryManager = dataManager.inventoryManager();
     var playerInventory = inventoryManager.playerInventory();
 
     ItemType leastHardItemType = null;
@@ -67,8 +67,8 @@ public class ItemPlaceHelper {
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
-  public static boolean placeBestToolInHand(SessionDataManager sessionDataManager, SFVec3i blockPosition) {
-    var inventoryManager = sessionDataManager.inventoryManager();
+  public static boolean placeBestToolInHand(SessionDataManager dataManager, SFVec3i blockPosition) {
+    var inventoryManager = dataManager.inventoryManager();
     var playerInventory = inventoryManager.playerInventory();
 
     SFItemStack bestItemStack = null;
@@ -84,17 +84,17 @@ public class ItemPlaceHelper {
         sawEmpty = true;
       }
 
-      var optionalBlockType = sessionDataManager.currentLevel().getBlockStateAt(blockPosition).blockType();
+      var optionalBlockType = dataManager.currentLevel().getBlockStateAt(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
         throw new IllegalStateException("Block at " + blockPosition + " is not in view range");
       }
 
       var cost =
         Costs.getRequiredMiningTicks(
-            sessionDataManager.tagsState(),
-            sessionDataManager.clientEntity(),
-            sessionDataManager.inventoryManager(),
-            sessionDataManager.clientEntity().onGround(),
+            dataManager.tagsState(),
+            dataManager.clientEntity(),
+            dataManager.inventoryManager(),
+            dataManager.clientEntity().onGround(),
             slotItem,
             optionalBlockType)
           .ticks();

@@ -38,12 +38,11 @@ public class AutoJump implements InternalPlugin {
       return;
     }
 
-    var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
     ExecutorHelper.executeRandomDelaySeconds(
-      executor,
+      connection.scheduler(),
       () -> {
-        var sessionDataManager = connection.sessionDataManager();
-        var clientEntity = sessionDataManager.clientEntity();
+        var dataManager = connection.dataManager();
+        var clientEntity = dataManager.clientEntity();
         if (clientEntity != null
           && clientEntity.level().isChunkLoaded(clientEntity.blockPos())
           && clientEntity.onGround()) {

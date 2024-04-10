@@ -1022,7 +1022,7 @@ public final class SessionDataManager {
       return;
     }
 
-    var version = connection.meta().protocolVersion();
+    var version = connection.protocolVersion();
     if (SFVersionConstants.isBedrock(version)) {
       connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DECLINED));
       return;

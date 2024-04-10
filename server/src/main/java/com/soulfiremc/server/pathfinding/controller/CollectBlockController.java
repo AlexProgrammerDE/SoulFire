@@ -43,7 +43,7 @@ public class CollectBlockController {
 
   public static Optional<Vector3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker,
                                                              int iterations) {
-    var clientEntity = botConnection.sessionDataManager().clientEntity();
+    var clientEntity = botConnection.dataManager().clientEntity();
     var clientPosition = clientEntity.pos().toInt();
     var level = clientEntity.level();
     var checkedPositions = new HashSet<Vector3i>();

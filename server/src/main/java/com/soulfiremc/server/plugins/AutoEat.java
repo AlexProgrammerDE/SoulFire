@@ -42,18 +42,17 @@ public class AutoEat implements InternalPlugin {
       return;
     }
 
-    var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoEat");
     ExecutorHelper.executeRandomDelaySeconds(
-      executor,
+      connection.scheduler(),
       () -> {
-        var sessionDataManager = connection.sessionDataManager();
+        var dataManager = connection.dataManager();
 
-        var healthData = sessionDataManager.healthData();
+        var healthData = dataManager.healthData();
         if (healthData == null || healthData.food() >= 20) {
           return;
         }
 
-        var inventoryManager = sessionDataManager.inventoryManager();
+        var inventoryManager = dataManager.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
@@ -79,7 +78,7 @@ public class AutoEat implements InternalPlugin {
             }
           }
 
-          sessionDataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
+          dataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
 
           // Wait before eating again
           TimeUtil.waitTime(2, TimeUnit.SECONDS);

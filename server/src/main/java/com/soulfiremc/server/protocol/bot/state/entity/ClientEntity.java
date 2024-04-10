@@ -47,7 +47,7 @@ import lombok.Setter;
 public class ClientEntity extends Entity {
   private final PhysicsData physics = new PhysicsData();
   private final BotConnection connection;
-  private final SessionDataManager sessionDataManager;
+  private final SessionDataManager dataManager;
   private final ControlState controlState;
   private final PlayerMovementState movementState;
   private final BotMovementManager botMovementManager;
@@ -62,15 +62,15 @@ public class ClientEntity extends Entity {
   private int positionReminder = 0;
 
   public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection, SessionDataManager sessionDataManager, ControlState controlState,
+    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, ControlState controlState,
     Level level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
-    this.sessionDataManager = sessionDataManager;
+    this.dataManager = dataManager;
     this.controlState = controlState;
     this.movementState =
-      new PlayerMovementState(this, sessionDataManager.inventoryManager().playerInventory());
-    this.botMovementManager = new BotMovementManager(sessionDataManager, movementState, this);
+      new PlayerMovementState(this, dataManager.inventoryManager().playerInventory());
+    this.botMovementManager = new BotMovementManager(dataManager, movementState, this);
   }
 
   @Override
@@ -134,7 +134,6 @@ public class ClientEntity extends Entity {
   public double eyeHeight() {
     if (this.controlState.sneaking()) {
       return connection
-        .meta()
         .protocolVersion()
         .newerThanOrEqualTo(ProtocolVersion.v1_14)
         ? 1.27F
@@ -194,7 +193,7 @@ public class ClientEntity extends Entity {
   }
 
   public AbilitiesData abilities() {
-    return sessionDataManager.abilitiesData();
+    return dataManager.abilitiesData();
   }
 
   public void jump() {

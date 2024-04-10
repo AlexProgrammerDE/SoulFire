@@ -21,7 +21,6 @@ import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TickTimer;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.MDC;
 
@@ -30,19 +29,18 @@ public class BotTicker implements InternalPlugin {
     var connection = event.connection();
     startTicker(
       connection,
-      connection.executorManager().newScheduledExecutorService(connection, "Tick"),
       new TickTimer(20));
   }
 
   private static void startTicker(
-    BotConnection connection, ScheduledExecutorService executor, TickTimer tickTimer) {
-    executor.scheduleWithFixedDelay(
+    BotConnection connection, TickTimer tickTimer) {
+    connection.scheduler().scheduleWithFixedDelay(
       () -> {
         tickTimer.advanceTime();
 
         MDC.put("connectionId", connection.connectionId().toString());
-        MDC.put("botName", connection.meta().accountName());
-        MDC.put("botUuid", connection.meta().accountProfileId().toString());
+        MDC.put("botName", connection.accountName());
+        MDC.put("botUuid", connection.accountProfileId().toString());
         try {
           connection.tick(tickTimer.ticks);
         } catch (Throwable t) {

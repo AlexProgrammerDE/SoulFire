@@ -48,18 +48,18 @@ public final class BlockBreakAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var level = connection.sessionDataManager().currentLevel();
+    var level = connection.dataManager().currentLevel();
 
     return BlockTypeHelper.isEmptyBlock(level.getBlockStateAt(blockPosition).blockType());
   }
 
   @Override
   public void tick(BotConnection connection) {
-    var sessionDataManager = connection.sessionDataManager();
-    var clientEntity = sessionDataManager.clientEntity();
-    sessionDataManager.controlState().resetAll();
+    var dataManager = connection.dataManager();
+    var clientEntity = dataManager.clientEntity();
+    dataManager.controlState().resetAll();
 
-    var level = sessionDataManager.currentLevel();
+    var level = dataManager.currentLevel();
     if (!didLook) {
       didLook = true;
       var previousYaw = clientEntity.yaw();
@@ -73,7 +73,7 @@ public final class BlockBreakAction implements WorldAction {
     }
 
     if (!putInHand) {
-      if (ItemPlaceHelper.placeBestToolInHand(sessionDataManager, blockPosition)) {
+      if (ItemPlaceHelper.placeBestToolInHand(dataManager, blockPosition)) {
         putInHand = true;
       }
 
@@ -93,21 +93,21 @@ public final class BlockBreakAction implements WorldAction {
 
       remainingTicks =
         Costs.getRequiredMiningTicks(
-            sessionDataManager.tagsState(),
-            sessionDataManager.clientEntity(),
-            sessionDataManager.inventoryManager(),
+            dataManager.tagsState(),
+            dataManager.clientEntity(),
+            dataManager.inventoryManager(),
             clientEntity.onGround(),
-            sessionDataManager.inventoryManager().playerInventory().getHeldItem().item(),
+            dataManager.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
           .ticks();
-      sessionDataManager.botActionManager()
+      dataManager.botActionManager()
         .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
     } else if (--remainingTicks == 0) {
-      sessionDataManager.botActionManager()
+      dataManager.botActionManager()
         .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
       finishedDigging = true;
     } else {
-      sessionDataManager.botActionManager().sendBreakBlockAnimation();
+      dataManager.botActionManager().sendBreakBlockAnimation();
     }
   }
 

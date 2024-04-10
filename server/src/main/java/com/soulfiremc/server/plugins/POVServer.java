@@ -344,7 +344,7 @@ public class POVServer implements InternalPlugin {
 
                       var first =
                         attackManager.botConnections().values().stream()
-                          .filter(c -> c.meta().accountName().equals(selectedName))
+                          .filter(c -> c.accountName().equals(selectedName))
                           .findFirst();
                       if (first.isEmpty()) {
                         session.send(
@@ -379,7 +379,7 @@ public class POVServer implements InternalPlugin {
                               }
 
                               var clientEntity =
-                                botConnection.sessionDataManager().clientEntity();
+                                botConnection.dataManager().clientEntity();
                               // Bot -> MC Client
                               switch (packet) {
                                 case ServerboundMovePlayerPosRotPacket posRot -> povSession.send(
@@ -420,7 +420,7 @@ public class POVServer implements InternalPlugin {
                                   .color(NamedTextColor.GREEN)
                                   .append(
                                     Component.text(
-                                        botConnection.meta().accountName())
+                                        botConnection.accountName())
                                       .color(NamedTextColor.AQUA)
                                       .decorate(TextDecoration.UNDERLINED))
                                   .append(Component.text("!"))
@@ -448,7 +448,7 @@ public class POVServer implements InternalPlugin {
                       return;
                     }
 
-                    var clientEntity = botConnection.sessionDataManager().clientEntity();
+                    var clientEntity = botConnection.dataManager().clientEntity();
                     switch (packet) {
                       case ServerboundMovePlayerPosRotPacket posRot -> {
                         clientEntity.x(posRot.getX());
@@ -538,7 +538,7 @@ public class POVServer implements InternalPlugin {
 
                 private void syncBotAndUser() {
                   Objects.requireNonNull(botConnection);
-                  var sessionDataManager = botConnection.sessionDataManager();
+                  var dataManager = botConnection.dataManager();
 
                   session.send(new ClientboundStartConfigurationPacket());
                   awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
@@ -551,7 +551,7 @@ public class POVServer implements InternalPlugin {
                   session.send(
                     new ClientboundRegistryDataPacket(MinecraftProtocol.loadNetworkCodec()));
                   var tagsPacket = new ClientboundUpdateTagsPacket();
-                  tagsPacket.getTags().putAll(sessionDataManager.tagsState().exportTags());
+                  tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
 
                   session.send(new ClientboundFinishConfigurationPacket());
                   awaitReceived(ServerboundFinishConfigurationPacket.class);
@@ -561,75 +561,75 @@ public class POVServer implements InternalPlugin {
 
                   var spawnInfo =
                     new PlayerSpawnInfo(
-                      sessionDataManager.currentDimension().dimensionType(),
-                      sessionDataManager.currentDimension().worldName(),
-                      sessionDataManager.currentDimension().hashedSeed(),
-                      sessionDataManager.gameMode(),
-                      sessionDataManager.previousGameMode(),
-                      sessionDataManager.currentDimension().debug(),
-                      sessionDataManager.currentDimension().flat(),
-                      sessionDataManager.lastDeathPos(),
-                      sessionDataManager.portalCooldown());
+                      dataManager.currentDimension().dimensionType(),
+                      dataManager.currentDimension().worldName(),
+                      dataManager.currentDimension().hashedSeed(),
+                      dataManager.gameMode(),
+                      dataManager.previousGameMode(),
+                      dataManager.currentDimension().debug(),
+                      dataManager.currentDimension().flat(),
+                      dataManager.lastDeathPos(),
+                      dataManager.portalCooldown());
                   session.send(
                     new ClientboundLoginPacket(
-                      sessionDataManager.clientEntity().entityId(),
-                      sessionDataManager.loginData().hardcore(),
-                      sessionDataManager.loginData().worldNames(),
-                      sessionDataManager.loginData().maxPlayers(),
-                      sessionDataManager.serverViewDistance(),
-                      sessionDataManager.serverSimulationDistance(),
-                      sessionDataManager.clientEntity().showReducedDebug(),
-                      sessionDataManager.enableRespawnScreen(),
-                      sessionDataManager.doLimitedCrafting(),
+                      dataManager.clientEntity().entityId(),
+                      dataManager.loginData().hardcore(),
+                      dataManager.loginData().worldNames(),
+                      dataManager.loginData().maxPlayers(),
+                      dataManager.serverViewDistance(),
+                      dataManager.serverSimulationDistance(),
+                      dataManager.clientEntity().showReducedDebug(),
+                      dataManager.enableRespawnScreen(),
+                      dataManager.doLimitedCrafting(),
                       spawnInfo));
                   session.send(new ClientboundRespawnPacket(spawnInfo, false, false));
 
-                  if (sessionDataManager.difficultyData() != null) {
+                  if (dataManager.difficultyData() != null) {
                     session.send(
                       new ClientboundChangeDifficultyPacket(
-                        sessionDataManager.difficultyData().difficulty(),
-                        sessionDataManager.difficultyData().locked()));
+                        dataManager.difficultyData().difficulty(),
+                        dataManager.difficultyData().locked()));
                   }
 
-                  if (sessionDataManager.abilitiesData() != null) {
+                  if (dataManager.abilitiesData() != null) {
                     session.send(
                       new ClientboundPlayerAbilitiesPacket(
-                        sessionDataManager.abilitiesData().invulnerable(),
-                        sessionDataManager.abilitiesData().flying(),
-                        sessionDataManager.abilitiesData().allowFlying(),
-                        sessionDataManager.abilitiesData().creativeModeBreak(),
-                        sessionDataManager.abilitiesData().flySpeed(),
-                        sessionDataManager.abilitiesData().walkSpeed()));
+                        dataManager.abilitiesData().invulnerable(),
+                        dataManager.abilitiesData().flying(),
+                        dataManager.abilitiesData().allowFlying(),
+                        dataManager.abilitiesData().creativeModeBreak(),
+                        dataManager.abilitiesData().flySpeed(),
+                        dataManager.abilitiesData().walkSpeed()));
                   }
 
                   session.send(
                     new ClientboundGameEventPacket(
-                      GameEvent.CHANGE_GAMEMODE, sessionDataManager.gameMode()));
+                      GameEvent.CHANGE_GAMEMODE, dataManager.gameMode()));
 
-                  if (sessionDataManager.borderState() != null) {
+                  if (dataManager.borderState() != null) {
                     session.send(
                       new ClientboundInitializeBorderPacket(
-                        sessionDataManager.borderState().centerX(),
-                        sessionDataManager.borderState().centerZ(),
-                        sessionDataManager.borderState().oldSize(),
-                        sessionDataManager.borderState().newSize(),
-                        sessionDataManager.borderState().lerpTime(),
-                        sessionDataManager.borderState().newAbsoluteMaxSize(),
-                        sessionDataManager.borderState().warningBlocks(),
-                        sessionDataManager.borderState().warningTime()));
+                        dataManager.borderState().centerX(),
+                        dataManager.borderState().centerZ(),
+                        dataManager.borderState().oldSize(),
+                        dataManager.borderState().newSize(),
+                        dataManager.borderState().lerpTime(),
+                        dataManager.borderState().newAbsoluteMaxSize(),
+                        dataManager.borderState().warningBlocks(),
+                        dataManager.borderState().warningTime()));
                   }
 
-                  if (sessionDataManager.defaultSpawnData() != null) {
+                  if (dataManager.defaultSpawnData() != null) {
                     session.send(
                       new ClientboundSetDefaultSpawnPositionPacket(
-                        sessionDataManager.defaultSpawnData().position(),
-                        sessionDataManager.defaultSpawnData().angle()));
+                        dataManager.defaultSpawnData().position(),
+                        dataManager.defaultSpawnData().angle()));
                   }
 
-                  if (sessionDataManager.weatherState() != null) {
+                  if (dataManager.weatherState() != null) {
                     session.send(
                       new ClientboundGameEventPacket(
-                        sessionDataManager.weatherState().raining()
+                        dataManager.weatherState().raining()
                           ? GameEvent.START_RAIN
                           : GameEvent.STOP_RAIN,
                         null));
@@ -637,45 +637,45 @@ public class POVServer implements InternalPlugin {
                       new ClientboundGameEventPacket(
                         GameEvent.RAIN_STRENGTH,
                         new RainStrengthValue(
-                          sessionDataManager.weatherState().rainStrength())));
+                          dataManager.weatherState().rainStrength())));
                     session.send(
                       new ClientboundGameEventPacket(
                         GameEvent.THUNDER_STRENGTH,
                         new ThunderStrengthValue(
-                          sessionDataManager.weatherState().thunderStrength())));
+                          dataManager.weatherState().thunderStrength())));
                   }
 
-                  if (sessionDataManager.healthData() != null) {
+                  if (dataManager.healthData() != null) {
                     session.send(
                       new ClientboundSetHealthPacket(
-                        sessionDataManager.healthData().health(),
-                        sessionDataManager.healthData().food(),
-                        sessionDataManager.healthData().saturation()));
+                        dataManager.healthData().health(),
+                        dataManager.healthData().food(),
+                        dataManager.healthData().saturation()));
                   }
 
-                  if (sessionDataManager.experienceData() != null) {
+                  if (dataManager.experienceData() != null) {
                     session.send(
                       new ClientboundSetExperiencePacket(
-                        sessionDataManager.experienceData().experience(),
-                        sessionDataManager.experienceData().level(),
-                        sessionDataManager.experienceData().totalExperience()));
+                        dataManager.experienceData().experience(),
+                        dataManager.experienceData().level(),
+                        dataManager.experienceData().totalExperience()));
                   }
 
                   session.send(
                     new ClientboundPlayerPositionPacket(
-                      sessionDataManager.clientEntity().x(),
-                      sessionDataManager.clientEntity().y(),
-                      sessionDataManager.clientEntity().z(),
-                      sessionDataManager.clientEntity().yaw(),
-                      sessionDataManager.clientEntity().pitch(),
+                      dataManager.clientEntity().x(),
+                      dataManager.clientEntity().y(),
+                      dataManager.clientEntity().z(),
+                      dataManager.clientEntity().yaw(),
+                      dataManager.clientEntity().pitch(),
                       Integer.MIN_VALUE));
 
-                  if (sessionDataManager.playerListState().header() != null
-                    && sessionDataManager.playerListState().footer() != null) {
+                  if (dataManager.playerListState().header() != null
+                    && dataManager.playerListState().footer() != null) {
                     session.send(
                       new ClientboundTabListPacket(
-                        sessionDataManager.playerListState().header(),
-                        sessionDataManager.playerListState().footer()));
+                        dataManager.playerListState().header(),
+                        dataManager.playerListState().footer()));
                   }
 
                   var currentId =
@@ -689,12 +689,12 @@ public class POVServer implements InternalPlugin {
                         PlayerListEntryAction.UPDATE_LISTED,
                         PlayerListEntryAction.UPDATE_LATENCY,
                         PlayerListEntryAction.UPDATE_DISPLAY_NAME),
-                      sessionDataManager.playerListState().entries().values().stream()
+                      dataManager.playerListState().entries().values().stream()
                         .map(
                           entry -> {
                             if (entry
                               .getProfileId()
-                              .equals(sessionDataManager.botProfile().getId())) {
+                              .equals(dataManager.botProfile().getId())) {
                               GameProfile newGameProfile;
                               if (entry.getProfile() == null) {
                                 newGameProfile = null;
@@ -724,18 +724,18 @@ public class POVServer implements InternalPlugin {
                         .toList()
                         .toArray(new PlayerListEntry[0])));
 
-                  if (sessionDataManager.centerChunk() != null) {
+                  if (dataManager.centerChunk() != null) {
                     session.send(
                       new ClientboundSetChunkCacheCenterPacket(
-                        sessionDataManager.centerChunk().chunkX(),
-                        sessionDataManager.centerChunk().chunkZ()));
+                        dataManager.centerChunk().chunkX(),
+                        dataManager.centerChunk().chunkZ()));
                   }
 
                   session.send(
                     new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
                   for (var chunkEntry :
-                    sessionDataManager.currentLevel()
+                    dataManager.currentLevel()
                       .chunks()
                       .getChunks()
                       .long2ObjectEntrySet()) {
@@ -746,7 +746,7 @@ public class POVServer implements InternalPlugin {
                     for (var i = 0; i < chunk.getSectionCount(); i++) {
                       SessionDataManager.writeChunkSection(
                         buf,
-                        sessionDataManager.session().getCodecHelper(),
+                        dataManager.session().getCodecHelper(),
                         chunk.getSection(i));
                     }
 
@@ -779,26 +779,26 @@ public class POVServer implements InternalPlugin {
                         lightUpdateData));
                   }
 
-                  if (sessionDataManager.inventoryManager() != null) {
+                  if (dataManager.inventoryManager() != null) {
                     session.send(
                       new ClientboundSetCarriedItemPacket(
-                        sessionDataManager.inventoryManager().heldItemSlot()));
+                        dataManager.inventoryManager().heldItemSlot()));
                     var stateIndex = 0;
                     for (var container :
-                      sessionDataManager.inventoryManager().containerData().values()) {
+                      dataManager.inventoryManager().containerData().values()) {
                       session.send(
                         new ClientboundContainerSetContentPacket(
                           container.id(),
                           stateIndex++,
                           Arrays.stream(
-                              sessionDataManager
+                              dataManager
                                 .inventoryManager()
                                 .playerInventory()
                                 .slots())
                             .map(ContainerSlot::item)
                             .toList()
                             .toArray(new ItemStack[0]),
-                          sessionDataManager.inventoryManager().cursorItem()));
+                          dataManager.inventoryManager().cursorItem()));
 
                       if (container.properties() != null) {
                         for (var containerProperty : container.properties().int2IntEntrySet()) {
@@ -812,7 +812,7 @@ public class POVServer implements InternalPlugin {
                     }
                   }
 
-                  for (var entity : sessionDataManager.entityTrackerState().getEntities()) {
+                  for (var entity : dataManager.entityTrackerState().getEntities()) {
                     if (entity instanceof ClientEntity clientEntity) {
                       session.send(
                         new ClientboundEntityEventPacket(

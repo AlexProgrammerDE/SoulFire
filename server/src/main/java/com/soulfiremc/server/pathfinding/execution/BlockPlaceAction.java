@@ -38,18 +38,18 @@ public final class BlockPlaceAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var level = connection.sessionDataManager().currentLevel();
+    var level = connection.dataManager().currentLevel();
 
     return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPosition));
   }
 
   @Override
   public void tick(BotConnection connection) {
-    var sessionDataManager = connection.sessionDataManager();
-    sessionDataManager.controlState().resetAll();
+    var dataManager = connection.dataManager();
+    dataManager.controlState().resetAll();
 
     if (!putOnHotbar) {
-      if (ItemPlaceHelper.placeBestBlockInHand(sessionDataManager)) {
+      if (ItemPlaceHelper.placeBestBlockInHand(dataManager)) {
         putOnHotbar = true;
       }
 
@@ -60,7 +60,7 @@ public final class BlockPlaceAction implements WorldAction {
       return;
     }
 
-    connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
+    connection.dataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
     finishedPlacing = true;
   }
 

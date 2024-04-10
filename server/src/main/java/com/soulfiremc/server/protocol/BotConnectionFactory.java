@@ -20,13 +20,8 @@ package com.soulfiremc.server.protocol;
 import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.soulfiremc.server.AttackManager;
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
-import com.soulfiremc.server.protocol.bot.BotControlAPI;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -34,9 +29,6 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.slf4j.Logger;
 
 public record BotConnectionFactory(
@@ -55,46 +47,28 @@ public record BotConnectionFactory(
   }
 
   public BotConnection prepareConnectionInternal(ProtocolState targetState) {
-    var meta = new BotConnectionMeta(minecraftAccount, targetState, protocolVersion, proxyData);
-    var session =
-      new ViaClientSession(
-        resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, meta);
     var botConnection =
       new BotConnection(
-        UUID.randomUUID(),
         this,
         attackManager,
         attackManager.soulFireServer(),
         settingsHolder,
         logger,
         protocol,
-        session,
         resolvedAddress,
-        new ExecutorManager("SoulFire-Attack-" + attackManager.id()),
-        new CopyOnWriteArrayList<>(),
-        meta,
-        LambdaManager.basic(new ASMGenerator())
-          .setExceptionHandler(EventExceptionHandler.INSTANCE)
-          .setEventFilter(
-            (c, h) -> {
-              if (SoulFireBotEvent.class.isAssignableFrom(c)) {
-                return true;
-              } else {
-                throw new IllegalStateException(
-                  "This event handler only accepts bot events");
-              }
-            }));
+        minecraftAccount,
+        targetState,
+        protocolVersion,
+        proxyData,
+        eventLoopGroup);
 
-    var sessionDataManager = new SessionDataManager(botConnection);
-    session.meta().sessionDataManager(sessionDataManager);
-    session.meta().botControlAPI(new BotControlAPI(botConnection, sessionDataManager));
-
+    var session = botConnection.session();
     session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
     session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
     session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
 
     session.addListener(new SFBaseListener(botConnection, targetState));
-    session.addListener(new SFSessionListener(sessionDataManager, botConnection));
+    session.addListener(new SFSessionListener(botConnection.dataManager(), botConnection));
 
     attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 

@@ -53,8 +53,7 @@ public class AutoReconnect implements InternalPlugin {
 
     connection
       .attackManager()
-      .executorManager()
-      .newScheduledExecutorService(connection, "Reconnect")
+      .scheduler()
       .schedule(
         () -> {
           var eventLoopGroup = connection.session().eventLoopGroup();

@@ -199,7 +199,7 @@ public class ServerCommandManager implements PlatformCommandManager {
 
                       return executePathfinding(c, bot -> {
                         var random = ThreadLocalRandom.current();
-                        var pos = bot.sessionDataManager().clientEntity().pos();
+                        var pos = bot.dataManager().clientEntity().pos();
                         var x =
                           random.nextInt(
                             pos.getFloorX() - radius,
@@ -271,9 +271,8 @@ public class ServerCommandManager implements PlatformCommandManager {
                     return forEveryBot(
                       c,
                       bot -> {
-                        bot.executorManager().newExecutorService(bot, "Pathfinding")
-                          .submit(() -> new CollectBlockController(
-                            resolvable.resolve(bot.sessionDataManager().tagsState()),
+                        bot.scheduler().schedule(() -> new CollectBlockController(
+                            resolvable.resolve(bot.dataManager().tagsState()),
                             amount,
                             searchRadius
                           ).start(bot));
@@ -295,7 +294,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   return forEveryBot(
                     c,
                     bot -> {
-                      var dataManager = bot.sessionDataManager();
+                      var dataManager = bot.dataManager();
 
                       var parsedUniqueId = UUIDHelper.tryParseUniqueId(entityName);
                       var entityId = -1;
@@ -324,8 +323,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                       }
 
                       var finalEntityId = entityId;
-                      bot.executorManager().newExecutorService(bot, "Pathfinding")
-                        .submit(() -> new FollowEntityController(
+                      bot.scheduler().schedule(() -> new FollowEntityController(
                           finalEntityId,
                           maxRadius
                         ).start(bot));
@@ -357,13 +355,13 @@ public class ServerCommandManager implements PlatformCommandManager {
                             return false;
                           }));
 
-                  bot.sessionDataManager().controlState().resetAll();
+                  bot.dataManager().controlState().resetAll();
 
                   if (changed == 0) {
                     c.getSource().sendWarn("No pathfinding was running!");
                   } else {
                     c.getSource()
-                      .sendInfo("Stopped pathfinding for " + bot.meta().accountName());
+                      .sendInfo("Stopped pathfinding for " + bot.accountName());
                   }
                   return Command.SINGLE_SUCCESS;
                 }))));
@@ -388,7 +386,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                           return forEveryBot(
                             c,
                             bot -> {
-                              bot.sessionDataManager()
+                              bot.dataManager()
                                 .clientEntity()
                                 .lookAt(
                                   RotationOrigin.EYES,
@@ -407,7 +405,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.sessionDataManager().controlState();
+                      var controlState = bot.dataManager().controlState();
 
                       controlState.forward(!controlState.forward());
                       controlState.backward(false);
@@ -422,7 +420,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.sessionDataManager().controlState();
+                      var controlState = bot.dataManager().controlState();
 
                       controlState.backward(!controlState.backward());
                       controlState.forward(false);
@@ -437,7 +435,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.sessionDataManager().controlState();
+                      var controlState = bot.dataManager().controlState();
 
                       controlState.left(!controlState.left());
                       controlState.right(false);
@@ -452,7 +450,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.sessionDataManager().controlState();
+                      var controlState = bot.dataManager().controlState();
 
                       controlState.right(!controlState.right());
                       controlState.left(false);
@@ -467,7 +465,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               forEveryBot(
                 c,
                 bot -> {
-                  var controlState = bot.sessionDataManager().controlState();
+                  var controlState = bot.dataManager().controlState();
 
                   controlState.jumping(!controlState.jumping());
                   return Command.SINGLE_SUCCESS;
@@ -493,7 +491,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               forEveryBot(
                 c,
                 bot -> {
-                  bot.sessionDataManager().controlState().resetAll();
+                  bot.dataManager().controlState().resetAll();
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -524,7 +522,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                   var online = new ArrayList<String>();
                   for (var bot : attackManager.botConnections().values()) {
                     if (bot.isOnline()) {
-                      online.add(bot.meta().accountName());
+                      online.add(bot.accountName());
                     }
                   }
 
@@ -622,7 +620,7 @@ public class ServerCommandManager implements PlatformCommandManager {
         .executes(
           help(
             "Exports images of all map items. Can be a held item or in a item-frame.",
-            c -> exportMap(c, bot -> bot.sessionDataManager().mapDataStates().keySet())))
+            c -> exportMap(c, bot -> bot.dataManager().mapDataStates().keySet())))
         .then(
           argument("map_id", IntegerArgumentType.integer())
             .executes(
@@ -683,7 +681,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                 forEveryBot(
                   c,
                   bot -> {
-                    b.suggest(bot.meta().accountName());
+                    b.suggest(bot.accountName());
 
                     return Command.SINGLE_SUCCESS;
                   },
@@ -742,7 +740,7 @@ public class ServerCommandManager implements PlatformCommandManager {
       context,
       bot -> {
         for (var mapId : idProvider.apply(bot).toIntArray()) {
-          var mapDataState = bot.sessionDataManager().mapDataStates().get(mapId);
+          var mapDataState = bot.dataManager().mapDataStates().get(mapId);
           if (mapDataState == null) {
             context.getSource().sendInfo("Map not found!");
             return Command.SINGLE_SUCCESS;
@@ -750,7 +748,7 @@ public class ServerCommandManager implements PlatformCommandManager {
 
           var image = mapDataState.toBufferedImage();
           var fileName =
-            "map_" + currentTime + "_" + mapId + "_" + bot.meta().accountName() + ".png";
+            "map_" + currentTime + "_" + mapId + "_" + bot.accountName() + ".png";
           try {
             Files.createDirectories(SFPathConstants.MAPS_FOLDER);
             var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
@@ -846,14 +844,14 @@ public class ServerCommandManager implements PlatformCommandManager {
         for (var bot : attackManager.botConnections().values()) {
           if (context.getSource().extraData.containsKey("bot_names")
             && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
-            .noneMatch(s -> s.equals(bot.meta().accountName()))) {
+            .noneMatch(s -> s.equals(bot.accountName()))) {
             continue;
           }
 
           if (printMessages) {
             context
               .getSource()
-              .sendInfo("--- Running command for bot " + bot.meta().accountName() + " ---");
+              .sendInfo("--- Running command for bot " + bot.accountName() + " ---");
           }
 
           var result = consumer.applyAsInt(bot);

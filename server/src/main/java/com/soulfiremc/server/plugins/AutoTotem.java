@@ -41,13 +41,11 @@ public class AutoTotem implements InternalPlugin {
       return;
     }
 
-    var executor =
-      connection.executorManager().newScheduledExecutorService(connection, "AutoTotem");
     ExecutorHelper.executeRandomDelaySeconds(
-      executor,
+      connection.scheduler(),
       () -> {
-        var sessionDataManager = connection.sessionDataManager();
-        var inventoryManager = sessionDataManager.inventoryManager();
+        var dataManager = connection.dataManager();
+        var inventoryManager = dataManager.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
         var offhandSlot = playerInventory.getOffhand();
 

@@ -72,7 +72,7 @@ public class SFBaseListener extends SessionAdapter {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
         UserConnection viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
-        var authSupport = botConnection.meta().minecraftAccount().isPremiumJava();
+        var authSupport = botConnection.minecraftAccount().isPremiumJava();
         if (!authSupport) {
           botConnection
             .logger()
@@ -81,7 +81,7 @@ public class SFBaseListener extends SessionAdapter {
         }
 
         var auth = authSupport;
-        var isLegacy = SFVersionConstants.isLegacy(botConnection.meta().protocolVersion());
+        var isLegacy = SFVersionConstants.isLegacy(botConnection.protocolVersion());
         if (auth && isLegacy) {
           auth =
             Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class))
@@ -103,7 +103,7 @@ public class SFBaseListener extends SessionAdapter {
           var serverId =
             SFSessionService.getServerId(
               helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-          botConnection.meta().joinServerId(serverId, viaSession);
+          botConnection.joinServerId(serverId, viaSession);
         }
 
         session.send(
@@ -155,7 +155,7 @@ public class SFBaseListener extends SessionAdapter {
       if (this.targetState == ProtocolState.LOGIN) {
         session.send(
           new ServerboundHelloPacket(
-            botConnection.meta().accountName(), botConnection.meta().accountProfileId()));
+            botConnection.accountName(), botConnection.accountProfileId()));
       } else {
         session.send(new ServerboundStatusRequestPacket());
       }

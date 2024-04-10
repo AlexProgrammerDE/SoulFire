@@ -108,12 +108,11 @@ public class AutoArmor implements InternalPlugin {
       return;
     }
 
-    var executor = connection.executorManager().newScheduledExecutorService(connection, "AutoJump");
     ExecutorHelper.executeRandomDelaySeconds(
-      executor,
+      connection.scheduler(),
       () -> {
         for (var type : ArmorType.VALUES) {
-          putOn(connection.sessionDataManager().inventoryManager(), type);
+          putOn(connection.dataManager().inventoryManager(), type);
         }
       },
       settingsHolder.get(AutoArmorSettings.DELAY.min()),

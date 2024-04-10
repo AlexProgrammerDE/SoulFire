@@ -39,9 +39,9 @@ public final class MovementAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var clientEntity = connection.sessionDataManager().clientEntity();
+    var clientEntity = connection.dataManager().clientEntity();
     var botPosition = clientEntity.pos();
-    var level = connection.sessionDataManager().currentLevel();
+    var level = connection.dataManager().currentLevel();
 
     var blockMeta = level.getBlockStateAt(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
@@ -56,10 +56,10 @@ public final class MovementAction implements WorldAction {
 
   @Override
   public void tick(BotConnection connection) {
-    var clientEntity = connection.sessionDataManager().clientEntity();
+    var clientEntity = connection.dataManager().clientEntity();
     clientEntity.controlState().resetAll();
 
-    var level = connection.sessionDataManager().currentLevel();
+    var level = connection.dataManager().currentLevel();
 
     var blockMeta = level.getBlockStateAt(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);

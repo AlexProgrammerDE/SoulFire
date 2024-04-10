@@ -261,11 +261,11 @@ public class BotControlAPI {
         && dataManager.connection().attackManager().botConnections().values().stream()
         .anyMatch(
           b -> {
-            if (b.sessionDataManager().clientEntity() == null) {
+            if (b.dataManager().clientEntity() == null) {
               return false;
             }
 
-            return b.sessionDataManager().clientEntity().uuid().equals(entity.uuid());
+            return b.dataManager().clientEntity().uuid().equals(entity.uuid());
           })) {
         continue;
       }

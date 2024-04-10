@@ -80,12 +80,12 @@ public class KillAura implements InternalPlugin {
         var bestVisiblePoint = control.getEntityVisiblePoint(target);
         if (bestVisiblePoint != null) {
           distance =
-            bestVisiblePoint.distance(bot.sessionDataManager().clientEntity().eyePosition());
+            bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition());
         } else {
           distance =
             target
               .eyePosition()
-              .distance(bot.sessionDataManager().clientEntity().eyePosition());
+              .distance(bot.dataManager().clientEntity().eyePosition());
         }
 
         if (distance > lookRange) {
@@ -93,9 +93,9 @@ public class KillAura implements InternalPlugin {
         }
 
         if (bestVisiblePoint != null) {
-          bot.sessionDataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+          bot.dataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
         } else {
-          bot.sessionDataManager()
+          bot.dataManager()
             .clientEntity()
             .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
         }
@@ -116,7 +116,7 @@ public class KillAura implements InternalPlugin {
                 control.swingArm();
               }
 
-              if (bot.meta().protocolVersion().olderThan(ProtocolVersion.v1_9)
+              if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
                 || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
                 var randomTickDelay =
                   ThreadLocalRandom.current()

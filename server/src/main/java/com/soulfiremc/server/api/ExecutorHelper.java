@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.api;
 
+import com.soulfiremc.server.protocol.BotScheduler;
 import com.soulfiremc.server.util.RandomUtil;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +28,10 @@ public class ExecutorHelper {
   private ExecutorHelper() {}
 
   public static void executeRandomDelaySeconds(
-    ScheduledExecutorService executorService, Runnable runnable, int minDelay, int maxDelay) {
+    BotScheduler scheduler, Runnable runnable, int minDelay, int maxDelay) {
     var delay = new AtomicInteger();
     var counter = new AtomicInteger();
-    executorService.scheduleWithFixedDelay(
+    scheduler.scheduleWithFixedDelay(
       () -> {
         if (counter.get() == 0) {
           delay.set(RandomUtil.getRandomInt(minDelay, maxDelay));

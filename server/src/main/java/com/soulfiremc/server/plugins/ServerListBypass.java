@@ -36,7 +36,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 public class ServerListBypass implements InternalPlugin {
   public static void onPreConnect(PreBotConnectEvent event) {
     var connection = event.connection();
-    if (connection.meta().targetState() == ProtocolState.STATUS) {
+    if (connection.targetState() == ProtocolState.STATUS) {
       return;
     }
 

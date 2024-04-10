@@ -35,13 +35,13 @@ public class FollowEntityController {
 
   public void start(BotConnection bot) {
     while (true) {
-      var entity = bot.sessionDataManager().entityTrackerState().getEntity(entityId);
+      var entity = bot.dataManager().entityTrackerState().getEntity(entityId);
       if (entity == null) {
         log.info("Entity not found, aborting");
         return;
       }
 
-      if (entity.blockPos().distance(bot.sessionDataManager().clientEntity().blockPos()) <= maxRadius) {
+      if (entity.blockPos().distance(bot.dataManager().clientEntity().blockPos()) <= maxRadius) {
         TimeUtil.waitTime(1, TimeUnit.SECONDS);
         continue;
       }

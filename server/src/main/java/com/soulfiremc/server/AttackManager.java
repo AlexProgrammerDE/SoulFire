@@ -26,7 +26,6 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
-import com.soulfiremc.server.protocol.ExecutorManager;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.settings.AccountSettings;
@@ -83,7 +82,7 @@ public class AttackManager {
           }
         });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
-  private final ExecutorManager executorManager = new ExecutorManager("SoulFire-Attack-" + id);
+  private final AttackScheduler scheduler = new AttackScheduler(this);
   private final SoulFireServer soulFireServer;
   private final SettingsHolder settingsHolder;
   @Setter
@@ -218,11 +217,6 @@ public class AttackManager {
 
     eventBus.call(new AttackStartEvent(this));
 
-    // Used for concurrent bot connecting
-    var connectService =
-      executorManager.newFixedExecutorService(
-        settingsHolder.get(BotSettings.CONCURRENT_CONNECTS), null, "Connect");
-
     return CompletableFuture.runAsync(
       () -> {
         while (!factories.isEmpty()) {
@@ -232,7 +226,7 @@ public class AttackManager {
           }
 
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
-          connectService.execute(
+          scheduler.schedule(
             () -> {
               if (attackState.isStopped()) {
                 return;
@@ -273,7 +267,7 @@ public class AttackManager {
 
   private void stopInternal() {
     logger.info("Shutting down attack executor");
-    executorManager.shutdownAll();
+    scheduler.shutdown();
 
     logger.info("Disconnecting bots");
     do {

@@ -26,6 +26,6 @@ public class SFViaOldAuthProvider extends OldAuthProvider {
   @Override
   public void sendAuthRequest(UserConnection user, String serverId) {
     var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-    session.meta().joinServerId(serverId, session);
+    session.botConnection().joinServerId(serverId, session);
   }
 }

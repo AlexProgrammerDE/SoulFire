@@ -31,13 +31,11 @@ import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class PathExecutor implements Consumer<BotPreTickEvent> {
-  private final ExecutorService executorService;
   private final Queue<WorldAction> worldActionQueue = new LinkedBlockingQueue<>();
   private final BotConnection connection;
   private final Boolean2ObjectFunction<List<WorldAction>> findPath;
@@ -51,7 +49,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     BotConnection connection,
     Boolean2ObjectFunction<List<WorldAction>> findPath,
     CompletableFuture<Void> pathCompletionFuture) {
-    this.executorService = connection.executorManager().newExecutorService(connection, "PathExecutor");
     this.connection = connection;
     this.findPath = findPath;
     this.pathCompletionFuture = pathCompletionFuture;
@@ -67,22 +64,22 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     });
 
     var logger = bot.logger();
-    var sessionDataManager = bot.sessionDataManager();
-    var clientEntity = sessionDataManager.clientEntity();
+    var dataManager = bot.dataManager();
+    var clientEntity = dataManager.clientEntity();
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
         var level = new ProjectedLevel(
-          sessionDataManager.currentLevel()
+          dataManager.currentLevel()
             .chunks()
             .immutableCopy());
         var inventory =
           new ProjectedInventory(
-            sessionDataManager.inventoryManager().playerInventory());
+            dataManager.inventoryManager().playerInventory());
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =
-          new RouteFinder(new MinecraftGraph(sessionDataManager.tagsState(), level, inventory, true, true), goalScorer);
+          new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, true, true), goalScorer);
 
         logger.info("Starting calculations at: {}", start);
         var actions = routeFinder.findRoute(start, requiresRepositioning, pathCompletionFuture);
@@ -101,9 +98,9 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
   public void submitForPathCalculation(boolean isInitial) {
     unregister();
-    connection.sessionDataManager().controlState().resetAll();
+    connection.dataManager().controlState().resetAll();
 
-    executorService.submit(() -> {
+    connection.scheduler().schedule(() -> {
       try {
         if (isDone()) {
           return;
@@ -195,7 +192,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
       // If there are no more goals, stop
       if (worldAction == null) {
         connection.logger().info("Finished all goals!");
-        connection.sessionDataManager().controlState().resetAll();
+        connection.dataManager().controlState().resetAll();
         pathCompletionFuture.complete(null);
         unregister();
         return;
@@ -224,7 +221,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = true;
-    connection.sessionDataManager().clientEntity().controlState().incrementActivelyControlling();
+    connection.dataManager().clientEntity().controlState().incrementActivelyControlling();
     EventUtil.runAndAssertChanged(
       connection.eventBus(),
       () -> connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
@@ -236,7 +233,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = false;
-    connection.sessionDataManager().clientEntity().controlState().decrementActivelyControlling();
+    connection.dataManager().clientEntity().controlState().decrementActivelyControlling();
     EventUtil.runAndAssertChanged(
       connection.eventBus(),
       () -> connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));

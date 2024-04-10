@@ -36,19 +36,19 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var level = connection.sessionDataManager().currentLevel();
+    var level = connection.dataManager().currentLevel();
 
     return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPlacePosition));
   }
 
   @Override
   public void tick(BotConnection connection) {
-    var sessionDataManager = connection.sessionDataManager();
-    var clientEntity = sessionDataManager.clientEntity();
-    sessionDataManager.controlState().resetAll();
+    var dataManager = connection.dataManager();
+    var clientEntity = dataManager.clientEntity();
+    dataManager.controlState().resetAll();
 
     if (!putOnHotbar) {
-      if (ItemPlaceHelper.placeBestBlockInHand(sessionDataManager)) {
+      if (ItemPlaceHelper.placeBestBlockInHand(dataManager)) {
         putOnHotbar = true;
       }
 
@@ -61,13 +61,13 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
 
     if (clientEntity.y() < blockPlacePosition.y + 1) {
       // Make sure we are so high that we can place the block
-      sessionDataManager.controlState().jumping(true);
+      dataManager.controlState().jumping(true);
       return;
     } else {
-      sessionDataManager.controlState().jumping(false);
+      dataManager.controlState().jumping(false);
     }
 
-    connection.sessionDataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
+    connection.dataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
     finishedPlacing = true;
   }
 

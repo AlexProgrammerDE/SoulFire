@@ -54,8 +54,7 @@ public class AutoRespawn implements InternalPlugin {
           message);
 
       connection
-        .executorManager()
-        .newScheduledExecutorService(connection, "Respawn")
+        .scheduler()
         .schedule(
           () ->
             connection

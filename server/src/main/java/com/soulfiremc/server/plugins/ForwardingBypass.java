@@ -71,7 +71,7 @@ public class ForwardingBypass implements InternalPlugin {
     // Ensure we are in range
     requested = Math.min(requested, VelocityConstants.MODERN_FORWARDING_MAX_VERSION);
     if (requested > VelocityConstants.MODERN_FORWARDING_DEFAULT) {
-      if (player.meta().protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
+      if (player.protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
         //noinspection NonStrictComparisonCanBeEquality
         return requested >= VelocityConstants.MODERN_LAZY_SESSION
           ? VelocityConstants.MODERN_LAZY_SESSION
@@ -105,8 +105,8 @@ public class ForwardingBypass implements InternalPlugin {
       var codecHelper = player.session().getCodecHelper();
       codecHelper.writeVarInt(forwarded, actualVersion);
       codecHelper.writeString(forwarded, address);
-      codecHelper.writeUUID(forwarded, player.meta().accountProfileId());
-      codecHelper.writeString(forwarded, player.meta().accountName());
+      codecHelper.writeUUID(forwarded, player.accountProfileId());
+      codecHelper.writeString(forwarded, player.accountName());
 
       // This serves as additional redundancy. The key normally is stored in the
       // login start to the server, but some setups require this.
@@ -168,7 +168,7 @@ public class ForwardingBypass implements InternalPlugin {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
     var hostname = handshake.getHostname();
-    var uuid = connection.meta().accountProfileId();
+    var uuid = connection.accountProfileId();
 
     switch (settingsHolder.get(
       ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
