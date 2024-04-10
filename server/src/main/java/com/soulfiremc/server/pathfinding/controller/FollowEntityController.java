@@ -47,7 +47,8 @@ public class FollowEntityController {
       }
 
       var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius), pathFuture);
+      PathExecutor.executePathfinding(bot, new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius),
+        pathFuture);
 
       try {
         pathFuture.get();

@@ -118,6 +118,7 @@ import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
+import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
@@ -147,7 +148,6 @@ import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
@@ -241,14 +241,6 @@ public final class SessionDataManager {
     }
 
     return list;
-  }
-
-  public static void writeChunkSection(
-    ByteBuf buf, MinecraftCodecHelper codec, ChunkSection chunkSection) {
-    buf.writeShort(chunkSection.getBlockCount());
-
-    codec.writeDataPalette(buf, chunkSection.getChunkData());
-    codec.writeDataPalette(buf, chunkSection.getBiomeData());
   }
 
   @EventHandler
@@ -676,7 +668,7 @@ public final class SessionDataManager {
 
     try {
       for (var i = 0; i < chunkData.getSectionCount(); i++) {
-        chunkData.setSection(i, readChunkSection(buf));
+        chunkData.setSection(i, SFProtocolHelper.readChunkSection(buf, codecHelper));
       }
     } catch (IOException e) {
       log.error("Failed to read chunk section", e);
@@ -1064,14 +1056,6 @@ public final class SessionDataManager {
     }
 
     log.error("Cause: {}", cause.getMessage());
-  }
-
-  public ChunkSection readChunkSection(ByteBuf buf) throws IOException {
-    int blockCount = buf.readShort();
-
-    var chunkPalette = codecHelper.readDataPalette(buf, PaletteType.CHUNK);
-    var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
-    return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 
   public @NotNull Level currentLevel() {

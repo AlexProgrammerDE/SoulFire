@@ -272,10 +272,10 @@ public class ServerCommandManager implements PlatformCommandManager {
                       c,
                       bot -> {
                         bot.scheduler().schedule(() -> new CollectBlockController(
-                            resolvable.resolve(bot.dataManager().tagsState()),
-                            amount,
-                            searchRadius
-                          ).start(bot));
+                           resolvable.resolve(bot.dataManager().tagsState()),
+                          amount,
+                          searchRadius
+                        ).start(bot));
 
                         return Command.SINGLE_SUCCESS;
                       });
@@ -324,9 +324,9 @@ public class ServerCommandManager implements PlatformCommandManager {
 
                       var finalEntityId = entityId;
                       bot.scheduler().schedule(() -> new FollowEntityController(
-                          finalEntityId,
-                          maxRadius
-                        ).start(bot));
+                        finalEntityId,
+                        maxRadius
+                      ).start(bot));
 
                       return Command.SINGLE_SUCCESS;
                     });

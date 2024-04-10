@@ -109,7 +109,7 @@ import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
+import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
@@ -270,10 +270,10 @@ public class POVServer implements InternalPlugin {
               chunk.set(0, 0, 0, 0);
               var biome = DataPalette.createForBiome();
               biome.set(0, 0, 0, 0);
-              SessionDataManager.writeChunkSection(
+              SFProtocolHelper.writeChunkSection(
                 buf,
-                (MinecraftCodecHelper) session.getCodecHelper(),
-                new ChunkSection(0, chunk, biome));
+                new ChunkSection(0, chunk, biome),
+                (MinecraftCodecHelper) session.getCodecHelper());
             }
 
             var chunkBytes = new byte[buf.readableBytes()];
@@ -744,10 +744,10 @@ public class POVServer implements InternalPlugin {
                     var buf = Unpooled.buffer();
 
                     for (var i = 0; i < chunk.getSectionCount(); i++) {
-                      SessionDataManager.writeChunkSection(
+                      SFProtocolHelper.writeChunkSection(
                         buf,
-                        dataManager.session().getCodecHelper(),
-                        chunk.getSection(i));
+                        chunk.getSection(i),
+                        dataManager.codecHelper());
                     }
 
                     var chunkBytes = new byte[buf.readableBytes()];
