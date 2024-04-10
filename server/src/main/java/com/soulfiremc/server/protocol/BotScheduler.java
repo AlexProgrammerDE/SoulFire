@@ -18,8 +18,7 @@
 package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.util.RandomUtil;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +27,13 @@ import lombok.RequiredArgsConstructor;
 public class BotScheduler {
   public static final ThreadLocal<BotConnection> BOT_CONNECTION_THREAD_LOCAL = new ThreadLocal<>();
   @Getter
-  private final ScheduledExecutorService mainThreadExecutor;
+  private final ScheduledThreadPoolExecutor mainThreadExecutor;
   private final BotConnection botConnection;
   private boolean shutdown = false;
 
   public BotScheduler(BotConnection botConnection) {
     this.botConnection = botConnection;
-    this.mainThreadExecutor = Executors.newScheduledThreadPool(1, runnable -> Thread.ofPlatform()
+    this.mainThreadExecutor = new ScheduledThreadPoolExecutor(128, runnable -> Thread.ofPlatform()
       .name("SoulFire-Scheduler-Bot-" + botConnection.accountName())
       .daemon()
       .unstarted(
@@ -43,6 +42,8 @@ public class BotScheduler {
           runnable.run();
           BOT_CONNECTION_THREAD_LOCAL.remove();
         }));
+    mainThreadExecutor.setKeepAliveTime(10, TimeUnit.SECONDS);
+    mainThreadExecutor.allowCoreThreadTimeOut(true);
   }
 
   public void schedule(Runnable command) {
