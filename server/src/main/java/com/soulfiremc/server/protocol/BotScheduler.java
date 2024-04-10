@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.util.RandomUtil;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,17 @@ public class BotScheduler {
     }
 
     mainThreadExecutor.scheduleWithFixedDelay(wrapCommand(command), delay, period, unit);
+  }
+
+  public void scheduleWithRandomDelay(Runnable command, long minDelay, long maxDelay, TimeUnit unit) {
+    if (shutdown) {
+      return;
+    }
+
+    schedule(() -> {
+      command.run();
+      scheduleWithRandomDelay(command, minDelay, maxDelay, unit);
+    }, RandomUtil.getRandomLong(minDelay, maxDelay), unit);
   }
 
   public void shutdown() {

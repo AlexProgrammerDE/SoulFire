@@ -18,7 +18,6 @@
 package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
-import com.soulfiremc.server.api.ExecutorHelper;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
@@ -42,8 +41,7 @@ public class AutoEat implements InternalPlugin {
       return;
     }
 
-    ExecutorHelper.executeRandomDelaySeconds(
-      connection.scheduler(),
+    connection.scheduler().scheduleWithRandomDelay(
       () -> {
         var dataManager = connection.dataManager();
 
@@ -87,7 +85,8 @@ public class AutoEat implements InternalPlugin {
         }
       },
       settingsHolder.get(AutoEatSettings.DELAY.min()),
-      settingsHolder.get(AutoEatSettings.DELAY.max()));
+      settingsHolder.get(AutoEatSettings.DELAY.max()),
+      TimeUnit.SECONDS);
   }
 
   @EventHandler

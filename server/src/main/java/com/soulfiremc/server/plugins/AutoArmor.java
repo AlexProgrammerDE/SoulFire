@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.api.ExecutorHelper;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
@@ -108,15 +107,15 @@ public class AutoArmor implements InternalPlugin {
       return;
     }
 
-    ExecutorHelper.executeRandomDelaySeconds(
-      connection.scheduler(),
+    connection.scheduler().scheduleWithRandomDelay(
       () -> {
         for (var type : ArmorType.VALUES) {
           putOn(connection.dataManager().inventoryManager(), type);
         }
       },
       settingsHolder.get(AutoArmorSettings.DELAY.min()),
-      settingsHolder.get(AutoArmorSettings.DELAY.max()));
+      settingsHolder.get(AutoArmorSettings.DELAY.max()),
+      TimeUnit.SECONDS);
   }
 
   @EventHandler

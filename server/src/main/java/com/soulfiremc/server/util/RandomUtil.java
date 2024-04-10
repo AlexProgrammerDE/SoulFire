@@ -33,4 +33,16 @@ public class RandomUtil {
 
     return ThreadLocalRandom.current().nextInt(min, max);
   }
+
+  public static long getRandomLong(long min, long max) {
+    if (min > max) {
+      throw new IllegalArgumentException("max must be greater than min");
+    }
+
+    if (min == max) {
+      return min;
+    }
+
+    return ThreadLocalRandom.current().nextLong(min, max);
+  }
 }

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.api.ExecutorHelper;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
@@ -41,8 +40,7 @@ public class AutoTotem implements InternalPlugin {
       return;
     }
 
-    ExecutorHelper.executeRandomDelaySeconds(
-      connection.scheduler(),
+    connection.scheduler().scheduleWithRandomDelay(
       () -> {
         var dataManager = connection.dataManager();
         var inventoryManager = dataManager.inventoryManager();
@@ -80,7 +78,8 @@ public class AutoTotem implements InternalPlugin {
         }
       },
       settingsHolder.get(AutoTotemSettings.DELAY.min()),
-      settingsHolder.get(AutoTotemSettings.DELAY.max()));
+      settingsHolder.get(AutoTotemSettings.DELAY.max()),
+      TimeUnit.SECONDS);
   }
 
   @EventHandler

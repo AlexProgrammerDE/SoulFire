@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.api.ExecutorHelper;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
@@ -26,6 +25,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -38,8 +38,7 @@ public class AutoJump implements InternalPlugin {
       return;
     }
 
-    ExecutorHelper.executeRandomDelaySeconds(
-      connection.scheduler(),
+    connection.scheduler().scheduleWithRandomDelay(
       () -> {
         var dataManager = connection.dataManager();
         var clientEntity = dataManager.clientEntity();
@@ -51,7 +50,8 @@ public class AutoJump implements InternalPlugin {
         }
       },
       settingsHolder.get(AutoJumpSettings.DELAY.min()),
-      settingsHolder.get(AutoJumpSettings.DELAY.max()));
+      settingsHolder.get(AutoJumpSettings.DELAY.max()),
+      TimeUnit.SECONDS);
   }
 
   @EventHandler
