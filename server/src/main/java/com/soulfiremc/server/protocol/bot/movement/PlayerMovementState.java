@@ -21,7 +21,6 @@ import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
-import com.soulfiremc.server.protocol.bot.model.EffectData;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -68,20 +67,17 @@ public class PlayerMovementState {
 
   public void updateData() {
     pos = new MutableVector3d(entity.x(), entity.y(), entity.z());
-
     vel = new MutableVector3d(entity.motionX(), entity.motionY(), entity.motionZ());
 
     var effectState = entity.effectState();
-    jumpBoost = effectState.getEffect(Effect.JUMP_BOOST).map(EffectData::amplifier).orElse(0);
-    speed = effectState.getEffect(Effect.SPEED).map(EffectData::amplifier).orElse(0);
-    slowness = effectState.getEffect(Effect.SLOWNESS).map(EffectData::amplifier).orElse(0);
-    dolphinsGrace =
-      effectState.getEffect(Effect.DOLPHINS_GRACE).map(EffectData::amplifier).orElse(0);
-    slowFalling = effectState.getEffect(Effect.SLOW_FALLING).map(EffectData::amplifier).orElse(0);
-    levitation = effectState.getEffect(Effect.LEVITATION).map(EffectData::amplifier).orElse(0);
+    jumpBoost = effectState.getEffectValue(Effect.JUMP_BOOST);
+    speed = effectState.getEffectValue(Effect.SPEED);
+    slowness = effectState.getEffectValue(Effect.SLOWNESS);
+    dolphinsGrace = effectState.getEffectValue(Effect.DOLPHINS_GRACE);
+    slowFalling = effectState.getEffectValue(Effect.SLOW_FALLING);
+    levitation = effectState.getEffectValue(Effect.LEVITATION);
 
-    var bootsItem = inventoryContainer.getBoots().item();
-    depthStrider = bootsItem == null ? 0 : bootsItem.getEnchantmentLevel(EnchantmentType.DEPTH_STRIDER);
+    depthStrider = inventoryContainer.getEnchantmentLevel(EnchantmentType.DEPTH_STRIDER);
 
     var chestItem = inventoryContainer.getChestplate().item();
     elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;

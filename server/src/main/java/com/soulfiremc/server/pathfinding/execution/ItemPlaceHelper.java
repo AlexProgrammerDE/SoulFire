@@ -93,7 +93,7 @@ public class ItemPlaceHelper {
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
             dataManager.clientEntity(),
-            dataManager.inventoryManager(),
+            dataManager.inventoryManager().playerInventory(),
             dataManager.clientEntity().onGround(),
             slotItem,
             optionalBlockType)

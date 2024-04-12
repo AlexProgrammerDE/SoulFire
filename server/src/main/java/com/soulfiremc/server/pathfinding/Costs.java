@@ -25,7 +25,7 @@ import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.ToolSpeedType;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.protocol.bot.container.InventoryManager;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
@@ -144,7 +144,7 @@ public class Costs {
   public static TickResult getRequiredMiningTicks(
     TagsState tagsState,
     @Nullable ClientEntity entity,
-    @Nullable InventoryManager inventoryManager,
+    @Nullable PlayerInventoryContainer inventoryContainer,
     boolean onGround,
     @Nullable SFItemStack itemStack,
     BlockType blockType) {
@@ -181,8 +181,8 @@ public class Costs {
           };
       }
 
-      if (inventoryManager != null && entity.isEyeInFluid(FluidTags.WATER)
-        && !inventoryManager.hasEnchantment(EnchantmentType.AQUA_AFFINITY)) {
+      if (inventoryContainer != null && entity.isEyeInFluid(FluidTags.WATER)
+        && !inventoryContainer.hasEnchantment(EnchantmentType.AQUA_AFFINITY)) {
         speedMultiplier /= 5.0F;
       }
     }

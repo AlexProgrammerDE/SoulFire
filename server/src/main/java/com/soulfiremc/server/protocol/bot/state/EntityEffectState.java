@@ -67,6 +67,16 @@ public class EntityEffectState {
         state.factorData()));
   }
 
+  public int getEffectValue(Effect effect) {
+    var state = effects.get(effect);
+
+    if (state == null) {
+      return 0;
+    }
+
+    return state.amplifier();
+  }
+
   public void tick() {
     effects.values().forEach(effect -> effect.duration(effect.duration() - 1));
     effects.values().removeIf(effect -> effect.duration() <= 0);

@@ -23,7 +23,6 @@ import com.github.steveice10.mc.protocol.data.game.inventory.ContainerActionType
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSetCarriedItemPacket;
-import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.BotConnection;
@@ -184,26 +183,5 @@ public class InventoryManager {
     }
 
     lastInEquipment.put(equipmentSlot, item == null ? null : item.type());
-  }
-
-  public boolean hasEnchantment(EnchantmentType enchantmentType) {
-    return getEnchantmentLevel(enchantmentType) > 0;
-  }
-
-  public int getEnchantmentLevel(EnchantmentType enchantmentType) {
-    var highestLevel = 0;
-    for (var equipmentSlot : enchantmentType.slots()) {
-      var item = playerInventory.getEquipmentSlot(equipmentSlot).item();
-      if (item == null) {
-        continue;
-      }
-
-      var level = item.getEnchantmentLevel(enchantmentType);
-      if (level > highestLevel) {
-        highestLevel = level;
-      }
-    }
-
-    return highestLevel;
   }
 }
