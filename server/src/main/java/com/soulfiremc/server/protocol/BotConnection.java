@@ -21,6 +21,7 @@ import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.github.steveice10.mc.protocol.data.ProtocolState;
 import com.github.steveice10.packetlib.packet.Packet;
 import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 
 @Getter
 public final class BotConnection {
+  public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final UUID connectionId = UUID.randomUUID();
   private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
     .setExceptionHandler(EventExceptionHandler.INSTANCE)
@@ -64,7 +66,7 @@ public final class BotConnection {
         }
       });
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
-  private final BotScheduler scheduler = new BotScheduler(this);
+  private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final AttackManager attackManager;
   private final SettingsHolder settingsHolder;
@@ -97,6 +99,14 @@ public final class BotConnection {
     this.attackManager = attackManager;
     this.settingsHolder = settingsHolder;
     this.logger = logger;
+    this.scheduler = new SoulFireScheduler(logger, runnable -> () -> {
+      CURRENT.set(this);
+      try {
+        runnable.run();
+      } finally {
+        CURRENT.remove();
+      }
+    });
     this.protocol = protocol;
     this.resolvedAddress = resolvedAddress;
     this.minecraftAccount = minecraftAccount;

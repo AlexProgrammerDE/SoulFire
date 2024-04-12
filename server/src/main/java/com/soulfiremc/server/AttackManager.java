@@ -82,7 +82,7 @@ public class AttackManager {
           }
         });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
-  private final AttackScheduler scheduler = new AttackScheduler(this);
+  private final SoulFireScheduler scheduler = new SoulFireScheduler(logger);
   private final SoulFireServer soulFireServer;
   private final SettingsHolder settingsHolder;
   @Setter
