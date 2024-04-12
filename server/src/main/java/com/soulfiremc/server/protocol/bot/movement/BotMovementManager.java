@@ -470,7 +470,7 @@ public class BotMovementManager {
   }
 
   private float getFlyingSpeed() {
-    if (movementState.flying) {
+    if (controlState.flying()) {
       var abilitiesData = clientEntity.abilities();
       var flySpeed = abilitiesData == null ? 0.05F : abilitiesData.flySpeed();
       return controlState.sprinting() ? flySpeed * 2.0F : flySpeed;

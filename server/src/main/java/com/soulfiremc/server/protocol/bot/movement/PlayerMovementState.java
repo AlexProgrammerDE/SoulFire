@@ -66,9 +66,6 @@ public class PlayerMovementState {
   // Inventory
   public boolean elytraEquipped;
 
-  // Flying (creative)
-  public boolean flying;
-
   public void updateData() {
     pos = new MutableVector3d(entity.x(), entity.y(), entity.z());
 
