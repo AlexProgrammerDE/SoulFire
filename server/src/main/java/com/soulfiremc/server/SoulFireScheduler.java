@@ -20,8 +20,6 @@ package com.soulfiremc.server;
 import com.soulfiremc.server.util.RandomUtil;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -30,7 +28,8 @@ import org.slf4j.Logger;
 
 @RequiredArgsConstructor
 public class SoulFireScheduler {
-  private final ExecutorService managementExecutor = Executors.newVirtualThreadPerTaskExecutor();
+  private static final Thread.Builder.OfVirtual managementThreadBuilder = Thread.ofVirtual()
+    .name("SoulFireScheduler-Management-", 0);
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final ForkJoinPool mainThreadExecutor;
   private final Logger logger;
@@ -48,7 +47,7 @@ public class SoulFireScheduler {
     this.logger = logger;
     this.runnableWrapper = runnableWrapper;
 
-    this.managementExecutor.execute(this::managementTask);
+    managementThreadBuilder.start(this::managementTask);
   }
 
   @SuppressWarnings("BusyWait")
@@ -65,7 +64,7 @@ public class SoulFireScheduler {
         Thread.sleep(1);
       }
     } catch (InterruptedException e) {
-      logger.error("Error in executor", e);
+      logger.info("Management thread interrupted");
     }
   }
 
@@ -122,7 +121,6 @@ public class SoulFireScheduler {
 
   public void shutdown() {
     shutdown = true;
-    managementExecutor.shutdown();
     mainThreadExecutor.shutdown();
   }
 
