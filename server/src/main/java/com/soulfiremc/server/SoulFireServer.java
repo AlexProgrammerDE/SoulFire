@@ -36,6 +36,7 @@ import com.soulfiremc.server.plugins.AutoRegister;
 import com.soulfiremc.server.plugins.AutoRespawn;
 import com.soulfiremc.server.plugins.AutoTotem;
 import com.soulfiremc.server.plugins.BotTicker;
+import com.soulfiremc.server.plugins.ChatControl;
 import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.plugins.ClientBrand;
 import com.soulfiremc.server.plugins.ClientSettings;
@@ -247,6 +248,7 @@ public class SoulFireServer {
         new BotTicker(),
         new ClientBrand(),
         new ClientSettings(),
+        new ChatControl(),
         new AutoReconnect(),
         new AutoRegister(),
         new AutoRespawn(),
