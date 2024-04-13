@@ -110,7 +110,7 @@ public class BotActionManager {
 
   public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
     incrementSequenceNumber();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.player();
     var level = dataManager.currentLevel();
 
     var eyePosition = clientEntity.eyePosition();
@@ -126,7 +126,7 @@ public class BotActionManager {
 
     var rayCast =
       rayCastToBlock(
-        level.getBlockStateAt(againstBlock),
+        level.getBlockState(againstBlock),
         eyePosition,
         clientEntity.rotationVector(),
         againstBlock);

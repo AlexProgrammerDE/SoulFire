@@ -77,4 +77,12 @@ public class MathHelper {
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
   }
+
+  public static int sign(double x) {
+    if (x == 0.0) {
+      return 0;
+    } else {
+      return x > 0.0 ? 1 : -1;
+    }
+  }
 }

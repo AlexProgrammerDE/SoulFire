@@ -65,7 +65,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     var logger = bot.logger();
     var dataManager = bot.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.player();
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
@@ -221,7 +221,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = true;
-    connection.dataManager().clientEntity().controlState().incrementActivelyControlling();
+    connection.dataManager().player().controlState().incrementActivelyControlling();
     EventUtil.runAndAssertChanged(
       connection.eventBus(),
       () -> connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
@@ -233,7 +233,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = false;
-    connection.dataManager().clientEntity().controlState().decrementActivelyControlling();
+    connection.dataManager().player().controlState().decrementActivelyControlling();
     EventUtil.runAndAssertChanged(
       connection.eventBus(),
       () -> connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));

@@ -23,11 +23,13 @@ import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.player.Player;
 
 public class AttributesDataGenerator implements IDataGenerator {
   public static JsonObject generateAttribute(Attribute attribute) {
     var attributeDesc = new JsonObject();
 
+    Player
     attributeDesc.addProperty(
       "id", BuiltInRegistries.ATTRIBUTE.getId(attribute));
     attributeDesc.addProperty(

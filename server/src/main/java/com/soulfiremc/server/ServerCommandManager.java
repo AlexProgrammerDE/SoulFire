@@ -199,7 +199,7 @@ public class ServerCommandManager implements PlatformCommandManager {
 
                       return executePathfinding(c, bot -> {
                         var random = ThreadLocalRandom.current();
-                        var pos = bot.dataManager().clientEntity().pos();
+                        var pos = bot.dataManager().player().pos();
                         var x =
                           random.nextInt(
                             pos.getFloorX() - radius,
@@ -387,7 +387,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                             c,
                             bot -> {
                               bot.dataManager()
-                                .clientEntity()
+                                .player()
                                 .lookAt(
                                   RotationOrigin.EYES,
                                   Vector3d.from(x, y, z));

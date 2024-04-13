@@ -39,11 +39,11 @@ public final class MovementAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var clientEntity = connection.dataManager().clientEntity();
+    var clientEntity = connection.dataManager().player();
     var botPosition = clientEntity.pos();
     var level = connection.dataManager().currentLevel();
 
-    var blockMeta = level.getBlockStateAt(blockPosition);
+    var blockMeta = level.getBlockState(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
     if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.2)) {
       // We want to be on the same Y level
@@ -56,12 +56,12 @@ public final class MovementAction implements WorldAction {
 
   @Override
   public void tick(BotConnection connection) {
-    var clientEntity = connection.dataManager().clientEntity();
+    var clientEntity = connection.dataManager().player();
     clientEntity.controlState().resetAll();
 
     var level = connection.dataManager().currentLevel();
 
-    var blockMeta = level.getBlockStateAt(blockPosition);
+    var blockMeta = level.getBlockState(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
 
     var previousYaw = clientEntity.yaw();

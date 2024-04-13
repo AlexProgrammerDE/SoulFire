@@ -41,7 +41,7 @@ public class AutoJump implements InternalPlugin {
     connection.scheduler().scheduleWithRandomDelay(
       () -> {
         var dataManager = connection.dataManager();
-        var clientEntity = dataManager.clientEntity();
+        var clientEntity = dataManager.player();
         if (clientEntity != null
           && clientEntity.level().isChunkLoaded(clientEntity.blockPos())
           && clientEntity.onGround()) {

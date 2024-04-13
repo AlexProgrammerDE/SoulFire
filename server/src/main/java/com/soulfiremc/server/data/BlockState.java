@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.data;
 
-import com.soulfiremc.server.protocol.bot.movement.AABB;
-import java.util.List;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record BlockState(

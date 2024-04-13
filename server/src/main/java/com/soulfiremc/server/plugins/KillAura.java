@@ -80,12 +80,12 @@ public class KillAura implements InternalPlugin {
         var bestVisiblePoint = control.getEntityVisiblePoint(target);
         if (bestVisiblePoint != null) {
           distance =
-            bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition());
+            bestVisiblePoint.distance(bot.dataManager().player().eyePosition());
         } else {
           distance =
             target
               .eyePosition()
-              .distance(bot.dataManager().clientEntity().eyePosition());
+              .distance(bot.dataManager().player().eyePosition());
         }
 
         if (distance > lookRange) {
@@ -93,10 +93,10 @@ public class KillAura implements InternalPlugin {
         }
 
         if (bestVisiblePoint != null) {
-          bot.dataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+          bot.dataManager().player().lookAt(RotationOrigin.EYES, bestVisiblePoint);
         } else {
           bot.dataManager()
-            .clientEntity()
+            .player()
             .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
         }
 

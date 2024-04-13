@@ -29,7 +29,7 @@ import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.MathHelper;
 import java.util.OptionalInt;
 import org.jetbrains.annotations.Nullable;
@@ -143,7 +143,7 @@ public class Costs {
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     TagsState tagsState,
-    @Nullable ClientEntity entity,
+    @Nullable Player entity,
     @Nullable PlayerInventoryContainer inventoryContainer,
     boolean onGround,
     @Nullable SFItemStack itemStack,

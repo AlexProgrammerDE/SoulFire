@@ -168,7 +168,7 @@ public class InventoryManager {
         hasChanged = true;
 
         // Remove the old item's modifiers
-        dataManager.clientEntity().attributeState().removeItemModifiers(previousItem);
+        dataManager.player().attributeState().removeItemModifiers(previousItem);
       } else {
         // Item before, and we have the same one now
         hasChanged = false;
@@ -179,7 +179,7 @@ public class InventoryManager {
     }
 
     if (hasChanged && item != null && item.type().attributeSlot() == equipmentSlot) {
-      dataManager.clientEntity().attributeState().putItemModifiers(item.type());
+      dataManager.player().attributeState().putItemModifiers(item.type());
     }
 
     lastInEquipment.put(equipmentSlot, item == null ? null : item.type());

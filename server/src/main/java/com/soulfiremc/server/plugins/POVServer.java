@@ -112,7 +112,7 @@ import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -379,7 +379,7 @@ public class POVServer implements InternalPlugin {
                               }
 
                               var clientEntity =
-                                botConnection.dataManager().clientEntity();
+                                botConnection.dataManager().player();
                               // Bot -> MC Client
                               switch (packet) {
                                 case ServerboundMovePlayerPosRotPacket posRot -> povSession.send(
@@ -448,7 +448,7 @@ public class POVServer implements InternalPlugin {
                       return;
                     }
 
-                    var clientEntity = botConnection.dataManager().clientEntity();
+                    var clientEntity = botConnection.dataManager().player();
                     switch (packet) {
                       case ServerboundMovePlayerPosRotPacket posRot -> {
                         clientEntity.x(posRot.getX());
@@ -572,13 +572,13 @@ public class POVServer implements InternalPlugin {
                       dataManager.portalCooldown());
                   session.send(
                     new ClientboundLoginPacket(
-                      dataManager.clientEntity().entityId(),
+                      dataManager.player().entityId(),
                       dataManager.loginData().hardcore(),
                       dataManager.loginData().worldNames(),
                       dataManager.loginData().maxPlayers(),
                       dataManager.serverViewDistance(),
                       dataManager.serverSimulationDistance(),
-                      dataManager.clientEntity().showReducedDebug(),
+                      dataManager.player().showReducedDebug(),
                       dataManager.enableRespawnScreen(),
                       dataManager.doLimitedCrafting(),
                       spawnInfo));
@@ -663,11 +663,11 @@ public class POVServer implements InternalPlugin {
 
                   session.send(
                     new ClientboundPlayerPositionPacket(
-                      dataManager.clientEntity().x(),
-                      dataManager.clientEntity().y(),
-                      dataManager.clientEntity().z(),
-                      dataManager.clientEntity().yaw(),
-                      dataManager.clientEntity().pitch(),
+                      dataManager.player().x(),
+                      dataManager.player().y(),
+                      dataManager.player().z(),
+                      dataManager.player().yaw(),
+                      dataManager.player().pitch(),
                       Integer.MIN_VALUE));
 
                   if (dataManager.playerListState().header() != null
@@ -813,11 +813,11 @@ public class POVServer implements InternalPlugin {
                   }
 
                   for (var entity : dataManager.entityTrackerState().getEntities()) {
-                    if (entity instanceof ClientEntity clientEntity) {
+                    if (entity instanceof Player player) {
                       session.send(
                         new ClientboundEntityEventPacket(
-                          clientEntity.entityId(),
-                          switch (clientEntity.opPermissionLevel()) {
+                          player.entityId(),
+                          switch (player.opPermissionLevel()) {
                             case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
                             case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
                             case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
@@ -825,12 +825,12 @@ public class POVServer implements InternalPlugin {
                             case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
                             default -> throw new IllegalStateException(
                               "Unexpected value: "
-                                + clientEntity.opPermissionLevel());
+                                + player.opPermissionLevel());
                           }));
                       session.send(
                         new ClientboundEntityEventPacket(
-                          clientEntity.entityId(),
-                          clientEntity.showReducedDebug()
+                          player.entityId(),
+                          player.showReducedDebug()
                             ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
                             : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
                     } else if (entity instanceof RawEntity rawEntity) {

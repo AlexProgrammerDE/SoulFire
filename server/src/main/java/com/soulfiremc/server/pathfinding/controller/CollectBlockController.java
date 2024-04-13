@@ -43,7 +43,7 @@ public class CollectBlockController {
 
   public static Optional<Vector3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker,
                                                              int iterations) {
-    var clientEntity = botConnection.dataManager().clientEntity();
+    var clientEntity = botConnection.dataManager().player();
     var clientPosition = clientEntity.pos().toInt();
     var level = clientEntity.level();
     var checkedPositions = new HashSet<Vector3i>();
@@ -57,7 +57,7 @@ public class CollectBlockController {
           break;
         }
 
-        var blockState = level.getBlockStateAt(blockPos);
+        var blockState = level.getBlockState(blockPos);
         if (checker.test(blockState)) {
           return Optional.of(blockPos);
         }

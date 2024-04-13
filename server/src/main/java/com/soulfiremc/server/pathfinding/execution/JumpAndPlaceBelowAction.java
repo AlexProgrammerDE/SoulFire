@@ -38,13 +38,13 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPlacePosition));
+    return BlockTypeHelper.isFullBlock(level.getBlockState(blockPlacePosition));
   }
 
   @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.player();
     dataManager.controlState().resetAll();
 
     if (!putOnHotbar) {

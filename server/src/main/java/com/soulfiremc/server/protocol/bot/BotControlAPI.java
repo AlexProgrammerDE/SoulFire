@@ -93,7 +93,7 @@ public class BotControlAPI {
     // Let the server know we are sprinting
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.player().entityId(),
         newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
 
     return newSprint;
@@ -106,7 +106,7 @@ public class BotControlAPI {
     // Let the server know we are sneaking
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.player().entityId(),
         newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
 
     return newSneak;
@@ -174,7 +174,7 @@ public class BotControlAPI {
       }
     }
 
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.player().eyePosition();
 
     // sort by distance to the bot
     points.sort(Comparator.comparingDouble(eye::distance));
@@ -216,19 +216,19 @@ public class BotControlAPI {
     boolean ignoreBots,
     boolean onlyInteractable,
     boolean mustBeSeen) {
-    if (dataManager.clientEntity() == null) {
+    if (dataManager.player() == null) {
       return null;
     }
 
-    var x = dataManager.clientEntity().x();
-    var y = dataManager.clientEntity().y();
-    var z = dataManager.clientEntity().z();
+    var x = dataManager.player().x();
+    var y = dataManager.player().y();
+    var z = dataManager.player().z();
 
     Entity closest = null;
     var closestDistance = Double.MAX_VALUE;
 
     for (var entity : dataManager.entityTrackerState().getEntities()) {
-      if (entity.entityId() == dataManager.clientEntity().entityId()) {
+      if (entity.entityId() == dataManager.player().entityId()) {
         continue;
       }
 
@@ -261,11 +261,11 @@ public class BotControlAPI {
         && dataManager.connection().attackManager().botConnections().values().stream()
         .anyMatch(
           b -> {
-            if (b.dataManager().clientEntity() == null) {
+            if (b.dataManager().player() == null) {
               return false;
             }
 
-            return b.dataManager().clientEntity().uuid().equals(entity.uuid());
+            return b.dataManager().player().uuid().equals(entity.uuid());
           })) {
         continue;
       }
@@ -290,7 +290,7 @@ public class BotControlAPI {
   public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
     var level = dataManager.currentLevel();
 
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.player().eyePosition();
     var distance = eye.distance(vec);
     if (distance >= 256) {
       return false;
@@ -315,7 +315,7 @@ public class BotControlAPI {
 
     return (float)
       (1.0
-        / dataManager.clientEntity().attributeValue(AttributeType.GENERIC_ATTACK_SPEED)
+        / dataManager.player().attributeValue(AttributeType.GENERIC_ATTACK_SPEED)
         * 20.0);
   }
 }

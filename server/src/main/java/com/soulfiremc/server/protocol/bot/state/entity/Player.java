@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
+import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -25,11 +26,6 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
-import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
-import com.soulfiremc.server.protocol.bot.movement.BotMovementManager;
-import com.soulfiremc.server.protocol.bot.movement.ControlState;
-import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
-import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -37,6 +33,8 @@ import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 /**
  * Represents the bot itself as an entity.
@@ -44,13 +42,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class ClientEntity extends Entity {
-  private final PhysicsData physics = new PhysicsData();
+public class Player extends LivingEntity {
   private final BotConnection connection;
   private final SessionDataManager dataManager;
-  private final ControlState controlState;
-  private final PlayerMovementState movementState;
-  private final BotMovementManager botMovementManager;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -61,35 +55,88 @@ public class ClientEntity extends Entity {
   private boolean lastOnGround = false;
   private int positionReminder = 0;
 
-  public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, ControlState controlState,
-    Level level) {
+  public Player(
+    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, Level level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
     this.dataManager = dataManager;
-    this.controlState = controlState;
-    this.movementState =
-      new PlayerMovementState(this, dataManager.inventoryManager().playerInventory());
-    this.botMovementManager = new BotMovementManager(dataManager, movementState, this);
   }
 
   @Override
   public void tick() {
-    super.tick();
-
-    // Collect data for calculations
-    movementState.updateData();
-
-    // Tick physics movement
-    if (level.isChunkLoaded(this.blockPos())) {
-      botMovementManager.tick();
+    this.noPhysics = this.isSpectator();
+    if (this.isSpectator()) {
+      this.onGround(false);
     }
 
-    // Apply calculated state
-    movementState.applyData();
+    this.updateIsUnderwater();
+    super.tick();
+
+    int i = 29999999;
+    double d = MathHelper.doubleClamp(this.x(), -i, i);
+    double e = MathHelper.doubleClamp(this.z(), -i, i);
+    if (d != this.x() || e != this.z()) {
+      this.setPos(d, this.y(), e);
+    }
+
+    ++this.attackStrengthTicker;
+
+    this.cooldowns.tick();
+    this.updatePlayerPose();
 
     // Send position changes
     sendPositionChanges();
+  }
+
+  @Override
+  protected float getMaxHeadRotationRelativeToBody() {
+    return this.isBlocking() ? 15.0F : super.getMaxHeadRotationRelativeToBody();
+  }
+
+  private boolean isBlocking() {
+    return false; // TODO: Implement
+  }
+
+  @Override
+  public void aiStep() {
+    if (this.jumpTriggerTime > 0) {
+      --this.jumpTriggerTime;
+    }
+
+    this.inventory.tick();
+    super.aiStep();
+    this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+    float f;
+    if (this.onGround() && !this.isDeadOrDying() && !this.isSwimming()) {
+      f = Math.min(0.1F, (float)this.getDeltaMovement().horizontalDistance());
+    } else {
+      f = 0.0F;
+    }
+  }
+
+  @Override
+  public void travel(Vector3d travelVector) {
+    if (this.isSwimming() && !this.isPassenger()) {
+      double d = this.getLookAngle().y;
+      double e = d < -0.2 ? 0.085 : 0.06;
+      if (d <= 0.0
+        || this.jumping
+        || !this.level().getBlockState(Vector3i.from(this.x(), this.y() + 1.0 - 0.1, this.z())).getFluidState().isEmpty()) {
+        Vector3d vec3 = this.getDeltaMovement();
+        this.setDeltaMovement(vec3.add(0.0, (d - vec3.getY()) * e, 0.0));
+      }
+    }
+
+    if (dataManager.abilitiesData().flying() && !this.isPassenger()) {
+      double d = this.getDeltaMovement().getY();
+      super.travel(travelVector);
+      Vector3d vec32 = this.getDeltaMovement();
+      this.setDeltaMovement(vec32.getX(), d * 0.6, vec32.getZ());
+      this.resetFallDistance();
+      this.setSharedFlag(7, false);
+    } else {
+      super.travel(travelVector);
+    }
   }
 
   public void sendPositionChanges() {
@@ -192,16 +239,22 @@ public class ClientEntity extends Entity {
     connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
   }
 
-  public AbilitiesData abilities() {
-    return dataManager.abilitiesData();
-  }
-
-  public void jump() {
-    movementState.jumpQueued = true;
+  @Override
+  public boolean isSpectator() {
+    return dataManager.gameMode() == GameMode.SPECTATOR;
   }
 
   @Override
-  public float height() {
-    return this.controlState.sneaking() ? 1.5F : 1.8F;
+  public float getSpeed() {
+    return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+  }
+
+  @Override
+  public boolean isImmobile() {
+    return super.isImmobile() || this.isSleeping();
+  }
+
+  public boolean isSleeping() {
+    return false; // TODO: Implement
   }
 }

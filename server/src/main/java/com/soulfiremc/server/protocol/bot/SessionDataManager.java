@@ -142,7 +142,7 @@ import com.soulfiremc.server.protocol.bot.state.PlayerListState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.bot.state.WeatherState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
@@ -191,7 +191,7 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
-  private ClientEntity clientEntity;
+  private Player player;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
   private HealthData healthData;
@@ -283,10 +283,10 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // Init client entity
-    clientEntity =
-      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
-    clientEntity.showReducedDebug(packet.isReducedDebugInfo());
-    entityTrackerState.addEntity(clientEntity);
+    player =
+      new Player(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
+    player.showReducedDebug(packet.isReducedDebugInfo());
+    entityTrackerState.addEntity(player);
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
@@ -306,22 +306,22 @@ public final class SessionDataManager {
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
     var relative = packet.getRelative();
-    var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getX() : packet.getX();
-    var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
-    var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
+    var x = relative.contains(PositionElement.X) ? player.x() + packet.getX() : packet.getX();
+    var y = relative.contains(PositionElement.Y) ? player.y() + packet.getY() : packet.getY();
+    var z = relative.contains(PositionElement.Z) ? player.z() + packet.getZ() : packet.getZ();
     var yaw =
       relative.contains(PositionElement.YAW)
-        ? clientEntity.yaw() + packet.getYaw()
+        ? player.yaw() + packet.getYaw()
         : packet.getYaw();
     var pitch =
       relative.contains(PositionElement.PITCH)
-        ? clientEntity.pitch() + packet.getPitch()
+        ? player.pitch() + packet.getPitch()
         : packet.getPitch();
 
-    clientEntity.setPosition(x, y, z);
-    clientEntity.setRotation(yaw, pitch);
+    player.setPosition(x, y, z);
+    player.setRotation(yaw, pitch);
 
-    var position = clientEntity.blockPos();
+    var position = player.blockPos();
     if (!joinedWorld) {
       joinedWorld = true;
 
@@ -351,7 +351,7 @@ public final class SessionDataManager {
       }
     }
 
-    clientEntity.lookAt(packet.getOrigin(), targetPosition);
+    player.lookAt(packet.getOrigin(), targetPosition);
   }
 
   @EventHandler
@@ -359,7 +359,7 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // We are now possibly in a new dimension
-    clientEntity.level(currentLevel());
+    player.level(currentLevel());
 
     log.info("Respawned");
   }
@@ -368,7 +368,7 @@ public final class SessionDataManager {
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
 
-    if (state == null || state != clientEntity) {
+    if (state == null || state != player) {
       log.warn("Received death for unknown or invalid entity {}", packet.getPlayerId());
       return;
     }
@@ -496,7 +496,7 @@ public final class SessionDataManager {
         packet.getFlySpeed(),
         packet.getWalkSpeed());
 
-    var attributeState = clientEntity.attributeState();
+    var attributeState = player.attributeState();
     attributeState
       .getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED)
       .baseValue(abilitiesData.walkSpeed());

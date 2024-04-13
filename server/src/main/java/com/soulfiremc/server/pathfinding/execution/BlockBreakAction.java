@@ -50,13 +50,13 @@ public final class BlockBreakAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isEmptyBlock(level.getBlockStateAt(blockPosition).blockType());
+    return BlockTypeHelper.isEmptyBlock(level.getBlockState(blockPosition).blockType());
   }
 
   @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.player();
     dataManager.controlState().resetAll();
 
     var level = dataManager.currentLevel();
@@ -85,7 +85,7 @@ public final class BlockBreakAction implements WorldAction {
     }
 
     if (remainingTicks == -1) {
-      var optionalBlockType = level.getBlockStateAt(blockPosition).blockType();
+      var optionalBlockType = level.getBlockState(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
         log.warn("Block at {} is not in view range!", blockPosition);
         return;
@@ -94,7 +94,7 @@ public final class BlockBreakAction implements WorldAction {
       remainingTicks =
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
-            dataManager.clientEntity(),
+            dataManager.player(),
             dataManager.inventoryManager().playerInventory(),
             clientEntity.onGround(),
             dataManager.inventoryManager().playerInventory().getHeldItem().item(),
