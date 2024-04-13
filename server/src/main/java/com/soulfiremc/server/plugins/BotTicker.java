@@ -19,7 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
-import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TickTimer;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.MDC;
@@ -27,13 +26,7 @@ import org.slf4j.MDC;
 public class BotTicker implements InternalPlugin {
   public static void onConnectionInit(BotConnectionInitEvent event) {
     var connection = event.connection();
-    startTicker(
-      connection,
-      new TickTimer(20));
-  }
-
-  private static void startTicker(
-    BotConnection connection, TickTimer tickTimer) {
+    var tickTimer = new TickTimer(20);
     connection.scheduler().scheduleWithFixedDelay(
       () -> {
         tickTimer.advanceTime();

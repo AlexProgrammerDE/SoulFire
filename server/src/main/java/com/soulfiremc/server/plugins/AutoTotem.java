@@ -83,7 +83,7 @@ public class AutoTotem implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(AutoTotemSettings.class, "Auto Totem");
   }
 

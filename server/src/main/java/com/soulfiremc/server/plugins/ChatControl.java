@@ -46,12 +46,12 @@ public class ChatControl implements InternalPlugin {
       connection.logger().info("[ChatControl] Executing command: {}", command);
       var code = connection.attackManager().soulFireServer().injector().getSingleton(ServerCommandManager.class).execute(command);
 
-      connection.botControl().sendMessage("Command \"" + command + "\" executed! (Result code: " + code + ")");
+      connection.botControl().sendMessage("Command \"" + command + "\" executed! (Code: " + code + ")");
     }
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control");
   }
 

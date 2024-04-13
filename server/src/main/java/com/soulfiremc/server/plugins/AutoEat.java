@@ -90,7 +90,7 @@ public class AutoEat implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat");
   }
 

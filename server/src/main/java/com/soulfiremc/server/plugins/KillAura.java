@@ -39,7 +39,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 @Slf4j
 public class KillAura implements InternalPlugin {
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");
   }
 

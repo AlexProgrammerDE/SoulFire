@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -121,7 +120,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       new JumpAndPlaceBelowAction(
         node,
         new BotActionManager.BlockPlaceAgainstData(
-          node.sub(0, 1, 0), Direction.UP)));
+          node.sub(0, 1, 0), BlockFace.TOP)));
 
     return new GraphInstructions(
       absoluteTargetFeetBlock, cost, actions);

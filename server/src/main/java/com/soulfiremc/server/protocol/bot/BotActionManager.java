@@ -27,6 +27,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.Server
 import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import java.util.ArrayList;
@@ -83,18 +84,6 @@ public class BotActionManager {
     return Optional.of(closestIntersection);
   }
 
-  public static Vector3d getMiddleBlockFace(Vector3i blockPos, Direction blockFace) {
-    var blockPosDouble = blockPos.toDouble();
-    return switch (blockFace) {
-      case DOWN -> blockPosDouble.add(0.5, 0, 0.5);
-      case UP -> blockPosDouble.add(0.5, 1, 0.5);
-      case NORTH -> blockPosDouble.add(0.5, 0.5, 0);
-      case SOUTH -> blockPosDouble.add(0.5, 0.5, 1);
-      case WEST -> blockPosDouble.add(0, 0.5, 0.5);
-      case EAST -> blockPosDouble.add(1, 0.5, 0.5);
-    };
-  }
-
   public void incrementSequenceNumber() {
     sequenceNumber++;
   }
@@ -108,14 +97,14 @@ public class BotActionManager {
     placeBlock(hand, blockPlaceAgainstData.againstPos().toVector3i(), blockPlaceAgainstData.blockFace());
   }
 
-  public void placeBlock(Hand hand, Vector3i againstBlock, Direction againstFace) {
+  public void placeBlock(Hand hand, Vector3i againstBlock, BlockFace againstFace) {
     incrementSequenceNumber();
     var clientEntity = dataManager.clientEntity();
     var level = dataManager.currentLevel();
 
     var eyePosition = clientEntity.eyePosition();
 
-    var againstPlacePosition = getMiddleBlockFace(againstBlock, againstFace);
+    var againstPlacePosition = againstFace.getMiddleOfFace(SFVec3i.fromInt(againstBlock));
 
     var previousYaw = clientEntity.yaw();
     var previousPitch = clientEntity.pitch();
@@ -140,7 +129,7 @@ public class BotActionManager {
     connection.sendPacket(
       new ServerboundUseItemOnPacket(
         againstBlock,
-        againstFace,
+        againstFace.toDirection(),
         hand,
         rayCastPosition.getX(),
         rayCastPosition.getY(),
@@ -167,5 +156,5 @@ public class BotActionManager {
     connection.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
   }
 
-  public record BlockPlaceAgainstData(SFVec3i againstPos, Direction blockFace) {}
+  public record BlockPlaceAgainstData(SFVec3i againstPos, BlockFace blockFace) {}
 }

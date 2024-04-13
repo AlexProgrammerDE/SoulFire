@@ -52,7 +52,7 @@ public class ModLoaderSupport implements InternalPlugin {
   private static final char HOSTNAME_SEPARATOR = '\0';
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support");
   }
 

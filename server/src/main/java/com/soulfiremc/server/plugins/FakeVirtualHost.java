@@ -48,7 +48,7 @@ public class FakeVirtualHost implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(FakeVirtualHostSettings.class, "Fake Virtual Host");
   }
 

@@ -70,12 +70,12 @@ public class PlayerMovementState {
     vel = new MutableVector3d(entity.motionX(), entity.motionY(), entity.motionZ());
 
     var effectState = entity.effectState();
-    jumpBoost = effectState.getEffectValue(Effect.JUMP_BOOST);
-    speed = effectState.getEffectValue(Effect.SPEED);
-    slowness = effectState.getEffectValue(Effect.SLOWNESS);
-    dolphinsGrace = effectState.getEffectValue(Effect.DOLPHINS_GRACE);
-    slowFalling = effectState.getEffectValue(Effect.SLOW_FALLING);
-    levitation = effectState.getEffectValue(Effect.LEVITATION);
+    jumpBoost = effectState.getEffectAmplifier(Effect.JUMP_BOOST);
+    speed = effectState.getEffectAmplifier(Effect.SPEED);
+    slowness = effectState.getEffectAmplifier(Effect.SLOWNESS);
+    dolphinsGrace = effectState.getEffectAmplifier(Effect.DOLPHINS_GRACE);
+    slowFalling = effectState.getEffectAmplifier(Effect.SLOW_FALLING);
+    levitation = effectState.getEffectAmplifier(Effect.LEVITATION);
 
     depthStrider = inventoryContainer.getEnchantmentLevel(EnchantmentType.DEPTH_STRIDER);
 

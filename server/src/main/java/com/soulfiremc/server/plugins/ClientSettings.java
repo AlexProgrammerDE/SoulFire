@@ -89,7 +89,7 @@ public class ClientSettings implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings");
   }
 

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -323,32 +322,32 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       case NORMAL -> // 5
         List.of(
           // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), Direction.UP),
+          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
           // In front
           new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.direction()),
+            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
           // Scaffolding
           new BotActionManager.BlockPlaceAgainstData(
-            oppositeDirection.offset(floorBlock), blockDirection.direction()),
+            oppositeDirection.offset(floorBlock), blockDirection.toBlockFace()),
           // Left side
           new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
+            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
           // Right side
           new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.direction()));
+            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
       case JUMP_UP_BLOCK, FALL_1 -> // 4 - no scaffolding
         List.of(
           // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), Direction.UP),
+          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
           // In front
           new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.direction()),
+            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
           // Left side
           new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.direction()),
+            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
           // Right side
           new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.direction()));
+            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
       default -> throw new IllegalStateException("Unexpected value: " + modifier);
     };
   }

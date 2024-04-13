@@ -55,7 +55,7 @@ public class ServerListBypass implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsManagerInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass");
   }
 
