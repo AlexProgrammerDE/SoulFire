@@ -29,7 +29,6 @@ import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -39,18 +38,17 @@ import lombok.extern.slf4j.Slf4j;
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   private static List<WorldAction> getActionTrace(MinecraftRouteNode current) {
     var actions = new ObjectArrayList<WorldAction>();
-    var previousElement = current;
-    do {
-      var previousActions = new ObjectArrayList<>(previousElement.actions());
 
-      // So they get executed in the right order
-      Collections.reverse(previousActions);
-      for (var action : previousActions) {
-        actions.add(0, action);
+    var currentElement = current;
+    do {
+      var previousActions = new ObjectArrayList<>(currentElement.actions());
+
+      for (var i = previousActions.size() - 1; i >= 0; i--) {
+        actions.add(0, previousActions.get(i));
       }
 
-      previousElement = previousElement.parent();
-    } while (previousElement != null);
+      currentElement = currentElement.parent();
+    } while (currentElement != null);
 
     return actions;
   }
