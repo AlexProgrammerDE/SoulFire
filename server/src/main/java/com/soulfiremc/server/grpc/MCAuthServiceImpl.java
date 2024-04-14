@@ -25,6 +25,7 @@ import com.soulfiremc.server.account.SFEasyMCAuthService;
 import com.soulfiremc.server.account.SFJavaMicrosoftAuthService;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.account.SFTheAlteningAuthService;
+import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.settings.proxy.SFProxy;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -47,7 +48,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
 
   @Override
   public void login(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.AUTHENTICATE_MC_ACCOUNT);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
     try {
       var account =

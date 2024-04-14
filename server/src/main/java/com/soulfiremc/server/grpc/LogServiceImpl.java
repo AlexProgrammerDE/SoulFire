@@ -22,94 +22,107 @@ import com.soulfiremc.grpc.generated.LogResponse;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.system.SystemLogEvent;
+import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
+  @Getter
+  private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
   public LogServiceImpl() {
     SoulFireAPI.registerListener(SystemLogEvent.class, event -> logs.add(event.message()));
   }
 
-  private static void publishLine(String line, StreamObserver<LogResponse> responseObserver) {
-    var response = LogResponse.newBuilder().setMessage(line).build();
-
-    responseObserver.onNext(response);
-  }
-
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SUBSCRIBE_LOGS);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS);
 
     try {
-      sendPreviousLogs(request.getPrevious(), responseObserver);
-      SoulFireAPI.registerListener(SystemLogEvent.class,
-        new LogEventListener((ServerCallStreamObserver<LogResponse>) responseObserver));
+      var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver);
+      subscribers.put(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(), sender);
+
+      sendPreviousLogs(request.getPrevious(), sender);
+      SoulFireAPI.registerListener(SystemLogEvent.class, e -> sender.sendMessage(e.message()));
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
 
-  private void sendPreviousLogs(int requestPrevious, StreamObserver<LogResponse> responseObserver) {
+  private void sendPreviousLogs(int requestPrevious, ConnectionMessageSender sender) {
     for (var log : logs.getNewest(requestPrevious)) {
-      publishLine(log, responseObserver);
+      sender.sendMessage(log);
     }
   }
 
-  private record LogEventListener(ServerCallStreamObserver<LogResponse> responseObserver)
-    implements Consumer<SystemLogEvent> {
-    @Override
-    public void accept(SystemLogEvent event) {
+  private record ConnectionMessageSender(ServerCallStreamObserver<LogResponse> responseObserver) {
+    public void sendMessage(String message) {
       if (responseObserver.isCancelled()) {
         return;
       }
 
-      publishLine(event.message(), responseObserver);
+      responseObserver.onNext(LogResponse.newBuilder().setMessage(message).build());
     }
   }
 
   public static class QueueWithMaxSize<E> {
     private final int maxSize;
     private final Queue<E> queue;
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public QueueWithMaxSize(int maxSize) {
       this.maxSize = maxSize;
       this.queue = new ArrayBlockingQueue<>(maxSize);
     }
 
-    public synchronized boolean add(E element) {
-      if (queue.size() >= maxSize) {
-        queue.poll(); // Remove the oldest element if max size is reached
-      }
+    public boolean add(E element) {
+      lock.writeLock().lock();
+      try {
+        if (queue.size() >= maxSize) {
+          queue.poll(); // Remove the oldest element if max size is reached
+        }
 
-      return queue.add(element);
+        return queue.add(element);
+      } finally {
+        lock.writeLock().unlock();
+      }
     }
 
-    public synchronized List<E> getNewest(int amount) {
+    public List<E> getNewest(int amount) {
       if (amount > maxSize) {
         throw new IllegalArgumentException("Amount is bigger than max size!");
       }
 
-      var list = new ArrayList<>(queue);
-      var size = list.size();
-      var start = size - amount;
+      lock.readLock().lock();
+      try {
+        var list = new ArrayList<>(queue);
+        var size = list.size();
+        var start = size - amount;
 
-      if (start < 0) {
-        start = 0;
+        if (start < 0) {
+          start = 0;
+        }
+
+        return list.subList(start, size);
+      } finally {
+        lock.readLock().unlock();
       }
-
-      return list.subList(start, size);
     }
   }
 }

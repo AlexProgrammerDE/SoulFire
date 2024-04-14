@@ -15,17 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.grpc;
+package com.soulfiremc.server.user;
 
-public enum Resource {
-  COMMAND_EXECUTION,
-  COMMAND_COMPLETION,
-  COMMAND_HISTORY,
-  START_ATTACK,
-  TOGGLE_ATTACK,
-  STOP_ATTACK,
-  AUTHENTICATE_MC_ACCOUNT,
-  CHECK_PROXY,
-  SUBSCRIBE_LOGS,
-  SERVER_CONFIG
+import java.util.ArrayList;
+import java.util.List;
+
+public record Permission(String id, String description) {
+  public static final List<Permission> VALUES = new ArrayList<>();
+
+  public Permission {
+    VALUES.add(this);
+  }
 }

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.util.RPCConstants;
 import io.grpc.Context;
 import io.grpc.Contexts;
@@ -67,8 +68,6 @@ public class JwtServerInterceptor implements ServerInterceptor {
         // set client id into current context
         var ctx =
           Context.current()
-            .withValue(
-              ServerRPCConstants.CLIENT_ID_CONTEXT_KEY, claims.getPayload().getSubject())
             .withValue(
               ServerRPCConstants.USER_CONTEXT_KEY,
               authSystem.authenticate(

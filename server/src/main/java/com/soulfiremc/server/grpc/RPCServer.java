@@ -27,6 +27,7 @@ import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.grpc.GrpcService;
+import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
 import java.net.InetSocketAddress;

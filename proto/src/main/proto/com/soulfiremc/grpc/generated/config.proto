@@ -102,7 +102,12 @@ message ClientPluginSettingsPage {
   repeated ClientPluginSettingEntry entries = 4;
 }
 
-// New options that extend the clients options
+message PermissionMessage {
+  string id = 1;
+  string description = 2;
+  bool granted = 3;
+}
+
 message ClientPlugin {
   string id = 1;
   string version = 2;
@@ -110,12 +115,13 @@ message ClientPlugin {
   string provider = 4;
 }
 
-message UIClientDataResponse {
+message ClientDataResponse {
   string username = 1;
-  repeated ClientPlugin plugins = 2;
-  repeated ClientPluginSettingsPage pluginSettings = 3;
+  repeated PermissionMessage permissions = 2;
+  repeated ClientPlugin plugins = 3;
+  repeated ClientPluginSettingsPage pluginSettings = 4;
 }
 
 service ConfigService {
-  rpc getUIClientData(ClientDataRequest) returns (UIClientDataResponse);
+  rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
 }

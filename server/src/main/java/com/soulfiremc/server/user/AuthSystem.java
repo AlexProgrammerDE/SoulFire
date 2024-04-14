@@ -15,20 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.grpc;
+package com.soulfiremc.server.user;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
+import java.util.Date;
 
-public interface AuthenticatedUser {
-  String getUsername();
-
-  boolean canAccess(Resource resource);
-
-  default void canAccessOrThrow(Resource resource) {
-    if (!canAccess(resource)) {
-      throw new StatusRuntimeException(
-        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
-    }
-  }
+public interface AuthSystem {
+  /**
+   * Authenticates a user by subject and token issued at date.
+   *
+   * @param subject  The subject of the token
+   * @param issuedAt The date the token was made, use to check if the token is valid for that user.
+   *                 Use issuedAt to check if the token is valid for that user. If a user resets their password,
+   *                 the token should be invalidated by raising the required issuedAt date to the current date.
+   * @return The authenticated user
+   */
+  AuthenticatedUser authenticate(String subject, Date issuedAt);
 }

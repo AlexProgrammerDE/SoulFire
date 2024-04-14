@@ -89,7 +89,7 @@ public class CLIManager {
     for (var page :
       rpcClient
         .configStubBlocking()
-        .getUIClientData(ClientDataRequest.getDefaultInstance())
+        .getClientData(ClientDataRequest.getDefaultInstance())
         .getPluginSettingsList()) {
       for (var entry : page.getEntriesList()) {
         switch (entry.getValueCase()) {

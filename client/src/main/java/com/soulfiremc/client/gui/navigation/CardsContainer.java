@@ -53,7 +53,7 @@ public class CardsContainer extends JPanel {
       guiManager
         .rpcClient()
         .configStubBlocking()
-        .getUIClientData(ClientDataRequest.getDefaultInstance())
+        .getClientData(ClientDataRequest.getDefaultInstance())
         .getPluginSettingsList());
 
     // Add bot settings

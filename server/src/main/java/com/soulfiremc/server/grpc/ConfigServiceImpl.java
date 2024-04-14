@@ -18,10 +18,13 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.ClientDataRequest;
+import com.soulfiremc.grpc.generated.ClientDataResponse;
 import com.soulfiremc.grpc.generated.ClientPlugin;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
-import com.soulfiremc.grpc.generated.UIClientDataResponse;
+import com.soulfiremc.grpc.generated.PermissionMessage;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -35,6 +38,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
+
+  private Collection<PermissionMessage> getPermissions() {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    var permissions = new ArrayList<PermissionMessage>();
+    for (var permission : Permission.VALUES) {
+      permissions.add(PermissionMessage.newBuilder()
+        .setId(permission.id())
+        .setDescription(permission.description())
+        .setGranted(user.hasPermission(permission))
+        .build());
+    }
+
+    return permissions;
+  }
 
   private Collection<ClientPlugin> getExtensions() {
     var plugins = new ArrayList<ClientPlugin>();
@@ -57,15 +74,15 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   }
 
   @Override
-  public void getUIClientData(
-    ClientDataRequest request, StreamObserver<UIClientDataResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.SERVER_CONFIG);
+  public void getClientData(
+    ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SERVER_CONFIG);
 
     try {
-      var username = ServerRPCConstants.CLIENT_ID_CONTEXT_KEY.get();
       responseObserver.onNext(
-        UIClientDataResponse.newBuilder()
-          .setUsername(username)
+        ClientDataResponse.newBuilder()
+          .setUsername(ServerRPCConstants.USER_CONTEXT_KEY.get().getUsername())
+          .addAllPermissions(getPermissions())
           .addAllPlugins(getExtensions())
           .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
           .build());

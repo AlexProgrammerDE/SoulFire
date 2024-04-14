@@ -22,6 +22,7 @@ import com.soulfiremc.grpc.generated.ProxyCheckRequest;
 import com.soulfiremc.grpc.generated.ProxyCheckResponse;
 import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
+import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.ReactorHttpHelper;
 import io.grpc.Status;
@@ -41,7 +42,7 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
   @Override
   public void check(
     ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.CHECK_PROXY);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CHECK_PROXY);
 
     try {
       var url =

@@ -26,6 +26,7 @@ import com.soulfiremc.grpc.generated.AttackStopRequest;
 import com.soulfiremc.grpc.generated.AttackStopResponse;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -41,7 +42,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   @Override
   public void startAttack(
     AttackStartRequest request, StreamObserver<AttackStartResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.START_ATTACK);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.START_ATTACK);
 
     try {
       var settingsHolder = SettingsHolder.deserialize(request);
@@ -59,7 +60,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   public void toggleAttackState(
     AttackStateToggleRequest request,
     StreamObserver<AttackStateToggleResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.TOGGLE_ATTACK);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.TOGGLE_ATTACK);
 
     try {
       soulFireServer.toggleAttackState(
@@ -79,7 +80,7 @@ public class AttackServiceImpl extends AttackServiceGrpc.AttackServiceImplBase {
   @Override
   public void stopAttack(
     AttackStopRequest request, StreamObserver<AttackStopResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.STOP_ATTACK);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.STOP_ATTACK);
 
     try {
       soulFireServer.stopAttack(request.getId());
