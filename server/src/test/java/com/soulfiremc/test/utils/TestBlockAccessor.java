@@ -40,7 +40,7 @@ public class TestBlockAccessor implements BlockAccessor {
   }
 
   @Override
-  public BlockState getBlockStateAt(int x, int y, int z) {
+  public BlockState getBlockState(int x, int y, int z) {
     return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
   }
 }

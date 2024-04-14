@@ -149,7 +149,7 @@ public class Level {
   }
 
   public BlockState getBlockState(int x, int y, int z) {
-    return chunks.getBlockStateAt(x, y, z);
+    return chunks.getBlockState(x, y, z);
   }
 
   public List<AABB> getCollisionBoxes(AABB aabb) {

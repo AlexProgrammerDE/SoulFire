@@ -54,12 +54,12 @@ public class ProjectedLevel {
     return new ProjectedLevel(accessor, blockChanges);
   }
 
-  public BlockState getBlockStateAt(SFVec3i position) {
+  public BlockState getBlockState(SFVec3i position) {
     var blockChange = blockChanges.get(position);
     if (blockChange != null) {
       return blockChange;
     }
 
-    return accessor.getBlockStateAt(position.x, position.y, position.z);
+    return accessor.getBlockState(position.x, position.y, position.z);
   }
 }

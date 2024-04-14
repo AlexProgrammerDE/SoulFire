@@ -81,7 +81,7 @@ public class PathfindingBenchmark {
       // Find the first safe block at 0 0
       var safeY = 0;
       for (var y = 0; y < 255; y++) {
-        if (accessor.getBlockStateAt(0, y, 0).blockType() == BlockType.AIR) {
+        if (accessor.getBlockState(0, y, 0).blockType() == BlockType.AIR) {
           safeY = y;
           break;
         }

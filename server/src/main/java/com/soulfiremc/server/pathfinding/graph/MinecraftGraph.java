@@ -337,7 +337,7 @@ public record MinecraftGraph(TagsState tagsState,
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
         absolutePositionBlock = node.add(key);
-        blockState = level.getBlockStateAt(absolutePositionBlock);
+        blockState = level.getBlockState(absolutePositionBlock);
 
         if (blockState.blockType() == BlockType.VOID_AIR) {
           throw new OutOfLevelException();

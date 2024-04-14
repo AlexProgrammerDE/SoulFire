@@ -21,9 +21,9 @@ import com.soulfiremc.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public interface BlockAccessor {
-  BlockState getBlockStateAt(int x, int y, int z);
+  BlockState getBlockState(int x, int y, int z);
 
-  default BlockState getBlockStateAt(Vector3i pos) {
-    return getBlockStateAt(pos.getX(), pos.getY(), pos.getZ());
+  default BlockState getBlockState(Vector3i pos) {
+    return getBlockState(pos.getX(), pos.getY(), pos.getZ());
   }
 }
