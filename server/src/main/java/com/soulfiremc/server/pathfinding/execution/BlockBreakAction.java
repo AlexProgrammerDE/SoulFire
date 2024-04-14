@@ -50,7 +50,7 @@ public final class BlockBreakAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isEmptyBlock(level.getBlockStateAt(blockPosition).blockType());
+    return BlockTypeHelper.isEmptyBlock(level.getBlockState(blockPosition).blockType());
   }
 
   @Override
@@ -85,7 +85,7 @@ public final class BlockBreakAction implements WorldAction {
     }
 
     if (remainingTicks == -1) {
-      var optionalBlockType = level.getBlockStateAt(blockPosition).blockType();
+      var optionalBlockType = level.getBlockState(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
         log.warn("Block at {} is not in view range!", blockPosition);
         return;

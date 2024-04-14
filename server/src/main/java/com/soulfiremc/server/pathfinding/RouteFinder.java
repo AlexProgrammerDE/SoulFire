@@ -43,6 +43,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     do {
       var previousActions = new ObjectArrayList<>(currentElement.actions());
 
+      // Insert the actions in reversed order
       for (var i = previousActions.size() - 1; i >= 0; i--) {
         actions.add(0, previousActions.get(i));
       }

@@ -115,7 +115,7 @@ public class BotActionManager {
 
     var rayCast =
       rayCastToBlock(
-        level.getBlockStateAt(againstBlock),
+        level.getBlockState(againstBlock),
         eyePosition,
         clientEntity.rotationVector(),
         againstBlock);

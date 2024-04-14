@@ -57,7 +57,7 @@ public class CollectBlockController {
           break;
         }
 
-        var blockState = level.getBlockStateAt(blockPos);
+        var blockState = level.getBlockState(blockPos);
         if (checker.test(blockState)) {
           return Optional.of(blockPos);
         }

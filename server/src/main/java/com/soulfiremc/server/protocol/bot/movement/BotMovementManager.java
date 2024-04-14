@@ -83,7 +83,7 @@ public class BotMovementManager {
       for (var y = startY; y <= endY; y++) {
         for (var z = startZ; z <= endZ; z++) {
           var cursor = Vector3i.from(x, y, z);
-          var block = world.getBlockStateAt(cursor);
+          var block = world.getBlockState(cursor);
 
           for (var collisionBox : block.getCollisionBoxes(cursor)) {
             if (collisionBox.intersects(queryBB)) {
@@ -210,7 +210,7 @@ public class BotMovementManager {
     for (var x = minX; x <= maxX; x++) {
       for (var y = minY; y <= maxY; y++) {
         for (var z = minZ; z <= maxZ; z++) {
-          var block = world.getBlockStateAt(Vector3i.from(x, y, z));
+          var block = world.getBlockState(Vector3i.from(x, y, z));
           if (types.contains(block.blockType())) {
             return true;
           }
@@ -228,7 +228,7 @@ public class BotMovementManager {
   }
 
   public boolean isClimbable(Level world, Vector3i pos) {
-    var blockType = world.getBlockStateAt(pos).blockType();
+    var blockType = world.getBlockState(pos).blockType();
     return tagsState.isBlockInTag(blockType, BlockTags.CLIMBABLE)
       || blockType == BlockType.POWDER_SNOW;
   }
@@ -267,7 +267,7 @@ public class BotMovementManager {
         vel.y += 0.04;
       } else if (movementState.onGround && movementState.jumpTicks == 0) {
         var blockBelow =
-          world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+          world.getBlockState(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
         vel.y =
           (float) (0.42)
             * ((blockBelow.blockType() == BlockType.HONEY_BLOCK)
@@ -432,7 +432,7 @@ public class BotMovementManager {
       var xzMultiplier = 0.91F;
       float frictionInfluencedSpeed;
 
-      var blockUnder = world.getBlockStateAt(pos.offset(0, -0.500001F, 0).toImmutableInt());
+      var blockUnder = world.getBlockState(pos.offset(0, -0.500001F, 0).toImmutableInt());
       if (movementState.onGround) {
         var friction = getBlockFriction(blockUnder.blockType());
         xzMultiplier *= friction;
@@ -588,7 +588,7 @@ public class BotMovementManager {
     }
 
     if (dy != oldVelY) {
-      var blockAtFeet = world.getBlockStateAt(pos.offset(0, -0.2, 0).toImmutableInt());
+      var blockAtFeet = world.getBlockState(pos.offset(0, -0.2, 0).toImmutableInt());
       if (blockAtFeet.blockType() == BlockType.SLIME_BLOCK && !controlState.sneaking()) {
         vel.y = -vel.y;
       } else {
@@ -605,7 +605,7 @@ public class BotMovementManager {
           movementState.isInWeb = true;
         } else if (block.blockType() == BlockType.BUBBLE_COLUMN) {
           var down = !block.properties().getBoolean("drag");
-          var aboveBlock = world.getBlockStateAt(cursor.add(0, 1, 0));
+          var aboveBlock = world.getBlockState(cursor.add(0, 1, 0));
           var bubbleDrag =
             aboveBlock.blockType() == BlockType.AIR
               ? physics.bubbleColumnSurfaceDrag
@@ -619,7 +619,7 @@ public class BotMovementManager {
       });
 
     var blockBelow =
-      world.getBlockStateAt(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
+      world.getBlockState(movementState.pos.floored().offset(0, -0.5, 0).toImmutableInt());
     if (blockBelow.blockType() == BlockType.SOUL_SAND) {
       vel.x *= physics.soulsandSpeed;
       vel.z *= physics.soulsandSpeed;
@@ -737,12 +737,12 @@ public class BotMovementManager {
       var dx = combination[0];
       var dz = combination[1];
       var adjBlockVec = block.add(dx, 0, dz);
-      var adjBlock = world.getBlockStateAt(adjBlockVec);
+      var adjBlock = world.getBlockState(adjBlockVec);
       var adjLevel = getRenderedDepth(adjBlock);
       if (adjLevel < 0) {
         if (adjBlock.blockShapeGroup().hasNoCollisions()) {
           var adjLevel2Vec = block.add(dx, -1, dz);
-          var adjLevel2 = getRenderedDepth(world.getBlockStateAt(adjLevel2Vec));
+          var adjLevel2 = getRenderedDepth(world.getBlockState(adjLevel2Vec));
           if (adjLevel2 >= 0) {
             var f = adjLevel2 - (curlevel - 8);
             flow.x += dx * f;
@@ -761,8 +761,8 @@ public class BotMovementManager {
         new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
         var dx = combination[0];
         var dz = combination[1];
-        var adjBlock = world.getBlockStateAt(block.add(dx, 0, dz));
-        var adjUpBlock = world.getBlockStateAt(block.add(dx, 1, dz));
+        var adjBlock = world.getBlockState(block.add(dx, 0, dz));
+        var adjUpBlock = world.getBlockState(block.add(dx, 1, dz));
         if ((adjBlock.blockShapeGroup().hasNoCollisions())
           || (adjUpBlock.blockShapeGroup().hasNoCollisions())) {
           flow.normalize().translate(0, -6, 0);

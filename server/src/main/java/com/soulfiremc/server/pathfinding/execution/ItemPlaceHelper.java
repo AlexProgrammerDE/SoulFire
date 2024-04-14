@@ -84,7 +84,7 @@ public class ItemPlaceHelper {
         sawEmpty = true;
       }
 
-      var optionalBlockType = dataManager.currentLevel().getBlockStateAt(blockPosition).blockType();
+      var optionalBlockType = dataManager.currentLevel().getBlockState(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
         throw new IllegalStateException("Block at " + blockPosition + " is not in view range");
       }

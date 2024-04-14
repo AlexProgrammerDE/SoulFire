@@ -40,7 +40,7 @@ public final class BlockPlaceAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isFullBlock(level.getBlockStateAt(blockPosition));
+    return BlockTypeHelper.isFullBlock(level.getBlockState(blockPosition));
   }
 
   @Override

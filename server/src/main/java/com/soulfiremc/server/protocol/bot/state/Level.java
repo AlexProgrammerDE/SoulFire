@@ -140,15 +140,15 @@ public class Level {
     return chunks.isChunkLoaded(block);
   }
 
-  public BlockState getBlockStateAt(Vector3i block) {
-    return getBlockStateAt(block.getX(), block.getY(), block.getZ());
+  public BlockState getBlockState(Vector3i block) {
+    return getBlockState(block.getX(), block.getY(), block.getZ());
   }
 
-  public BlockState getBlockStateAt(SFVec3i block) {
-    return getBlockStateAt(block.x, block.y, block.z);
+  public BlockState getBlockState(SFVec3i block) {
+    return getBlockState(block.x, block.y, block.z);
   }
 
-  public BlockState getBlockStateAt(int x, int y, int z) {
+  public BlockState getBlockState(int x, int y, int z) {
     return chunks.getBlockStateAt(x, y, z);
   }
 
@@ -167,7 +167,7 @@ public class Level {
       for (var y = startY; y <= endY; y++) {
         for (var z = startZ; z <= endZ; z++) {
           var cursor = Vector3i.from(x, y, z);
-          var blockState = getBlockStateAt(cursor);
+          var blockState = getBlockState(cursor);
 
           for (var collisionBox : blockState.getCollisionBoxes(cursor)) {
             if (collisionBox.intersects(aabb)) {
