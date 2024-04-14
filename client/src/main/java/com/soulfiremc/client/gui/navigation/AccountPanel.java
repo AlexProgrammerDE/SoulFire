@@ -179,8 +179,8 @@ public class AccountPanel extends NavigationItem {
       e ->
         new ImportTextDialog(
           SFPathConstants.WORKING_DIRECTORY,
-          String.format("Add %s accounts", type),
-          String.format("%s list file", type),
+          "Add %s accounts".formatted(type),
+          "%s list file".formatted(String.valueOf(type)),
           guiManager,
           parent,
           text ->

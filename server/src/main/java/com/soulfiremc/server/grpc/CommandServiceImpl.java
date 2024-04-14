@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandCompletionResponse;
 import com.soulfiremc.grpc.generated.CommandHistoryRequest;
@@ -43,7 +44,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_EXECUTION);
 
     try {
-      var code = serverCommandManager.execute(request.getCommand());
+      var code = serverCommandManager.execute(request.getCommand(), new LocalConsole());
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
       responseObserver.onCompleted();
@@ -60,7 +61,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     ServerRPCConstants.USER_CONTEXT_KEY.get().canAccessOrThrow(Resource.COMMAND_COMPLETION);
 
     try {
-      var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand());
+      var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand(), new LocalConsole());
 
       responseObserver.onNext(
         CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());

@@ -18,6 +18,7 @@
 package com.soulfiremc.client.cli;
 
 import com.soulfiremc.brigadier.GenericTerminalConsole;
+import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.settings.account.AuthType;
@@ -99,12 +100,12 @@ public class SFCommandDefinition implements Callable<Integer> {
 
             var name =
               Arrays.stream(option.names())
-                .map(s -> String.format("`%s`", s))
+                .map("`%s`"::formatted)
                 .collect(Collectors.joining(", "));
             var defaultValue =
               option.defaultValueString() == null
                 ? ""
-                : String.format("`%s`", option.defaultValueString());
+                : "`%s`".formatted(option.defaultValueString());
             var description =
               option.description() == null ? "" : String.join(", ", option.description());
             System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
@@ -152,7 +153,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     }
 
     if (start) {
-      cliManager.clientCommandManager().execute("start-attack");
+      cliManager.clientCommandManager().execute("start-attack", new LocalConsole());
     } else {
       log.info(
         "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");

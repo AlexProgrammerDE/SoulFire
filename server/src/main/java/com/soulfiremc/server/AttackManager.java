@@ -172,7 +172,7 @@ public class AttackManager {
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
-      SFNettyHelper.createEventLoopGroup(0, String.format("Attack-%d", id));
+      SFNettyHelper.createEventLoopGroup(0, "Attack-%d".formatted(id));
 
     var protocolVersion =
       settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);

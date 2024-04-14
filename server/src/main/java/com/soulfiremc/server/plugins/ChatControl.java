@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -44,7 +45,11 @@ public class ChatControl implements InternalPlugin {
     if (plainMessage.startsWith(prefix)) {
       var command = plainMessage.substring(prefix.length());
       connection.logger().info("[ChatControl] Executing command: {}", command);
-      var code = connection.attackManager().soulFireServer().injector().getSingleton(ServerCommandManager.class).execute(command);
+      var code = connection.attackManager()
+        .soulFireServer()
+        .injector()
+        .getSingleton(ServerCommandManager.class)
+        .execute(command, new LocalConsole());
 
       connection.botControl().sendMessage("Command \"" + command + "\" executed! (Code: " + code + ")");
     }

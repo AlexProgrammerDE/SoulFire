@@ -39,7 +39,7 @@ public class JwtCredential extends CallCredentials {
           var headers = new Metadata();
           headers.put(
             RPCConstants.AUTHORIZATION_METADATA_KEY,
-            String.format("%s %s", RPCConstants.BEARER_TYPE, jwt));
+            "%s %s".formatted(RPCConstants.BEARER_TYPE, jwt));
           metadataApplier.apply(headers);
         } catch (Throwable e) {
           metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));

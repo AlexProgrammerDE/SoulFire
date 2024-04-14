@@ -51,7 +51,7 @@ public class RPCClient {
 
   public RPCClient(String host, int port, String jwt) {
     this(
-      GrpcClients.builder(String.format("https://%s:%d", host, port))
+      GrpcClients.builder("https://%s:%d".formatted(host, port))
         .serializationFormat(GrpcSerializationFormats.PROTO)
         .compressor(new Codec.Gzip())
         .callCredentials(new JwtCredential(jwt))

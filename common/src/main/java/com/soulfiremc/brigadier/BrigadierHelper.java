@@ -26,25 +26,25 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 public class BrigadierHelper {
   private BrigadierHelper() {}
 
-  public static LiteralArgumentBuilder<ConsoleSubject> literal(String name) {
+  public static LiteralArgumentBuilder<CommandSource> literal(String name) {
     return LiteralArgumentBuilder.literal(name);
   }
 
-  public static <T> RequiredArgumentBuilder<ConsoleSubject, T> argument(
+  public static <T> RequiredArgumentBuilder<CommandSource, T> argument(
     String name, ArgumentType<T> type) {
     return RequiredArgumentBuilder.argument(name, type);
   }
 
-  public static Command<ConsoleSubject> help(String help, Command<ConsoleSubject> command) {
+  public static Command<CommandSource> help(String help, Command<CommandSource> command) {
     return new CommandHelpWrapper(command, help, false);
   }
 
-  public static RedirectModifier<ConsoleSubject> helpRedirect(
-    String help, RedirectModifier<ConsoleSubject> redirect) {
+  public static RedirectModifier<CommandSource> helpRedirect(
+    String help, RedirectModifier<CommandSource> redirect) {
     return new RedirectHelpWrapper(redirect, help, false);
   }
 
-  public static Command<ConsoleSubject> privateCommand(Command<ConsoleSubject> command) {
+  public static Command<CommandSource> privateCommand(Command<CommandSource> command) {
     return new CommandHelpWrapper(command, null, true);
   }
 }

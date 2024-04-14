@@ -55,7 +55,7 @@ public class ChunkData {
   public ChunkSection getSection(int sectionIndex) {
     var section = sections[sectionIndex];
     if (section == null) {
-      throw new NullPointerException(String.format("Section %d is null!", sectionIndex));
+      throw new NullPointerException("Section %d is null!".formatted(sectionIndex));
     }
 
     return section;

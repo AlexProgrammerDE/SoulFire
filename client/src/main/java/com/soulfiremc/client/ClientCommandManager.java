@@ -23,7 +23,8 @@ import static com.soulfiremc.brigadier.BrigadierHelper.literal;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.soulfiremc.brigadier.ConsoleSubject;
+import com.soulfiremc.brigadier.CommandSource;
+import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
@@ -46,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientCommandManager implements PlatformCommandManager {
   @Getter
-  private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
+  private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
   private final RPCClient rpcClient;
   private final ClientSettingsManager clientSettingsManager;
 
@@ -83,11 +84,11 @@ public class ClientCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public int execute(String command) {
+  public int execute(String command, CommandSource source) {
     try {
       if (isClientCommand(command)) {
         log.debug("Executing command {} on client", command);
-        return dispatcher.execute(command, new ConsoleSubject());
+        return dispatcher.execute(command, new LocalConsole());
       } else {
         log.debug("Executing command {} on server", command);
         return rpcClient
@@ -108,7 +109,7 @@ public class ClientCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public List<String> getCompletionSuggestions(String command) {
+  public List<String> getCompletionSuggestions(String command, CommandSource source) {
     try {
       return rpcClient
         .commandStubBlocking()

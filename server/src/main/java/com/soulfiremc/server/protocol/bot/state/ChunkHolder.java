@@ -120,9 +120,7 @@ public class ChunkHolder implements BlockAccessor {
 
   @Override
   public BlockState getBlockState(int x, int y, int z) {
-    if (y < minBuildHeight) {
-      return VOID_AIR_BLOCK_STATE;
-    } else if (y >= maxBuildHeight) {
+    if (isOutsideBuildHeight(y)) {
       return VOID_AIR_BLOCK_STATE;
     }
 

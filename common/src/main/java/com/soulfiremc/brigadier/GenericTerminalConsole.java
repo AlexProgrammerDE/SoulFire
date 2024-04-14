@@ -50,7 +50,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
 
   @Override
   protected void runCommand(String command) {
-    commandManager.execute(command);
+    commandManager.execute(command, LocalConsole.INSTANCE);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
         .completer(
           (reader, parsedLine, list) -> {
             for (var suggestion :
-              commandManager.getCompletionSuggestions(parsedLine.line())) {
+              commandManager.getCompletionSuggestions(parsedLine.line(), LocalConsole.INSTANCE)) {
               list.add(new Candidate(suggestion));
             }
           })

@@ -190,8 +190,8 @@ public class ProxyPanel extends NavigationItem {
       e ->
         new ImportTextDialog(
           SFPathConstants.WORKING_DIRECTORY,
-          String.format("Load %s proxies", type),
-          String.format("%s list file", type),
+          "Load %s proxies".formatted(type),
+          "%s list file".formatted(String.valueOf(type)),
           guiManager,
           parent,
           text ->

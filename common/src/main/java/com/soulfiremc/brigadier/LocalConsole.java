@@ -17,27 +17,29 @@
  */
 package com.soulfiremc.brigadier;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsoleSubject {
+public class LocalConsole implements CommandSource {
+  public static final LocalConsole INSTANCE = new LocalConsole();
   private static final Logger log = LoggerFactory.getLogger("Console");
-  public Map<String, String> extraData = new Object2ObjectOpenHashMap<>();
 
+  @Override
   public void sendInfo(String message, Object... args) {
     log.info(message, args);
   }
 
+  @Override
   public void sendWarn(String message, Object... args) {
     log.warn(message, args);
   }
 
+  @Override
   public void sendError(String message, Object... args) {
     log.error(message, args);
   }
 
+  @Override
   public void sendError(String message, Throwable t) {
     log.error(message, t);
   }

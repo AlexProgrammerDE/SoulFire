@@ -17,17 +17,12 @@
  */
 package com.soulfiremc.brigadier;
 
-import com.mojang.brigadier.RedirectModifier;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.Collection;
+public interface CommandSource {
+  void sendInfo(String message, Object... args);
 
-public record RedirectHelpWrapper(
-  RedirectModifier<CommandSource> command, String help, boolean privateCommand)
-  implements RedirectModifier<CommandSource> {
-  @Override
-  public Collection<CommandSource> apply(CommandContext<CommandSource> context)
-    throws CommandSyntaxException {
-    return command.apply(context);
-  }
+  void sendWarn(String message, Object... args);
+
+  void sendError(String message, Object... args);
+
+  void sendError(String message, Throwable t);
 }

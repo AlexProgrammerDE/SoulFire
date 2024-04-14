@@ -54,9 +54,8 @@ public record MinecraftAccount(
 
   @Override
   public String toString() {
-    return String.format(
-      "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)",
-      authType, profileId, lastKnownName);
+    return "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)"
+      .formatted(authType, profileId, lastKnownName);
   }
 
   public boolean isPremiumJava() {

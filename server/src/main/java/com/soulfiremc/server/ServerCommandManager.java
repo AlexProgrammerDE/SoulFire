@@ -35,7 +35,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
-import com.soulfiremc.brigadier.ConsoleSubject;
+import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -61,6 +61,7 @@ import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,9 +89,11 @@ import org.cloudburstmc.math.vector.Vector3d;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager {
+  private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
+    ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
   private static final Path HISTORY_FILE = SFPathConstants.DATA_FOLDER.resolve(".command_history");
   @Getter
-  private final CommandDispatcher<ConsoleSubject> dispatcher = new CommandDispatcher<>();
+  private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
   private final List<Map.Entry<Instant, String>> commandHistory =
     Collections.synchronizedList(new ArrayList<>());
@@ -130,8 +133,7 @@ public class ServerCommandManager implements PlatformCommandManager {
             c -> {
               for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
                 c.getSource()
-                  .sendInfo(
-                    String.format("| `%s` | %s |", command.command(), command.help()));
+                  .sendInfo("| `%s` | %s |".formatted(command.command(), command.help()));
               }
 
               return Command.SINGLE_SUCCESS;
@@ -272,7 +274,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                       c,
                       bot -> {
                         bot.scheduler().schedule(() -> new CollectBlockController(
-                           resolvable.resolve(bot.dataManager().tagsState()),
+                          resolvable.resolve(bot.dataManager().tagsState()),
                           amount,
                           searchRadius
                         ).start(bot));
@@ -657,14 +659,8 @@ public class ServerCommandManager implements PlatformCommandManager {
                       SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
 
                     builder.append(
-                      String.format(
-                        "| %s | %s | %s | %s | %s | %s |\n",
-                        version.getName(),
-                        nativeVersion,
-                        javaVersion,
-                        snapshotVersion,
-                        legacyVersion,
-                        bedrockVersion));
+                      "| %s | %s | %s | %s | %s | %s |\n".formatted(version.getName(), nativeVersion, javaVersion,
+                        snapshotVersion, legacyVersion, bedrockVersion));
                   });
               log.info(builder.toString());
 
@@ -694,9 +690,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               helpRedirect(
                 "Instead of running a command for all bots, run it for a specific list of bots. Use a comma to separate the names",
                 c -> {
-                  c.getSource()
-                    .extraData
-                    .put("bot_names", StringArgumentType.getString(c, "bot_names"));
+                  COMMAND_CONTEXT.get().put("bot_names", StringArgumentType.getString(c, "bot_names"));
                   return Collections.singleton(c.getSource());
                 }),
               false)));
@@ -722,9 +716,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               helpRedirect(
                 "Instead of running a command for all attacks, run it for a specific list of attacks. Use a comma to separate the ids",
                 c -> {
-                  c.getSource()
-                    .extraData
-                    .put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
+                  COMMAND_CONTEXT.get().put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
                   return Collections.singleton(c.getSource());
                 }),
               false)));
@@ -733,7 +725,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   private int exportMap(
-    CommandContext<ConsoleSubject> context, Function<BotConnection, IntSet> idProvider) {
+    CommandContext<CommandSource> context, Function<BotConnection, IntSet> idProvider) {
     // Inside here to capture a time for the file name
     var currentTime = System.currentTimeMillis();
     return forEveryBot(
@@ -747,8 +739,7 @@ public class ServerCommandManager implements PlatformCommandManager {
           }
 
           var image = mapDataState.toBufferedImage();
-          var fileName =
-            "map_" + currentTime + "_" + mapId + "_" + bot.accountName() + ".png";
+          var fileName = "map_%d_%d_%s.png".formatted(currentTime, mapId, bot.accountName());
           try {
             Files.createDirectories(SFPathConstants.MAPS_FOLDER);
             var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
@@ -764,12 +755,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryAttack(
-    CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<CommandSource> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
 
   private int forEveryAttack(
-    CommandContext<ConsoleSubject> context,
+    CommandContext<CommandSource> context,
     ToIntFunction<AttackManager> consumer,
     boolean printMessages) {
     if (soulFireServer.attacks().isEmpty()) {
@@ -782,8 +773,8 @@ public class ServerCommandManager implements PlatformCommandManager {
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var attackManager : soulFireServer.attacks().values()) {
-      if (context.getSource().extraData.containsKey("attack_ids")
-        && Arrays.stream(context.getSource().extraData.get("attack_ids").split(","))
+      if (COMMAND_CONTEXT.get().containsKey("attack_ids")
+        && Arrays.stream(COMMAND_CONTEXT.get().get("attack_ids").split(","))
         .mapToInt(Integer::parseInt)
         .noneMatch(i -> i == attackManager.id())) {
         continue;
@@ -805,12 +796,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryAttackEnsureHasBots(
-    CommandContext<ConsoleSubject> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<CommandSource> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
 
   private int forEveryAttackEnsureHasBots(
-    CommandContext<ConsoleSubject> context,
+    CommandContext<CommandSource> context,
     ToIntFunction<AttackManager> consumer,
     boolean printMessages) {
     return forEveryAttack(
@@ -829,12 +820,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryBot(
-    CommandContext<ConsoleSubject> context, ToIntFunction<BotConnection> consumer) {
+    CommandContext<CommandSource> context, ToIntFunction<BotConnection> consumer) {
     return forEveryBot(context, consumer, true);
   }
 
   private int forEveryBot(
-    CommandContext<ConsoleSubject> context,
+    CommandContext<CommandSource> context,
     ToIntFunction<BotConnection> consumer,
     boolean printMessages) {
     return forEveryAttackEnsureHasBots(
@@ -842,8 +833,8 @@ public class ServerCommandManager implements PlatformCommandManager {
       attackManager -> {
         var resultCode = Command.SINGLE_SUCCESS;
         for (var bot : attackManager.botConnections().values()) {
-          if (context.getSource().extraData.containsKey("bot_names")
-            && Arrays.stream(context.getSource().extraData.get("bot_names").split(","))
+          if (COMMAND_CONTEXT.get().containsKey("bot_names")
+            && Arrays.stream(COMMAND_CONTEXT.get().get("bot_names").split(","))
             .noneMatch(s -> s.equals(bot.accountName()))) {
             continue;
           }
@@ -865,7 +856,7 @@ public class ServerCommandManager implements PlatformCommandManager {
       printMessages);
   }
 
-  public int executePathfinding(CommandContext<ConsoleSubject> context,
+  public int executePathfinding(CommandContext<CommandSource> context,
                                 Function<BotConnection, GoalScorer> goalScorerFactory) {
     return forEveryBot(
       context,
@@ -883,11 +874,11 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public int execute(String command) {
+  public int execute(String command, CommandSource source) {
     command = command.strip();
 
     try {
-      var result = dispatcher.execute(command, new ConsoleSubject());
+      var result = dispatcher.execute(command, source);
       commandHistory.add(Map.entry(Instant.now(), command));
 
       // Only save successful commands
@@ -899,6 +890,8 @@ public class ServerCommandManager implements PlatformCommandManager {
     } catch (CommandSyntaxException e) {
       log.warn(e.getMessage());
       return Command.SINGLE_SUCCESS;
+    } finally {
+      COMMAND_CONTEXT.get().clear();
     }
   }
 
@@ -953,26 +946,30 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public List<String> getCompletionSuggestions(String command) {
-    return dispatcher
-      .getCompletionSuggestions(dispatcher.parse(command, new ConsoleSubject()))
-      .join()
-      .getList()
-      .stream()
-      .map(Suggestion::getText)
-      .toList();
+  public List<String> getCompletionSuggestions(String command, CommandSource source) {
+    try {
+      return dispatcher
+        .getCompletionSuggestions(dispatcher.parse(command, source))
+        .join()
+        .getList()
+        .stream()
+        .map(Suggestion::getText)
+        .toList();
+    } finally {
+      COMMAND_CONTEXT.get().clear();
+    }
   }
 
   private HelpData[] getAllUsage(
-    final CommandNode<ConsoleSubject> node, final ConsoleSubject source) {
+    final CommandNode<CommandSource> node, final CommandSource source) {
     final var result = new ArrayList<HelpData>();
     getAllUsage(node, source, result, "");
     return result.toArray(new HelpData[0]);
   }
 
   private void getAllUsage(
-    final CommandNode<ConsoleSubject> node,
-    final ConsoleSubject source,
+    final CommandNode<CommandSource> node,
+    final CommandSource source,
     final ArrayList<HelpData> result,
     final String prefix) {
     if (!node.canUse(source)) {
