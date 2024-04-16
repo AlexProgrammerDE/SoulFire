@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerChunkCache.class)
 public class ServerChunkCacheMixin {
-  @SuppressWarnings("UnusedAssignment")
+  @SuppressWarnings({"UnusedAssignment", "ParameterCanBeLocal"})
   @Inject(method = "addRegionTicket", at = @At("HEAD"))
   private <T> void init(TicketType<T> type, ChunkPos pos, int distance, T value, CallbackInfo ci) {
     if (type == TicketType.START) {
