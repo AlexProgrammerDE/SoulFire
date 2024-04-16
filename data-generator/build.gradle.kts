@@ -9,17 +9,28 @@ repositories {
   }
 }
 
+val minecraftVersion = property("minecraft_version")
+val parchmentVersion = property("parchment_version")
+val loaderVersion = property("loader_version")
+
+tasks.create("generateData") {
+  group = "data-generator"
+  description = "Generates data for SoulFire"
+
+  finalizedBy(tasks.runServer)
+}
+
 dependencies {
-  minecraft("com.mojang:minecraft:${property("minecraft_version")}")
+  minecraft("com.mojang:minecraft:${minecraftVersion}")
   @Suppress("UnstableApiUsage")
   mappings(loom.layered {
     officialMojangMappings {
       nameSyntheticMembers = true
     }
-    parchment("org.parchmentmc.data:parchment-1.20.3:2023.12.31@zip")
+    parchment("org.parchmentmc.data:parchment-${parchmentVersion}@zip")
   })
 
-  modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
+  modImplementation("net.fabricmc:fabric-loader:${loaderVersion}")
 }
 
 java {
