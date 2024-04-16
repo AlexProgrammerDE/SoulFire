@@ -8,8 +8,7 @@
     "BlockSettingsOffsetMixin",
     "EULAMixin",
     "FeatureFlagSetMixin",
-    "ReadyMixin",
-    "ServerChunkCacheMixin"
+    "ReadyMixin"
   ],
   "client": [
   ],

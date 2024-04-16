@@ -44,7 +44,7 @@ public class ChatControl implements InternalPlugin {
 
     if (plainMessage.startsWith(prefix)) {
       var command = plainMessage.substring(prefix.length());
-      connection.logger().info("[ChatControl] Executing command: {}", command);
+      connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
       var code = connection.attackManager()
         .soulFireServer()
         .injector()
