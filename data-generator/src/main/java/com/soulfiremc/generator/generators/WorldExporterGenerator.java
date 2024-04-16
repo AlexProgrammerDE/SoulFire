@@ -35,8 +35,10 @@ import net.minecraft.world.level.block.Blocks;
 
 @Slf4j
 public class WorldExporterGenerator implements IDataGenerator {
-  private static final int CHUNK_X = 8;
-  private static final int CHUNK_Z = 8;
+  private static final int CHUNK_X_MIN = -4;
+  private static final int CHUNK_X_MAX = 4;
+  private static final int CHUNK_Z_MIN = -4;
+  private static final int CHUNK_Z_MAX = 4;
   private static final int CHUNK_SIZE = 16;
 
   @Override
@@ -60,19 +62,22 @@ public class WorldExporterGenerator implements IDataGenerator {
       }
       jsonObject.add("definitions", GsonInstance.GSON.toJsonTree(definitionArray));
 
-      var data = new int[CHUNK_X * CHUNK_SIZE][level.getHeight()][CHUNK_Z * CHUNK_SIZE];
-      for (var x = 0; x < CHUNK_X * CHUNK_SIZE; x++) {
+      var data =
+        new int[CHUNK_SIZE * (CHUNK_X_MAX - CHUNK_X_MIN)][level.getHeight()][CHUNK_SIZE * (CHUNK_Z_MAX - CHUNK_Z_MIN)];
+      for (var x = CHUNK_X_MIN * CHUNK_SIZE; x < CHUNK_X_MAX * CHUNK_SIZE; x++) {
         for (var y = 0; y < level.getHeight(); y++) {
-          for (var z = 0; z < CHUNK_Z * CHUNK_SIZE; z++) {
+          for (var z = CHUNK_Z_MIN * CHUNK_SIZE; z < CHUNK_Z_MAX * CHUNK_SIZE; z++) {
             var pos = new BlockPos(x, y + minBuildHeight, z);
             var blockState = level.getBlockState(pos);
 
+            int block;
             if (!blockState.isCollisionShapeFullBlock(level, pos)) {
-              data[x][y][z] = BuiltInRegistries.BLOCK.getId(Blocks.AIR);
-              continue;
+              block = BuiltInRegistries.BLOCK.getId(Blocks.AIR);
+            } else {
+              block = BuiltInRegistries.BLOCK.getId(blockState.getBlock());
             }
 
-            data[x][y][z] = BuiltInRegistries.BLOCK.getId(blockState.getBlock());
+            data[x - CHUNK_X_MIN * CHUNK_SIZE][y][z - CHUNK_Z_MIN * CHUNK_SIZE] = block;
           }
         }
       }
