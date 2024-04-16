@@ -42,6 +42,12 @@ COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/dedicated/build
 # Use the soulfire's home directory as our work directory
 WORKDIR /soulfire
 
+# Copy over the start script
+COPY start.sh /soulfire/start.sh
+
+# Make executable
+RUN chmod +x /soulfire/start.sh
+
 # Switch from root to soulfire
 USER soulfire
 
@@ -49,4 +55,4 @@ EXPOSE 38765/tcp
 
 # Start the process using dumb-init
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["/opt/java/openjdk/bin/java", "-jar", "/soulfire/soulfire.jar"]
+CMD ["/bin/sh", "/soulfire/start.sh"]
