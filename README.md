@@ -43,15 +43,14 @@ performance.
 * Console command support
 * A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
+## 🖥 Installation
+
+For installing SoulFire, please refer to the [installation guide](https://soulfiremc.com/docs/installation).
+
 ## ✨ Nightly builds
 
 You can download the latest development version of SoulFire
 through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip).
-
-## 🔭 Requirements
-
-* Java 21+
-* Minecraft server (Tested with Spigot/Paper/Purpur/Folia, Velocity/BungeeCord)
 
 ## 🍿 Version support
 
@@ -71,10 +70,6 @@ The packet translation happens "client/bot side".
 This feature takes inspiration from services like [VIAaaS](https://github.com/ViaVersion/VIAaaS)
 and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
 which include client-side translation externally.
-
-## 🎬 Videos
-
-[Download & install SoulFire](https://youtu.be/X9hREa17yAo)
 
 ## ⌨ Commands
 
@@ -97,13 +92,7 @@ SoulFire has a built-in GUI for easy usage.
 
 ## 💻 Command Line Usage
 
-To run SoulFire from the command line without a GUI, enter:
-`java -jar SoulFire.jar <flags>`
-
-> **Note:** Some features are not available in CLI mode, we recommend using the GUI.
-
-For a list of all available CLI flags, look at the [documentation](https://soulfiremc.com/docs/usage/cli-flags)
-or run `java -jar SoulFire.jar --help`.
+If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](https://soulfiremc.com/docs/guides/cli-mode).
 
 ## 🔧 Build from source
 
