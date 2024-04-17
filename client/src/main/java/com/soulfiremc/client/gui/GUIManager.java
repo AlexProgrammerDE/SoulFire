@@ -23,6 +23,7 @@ import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
+import com.soulfiremc.util.CommandHistoryManager;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
 import java.awt.Desktop;
@@ -45,6 +46,7 @@ import org.pf4j.PluginManager;
 public class GUIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
+  private final CommandHistoryManager commandHistoryManager = new CommandHistoryManager(SFPathConstants.CLIENT_DATA_DIRECTORY);
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -95,7 +97,7 @@ public class GUIManager {
 
     SwingUtilities.invokeLater(() -> guiFrame.open(injector));
 
-    new GenericTerminalConsole(shutdownManager, clientCommandManager).start();
+    new GenericTerminalConsole(shutdownManager, clientCommandManager, commandHistoryManager).start();
 
     shutdownManager.awaitShutdown();
   }

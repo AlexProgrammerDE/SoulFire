@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.brigadier;
 
+import com.mojang.brigadier.Command;
+import com.soulfiremc.util.CommandHistoryManager;
 import com.soulfiremc.util.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
@@ -34,6 +36,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   private static final Logger logger = LogManager.getLogger("SoulFireConsole");
   private final ShutdownManager shutdownManager;
   private final PlatformCommandManager commandManager;
+  private final CommandHistoryManager commandHistoryManager;
 
   /**
    * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
@@ -50,7 +53,10 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
 
   @Override
   protected void runCommand(String command) {
-    commandManager.execute(command, LocalConsole.INSTANCE);
+    var result = commandManager.execute(command, LocalConsole.INSTANCE);
+    if (result == Command.SINGLE_SUCCESS) {
+      commandHistoryManager.newCommandHistoryEntry(command);
+    }
   }
 
   @Override
@@ -61,7 +67,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   @Override
   protected LineReader buildReader(LineReaderBuilder builder) {
     var history = new DefaultHistory();
-    for (var command : commandManager.getCommandHistory()) {
+    for (var command : commandHistoryManager.getCommandHistory()) {
       history.add(command.getKey(), command.getValue());
     }
 

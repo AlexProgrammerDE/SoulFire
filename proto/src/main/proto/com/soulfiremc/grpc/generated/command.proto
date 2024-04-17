@@ -16,24 +16,11 @@ message CommandCompletionRequest {
   string command = 1;
 }
 
-message CommandHistoryRequest {
-}
-
 message CommandCompletionResponse {
   repeated string suggestions = 1;
-}
-
-message CommandHistoryEntry {
-  int64 timestamp = 1;
-  string command = 2;
-}
-
-message CommandHistoryResponse {
-  repeated CommandHistoryEntry entries = 1;
 }
 
 service CommandService {
   rpc executeCommand(CommandRequest) returns (CommandResponse);
   rpc tabCompleteCommand(CommandCompletionRequest) returns (CommandCompletionResponse);
-  rpc getCommandHistory(CommandHistoryRequest) returns (CommandHistoryResponse);
 }

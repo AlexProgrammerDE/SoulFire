@@ -20,8 +20,6 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandCompletionResponse;
-import com.soulfiremc.grpc.generated.CommandHistoryRequest;
-import com.soulfiremc.grpc.generated.CommandHistoryResponse;
 import com.soulfiremc.grpc.generated.CommandRequest;
 import com.soulfiremc.grpc.generated.CommandResponse;
 import com.soulfiremc.grpc.generated.CommandServiceGrpc;
@@ -69,30 +67,6 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error tab completing", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
-  }
-
-  @Override
-  public void getCommandHistory(
-    CommandHistoryRequest request, StreamObserver<CommandHistoryResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_HISTORY);
-
-    try {
-      var history = serverCommandManager.getCommandHistory();
-      var builder = CommandHistoryResponse.newBuilder();
-      for (var entry : history) {
-        builder
-          .addEntriesBuilder()
-          .setTimestamp(entry.getKey().getEpochSecond())
-          .setCommand(entry.getValue())
-          .build();
-      }
-
-      responseObserver.onNext(builder.build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error getting history", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

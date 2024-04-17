@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GUIClientProps {
   private static final Path SETTINGS_PATH =
-    SFPathConstants.DATA_DIRECTORY.resolve("gui-data.properties");
+    SFPathConstants.CLIENT_DATA_DIRECTORY.resolve("gui-data.properties");
   private static final Properties SETTINGS = new Properties();
 
   private GUIClientProps() {}

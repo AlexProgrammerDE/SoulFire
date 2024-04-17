@@ -29,6 +29,8 @@ import com.soulfiremc.grpc.generated.ComboOption;
 import com.soulfiremc.grpc.generated.DoubleSetting;
 import com.soulfiremc.grpc.generated.IntSetting;
 import com.soulfiremc.settings.PropertyKey;
+import com.soulfiremc.util.CommandHistoryManager;
+import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,6 +46,7 @@ import picocli.CommandLine;
 public class CLIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
+  private final CommandHistoryManager commandHistoryManager = new CommandHistoryManager(SFPathConstants.CLIENT_DATA_DIRECTORY);
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();

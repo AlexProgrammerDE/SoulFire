@@ -64,8 +64,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,7 +89,6 @@ import org.cloudburstmc.math.vector.Vector3d;
 public class ServerCommandManager implements PlatformCommandManager {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
     ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
-  private static final Path HISTORY_FILE = SFPathConstants.DATA_DIRECTORY.resolve(".command_history");
   @Getter
   private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
@@ -110,8 +107,6 @@ public class ServerCommandManager implements PlatformCommandManager {
 
   @PostConstruct
   public void postConstruct() {
-    loadCommandHistory();
-
     // Help
     dispatcher.register(
       literal("help")
@@ -160,28 +155,6 @@ public class ServerCommandManager implements PlatformCommandManager {
             "See who you are",
             c -> {
               c.getSource().sendInfo("Username: {}", getCurrentUsername());
-
-              return Command.SINGLE_SUCCESS;
-            })));
-
-    // History commands
-    dispatcher.register(
-      literal("reload-history")
-        .executes(
-          help(
-            "Refreshes the loaded command history from the data file",
-            c -> {
-              loadCommandHistory();
-
-              return Command.SINGLE_SUCCESS;
-            })));
-    dispatcher.register(
-      literal("clear-history")
-        .executes(
-          help(
-            "Wipes the command history data",
-            c -> {
-              clearCommandHistory();
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -868,13 +841,6 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public List<Map.Entry<Instant, String>> getCommandHistory() {
-    synchronized (commandHistory) {
-      return List.copyOf(commandHistory);
-    }
-  }
-
-  @Override
   public int execute(String command, CommandSource source) {
     command = command.strip();
 
@@ -882,67 +848,12 @@ public class ServerCommandManager implements PlatformCommandManager {
       var result = dispatcher.execute(command, source);
       commandHistory.add(Map.entry(Instant.now(), command));
 
-      // Only save successful commands
-      if (result == Command.SINGLE_SUCCESS) {
-        newCommandHistoryEntry(command);
-      }
-
       return result;
     } catch (CommandSyntaxException e) {
       log.warn(e.getMessage());
       return Command.SINGLE_SUCCESS;
     } finally {
       COMMAND_CONTEXT.get().clear();
-    }
-  }
-
-  private void loadCommandHistory() {
-    synchronized (commandHistory) {
-      commandHistory.clear();
-      try {
-        if (!Files.exists(HISTORY_FILE)) {
-          return;
-        }
-
-        var lines = Files.readAllLines(HISTORY_FILE);
-        for (var line : lines) {
-          var firstColon = line.indexOf(':');
-          if (firstColon == -1) {
-            continue;
-          }
-
-          var seconds = Long.parseLong(line.substring(0, firstColon));
-          var command = line.substring(firstColon + 1);
-
-          commandHistory.add(Map.entry(Instant.ofEpochSecond(seconds), command));
-        }
-      } catch (IOException e) {
-        log.error("Failed to create command history file!", e);
-      }
-    }
-  }
-
-  private void newCommandHistoryEntry(String command) {
-    synchronized (commandHistory) {
-      try {
-        Files.createDirectories(HISTORY_FILE.getParent());
-        var newLine = Instant.now().getEpochSecond() + ":" + command + System.lineSeparator();
-        Files.writeString(
-          HISTORY_FILE, newLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-      } catch (IOException e) {
-        log.error("Failed to create command history file!", e);
-      }
-    }
-  }
-
-  private void clearCommandHistory() {
-    synchronized (commandHistory) {
-      try {
-        Files.deleteIfExists(HISTORY_FILE);
-        commandHistory.clear();
-      } catch (IOException e) {
-        log.error("Failed to delete command history file!", e);
-      }
     }
   }
 

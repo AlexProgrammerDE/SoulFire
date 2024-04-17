@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client.gui;
 
+import com.mojang.brigadier.Command;
 import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.client.gui.libs.MessageLogPanel;
 import com.soulfiremc.client.gui.libs.SFSwingUtils;
@@ -103,7 +104,7 @@ public class LogPanel extends JPanel {
 
     public void initHistory() {
       commandHistory.addAll(
-        guiManager.clientCommandManager().getCommandHistory().stream()
+        guiManager.commandHistoryManager().getCommandHistory().stream()
           .map(Map.Entry::getValue)
           .toList());
     }
@@ -123,7 +124,10 @@ public class LogPanel extends JPanel {
       undoManager.discardAllEdits();
 
       commandHistory.add(command);
-      guiManager.clientCommandManager().execute(command, new LocalConsole());
+      var result = guiManager.clientCommandManager().execute(command, new LocalConsole());
+      if (result == Command.SINGLE_SUCCESS) {
+        guiManager.commandHistoryManager().newCommandHistoryEntry(command);
+      }
     }
 
     @Override

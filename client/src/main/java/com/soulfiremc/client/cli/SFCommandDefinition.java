@@ -159,7 +159,7 @@ public class SFCommandDefinition implements Callable<Integer> {
         "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
 
-    new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager())
+    new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager(), cliManager.commandHistoryManager())
       .start();
 
     cliManager.shutdownManager().awaitShutdown();

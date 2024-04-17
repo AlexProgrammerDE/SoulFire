@@ -232,7 +232,7 @@ public class SFMenuBar extends JMenuBar {
     saveLogs.addActionListener(
       listener ->
         JFXFileHelper.showSaveDialog(
-            SFPathConstants.DATA_DIRECTORY, Map.of("Log Files", "log"), "log.txt")
+            SFPathConstants.CLIENT_DATA_DIRECTORY, Map.of("Log Files", "log"), "log.txt")
           .ifPresent(
             file -> {
               try {
@@ -269,6 +269,6 @@ public class SFMenuBar extends JMenuBar {
   }
 
   private void openHome() {
-    guiManager.browse(SFPathConstants.DATA_DIRECTORY.toUri());
+    guiManager.browse(SFPathConstants.CLIENT_DATA_DIRECTORY.toUri());
   }
 }

@@ -22,6 +22,7 @@ import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
+import com.soulfiremc.util.CommandHistoryManager;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
 import java.nio.file.Path;
@@ -54,7 +55,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      soulFire.injector().getSingleton(ServerCommandManager.class))
+      soulFire.injector().getSingleton(ServerCommandManager.class),
+      new CommandHistoryManager(SFPathConstants.WORKING_DIRECTORY))
       .start();
 
     soulFire.shutdownManager().awaitShutdown();

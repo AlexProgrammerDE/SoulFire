@@ -30,13 +30,9 @@ import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.AttackStartResponse;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
-import com.soulfiremc.grpc.generated.CommandHistoryRequest;
 import com.soulfiremc.grpc.generated.CommandRequest;
 import io.grpc.stub.StreamObserver;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -86,6 +82,7 @@ public class ClientCommandManager implements PlatformCommandManager {
   @Override
   public int execute(String command, CommandSource source) {
     try {
+      int result;
       if (isClientCommand(command)) {
         log.debug("Executing command {} on client", command);
         return dispatcher.execute(command, new LocalConsole());
@@ -119,19 +116,5 @@ public class ClientCommandManager implements PlatformCommandManager {
       log.error("An error occurred while trying to perform tab completion.", e);
       return List.of();
     }
-  }
-
-  @Override
-  public List<Map.Entry<Instant, String>> getCommandHistory() {
-    var history = new ArrayList<Map.Entry<Instant, String>>();
-    for (var entry :
-      rpcClient
-        .commandStubBlocking()
-        .getCommandHistory(CommandHistoryRequest.newBuilder().build())
-        .getEntriesList()) {
-      history.add(Map.entry(Instant.ofEpochSecond(entry.getTimestamp()), entry.getCommand()));
-    }
-
-    return history;
   }
 }
