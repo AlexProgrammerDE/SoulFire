@@ -47,11 +47,6 @@ performance.
 
 For installing SoulFire, please refer to the [installation guide](https://soulfiremc.com/docs/installation).
 
-## ✨ Nightly builds
-
-You can download the latest development version of SoulFire
-through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip).
-
 ## 🍿 Version support
 
 You can find an up-to-date list of supported versions in
@@ -71,14 +66,19 @@ You can read about the SoulFire plugins in the [documentation](https://soulfirem
 You can read about how to import accounts in the [account documentation](https://soulfiremc.com/docs/usage/accounts) and
 how to import proxies in the [proxy documentation](https://soulfiremc.com/docs/usage/proxies).
 
+## 💻 Command Line Usage
+
+If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](https://soulfiremc.com/docs/guides/cli-mode).
+
 ## 🧵 Demo
 
 SoulFire has a built-in GUI for easy usage.
 ![GUI](./assets/demo.png)
 
-## 💻 Command Line Usage
+## ✨ Nightly builds
 
-If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](https://soulfiremc.com/docs/guides/cli-mode).
+You can download the latest development version of SoulFire
+through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip).
 
 ## 🔧 Build from source
 
