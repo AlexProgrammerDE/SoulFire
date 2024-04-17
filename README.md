@@ -37,9 +37,9 @@ performance.
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Supports [almost every Minecraft version](#-version-support)
-* Use Microsoft, The Altening, EasyMC or Offline accounts
-* Use HTTP/SOCKS4/SOCKS5 proxies
-* Multiple [built-in plugins](#-plugins) like AutoRespawn, AutoJump, ClientSettings and more
+* Use `Microsoft`, `The Altening`, `EasyMC` or `Offline` accounts
+* Use `HTTP`, `SOCKS4` and `SOCKS5` proxies
+* Multiple [built-in plugins](#-plugins) like `AutoRespawn`, `AutoJump`, `ClientSettings` and more
 * Console command support
 * A* Pathfinding (Diagonal moves, parkour, mining blocks, placing blocks)
 
@@ -54,22 +54,8 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/
 
 ## 🍿 Version support
 
-SoulFire supports many versions of Minecraft, including releases, april fools snapshots, beta, alpha,
-classic (including [CPE](https://wiki.vg/Classic_Protocol_Extension)) and even Minecraft Bedrock edition,
-and that includes every single subversion, not just a few specific versions.
-
 You can find an up-to-date list of supported versions in
 the [documentation](https://soulfiremc.com/docs/usage/versions).
-
-### How does this work?
-
-Thanks to a built-in implementation of [ViaVersion](https://github.com/ViaVersion/ViaVersion),
-[ViaLegacy](https://github.com/RaphiMC/ViaLegacy), [ViaBedrock](https://github.com/RaphiMC/ViaBedrock) and many others,
-a SoulFire bot can connect to all these versions even without the server having ViaVersion installed.
-The packet translation happens "client/bot side".
-This feature takes inspiration from services like [VIAaaS](https://github.com/ViaVersion/VIAaaS)
-and [ViaProxy](https://github.com/RaphiMC/ViaProxy),
-which include client-side translation externally.
 
 ## ⌨ Commands
 
