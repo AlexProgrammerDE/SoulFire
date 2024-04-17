@@ -82,7 +82,6 @@ public class ClientCommandManager implements PlatformCommandManager {
   @Override
   public int execute(String command, CommandSource source) {
     try {
-      int result;
       if (isClientCommand(command)) {
         log.debug("Executing command {} on client", command);
         return dispatcher.execute(command, new LocalConsole());
