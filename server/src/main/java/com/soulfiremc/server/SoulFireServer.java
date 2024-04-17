@@ -73,6 +73,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
@@ -118,15 +119,18 @@ public class SoulFireServer {
   private final SecretKey jwtSecretKey;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
+  private final Path baseDirectory;
 
   public SoulFireServer(
     String host,
     int port,
     PluginManager pluginManager,
     Instant startTime,
-    AuthSystem authSystem) {
+    AuthSystem authSystem,
+    Path baseDirectory) {
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
+    this.baseDirectory = baseDirectory;
 
     // Register into injector
     injector.register(SoulFireServer.class, this);
@@ -161,11 +165,12 @@ public class SoulFireServer {
 
     log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
+    var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
       CompletableFuture.runAsync(
         () -> {
           // Init via
-          var platform = new SFViaPlatform(SFPathConstants.CONFIG_FOLDER.resolve("ViaVersion"));
+          var platform = new SFViaPlatform(configDirectory.resolve("ViaVersion"));
 
           Via.init(
             ViaManagerImpl.builder()
@@ -184,14 +189,11 @@ public class SoulFireServer {
           Via.getManager()
             .addEnableListener(
               () -> {
-                new SFViaRewind(SFPathConstants.CONFIG_FOLDER.resolve("ViaRewind")).init();
-                new SFViaBackwards(SFPathConstants.CONFIG_FOLDER.resolve("ViaBackwards"))
-                  .init();
-                new SFViaAprilFools(SFPathConstants.CONFIG_FOLDER.resolve("ViaAprilFools"))
-                  .init();
-                new SFViaLegacy(SFPathConstants.CONFIG_FOLDER.resolve("ViaLegacy")).init();
-                new SFViaBedrock(SFPathConstants.CONFIG_FOLDER.resolve("ViaBedrock"))
-                  .init();
+                new SFViaRewind(configDirectory.resolve("ViaRewind")).init();
+                new SFViaBackwards(configDirectory.resolve("ViaBackwards")).init();
+                new SFViaAprilFools(configDirectory.resolve("ViaAprilFools")).init();
+                new SFViaLegacy(configDirectory.resolve("ViaLegacy")).init();
+                new SFViaBedrock(configDirectory.resolve("ViaBedrock")).init();
               });
 
           var manager = (ViaManagerImpl) Via.getManager();

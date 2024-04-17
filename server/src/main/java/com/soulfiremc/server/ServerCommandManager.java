@@ -91,7 +91,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 public class ServerCommandManager implements PlatformCommandManager {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
     ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
-  private static final Path HISTORY_FILE = SFPathConstants.DATA_FOLDER.resolve(".command_history");
+  private static final Path HISTORY_FILE = SFPathConstants.DATA_DIRECTORY.resolve(".command_history");
   @Getter
   private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
@@ -741,8 +741,9 @@ public class ServerCommandManager implements PlatformCommandManager {
           var image = mapDataState.toBufferedImage();
           var fileName = "map_%d_%d_%s.png".formatted(currentTime, mapId, bot.accountName());
           try {
-            Files.createDirectories(SFPathConstants.MAPS_FOLDER);
-            var file = SFPathConstants.MAPS_FOLDER.resolve(fileName);
+            var mapsDirectory = SFPathConstants.getMapsDirectory(soulFireServer.baseDirectory());
+            Files.createDirectories(mapsDirectory);
+            var file = mapsDirectory.resolve(fileName);
             ImageIO.write(image, "png", file.toFile());
             context.getSource().sendInfo("Exported map to {}", file);
           } catch (IOException e) {

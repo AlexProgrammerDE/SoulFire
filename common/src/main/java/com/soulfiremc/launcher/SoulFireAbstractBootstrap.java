@@ -25,6 +25,7 @@ import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,8 +44,8 @@ import org.pf4j.PluginManager;
 @Slf4j
 public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();
-  public static final PluginManager PLUGIN_MANAGER =
-    new JarPluginManager(SFPathConstants.PLUGINS_FOLDER);
+  protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());
+  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory);
 
   static {
     System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -87,21 +88,21 @@ public abstract class SoulFireAbstractBootstrap {
       });
   }
 
-  private static void initPlugins(List<ClassLoader> classLoaders) {
+  private void initPlugins(List<ClassLoader> classLoaders) {
     try {
-      Files.createDirectories(SFPathConstants.PLUGINS_FOLDER);
+      Files.createDirectories(pluginsDirectory);
     } catch (IOException e) {
-      log.error("Failed to create plugin directory", e);
+      log.error("Failed to create plugins directory", e);
     }
 
     // Prepare the plugin manager
-    PLUGIN_MANAGER.setSystemVersion(BuildData.VERSION);
+    pluginManager.setSystemVersion(BuildData.VERSION);
 
     // Load all plugins available
-    PLUGIN_MANAGER.loadPlugins();
-    PLUGIN_MANAGER.startPlugins();
+    pluginManager.loadPlugins();
+    pluginManager.startPlugins();
 
-    for (var plugin : PLUGIN_MANAGER.getPlugins()) {
+    for (var plugin : pluginManager.getPlugins()) {
       classLoaders.add(plugin.getPluginClassLoader());
     }
   }
@@ -118,7 +119,7 @@ public abstract class SoulFireAbstractBootstrap {
 
   private void injectMixinsAndRun(String[] args) {
     var mixinPaths = new HashSet<String>();
-    PLUGIN_MANAGER
+    pluginManager
       .getExtensions(MixinExtension.class)
       .forEach(
         mixinExtension -> {
@@ -133,7 +134,7 @@ public abstract class SoulFireAbstractBootstrap {
 
     var classLoaders = new ArrayList<ClassLoader>();
     classLoaders.add(SoulFireAbstractBootstrap.class.getClassLoader());
-    PLUGIN_MANAGER
+    pluginManager
       .getPlugins()
       .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
 
@@ -154,4 +155,6 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   protected abstract void postMixinMain(String[] args);
+
+  protected abstract Path getBaseDirectory();
 }

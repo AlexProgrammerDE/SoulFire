@@ -76,9 +76,9 @@ public class GUIManager {
     GenericTerminalConsole.setupStreams();
 
     try {
-      Files.createDirectories(SFPathConstants.PROFILES_FOLDER);
+      Files.createDirectories(SFPathConstants.PROFILES_DIRECTORY);
     } catch (IOException e) {
-      log.error("Failed to create profiles folder!", e);
+      log.error("Failed to create profiles directory!", e);
     }
 
     // Override the title in AWT (GNOME displays the class name otherwise)

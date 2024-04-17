@@ -25,8 +25,10 @@ import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
+import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ServerAddress;
 import java.awt.GraphicsEnvironment;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -59,11 +61,11 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
 
         if (runHeadless) {
           log.info("Starting CLI");
-          var cliManager = new CLIManager(rpcClient, PLUGIN_MANAGER);
+          var cliManager = new CLIManager(rpcClient, pluginManager);
           cliManager.initCLI(args);
         } else {
           log.info("Starting GUI");
-          var guiManager = new GUIManager(rpcClient, PLUGIN_MANAGER);
+          var guiManager = new GUIManager(rpcClient, pluginManager);
           guiManager.initGUI();
         }
       };
@@ -74,7 +76,7 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
 
         log.info("Starting integrated server on {}:{}", host, port);
         var soulFire =
-          new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
+          new SoulFireServer(host, port, pluginManager, START_TIME, new DefaultAuthSystem(), getBaseDirectory());
 
         var jwtToken = soulFire.generateIntegratedUserJWT();
         remoteServerConsumer.accept(
@@ -107,5 +109,10 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
           () -> new ServerSelectDialog(runIntegratedServer, remoteServerConsumer));
       }
     }
+  }
+
+  @Override
+  protected Path getBaseDirectory() {
+    return SFPathConstants.INTEGRATED_SERVER_DIRECTORY;
   }
 }

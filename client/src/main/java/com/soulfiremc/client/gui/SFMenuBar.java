@@ -88,7 +88,7 @@ public class SFMenuBar extends JMenuBar {
     var fileMenu = new JMenu("File");
     var loadProfile = new JMenu("Load Profile");
     try {
-      Files.list(SFPathConstants.PROFILES_FOLDER)
+      Files.list(SFPathConstants.PROFILES_DIRECTORY)
         .filter(Files::isRegularFile)
         .filter(path -> path.toString().endsWith(".json"))
         .forEach(
@@ -117,7 +117,7 @@ public class SFMenuBar extends JMenuBar {
     fromFile.addActionListener(
       e ->
         JFXFileHelper.showOpenDialog(
-            SFPathConstants.PROFILES_FOLDER, Map.of("SoulFire profile", "json"))
+            SFPathConstants.PROFILES_DIRECTORY, Map.of("SoulFire profile", "json"))
           .ifPresent(
             file -> {
               try {
@@ -134,7 +134,7 @@ public class SFMenuBar extends JMenuBar {
     saveProfile.addActionListener(
       e ->
         JFXFileHelper.showSaveDialog(
-            SFPathConstants.PROFILES_FOLDER,
+            SFPathConstants.PROFILES_DIRECTORY,
             Map.of("SoulFire profile", "json"),
             "profile.json")
           .ifPresent(
@@ -232,7 +232,7 @@ public class SFMenuBar extends JMenuBar {
     saveLogs.addActionListener(
       listener ->
         JFXFileHelper.showSaveDialog(
-            SFPathConstants.DATA_FOLDER, Map.of("Log Files", "log"), "log.txt")
+            SFPathConstants.DATA_DIRECTORY, Map.of("Log Files", "log"), "log.txt")
           .ifPresent(
             file -> {
               try {
@@ -269,6 +269,6 @@ public class SFMenuBar extends JMenuBar {
   }
 
   private void openHome() {
-    guiManager.browse(SFPathConstants.DATA_FOLDER.toUri());
+    guiManager.browse(SFPathConstants.DATA_DIRECTORY.toUri());
   }
 }

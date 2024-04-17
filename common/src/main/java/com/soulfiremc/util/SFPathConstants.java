@@ -22,15 +22,25 @@ import net.harawata.appdirs.AppDirsFactory;
 
 public class SFPathConstants {
   public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
-  public static final Path DATA_FOLDER = getApplicationDataFolder();
-  public static final Path PLUGINS_FOLDER = DATA_FOLDER.resolve("plugins");
-  public static final Path CONFIG_FOLDER = DATA_FOLDER.resolve("config");
-  public static final Path PROFILES_FOLDER = DATA_FOLDER.resolve("profiles");
-  public static final Path MAPS_FOLDER = DATA_FOLDER.resolve("maps");
+  public static final Path DATA_DIRECTORY = getApplicationDataDirectory();
+  public static final Path PROFILES_DIRECTORY = DATA_DIRECTORY.resolve("profiles");
+  public static final Path INTEGRATED_SERVER_DIRECTORY = DATA_DIRECTORY.resolve("integrated-server");
 
   private SFPathConstants() {}
 
-  private static Path getApplicationDataFolder() {
+  private static Path getApplicationDataDirectory() {
     return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
+  }
+
+  public static Path getPluginsDirectory(Path baseFolder) {
+    return baseFolder.resolve("plugins");
+  }
+
+  public static Path getConfigDirectory(Path baseFolder) {
+    return baseFolder.resolve("config");
+  }
+
+  public static Path getMapsDirectory(Path baseFolder) {
+    return baseFolder.resolve("maps");
   }
 }

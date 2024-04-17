@@ -23,6 +23,8 @@ import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
+import com.soulfiremc.util.SFPathConstants;
+import java.nio.file.Path;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +48,7 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
     GenericTerminalConsole.setupStreams();
     var soulFire =
-      new SoulFireServer(host, port, PLUGIN_MANAGER, START_TIME, new DefaultAuthSystem());
+      new SoulFireServer(host, port, pluginManager, START_TIME, new DefaultAuthSystem(), getBaseDirectory());
 
     log.info("Tip: To generate a new access token, use the command: 'generate-token'");
 
@@ -56,5 +58,10 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
       .start();
 
     soulFire.shutdownManager().awaitShutdown();
+  }
+
+  @Override
+  protected Path getBaseDirectory() {
+    return SFPathConstants.WORKING_DIRECTORY;
   }
 }
