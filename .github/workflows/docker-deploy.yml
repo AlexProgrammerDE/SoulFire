@@ -16,7 +16,7 @@ jobs:
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
           echo "::set-output name=version::$projectVersion"
       - name: "Login to Docker Container Registry"
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_PASSWORD}}
