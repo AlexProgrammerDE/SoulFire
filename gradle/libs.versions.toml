@@ -20,7 +20,7 @@ armeria = "1.28.1"
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
 protobuf = "com.google.protobuf:0.9.4"
-loom = "fabric-loom:1.6.9"
+loom = "fabric-loom:1.6.10"
 jmh = "me.champeau.jmh:0.7.2"
 license-report = "com.github.jk1.dependency-license-report:2.7"
 
