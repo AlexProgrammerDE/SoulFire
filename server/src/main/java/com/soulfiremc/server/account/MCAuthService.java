@@ -19,7 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public sealed interface MCAuthService<T>
   permits SFBedrockMicrosoftAuthService,
@@ -27,11 +27,11 @@ public sealed interface MCAuthService<T>
   SFJavaMicrosoftAuthService,
   SFOfflineAuthService,
   SFTheAlteningAuthService {
-  MinecraftAccount login(T data, SFProxy proxyData) throws IOException;
+  CompletableFuture<MinecraftAccount> login(T data, SFProxy proxyData);
 
   T createData(String data);
 
-  default MinecraftAccount createDataAndLogin(String data, SFProxy proxyData) throws IOException {
+  default CompletableFuture<MinecraftAccount> createDataAndLogin(String data, SFProxy proxyData) {
     return login(createData(data), proxyData);
   }
 }

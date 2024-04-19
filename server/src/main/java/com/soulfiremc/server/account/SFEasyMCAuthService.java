@@ -23,9 +23,9 @@ import com.soulfiremc.settings.account.service.OnlineJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
-import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -38,7 +38,7 @@ public final class SFEasyMCAuthService
     URI.create("https://api.easymc.io/v1/token/redeem");
 
   @Override
-  public MinecraftAccount login(EasyMCAuthData data, SFProxy proxyData) throws IOException {
+  public CompletableFuture<MinecraftAccount> login(EasyMCAuthData data, SFProxy proxyData) {
     var request = new AuthenticationRequest(data.altToken);
     return ReactorHttpHelper.createReactorClient(proxyData, true)
       .post()
@@ -70,7 +70,7 @@ public final class SFEasyMCAuthService
                   response.mcName(),
                   new OnlineJavaData(response.session(), -1));
               }))
-      .block();
+      .toFuture();
   }
 
   @Override

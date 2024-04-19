@@ -22,20 +22,26 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.OnlineJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 public final class SFJavaMicrosoftAuthService
   implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
   @Override
-  public MinecraftAccount login(JavaMicrosoftAuthData data, SFProxy proxyData) throws IOException {
-    try {
-      var fullJavaSession =
-        MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
+  public CompletableFuture<MinecraftAccount> login(JavaMicrosoftAuthData data, SFProxy proxyData) {
+    return CompletableFuture.supplyAsync(() -> {
+      StepFullJavaSession.FullJavaSession fullJavaSession;
+      try {
+        fullJavaSession = MinecraftAuth.JAVA_CREDENTIALS_LOGIN.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+
       var mcProfile = fullJavaSession.getMcProfile();
       var mcToken = mcProfile.getMcToken();
       return new MinecraftAccount(
@@ -43,9 +49,7 @@ public final class SFJavaMicrosoftAuthService
         mcProfile.getId(),
         mcProfile.getName(),
         new OnlineJavaData(mcToken.getAccessToken(), mcToken.getExpireTimeMs()));
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
+    });
   }
 
   @Override

@@ -62,7 +62,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
         })
           .createDataAndLogin(request.getPayload(), convertProxy(request));
 
-      responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.toProto()).build());
+      responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.join().toProto()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error authenticating account", t);

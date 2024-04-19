@@ -22,21 +22,25 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.proxy.SFProxy;
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 public final class SFBedrockMicrosoftAuthService
   implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
   @Override
-  public MinecraftAccount login(BedrockMicrosoftAuthData data, SFProxy proxyData)
-    throws IOException {
-    try {
-      var fullBedrockSession =
-        MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
+  public CompletableFuture<MinecraftAccount> login(BedrockMicrosoftAuthData data, SFProxy proxyData) {
+    return CompletableFuture.supplyAsync(() -> {
+      StepFullBedrockSession.FullBedrockSession fullBedrockSession;
+      try {
+        fullBedrockSession = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepCredentialsMsaCode.MsaCredentials(data.email, data.password));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
 
       var mcChain = fullBedrockSession.getMcChain();
       var xblXsts = mcChain.getXblXsts();
@@ -53,9 +57,7 @@ public final class SFBedrockMicrosoftAuthService
           mcChain.getPrivateKey(),
           deviceId,
           playFabId));
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
+    });
   }
 
   @Override
