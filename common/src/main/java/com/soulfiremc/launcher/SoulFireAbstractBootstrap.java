@@ -21,6 +21,7 @@ import com.soulfiremc.api.MixinExtension;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.util.CustomClassProvider;
 import com.soulfiremc.util.PortHelper;
+import com.soulfiremc.util.SFLogAppender;
 import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
 import java.io.IOException;
@@ -108,6 +109,8 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   protected void internalBootstrap(String[] args, List<ClassLoader> classLoaders) {
+    SFLogAppender.INSTANCE.start();
+
     AnsiConsole.systemInstall();
 
     injectExceptionHandler();

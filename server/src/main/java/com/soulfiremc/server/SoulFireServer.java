@@ -53,7 +53,6 @@ import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.util.SFLogAppender;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.viaversion.SFViaLoader;
 import com.soulfiremc.server.viaversion.platform.SFViaAprilFools;
@@ -94,7 +93,6 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.PluginManager;
 
@@ -139,11 +137,6 @@ public class SoulFireServer {
     SoulFireAPI.setSoulFire(this);
 
     injector.register(ShutdownManager.class, shutdownManager);
-
-    var logAppender = new SFLogAppender();
-    logAppender.start();
-    injector.register(SFLogAppender.class, logAppender);
-    ((org.apache.logging.log4j.core.Logger) LogManager.getRootLogger()).addAppender(logAppender);
 
     try {
       var keyGen = KeyGenerator.getInstance("HmacSHA256");
