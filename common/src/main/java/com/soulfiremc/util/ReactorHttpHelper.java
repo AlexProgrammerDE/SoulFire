@@ -41,6 +41,7 @@ public class ReactorHttpHelper {
     SFProxy proxyData, boolean withBody) {
     var base =
       HttpClient.create()
+        .compress(true)
         .responseTimeout(Duration.ofSeconds(5))
         .headers(
           h -> {
