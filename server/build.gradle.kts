@@ -9,7 +9,9 @@ dependencies {
   api(projects.common)
 
   // Main protocol library
-  api(libs.mcprotocollib)
+  api(libs.mcprotocollib) {
+    exclude("io.netty")
+  }
   api(libs.bundles.kyori)
 
   // For advanced encryption and compression
@@ -33,7 +35,7 @@ dependencies {
 
   // For Bedrock support
   api(libs.via.bedrock) {
-    exclude("io.netty", "netty-codec-http")
+    exclude("io.netty")
   }
 
   // For YAML support (ViaVersion)
