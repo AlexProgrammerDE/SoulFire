@@ -2,16 +2,13 @@
   "extends": [
     "config:base"
   ],
+  "ignoreDeps": [
+    "com.github.GeyserMC:MCProtocolLib",
+    "com.github.GeyserMC:mcauthlib",
+    "org.cloudburstmc.netty:netty-transport-raknet",
+    "eclipse-temurin"
+  ],
   "packageRules": [
-    {
-      "matchPackageNames": [
-        "com.github.GeyserMC:MCProtocolLib",
-        "com.github.GeyserMC:mcauthlib",
-        "org.cloudburstmc.netty:netty-transport-raknet",
-        "eclipse-temurin"
-      ],
-      "enabled": false
-    },
     {
       "matchUpdateTypes": [
         "minor",
