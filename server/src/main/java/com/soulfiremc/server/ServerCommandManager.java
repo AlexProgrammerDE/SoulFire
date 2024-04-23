@@ -121,18 +121,6 @@ public class ServerCommandManager implements PlatformCommandManager {
 
               return Command.SINGLE_SUCCESS;
             })));
-    dispatcher.register(
-      literal("help-markdown")
-        .executes(
-          privateCommand(
-            c -> {
-              for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
-                c.getSource()
-                  .sendInfo("| `%s` | %s |".formatted(command.command(), command.help()));
-              }
-
-              return Command.SINGLE_SUCCESS;
-            })));
 
     // Administration
     dispatcher.register(
@@ -608,8 +596,7 @@ public class ServerCommandManager implements PlatformCommandManager {
     dispatcher.register(
       literal("generate-versions")
         .executes(
-          help(
-            "Create a table of all supported protocol versions",
+          privateCommand(
             c -> {
               var yesEmoji = "✅";
               var noEmoji = "❌";
@@ -635,7 +622,20 @@ public class ServerCommandManager implements PlatformCommandManager {
                       "| %s | %s | %s | %s | %s | %s |\n".formatted(version.getName(), nativeVersion, javaVersion,
                         snapshotVersion, legacyVersion, bedrockVersion));
                   });
-              log.info(builder.toString());
+              c.getSource().sendInfo(builder.toString());
+
+              return Command.SINGLE_SUCCESS;
+            })));
+    dispatcher.register(
+      literal("generate-commands")
+        .executes(
+          privateCommand(
+            c -> {
+              var builder = new StringBuilder("\n");
+              for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
+                builder.append("| `%s` | %s |\n".formatted(command.command(), command.help()));
+              }
+              c.getSource().sendInfo(builder.toString());
 
               return Command.SINGLE_SUCCESS;
             })));
