@@ -29,6 +29,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.netty.handler.codec.http.HttpStatusClass;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -39,6 +40,9 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
+  private static final URL IPIFY_URL = ReactorHttpHelper.createURL("https://api.ipify.org");
+  private static final URL AWS_URL = ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
+
   @Override
   public void check(
     ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
@@ -47,8 +51,8 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
     try {
       var url =
         switch (request.getTarget()) {
-          case IPIFY -> ReactorHttpHelper.createURL("https://api.ipify.org");
-          case AWS -> ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
+          case IPIFY -> IPIFY_URL;
+          case AWS -> AWS_URL;
           case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized target");
         };
 

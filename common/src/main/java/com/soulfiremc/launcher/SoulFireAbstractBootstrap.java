@@ -151,7 +151,7 @@ public abstract class SoulFireAbstractBootstrap {
       log.info("Used Runtime Agent to inject mixins");
 
       this.postMixinMain(args);
-    } catch (ReflectiveOperationException | IOException t) {
+    } catch (IOException t) {
       log.error("Failed to inject mixins", t);
       System.exit(1);
     }

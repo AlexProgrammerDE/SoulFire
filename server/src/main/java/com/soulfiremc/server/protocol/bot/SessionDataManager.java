@@ -159,6 +159,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1032,12 +1033,18 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
-    log.error("Login failed with reason \"{}\"", toPlainText(packet.getReason()));
+    var plainMessage = toPlainText(packet.getReason());
+    log.error("Login failed with reason \"{}\"", plainMessage);
+
+    handleTips(plainMessage);
   }
 
   @EventHandler
   public void onDisconnectPacket(ClientboundDisconnectPacket packet) {
-    log.info("Disconnected with reason \"{}\"", toPlainText(packet.getReason()));
+    var plainMessage = toPlainText(packet.getReason());
+    log.info("Disconnected with reason \"{}\"", plainMessage);
+
+    handleTips(plainMessage);
   }
 
   public void onDisconnectEvent(DisconnectedEvent event) {
@@ -1056,6 +1063,14 @@ public final class SessionDataManager {
     }
 
     log.error("Cause: {}", cause.getMessage());
+  }
+
+  private void handleTips(String message) {
+    var lowerCaseMessage = message.toLowerCase(Locale.ROOT);
+    if (lowerCaseMessage.contains("connection throttled")) {
+      log.info("Tip: The server limits the amount of connections per second. To disable this, set 'settings.connection-throttle' to 0 in bukkit.yml of the server.");
+      log.info("Tip: If you don't have access to the server, you can try increasing your join delay in the bot settings.");
+    }
   }
 
   public @NotNull Level currentLevel() {
