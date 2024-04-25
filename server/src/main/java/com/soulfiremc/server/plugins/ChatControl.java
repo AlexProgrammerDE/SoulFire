@@ -51,7 +51,7 @@ public class ChatControl implements InternalPlugin {
         .getSingleton(ServerCommandManager.class)
         .execute(command, new LocalConsole());
 
-      connection.botControl().sendMessage("Command \"" + command + "\" executed! (Code: " + code + ")");
+      connection.botControl().sendMessage("Command \"%s\" executed! (Code: %d)".formatted(command, code));
     }
   }
 

@@ -86,7 +86,7 @@ public class ItemPlaceHelper {
 
       var optionalBlockType = dataManager.currentLevel().getBlockState(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
-        throw new IllegalStateException("Block at " + blockPosition + " is not in view range");
+        throw new IllegalStateException("Block at %s is not in view range".formatted(blockPosition));
       }
 
       var cost =

@@ -215,7 +215,7 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
     if (uuid == null) {
       this.getLogger().info(message);
     } else {
-      this.getLogger().info("[" + uuid + "] " + message);
+      this.getLogger().info("[%s] %s".formatted(uuid, message));
     }
   }
 

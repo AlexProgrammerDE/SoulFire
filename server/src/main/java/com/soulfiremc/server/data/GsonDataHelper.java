@@ -81,6 +81,6 @@ public class GsonDataHelper {
       }
     }
 
-    throw new RuntimeException("Failed to find data key " + dataKey + " in file " + dataFile);
+    throw new RuntimeException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
   }
 }

@@ -99,11 +99,11 @@ public class SFVec3i {
 
   @Override
   public String toString() {
-    return "SFVec3i(" + x + ", " + y + ", " + z + ")";
+    return "SFVec3i(%d, %d, %d)".formatted(x, y, z);
   }
 
   public String formatXYZ() {
-    return "[" + x + ", " + y + ", " + z + "]";
+    return "[%d, %d, %d]".formatted(x, y, z);
   }
 
   public double distance(SFVec3i goal) {

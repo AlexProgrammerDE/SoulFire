@@ -25,6 +25,6 @@ public record ResourceKey(String namespace, String path) {
 
   @Override
   public String toString() {
-    return namespace + ":" + path;
+    return "%s:%s".formatted(namespace, path);
   }
 }

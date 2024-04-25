@@ -174,7 +174,7 @@ public class GeneratedPanel extends NavigationItem {
                 yield comboBox;
               }
               case VALUE_NOT_SET -> throw new IllegalStateException(
-                "Unexpected value: " + settingType.getValueCase());
+                "Unexpected value: %s".formatted(settingType.getValueCase()));
             };
           GBC.create(panel)
             .grid(1, row++)

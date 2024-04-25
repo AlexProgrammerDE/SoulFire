@@ -11,6 +11,6 @@ checkstyle {
 // To fix a conflict in checkstyle dependencies
 configurations.checkstyle {
   resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
-    select("com.google.guava:guava:" + libs.guava.get().version)
+    select("com.google.guava:guava:${libs.guava.get().version}")
   }
 }

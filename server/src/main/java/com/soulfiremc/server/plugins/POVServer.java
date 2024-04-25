@@ -210,7 +210,7 @@ public class POVServer implements InternalPlugin {
             MinecraftCodec.CODEC.getMinecraftVersion(),
             MinecraftCodec.CODEC.getProtocolVersion()),
           new PlayerInfo(100, 0, new ArrayList<>()),
-          Component.text("Attack POV server for attack " + attackManager.id() + "!")
+          Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
             .color(NamedTextColor.GREEN)
             .decorate(TextDecoration.BOLD),
           null,

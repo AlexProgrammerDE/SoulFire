@@ -77,7 +77,6 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
   public R parse(StringReader stringReader) throws CommandSyntaxException {
     final var start = stringReader.getCursor();
     var string = readStringCustom(stringReader);
-    System.out.println("string = " + string);
 
     var currentKeys = directKeys;
     var currentSupplier = directSupplier;

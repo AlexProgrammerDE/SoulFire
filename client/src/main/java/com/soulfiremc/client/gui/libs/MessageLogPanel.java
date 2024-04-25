@@ -257,7 +257,7 @@ public class MessageLogPanel extends JPanel {
           var url = LogsUploadService.upload(textComponent.getText()).url();
           JOptionPane.showMessageDialog(
             this,
-            SFSwingUtils.createHtmlPane("Uploaded to: <a href='" + url + "'>" + url + "</a>"),
+            SFSwingUtils.createHtmlPane("Uploaded to: <a href='%s'>%s</a>".formatted(url, url)),
             "Success",
             JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {

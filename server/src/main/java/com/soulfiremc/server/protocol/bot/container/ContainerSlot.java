@@ -57,6 +57,6 @@ public final class ContainerSlot {
 
   @Override
   public String toString() {
-    return "ContainerSlot[" + "slot=" + slot + ", " + "item=" + item + ']';
+    return "ContainerSlot[slot=%d, item=%s]".formatted(slot, item);
   }
 }

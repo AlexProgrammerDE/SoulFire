@@ -27,7 +27,7 @@ public record OfflineJavaData() implements AccountData {
   }
 
   public static UUID getOfflineUUID(String username) {
-    return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
+    return UUID.nameUUIDFromBytes(("OfflinePlayer:%s".formatted(username)).getBytes(StandardCharsets.UTF_8));
   }
 
   public MinecraftAccountProto.OfflineJavaData toProto() {

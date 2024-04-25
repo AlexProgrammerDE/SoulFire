@@ -65,11 +65,11 @@ public class SFSwingUtils {
   }
 
   public static String htmlCenterText(String text) {
-    return htmlText("<center>" + text + "</center>");
+    return htmlText("<center>%s</center>".formatted(text));
   }
 
   public static String htmlText(String text) {
-    return "<html>" + text + "</html>";
+    return "<html>%s</html>".formatted(text);
   }
 
   public static UndoManager addUndoRedo(JTextComponent textComponent) {

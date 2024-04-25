@@ -34,7 +34,7 @@ public class AboutPopup extends JDialog {
 
     content.add(SFSwingUtils.createHtmlPane("<b>SoulFire</b>"));
     content.add(
-      SFSwingUtils.createHtmlPane("Version: <b><code>" + BuildData.VERSION + "</code></b>"));
+      SFSwingUtils.createHtmlPane("Version: <b><code>%s</code></b>".formatted(BuildData.VERSION)));
     content.add(
       SFSwingUtils.createHtmlPane(
         "Author: <b><a href='https://github.com/AlexProgrammerDE'>AlexProgrammerDE</a></b>"));
