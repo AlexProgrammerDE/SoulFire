@@ -72,7 +72,7 @@ public class SFNettyHelper {
   }
 
   public static void addProxy(ChannelPipeline pipeline, SFProxy proxy) {
-    var address = proxy.getInetSocketAddress();
+    var address = proxy.getSocketAddress();
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {

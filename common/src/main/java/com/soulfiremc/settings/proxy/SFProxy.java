@@ -18,14 +18,15 @@
 package com.soulfiremc.settings.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
+import com.soulfiremc.util.SocketAddressHelper;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 public record SFProxy(
   @NonNull ProxyType type,
-  @NonNull String host,
-  int port,
+  @NonNull InetSocketAddress address,
   @Nullable String username,
   @Nullable String password) {
   public SFProxy {
@@ -47,22 +48,20 @@ public record SFProxy(
   public static SFProxy fromProto(ProxyProto proto) {
     return new SFProxy(
       ProxyType.valueOf(proto.getType().name()),
-      proto.getHost(),
-      proto.getPort(),
+      (InetSocketAddress) SocketAddressHelper.deserialize(proto.getAddress()),
       proto.hasUsername() ? proto.getUsername() : null,
       proto.hasPassword() ? proto.getPassword() : null);
   }
 
-  public InetSocketAddress getInetSocketAddress() {
-    return new InetSocketAddress(host, port);
+  public SocketAddress getSocketAddress() {
+    return address;
   }
 
   public ProxyProto toProto() {
     var builder =
       ProxyProto.newBuilder()
         .setType(ProxyProto.Type.valueOf(type.name()))
-        .setHost(host)
-        .setPort(port);
+        .setAddress(SocketAddressHelper.serialize(address));
 
     if (username != null) {
       builder.setUsername(username);

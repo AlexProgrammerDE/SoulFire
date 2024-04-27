@@ -27,9 +27,11 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import com.soulfiremc.util.EnabledWrapper;
 import com.soulfiremc.util.SFPathConstants;
+import com.soulfiremc.util.SocketAddressHelper;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
@@ -64,13 +66,12 @@ public class ProxyPanel extends NavigationItem {
 
     GBC.create(this).grid(0, 1).insets(10, 4, -5, 4).fill(GBC.HORIZONTAL).weightx(0).add(toolBar);
 
-    var columnNames = new String[] {"IP", "Port", "Username", "Password", "Type", "Enabled"};
+    var columnNames = new String[] {"Address", "Username", "Password", "Type", "Enabled"};
     var model =
       new DefaultTableModel(columnNames, 0) {
         final Class<?>[] columnTypes =
           new Class<?>[] {
             Object.class,
-            Integer.class,
             Object.class,
             Object.class,
             ProxyType.class,
@@ -96,8 +97,7 @@ public class ProxyPanel extends NavigationItem {
         for (var proxy : proxies) {
           dataVector[i++] =
             new Object[] {
-              proxy.value().host(),
-              proxy.value().port(),
+              SocketAddressHelper.serialize(proxy.value().address()),
               proxy.value().username(),
               proxy.value().password(),
               proxy.value().type(),
@@ -109,7 +109,7 @@ public class ProxyPanel extends NavigationItem {
 
         proxyList
           .getColumnModel()
-          .getColumn(4)
+          .getColumn(3)
           .setCellEditor(new DefaultCellEditor(new JEnumComboBox<>(ProxyType.class)));
 
         model.fireTableDataChanged();
@@ -127,15 +127,14 @@ public class ProxyPanel extends NavigationItem {
             rowData[column] = proxyList.getValueAt(row, column);
           }
 
-          var host = (String) rowData[0];
-          var port = (int) rowData[1];
-          var username = (String) rowData[2];
-          var password = (String) rowData[3];
-          var type = (ProxyType) rowData[4];
-          var enabled = (boolean) rowData[5];
+          var address = (String) rowData[0];
+          var username = (String) rowData[1];
+          var password = (String) rowData[2];
+          var type = (ProxyType) rowData[3];
+          var enabled = (boolean) rowData[4];
 
           proxies.add(
-            new EnabledWrapper<>(enabled, new SFProxy(type, host, port, username, password)));
+            new EnabledWrapper<>(enabled, new SFProxy(type, (InetSocketAddress) SocketAddressHelper.deserialize(address), username, password)));
         }
 
         proxyRegistry.setProxies(proxies);

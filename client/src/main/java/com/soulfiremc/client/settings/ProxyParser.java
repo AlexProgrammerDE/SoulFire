@@ -19,6 +19,7 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.settings.proxy.ProxyType;
 import com.soulfiremc.settings.proxy.SFProxy;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -49,7 +50,7 @@ public abstract class ProxyParser {
         var username = getIndexOrNull(split, 2);
         var password = getIndexOrNull(split, 3);
 
-        return new SFProxy(type, host, port, username, password);
+        return new SFProxy(type, new InetSocketAddress(host, port), username, password);
       }
     };
   }
@@ -89,7 +90,7 @@ public abstract class ProxyParser {
           password = getIndexOrNull(split, 1);
         }
 
-        return new SFProxy(proxyType, host, port, username, password);
+        return new SFProxy(proxyType, new InetSocketAddress(host, port), username, password);
       }
     };
   }
