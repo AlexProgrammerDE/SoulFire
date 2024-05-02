@@ -68,7 +68,7 @@ kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref 
 kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
 commons-validator = "commons-validator:commons-validator:1.8.0"
 commons-io = "commons-io:commons-io:2.16.1"
-guava = "com.google.guava:guava:33.1.0-jre"
+guava = "com.google.guava:guava:33.2.0-jre"
 gson = "com.google.code.gson:gson:2.10.1"
 pf4j = "org.pf4j:pf4j:3.11.0"
 fastutil = "it.unimi.dsi:fastutil:8.5.13"
