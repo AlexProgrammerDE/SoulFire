@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
 
 public enum BlockFace {
   NORTH,

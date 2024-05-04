@@ -17,13 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.github.steveice10.opennbt.tag.builtin.ByteTag;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.DoubleTag;
-import com.github.steveice10.opennbt.tag.builtin.FloatTag;
-import com.github.steveice10.opennbt.tag.builtin.IntTag;
-import com.github.steveice10.opennbt.tag.builtin.LongTag;
-import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
@@ -36,6 +29,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.nbt.NbtMap;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
@@ -73,38 +67,37 @@ public class Level {
     TagsState tagsState,
     String dimensionName,
     int dimensionId,
-    CompoundTag levelRegistry) {
+    NbtMap levelRegistry) {
     this.tagsState = tagsState;
     this.dimensionName = dimensionName;
     this.dimensionId = dimensionId;
-    Object lightLevel = levelRegistry.get("monster_spawn_light_level");
-    if (lightLevel instanceof CompoundTag lightCompound) {
-      this.monsterSpawnLightLevel = new MCUniform(lightCompound.get("value"));
-    } else if (lightLevel instanceof IntTag lightInt) {
-      this.monsterSpawnLightLevel = new MCUniformInt(lightInt.getValue());
+    var lightLevel = levelRegistry.get("monster_spawn_light_level");
+    if (lightLevel instanceof NbtMap lightCompound) {
+      this.monsterSpawnLightLevel = new MCUniform(lightCompound.getCompound("value"));
+    } else if (lightLevel instanceof Integer lightInt) {
+      this.monsterSpawnLightLevel = new MCUniformInt(lightInt);
     } else {
       throw new IllegalArgumentException("Invalid monster_spawn_light_level: " + lightLevel);
     }
 
-    this.infiniburn = levelRegistry.<StringTag>get("infiniburn").getValue();
-    this.effects = levelRegistry.<StringTag>get("effects").getValue();
-    this.ultrawarm = levelRegistry.<ByteTag>get("ultrawarm").getValue();
-    this.height = levelRegistry.<IntTag>get("height").getValue();
-    this.logicalHeight = levelRegistry.<IntTag>get("logical_height").getValue();
-    this.natural = levelRegistry.<ByteTag>get("natural").getValue();
-    this.minY = levelRegistry.<IntTag>get("min_y").getValue();
-    this.bedWorks = levelRegistry.<ByteTag>get("bed_works").getValue();
-    LongTag fixedTimeTad = levelRegistry.get("fixed_time");
-    this.fixedTime = fixedTimeTad == null ? null : fixedTimeTad.getValue();
-    this.coordinateScale = levelRegistry.<DoubleTag>get("coordinate_scale").getValue();
-    this.piglinSafe = levelRegistry.<ByteTag>get("piglin_safe").getValue();
-    this.hasCeiling = levelRegistry.<ByteTag>get("has_ceiling").getValue();
-    this.hasSkylight = levelRegistry.<ByteTag>get("has_skylight").getValue();
-    this.ambientLight = levelRegistry.<FloatTag>get("ambient_light").getValue();
+    this.infiniburn = levelRegistry.getString("infiniburn");
+    this.effects = levelRegistry.getString("effects");
+    this.ultrawarm = levelRegistry.getByte("ultrawarm");
+    this.height = levelRegistry.getInt("height");
+    this.logicalHeight = levelRegistry.getInt("logical_height");
+    this.natural = levelRegistry.getByte("natural");
+    this.minY = levelRegistry.getInt("min_y");
+    this.bedWorks = levelRegistry.getByte("bed_works");
+    this.fixedTime = levelRegistry.containsKey("fixed_time") ? levelRegistry.getLong("fixed_time") : null;
+    this.coordinateScale = levelRegistry.getDouble("coordinate_scale");
+    this.piglinSafe = levelRegistry.getByte("piglin_safe");
+    this.hasCeiling = levelRegistry.getByte("has_ceiling");
+    this.hasSkylight = levelRegistry.getByte("has_skylight");
+    this.ambientLight = levelRegistry.getFloat("ambient_light");
     this.monsterSpawnBlockLightLimit =
-      levelRegistry.<IntTag>get("monster_spawn_block_light_limit").getValue();
-    this.hasRaids = levelRegistry.<ByteTag>get("has_raids").getValue();
-    this.respawnAnchorWorks = levelRegistry.<ByteTag>get("respawn_anchor_works").getValue();
+      levelRegistry.getInt("monster_spawn_block_light_limit");
+    this.hasRaids = levelRegistry.getByte("has_raids");
+    this.respawnAnchorWorks = levelRegistry.getByte("respawn_anchor_works");
 
     this.chunks = new ChunkHolder(getMinBuildHeight(), getMaxBuildHeight());
   }

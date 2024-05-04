@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.object.Direction;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
 
 @Getter
 @RequiredArgsConstructor

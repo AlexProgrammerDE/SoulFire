@@ -17,11 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.nbt;
 
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.IntTag;
+import org.cloudburstmc.nbt.NbtMap;
 
 public record MCUniform(int maxInclusive, int minInclusive) implements UniformOrInt {
-  public MCUniform(CompoundTag tag) {
-    this(tag.<IntTag>get("max_inclusive").getValue(), tag.<IntTag>get("min_inclusive").getValue());
+  public MCUniform(NbtMap tag) {
+    this(tag.getInt("max_inclusive"), tag.getInt("min_inclusive"));
   }
 }

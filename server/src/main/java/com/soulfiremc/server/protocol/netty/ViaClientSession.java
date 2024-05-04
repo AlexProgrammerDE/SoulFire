@@ -17,15 +17,6 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
-import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
-import com.github.steveice10.packetlib.BuiltinFlags;
-import com.github.steveice10.packetlib.codec.PacketCodecHelper;
-import com.github.steveice10.packetlib.crypt.PacketEncryption;
-import com.github.steveice10.packetlib.event.session.PacketSendingEvent;
-import com.github.steveice10.packetlib.packet.Packet;
-import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.TcpSession;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.FrameCodec;
@@ -70,6 +61,15 @@ import net.raphimc.vialoader.netty.viabedrock.DisconnectHandler;
 import net.raphimc.vialoader.netty.viabedrock.RakMessageEncapsulationCodec;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
+import org.geysermc.mcprotocollib.network.BuiltinFlags;
+import org.geysermc.mcprotocollib.network.codec.PacketCodecHelper;
+import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
+import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
+import org.geysermc.mcprotocollib.network.tcp.TcpSession;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
 import org.slf4j.Logger;
 
 public class ViaClientSession extends TcpSession {
@@ -127,9 +127,9 @@ public class ViaClientSession extends TcpSession {
         }
 
         bootstrap.channelFactory(
-          RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
+          RakChannelFactory.client(SFNettyHelper.TRANSPORT_TYPE.datagramChannelFactory()));
       } else {
-        bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
+        bootstrap.channelFactory(SFNettyHelper.TRANSPORT_TYPE.socketChannelFactory());
       }
 
       bootstrap
@@ -147,7 +147,7 @@ public class ViaClientSession extends TcpSession {
       } else {
         bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
-        if (SFNettyHelper.TRANSPORT_METHOD.tcpFastOpenClientSideAvailable()) {
+        if (SFNettyHelper.TRANSPORT_TYPE.supportsTcpFastOpenClient()) {
           bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
         }
       }
@@ -157,7 +157,7 @@ public class ViaClientSession extends TcpSession {
           @Override
           public void initChannel(Channel channel) {
             var protocol = getPacketProtocol();
-            protocol.newClientSession(ViaClientSession.this);
+            protocol.newClientSession(ViaClientSession.this, false);
 
             var pipeline = channel.pipeline();
 
@@ -281,7 +281,7 @@ public class ViaClientSession extends TcpSession {
   }
 
   private void addHAProxySupport(ChannelPipeline pipeline) {
-    InetSocketAddress clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
+    var clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
     if (getFlag(BuiltinFlags.ENABLE_CLIENT_PROXY_PROTOCOL, false) && clientAddress != null) {
       pipeline.addFirst(
         "proxy-protocol-packet-sender",

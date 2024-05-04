@@ -17,8 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.model;
 
-import com.github.steveice10.mc.protocol.data.game.entity.Effect;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public record EffectData(
   Effect effect,
@@ -27,4 +26,4 @@ public record EffectData(
   boolean ambient,
   boolean showParticles,
   boolean showIcon,
-  CompoundTag factorData) {}
+  boolean blend) {}

@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.github.steveice10.packetlib.packet.Packet;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
@@ -48,6 +45,9 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.slf4j.Logger;
 
 @Getter

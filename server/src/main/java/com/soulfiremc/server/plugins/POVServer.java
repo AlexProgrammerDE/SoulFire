@@ -18,91 +18,6 @@
 package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.protocol.MinecraftConstants;
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.ServerLoginHandler;
-import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
-import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.github.steveice10.mc.protocol.data.game.PlayerListEntry;
-import com.github.steveice10.mc.protocol.data.game.PlayerListEntryAction;
-import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import com.github.steveice10.mc.protocol.data.game.chunk.DataPalette;
-import com.github.steveice10.mc.protocol.data.game.entity.EntityEvent;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.Attribute;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeModifier;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.AttributeType;
-import com.github.steveice10.mc.protocol.data.game.entity.attribute.ModifierOperation;
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.EntityMetadata;
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
-import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
-import com.github.steveice10.mc.protocol.data.game.entity.type.EntityType;
-import com.github.steveice10.mc.protocol.data.game.level.LightUpdateData;
-import com.github.steveice10.mc.protocol.data.game.level.block.BlockEntityInfo;
-import com.github.steveice10.mc.protocol.data.game.level.notify.GameEvent;
-import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
-import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
-import com.github.steveice10.mc.protocol.data.status.PlayerInfo;
-import com.github.steveice10.mc.protocol.data.status.ServerStatusInfo;
-import com.github.steveice10.mc.protocol.data.status.VersionInfo;
-import com.github.steveice10.mc.protocol.data.status.handler.ServerInfoBuilder;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundPingPacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundPongPacket;
-import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
-import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
-import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
-import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.packetlib.Server;
-import com.github.steveice10.packetlib.Session;
-import com.github.steveice10.packetlib.event.server.ServerAdapter;
-import com.github.steveice10.packetlib.event.server.ServerClosedEvent;
-import com.github.steveice10.packetlib.event.server.SessionAddedEvent;
-import com.github.steveice10.packetlib.event.session.ConnectedEvent;
-import com.github.steveice10.packetlib.event.session.DisconnectingEvent;
-import com.github.steveice10.packetlib.event.session.PacketErrorEvent;
-import com.github.steveice10.packetlib.event.session.SessionAdapter;
-import com.github.steveice10.packetlib.packet.Packet;
-import com.github.steveice10.packetlib.tcp.TcpServer;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
@@ -138,6 +53,90 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.nbt.NbtMap;
+import org.geysermc.mcprotocollib.network.Server;
+import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
+import org.geysermc.mcprotocollib.network.event.server.ServerClosedEvent;
+import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
+import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
+import org.geysermc.mcprotocollib.network.event.session.DisconnectingEvent;
+import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
+import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.network.tcp.TcpServer;
+import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
+import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.Attribute;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
+import org.geysermc.mcprotocollib.protocol.data.game.level.LightUpdateData;
+import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengthValue;
+import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.ServerStatusInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.handler.ServerInfoBuilder;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundPingPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundPongPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 
 @Slf4j
 public class POVServer implements InternalPlugin {
@@ -223,94 +222,93 @@ public class POVServer implements InternalPlugin {
 
       server.setGlobalFlag(
         MinecraftConstants.SERVER_LOGIN_HANDLER_KEY,
-        (ServerLoginHandler)
-          session -> {
-            session.send(
-              new ClientboundLoginPacket(
-                0,
+        session -> {
+          session.send(
+            new ClientboundLoginPacket(
+              0,
+              false,
+              new String[] {"minecraft:the_end"},
+              1,
+              0,
+              0,
+              false,
+              false,
+              false,
+              new PlayerSpawnInfo(
+                "minecraft:the_end",
+                "minecraft:the_end",
+                100,
+                GameMode.SPECTATOR,
+                GameMode.SPECTATOR,
                 false,
-                new String[] {"minecraft:the_end"},
-                1,
-                0,
-                0,
                 false,
-                false,
-                false,
-                new PlayerSpawnInfo(
-                  "minecraft:the_end",
-                  "minecraft:the_end",
-                  100,
-                  GameMode.SPECTATOR,
-                  GameMode.SPECTATOR,
-                  false,
-                  false,
-                  null,
-                  0)));
+                null,
+                0)));
 
-            session.send(
-              new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
+          session.send(
+            new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
 
-            // this packet is also required to let our player spawn, but the location itself
-            // doesn't matter
-            session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
+          // this packet is also required to let our player spawn, but the location itself
+          // doesn't matter
+          session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
 
-            // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
-            // request packet spam,
-            // so send it after calling ConnectedEvent which adds the PacketHandler as listener
-            session.send(new ClientboundPlayerPositionPacket(0, 0, 0, 0, 0, 0));
+          // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
+          // request packet spam,
+          // so send it after calling ConnectedEvent which adds the PacketHandler as listener
+          session.send(new ClientboundPlayerPositionPacket(0, 0, 0, 0, 0, 0));
 
-            // this packet is required since 1.20.3
-            session.send(
-              new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+          // this packet is required since 1.20.3
+          session.send(
+            new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
-            var sectionCount = 16;
-            var buf = Unpooled.buffer();
-            for (var i = 0; i < sectionCount; i++) {
-              var chunk = DataPalette.createForChunk();
-              chunk.set(0, 0, 0, 0);
-              var biome = DataPalette.createForBiome();
-              biome.set(0, 0, 0, 0);
-              SFProtocolHelper.writeChunkSection(
-                buf,
-                new ChunkSection(0, chunk, biome),
-                (MinecraftCodecHelper) session.getCodecHelper());
-            }
+          var sectionCount = 16;
+          var buf = Unpooled.buffer();
+          for (var i = 0; i < sectionCount; i++) {
+            var chunk = DataPalette.createForChunk();
+            chunk.set(0, 0, 0, 0);
+            var biome = DataPalette.createForBiome();
+            biome.set(0, 0, 0, 0);
+            SFProtocolHelper.writeChunkSection(
+              buf,
+              new ChunkSection(0, chunk, biome),
+              (MinecraftCodecHelper) session.getCodecHelper());
+          }
 
-            var chunkBytes = new byte[buf.readableBytes()];
-            buf.readBytes(chunkBytes);
+          var chunkBytes = new byte[buf.readableBytes()];
+          buf.readBytes(chunkBytes);
 
-            var lightMask = new BitSet();
-            lightMask.set(0, sectionCount + 2);
-            var skyUpdateList = new ArrayList<byte[]>();
-            for (var i = 0; i < sectionCount + 2; i++) {
-              skyUpdateList.add(FULL_LIGHT); // sky light
-            }
+          var lightMask = new BitSet();
+          lightMask.set(0, sectionCount + 2);
+          var skyUpdateList = new ArrayList<byte[]>();
+          for (var i = 0; i < sectionCount + 2; i++) {
+            skyUpdateList.add(FULL_LIGHT); // sky light
+          }
 
-            var lightUpdateData =
-              new LightUpdateData(
-                lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
+          var lightUpdateData =
+            new LightUpdateData(
+              lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
 
-            session.send(
-              new ClientboundLevelChunkWithLightPacket(
-                0,
-                0,
-                chunkBytes,
-                new CompoundTag(""),
-                new BlockEntityInfo[0],
-                lightUpdateData));
+          session.send(
+            new ClientboundLevelChunkWithLightPacket(
+              0,
+              0,
+              chunkBytes,
+              NbtMap.builder().build(),
+              new BlockEntityInfo[0],
+              lightUpdateData));
 
-            // Manually call the connect event
-            session.callEvent(new ConnectedEvent(session));
+          // Manually call the connect event
+          session.callEvent(new ConnectedEvent(session));
 
-            var brandBuffer = Unpooled.buffer();
-            session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
+          var brandBuffer = Unpooled.buffer();
+          session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
 
-            var brandBytes = new byte[brandBuffer.readableBytes()];
-            brandBuffer.readBytes(brandBytes);
+          var brandBytes = new byte[brandBuffer.readableBytes()];
+          brandBuffer.readBytes(brandBytes);
 
-            session.send(
-              new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
-          });
+          session.send(
+            new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
+        });
       server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
 
       server.addListener(
@@ -561,7 +559,7 @@ public class POVServer implements InternalPlugin {
 
                   var spawnInfo =
                     new PlayerSpawnInfo(
-                      dataManager.currentDimension().dimensionType(),
+                      dataManager.currentDimension().dimensionId(),
                       dataManager.currentDimension().worldName(),
                       dataManager.currentDimension().hashedSeed(),
                       dataManager.gameMode(),
@@ -581,7 +579,8 @@ public class POVServer implements InternalPlugin {
                       dataManager.clientEntity().showReducedDebug(),
                       dataManager.enableRespawnScreen(),
                       dataManager.doLimitedCrafting(),
-                      spawnInfo));
+                      spawnInfo,
+                      dataManager.loginData().enforcesSecureChat()));
                   session.send(new ClientboundRespawnPacket(spawnInfo, false, false));
 
                   if (dataManager.difficultyData() != null) {
@@ -774,7 +773,7 @@ public class POVServer implements InternalPlugin {
                         chunkKey.chunkX(),
                         chunkKey.chunkZ(),
                         chunkBytes,
-                        new CompoundTag(""),
+                        NbtMap.builder().build(),
                         new BlockEntityInfo[0],
                         lightUpdateData));
                   }
@@ -869,7 +868,7 @@ public class POVServer implements InternalPlugin {
                           effect.getValue().ambient(),
                           effect.getValue().showParticles(),
                           effect.getValue().showIcon(),
-                          effect.getValue().factorData()));
+                          effect.getValue().blend()));
                     }
 
                     session.send(
@@ -899,9 +898,8 @@ public class POVServer implements InternalPlugin {
                                         modifier.amount(),
                                         switch (modifier.operation()) {
                                           case ADDITION -> ModifierOperation.ADD;
-                                          case MULTIPLY_BASE -> ModifierOperation
-                                            .ADD_MULTIPLIED;
-                                          case MULTIPLY_TOTAL -> ModifierOperation.MULTIPLY;
+                                          case MULTIPLY_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
+                                          case MULTIPLY_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
                                         }))
                                   .toList()))
                           .toList()));

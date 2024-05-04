@@ -24,7 +24,6 @@ import static com.soulfiremc.brigadier.BrigadierHelper.helpRedirect;
 import static com.soulfiremc.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.brigadier.BrigadierHelper.privateCommand;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -83,6 +82,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

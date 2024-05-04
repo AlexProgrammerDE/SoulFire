@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.github.steveice10.mc.protocol.codec.MinecraftCodec;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 
 public class SFVersionConstants {
   public static final ProtocolVersion CURRENT_PROTOCOL_VERSION =
