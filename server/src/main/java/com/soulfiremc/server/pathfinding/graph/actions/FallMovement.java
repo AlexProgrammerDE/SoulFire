@@ -307,11 +307,10 @@ public final class FallMovement extends GraphAction implements Cloneable {
       }
     }
 
-    // -1 means we place a block to be able to fall one down
-    var targetDown = closestBlockToFallOn == Integer.MIN_VALUE ? -1 : closestBlockToFallOn + 1;
     var absoluteTargetFeetBlock = node.add(direction
       .offset(FEET_POSITION_RELATIVE_BLOCK)
-      .add(0, targetDown, 0));
+      // -1 means we place a block to be able to fall one down
+      .add(0, closestBlockToFallOn == Integer.MIN_VALUE ? -1 : closestBlockToFallOn + 1, 0));
 
     if (needsToPlaceBlock) {
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
