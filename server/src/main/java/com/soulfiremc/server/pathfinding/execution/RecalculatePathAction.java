@@ -38,7 +38,8 @@ public final class RecalculatePathAction implements WorldAction {
 
   @Override
   public BotEntityState simulate(BotEntityState state) {
-    throw new UnsupportedOperationException("Should be handled separately!");
+    // This action does not change the state of the bot.
+    return state;
   }
 
   @Override
