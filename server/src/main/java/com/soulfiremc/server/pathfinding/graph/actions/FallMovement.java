@@ -62,8 +62,6 @@ public final class FallMovement extends GraphAction implements Cloneable {
   private double baseCost;
   @Getter
   private boolean appliedCornerCost = false;
-  @Setter
-  private boolean requiresAgainstBlock = false;
   @Getter
   @Setter
   private int closestBlockToFallOn = Integer.MIN_VALUE;
@@ -280,7 +278,8 @@ public final class FallMovement extends GraphAction implements Cloneable {
   public GraphInstructions getInstructions(SFVec3i node) {
     var cost = this.baseCost;
 
-    if (closestBlockToFallOn == Integer.MIN_VALUE) {
+    var needsToPlaceBlock = closestBlockToFallOn == Integer.MIN_VALUE;
+    if (needsToPlaceBlock) {
       // We place a block and fall one down to land on that block
       cost += Costs.FALL_1;
     } else {
@@ -294,7 +293,7 @@ public final class FallMovement extends GraphAction implements Cloneable {
     }
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
-    var blockToPlace = requiresAgainstBlock ? 1 : 0;
+    var blockToPlace = needsToPlaceBlock ? 1 : 0;
 
     var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
     if (blockBreakCosts != null) {
@@ -314,7 +313,7 @@ public final class FallMovement extends GraphAction implements Cloneable {
       .offset(FEET_POSITION_RELATIVE_BLOCK)
       .add(0, targetDown, 0));
 
-    if (requiresAgainstBlock) {
+    if (needsToPlaceBlock) {
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       cost += Costs.PLACE_BLOCK;
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
