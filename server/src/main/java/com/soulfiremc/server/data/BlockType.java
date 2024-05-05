@@ -43,14 +43,6 @@ public record BlockType(
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) {
-  public BlockType {
-    statesData = BlockStates.fromJsonArray(
-      this,
-      key,
-      GsonDataHelper.fromJson("/minecraft/blocks.json", key.toString(), JsonObject.class)
-        .getAsJsonArray("states"));
-  }
-
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
     @Override
     public void write(JsonWriter out, FluidType value) throws IOException {
@@ -65,7 +57,6 @@ public record BlockType(
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
   public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
     new Object2ReferenceOpenHashMap<>();
-
   //@formatter:off
   public static final BlockType AIR = register("minecraft:air");
   public static final BlockType STONE = register("minecraft:stone");
@@ -1126,6 +1117,14 @@ public record BlockType(
   public static final BlockType CRAFTER = register("minecraft:crafter");
   public static final BlockType TRIAL_SPAWNER = register("minecraft:trial_spawner");
   //@formatter:on
+
+  public BlockType {
+    statesData = BlockStates.fromJsonArray(
+      this,
+      key,
+      GsonDataHelper.fromJson("/minecraft/blocks.json", key.toString(), JsonObject.class)
+        .getAsJsonArray("states"));
+  }
 
   public static BlockType register(String key) {
     var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class, Map.of(

@@ -17,16 +17,25 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
+import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
+import com.soulfiremc.server.protocol.bot.BotActionManager;
+import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.ObjectReference;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import net.kyori.adventure.util.TriState;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
@@ -36,6 +45,43 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   public ParkourMovement(ParkourDirection direction) {
     this.direction = direction;
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
+  }
+
+  public static void registerParkourMovements(
+    Consumer<GraphAction> callback,
+    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    for (var direction : ParkourDirection.VALUES) {
+      callback.accept(
+        ParkourMovement.registerParkourMovement(
+          blockSubscribers, new ParkourMovement(direction)));
+    }
+  }
+
+  private static ParkourMovement registerParkourMovement(
+    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    ParkourMovement movement) {
+    {
+      var blockId = 0;
+      for (var freeBlock : movement.listRequiredFreeBlocks()) {
+        movement.subscribe();
+        blockSubscribers
+          .accept(freeBlock.key(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+      }
+    }
+
+    {
+      movement.subscribe();
+      blockSubscribers
+        .accept(movement.requiredUnsafeBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+    }
+
+    {
+      movement.subscribe();
+      blockSubscribers
+        .accept(movement.requiredSolidBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
+    }
+
+    return movement;
   }
 
   public List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
@@ -93,6 +139,65 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       return (ParkourMovement) super.clone();
     } catch (CloneNotSupportedException cantHappen) {
       throw new InternalError();
+    }
+  }
+
+  public record ParkourMovementBlockSubscription(
+    MinecraftGraph.SubscriptionType type,
+    int blockArrayIndex,
+    BlockFace blockBreakSideHint,
+    BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
+    BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<ParkourMovement> {
+    public ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType type) {
+      this(type, -1, null, null, null);
+    }
+
+    public ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+      this(type, blockArrayIndex, blockBreakSideHint, null, null);
+    }
+
+    @Override
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, ObjectReference<TriState> isFreeReference,
+                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
+
+      return switch (type) {
+        case MOVEMENT_FREE -> {
+          if (isFreeReference.value == TriState.NOT_SET) {
+            // We can walk through blocks like air or grass
+            isFreeReference.value = MinecraftGraph.isBlockFree(blockState);
+          }
+
+          if (isFreeReference.value == TriState.TRUE) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+        }
+        case PARKOUR_UNSAFE_TO_STAND_ON -> {
+          // We only want to jump over dangerous blocks/gaps
+          // So either a non-full-block like water or lava or magma
+          // since it hurts to stand on.
+          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_SOLID -> {
+          // Block is safe to walk on, no need to check for more
+          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+        }
+        default -> throw new IllegalStateException("Unexpected value: " + type);
+      };
+    }
+
+    @Override
+    public ParkourMovement castAction(GraphAction action) {
+      return (ParkourMovement) action;
     }
   }
 }

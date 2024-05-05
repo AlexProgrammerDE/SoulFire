@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
+import com.soulfiremc.server.data.BlockItems;
+import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
@@ -25,6 +27,7 @@ import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
@@ -33,13 +36,18 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
+import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.ObjectReference;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.util.TriState;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {
@@ -105,6 +113,86 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       unsafeToBreak = null;
       noNeedToBreak = null;
     }
+  }
+
+  public static void registerMovements(
+    Consumer<GraphAction> callback,
+    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    for (var direction : MovementDirection.VALUES) {
+      var diagonal = direction.isDiagonal();
+      for (var modifier : MovementModifier.VALUES) {
+        if (diagonal) {
+          for (var side : MovementSide.VALUES) {
+            callback.accept(
+              SimpleMovement.registerMovement(
+                blockSubscribers,
+                new SimpleMovement(direction, side, modifier)));
+          }
+        } else {
+          callback.accept(
+            SimpleMovement.registerMovement(
+              blockSubscribers, new SimpleMovement(direction, null, modifier)));
+        }
+      }
+    }
+  }
+
+  private static SimpleMovement registerMovement(
+    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    SimpleMovement movement) {
+    {
+      var blockId = 0;
+      for (var freeBlock : movement.requiredFreeBlocks()) {
+        movement.subscribe();
+        blockSubscribers
+          .accept(freeBlock.key(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+      }
+    }
+
+    {
+      var safeBlocks = movement.listCheckSafeMineBlocks();
+      for (var i = 0; i < safeBlocks.length; i++) {
+        var savedBlock = safeBlocks[i];
+        if (savedBlock == null) {
+          continue;
+        }
+
+        for (var block : savedBlock) {
+          movement.subscribe();
+          blockSubscribers
+            .accept(block.position(), new SimpleMovementBlockSubscription(
+              MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+              i,
+              block.type()));
+        }
+      }
+    }
+
+    {
+      movement.subscribe();
+      blockSubscribers
+        .accept(movement.requiredSolidBlock(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
+    }
+
+    {
+      for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
+        movement.subscribe();
+        blockSubscribers
+          .accept(addCostIfSolidBlock, new SimpleMovementBlockSubscription(
+            MinecraftGraph.SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+      }
+    }
+
+    {
+      for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
+        movement.subscribe();
+        blockSubscribers
+          .accept(againstBlock.againstPos(), new SimpleMovementBlockSubscription(
+            MinecraftGraph.SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
+      }
+    }
+
+    return movement;
   }
 
   private int freeBlockIndex(SFVec3i block) {
@@ -392,6 +480,164 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return c;
     } catch (CloneNotSupportedException cantHappen) {
       throw new InternalError();
+    }
+  }
+
+  public record SimpleMovementBlockSubscription(
+    MinecraftGraph.SubscriptionType type,
+    int blockArrayIndex,
+    BlockFace blockBreakSideHint,
+    BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
+    BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<SimpleMovement> {
+    public SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType type) {
+      this(type, -1, null, null, null);
+    }
+
+    public SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+      this(type, blockArrayIndex, blockBreakSideHint, null, null);
+    }
+
+    public SimpleMovementBlockSubscription(
+      MinecraftGraph.SubscriptionType type,
+      BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst) {
+      this(type, -1, null, blockToPlaceAgainst, null);
+    }
+
+    public SimpleMovementBlockSubscription(
+      MinecraftGraph.SubscriptionType subscriptionType,
+      int i,
+      BlockSafetyData.BlockSafetyType type) {
+      this(subscriptionType, i, null, null, type);
+    }
+
+    @Override
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, ObjectReference<TriState> isFreeReference,
+                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
+      return switch (type) {
+        case MOVEMENT_FREE -> {
+          if (isFreeReference.value == TriState.NOT_SET) {
+            // We can walk through blocks like air or grass
+            isFreeReference.value = MinecraftGraph.isBlockFree(blockState);
+          }
+
+          if (isFreeReference.value == TriState.TRUE) {
+            if (simpleMovement.allowBlockActions()) {
+              simpleMovement.noNeedToBreak()[blockArrayIndex] = true;
+            }
+
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          // Search for a way to break this block
+          if (!graph.canBreakBlocks()
+            || !simpleMovement.allowBlockActions()
+            // Narrow this down to blocks that can be broken
+            || !BlockTypeHelper.isDiggable(blockState.blockType())
+            // Check if we previously found out this block is unsafe to break
+            || simpleMovement.unsafeToBreak()[blockArrayIndex]
+            // Narrows the list down to a reasonable size
+            || !BlockItems.hasItemType(blockState.blockType())) {
+            // No way to break this block
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
+          var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
+          // We can mine this block, lets add costs and continue
+          simpleMovement.blockBreakCosts()[blockArrayIndex] =
+            new MovementMiningCost(
+              absolutePositionBlock,
+              cacheableMiningCost.miningCost(),
+              cacheableMiningCost.willDrop(),
+              blockBreakSideHint);
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_BREAK_SAFETY_CHECK -> {
+          // There is no need to break this block, so there is no need for safety checks
+          if (simpleMovement.noNeedToBreak()[blockArrayIndex]) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          // The block was already marked as unsafe
+          if (simpleMovement.unsafeToBreak()[blockArrayIndex]) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          var unsafe = safetyType.isUnsafeBlock(blockState);
+
+          if (!unsafe) {
+            // All good, we can continue
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          var currentValue = simpleMovement.blockBreakCosts()[blockArrayIndex];
+
+          if (currentValue != null) {
+            // We learned that this block needs to be broken, so we need to set it as impossible
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
+          // Store for a later time that this is unsafe,
+          // so if we check this block,
+          // we know it's unsafe
+          simpleMovement.unsafeToBreak()[blockArrayIndex] = true;
+
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_SOLID -> {
+          // Block is safe to walk on, no need to check for more
+          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          if (!graph.canPlaceBlocks()
+            || !simpleMovement.allowBlockActions()
+            || !blockState.blockType().replaceable()) {
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
+          // We can place a block here, but we need to find a block to place against
+          simpleMovement.requiresAgainstBlock(true);
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_AGAINST_PLACE_SOLID -> {
+          // We already found one, no need to check for more
+          if (simpleMovement.blockPlaceAgainstData() != null) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          // This block should not be placed against
+          if (!blockState.blockShapeGroup().isFullBlock()) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          // Fixup the position to be the block we are placing against instead of relative
+          simpleMovement.blockPlaceAgainstData(
+            new BotActionManager.BlockPlaceAgainstData(
+              absolutePositionBlock, blockToPlaceAgainst.blockFace()));
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
+          // No need to apply the cost multiple times.
+          if (simpleMovement.appliedCornerCost()) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          if (blockState.blockShapeGroup().isFullBlock()) {
+            simpleMovement.addCornerCost();
+          } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
+            // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        default -> throw new IllegalStateException("Unexpected value: " + type);
+      };
+    }
+
+    @Override
+    public SimpleMovement castAction(GraphAction action) {
+      return (SimpleMovement) action;
     }
   }
 }
