@@ -70,6 +70,7 @@ public class AttackManager {
   private static final AtomicInteger ID_COUNTER = new AtomicInteger();
   private final int id = ID_COUNTER.getAndIncrement();
   private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
+  private final SoulFireScheduler scheduler = new SoulFireScheduler(logger);
   private final LambdaManager eventBus =
     LambdaManager.basic(new ASMGenerator())
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
@@ -82,7 +83,6 @@ public class AttackManager {
           }
         });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
-  private final SoulFireScheduler scheduler = new SoulFireScheduler(logger);
   private final SoulFireServer soulFireServer;
   private final SettingsHolder settingsHolder;
   @Setter

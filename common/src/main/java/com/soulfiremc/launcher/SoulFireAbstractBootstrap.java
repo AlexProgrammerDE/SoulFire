@@ -45,8 +45,6 @@ import org.pf4j.PluginManager;
 @Slf4j
 public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();
-  protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());
-  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory);
 
   static {
     System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -63,6 +61,9 @@ public abstract class SoulFireAbstractBootstrap {
       ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
     }
   }
+
+  protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());
+  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory);
 
   protected SoulFireAbstractBootstrap() {}
 

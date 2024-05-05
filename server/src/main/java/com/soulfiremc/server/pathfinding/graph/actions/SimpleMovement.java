@@ -351,8 +351,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     try {
       var c = (SimpleMovement) super.clone();
 
-      c.blockBreakCosts =
-        this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
+      c.blockBreakCosts = this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];
       c.unsafeToBreak = this.unsafeToBreak == null ? null : new boolean[this.unsafeToBreak.length];
       c.noNeedToBreak = this.noNeedToBreak == null ? null : new boolean[this.noNeedToBreak.length];
 
