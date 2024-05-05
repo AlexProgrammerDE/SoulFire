@@ -28,14 +28,13 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ObjectReference;
+import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.kyori.adventure.util.TriState;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
@@ -64,18 +63,18 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         blockSubscribers
-          .accept(freeBlock.key(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+          .accept(freeBlock.key(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
     {
       blockSubscribers
-        .accept(movement.requiredUnsafeBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+        .accept(movement.requiredUnsafeBlock(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
     }
 
     {
       blockSubscribers
-        .accept(movement.requiredSolidBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
+        .accept(movement.requiredSolidBlock(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.MOVEMENT_SOLID));
     }
 
     return movement;
@@ -139,32 +138,27 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
-  public record ParkourMovementBlockSubscription(
-    MinecraftGraph.SubscriptionType type,
+  record ParkourMovementBlockSubscription(
+    SubscriptionType type,
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
     BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<ParkourMovement> {
-    public ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType type) {
+    ParkourMovementBlockSubscription(SubscriptionType type) {
       this(type, -1, null, null, null);
     }
 
-    public ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+    ParkourMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
       this(type, blockArrayIndex, blockBreakSideHint, null, null);
     }
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, ObjectReference<TriState> isFreeReference,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absolutePositionBlock) {
 
       return switch (type) {
         case MOVEMENT_FREE -> {
-          if (isFreeReference.value == TriState.NOT_SET) {
-            // We can walk through blocks like air or grass
-            isFreeReference.value = MinecraftGraph.isBlockFree(blockState);
-          }
-
-          if (isFreeReference.value == TriState.TRUE) {
+          if (isFree.get()) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
@@ -188,13 +182,18 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
           yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
         }
-        default -> throw new IllegalStateException("Unexpected value: " + type);
       };
     }
 
     @Override
     public ParkourMovement castAction(GraphAction action) {
       return (ParkourMovement) action;
+    }
+
+    enum SubscriptionType {
+      MOVEMENT_FREE,
+      PARKOUR_UNSAFE_TO_STAND_ON,
+      MOVEMENT_SOLID
     }
   }
 }

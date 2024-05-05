@@ -37,7 +37,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ObjectReference;
+import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
@@ -47,7 +47,6 @@ import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.util.TriState;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {
@@ -144,7 +143,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks()) {
         blockSubscribers
-          .accept(freeBlock.key(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+          .accept(freeBlock.key(), new SimpleMovementBlockSubscription(SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
@@ -159,7 +158,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         for (var block : savedBlock) {
           blockSubscribers
             .accept(block.position(), new SimpleMovementBlockSubscription(
-              MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+              SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
               i,
               block.type()));
         }
@@ -168,14 +167,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     {
       blockSubscribers
-        .accept(movement.requiredSolidBlock(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
+        .accept(movement.requiredSolidBlock(), new SimpleMovementBlockSubscription(SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_SOLID));
     }
 
     {
       for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
         blockSubscribers
           .accept(addCostIfSolidBlock, new SimpleMovementBlockSubscription(
-            MinecraftGraph.SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+            SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
       }
     }
 
@@ -183,7 +182,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
         blockSubscribers
           .accept(againstBlock.againstPos(), new SimpleMovementBlockSubscription(
-            MinecraftGraph.SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
+            SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
       }
     }
 
@@ -478,44 +477,39 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  public record SimpleMovementBlockSubscription(
-    MinecraftGraph.SubscriptionType type,
+  record SimpleMovementBlockSubscription(
+    SubscriptionType type,
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
     BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<SimpleMovement> {
-    public SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType type) {
+    SimpleMovementBlockSubscription(SubscriptionType type) {
       this(type, -1, null, null, null);
     }
 
-    public SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+    SimpleMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
       this(type, blockArrayIndex, blockBreakSideHint, null, null);
     }
 
-    public SimpleMovementBlockSubscription(
-      MinecraftGraph.SubscriptionType type,
+    SimpleMovementBlockSubscription(
+      SubscriptionType type,
       BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst) {
       this(type, -1, null, blockToPlaceAgainst, null);
     }
 
-    public SimpleMovementBlockSubscription(
-      MinecraftGraph.SubscriptionType subscriptionType,
+    SimpleMovementBlockSubscription(
+      SubscriptionType subscriptionType,
       int i,
       BlockSafetyData.BlockSafetyType type) {
       this(subscriptionType, i, null, null, type);
     }
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, ObjectReference<TriState> isFreeReference,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absolutePositionBlock) {
       return switch (type) {
         case MOVEMENT_FREE -> {
-          if (isFreeReference.value == TriState.NOT_SET) {
-            // We can walk through blocks like air or grass
-            isFreeReference.value = MinecraftGraph.isBlockFree(blockState);
-          }
-
-          if (isFreeReference.value == TriState.TRUE) {
+          if (isFree.get()) {
             if (simpleMovement.allowBlockActions()) {
               simpleMovement.noNeedToBreak()[blockArrayIndex] = true;
             }
@@ -626,13 +620,20 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
-        default -> throw new IllegalStateException("Unexpected value: " + type);
       };
     }
 
     @Override
     public SimpleMovement castAction(GraphAction action) {
       return (SimpleMovement) action;
+    }
+
+    enum SubscriptionType {
+      MOVEMENT_FREE,
+      MOVEMENT_BREAK_SAFETY_CHECK,
+      MOVEMENT_SOLID,
+      MOVEMENT_ADD_CORNER_COST_IF_SOLID,
+      MOVEMENT_AGAINST_PLACE_SOLID
     }
   }
 }

@@ -32,7 +32,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCo
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ObjectReference;
+import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
@@ -41,7 +41,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.util.TriState;
 
 @Slf4j
 public final class UpMovement extends GraphAction implements Cloneable {
@@ -78,7 +77,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks()) {
         blockSubscribers
-          .accept(freeBlock.key(), new UpMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+          .accept(freeBlock.key(), new UpMovementBlockSubscription(UpMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
@@ -93,7 +92,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
         for (var block : savedBlock) {
           blockSubscribers
             .accept(block.position(), new UpMovementBlockSubscription(
-              MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+              UpMovementBlockSubscription.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
               i,
               block.type()));
         }
@@ -194,24 +193,24 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
   }
 
-  public record UpMovementBlockSubscription(
-    MinecraftGraph.SubscriptionType type,
+  record UpMovementBlockSubscription(
+    SubscriptionType type,
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<UpMovement> {
-    public UpMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+    UpMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
       this(type, blockArrayIndex, blockBreakSideHint, null);
     }
 
-    public UpMovementBlockSubscription(
-      MinecraftGraph.SubscriptionType subscriptionType,
+    UpMovementBlockSubscription(
+      SubscriptionType subscriptionType,
       int i,
       BlockSafetyData.BlockSafetyType type) {
       this(subscriptionType, i, null, type);
     }
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, ObjectReference<TriState> isFreeReference,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absolutePositionBlock) {
       // Towering requires placing a block below
       if (!graph.canPlaceBlocks()) {
@@ -220,12 +219,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
       return switch (type) {
         case MOVEMENT_FREE -> {
-          if (isFreeReference.value == TriState.NOT_SET) {
-            // We can walk through blocks like air or grass
-            isFreeReference.value = MinecraftGraph.isBlockFree(blockState);
-          }
-
-          if (isFreeReference.value == TriState.TRUE) {
+          if (isFree.get()) {
             upMovement.noNeedToBreak()[blockArrayIndex] = true;
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
@@ -281,13 +275,17 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
-        default -> throw new IllegalStateException("Unexpected value: " + type);
       };
     }
 
     @Override
     public UpMovement castAction(GraphAction action) {
       return (UpMovement) action;
+    }
+
+    enum SubscriptionType {
+      MOVEMENT_FREE,
+      MOVEMENT_BREAK_SAFETY_CHECK
     }
   }
 }

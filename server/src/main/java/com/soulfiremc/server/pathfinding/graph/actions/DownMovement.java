@@ -29,7 +29,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ObjectReference;
+import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
@@ -38,7 +38,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.util.TriState;
 
 public final class DownMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
@@ -49,6 +48,9 @@ public final class DownMovement extends GraphAction implements Cloneable {
   @Getter
   @Setter
   private int closestBlockToFallOn = Integer.MIN_VALUE;
+  @Getter
+  @Setter
+  private int closestObstructingBlock = Integer.MIN_VALUE;
 
   public DownMovement() {
     this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
@@ -66,14 +68,21 @@ public final class DownMovement extends GraphAction implements Cloneable {
     {
       for (var safetyBlock : movement.listSafetyCheckBlocks()) {
         blockSubscribers
-          .accept(safetyBlock, new DownMovementBlockSubscription(MinecraftGraph.SubscriptionType.DOWN_SAFETY_CHECK));
+          .accept(safetyBlock, new DownMovementBlockSubscription(DownMovementBlockSubscription.SubscriptionType.DOWN_SAFETY_CHECK));
+      }
+    }
+
+    {
+      for (var obstructingBlock : movement.listObstructFallCheckBlocks()) {
+        blockSubscribers
+          .accept(obstructingBlock, new DownMovementBlockSubscription(DownMovementBlockSubscription.SubscriptionType.MOVEMENT_OBSTRUCTING_FALL_CHECK));
       }
     }
 
     {
       var freeBlock = movement.blockToBreak();
       blockSubscribers
-        .accept(freeBlock.key(), new DownMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, 0, freeBlock.value()));
+        .accept(freeBlock.key(), new DownMovementBlockSubscription(DownMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, 0, freeBlock.value()));
     }
 
     {
@@ -87,7 +96,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
         for (var block : savedBlock) {
           blockSubscribers
             .accept(block.position(), new DownMovementBlockSubscription(
-              MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
+              DownMovementBlockSubscription.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
               i,
               block.type()));
         }
@@ -117,6 +126,18 @@ public final class DownMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
+  public List<SFVec3i> listObstructFallCheckBlocks() {
+    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+
+    // Block below the block we mine can obstruct a 2 block fall
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
+
+    // Block below the block we mine can obstruct a 3 block fall
+    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
+
+    return requiredFreeBlocks;
+  }
+
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
     var results = new BlockSafetyData[1][];
 
@@ -142,7 +163,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
   @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
-    if (closestBlockToFallOn == Integer.MIN_VALUE) {
+    if (closestBlockToFallOn == Integer.MIN_VALUE || closestObstructingBlock > closestBlockToFallOn) {
       return Collections.emptyList();
     }
 
@@ -180,28 +201,28 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  public record DownMovementBlockSubscription(
-    MinecraftGraph.SubscriptionType type,
+  record DownMovementBlockSubscription(
+    SubscriptionType type,
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<DownMovement> {
-    public DownMovementBlockSubscription(MinecraftGraph.SubscriptionType type) {
+    DownMovementBlockSubscription(SubscriptionType type) {
       this(type, -1, null, null);
     }
 
-    public DownMovementBlockSubscription(MinecraftGraph.SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
+    DownMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
       this(type, blockArrayIndex, blockBreakSideHint, null);
     }
 
-    public DownMovementBlockSubscription(
-      MinecraftGraph.SubscriptionType subscriptionType,
+    DownMovementBlockSubscription(
+      SubscriptionType subscriptionType,
       int i,
       BlockSafetyData.BlockSafetyType type) {
       this(subscriptionType, i, null, type);
     }
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, ObjectReference<TriState> isFreeReference,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absolutePositionBlock) {
       return switch (type) {
         case MOVEMENT_FREE -> {
@@ -250,13 +271,40 @@ public final class DownMovement extends GraphAction implements Cloneable {
           // All good, we can continue
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
-        default -> throw new IllegalStateException("Unexpected value: " + type);
+        case MOVEMENT_OBSTRUCTING_FALL_CHECK -> {
+          var yLevel = key.y;
+
+          if (yLevel < downMovement.closestObstructingBlock()) {
+            // We already found a higher obstructing block
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          if (yLevel < downMovement.closestBlockToFallOn()) {
+            // We only search blocks above the closest block to fall on
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          if (isFree.get()) {
+            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+          }
+
+          // We found a block that obstructs our fall
+          downMovement.closestObstructingBlock(yLevel);
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
       };
     }
 
     @Override
     public DownMovement castAction(GraphAction action) {
       return (DownMovement) action;
+    }
+
+    enum SubscriptionType {
+      MOVEMENT_FREE,
+      DOWN_SAFETY_CHECK,
+      MOVEMENT_BREAK_SAFETY_CHECK,
+      MOVEMENT_OBSTRUCTING_FALL_CHECK
     }
   }
 }

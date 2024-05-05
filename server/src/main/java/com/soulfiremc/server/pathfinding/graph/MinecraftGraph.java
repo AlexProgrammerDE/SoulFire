@@ -27,7 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.SimpleMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.UpMovement;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.util.ObjectReference;
+import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.util.TriState;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,
@@ -82,9 +81,8 @@ public record MinecraftGraph(TagsState tagsState,
     }
   }
 
-  public static TriState isBlockFree(BlockState blockState) {
-    return TriState.byBoolean(
-      blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY);
+  public static boolean isBlockFree(BlockState blockState) {
+    return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
   }
 
   public void insertActions(
@@ -120,7 +118,7 @@ public record MinecraftGraph(TagsState tagsState,
     SFVec3i absolutePositionBlock = null;
 
     // We cache only this, but not solid because solid will only occur a single time
-    var isFreeReference = new ObjectReference<>(TriState.NOT_SET);
+    LazyBoolean isFree = null;
     for (var subscriber : value) {
       var action = actions[subscriber.actionIndex];
       if (action == null) {
@@ -137,7 +135,12 @@ public record MinecraftGraph(TagsState tagsState,
         }
       }
 
-      switch (subscriber.subscription.processBlockUnsafe(this, key, action, isFreeReference, blockState, absolutePositionBlock)) {
+      if (isFree == null) {
+        var finalBlockState = blockState;
+        isFree = new LazyBoolean(() -> isBlockFree(finalBlockState));
+      }
+
+      switch (subscriber.subscription.processBlockUnsafe(this, key, action, isFree, blockState, absolutePositionBlock)) {
         case CONTINUE -> {
           if (!action.decrementAndIsDone()) {
             continue;
@@ -157,22 +160,12 @@ public record MinecraftGraph(TagsState tagsState,
     IMPOSSIBLE
   }
 
-  public enum SubscriptionType {
-    MOVEMENT_FREE,
-    MOVEMENT_BREAK_SAFETY_CHECK,
-    MOVEMENT_SOLID,
-    MOVEMENT_ADD_CORNER_COST_IF_SOLID,
-    MOVEMENT_AGAINST_PLACE_SOLID,
-    DOWN_SAFETY_CHECK,
-    PARKOUR_UNSAFE_TO_STAND_ON
-  }
-
   public interface MovementSubscription<M extends GraphAction> {
     SubscriptionSingleResult processBlock(
       MinecraftGraph graph,
       SFVec3i key,
       M action,
-      ObjectReference<TriState> isFreeReference,
+      LazyBoolean isFree,
       BlockState blockState,
       SFVec3i absolutePositionBlock);
 
@@ -180,10 +173,10 @@ public record MinecraftGraph(TagsState tagsState,
       MinecraftGraph graph,
       SFVec3i key,
       GraphAction action,
-      ObjectReference<TriState> isFreeReference,
+      LazyBoolean isFree,
       BlockState blockState,
       SFVec3i absolutePositionBlock) {
-      return processBlock(graph, key, castAction(action), isFreeReference, blockState, absolutePositionBlock);
+      return processBlock(graph, key, castAction(action), isFree, blockState, absolutePositionBlock);
     }
 
     M castAction(GraphAction action);
