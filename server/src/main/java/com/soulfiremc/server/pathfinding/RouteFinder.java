@@ -118,12 +118,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return List.of();
       }
 
-      if (System.currentTimeMillis() > nextLog) {
+      if (System.currentTimeMillis() > nextLog && log.isInfoEnabled()) {
         var bestNode = findBestNode(routeIndex.valuesArray());
-        log.info("Still looking for route... {} time left, {} nodes left, closest position is {} with distance {}",
+        log.info("Still looking for route... {}ms time left, {} nodes left, closest position is {} with distance {}",
           expireTime - System.currentTimeMillis(),
           openSet.size(),
-          bestNode.blockPosition(),
+          bestNode.blockPosition().formatXYZ(),
           bestNode.totalRouteScore() - bestNode.sourceCost()
         );
         nextLog = System.currentTimeMillis() + 1000;
