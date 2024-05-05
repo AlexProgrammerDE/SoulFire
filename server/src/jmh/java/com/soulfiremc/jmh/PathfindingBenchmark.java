@@ -65,6 +65,7 @@ public class PathfindingBenchmark {
 
       log.info("Parsing world data...");
 
+      var maxY = 0;
       var accessor = new TestBlockAccessor();
       for (var x = 0; x < data.length; x++) {
         var xArray = data[x];
@@ -72,6 +73,7 @@ public class PathfindingBenchmark {
           var yArray = xArray[y];
           for (var z = 0; z < yArray.length; z++) {
             accessor.setBlockAt(x, y, z, BlockType.getByKey(ResourceKey.fromString(blockDefinitions[yArray[z]])));
+            maxY = Math.max(maxY, y);
           }
         }
       }
@@ -80,14 +82,16 @@ public class PathfindingBenchmark {
 
       // Find the first safe block at 0 0
       var safeY = 0;
-      for (var y = 0; y < 255; y++) {
-        if (accessor.getBlockState(0, y, 0).blockType() == BlockType.AIR) {
-          safeY = y;
+      for (var y = maxY; y >= 0; y--) {
+        if (accessor.getBlockState(0, y, 0).blockType() != BlockType.AIR) {
+          safeY = y + 1;
           break;
         }
       }
 
       initialState = new SFVec3i(0, safeY, 0);
+      log.info("Initial state: {}", initialState);
+
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
         new ProjectedLevel(accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),
         true, true), new PosGoal(100, 80, 100));
