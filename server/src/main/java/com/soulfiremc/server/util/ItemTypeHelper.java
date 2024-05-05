@@ -24,15 +24,12 @@ public class ItemTypeHelper {
   private ItemTypeHelper() {}
 
   public static boolean isSafeFullBlockItem(ItemType type) {
-    return BlockItems.getBlockType(type).isPresent() && !isUnsafeToPlace(type);
+    var blockType = BlockItems.getBlockType(type);
+    return blockType.isPresent() && !blockType.get().fallingBlock();
   }
 
   public static boolean isTool(ItemType type) {
     return type.tierType() != null || type == ItemType.SHEARS;
-  }
-
-  public static boolean isUnsafeToPlace(ItemType type) {
-    return type == ItemType.SAND || type == ItemType.GRAVEL;
   }
 
   public static boolean isGoodEdibleFood(ItemType type) {

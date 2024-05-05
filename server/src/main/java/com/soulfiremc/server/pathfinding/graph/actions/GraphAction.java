@@ -20,18 +20,15 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import java.util.List;
+import lombok.Setter;
 
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
+@Setter
 public abstract sealed class GraphAction
   permits DownMovement, ParkourMovement, SimpleMovement, UpMovement {
   private int subscriptionCounter;
-
-  public void subscribe() {
-    // Shall only be called in the precautions of the graph action
-    subscriptionCounter++;
-  }
 
   public boolean decrementAndIsDone() {
     // Check if this action has all subscriptions fulfilled

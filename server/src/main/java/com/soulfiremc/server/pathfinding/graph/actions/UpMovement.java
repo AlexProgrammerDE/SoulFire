@@ -77,7 +77,6 @@ public final class UpMovement extends GraphAction implements Cloneable {
     {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks()) {
-        movement.subscribe();
         blockSubscribers
           .accept(freeBlock.key(), new UpMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
@@ -92,7 +91,6 @@ public final class UpMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          movement.subscribe();
           blockSubscribers
             .accept(block.position(), new UpMovementBlockSubscription(
               MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,

@@ -65,14 +65,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
     DownMovement movement) {
     {
       for (var safetyBlock : movement.listSafetyCheckBlocks()) {
-        movement.subscribe();
         blockSubscribers
           .accept(safetyBlock, new DownMovementBlockSubscription(MinecraftGraph.SubscriptionType.DOWN_SAFETY_CHECK));
       }
     }
 
     {
-      movement.subscribe();
       var freeBlock = movement.blockToBreak();
       blockSubscribers
         .accept(freeBlock.key(), new DownMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, 0, freeBlock.value()));
@@ -87,7 +85,6 @@ public final class DownMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          movement.subscribe();
           blockSubscribers
             .accept(block.position(), new DownMovementBlockSubscription(
               MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,

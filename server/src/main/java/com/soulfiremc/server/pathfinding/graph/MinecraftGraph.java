@@ -32,6 +32,7 @@ import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -51,13 +52,20 @@ public record MinecraftGraph(TagsState tagsState,
   static {
     var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, ObjectList<WrappedActionSubscription>>();
     var actions = new ObjectArrayList<GraphAction>();
-    BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) ->
+    var currentSubscriptions = new AtomicInteger(0);
+    BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) -> {
+      currentSubscriptions.incrementAndGet();
       blockSubscribers.computeIfAbsent(key, CREATE_MISSING_FUNCTION).add(new WrappedActionSubscription(actions.size(), value));
+    };
+    Consumer<GraphAction> actionAdder = action -> {
+      actions.add(action);
+      action.subscriptionCounter(currentSubscriptions.getAndSet(0));
+    };
 
-    SimpleMovement.registerMovements(actions::add, blockSubscribersConsumer);
-    ParkourMovement.registerParkourMovements(actions::add, blockSubscribersConsumer);
-    DownMovement.registerDownMovements(actions::add, blockSubscribersConsumer);
-    UpMovement.registerUpMovements(actions::add, blockSubscribersConsumer);
+    SimpleMovement.registerMovements(actionAdder, blockSubscribersConsumer);
+    ParkourMovement.registerParkourMovements(actionAdder, blockSubscribersConsumer);
+    DownMovement.registerDownMovements(actionAdder, blockSubscribersConsumer);
+    UpMovement.registerUpMovements(actionAdder, blockSubscribersConsumer);
 
     ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
     SUBSCRIPTION_KEYS = new SFVec3i[blockSubscribers.size()];

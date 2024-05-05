@@ -143,7 +143,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks()) {
-        movement.subscribe();
         blockSubscribers
           .accept(freeBlock.key(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
@@ -158,7 +157,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          movement.subscribe();
           blockSubscribers
             .accept(block.position(), new SimpleMovementBlockSubscription(
               MinecraftGraph.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
@@ -169,14 +167,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     {
-      movement.subscribe();
       blockSubscribers
         .accept(movement.requiredSolidBlock(), new SimpleMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
     }
 
     {
       for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
-        movement.subscribe();
         blockSubscribers
           .accept(addCostIfSolidBlock, new SimpleMovementBlockSubscription(
             MinecraftGraph.SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
@@ -185,7 +181,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     {
       for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-        movement.subscribe();
         blockSubscribers
           .accept(againstBlock.againstPos(), new SimpleMovementBlockSubscription(
             MinecraftGraph.SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));

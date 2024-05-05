@@ -63,20 +63,17 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     {
       var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
-        movement.subscribe();
         blockSubscribers
           .accept(freeBlock.key(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
     }
 
     {
-      movement.subscribe();
       blockSubscribers
         .accept(movement.requiredUnsafeBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
     }
 
     {
-      movement.subscribe();
       blockSubscribers
         .accept(movement.requiredSolidBlock(), new ParkourMovementBlockSubscription(MinecraftGraph.SubscriptionType.MOVEMENT_SOLID));
     }
