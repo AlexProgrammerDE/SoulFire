@@ -28,11 +28,8 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
-import lombok.With;
 
 @SuppressWarnings("unused")
-@With(value = AccessLevel.PRIVATE)
 public record BlockType(
   int id,
   ResourceKey key,
@@ -46,6 +43,14 @@ public record BlockType(
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) {
+  public BlockType {
+    statesData = BlockStates.fromJsonArray(
+      this,
+      key,
+      GsonDataHelper.fromJson("/minecraft/blocks.json", key.toString(), JsonObject.class)
+        .getAsJsonArray("states"));
+  }
+
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
     @Override
     public void write(JsonWriter out, FluidType value) throws IOException {
@@ -70,12 +75,6 @@ public record BlockType(
       FluidType.class,
       CUSTOM_FLUID_TYPE
     ));
-    instance =
-      instance.withStatesData(
-        BlockStates.fromJsonArray(
-          instance,
-          GsonDataHelper.fromJson("/minecraft/blocks.json", key, JsonObject.class)
-            .getAsJsonArray("states")));
 
     FROM_ID.put(instance.id(), instance);
     FROM_KEY.put(instance.key(), instance);
