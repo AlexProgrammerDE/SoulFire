@@ -49,6 +49,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     return Pair.of(targetToMineBlock, BlockFace.TOP);
   }
 
+  // These blocks are possibly safe blocks we can fall on top of
   public List<SFVec3i> listSafetyCheckBlocks() {
     var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
 

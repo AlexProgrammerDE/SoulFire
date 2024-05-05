@@ -27,7 +27,6 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -55,7 +54,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return actions;
   }
 
-  private static MinecraftRouteNode findBestNode(ObjectCollection<MinecraftRouteNode> values) {
+  private static MinecraftRouteNode findBestNode(MinecraftRouteNode[] values) {
     MinecraftRouteNode bestNode = null;
     var smallestScore = Double.MAX_VALUE;
 
@@ -107,6 +106,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       openSet.enqueue(start);
     }
 
+    var nextLog = System.currentTimeMillis() + 1000;
     while (!openSet.isEmpty()) {
       if (pathCompletionFuture.isDone()) {
         stopwatch.stop();
@@ -116,6 +116,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Expired pathfinding after {}ms", stopwatch.elapsed().toMillis());
         return List.of();
+      }
+
+      if (System.currentTimeMillis() > nextLog) {
+        var bestNode = findBestNode(routeIndex.valuesArray());
+        log.info("Still looking for route... {} time left, {} nodes left, closest position is {} with distance {}",
+          expireTime - System.currentTimeMillis(),
+          openSet.size(),
+          bestNode.blockPosition(),
+          bestNode.totalRouteScore() - bestNode.sourceCost()
+        );
+        nextLog = System.currentTimeMillis() + 1000;
       }
 
       var current = openSet.dequeue();
@@ -192,7 +203,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           stopwatch.elapsed().toMillis());
 
         // The current node is not always the best node. We need to find the best node.
-        var bestNode = findBestNode(routeIndex.values());
+        var bestNode = findBestNode(routeIndex.valuesArray());
 
         // This is the best node we found so far
         // We will add a recalculating action and return the best route

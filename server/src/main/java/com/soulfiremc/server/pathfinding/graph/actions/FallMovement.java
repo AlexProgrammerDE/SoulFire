@@ -29,7 +29,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
@@ -41,12 +40,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public final class SimpleMovement extends GraphAction implements Cloneable {
+public final class FallMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final MovementDirection direction;
   private final MovementSide side;
-  private final MovementModifier modifier;
-  private final SFVec3i targetFeetBlock;
   @Getter
   private final boolean diagonal;
   @Getter
@@ -62,29 +59,22 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   @Setter
   @Getter
   private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
-  private double cost;
+  private double baseCost;
   @Getter
   private boolean appliedCornerCost = false;
   @Setter
   private boolean requiresAgainstBlock = false;
+  @Getter
+  @Setter
+  private int closestBlockToFallOn = Integer.MIN_VALUE;
 
-  public SimpleMovement(MovementDirection direction, MovementSide side, MovementModifier modifier) {
+  public FallMovement(MovementDirection direction, MovementSide side) {
     this.direction = direction;
     this.side = side;
-    this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
 
-    this.cost =
-      (diagonal ? Costs.DIAGONAL : Costs.STRAIGHT)
-        // Add modifier costs
-        // Jump up block gets a tiny bit extra (you can move midair)
-        // But that's fine since we also want to slightly discourage jumping up
-        + switch (modifier) {
-        case NORMAL -> 0;
-        case JUMP_UP_BLOCK -> Costs.JUMP_UP_BLOCK;
-      };
+    this.baseCost = diagonal ? Costs.DIAGONAL : Costs.STRAIGHT;
 
-    this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
     this.allowBlockActions = !diagonal;
 
     this.requiredFreeBlocks = listRequiredFreeBlocks();
@@ -112,11 +102,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
     var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
 
-    if (modifier == MovementModifier.JUMP_UP_BLOCK) {
-      // Make block above the head block free for jump
-      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
-    }
-
     // Add the blocks that are required to be free for diagonal movement
     if (diagonal) {
       var corner = getCorner(side);
@@ -124,7 +109,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
         requiredFreeBlocks.add(
-          Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toBlockFace()));
+          Pair.of(bodyOffset.offset(corner), getCornerDirection(side).opposite().toBlockFace()));
       }
     }
 
@@ -138,8 +123,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Apply jump shift to target diagonal and offset for body part
-      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), blockBreakSideHint));
+      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(targetEdge), blockBreakSideHint));
     }
+
+    // Require free blocks to fall into the target position
+    requiredFreeBlocks.add(Pair.of(targetEdge.sub(0, 1, 0), BlockFace.TOP));
 
     return requiredFreeBlocks;
   }
@@ -181,15 +169,19 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var corner = getCorner(side.opposite());
     for (var bodyOffset : BodyPart.VALUES) {
       // Apply jump shift to target edge and offset for body part
-      list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
+      list.add(bodyOffset.offset(corner));
     }
 
     return list;
   }
 
-  public SFVec3i requiredSolidBlock() {
-    // Floor block
-    return targetFeetBlock.sub(0, 1, 0);
+  // These blocks are possibly safe blocks we can fall on top of
+  public List<SFVec3i> listSafetyCheckBlocks() {
+    var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
+    return List.of(
+      targetEdge.sub(0, 2, 0),
+      targetEdge.sub(0, 3, 0),
+      targetEdge.sub(0, 4, 0));
   }
 
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
@@ -200,30 +192,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var results = new BlockSafetyData[requiredFreeBlocks.size()][];
 
     var blockDirection = direction.toSkyDirection();
-
-    var oppositeDirection = blockDirection.opposite();
     var leftDirectionSide = blockDirection.leftSide();
     var rightDirectionSide = blockDirection.rightSide();
-
-    if (modifier == MovementModifier.JUMP_UP_BLOCK) {
-      var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
-      results[freeBlockIndex(aboveHead)] =
-        new BlockSafetyData[] {
-          new BlockSafetyData(
-            aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
-          new BlockSafetyData(
-            oppositeDirection.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            leftDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            rightDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS)
-        };
-    }
 
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
     for (var bodyOffset : BodyPart.VALUES) {
       // Apply jump shift to target diagonal and offset for body part
-      var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
+      var block = bodyOffset.offset(targetEdge);
       var index = freeBlockIndex(block);
 
       if (bodyOffset == BodyPart.HEAD) {
@@ -249,6 +224,17 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
+    // Require free blocks to fall into the target position
+    var fallFree = targetEdge.sub(0, 1, 0);
+    results[freeBlockIndex(fallFree)] =
+      new BlockSafetyData[] {
+        new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          leftDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+        new BlockSafetyData(
+          rightDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS)
+      };
+
     return results;
   }
 
@@ -263,54 +249,49 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var leftDirectionSide = blockDirection.leftSide();
     var rightDirectionSide = blockDirection.rightSide();
 
-    var floorBlock = targetFeetBlock.sub(0, 1, 0);
-    return switch (modifier) {
-      case NORMAL -> // 5
-        List.of(
-          // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
-          // In front
-          new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
-          // Scaffolding
-          new BotActionManager.BlockPlaceAgainstData(
-            oppositeDirection.offset(floorBlock), blockDirection.toBlockFace()),
-          // Left side
-          new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
-          // Right side
-          new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
-      case JUMP_UP_BLOCK -> // 4 - no scaffolding
-        List.of(
-          // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
-          // In front
-          new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
-          // Left side
-          new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
-          // Right side
-          new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
-      default -> throw new IllegalStateException("Unexpected value: " + modifier);
-    };
+    var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
+    var floorBlock = targetEdge.sub(0, 1, 0);
+    return // 4 - no scaffolding
+      List.of(
+        // Below
+        new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
+        // In front
+        new BotActionManager.BlockPlaceAgainstData(
+          blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
+        // Left side
+        new BotActionManager.BlockPlaceAgainstData(
+          leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
+        // Right side
+        new BotActionManager.BlockPlaceAgainstData(
+          rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
   }
 
   public void addCornerCost() {
-    cost += Costs.CORNER_SLIDE;
+    baseCost += Costs.CORNER_SLIDE;
     appliedCornerCost = true;
   }
 
   @Override
   public boolean impossibleToComplete() {
-    return requiresAgainstBlock && blockPlaceAgainstData == null;
+    return closestBlockToFallOn == Integer.MIN_VALUE && blockPlaceAgainstData == null;
   }
 
   @Override
   public GraphInstructions getInstructions(SFVec3i node) {
-    var cost = this.cost;
+    var cost = this.baseCost;
+
+    if (closestBlockToFallOn == Integer.MIN_VALUE) {
+      // We place a block and fall one down to land on that block
+      cost += Costs.FALL_1;
+    } else {
+      // We fall on a block that is already there
+      switch (closestBlockToFallOn) {
+        case -2 -> cost += Costs.FALL_1;
+        case -3 -> cost += Costs.FALL_2;
+        case -4 -> cost += Costs.FALL_3;
+        default -> throw new IllegalStateException("Unexpected value: " + closestBlockToFallOn);
+      }
+    }
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
@@ -327,7 +308,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
-    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
+    // -1 means we place a block to be able to fall one down
+    var targetDown = closestBlockToFallOn == Integer.MIN_VALUE ? -1 : closestBlockToFallOn + 1;
+    var absoluteTargetFeetBlock = node.add(direction
+      .offset(FEET_POSITION_RELATIVE_BLOCK)
+      .add(0, targetDown, 0));
 
     if (requiresAgainstBlock) {
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
@@ -342,14 +327,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SimpleMovement copy() {
+  public FallMovement copy() {
     return this.clone();
   }
 
   @Override
-  public SimpleMovement clone() {
+  public FallMovement clone() {
     try {
-      var c = (SimpleMovement) super.clone();
+      var c = (FallMovement) super.clone();
 
       c.blockBreakCosts =
         this.blockBreakCosts == null ? null : new MovementMiningCost[this.blockBreakCosts.length];

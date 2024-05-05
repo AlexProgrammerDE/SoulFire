@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import static it.unimi.dsi.fastutil.HashCommon.arraySize;
 import static it.unimi.dsi.fastutil.HashCommon.maxFill;
 
+import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.HashCommon;
@@ -382,6 +383,18 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
   @Override
   public @NotNull ObjectCollection<V> values() {
     throw new UnsupportedOperationException();
+  }
+
+  public MinecraftRouteNode[] valuesArray() {
+    var result = new MinecraftRouteNode[size];
+    var i = 0;
+    for (var v : value) {
+      if (v != null) {
+        result[i++] = (MinecraftRouteNode) v;
+      }
+    }
+
+    return result;
   }
 
   @SuppressWarnings({"unchecked", "StatementWithEmptyBody"})

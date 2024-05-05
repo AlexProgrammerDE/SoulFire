@@ -24,7 +24,7 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
  * A calculated action that the bot can take on a graph world representation.
  */
 public abstract sealed class GraphAction
-  permits SimpleMovement, ParkourMovement, UpMovement, DownMovement {
+  permits DownMovement, FallMovement, ParkourMovement, SimpleMovement, UpMovement {
   private int subscriptionCounter;
 
   public void subscribe() {

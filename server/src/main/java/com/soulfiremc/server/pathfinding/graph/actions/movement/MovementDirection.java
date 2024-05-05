@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -32,6 +33,26 @@ public enum MovementDirection {
   SOUTH_WEST;
 
   public static final MovementDirection[] VALUES = values();
+
+  public SkyDirection toSkyDirection() {
+    return switch (this) {
+      case NORTH -> SkyDirection.NORTH;
+      case SOUTH -> SkyDirection.SOUTH;
+      case EAST -> SkyDirection.EAST;
+      case WEST -> SkyDirection.WEST;
+      default -> throw new IllegalStateException("Unexpected value: " + this);
+    };
+  }
+
+  public BlockFace toBlockFace() {
+    return switch (this) {
+      case NORTH -> BlockFace.NORTH;
+      case SOUTH -> BlockFace.SOUTH;
+      case EAST -> BlockFace.EAST;
+      case WEST -> BlockFace.WEST;
+      default -> throw new IllegalStateException("Unexpected value: " + this);
+    };
+  }
 
   public SFVec3i offset(SFVec3i vector) {
     return switch (this) {

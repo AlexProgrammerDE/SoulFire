@@ -34,7 +34,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class PathExecutor implements Consumer<BotPreTickEvent> {
   private final Queue<WorldAction> worldActionQueue = new LinkedBlockingQueue<>();
   private final BotConnection connection;
@@ -131,6 +133,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         // Register again
         register();
       } catch (Throwable t) {
+        log.error("Error while calculating path", t);
         pathCompletionFuture.completeExceptionally(t);
       }
     });
