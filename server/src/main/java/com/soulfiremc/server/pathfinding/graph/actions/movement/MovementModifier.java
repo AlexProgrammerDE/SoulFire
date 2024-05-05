@@ -23,7 +23,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MovementModifier {
   NORMAL,
-  JUMP_UP_BLOCK;
+  JUMP_UP_BLOCK,
+  FALL_1,
+  FALL_2,
+  FALL_3;
 
   public static final MovementModifier[] VALUES = values();
 
@@ -31,6 +34,9 @@ public enum MovementModifier {
     return switch (this) {
       case NORMAL -> vector;
       case JUMP_UP_BLOCK -> vector.add(0, 1, 0);
+      case FALL_1 -> vector.sub(0, 1, 0);
+      case FALL_2 -> vector.sub(0, 2, 0);
+      case FALL_3 -> vector.sub(0, 3, 0);
     };
   }
 

@@ -19,12 +19,13 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import java.util.List;
 
 /**
  * A calculated action that the bot can take on a graph world representation.
  */
 public abstract sealed class GraphAction
-  permits DownMovement, FallMovement, ParkourMovement, SimpleMovement, UpMovement {
+  permits DownMovement, ParkourMovement, SimpleMovement, UpMovement {
   private int subscriptionCounter;
 
   public void subscribe() {
@@ -37,13 +38,7 @@ public abstract sealed class GraphAction
     return --subscriptionCounter == 0;
   }
 
-  // A step further than isImpossible, for block placing this also considers no block
-  // to place against found.
-  public boolean impossibleToComplete() {
-    return false;
-  }
-
-  public abstract GraphInstructions getInstructions(SFVec3i node);
+  public abstract List<GraphInstructions> getInstructions(SFVec3i node);
 
   public abstract GraphAction copy();
 }

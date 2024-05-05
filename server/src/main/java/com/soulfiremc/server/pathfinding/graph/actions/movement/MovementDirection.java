@@ -34,6 +34,28 @@ public enum MovementDirection {
 
   public static final MovementDirection[] VALUES = values();
 
+  public SkyDirection side(MovementSide side) {
+    return switch (this) {
+      case NORTH_EAST -> switch (side) {
+        case LEFT -> SkyDirection.NORTH;
+        case RIGHT -> SkyDirection.EAST;
+      };
+      case NORTH_WEST -> switch (side) {
+        case LEFT -> SkyDirection.NORTH;
+        case RIGHT -> SkyDirection.WEST;
+      };
+      case SOUTH_EAST -> switch (side) {
+        case LEFT -> SkyDirection.SOUTH;
+        case RIGHT -> SkyDirection.EAST;
+      };
+      case SOUTH_WEST -> switch (side) {
+        case LEFT -> SkyDirection.SOUTH;
+        case RIGHT -> SkyDirection.WEST;
+      };
+      default -> throw new IllegalStateException("Unexpected value: " + this);
+    };
+  }
+
   public SkyDirection toSkyDirection() {
     return switch (this) {
       case NORTH -> SkyDirection.NORTH;

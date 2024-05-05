@@ -83,7 +83,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         var routeFinder =
           new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, true, true), goalScorer);
 
-        logger.info("Starting calculations at: {}", start);
+        logger.info("Starting calculations at: {}", start.formatXYZ());
         var actions = routeFinder.findRoute(start, requiresRepositioning, pathCompletionFuture);
         logger.info("Calculated path with {} actions: {}", actions.size(), actions);
 

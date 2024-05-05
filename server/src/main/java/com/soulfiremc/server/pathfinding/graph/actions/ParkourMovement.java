@@ -25,6 +25,7 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
@@ -72,13 +73,13 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(SFVec3i node) {
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
-    return new GraphInstructions(
+    return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
       Costs.ONE_GAP_JUMP,
-      List.of(new GapJumpAction(absoluteTargetFeetBlock)));
+      List.of(new GapJumpAction(absoluteTargetFeetBlock))));
   }
 
   @Override

@@ -23,7 +23,6 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
-import com.soulfiremc.server.pathfinding.graph.actions.FallMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
 import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.SimpleMovement;
@@ -78,25 +77,6 @@ public record MinecraftGraph(TagsState tagsState,
             registerMovement(
               blockSubscribers, new SimpleMovement(direction, null, modifier), actions.size()));
         }
-      }
-    }
-
-    for (var direction : MovementDirection.VALUES) {
-      var diagonal = direction.isDiagonal();
-      if (diagonal) {
-        for (var side : MovementSide.VALUES) {
-          actions.add(
-            registerFall(
-              blockSubscribers,
-              new FallMovement(direction, side),
-              actions.size()));
-        }
-      } else {
-        actions.add(
-          registerFall(
-            blockSubscribers,
-            new FallMovement(direction, null),
-            actions.size()));
       }
     }
 
@@ -166,76 +146,6 @@ public record MinecraftGraph(TagsState tagsState,
       blockSubscribers
         .computeIfAbsent(movement.requiredSolidBlock(), CREATE_MISSING_FUNCTION)
         .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_SOLID));
-    }
-
-    {
-      for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
-        movement.subscribe();
-        blockSubscribers
-          .computeIfAbsent(addCostIfSolidBlock, CREATE_MISSING_FUNCTION)
-          .add(
-            new BlockSubscription(
-              movementIndex, SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
-      }
-    }
-
-    {
-      for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-        movement.subscribe();
-        blockSubscribers
-          .computeIfAbsent(againstBlock.againstPos(), CREATE_MISSING_FUNCTION)
-          .add(
-            new BlockSubscription(
-              movementIndex, SubscriptionType.MOVEMENT_AGAINST_PLACE_SOLID, againstBlock));
-      }
-    }
-
-    return movement;
-  }
-
-  private static FallMovement registerFall(
-    Object2ObjectMap<SFVec3i, ObjectList<BlockSubscription>> blockSubscribers,
-    FallMovement movement,
-    int movementIndex) {
-    {
-      var blockId = 0;
-      for (var freeBlock : movement.requiredFreeBlocks()) {
-        movement.subscribe();
-        blockSubscribers
-          .computeIfAbsent(freeBlock.key(), CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
-      }
-    }
-
-    {
-      var safeBlocks = movement.listCheckSafeMineBlocks();
-      for (var i = 0; i < safeBlocks.length; i++) {
-        var savedBlock = safeBlocks[i];
-        if (savedBlock == null) {
-          continue;
-        }
-
-        for (var block : savedBlock) {
-          movement.subscribe();
-          blockSubscribers
-            .computeIfAbsent(block.position(), CREATE_MISSING_FUNCTION)
-            .add(
-              new BlockSubscription(
-                movementIndex,
-                SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
-                i,
-                block.type()));
-        }
-      }
-    }
-
-    {
-      for (var safetyBlock : movement.listSafetyCheckBlocks()) {
-        movement.subscribe();
-        blockSubscribers
-          .computeIfAbsent(safetyBlock, CREATE_MISSING_FUNCTION)
-          .add(new BlockSubscription(movementIndex, SubscriptionType.DOWN_SAFETY_CHECK));
-      }
     }
 
     {
@@ -437,11 +347,13 @@ public record MinecraftGraph(TagsState tagsState,
       switch (processSubscriptionAction(
         key, subscriber, action, isFreeReference, blockState, absolutePositionBlock)) {
         case CONTINUE -> {
-          if (!action.decrementAndIsDone() || action.impossibleToComplete()) {
+          if (!action.decrementAndIsDone()) {
             continue;
           }
 
-          callback.accept(action.getInstructions(node));
+          for (var instruction : action.getInstructions(node)) {
+            callback.accept(instruction);
+          }
         }
         case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
       }
@@ -458,8 +370,6 @@ public record MinecraftGraph(TagsState tagsState,
     return switch (action) {
       case SimpleMovement simpleMovement -> processMovementSubscription(
         subscriber, isFreeReference, blockState, absolutePositionBlock, simpleMovement);
-      case FallMovement fallMovement -> processFallSubscription(
-        key, subscriber, isFreeReference, blockState, absolutePositionBlock, fallMovement);
       case ParkourMovement ignored -> processParkourSubscription(subscriber, isFreeReference, blockState);
       case DownMovement downMovement -> processDownSubscription(
         key, subscriber, blockState, absolutePositionBlock, downMovement);
@@ -585,134 +495,6 @@ public record MinecraftGraph(TagsState tagsState,
 
         if (blockState.blockShapeGroup().isFullBlock()) {
           simpleMovement.addCornerCost();
-        } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
-          // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
-          yield SubscriptionSingleResult.IMPOSSIBLE;
-        }
-
-        yield SubscriptionSingleResult.CONTINUE;
-      }
-      default -> throw new IllegalStateException("Unexpected value: " + subscriber.type);
-    };
-  }
-
-  private SubscriptionSingleResult processFallSubscription(
-    SFVec3i key,
-    BlockSubscription subscriber,
-    ObjectReference<TriState> isFreeReference,
-    BlockState blockState,
-    SFVec3i absolutePositionBlock,
-    FallMovement fallMovement) {
-    return switch (subscriber.type) {
-      case MOVEMENT_FREE -> {
-        if (isFreeReference.value == TriState.NOT_SET) {
-          // We can walk through blocks like air or grass
-          isFreeReference.value = isBlockFree(blockState);
-        }
-
-        if (isFreeReference.value == TriState.TRUE) {
-          if (fallMovement.allowBlockActions()) {
-            fallMovement.noNeedToBreak()[subscriber.blockArrayIndex] = true;
-          }
-
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        // Search for a way to break this block
-        if (!canBreakBlocks
-          || !fallMovement.allowBlockActions()
-          // Narrow this down to blocks that can be broken
-          || !BlockTypeHelper.isDiggable(blockState.blockType())
-          // Check if we previously found out this block is unsafe to break
-          || fallMovement.unsafeToBreak()[subscriber.blockArrayIndex]
-          // Narrows the list down to a reasonable size
-          || !BlockItems.hasItemType(blockState.blockType())) {
-          // No way to break this block
-          yield SubscriptionSingleResult.IMPOSSIBLE;
-        }
-
-        var cacheableMiningCost = inventory.getMiningCosts(tagsState, blockState);
-        // We can mine this block, lets add costs and continue
-        fallMovement.blockBreakCosts()[subscriber.blockArrayIndex] =
-          new MovementMiningCost(
-            absolutePositionBlock,
-            cacheableMiningCost.miningCost(),
-            cacheableMiningCost.willDrop(),
-            subscriber.blockBreakSideHint);
-        yield SubscriptionSingleResult.CONTINUE;
-      }
-      case MOVEMENT_BREAK_SAFETY_CHECK -> {
-        // There is no need to break this block, so there is no need for safety checks
-        if (fallMovement.noNeedToBreak()[subscriber.blockArrayIndex]) {
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        // The block was already marked as unsafe
-        if (fallMovement.unsafeToBreak()[subscriber.blockArrayIndex]) {
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        var unsafe = subscriber.safetyType.isUnsafeBlock(blockState);
-
-        if (!unsafe) {
-          // All good, we can continue
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        var currentValue = fallMovement.blockBreakCosts()[subscriber.blockArrayIndex];
-
-        if (currentValue != null) {
-          // We learned that this block needs to be broken, so we need to set it as impossible
-          yield SubscriptionSingleResult.IMPOSSIBLE;
-        }
-
-        // Store for a later time that this is unsafe,
-        // so if we check this block,
-        // we know it's unsafe
-        fallMovement.unsafeToBreak()[subscriber.blockArrayIndex] = true;
-
-        yield SubscriptionSingleResult.CONTINUE;
-      }
-      case DOWN_SAFETY_CHECK -> {
-        var yLevel = key.y;
-
-        if (yLevel < fallMovement.closestBlockToFallOn()) {
-          // We already found a block to fall on, above this one
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
-          // We found a block to fall on
-          fallMovement.closestBlockToFallOn(yLevel);
-        }
-
-        yield SubscriptionSingleResult.CONTINUE;
-      }
-      case MOVEMENT_AGAINST_PLACE_SOLID -> {
-        // We already found one, no need to check for more
-        if (fallMovement.blockPlaceAgainstData() != null) {
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        // This block should not be placed against
-        if (!blockState.blockShapeGroup().isFullBlock()) {
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        // Fixup the position to be the block we are placing against instead of relative
-        fallMovement.blockPlaceAgainstData(
-          new BotActionManager.BlockPlaceAgainstData(
-            absolutePositionBlock, subscriber.blockToPlaceAgainst.blockFace()));
-        yield SubscriptionSingleResult.CONTINUE;
-      }
-      case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
-        // No need to apply the cost multiple times.
-        if (fallMovement.appliedCornerCost()) {
-          yield SubscriptionSingleResult.CONTINUE;
-        }
-
-        if (blockState.blockShapeGroup().isFullBlock()) {
-          fallMovement.addCornerCost();
         } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
           // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
           yield SubscriptionSingleResult.IMPOSSIBLE;

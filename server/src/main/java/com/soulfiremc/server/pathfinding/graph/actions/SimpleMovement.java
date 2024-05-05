@@ -35,6 +35,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -81,11 +82,18 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         // But that's fine since we also want to slightly discourage jumping up
         + switch (modifier) {
         case NORMAL -> 0;
+        case FALL_1 -> Costs.FALL_1;
+        case FALL_2 -> Costs.FALL_2;
+        case FALL_3 -> Costs.FALL_3;
         case JUMP_UP_BLOCK -> Costs.JUMP_UP_BLOCK;
       };
 
     this.targetFeetBlock = modifier.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
-    this.allowBlockActions = !diagonal;
+    this.allowBlockActions =
+      !diagonal && switch (modifier) {
+        case JUMP_UP_BLOCK, NORMAL, FALL_1 -> true;
+        default -> false;
+      };
 
     this.requiredFreeBlocks = listRequiredFreeBlocks();
     if (allowBlockActions) {
@@ -139,6 +147,20 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       // Apply jump shift to target diagonal and offset for body part
       requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), blockBreakSideHint));
+    }
+
+    // Require free blocks to fall into the target position
+    switch (modifier) {
+      case FALL_1 -> requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+      case FALL_2 -> {
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
+      }
+      case FALL_3 -> {
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
+        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_3.offset(targetEdge), BlockFace.TOP));
+      }
     }
 
     return requiredFreeBlocks;
@@ -249,6 +271,19 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
+    // Require free blocks to fall into the target position
+    if (modifier == MovementModifier.FALL_1) {
+      var fallFree = MovementModifier.FALL_1.offset(targetEdge);
+      results[freeBlockIndex(fallFree)] =
+        new BlockSafetyData[] {
+          new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+            leftDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
+          new BlockSafetyData(
+            rightDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS)
+        };
+    }
+
     return results;
   }
 
@@ -281,7 +316,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Right side
           new BotActionManager.BlockPlaceAgainstData(
             rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
-      case JUMP_UP_BLOCK -> // 4 - no scaffolding
+      case JUMP_UP_BLOCK, FALL_1 -> // 4 - no scaffolding
         List.of(
           // Below
           new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
@@ -304,12 +339,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public boolean impossibleToComplete() {
-    return requiresAgainstBlock && blockPlaceAgainstData == null;
-  }
+  public List<GraphInstructions> getInstructions(SFVec3i node) {
+    if (requiresAgainstBlock && blockPlaceAgainstData == null) {
+      return Collections.emptyList();
+    }
 
-  @Override
-  public GraphInstructions getInstructions(SFVec3i node) {
     var cost = this.cost;
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
@@ -337,8 +371,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
-    return new GraphInstructions(
-      absoluteTargetFeetBlock, cost, actions);
+    return Collections.singletonList(new GraphInstructions(
+      absoluteTargetFeetBlock, cost, actions));
   }
 
   @Override

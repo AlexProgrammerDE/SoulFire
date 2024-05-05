@@ -27,6 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCo
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -89,12 +90,11 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public boolean impossibleToComplete() {
-    return closestBlockToFallOn == Integer.MIN_VALUE;
-  }
+  public List<GraphInstructions> getInstructions(SFVec3i node) {
+    if (closestBlockToFallOn == Integer.MIN_VALUE) {
+      return Collections.emptyList();
+    }
 
-  @Override
-  public GraphInstructions getInstructions(SFVec3i node) {
     var cost = 0D;
 
     cost +=
@@ -109,10 +109,10 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     var absoluteTargetFeetBlock = node.add(0, closestBlockToFallOn + 1, 0);
 
-    return new GraphInstructions(
+    return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
       cost,
-      List.of(new BlockBreakAction(breakCost)));
+      List.of(new BlockBreakAction(breakCost))));
   }
 
   @Override

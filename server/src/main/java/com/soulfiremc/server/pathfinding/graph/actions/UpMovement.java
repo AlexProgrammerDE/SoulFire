@@ -30,6 +30,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +101,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public GraphInstructions getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(SFVec3i node) {
     var actions = new ObjectArrayList<WorldAction>();
     var cost = Costs.TOWER_COST;
 
@@ -122,8 +123,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
         new BotActionManager.BlockPlaceAgainstData(
           node.sub(0, 1, 0), BlockFace.TOP)));
 
-    return new GraphInstructions(
-      absoluteTargetFeetBlock, cost, actions);
+    return Collections.singletonList(new GraphInstructions(
+      absoluteTargetFeetBlock, cost, actions));
   }
 
   @Override
