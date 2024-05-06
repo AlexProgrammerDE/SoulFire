@@ -34,7 +34,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirectio
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementModifier;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
@@ -52,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 public final class SimpleMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final MovementDirection direction;
-  private final MovementSide side;
   private final MovementModifier modifier;
   private final SFVec3i targetFeetBlock;
   @Getter
@@ -69,16 +67,18 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private boolean[] noNeedToBreak;
   @Setter
   @Getter
-  private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
-  private double cost;
+  private MovementSide blockedSide;
+  @Setter
   @Getter
-  private boolean appliedCornerCost = false;
+  private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
+  @Getter
+  @Setter
+  private double cost;
   @Setter
   private boolean requiresAgainstBlock = false;
 
-  public SimpleMovement(MovementDirection direction, MovementSide side, MovementModifier modifier) {
+  public SimpleMovement(MovementDirection direction, MovementModifier modifier) {
     this.direction = direction;
-    this.side = side;
     this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
 
@@ -118,20 +118,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     Consumer<GraphAction> callback,
     BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
     for (var direction : MovementDirection.VALUES) {
-      var diagonal = direction.isDiagonal();
       for (var modifier : MovementModifier.VALUES) {
-        if (diagonal) {
-          for (var side : MovementSide.VALUES) {
-            callback.accept(
-              SimpleMovement.registerMovement(
-                blockSubscribers,
-                new SimpleMovement(direction, side, modifier)));
-          }
-        } else {
-          callback.accept(
-            SimpleMovement.registerMovement(
-              blockSubscribers, new SimpleMovement(direction, null, modifier)));
-        }
+        callback.accept(
+          SimpleMovement.registerMovement(
+            blockSubscribers,
+            new SimpleMovement(direction, modifier)));
       }
     }
   }
@@ -171,10 +162,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     {
-      for (var addCostIfSolidBlock : movement.listAddCostIfSolidBlocks()) {
+      for (var diagonalCollisionBlock : movement.listDiagonalCollisionBlocks()) {
         blockSubscribers
-          .accept(addCostIfSolidBlock, new SimpleMovementBlockSubscription(
-            SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_ADD_CORNER_COST_IF_SOLID));
+          .accept(diagonalCollisionBlock.key(), new SimpleMovementBlockSubscription(
+            SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_DIAGONAL_COLLISION, diagonalCollisionBlock.value()));
       }
     }
 
@@ -207,22 +198,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
     }
 
-    // Add the blocks that are required to be free for diagonal movement
-    if (diagonal) {
-      var corner = getCorner(side);
-
-      for (var bodyOffset : BodyPart.VALUES) {
-        // Apply jump shift to target edge and offset for body part
-        requiredFreeBlocks.add(
-          Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), getCornerDirection(side).opposite().toBlockFace()));
-      }
-    }
-
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
     for (var bodyOffset : BodyPart.VALUES) {
       BlockFace blockBreakSideHint;
       if (diagonal) {
-        blockBreakSideHint = getCornerDirection(side.opposite()).opposite().toBlockFace();
+        blockBreakSideHint = null; // We don't mine blocks in diagonals
       } else {
         blockBreakSideHint = direction.toBlockFace();
       }
@@ -248,44 +228,20 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  private SFVec3i getCorner(MovementSide side) {
-    return getCornerDirection(side).offset(FEET_POSITION_RELATIVE_BLOCK);
-  }
-
-  private SkyDirection getCornerDirection(MovementSide side) {
-    return (switch (direction) {
-      case NORTH_EAST -> switch (side) {
-        case LEFT -> SkyDirection.NORTH;
-        case RIGHT -> SkyDirection.EAST;
-      };
-      case NORTH_WEST -> switch (side) {
-        case LEFT -> SkyDirection.NORTH;
-        case RIGHT -> SkyDirection.WEST;
-      };
-      case SOUTH_EAST -> switch (side) {
-        case LEFT -> SkyDirection.SOUTH;
-        case RIGHT -> SkyDirection.EAST;
-      };
-      case SOUTH_WEST -> switch (side) {
-        case LEFT -> SkyDirection.SOUTH;
-        case RIGHT -> SkyDirection.WEST;
-      };
-      default -> throw new IllegalStateException("Unexpected value: " + direction);
-    });
-  }
-
-  public List<SFVec3i> listAddCostIfSolidBlocks() {
+  public List<Pair<SFVec3i, MovementSide>> listDiagonalCollisionBlocks() {
     if (!diagonal) {
       return List.of();
     }
 
-    var list = new ObjectArrayList<SFVec3i>(2);
+    var list = new ObjectArrayList<Pair<SFVec3i, MovementSide>>(4);
 
-    // If these blocks are solid, the bot moves slower because the bot is running around a corner
-    var corner = getCorner(side.opposite());
-    for (var bodyOffset : BodyPart.VALUES) {
-      // Apply jump shift to target edge and offset for body part
-      list.add(bodyOffset.offset(modifier.offsetIfJump(corner)));
+    for (var side : MovementSide.VALUES) {
+      // If these blocks are solid, the bot moves slower because the bot is running around a corner
+      var corner = direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK);
+      for (var bodyOffset : BodyPart.VALUES) {
+        // Apply jump shift to target edge and offset for body part
+        list.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), side));
+      }
     }
 
     return list;
@@ -297,6 +253,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
+    // This also excludes diagonal movement, so we only worry about digging straight
     if (!allowBlockActions) {
       return new BlockSafetyData[0][];
     }
@@ -415,11 +372,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     };
   }
 
-  public void addCornerCost() {
-    cost += Costs.CORNER_SLIDE;
-    appliedCornerCost = true;
-  }
-
   @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
@@ -482,26 +434,31 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
-    BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<SimpleMovement> {
+    BlockSafetyData.BlockSafetyType safetyType,
+    MovementSide side) implements MinecraftGraph.MovementSubscription<SimpleMovement> {
     SimpleMovementBlockSubscription(SubscriptionType type) {
-      this(type, -1, null, null, null);
+      this(type, -1, null, null, null, null);
+    }
+
+    SimpleMovementBlockSubscription(SubscriptionType type, MovementSide side) {
+      this(type, -1, null, null, null, side);
     }
 
     SimpleMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
-      this(type, blockArrayIndex, blockBreakSideHint, null, null);
+      this(type, blockArrayIndex, blockBreakSideHint, null, null, null);
     }
 
     SimpleMovementBlockSubscription(
       SubscriptionType type,
       BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst) {
-      this(type, -1, null, blockToPlaceAgainst, null);
+      this(type, -1, null, blockToPlaceAgainst, null, null);
     }
 
     SimpleMovementBlockSubscription(
       SubscriptionType subscriptionType,
       int i,
       BlockSafetyData.BlockSafetyType type) {
-      this(subscriptionType, i, null, null, type);
+      this(subscriptionType, i, null, null, type, null);
     }
 
     @Override
@@ -605,17 +562,22 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
               absoluteKey, blockToPlaceAgainst.blockFace()));
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
-        case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {
-          // No need to apply the cost multiple times.
-          if (simpleMovement.appliedCornerCost()) {
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          if (blockState.blockShapeGroup().isFullBlock()) {
-            simpleMovement.addCornerCost();
-          } else if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
+        case MOVEMENT_DIAGONAL_COLLISION -> {
+          if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
             // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          } else if (blockState.blockShapeGroup().isFullBlock()) {
+            var blockedSide = simpleMovement.blockedSide();
+            if (blockedSide == null) {
+              simpleMovement.blockedSide(side);
+              simpleMovement.cost(simpleMovement.cost() + Costs.CORNER_SLIDE);
+              yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+            } else if (blockedSide == side) {
+              yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+            } else {
+              // Diagonal path is blocked on both sides
+              yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+            }
           }
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
@@ -632,7 +594,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       MOVEMENT_FREE,
       MOVEMENT_BREAK_SAFETY_CHECK,
       MOVEMENT_SOLID,
-      MOVEMENT_ADD_CORNER_COST_IF_SOLID,
+      MOVEMENT_DIAGONAL_COLLISION,
       MOVEMENT_AGAINST_PLACE_SOLID
     }
   }
