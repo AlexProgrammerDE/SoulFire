@@ -52,6 +52,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
@@ -217,11 +218,19 @@ public class AttackManager {
 
     eventBus.call(new AttackStartEvent(this));
 
+    var connectSemaphore = new Semaphore(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS));
     return CompletableFuture.runAsync(
       () -> {
         while (!factories.isEmpty()) {
           var factory = factories.poll();
           if (factory == null) {
+            break;
+          }
+
+          try {
+            connectSemaphore.acquire();
+          } catch (InterruptedException e) {
+            logger.error("Error while waiting for connection slot", e);
             break;
           }
 
@@ -242,6 +251,8 @@ public class AttackManager {
                 botConnection.connect().get();
               } catch (Throwable e) {
                 logger.error("Error while connecting", e);
+              } finally {
+                connectSemaphore.release();
               }
             });
 
