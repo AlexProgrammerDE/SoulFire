@@ -33,8 +33,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class ChunkHolder implements BlockAccessor {
-  private static final BlockState VOID_AIR_BLOCK_STATE =
-    BlockState.forDefaultBlockType(BlockType.VOID_AIR);
+  private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
+  private static final BlockState VOID_AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.VOID_AIR);
   private final Long2ObjectOpenHashMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
   private final Lock readLock;
   private final Lock writeLock;
@@ -122,7 +122,7 @@ public class ChunkHolder implements BlockAccessor {
   @Override
   public BlockState getBlockState(int x, int y, int z) {
     if (isOutsideBuildHeight(y)) {
-      return VOID_AIR_BLOCK_STATE;
+      return AIR_BLOCK_STATE;
     }
 
     var chunkData = getChunk(SectionUtils.blockToSection(x), SectionUtils.blockToSection(z));
