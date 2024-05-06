@@ -129,7 +129,7 @@ public class BotSettings implements SettingsObject {
 
   private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
     return ProtocolVersionList.getProtocolsNewToOld().stream()
-      .map(version -> new ComboProperty.ComboOption(version.getName(), version.toString()))
+      .map(version -> new ComboProperty.ComboOption("%s|%d".formatted(version.getVersionType().name(), version.getOriginalVersion()), version.getName()))
       .toArray(ComboProperty.ComboOption[]::new);
   }
 

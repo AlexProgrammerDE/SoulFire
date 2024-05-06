@@ -37,6 +37,7 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.api.protocol.version.VersionType;
 import io.netty.channel.EventLoopGroup;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -176,7 +177,14 @@ public class AttackManager {
       SFNettyHelper.createEventLoopGroup(0, "Attack-%d".formatted(id));
 
     var protocolVersion =
-      settingsHolder.get(BotSettings.PROTOCOL_VERSION, ProtocolVersion::getClosest);
+      settingsHolder.get(BotSettings.PROTOCOL_VERSION, s -> {
+        var split = s.split("\\|");
+        if (split.length == 1) {
+          return ProtocolVersion.getClosest(split[0]);
+        }
+
+        return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
+      });
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
     var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder);
 
