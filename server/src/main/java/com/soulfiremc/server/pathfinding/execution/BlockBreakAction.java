@@ -54,6 +54,11 @@ public final class BlockBreakAction implements WorldAction {
   }
 
   @Override
+  public SFVec3i targetPosition(BotConnection connection) {
+    return SFVec3i.fromDouble(connection.dataManager().clientEntity().pos());
+  }
+
+  @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
     var clientEntity = dataManager.clientEntity();

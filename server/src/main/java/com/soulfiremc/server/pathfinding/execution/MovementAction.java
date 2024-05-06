@@ -55,6 +55,11 @@ public final class MovementAction implements WorldAction {
   }
 
   @Override
+  public SFVec3i targetPosition(BotConnection connection) {
+    return blockPosition;
+  }
+
+  @Override
   public void tick(BotConnection connection) {
     var clientEntity = connection.dataManager().clientEntity();
     clientEntity.controlState().resetAll();

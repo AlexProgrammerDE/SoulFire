@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.soulfiremc.server.pathfinding.BotEntityState;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 
 public sealed interface WorldAction
@@ -28,6 +29,8 @@ public sealed interface WorldAction
   MovementAction,
   RecalculatePathAction {
   boolean isCompleted(BotConnection connection);
+
+  SFVec3i targetPosition(BotConnection connection);
 
   void tick(BotConnection connection);
 

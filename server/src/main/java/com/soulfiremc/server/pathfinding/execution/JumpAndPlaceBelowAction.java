@@ -42,6 +42,11 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   }
 
   @Override
+  public SFVec3i targetPosition(BotConnection connection) {
+    return blockPlacePosition.add(0, 1, 0);
+  }
+
+  @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
     var clientEntity = dataManager.clientEntity();
