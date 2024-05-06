@@ -233,7 +233,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
           }
 
           // Search for a way to break this block
-          if (!graph.canBreakBlocks()
+          if (graph.disallowedToBreakBlock(absoluteKey)
             || !BlockTypeHelper.isDiggable(blockState.blockType())
             || upMovement.unsafeToBreak()[blockArrayIndex]
             || !BlockItems.hasItemType(blockState.blockType())) {

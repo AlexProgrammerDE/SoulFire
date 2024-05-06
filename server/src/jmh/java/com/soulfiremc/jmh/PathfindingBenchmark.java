@@ -90,7 +90,7 @@ public class PathfindingBenchmark {
       }
 
       initialState = new SFVec3i(0, safeY, 0);
-      log.info("Initial state: {}", initialState);
+      log.info("Initial state: {}", initialState.formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
         new ProjectedLevel(accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),

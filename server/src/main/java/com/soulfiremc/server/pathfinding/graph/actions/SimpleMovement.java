@@ -518,7 +518,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           }
 
           // Search for a way to break this block
-          if (!graph.canBreakBlocks()
+          if (graph.disallowedToBreakBlock(absoluteKey)
             || !simpleMovement.allowBlockActions()
             // Narrow this down to blocks that can be broken
             || !BlockTypeHelper.isDiggable(blockState.blockType())

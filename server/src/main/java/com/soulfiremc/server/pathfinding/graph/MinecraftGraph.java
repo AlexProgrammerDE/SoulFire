@@ -35,13 +35,26 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,
                              ProjectedLevel level, ProjectedInventory inventory,
-                             boolean canBreakBlocks, boolean canPlaceBlocks) {
+                             Predicate<SFVec3i> canBreakBlockPredicate,
+                             Predicate<SFVec3i> canPlaceBlockPredicate) {
+  public MinecraftGraph(TagsState tagsState,
+                        ProjectedLevel level, ProjectedInventory inventory,
+                        boolean canBreakBlocks, boolean canPlaceBlocks) {
+    this(tagsState, level, inventory, v -> canBreakBlocks, v -> {
+      if (!canPlaceBlocks) {
+        return false;
+      }
+
+      return level.isPlaceable(v);
+    });
+  }
+
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends ObjectList<WrappedActionSubscription>>
     CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
@@ -87,11 +100,11 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   public boolean disallowedToPlaceBlock(SFVec3i position) {
-    if (!canPlaceBlocks) {
-      return true;
-    }
+    return !canPlaceBlockPredicate.test(position);
+  }
 
-    return !level.isPlaceable(position);
+  public boolean disallowedToBreakBlock(SFVec3i position) {
+    return !canBreakBlockPredicate.test(position);
   }
 
   public void insertActions(
@@ -126,8 +139,6 @@ public record MinecraftGraph(TagsState tagsState,
     BlockState blockState = null;
     SFVec3i absolutePositionBlock = null;
 
-    IntConsumer impossibleActionRemover = actionIndex -> actions[actionIndex] = null;
-
     // We cache only this, but not solid because solid will only occur a single time
     LazyBoolean isFree = null;
     for (var subscriber : value) {
@@ -161,7 +172,7 @@ public record MinecraftGraph(TagsState tagsState,
             callback.accept(instruction);
           }
         }
-        case IMPOSSIBLE -> impossibleActionRemover.accept(subscriber.actionIndex);
+        case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
       }
     }
   }

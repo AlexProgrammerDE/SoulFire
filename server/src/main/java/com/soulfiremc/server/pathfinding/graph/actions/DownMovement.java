@@ -226,7 +226,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       return switch (type) {
         case MOVEMENT_FREE -> {
-          if (!graph.canBreakBlocks()
+          if (graph.disallowedToBreakBlock(absoluteKey)
             || !BlockTypeHelper.isDiggable(blockState.blockType())
             // Narrows the list down to a reasonable size
             || !BlockItems.hasItemType(blockState.blockType())) {
