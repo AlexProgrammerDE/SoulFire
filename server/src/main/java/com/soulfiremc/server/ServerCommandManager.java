@@ -605,6 +605,7 @@ public class ServerCommandManager implements PlatformCommandManager {
               ProtocolVersionList.getProtocolsNewToOld()
                 .forEach(
                   version -> {
+                    var versionId = "%s\\|%d".formatted(version.getVersionType().name(), version.getOriginalVersion());
                     var nativeVersion =
                       SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
                         ? yesEmoji
@@ -619,7 +620,7 @@ public class ServerCommandManager implements PlatformCommandManager {
                       SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
 
                     builder.append(
-                      "| %s | %s | %s | %s | %s | %s |\n".formatted(version.getName(), nativeVersion, javaVersion,
+                      "| `%s` | `%s` | %s | %s | %s | %s | %s |\n".formatted(version.getName(), versionId, nativeVersion, javaVersion,
                         snapshotVersion, legacyVersion, bedrockVersion));
                   });
               c.getSource().sendInfo(builder.toString());
