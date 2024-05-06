@@ -62,4 +62,14 @@ public class ProjectedLevel {
 
     return accessor.getBlockState(position.x, position.y, position.z);
   }
+
+  public boolean isPlaceable(SFVec3i position) {
+    var minBuildHeight = accessor.minBuildHeight();
+    if (minBuildHeight.isPresent() && position.y < minBuildHeight.getAsInt()) {
+      return false;
+    }
+
+    var maxBuildHeight = accessor.maxBuildHeight();
+    return maxBuildHeight.isEmpty() || position.y < maxBuildHeight.getAsInt();
+  }
 }

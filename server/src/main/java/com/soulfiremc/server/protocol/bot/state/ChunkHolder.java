@@ -26,6 +26,7 @@ import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
 import com.soulfiremc.server.util.NoopLock;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.OptionalInt;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -132,6 +133,16 @@ public class ChunkHolder implements BlockAccessor {
     }
 
     return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
+  }
+
+  @Override
+  public OptionalInt minBuildHeight() {
+    return OptionalInt.of(minBuildHeight);
+  }
+
+  @Override
+  public OptionalInt maxBuildHeight() {
+    return OptionalInt.of(maxBuildHeight);
   }
 
   public Long2ObjectMap<ChunkData> getChunks() {

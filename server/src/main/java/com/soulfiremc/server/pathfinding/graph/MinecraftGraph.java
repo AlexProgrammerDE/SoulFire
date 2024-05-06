@@ -35,6 +35,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -85,6 +86,14 @@ public record MinecraftGraph(TagsState tagsState,
     return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
   }
 
+  public boolean disallowedToPlaceBlock(SFVec3i position) {
+    if (!canPlaceBlocks) {
+      return true;
+    }
+
+    return !level.isPlaceable(position);
+  }
+
   public void insertActions(
     SFVec3i node, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
@@ -116,6 +125,8 @@ public record MinecraftGraph(TagsState tagsState,
 
     BlockState blockState = null;
     SFVec3i absolutePositionBlock = null;
+
+    IntConsumer impossibleActionRemover = actionIndex -> actions[actionIndex] = null;
 
     // We cache only this, but not solid because solid will only occur a single time
     LazyBoolean isFree = null;
@@ -150,7 +161,7 @@ public record MinecraftGraph(TagsState tagsState,
             callback.accept(instruction);
           }
         }
-        case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
+        case IMPOSSIBLE -> impossibleActionRemover.accept(subscriber.actionIndex);
       }
     }
   }
@@ -167,7 +178,7 @@ public record MinecraftGraph(TagsState tagsState,
       M action,
       LazyBoolean isFree,
       BlockState blockState,
-      SFVec3i absolutePositionBlock);
+      SFVec3i absoluteKey);
 
     default SubscriptionSingleResult processBlockUnsafe(
       MinecraftGraph graph,

@@ -154,7 +154,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
-                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
+                                                                BlockState blockState, SFVec3i absoluteKey) {
 
       return switch (type) {
         case MOVEMENT_FREE -> {

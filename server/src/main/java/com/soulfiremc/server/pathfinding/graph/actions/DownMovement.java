@@ -223,7 +223,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
-                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
+                                                                BlockState blockState, SFVec3i absoluteKey) {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (!graph.canBreakBlocks()
@@ -238,7 +238,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
           // We can mine this block, lets add costs and continue
           downMovement.breakCost(
             new MovementMiningCost(
-              absolutePositionBlock,
+              absoluteKey,
               cacheableMiningCost.miningCost(),
               cacheableMiningCost.willDrop(),
               blockBreakSideHint));

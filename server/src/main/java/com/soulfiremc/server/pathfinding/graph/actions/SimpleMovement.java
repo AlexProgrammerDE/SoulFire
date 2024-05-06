@@ -506,7 +506,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
-                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
+                                                                BlockState blockState, SFVec3i absoluteKey) {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (isFree.get()) {
@@ -534,7 +534,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // We can mine this block, lets add costs and continue
           simpleMovement.blockBreakCosts()[blockArrayIndex] =
             new MovementMiningCost(
-              absolutePositionBlock,
+              absoluteKey,
               cacheableMiningCost.miningCost(),
               cacheableMiningCost.willDrop(),
               blockBreakSideHint);
@@ -578,7 +578,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
-          if (!graph.canPlaceBlocks()
+          if (graph.disallowedToPlaceBlock(absoluteKey)
             || !simpleMovement.allowBlockActions()
             || !blockState.blockType().replaceable()) {
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
@@ -602,7 +602,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Fixup the position to be the block we are placing against instead of relative
           simpleMovement.blockPlaceAgainstData(
             new BotActionManager.BlockPlaceAgainstData(
-              absolutePositionBlock, blockToPlaceAgainst.blockFace()));
+              absoluteKey, blockToPlaceAgainst.blockFace()));
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case MOVEMENT_ADD_CORNER_COST_IF_SOLID -> {

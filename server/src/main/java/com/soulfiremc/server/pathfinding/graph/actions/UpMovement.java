@@ -82,6 +82,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
 
     {
+      blockSubscribers
+        .accept(movement.blockPlacePosition(), new UpMovementBlockSubscription(UpMovementBlockSubscription.SubscriptionType.MOVEMENT_SOLID));
+    }
+
+    {
       var safeBlocks = movement.listCheckSafeMineBlocks();
       for (var i = 0; i < safeBlocks.length; i++) {
         var savedBlock = safeBlocks[i];
@@ -145,6 +150,10 @@ public final class UpMovement extends GraphAction implements Cloneable {
     return results;
   }
 
+  public SFVec3i blockPlacePosition() {
+    return FEET_POSITION_RELATIVE_BLOCK;
+  }
+
   @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
     var actions = new ObjectArrayList<WorldAction>();
@@ -198,6 +207,10 @@ public final class UpMovement extends GraphAction implements Cloneable {
     int blockArrayIndex,
     BlockFace blockBreakSideHint,
     BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<UpMovement> {
+    UpMovementBlockSubscription(SubscriptionType type) {
+      this(type, -1, null, null);
+    }
+
     UpMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
       this(type, blockArrayIndex, blockBreakSideHint, null);
     }
@@ -211,12 +224,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
-                                                                BlockState blockState, SFVec3i absolutePositionBlock) {
-      // Towering requires placing a block below
-      if (!graph.canPlaceBlocks()) {
-        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      }
-
+                                                                BlockState blockState, SFVec3i absoluteKey) {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (isFree.get()) {
@@ -237,10 +245,18 @@ public final class UpMovement extends GraphAction implements Cloneable {
           // We can mine this block, lets add costs and continue
           upMovement.blockBreakCosts()[blockArrayIndex] =
             new MovementMiningCost(
-              absolutePositionBlock,
+              absoluteKey,
               cacheableMiningCost.miningCost(),
               cacheableMiningCost.willDrop(),
               blockBreakSideHint);
+          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+        case MOVEMENT_SOLID -> {
+          // Towering requires placing a block at old feet position
+          if (graph.disallowedToPlaceBlock(absoluteKey)) {
+            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+          }
+
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case MOVEMENT_BREAK_SAFETY_CHECK -> {
@@ -285,6 +301,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     enum SubscriptionType {
       MOVEMENT_FREE,
+      MOVEMENT_SOLID,
       MOVEMENT_BREAK_SAFETY_CHECK
     }
   }

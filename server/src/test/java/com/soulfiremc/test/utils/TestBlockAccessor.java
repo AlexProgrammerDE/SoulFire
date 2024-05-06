@@ -22,6 +22,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import java.util.OptionalInt;
 
 public class TestBlockAccessor implements BlockAccessor {
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
@@ -42,5 +43,17 @@ public class TestBlockAccessor implements BlockAccessor {
   @Override
   public BlockState getBlockState(int x, int y, int z) {
     return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
+  }
+
+  @Override
+  public OptionalInt minBuildHeight() {
+    // For tests, it can be any height
+    return OptionalInt.empty();
+  }
+
+  @Override
+  public OptionalInt maxBuildHeight() {
+    // For tests, it can be any height
+    return OptionalInt.empty();
   }
 }
