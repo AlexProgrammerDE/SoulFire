@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
@@ -32,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 
 public class AutoEat implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {

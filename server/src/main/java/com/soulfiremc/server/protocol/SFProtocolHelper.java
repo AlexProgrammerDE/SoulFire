@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
-import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
 import io.netty.buffer.ByteBuf;
 import java.io.IOException;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 
 public class SFProtocolHelper {
   private SFProtocolHelper() {}

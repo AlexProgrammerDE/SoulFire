@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.github.steveice10.mc.protocol.data.game.entity.RotationOrigin;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
@@ -29,6 +28,7 @@ import com.soulfiremc.server.util.BlockTypeHelper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -19,4 +19,4 @@ package com.soulfiremc.server.protocol.bot.model;
 
 import lombok.NonNull;
 
-public record LoginPacketData(boolean hardcore, @NonNull String[] worldNames, int maxPlayers) {}
+public record LoginPacketData(boolean hardcore, @NonNull String[] worldNames, int maxPlayers, boolean enforcesSecureChat) {}

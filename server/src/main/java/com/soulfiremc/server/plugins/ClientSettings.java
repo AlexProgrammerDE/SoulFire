@@ -17,11 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.github.steveice10.mc.protocol.data.game.entity.player.HandPreference;
-import com.github.steveice10.mc.protocol.data.game.setting.ChatVisibility;
-import com.github.steveice10.mc.protocol.data.game.setting.SkinPart;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
-import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
@@ -38,6 +33,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
+import org.geysermc.mcprotocollib.protocol.data.game.setting.ChatVisibility;
+import org.geysermc.mcprotocollib.protocol.data.game.setting.SkinPart;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalPlugin {

@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.EntityMetadata;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 
 @Data
 public class EntityMetadataState {

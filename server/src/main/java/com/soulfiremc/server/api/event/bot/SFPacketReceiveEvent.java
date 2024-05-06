@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.api.event.bot;
 
-import com.github.steveice10.mc.protocol.codec.MinecraftPacket;
 import com.soulfiremc.server.api.event.AbstractCancellable;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 
 /**
  * This event is called when a packet is received from the connected server. This event is called

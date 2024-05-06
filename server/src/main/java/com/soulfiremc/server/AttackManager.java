@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
@@ -61,6 +60,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

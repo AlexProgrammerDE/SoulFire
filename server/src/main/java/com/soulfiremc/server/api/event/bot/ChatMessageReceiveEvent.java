@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.api.event.bot;
 
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
 
 /**
  * This event is called when a chat message is received from the server.

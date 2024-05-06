@@ -17,20 +17,20 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
-import com.github.steveice10.mc.protocol.MinecraftProtocol;
-import com.github.steveice10.mc.protocol.data.ProtocolState;
-import com.github.steveice10.mc.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
-import com.github.steveice10.mc.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
-import com.github.steveice10.packetlib.Session;
-import com.github.steveice10.packetlib.codec.PacketDefinition;
-import com.github.steveice10.packetlib.event.session.PacketErrorEvent;
-import com.github.steveice10.packetlib.packet.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.codec.PacketDefinition;
+import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
 
 @RequiredArgsConstructor
 public class SFTcpPacketCodec extends ByteToMessageCodec<Packet> {

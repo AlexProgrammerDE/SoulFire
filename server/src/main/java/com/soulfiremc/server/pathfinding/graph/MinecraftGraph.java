@@ -43,18 +43,6 @@ public record MinecraftGraph(TagsState tagsState,
                              ProjectedLevel level, ProjectedInventory inventory,
                              Predicate<SFVec3i> canBreakBlockPredicate,
                              Predicate<SFVec3i> canPlaceBlockPredicate) {
-  public MinecraftGraph(TagsState tagsState,
-                        ProjectedLevel level, ProjectedInventory inventory,
-                        boolean canBreakBlocks, boolean canPlaceBlocks) {
-    this(tagsState, level, inventory, v -> canBreakBlocks, v -> {
-      if (!canPlaceBlocks) {
-        return false;
-      }
-
-      return level.isPlaceable(v);
-    });
-  }
-
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends ObjectList<WrappedActionSubscription>>
     CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
@@ -93,6 +81,18 @@ public record MinecraftGraph(TagsState tagsState,
       SUBSCRIPTION_KEYS[i] = entry.getKey();
       SUBSCRIPTION_VALUES[i] = entry.getValue().toArray(new WrappedActionSubscription[0]);
     }
+  }
+
+  public MinecraftGraph(TagsState tagsState,
+                        ProjectedLevel level, ProjectedInventory inventory,
+                        boolean canBreakBlocks, boolean canPlaceBlocks) {
+    this(tagsState, level, inventory, v -> canBreakBlocks, v -> {
+      if (!canPlaceBlocks) {
+        return false;
+      }
+
+      return level.isPlaceable(v);
+    });
   }
 
   public static boolean isBlockFree(BlockState blockState) {

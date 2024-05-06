@@ -17,19 +17,14 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.ItemStack;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.ListTag;
-import com.github.steveice10.opennbt.tag.builtin.ShortTag;
-import com.github.steveice10.opennbt.tag.builtin.StringTag;
 import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.ResourceKey;
-import it.unimi.dsi.fastutil.objects.Object2ShortArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
 import java.util.Objects;
 import lombok.Getter;
+import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
 @Getter
 public class SFItemStack extends ItemStack {
@@ -38,19 +33,20 @@ public class SFItemStack extends ItemStack {
   private final int precalculatedHash;
 
   private SFItemStack(SFItemStack clone, int amount) {
-    super(clone.getId(), amount, clone.getNbt());
+    super(clone.getId(), amount, clone.getDataComponents());
     this.type = clone.type;
     this.enchantments = clone.enchantments;
     this.precalculatedHash = clone.precalculatedHash;
   }
 
   private SFItemStack(ItemStack itemStack) {
-    super(itemStack.getId(), itemStack.getAmount(), itemStack.getNbt());
+    super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponents());
     this.type = ItemType.getById(itemStack.getId());
-    var compound = itemStack.getNbt();
+    var compound = itemStack.getDataComponents();
     if (compound == null) {
       this.enchantments = Object2ShortMaps.emptyMap();
     } else {
+      /*
       var enchantmentsList = compound.<ListTag>get("Enchantments");
       if (enchantmentsList != null) {
         this.enchantments = new Object2ShortArrayMap<>(enchantmentsList.size());
@@ -64,6 +60,9 @@ public class SFItemStack extends ItemStack {
       } else {
         this.enchantments = Object2ShortMaps.emptyMap();
       }
+
+       */
+      this.enchantments = Object2ShortMaps.emptyMap();
     }
 
     this.precalculatedHash = Objects.hash(this.type, this.enchantments);

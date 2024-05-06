@@ -17,16 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
-import com.github.steveice10.mc.protocol.data.game.entity.player.Hand;
-import com.github.steveice10.mc.protocol.data.game.entity.player.InteractAction;
-import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerState;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ResourceKey;
@@ -42,7 +32,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Comparator;
 import lombok.Getter;
 import lombok.NonNull;
@@ -51,6 +40,16 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.InteractAction;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 
 /**
  * This class is used to control the bot. The goal is to reduce friction for doing simple things.
@@ -120,8 +119,7 @@ public class BotControlAPI {
       // handled
       // Command signing is signing every string parameter in the command because of reporting /msg
       connection.sendPacket(
-        new ServerboundChatCommandPacket(
-          command, now.toEpochMilli(), 0L, Collections.emptyList(), 0, new BitSet()));
+        new ServerboundChatCommandPacket(command));
     } else {
       var salt = secureRandom.nextLong();
       connection.sendPacket(

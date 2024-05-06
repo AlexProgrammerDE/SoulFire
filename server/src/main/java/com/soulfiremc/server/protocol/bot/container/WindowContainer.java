@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
-import com.github.steveice10.mc.protocol.data.game.inventory.ContainerType;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 
 @Getter
 public class WindowContainer extends Container {

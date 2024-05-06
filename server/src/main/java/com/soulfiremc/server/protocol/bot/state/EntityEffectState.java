@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.github.steveice10.mc.protocol.data.game.entity.Effect;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.soulfiremc.server.protocol.bot.model.EffectData;
 import java.util.EnumMap;
 import java.util.Map;
@@ -27,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 @Data
 public class EntityEffectState {
@@ -39,10 +38,10 @@ public class EntityEffectState {
     boolean ambient,
     boolean showParticles,
     boolean showIcon,
-    CompoundTag factorData) {
+    boolean blend) {
     effects.put(
       effect,
-      new InternalEffectState(amplifier, ambient, showParticles, showIcon, factorData, duration));
+      new InternalEffectState(amplifier, ambient, showParticles, showIcon, blend, duration));
   }
 
   public void removeEffect(Effect effect) {
@@ -64,7 +63,7 @@ public class EntityEffectState {
         state.ambient(),
         state.showParticles(),
         state.showIcon(),
-        state.factorData()));
+        state.blend()));
   }
 
   public boolean hasEffect(Effect effect) {
@@ -93,7 +92,7 @@ public class EntityEffectState {
     private final boolean ambient;
     private final boolean showParticles;
     private final boolean showIcon;
-    private final CompoundTag factorData;
+    private final boolean blend;
     private int duration;
   }
 }

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.movement;
 
-import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
@@ -25,6 +24,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 @Getter
 @Setter

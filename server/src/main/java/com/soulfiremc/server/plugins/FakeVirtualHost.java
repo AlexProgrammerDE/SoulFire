@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.github.steveice10.mc.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
@@ -30,6 +29,7 @@ import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 
 public class FakeVirtualHost implements InternalPlugin {
   public static void onPacket(SFPacketSendingEvent event) {

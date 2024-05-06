@@ -18,94 +18,6 @@
 package com.soulfiremc.server.protocol.bot;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.protocol.codec.MinecraftCodecHelper;
-import com.github.steveice10.mc.protocol.data.UnexpectedEncryptionException;
-import com.github.steveice10.mc.protocol.data.game.ClientCommand;
-import com.github.steveice10.mc.protocol.data.game.ResourcePackStatus;
-import com.github.steveice10.mc.protocol.data.game.chunk.ChunkSection;
-import com.github.steveice10.mc.protocol.data.game.chunk.palette.PaletteType;
-import com.github.steveice10.mc.protocol.data.game.entity.metadata.GlobalPos;
-import com.github.steveice10.mc.protocol.data.game.entity.player.GameMode;
-import com.github.steveice10.mc.protocol.data.game.entity.player.PlayerSpawnInfo;
-import com.github.steveice10.mc.protocol.data.game.entity.player.PositionElement;
-import com.github.steveice10.mc.protocol.data.game.level.notify.LimitedCraftingValue;
-import com.github.steveice10.mc.protocol.data.game.level.notify.RainStrengthValue;
-import com.github.steveice10.mc.protocol.data.game.level.notify.RespawnScreenValue;
-import com.github.steveice10.mc.protocol.data.game.level.notify.ThunderStrengthValue;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
-import com.github.steveice10.mc.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
-import com.github.steveice10.mc.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
-import com.github.steveice10.mc.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoRemovePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundServerDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRemoveMobEffectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundRotateHeadPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundTeleportEntityPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundBlockChangedAckPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerLookAtPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundHorseScreenOpenPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenBookPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundBlockUpdatePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundChunksBiomesPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSectionBlocksUpdatePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheRadiusPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetSimulationDistancePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.ClientboundSetTimePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderCenterPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderLerpSizePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderSizePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDelayPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDistancePacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
-import com.github.steveice10.mc.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
-import com.github.steveice10.mc.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.IntTag;
-import com.github.steveice10.opennbt.tag.builtin.ListTag;
-import com.github.steveice10.opennbt.tag.builtin.StringTag;
-import com.github.steveice10.packetlib.event.session.DisconnectedEvent;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
@@ -123,22 +35,23 @@ import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
-import com.soulfiremc.server.protocol.bot.model.BiomeData;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.model.DefaultSpawnData;
 import com.soulfiremc.server.protocol.bot.model.DifficultyData;
-import com.soulfiremc.server.protocol.bot.model.DimensionData;
 import com.soulfiremc.server.protocol.bot.model.ExperienceData;
 import com.soulfiremc.server.protocol.bot.model.HealthData;
 import com.soulfiremc.server.protocol.bot.model.LoginPacketData;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
+import com.soulfiremc.server.protocol.bot.state.Biome;
 import com.soulfiremc.server.protocol.bot.state.BorderState;
 import com.soulfiremc.server.protocol.bot.state.ChunkData;
+import com.soulfiremc.server.protocol.bot.state.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.EntityTrackerState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.MapDataState;
 import com.soulfiremc.server.protocol.bot.state.PlayerListState;
+import com.soulfiremc.server.protocol.bot.state.Registry;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.bot.state.WeatherState;
@@ -160,9 +73,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -170,6 +81,90 @@ import lombok.ToString;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
+import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
+import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
+import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.LimitedCraftingValue;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RespawnScreenValue;
+import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengthValue;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerInfoRemovePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundServerDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveEntitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRemoveMobEffectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundRotateHeadPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityMotionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundTeleportEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundBlockChangedAckPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerAbilitiesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerLookAtPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerPositionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetCarriedItemPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetExperiencePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundSetHealthPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerClosePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetSlotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundHorseScreenOpenPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenBookPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundBlockUpdatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundChunksBiomesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundForgetLevelChunkPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSectionBlocksUpdatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheRadiusPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetSimulationDistancePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetTimePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderCenterPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderLerpSizePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderSizePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDelayPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundSetBorderWarningDistancePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -184,8 +179,8 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
-  private final Map<String, Level> levels = new ConcurrentHashMap<>();
-  private final Int2ObjectMap<BiomeData> biomes = new Int2ObjectOpenHashMap<>();
+  private final Registry<DimensionType> dimensions = new Registry<>();
+  private final Registry<Biome> biomes = new Registry<>();
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final InventoryManager inventoryManager;
@@ -202,7 +197,7 @@ public final class SessionDataManager {
   private LoginPacketData loginData;
   private boolean enableRespawnScreen;
   private boolean doLimitedCrafting;
-  private DimensionData currentDimension;
+  private Level lastSpawnedInLevel;
   private int serverViewDistance = -1;
   private int serverSimulationDistance = -1;
   private @Nullable GlobalPos lastDeathPos;
@@ -251,30 +246,31 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
-    var registry = packet.getRegistry();
-    CompoundTag dimensionRegistry = registry.get("minecraft:dimension_type");
-    for (var type : dimensionRegistry.<ListTag>get("value").getValue()) {
-      var dimension = (CompoundTag) type;
-      var name = dimension.<StringTag>get("name").getValue();
-      int id = dimension.<IntTag>get("id").getValue();
-
-      levels.put(name, new Level(tagsState, name, id, dimension.get("element")));
+    switch (packet.getRegistry()) {
+      case "minecraft:dimension_type" -> {
+        var entries = packet.getEntries();
+        for (var i = 0; i < entries.size(); i++) {
+          var dimension = entries.get(i);
+          dimensions.register(ResourceKey.fromString(dimension.getId()), i, new DimensionType(Objects.requireNonNull(dimension.getData())));
+        }
+      }
+      case "minecraft:worldgen/biome" -> {
+        var entries = packet.getEntries();
+        for (var i = 0; i < entries.size(); i++) {
+          var biome = entries.get(i);
+          biomes.register(ResourceKey.fromString(biome.getId()), i, new Biome(Objects.requireNonNull(biome.getData())));
+        }
+        biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
+      }
+      default -> log.debug("Received registry data for unknown registry {}", packet.getRegistry());
     }
-    CompoundTag biomeRegistry = registry.get("minecraft:worldgen/biome");
-    for (var type : biomeRegistry.<ListTag>get("value").getValue()) {
-      var biome = (CompoundTag) type;
-      var biomeData = new BiomeData(biome);
-
-      biomes.put(biomeData.id(), biomeData);
-    }
-    biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
   }
 
   @EventHandler
   public void onJoin(ClientboundLoginPacket packet) {
     // Set data from the packet
     loginData =
-      new LoginPacketData(packet.isHardcore(), packet.getWorldNames(), packet.getMaxPlayers());
+      new LoginPacketData(packet.isHardcore(), packet.getWorldNames(), packet.getMaxPlayers(), packet.isEnforcesSecureChat());
 
     enableRespawnScreen = packet.isEnableRespawnScreen();
     doLimitedCrafting = packet.isDoLimitedCrafting();
@@ -291,10 +287,11 @@ public final class SessionDataManager {
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
-    currentDimension =
-      new DimensionData(
-        spawnInfo.getDimension(),
-        spawnInfo.getWorldName(),
+    lastSpawnedInLevel =
+      new Level(
+        tagsState,
+        dimensions.get(spawnInfo.getDimension()),
+        ResourceKey.fromString(spawnInfo.getWorldName()),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
         spawnInfo.isFlat());
@@ -386,7 +383,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onServerPlayData(ClientboundServerDataPacket packet) {
     serverPlayData =
-      new ServerPlayData(packet.getMotd(), packet.getIconBytes(), packet.isEnforcesSecureChat());
+      new ServerPlayData(packet.getMotd(), packet.getIconBytes());
   }
 
   @EventHandler
@@ -689,15 +686,11 @@ public final class SessionDataManager {
       }
 
       var buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
-      try {
-        for (var i = 0; chunkData.getSectionCount() > i; i++) {
-          var section = chunkData.getSection(i);
-          var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
-          chunkData.setSection(
-            i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
-        }
-      } catch (IOException e) {
-        log.error("Failed to read chunk section", e);
+      for (var i = 0; chunkData.getSectionCount() > i; i++) {
+        var section = chunkData.getSection(i);
+        var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
+        chunkData.setSection(
+          i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
       }
     }
   }
@@ -872,8 +865,8 @@ public final class SessionDataManager {
                   modifier.getAmount(),
                   switch (modifier.getOperation()) {
                     case ADD -> ModifierOperation.ADDITION;
-                    case ADD_MULTIPLIED -> ModifierOperation.MULTIPLY_BASE;
-                    case MULTIPLY -> ModifierOperation.MULTIPLY_TOTAL;
+                    case ADD_MULTIPLIED_BASE -> ModifierOperation.MULTIPLY_BASE;
+                    case ADD_MULTIPLIED_TOTAL -> ModifierOperation.MULTIPLY_TOTAL;
                   }))
             .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
     }
@@ -909,7 +902,7 @@ public final class SessionDataManager {
         packet.isAmbient(),
         packet.isShowParticles(),
         packet.isShowIcon(),
-        packet.getFactorData());
+        packet.isBlend());
   }
 
   @EventHandler
@@ -1074,7 +1067,7 @@ public final class SessionDataManager {
   }
 
   public @NotNull Level currentLevel() {
-    return Objects.requireNonNull(levels.get(currentDimension.dimensionType()));
+    return Objects.requireNonNull(lastSpawnedInLevel, "Current level is not set");
   }
 
   public void tick() {

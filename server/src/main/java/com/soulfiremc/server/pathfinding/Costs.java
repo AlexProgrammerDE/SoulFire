@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding;
 
-import com.github.steveice10.mc.protocol.data.game.entity.Effect;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EnchantmentType;
@@ -32,6 +31,7 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.util.MathHelper;
 import java.util.OptionalInt;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.jetbrains.annotations.Nullable;
 
 /**

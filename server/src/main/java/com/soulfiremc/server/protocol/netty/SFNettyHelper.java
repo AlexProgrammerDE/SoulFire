@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
-import com.github.steveice10.packetlib.helper.TransportHelper;
 import com.soulfiremc.settings.proxy.SFProxy;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -39,10 +38,11 @@ import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
+import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 
 public class SFNettyHelper {
   public static final TransportMethod TRANSPORT_METHOD =
-    switch (TransportHelper.determineTransportMethod()) {
+    switch (TransportHelper.determineTransportMethod().method()) {
       case IO_URING -> new TransportMethod(
         IOUring.isTcpFastOpenClientSideAvailable(),
         IOUringSocketChannel.class,
