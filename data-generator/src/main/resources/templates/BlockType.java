@@ -55,8 +55,7 @@ public record BlockType(
     }
   };
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
-    new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   // VALUES REPLACE

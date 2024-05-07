@@ -113,7 +113,7 @@ public class ItemPlaceHelper {
     var finalBestItemStack = bestItemStack;
     return placeInHand(inventoryManager, playerInventory,
       playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && slot.item().equalsShape(finalBestItemStack))
+          slot -> slot.item() != null && slot.item().canStackWith(finalBestItemStack))
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 

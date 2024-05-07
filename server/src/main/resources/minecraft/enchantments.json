@@ -5,12 +5,11 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [
-      "fire_protection",
-      "blast_protection",
-      "projectile_protection"
+      "minecraft:fire_protection",
+      "minecraft:blast_protection",
+      "minecraft:projectile_protection"
     ],
-    "category": "ARMOR",
-    "rarity": "COMMON",
+    "supportedItems": "minecraft:enchantable/armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -26,12 +25,11 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [
-      "protection",
-      "blast_protection",
-      "projectile_protection"
+      "minecraft:protection",
+      "minecraft:blast_protection",
+      "minecraft:projectile_protection"
     ],
-    "category": "ARMOR",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -47,8 +45,7 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [],
-    "category": "ARMOR_FEET",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/foot_armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -64,12 +61,11 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [
-      "protection",
-      "fire_protection",
-      "projectile_protection"
+      "minecraft:protection",
+      "minecraft:fire_protection",
+      "minecraft:projectile_protection"
     ],
-    "category": "ARMOR",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -85,12 +81,11 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [
-      "protection",
-      "fire_protection",
-      "blast_protection"
+      "minecraft:protection",
+      "minecraft:fire_protection",
+      "minecraft:blast_protection"
     ],
-    "category": "ARMOR",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -106,8 +101,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "ARMOR_HEAD",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/head_armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -123,8 +117,7 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [],
-    "category": "ARMOR_HEAD",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/head_armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -140,8 +133,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "ARMOR_CHEST",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -157,10 +149,9 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "frost_walker"
+      "minecraft:frost_walker"
     ],
-    "category": "ARMOR_FEET",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/foot_armor",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -176,10 +167,9 @@
     "minLevel": 1,
     "maxLevel": 2,
     "incompatible": [
-      "depth_strider"
+      "minecraft:depth_strider"
     ],
-    "category": "ARMOR_FEET",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/foot_armor",
     "tradeable": true,
     "discoverable": true,
     "treasureOnly": true,
@@ -193,8 +183,7 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [],
-    "category": "WEARABLE",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/equippable",
     "tradeable": true,
     "discoverable": true,
     "curse": true,
@@ -212,8 +201,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "ARMOR_FEET",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/foot_armor",
     "treasureOnly": true,
     "slots": [
       "FEET"
@@ -225,8 +213,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "ARMOR_LEGS",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/leg_armor",
     "treasureOnly": true,
     "slots": [
       "LEGS"
@@ -238,11 +225,11 @@
     "minLevel": 1,
     "maxLevel": 5,
     "incompatible": [
-      "smite",
-      "bane_of_arthropods"
+      "minecraft:smite",
+      "minecraft:bane_of_arthropods",
+      "minecraft:impaling"
     ],
-    "category": "WEAPON",
-    "rarity": "COMMON",
+    "supportedItems": "minecraft:enchantable/sharp_weapon",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -255,11 +242,11 @@
     "minLevel": 1,
     "maxLevel": 5,
     "incompatible": [
-      "sharpness",
-      "bane_of_arthropods"
+      "minecraft:sharpness",
+      "minecraft:bane_of_arthropods",
+      "minecraft:impaling"
     ],
-    "category": "WEAPON",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/weapon",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -272,11 +259,11 @@
     "minLevel": 1,
     "maxLevel": 5,
     "incompatible": [
-      "sharpness",
-      "smite"
+      "minecraft:sharpness",
+      "minecraft:smite",
+      "minecraft:impaling"
     ],
-    "category": "WEAPON",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/weapon",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -289,8 +276,7 @@
     "minLevel": 1,
     "maxLevel": 2,
     "incompatible": [],
-    "category": "WEAPON",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/sword",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -303,8 +289,7 @@
     "minLevel": 1,
     "maxLevel": 2,
     "incompatible": [],
-    "category": "WEAPON",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/fire_aspect",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -317,10 +302,9 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "silk_touch"
+      "minecraft:silk_touch"
     ],
-    "category": "WEAPON",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/sword",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -329,12 +313,11 @@
   },
   {
     "id": 19,
-    "key": "minecraft:sweeping",
+    "key": "minecraft:sweeping_edge",
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "WEAPON",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/sword",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -347,8 +330,7 @@
     "minLevel": 1,
     "maxLevel": 5,
     "incompatible": [],
-    "category": "DIGGER",
-    "rarity": "COMMON",
+    "supportedItems": "minecraft:enchantable/mining",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -361,12 +343,11 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [
-      "looting",
-      "fortune",
-      "luck_of_the_sea"
+      "minecraft:looting",
+      "minecraft:fortune",
+      "minecraft:luck_of_the_sea"
     ],
-    "category": "DIGGER",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/mining_loot",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -379,8 +360,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "BREAKABLE",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/durability",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -393,10 +373,9 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "silk_touch"
+      "minecraft:silk_touch"
     ],
-    "category": "DIGGER",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/mining_loot",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -409,8 +388,7 @@
     "minLevel": 1,
     "maxLevel": 5,
     "incompatible": [],
-    "category": "BOW",
-    "rarity": "COMMON",
+    "supportedItems": "minecraft:enchantable/bow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -423,8 +401,7 @@
     "minLevel": 1,
     "maxLevel": 2,
     "incompatible": [],
-    "category": "BOW",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/bow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -437,8 +414,7 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [],
-    "category": "BOW",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/bow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -451,10 +427,9 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [
-      "mending"
+      "minecraft:mending"
     ],
-    "category": "BOW",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/bow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -467,10 +442,9 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "silk_touch"
+      "minecraft:silk_touch"
     ],
-    "category": "FISHING_ROD",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/fishing",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -483,8 +457,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "FISHING_ROD",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/fishing",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -497,10 +470,9 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "riptide"
+      "minecraft:riptide"
     ],
-    "category": "TRIDENT",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/trident",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -512,9 +484,12 @@
     "key": "minecraft:impaling",
     "minLevel": 1,
     "maxLevel": 5,
-    "incompatible": [],
-    "category": "TRIDENT",
-    "rarity": "RARE",
+    "incompatible": [
+      "minecraft:sharpness",
+      "minecraft:smite",
+      "minecraft:bane_of_arthropods"
+    ],
+    "supportedItems": "minecraft:enchantable/trident",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -527,11 +502,10 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [
-      "loyalty",
-      "channeling"
+      "minecraft:loyalty",
+      "minecraft:channeling"
     ],
-    "category": "TRIDENT",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/trident",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -544,10 +518,9 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [
-      "riptide"
+      "minecraft:riptide"
     ],
-    "category": "TRIDENT",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/trident",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -560,10 +533,9 @@
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [
-      "piercing"
+      "minecraft:piercing"
     ],
-    "category": "CROSSBOW",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/crossbow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -576,8 +548,7 @@
     "minLevel": 1,
     "maxLevel": 3,
     "incompatible": [],
-    "category": "CROSSBOW",
-    "rarity": "UNCOMMON",
+    "supportedItems": "minecraft:enchantable/crossbow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -590,10 +561,9 @@
     "minLevel": 1,
     "maxLevel": 4,
     "incompatible": [
-      "multishot"
+      "minecraft:multishot"
     ],
-    "category": "CROSSBOW",
-    "rarity": "COMMON",
+    "supportedItems": "minecraft:enchantable/crossbow",
     "tradeable": true,
     "discoverable": true,
     "slots": [
@@ -602,14 +572,50 @@
   },
   {
     "id": 37,
+    "key": "minecraft:density",
+    "minLevel": 1,
+    "maxLevel": 5,
+    "incompatible": [],
+    "supportedItems": "minecraft:enchantable/mace",
+    "tradeable": true,
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
+  },
+  {
+    "id": 38,
+    "key": "minecraft:breach",
+    "minLevel": 1,
+    "maxLevel": 4,
+    "incompatible": [],
+    "supportedItems": "minecraft:enchantable/mace",
+    "tradeable": true,
+    "discoverable": true,
+    "slots": [
+      "MAINHAND"
+    ]
+  },
+  {
+    "id": 39,
+    "key": "minecraft:wind_burst",
+    "minLevel": 1,
+    "maxLevel": 3,
+    "incompatible": [],
+    "supportedItems": "minecraft:enchantable/mace",
+    "slots": [
+      "MAINHAND"
+    ]
+  },
+  {
+    "id": 40,
     "key": "minecraft:mending",
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [
-      "infinity"
+      "minecraft:infinity"
     ],
-    "category": "BREAKABLE",
-    "rarity": "RARE",
+    "supportedItems": "minecraft:enchantable/durability",
     "tradeable": true,
     "discoverable": true,
     "treasureOnly": true,
@@ -619,17 +625,17 @@
       "FEET",
       "LEGS",
       "CHEST",
-      "HEAD"
+      "HEAD",
+      "BODY"
     ]
   },
   {
-    "id": 38,
+    "id": 41,
     "key": "minecraft:vanishing_curse",
     "minLevel": 1,
     "maxLevel": 1,
     "incompatible": [],
-    "category": "VANISHABLE",
-    "rarity": "VERY_RARE",
+    "supportedItems": "minecraft:enchantable/vanishing",
     "tradeable": true,
     "discoverable": true,
     "curse": true,
@@ -640,7 +646,8 @@
       "FEET",
       "LEGS",
       "CHEST",
-      "HEAD"
+      "HEAD",
+      "BODY"
     ]
   }
 ]

@@ -84,6 +84,7 @@ public class BlockTags {
   public static final ResourceKey CANDLES = register("minecraft:candles");
   public static final ResourceKey DIRT = register("minecraft:dirt");
   public static final ResourceKey TERRACOTTA = register("minecraft:terracotta");
+  public static final ResourceKey BADLANDS_TERRACOTTA = register("minecraft:badlands_terracotta");
   public static final ResourceKey CONCRETE_POWDER = register("minecraft:concrete_powder");
   public static final ResourceKey COMPLETES_FIND_TREE_TUTORIAL = register("minecraft:completes_find_tree_tutorial");
   public static final ResourceKey FLOWER_POTS = register("minecraft:flower_pots");
@@ -162,6 +163,12 @@ public class BlockTags {
   public static final ResourceKey NEEDS_DIAMOND_TOOL = register("minecraft:needs_diamond_tool");
   public static final ResourceKey NEEDS_IRON_TOOL = register("minecraft:needs_iron_tool");
   public static final ResourceKey NEEDS_STONE_TOOL = register("minecraft:needs_stone_tool");
+  public static final ResourceKey INCORRECT_FOR_NETHERITE_TOOL = register("minecraft:incorrect_for_netherite_tool");
+  public static final ResourceKey INCORRECT_FOR_DIAMOND_TOOL = register("minecraft:incorrect_for_diamond_tool");
+  public static final ResourceKey INCORRECT_FOR_IRON_TOOL = register("minecraft:incorrect_for_iron_tool");
+  public static final ResourceKey INCORRECT_FOR_STONE_TOOL = register("minecraft:incorrect_for_stone_tool");
+  public static final ResourceKey INCORRECT_FOR_GOLD_TOOL = register("minecraft:incorrect_for_gold_tool");
+  public static final ResourceKey INCORRECT_FOR_WOODEN_TOOL = register("minecraft:incorrect_for_wooden_tool");
   public static final ResourceKey FEATURES_CANNOT_REPLACE = register("minecraft:features_cannot_replace");
   public static final ResourceKey LAVA_POOL_STONE_CANNOT_REPLACE = register("minecraft:lava_pool_stone_cannot_replace");
   public static final ResourceKey GEODE_INVALID_BLOCKS = register("minecraft:geode_invalid_blocks");
@@ -171,6 +178,7 @@ public class BlockTags {
   public static final ResourceKey ANCIENT_CITY_REPLACEABLE = register("minecraft:ancient_city_replaceable");
   public static final ResourceKey VIBRATION_RESONATORS = register("minecraft:vibration_resonators");
   public static final ResourceKey ANIMALS_SPAWNABLE_ON = register("minecraft:animals_spawnable_on");
+  public static final ResourceKey ARMADILLO_SPAWNABLE_ON = register("minecraft:armadillo_spawnable_on");
   public static final ResourceKey AXOLOTLS_SPAWNABLE_ON = register("minecraft:axolotls_spawnable_on");
   public static final ResourceKey GOATS_SPAWNABLE_ON = register("minecraft:goats_spawnable_on");
   public static final ResourceKey MOOSHROOMS_SPAWNABLE_ON = register("minecraft:mooshrooms_spawnable_on");
@@ -197,6 +205,8 @@ public class BlockTags {
   public static final ResourceKey ENCHANTMENT_POWER_PROVIDER = register("minecraft:enchantment_power_provider");
   public static final ResourceKey ENCHANTMENT_POWER_TRANSMITTER = register("minecraft:enchantment_power_transmitter");
   public static final ResourceKey MAINTAINS_FARMLAND = register("minecraft:maintains_farmland");
+  public static final ResourceKey BLOCKS_WIND_CHARGE_EXPLOSIONS = register("minecraft:blocks_wind_charge_explosions");
+  public static final ResourceKey DOES_NOT_BLOCK_HOPPERS = register("minecraft:does_not_block_hoppers");
   //@formatter:on
 
   private BlockTags() {}

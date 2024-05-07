@@ -24,13 +24,16 @@ import com.soulfiremc.generator.util.BlockSettingsAccessor;
 import com.soulfiremc.generator.util.GsonInstance;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import lombok.SneakyThrows;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class BlocksDataGenerator implements IDataGenerator {
+  @SneakyThrows
   public static JsonObject generateBlock(Block block) {
     var blockDesc = new JsonObject();
 
@@ -62,7 +65,7 @@ public class BlocksDataGenerator implements IDataGenerator {
     if (lootTableKey == BuiltInLootTables.EMPTY) {
       poolsArray = new JsonArray();
     } else {
-      var lootTableFilePath = "/data/minecraft/loot_tables/" + block.getLootTable().getPath() + ".json";
+      var lootTableFilePath = "/data/minecraft/loot_tables/" + block.getLootTable().location().getPath() + ".json";
       try (var in = Objects.requireNonNull(BlocksDataGenerator.class.getResourceAsStream(lootTableFilePath))) {
         var data = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         var dataJsonObject = GsonInstance.GSON.fromJson(data, JsonObject.class);
@@ -77,8 +80,13 @@ public class BlocksDataGenerator implements IDataGenerator {
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();
 
-      offsetData.addProperty("maxHorizontalOffset", block.getMaxHorizontalOffset());
-      offsetData.addProperty("maxVerticalOffset", block.getMaxVerticalOffset());
+      var horizontalOffsetMethod = BlockBehaviour.class.getDeclaredMethod("getMaxHorizontalOffset");
+      var verticalOffsetMethod = BlockBehaviour.class.getDeclaredMethod("getMaxVerticalOffset");
+      horizontalOffsetMethod.setAccessible(true);
+      verticalOffsetMethod.setAccessible(true);
+
+      offsetData.addProperty("maxHorizontalOffset", (float) horizontalOffsetMethod.invoke(block));
+      offsetData.addProperty("maxVerticalOffset", (float) verticalOffsetMethod.invoke(block));
 
       var blockSettings = ((BlockAccessor) block).properties();
       var offsetType = ((BlockSettingsAccessor) blockSettings).soulfire$getOffsetType();

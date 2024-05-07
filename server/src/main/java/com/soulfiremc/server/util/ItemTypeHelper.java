@@ -19,6 +19,8 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 
 public class ItemTypeHelper {
   private ItemTypeHelper() {}
@@ -32,7 +34,14 @@ public class ItemTypeHelper {
     return type.tierType() != null || type == ItemType.SHEARS;
   }
 
-  public static boolean isGoodEdibleFood(ItemType type) {
-    return type.foodProperties() != null && !type.foodProperties().possiblyHarmful();
+  public static boolean isGoodEdibleFood(SFItemStack itemStack) {
+    var components = itemStack.components();
+    return components.getOptional(DataComponentType.FOOD).map(f -> {
+      for (var effect : f.getEffects()) {
+        if (effect.getEffect().amplifier() > 0) {
+          return true;
+        }
+      }
+    }).orElse(false);
   }
 }

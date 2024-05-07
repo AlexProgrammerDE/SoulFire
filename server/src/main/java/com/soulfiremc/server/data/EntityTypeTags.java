@@ -42,9 +42,23 @@ public class EntityTypeTags {
   public static final ResourceKey FALL_DAMAGE_IMMUNE = register("minecraft:fall_damage_immune");
   public static final ResourceKey DISMOUNTS_UNDERWATER = register("minecraft:dismounts_underwater");
   public static final ResourceKey NON_CONTROLLING_RIDER = register("minecraft:non_controlling_rider");
-  public static final ResourceKey DEFLECTS_ARROWS = register("minecraft:deflects_arrows");
-  public static final ResourceKey DEFLECTS_TRIDENTS = register("minecraft:deflects_tridents");
+  public static final ResourceKey DEFLECTS_PROJECTILES = register("minecraft:deflects_projectiles");
   public static final ResourceKey CAN_TURN_IN_BOATS = register("minecraft:can_turn_in_boats");
+  public static final ResourceKey ILLAGER = register("minecraft:illager");
+  public static final ResourceKey AQUATIC = register("minecraft:aquatic");
+  public static final ResourceKey ARTHROPOD = register("minecraft:arthropod");
+  public static final ResourceKey IGNORES_POISON_AND_REGEN = register("minecraft:ignores_poison_and_regen");
+  public static final ResourceKey INVERTED_HEALING_AND_HARM = register("minecraft:inverted_healing_and_harm");
+  public static final ResourceKey WITHER_FRIENDS = register("minecraft:wither_friends");
+  public static final ResourceKey ILLAGER_FRIENDS = register("minecraft:illager_friends");
+  public static final ResourceKey NOT_SCARY_FOR_PUFFERFISH = register("minecraft:not_scary_for_pufferfish");
+  public static final ResourceKey SENSITIVE_TO_IMPALING = register("minecraft:sensitive_to_impaling");
+  public static final ResourceKey SENSITIVE_TO_BANE_OF_ARTHROPODS = register("minecraft:sensitive_to_bane_of_arthropods");
+  public static final ResourceKey SENSITIVE_TO_SMITE = register("minecraft:sensitive_to_smite");
+  public static final ResourceKey NO_ANGER_FROM_WIND_CHARGE = register("minecraft:no_anger_from_wind_charge");
+  public static final ResourceKey IMMUNE_TO_OOZING = register("minecraft:immune_to_oozing");
+  public static final ResourceKey IMMUNE_TO_INFESTED = register("minecraft:immune_to_infested");
+  public static final ResourceKey REDIRECTABLE_PROJECTILE = register("minecraft:redirectable_projectile");
   //@formatter:on
 
   private EntityTypeTags() {}

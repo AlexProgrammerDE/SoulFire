@@ -1,6 +1,6 @@
 plugins {
   `sf-java-conventions`
-  alias(libs.plugins.loom)
+  id("xyz.wagyourtail.unimined")
 }
 
 repositories {
@@ -9,34 +9,31 @@ repositories {
   }
 }
 
-val minecraftVersion = property("minecraft_version")
-val parchmentVersion = property("parchment_version")
-val loaderVersion = property("loader_version")
+unimined.minecraft {
+  version("1.20.6")
+
+  mappings {
+    intermediary()
+    mojmap()
+    parchment("1.20.6", "2024.05.01")
+
+    devFallbackNamespace("intermediary")
+  }
+
+  runs.config("server") {
+    javaVersion = JavaVersion.VERSION_21
+  }
+
+  fabric {
+    loader("0.15.10")
+  }
+
+  defaultRemapJar = true
+}
 
 tasks.create("generateData") {
   group = "data-generator"
   description = "Generates data for SoulFire"
-
-  finalizedBy(tasks.runServer)
-}
-
-dependencies {
-  minecraft("com.mojang:minecraft:${minecraftVersion}")
-  @Suppress("UnstableApiUsage")
-  mappings(loom.layered {
-    officialMojangMappings {
-      nameSyntheticMembers = true
-    }
-    parchment("org.parchmentmc.data:parchment-${parchmentVersion}@zip")
-  })
-
-  modImplementation("net.fabricmc:fabric-loader:${loaderVersion}")
-}
-
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
 }
 
 tasks {

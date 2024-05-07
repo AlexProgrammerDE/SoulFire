@@ -21,6 +21,16 @@
   },
   {
     "id": 2,
+    "key": "minecraft:armadillo",
+    "width": 0.7,
+    "height": 0.65,
+    "category": "creature",
+    "friendly": true,
+    "summonable": true,
+    "attackable": true
+  },
+  {
+    "id": 3,
     "key": "minecraft:armor_stand",
     "width": 0.5,
     "height": 1.975,
@@ -30,7 +40,7 @@
     "attackable": true
   },
   {
-    "id": 3,
+    "id": 4,
     "key": "minecraft:arrow",
     "width": 0.5,
     "height": 0.5,
@@ -39,7 +49,7 @@
     "summonable": true
   },
   {
-    "id": 4,
+    "id": 5,
     "key": "minecraft:axolotl",
     "width": 0.75,
     "height": 0.42,
@@ -49,7 +59,7 @@
     "attackable": true
   },
   {
-    "id": 5,
+    "id": 6,
     "key": "minecraft:bat",
     "width": 0.5,
     "height": 0.9,
@@ -59,7 +69,7 @@
     "attackable": true
   },
   {
-    "id": 6,
+    "id": 7,
     "key": "minecraft:bee",
     "width": 0.7,
     "height": 0.6,
@@ -69,7 +79,7 @@
     "attackable": true
   },
   {
-    "id": 7,
+    "id": 8,
     "key": "minecraft:blaze",
     "width": 0.6,
     "height": 1.8,
@@ -78,7 +88,7 @@
     "attackable": true
   },
   {
-    "id": 8,
+    "id": 9,
     "key": "minecraft:block_display",
     "width": 0.0,
     "height": 0.0,
@@ -88,7 +98,7 @@
     "attackable": true
   },
   {
-    "id": 9,
+    "id": 10,
     "key": "minecraft:boat",
     "width": 1.375,
     "height": 0.5625,
@@ -98,16 +108,35 @@
     "attackable": true
   },
   {
-    "id": 10,
-    "key": "minecraft:breeze",
+    "id": 11,
+    "key": "minecraft:bogged",
     "width": 0.6,
-    "height": 1.7,
+    "height": 1.99,
     "category": "monster",
     "summonable": true,
     "attackable": true
   },
   {
-    "id": 11,
+    "id": 12,
+    "key": "minecraft:breeze",
+    "width": 0.6,
+    "height": 1.77,
+    "category": "monster",
+    "summonable": true,
+    "attackable": true
+  },
+  {
+    "id": 13,
+    "key": "minecraft:breeze_wind_charge",
+    "width": 0.3125,
+    "height": 0.3125,
+    "category": "misc",
+    "friendly": true,
+    "summonable": true,
+    "attackable": true
+  },
+  {
+    "id": 14,
     "key": "minecraft:camel",
     "width": 1.7,
     "height": 2.375,
@@ -117,7 +146,7 @@
     "attackable": true
   },
   {
-    "id": 12,
+    "id": 15,
     "key": "minecraft:cat",
     "width": 0.6,
     "height": 0.7,
@@ -127,7 +156,7 @@
     "attackable": true
   },
   {
-    "id": 13,
+    "id": 16,
     "key": "minecraft:cave_spider",
     "width": 0.7,
     "height": 0.5,
@@ -136,7 +165,7 @@
     "attackable": true
   },
   {
-    "id": 14,
+    "id": 17,
     "key": "minecraft:chest_boat",
     "width": 1.375,
     "height": 0.5625,
@@ -146,7 +175,7 @@
     "attackable": true
   },
   {
-    "id": 15,
+    "id": 18,
     "key": "minecraft:chest_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -156,7 +185,7 @@
     "attackable": true
   },
   {
-    "id": 16,
+    "id": 19,
     "key": "minecraft:chicken",
     "width": 0.4,
     "height": 0.7,
@@ -166,7 +195,7 @@
     "attackable": true
   },
   {
-    "id": 17,
+    "id": 20,
     "key": "minecraft:cod",
     "width": 0.5,
     "height": 0.3,
@@ -176,7 +205,7 @@
     "attackable": true
   },
   {
-    "id": 18,
+    "id": 21,
     "key": "minecraft:command_block_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -186,7 +215,7 @@
     "attackable": true
   },
   {
-    "id": 19,
+    "id": 22,
     "key": "minecraft:cow",
     "width": 0.9,
     "height": 1.4,
@@ -196,7 +225,7 @@
     "attackable": true
   },
   {
-    "id": 20,
+    "id": 23,
     "key": "minecraft:creeper",
     "width": 0.6,
     "height": 1.7,
@@ -205,7 +234,7 @@
     "attackable": true
   },
   {
-    "id": 21,
+    "id": 24,
     "key": "minecraft:dolphin",
     "width": 0.9,
     "height": 0.6,
@@ -215,7 +244,7 @@
     "attackable": true
   },
   {
-    "id": 22,
+    "id": 25,
     "key": "minecraft:donkey",
     "width": 1.3964844,
     "height": 1.5,
@@ -225,7 +254,7 @@
     "attackable": true
   },
   {
-    "id": 23,
+    "id": 26,
     "key": "minecraft:dragon_fireball",
     "width": 1.0,
     "height": 1.0,
@@ -235,7 +264,7 @@
     "attackable": true
   },
   {
-    "id": 24,
+    "id": 27,
     "key": "minecraft:drowned",
     "width": 0.6,
     "height": 1.95,
@@ -244,7 +273,7 @@
     "attackable": true
   },
   {
-    "id": 25,
+    "id": 28,
     "key": "minecraft:egg",
     "width": 0.25,
     "height": 0.25,
@@ -254,7 +283,7 @@
     "attackable": true
   },
   {
-    "id": 26,
+    "id": 29,
     "key": "minecraft:elder_guardian",
     "width": 1.9975,
     "height": 1.9975,
@@ -263,7 +292,7 @@
     "attackable": true
   },
   {
-    "id": 27,
+    "id": 30,
     "key": "minecraft:end_crystal",
     "width": 2.0,
     "height": 2.0,
@@ -273,7 +302,7 @@
     "attackable": true
   },
   {
-    "id": 28,
+    "id": 31,
     "key": "minecraft:ender_dragon",
     "width": 16.0,
     "height": 8.0,
@@ -282,7 +311,7 @@
     "attackable": true
   },
   {
-    "id": 29,
+    "id": 32,
     "key": "minecraft:ender_pearl",
     "width": 0.25,
     "height": 0.25,
@@ -292,7 +321,7 @@
     "attackable": true
   },
   {
-    "id": 30,
+    "id": 33,
     "key": "minecraft:enderman",
     "width": 0.6,
     "height": 2.9,
@@ -301,7 +330,7 @@
     "attackable": true
   },
   {
-    "id": 31,
+    "id": 34,
     "key": "minecraft:endermite",
     "width": 0.4,
     "height": 0.3,
@@ -310,7 +339,7 @@
     "attackable": true
   },
   {
-    "id": 32,
+    "id": 35,
     "key": "minecraft:evoker",
     "width": 0.6,
     "height": 1.95,
@@ -319,7 +348,7 @@
     "attackable": true
   },
   {
-    "id": 33,
+    "id": 36,
     "key": "minecraft:evoker_fangs",
     "width": 0.5,
     "height": 0.8,
@@ -329,7 +358,7 @@
     "attackable": true
   },
   {
-    "id": 34,
+    "id": 37,
     "key": "minecraft:experience_bottle",
     "width": 0.25,
     "height": 0.25,
@@ -339,7 +368,7 @@
     "attackable": true
   },
   {
-    "id": 35,
+    "id": 38,
     "key": "minecraft:experience_orb",
     "width": 0.5,
     "height": 0.5,
@@ -348,7 +377,7 @@
     "summonable": true
   },
   {
-    "id": 36,
+    "id": 39,
     "key": "minecraft:eye_of_ender",
     "width": 0.25,
     "height": 0.25,
@@ -357,7 +386,7 @@
     "summonable": true
   },
   {
-    "id": 37,
+    "id": 40,
     "key": "minecraft:falling_block",
     "width": 0.98,
     "height": 0.98,
@@ -366,7 +395,7 @@
     "summonable": true
   },
   {
-    "id": 38,
+    "id": 41,
     "key": "minecraft:firework_rocket",
     "width": 0.25,
     "height": 0.25,
@@ -375,7 +404,7 @@
     "summonable": true
   },
   {
-    "id": 39,
+    "id": 42,
     "key": "minecraft:fox",
     "width": 0.6,
     "height": 0.7,
@@ -385,7 +414,7 @@
     "attackable": true
   },
   {
-    "id": 40,
+    "id": 43,
     "key": "minecraft:frog",
     "width": 0.5,
     "height": 0.5,
@@ -395,7 +424,7 @@
     "attackable": true
   },
   {
-    "id": 41,
+    "id": 44,
     "key": "minecraft:furnace_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -405,7 +434,7 @@
     "attackable": true
   },
   {
-    "id": 42,
+    "id": 45,
     "key": "minecraft:ghast",
     "width": 4.0,
     "height": 4.0,
@@ -414,7 +443,7 @@
     "attackable": true
   },
   {
-    "id": 43,
+    "id": 46,
     "key": "minecraft:giant",
     "width": 3.6,
     "height": 12.0,
@@ -423,7 +452,7 @@
     "attackable": true
   },
   {
-    "id": 44,
+    "id": 47,
     "key": "minecraft:glow_item_frame",
     "width": 0.5,
     "height": 0.5,
@@ -433,7 +462,7 @@
     "attackable": true
   },
   {
-    "id": 45,
+    "id": 48,
     "key": "minecraft:glow_squid",
     "width": 0.8,
     "height": 0.8,
@@ -443,7 +472,7 @@
     "attackable": true
   },
   {
-    "id": 46,
+    "id": 49,
     "key": "minecraft:goat",
     "width": 0.9,
     "height": 1.3,
@@ -453,7 +482,7 @@
     "attackable": true
   },
   {
-    "id": 47,
+    "id": 50,
     "key": "minecraft:guardian",
     "width": 0.85,
     "height": 0.85,
@@ -462,7 +491,7 @@
     "attackable": true
   },
   {
-    "id": 48,
+    "id": 51,
     "key": "minecraft:hoglin",
     "width": 1.3964844,
     "height": 1.4,
@@ -471,7 +500,7 @@
     "attackable": true
   },
   {
-    "id": 49,
+    "id": 52,
     "key": "minecraft:hopper_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -481,7 +510,7 @@
     "attackable": true
   },
   {
-    "id": 50,
+    "id": 53,
     "key": "minecraft:horse",
     "width": 1.3964844,
     "height": 1.6,
@@ -491,7 +520,7 @@
     "attackable": true
   },
   {
-    "id": 51,
+    "id": 54,
     "key": "minecraft:husk",
     "width": 0.6,
     "height": 1.95,
@@ -500,7 +529,7 @@
     "attackable": true
   },
   {
-    "id": 52,
+    "id": 55,
     "key": "minecraft:illusioner",
     "width": 0.6,
     "height": 1.95,
@@ -509,7 +538,7 @@
     "attackable": true
   },
   {
-    "id": 53,
+    "id": 56,
     "key": "minecraft:interaction",
     "width": 0.0,
     "height": 0.0,
@@ -519,7 +548,7 @@
     "attackable": true
   },
   {
-    "id": 54,
+    "id": 57,
     "key": "minecraft:iron_golem",
     "width": 1.4,
     "height": 2.7,
@@ -529,7 +558,7 @@
     "attackable": true
   },
   {
-    "id": 55,
+    "id": 58,
     "key": "minecraft:item",
     "width": 0.25,
     "height": 0.25,
@@ -538,7 +567,7 @@
     "summonable": true
   },
   {
-    "id": 56,
+    "id": 59,
     "key": "minecraft:item_display",
     "width": 0.0,
     "height": 0.0,
@@ -548,7 +577,7 @@
     "attackable": true
   },
   {
-    "id": 57,
+    "id": 60,
     "key": "minecraft:item_frame",
     "width": 0.5,
     "height": 0.5,
@@ -558,7 +587,17 @@
     "attackable": true
   },
   {
-    "id": 58,
+    "id": 61,
+    "key": "minecraft:ominous_item_spawner",
+    "width": 0.25,
+    "height": 0.25,
+    "category": "misc",
+    "friendly": true,
+    "summonable": true,
+    "attackable": true
+  },
+  {
+    "id": 62,
     "key": "minecraft:fireball",
     "width": 1.0,
     "height": 1.0,
@@ -568,7 +607,7 @@
     "attackable": true
   },
   {
-    "id": 59,
+    "id": 63,
     "key": "minecraft:leash_knot",
     "width": 0.375,
     "height": 0.5,
@@ -578,7 +617,7 @@
     "attackable": true
   },
   {
-    "id": 60,
+    "id": 64,
     "key": "minecraft:lightning_bolt",
     "width": 0.0,
     "height": 0.0,
@@ -588,7 +627,7 @@
     "attackable": true
   },
   {
-    "id": 61,
+    "id": 65,
     "key": "minecraft:llama",
     "width": 0.9,
     "height": 1.87,
@@ -598,7 +637,7 @@
     "attackable": true
   },
   {
-    "id": 62,
+    "id": 66,
     "key": "minecraft:llama_spit",
     "width": 0.25,
     "height": 0.25,
@@ -608,16 +647,16 @@
     "attackable": true
   },
   {
-    "id": 63,
+    "id": 67,
     "key": "minecraft:magma_cube",
-    "width": 2.04,
-    "height": 2.04,
+    "width": 0.52,
+    "height": 0.52,
     "category": "monster",
     "summonable": true,
     "attackable": true
   },
   {
-    "id": 64,
+    "id": 68,
     "key": "minecraft:marker",
     "width": 0.0,
     "height": 0.0,
@@ -627,7 +666,7 @@
     "attackable": true
   },
   {
-    "id": 65,
+    "id": 69,
     "key": "minecraft:minecart",
     "width": 0.98,
     "height": 0.7,
@@ -637,7 +676,7 @@
     "attackable": true
   },
   {
-    "id": 66,
+    "id": 70,
     "key": "minecraft:mooshroom",
     "width": 0.9,
     "height": 1.4,
@@ -647,7 +686,7 @@
     "attackable": true
   },
   {
-    "id": 67,
+    "id": 71,
     "key": "minecraft:mule",
     "width": 1.3964844,
     "height": 1.6,
@@ -657,7 +696,7 @@
     "attackable": true
   },
   {
-    "id": 68,
+    "id": 72,
     "key": "minecraft:ocelot",
     "width": 0.6,
     "height": 0.7,
@@ -667,7 +706,7 @@
     "attackable": true
   },
   {
-    "id": 69,
+    "id": 73,
     "key": "minecraft:painting",
     "width": 0.5,
     "height": 0.5,
@@ -677,7 +716,7 @@
     "attackable": true
   },
   {
-    "id": 70,
+    "id": 74,
     "key": "minecraft:panda",
     "width": 1.3,
     "height": 1.25,
@@ -687,7 +726,7 @@
     "attackable": true
   },
   {
-    "id": 71,
+    "id": 75,
     "key": "minecraft:parrot",
     "width": 0.5,
     "height": 0.9,
@@ -697,7 +736,7 @@
     "attackable": true
   },
   {
-    "id": 72,
+    "id": 76,
     "key": "minecraft:phantom",
     "width": 0.9,
     "height": 0.5,
@@ -706,7 +745,7 @@
     "attackable": true
   },
   {
-    "id": 73,
+    "id": 77,
     "key": "minecraft:pig",
     "width": 0.9,
     "height": 0.9,
@@ -716,7 +755,7 @@
     "attackable": true
   },
   {
-    "id": 74,
+    "id": 78,
     "key": "minecraft:piglin",
     "width": 0.6,
     "height": 1.95,
@@ -725,7 +764,7 @@
     "attackable": true
   },
   {
-    "id": 75,
+    "id": 79,
     "key": "minecraft:piglin_brute",
     "width": 0.6,
     "height": 1.95,
@@ -734,7 +773,7 @@
     "attackable": true
   },
   {
-    "id": 76,
+    "id": 80,
     "key": "minecraft:pillager",
     "width": 0.6,
     "height": 1.95,
@@ -743,7 +782,7 @@
     "attackable": true
   },
   {
-    "id": 77,
+    "id": 81,
     "key": "minecraft:polar_bear",
     "width": 1.4,
     "height": 1.4,
@@ -753,7 +792,7 @@
     "attackable": true
   },
   {
-    "id": 78,
+    "id": 82,
     "key": "minecraft:potion",
     "width": 0.25,
     "height": 0.25,
@@ -763,7 +802,7 @@
     "attackable": true
   },
   {
-    "id": 79,
+    "id": 83,
     "key": "minecraft:pufferfish",
     "width": 0.7,
     "height": 0.7,
@@ -773,7 +812,7 @@
     "attackable": true
   },
   {
-    "id": 80,
+    "id": 84,
     "key": "minecraft:rabbit",
     "width": 0.4,
     "height": 0.5,
@@ -783,7 +822,7 @@
     "attackable": true
   },
   {
-    "id": 81,
+    "id": 85,
     "key": "minecraft:ravager",
     "width": 1.95,
     "height": 2.2,
@@ -792,7 +831,7 @@
     "attackable": true
   },
   {
-    "id": 82,
+    "id": 86,
     "key": "minecraft:salmon",
     "width": 0.7,
     "height": 0.4,
@@ -802,7 +841,7 @@
     "attackable": true
   },
   {
-    "id": 83,
+    "id": 87,
     "key": "minecraft:sheep",
     "width": 0.9,
     "height": 1.3,
@@ -812,7 +851,7 @@
     "attackable": true
   },
   {
-    "id": 84,
+    "id": 88,
     "key": "minecraft:shulker",
     "width": 1.0,
     "height": 1.0,
@@ -821,7 +860,7 @@
     "attackable": true
   },
   {
-    "id": 85,
+    "id": 89,
     "key": "minecraft:shulker_bullet",
     "width": 0.3125,
     "height": 0.3125,
@@ -831,7 +870,7 @@
     "attackable": true
   },
   {
-    "id": 86,
+    "id": 90,
     "key": "minecraft:silverfish",
     "width": 0.4,
     "height": 0.3,
@@ -840,7 +879,7 @@
     "attackable": true
   },
   {
-    "id": 87,
+    "id": 91,
     "key": "minecraft:skeleton",
     "width": 0.6,
     "height": 1.99,
@@ -849,7 +888,7 @@
     "attackable": true
   },
   {
-    "id": 88,
+    "id": 92,
     "key": "minecraft:skeleton_horse",
     "width": 1.3964844,
     "height": 1.6,
@@ -859,16 +898,16 @@
     "attackable": true
   },
   {
-    "id": 89,
+    "id": 93,
     "key": "minecraft:slime",
-    "width": 2.04,
-    "height": 2.04,
+    "width": 0.52,
+    "height": 0.52,
     "category": "monster",
     "summonable": true,
     "attackable": true
   },
   {
-    "id": 90,
+    "id": 94,
     "key": "minecraft:small_fireball",
     "width": 0.3125,
     "height": 0.3125,
@@ -878,7 +917,7 @@
     "attackable": true
   },
   {
-    "id": 91,
+    "id": 95,
     "key": "minecraft:sniffer",
     "width": 1.9,
     "height": 1.75,
@@ -888,7 +927,7 @@
     "attackable": true
   },
   {
-    "id": 92,
+    "id": 96,
     "key": "minecraft:snow_golem",
     "width": 0.7,
     "height": 1.9,
@@ -898,7 +937,7 @@
     "attackable": true
   },
   {
-    "id": 93,
+    "id": 97,
     "key": "minecraft:snowball",
     "width": 0.25,
     "height": 0.25,
@@ -908,7 +947,7 @@
     "attackable": true
   },
   {
-    "id": 94,
+    "id": 98,
     "key": "minecraft:spawner_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -918,7 +957,7 @@
     "attackable": true
   },
   {
-    "id": 95,
+    "id": 99,
     "key": "minecraft:spectral_arrow",
     "width": 0.5,
     "height": 0.5,
@@ -927,7 +966,7 @@
     "summonable": true
   },
   {
-    "id": 96,
+    "id": 100,
     "key": "minecraft:spider",
     "width": 1.4,
     "height": 0.9,
@@ -936,7 +975,7 @@
     "attackable": true
   },
   {
-    "id": 97,
+    "id": 101,
     "key": "minecraft:squid",
     "width": 0.8,
     "height": 0.8,
@@ -946,7 +985,7 @@
     "attackable": true
   },
   {
-    "id": 98,
+    "id": 102,
     "key": "minecraft:stray",
     "width": 0.6,
     "height": 1.99,
@@ -955,7 +994,7 @@
     "attackable": true
   },
   {
-    "id": 99,
+    "id": 103,
     "key": "minecraft:strider",
     "width": 0.9,
     "height": 1.7,
@@ -965,7 +1004,7 @@
     "attackable": true
   },
   {
-    "id": 100,
+    "id": 104,
     "key": "minecraft:tadpole",
     "width": 0.4,
     "height": 0.3,
@@ -975,7 +1014,7 @@
     "attackable": true
   },
   {
-    "id": 101,
+    "id": 105,
     "key": "minecraft:text_display",
     "width": 0.0,
     "height": 0.0,
@@ -985,7 +1024,7 @@
     "attackable": true
   },
   {
-    "id": 102,
+    "id": 106,
     "key": "minecraft:tnt",
     "width": 0.98,
     "height": 0.98,
@@ -995,7 +1034,7 @@
     "attackable": true
   },
   {
-    "id": 103,
+    "id": 107,
     "key": "minecraft:tnt_minecart",
     "width": 0.98,
     "height": 0.7,
@@ -1005,7 +1044,7 @@
     "attackable": true
   },
   {
-    "id": 104,
+    "id": 108,
     "key": "minecraft:trader_llama",
     "width": 0.9,
     "height": 1.87,
@@ -1015,7 +1054,7 @@
     "attackable": true
   },
   {
-    "id": 105,
+    "id": 109,
     "key": "minecraft:trident",
     "width": 0.5,
     "height": 0.5,
@@ -1024,7 +1063,7 @@
     "summonable": true
   },
   {
-    "id": 106,
+    "id": 110,
     "key": "minecraft:tropical_fish",
     "width": 0.5,
     "height": 0.4,
@@ -1034,7 +1073,7 @@
     "attackable": true
   },
   {
-    "id": 107,
+    "id": 111,
     "key": "minecraft:turtle",
     "width": 1.2,
     "height": 0.4,
@@ -1044,7 +1083,7 @@
     "attackable": true
   },
   {
-    "id": 108,
+    "id": 112,
     "key": "minecraft:vex",
     "width": 0.4,
     "height": 0.8,
@@ -1053,7 +1092,7 @@
     "attackable": true
   },
   {
-    "id": 109,
+    "id": 113,
     "key": "minecraft:villager",
     "width": 0.6,
     "height": 1.95,
@@ -1063,7 +1102,7 @@
     "attackable": true
   },
   {
-    "id": 110,
+    "id": 114,
     "key": "minecraft:vindicator",
     "width": 0.6,
     "height": 1.95,
@@ -1072,7 +1111,7 @@
     "attackable": true
   },
   {
-    "id": 111,
+    "id": 115,
     "key": "minecraft:wandering_trader",
     "width": 0.6,
     "height": 1.95,
@@ -1082,7 +1121,7 @@
     "attackable": true
   },
   {
-    "id": 112,
+    "id": 116,
     "key": "minecraft:warden",
     "width": 0.9,
     "height": 2.9,
@@ -1091,7 +1130,7 @@
     "attackable": true
   },
   {
-    "id": 113,
+    "id": 117,
     "key": "minecraft:wind_charge",
     "width": 0.3125,
     "height": 0.3125,
@@ -1101,7 +1140,7 @@
     "attackable": true
   },
   {
-    "id": 114,
+    "id": 118,
     "key": "minecraft:witch",
     "width": 0.6,
     "height": 1.95,
@@ -1110,7 +1149,7 @@
     "attackable": true
   },
   {
-    "id": 115,
+    "id": 119,
     "key": "minecraft:wither",
     "width": 0.9,
     "height": 3.5,
@@ -1119,7 +1158,7 @@
     "attackable": true
   },
   {
-    "id": 116,
+    "id": 120,
     "key": "minecraft:wither_skeleton",
     "width": 0.7,
     "height": 2.4,
@@ -1128,7 +1167,7 @@
     "attackable": true
   },
   {
-    "id": 117,
+    "id": 121,
     "key": "minecraft:wither_skull",
     "width": 0.3125,
     "height": 0.3125,
@@ -1138,7 +1177,7 @@
     "attackable": true
   },
   {
-    "id": 118,
+    "id": 122,
     "key": "minecraft:wolf",
     "width": 0.6,
     "height": 0.85,
@@ -1148,7 +1187,7 @@
     "attackable": true
   },
   {
-    "id": 119,
+    "id": 123,
     "key": "minecraft:zoglin",
     "width": 1.3964844,
     "height": 1.4,
@@ -1157,7 +1196,7 @@
     "attackable": true
   },
   {
-    "id": 120,
+    "id": 124,
     "key": "minecraft:zombie",
     "width": 0.6,
     "height": 1.95,
@@ -1166,7 +1205,7 @@
     "attackable": true
   },
   {
-    "id": 121,
+    "id": 125,
     "key": "minecraft:zombie_horse",
     "width": 1.3964844,
     "height": 1.6,
@@ -1176,7 +1215,7 @@
     "attackable": true
   },
   {
-    "id": 122,
+    "id": 126,
     "key": "minecraft:zombie_villager",
     "width": 0.6,
     "height": 1.95,
@@ -1185,7 +1224,7 @@
     "attackable": true
   },
   {
-    "id": 123,
+    "id": 127,
     "key": "minecraft:zombified_piglin",
     "width": 0.6,
     "height": 1.95,
@@ -1194,7 +1233,7 @@
     "attackable": true
   },
   {
-    "id": 124,
+    "id": 128,
     "key": "minecraft:player",
     "width": 0.6,
     "height": 1.8,
@@ -1203,7 +1242,7 @@
     "attackable": true
   },
   {
-    "id": 125,
+    "id": 129,
     "key": "minecraft:fishing_bobber",
     "width": 0.25,
     "height": 0.25,

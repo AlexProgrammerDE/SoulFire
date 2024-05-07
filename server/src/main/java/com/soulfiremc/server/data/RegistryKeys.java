@@ -84,12 +84,16 @@ public class RegistryKeys {
   public static final ResourceKey WORLDGEN_WITH_POOL_ALIAS_BINDING = ResourceKey.fromString("minecraft:worldgen/pool_alias_binding");
   public static final ResourceKey CAT_VARIANT = ResourceKey.fromString("minecraft:cat_variant");
   public static final ResourceKey FROG_VARIANT = ResourceKey.fromString("minecraft:frog_variant");
-  public static final ResourceKey BANNER_PATTERN = ResourceKey.fromString("minecraft:banner_pattern");
   public static final ResourceKey INSTRUMENT = ResourceKey.fromString("minecraft:instrument");
   public static final ResourceKey DECORATED_POT_PATTERNS = ResourceKey.fromString("minecraft:decorated_pot_patterns");
   public static final ResourceKey CREATIVE_MODE_TAB = ResourceKey.fromString("minecraft:creative_mode_tab");
   public static final ResourceKey TRIGGER_TYPE = ResourceKey.fromString("minecraft:trigger_type");
   public static final ResourceKey NUMBER_FORMAT_TYPE = ResourceKey.fromString("minecraft:number_format_type");
+  public static final ResourceKey ARMOR_MATERIAL = ResourceKey.fromString("minecraft:armor_material");
+  public static final ResourceKey DATA_COMPONENT_TYPE = ResourceKey.fromString("minecraft:data_component_type");
+  public static final ResourceKey ENTITY_SUB_PREDICATE_TYPE = ResourceKey.fromString("minecraft:entity_sub_predicate_type");
+  public static final ResourceKey ITEM_SUB_PREDICATE_TYPE = ResourceKey.fromString("minecraft:item_sub_predicate_type");
+  public static final ResourceKey MAP_DECORATION_TYPE = ResourceKey.fromString("minecraft:map_decoration_type");
   //@formatter:on
 
   private RegistryKeys() {}

@@ -30,16 +30,14 @@ public record EnchantmentType(
   ResourceKey key,
   int minLevel,
   int maxLevel,
-  List<String> incompatible,
-  String category,
-  String rarity,
+  List<ResourceKey> incompatible,
+  ResourceKey supportedItems,
   boolean tradeable,
   boolean discoverable,
   boolean curse,
   boolean treasureOnly,
   List<EquipmentSlot> slots) {
-  public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY =
-    new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   // VALUES REPLACE

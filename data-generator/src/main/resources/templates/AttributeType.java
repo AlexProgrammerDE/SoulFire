@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.data;
 
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
@@ -25,8 +27,8 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record AttributeType(int id, ResourceKey key, double min, double max, double defaultValue) {
-  public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY =
-    new Object2ReferenceOpenHashMap<>();
+  public static final Int2ReferenceMap<AttributeType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -36,8 +38,13 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
     var instance =
       GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
 
+    FROM_ID.put(instance.id(), instance);
     FROM_KEY.put(instance.key(), instance);
     return instance;
+  }
+
+  public static AttributeType getById(int id) {
+    return FROM_ID.get(id);
   }
 
   public static AttributeType getByKey(ResourceKey key) {

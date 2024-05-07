@@ -55,8 +55,8 @@ public record BlockType(
     }
   };
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY =
-    new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+
   //@formatter:off
   public static final BlockType AIR = register("minecraft:air");
   public static final BlockType STONE = register("minecraft:stone");
@@ -1116,6 +1116,8 @@ public record BlockType(
   public static final BlockType DECORATED_POT = register("minecraft:decorated_pot");
   public static final BlockType CRAFTER = register("minecraft:crafter");
   public static final BlockType TRIAL_SPAWNER = register("minecraft:trial_spawner");
+  public static final BlockType VAULT = register("minecraft:vault");
+  public static final BlockType HEAVY_CORE = register("minecraft:heavy_core");
   //@formatter:on
 
   public BlockType {

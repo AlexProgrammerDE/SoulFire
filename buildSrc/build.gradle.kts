@@ -3,6 +3,12 @@ plugins {
 }
 
 repositories {
+  maven("https://maven.wagyourtail.xyz/releases") {
+    name = "WagYourReleases"
+  }
+  maven("https://maven.wagyourtail.xyz/snapshots") {
+    name = "WagYourSnapshots"
+  }
   gradlePluginPortal()
   mavenCentral()
 }
@@ -15,4 +21,5 @@ dependencies {
   implementation(libs.gradle.plugin.licenser)
   implementation(libs.gradle.plugin.lombok)
   implementation(libs.gradle.plugin.indra.git)
+  implementation(libs.gradle.plugin.unimined)
 }

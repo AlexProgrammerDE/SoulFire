@@ -31,22 +31,23 @@ import java.util.function.Function;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
+  private static final TypeAdapter<ResourceKey> RESOURCE_KEY_ADAPTER =
+    new TypeAdapter<ResourceKey>() {
+      @Override
+      public void write(JsonWriter out, ResourceKey value) throws IOException {
+        out.value(value.toString());
+      }
+
+      @Override
+      public ResourceKey read(JsonReader in) throws IOException {
+        var key = in.nextString();
+        return ResourceKey.fromString(key);
+      }
+    };
   private static final Function<Map<Class<?>, TypeAdapter<?>>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
-      .registerTypeAdapter(
-        ResourceKey.class,
-        new TypeAdapter<ResourceKey>() {
-          @Override
-          public void write(JsonWriter out, ResourceKey value) throws IOException {
-            out.value(value.toString());
-          }
-
-          @Override
-          public ResourceKey read(JsonReader in) throws IOException {
-            var key = in.nextString();
-            return ResourceKey.fromString(key);
-          }
-        });
+      .registerTypeAdapter(ResourceKey.class, RESOURCE_KEY_ADAPTER)
+      .registerTypeAdapter(JsonDataComponents.class, JsonDataComponents.SERIALIZER);
 
     for (var entry : typeAdapters.entrySet()) {
       builder.registerTypeAdapter(entry.getKey(), entry.getValue());

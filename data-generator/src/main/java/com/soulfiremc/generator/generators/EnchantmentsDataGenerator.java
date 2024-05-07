@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import lombok.SneakyThrows;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EnchantmentsDataGenerator implements IDataGenerator {
@@ -46,12 +45,11 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
       .forEach(
         other ->
           incompatible.add(
-            Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(other)).getPath()));
+            Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(other)).toString()));
 
     enchantmentDesc.add("incompatible", incompatible);
 
-    enchantmentDesc.addProperty("category", enchantment.category.name());
-    enchantmentDesc.addProperty("rarity", enchantment.getRarity().name());
+    enchantmentDesc.addProperty("supportedItems", enchantment.getSupportedItems().location().toString());
 
     if (enchantment.isTradeable()) {
       enchantmentDesc.addProperty("tradeable", true);
@@ -69,11 +67,11 @@ public class EnchantmentsDataGenerator implements IDataGenerator {
       enchantmentDesc.addProperty("treasureOnly", true);
     }
 
-    var slotsField = Enchantment.class.getDeclaredField("slots");
+    var slotsField = Enchantment.class.getDeclaredField("definition");
     slotsField.setAccessible(true);
-    var slots = (EquipmentSlot[]) slotsField.get(enchantment);
+    var definition = (Enchantment.EnchantmentDefinition) slotsField.get(enchantment);
     var slotsArray = new JsonArray();
-    Arrays.stream(slots).map(Enum::name).forEach(slotsArray::add);
+    Arrays.stream(definition.slots()).map(Enum::name).forEach(slotsArray::add);
     enchantmentDesc.add("slots", slotsArray);
 
     return enchantmentDesc;

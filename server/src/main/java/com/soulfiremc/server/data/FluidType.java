@@ -25,8 +25,7 @@ import lombok.With;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record FluidType(int id, ResourceKey key) {
-  public static final Object2ReferenceMap<ResourceKey, FluidType> FROM_KEY =
-    new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<ResourceKey, FluidType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   public static final FluidType EMPTY = register("minecraft:empty");

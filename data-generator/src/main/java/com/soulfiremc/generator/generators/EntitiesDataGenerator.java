@@ -23,6 +23,7 @@ import com.soulfiremc.generator.util.MCHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.GameType;
 
 public class EntitiesDataGenerator implements IDataGenerator {
 
@@ -34,8 +35,8 @@ public class EntitiesDataGenerator implements IDataGenerator {
 
     var dimensions = entityType.getDimensions();
 
-    entityDesc.addProperty("width", dimensions.width);
-    entityDesc.addProperty("height", dimensions.height);
+    entityDesc.addProperty("width", dimensions.width());
+    entityDesc.addProperty("height", dimensions.height());
 
     var category = entityType.getCategory();
     entityDesc.addProperty("category", category.getName());
@@ -57,7 +58,7 @@ public class EntitiesDataGenerator implements IDataGenerator {
 
   private static <T extends Entity> T createEntity(EntityType<T> entityType) {
     if (entityType == EntityType.PLAYER) {
-      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer());
+      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE));
     }
 
     return entityType.create(MCHelper.getLevel());

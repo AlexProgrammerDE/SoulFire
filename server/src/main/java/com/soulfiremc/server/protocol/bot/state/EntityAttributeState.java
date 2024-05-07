@@ -19,12 +19,13 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Data;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 
 @Data
 public class EntityAttributeState {
@@ -35,9 +36,10 @@ public class EntityAttributeState {
     return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
   }
 
-  public void putItemModifiers(ItemType type) {
-    for (var attribute : type.attributes()) {
-      getOrCreateAttribute(attribute.type())
+  public void putItemModifiers(SFItemStack itemStack) {
+    var components = itemStack.components();
+    for (var attribute : components.get(DataComponentType.ATTRIBUTE_MODIFIERS).getModifiers()) {
+      getOrCreateAttribute(AttributeType.getByKey()attribute.type())
         .modifiers()
         .putAll(
           attribute.modifiers().stream()
@@ -45,7 +47,7 @@ public class EntityAttributeState {
     }
   }
 
-  public void removeItemModifiers(ItemType type) {
+  public void removeItemModifiers(SFItemStack itemStack) {
     for (var attribute : type.attributes()) {
       for (var modifier : attribute.modifiers()) {
         getOrCreateAttribute(attribute.type()).modifiers().remove(modifier.uuid());

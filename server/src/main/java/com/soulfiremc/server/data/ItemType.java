@@ -19,17 +19,12 @@ package com.soulfiremc.server.data;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
-import java.util.List;
 
 @SuppressWarnings("unused")
 public record ItemType(
   int id,
   ResourceKey key,
-  int stackSize,
-  DepletionData depletionData,
-  FoodProperties foodProperties,
-  EquipmentSlot attributeSlot,
-  List<Attribute> attributes,
+  JsonDataComponents components,
   TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
@@ -119,6 +114,7 @@ public record ItemType(
   public static final ItemType RAW_IRON_BLOCK = register("minecraft:raw_iron_block");
   public static final ItemType RAW_COPPER_BLOCK = register("minecraft:raw_copper_block");
   public static final ItemType RAW_GOLD_BLOCK = register("minecraft:raw_gold_block");
+  public static final ItemType HEAVY_CORE = register("minecraft:heavy_core");
   public static final ItemType AMETHYST_BLOCK = register("minecraft:amethyst_block");
   public static final ItemType BUDDING_AMETHYST = register("minecraft:budding_amethyst");
   public static final ItemType IRON_BLOCK = register("minecraft:iron_block");
@@ -828,7 +824,9 @@ public record ItemType(
   public static final ItemType STRUCTURE_BLOCK = register("minecraft:structure_block");
   public static final ItemType JIGSAW = register("minecraft:jigsaw");
   public static final ItemType TURTLE_HELMET = register("minecraft:turtle_helmet");
-  public static final ItemType SCUTE = register("minecraft:scute");
+  public static final ItemType TURTLE_SCUTE = register("minecraft:turtle_scute");
+  public static final ItemType ARMADILLO_SCUTE = register("minecraft:armadillo_scute");
+  public static final ItemType WOLF_ARMOR = register("minecraft:wolf_armor");
   public static final ItemType FLINT_AND_STEEL = register("minecraft:flint_and_steel");
   public static final ItemType APPLE = register("minecraft:apple");
   public static final ItemType BOW = register("minecraft:bow");
@@ -1039,11 +1037,13 @@ public record ItemType(
   public static final ItemType CAULDRON = register("minecraft:cauldron");
   public static final ItemType ENDER_EYE = register("minecraft:ender_eye");
   public static final ItemType GLISTERING_MELON_SLICE = register("minecraft:glistering_melon_slice");
+  public static final ItemType ARMADILLO_SPAWN_EGG = register("minecraft:armadillo_spawn_egg");
   public static final ItemType ALLAY_SPAWN_EGG = register("minecraft:allay_spawn_egg");
   public static final ItemType AXOLOTL_SPAWN_EGG = register("minecraft:axolotl_spawn_egg");
   public static final ItemType BAT_SPAWN_EGG = register("minecraft:bat_spawn_egg");
   public static final ItemType BEE_SPAWN_EGG = register("minecraft:bee_spawn_egg");
   public static final ItemType BLAZE_SPAWN_EGG = register("minecraft:blaze_spawn_egg");
+  public static final ItemType BOGGED_SPAWN_EGG = register("minecraft:bogged_spawn_egg");
   public static final ItemType BREEZE_SPAWN_EGG = register("minecraft:breeze_spawn_egg");
   public static final ItemType CAT_SPAWN_EGG = register("minecraft:cat_spawn_egg");
   public static final ItemType CAMEL_SPAWN_EGG = register("minecraft:camel_spawn_egg");
@@ -1119,8 +1119,10 @@ public record ItemType(
   public static final ItemType ZOMBIFIED_PIGLIN_SPAWN_EGG = register("minecraft:zombified_piglin_spawn_egg");
   public static final ItemType EXPERIENCE_BOTTLE = register("minecraft:experience_bottle");
   public static final ItemType FIRE_CHARGE = register("minecraft:fire_charge");
+  public static final ItemType WIND_CHARGE = register("minecraft:wind_charge");
   public static final ItemType WRITABLE_BOOK = register("minecraft:writable_book");
   public static final ItemType WRITTEN_BOOK = register("minecraft:written_book");
+  public static final ItemType MACE = register("minecraft:mace");
   public static final ItemType ITEM_FRAME = register("minecraft:item_frame");
   public static final ItemType GLOW_ITEM_FRAME = register("minecraft:glow_item_frame");
   public static final ItemType FLOWER_POT = register("minecraft:flower_pot");
@@ -1225,6 +1227,8 @@ public record ItemType(
   public static final ItemType MOJANG_BANNER_PATTERN = register("minecraft:mojang_banner_pattern");
   public static final ItemType GLOBE_BANNER_PATTERN = register("minecraft:globe_banner_pattern");
   public static final ItemType PIGLIN_BANNER_PATTERN = register("minecraft:piglin_banner_pattern");
+  public static final ItemType FLOW_BANNER_PATTERN = register("minecraft:flow_banner_pattern");
+  public static final ItemType GUSTER_BANNER_PATTERN = register("minecraft:guster_banner_pattern");
   public static final ItemType GOAT_HORN = register("minecraft:goat_horn");
   public static final ItemType COMPOSTER = register("minecraft:composter");
   public static final ItemType BARREL = register("minecraft:barrel");
@@ -1308,6 +1312,8 @@ public record ItemType(
   public static final ItemType SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:silence_armor_trim_smithing_template");
   public static final ItemType RAISER_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:raiser_armor_trim_smithing_template");
   public static final ItemType HOST_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:host_armor_trim_smithing_template");
+  public static final ItemType FLOW_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:flow_armor_trim_smithing_template");
+  public static final ItemType BOLT_ARMOR_TRIM_SMITHING_TEMPLATE = register("minecraft:bolt_armor_trim_smithing_template");
   public static final ItemType ANGLER_POTTERY_SHERD = register("minecraft:angler_pottery_sherd");
   public static final ItemType ARCHER_POTTERY_SHERD = register("minecraft:archer_pottery_sherd");
   public static final ItemType ARMS_UP_POTTERY_SHERD = register("minecraft:arms_up_pottery_sherd");
@@ -1316,7 +1322,9 @@ public record ItemType(
   public static final ItemType BURN_POTTERY_SHERD = register("minecraft:burn_pottery_sherd");
   public static final ItemType DANGER_POTTERY_SHERD = register("minecraft:danger_pottery_sherd");
   public static final ItemType EXPLORER_POTTERY_SHERD = register("minecraft:explorer_pottery_sherd");
+  public static final ItemType FLOW_POTTERY_SHERD = register("minecraft:flow_pottery_sherd");
   public static final ItemType FRIEND_POTTERY_SHERD = register("minecraft:friend_pottery_sherd");
+  public static final ItemType GUSTER_POTTERY_SHERD = register("minecraft:guster_pottery_sherd");
   public static final ItemType HEART_POTTERY_SHERD = register("minecraft:heart_pottery_sherd");
   public static final ItemType HEARTBREAK_POTTERY_SHERD = register("minecraft:heartbreak_pottery_sherd");
   public static final ItemType HOWL_POTTERY_SHERD = register("minecraft:howl_pottery_sherd");
@@ -1324,6 +1332,7 @@ public record ItemType(
   public static final ItemType MOURNER_POTTERY_SHERD = register("minecraft:mourner_pottery_sherd");
   public static final ItemType PLENTY_POTTERY_SHERD = register("minecraft:plenty_pottery_sherd");
   public static final ItemType PRIZE_POTTERY_SHERD = register("minecraft:prize_pottery_sherd");
+  public static final ItemType SCRAPE_POTTERY_SHERD = register("minecraft:scrape_pottery_sherd");
   public static final ItemType SHEAF_POTTERY_SHERD = register("minecraft:sheaf_pottery_sherd");
   public static final ItemType SHELTER_POTTERY_SHERD = register("minecraft:shelter_pottery_sherd");
   public static final ItemType SKULL_POTTERY_SHERD = register("minecraft:skull_pottery_sherd");
@@ -1346,6 +1355,10 @@ public record ItemType(
   public static final ItemType WAXED_OXIDIZED_COPPER_BULB = register("minecraft:waxed_oxidized_copper_bulb");
   public static final ItemType TRIAL_SPAWNER = register("minecraft:trial_spawner");
   public static final ItemType TRIAL_KEY = register("minecraft:trial_key");
+  public static final ItemType OMINOUS_TRIAL_KEY = register("minecraft:ominous_trial_key");
+  public static final ItemType VAULT = register("minecraft:vault");
+  public static final ItemType OMINOUS_BOTTLE = register("minecraft:ominous_bottle");
+  public static final ItemType BREEZE_ROD = register("minecraft:breeze_rod");
   //@formatter:on
 
   public static ItemType register(String key) {
@@ -1375,14 +1388,4 @@ public record ItemType(
   public int hashCode() {
     return id;
   }
-
-  public record DepletionData(List<String> repairWith, int maxDamage) {}
-
-  public record FoodProperties(
-    int nutrition,
-    float saturationModifier,
-    boolean fastFood,
-    boolean isMeat,
-    boolean canAlwaysEat,
-    boolean possiblyHarmful) {}
 }
