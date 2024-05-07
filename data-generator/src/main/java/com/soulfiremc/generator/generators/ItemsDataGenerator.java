@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.soulfiremc.generator.util.MCHelper;
+import java.util.Map;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
@@ -38,9 +39,13 @@ public class ItemsDataGenerator implements IDataGenerator {
       itemDesc.addProperty("tierType", ((Tiers) tieredItem.getTier()).name());
     }
 
-    itemDesc.add("components", DataComponentMap.CODEC.encodeStart(
+    var sortedComponentObj = new JsonObject();
+    DataComponentMap.CODEC.encodeStart(
       MCHelper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE),
-      item.components()).result().orElseThrow());
+      item.components()).result().orElseThrow().getAsJsonObject()
+      .entrySet().stream().sorted(Map.Entry.comparingByKey())
+      .forEach(e -> sortedComponentObj.add(e.getKey(), e.getValue()));
+    itemDesc.add("components", sortedComponentObj);
 
     return itemDesc;
   }
