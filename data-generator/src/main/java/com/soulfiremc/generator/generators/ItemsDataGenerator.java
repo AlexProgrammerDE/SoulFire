@@ -22,9 +22,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.soulfiremc.generator.util.MCHelper;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
@@ -40,9 +38,8 @@ public class ItemsDataGenerator implements IDataGenerator {
       itemDesc.addProperty("tierType", ((Tiers) tieredItem.getTier()).name());
     }
 
-    DataComponents
     itemDesc.add("components", DataComponentMap.CODEC.encodeStart(
-      RegistryOps.create(JsonOps.INSTANCE, MCHelper.getLevel().registryAccess()),
+      MCHelper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE),
       item.components()).result().orElseThrow());
 
     return itemDesc;
