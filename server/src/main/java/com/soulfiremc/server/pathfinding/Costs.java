@@ -159,7 +159,7 @@ public class Costs {
       var efficiency = itemStack.getEnchantmentLevel(EnchantmentType.EFFICIENCY);
       if (efficiency > 0) {
         // Efficiency is capped at 255
-        efficiency = MathHelper.shortClamp(efficiency, (short) 0, (short) 255);
+        efficiency = MathHelper.shortClamp((short) efficiency, (short) 0, (short) 255);
         speedMultiplier += (float) (efficiency * efficiency + 1);
       }
     }

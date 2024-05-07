@@ -1056,3 +1056,5 @@ minecraft:reinforced_deepslate|1
 minecraft:decorated_pot|116
 minecraft:crafter|1
 minecraft:trial_spawner|1
+minecraft:vault|1
+minecraft:heavy_core|161

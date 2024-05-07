@@ -54,7 +54,7 @@ public class AutoEat implements InternalPlugin {
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && ItemTypeHelper.isGoodEdibleFood(slot.item().type()));
+          slot -> slot.item() != null && ItemTypeHelper.isGoodEdibleFood(slot.item()));
         if (edibleSlot.isEmpty()) {
           return;
         }

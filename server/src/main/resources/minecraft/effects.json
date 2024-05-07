@@ -1,0 +1,219 @@
+[
+  {
+    "id": 0,
+    "key": "minecraft:speed",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 1,
+    "key": "minecraft:slowness",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 2,
+    "key": "minecraft:haste",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 3,
+    "key": "minecraft:mining_fatigue",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 4,
+    "key": "minecraft:strength",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 5,
+    "key": "minecraft:instant_health",
+    "category": "BENEFICIAL",
+    "beneficial": true,
+    "instantenous": true
+  },
+  {
+    "id": 6,
+    "key": "minecraft:instant_damage",
+    "category": "HARMFUL",
+    "instantenous": true
+  },
+  {
+    "id": 7,
+    "key": "minecraft:jump_boost",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 8,
+    "key": "minecraft:nausea",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 9,
+    "key": "minecraft:regeneration",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 10,
+    "key": "minecraft:resistance",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 11,
+    "key": "minecraft:fire_resistance",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 12,
+    "key": "minecraft:water_breathing",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 13,
+    "key": "minecraft:invisibility",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 14,
+    "key": "minecraft:blindness",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 15,
+    "key": "minecraft:night_vision",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 16,
+    "key": "minecraft:hunger",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 17,
+    "key": "minecraft:weakness",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 18,
+    "key": "minecraft:poison",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 19,
+    "key": "minecraft:wither",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 20,
+    "key": "minecraft:health_boost",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 21,
+    "key": "minecraft:absorption",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 22,
+    "key": "minecraft:saturation",
+    "category": "BENEFICIAL",
+    "beneficial": true,
+    "instantenous": true
+  },
+  {
+    "id": 23,
+    "key": "minecraft:glowing",
+    "category": "NEUTRAL"
+  },
+  {
+    "id": 24,
+    "key": "minecraft:levitation",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 25,
+    "key": "minecraft:luck",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 26,
+    "key": "minecraft:unluck",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 27,
+    "key": "minecraft:slow_falling",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 28,
+    "key": "minecraft:conduit_power",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 29,
+    "key": "minecraft:dolphins_grace",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 30,
+    "key": "minecraft:bad_omen",
+    "category": "NEUTRAL"
+  },
+  {
+    "id": 31,
+    "key": "minecraft:hero_of_the_village",
+    "category": "BENEFICIAL",
+    "beneficial": true
+  },
+  {
+    "id": 32,
+    "key": "minecraft:darkness",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 33,
+    "key": "minecraft:trial_omen",
+    "category": "NEUTRAL"
+  },
+  {
+    "id": 34,
+    "key": "minecraft:raid_omen",
+    "category": "NEUTRAL"
+  },
+  {
+    "id": 35,
+    "key": "minecraft:wind_charged",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 36,
+    "key": "minecraft:weaving",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 37,
+    "key": "minecraft:oozing",
+    "category": "HARMFUL"
+  },
+  {
+    "id": 38,
+    "key": "minecraft:infested",
+    "category": "HARMFUL"
+  }
+]

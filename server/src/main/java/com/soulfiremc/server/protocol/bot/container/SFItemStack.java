@@ -77,12 +77,18 @@ public class SFItemStack extends ItemStack {
     return new SFItemStack(itemType, 1);
   }
 
-  public static SFItemStack forTypeStack(ItemType itemType) {
-    return new SFItemStack(itemType, itemType.stackSize());
-  }
+  public int getEnchantmentLevel(EnchantmentType enchantment) {
+    return components().getOptional(DataComponentType.ENCHANTMENTS)
+        .map(enchantments -> {
+          for (var itemEnchantment : enchantments.getEnchantments().entrySet()) {
+            if (itemEnchantment.getKey() == enchantment.id()) {
+              return itemEnchantment.getValue();
+            }
+          }
 
-  public short getEnchantmentLevel(EnchantmentType enchantment) {
-    return this.enchantments.getShort(enchantment.key());
+          return 0;
+        })
+        .orElse(0);
   }
 
   public SFItemStack withAmount(int amount) {

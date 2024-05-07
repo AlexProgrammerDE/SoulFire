@@ -33,6 +33,8 @@ public class EffectsDataGenerator implements IDataGenerator {
       "key",
       Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(effect)).toString());
 
+    effectDesc.addProperty("category", effect.getCategory().name());
+
     if (effect.isBeneficial()) {
       effectDesc.addProperty("beneficial", true);
     }
