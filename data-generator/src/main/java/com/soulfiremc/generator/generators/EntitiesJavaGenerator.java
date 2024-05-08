@@ -25,7 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class EntitiesJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "EntityType.java";
+    return "java/EntityType.java";
   }
 
   @Override

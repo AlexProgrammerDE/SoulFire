@@ -19,7 +19,6 @@ package com.soulfiremc.data;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
-import java.util.List;
 
 @SuppressWarnings("unused")
 public record ItemType(

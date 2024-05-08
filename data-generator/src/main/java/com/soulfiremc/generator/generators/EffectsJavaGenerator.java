@@ -26,7 +26,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class EffectsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "EffectType.java";
+    return "java/EffectType.java";
   }
 
   @Override

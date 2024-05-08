@@ -26,7 +26,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class AttributesJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "AttributeType.java";
+    return "java/AttributeType.java";
   }
 
   @Override

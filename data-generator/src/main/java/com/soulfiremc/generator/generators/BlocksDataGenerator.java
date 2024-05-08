@@ -131,7 +131,7 @@ public class BlocksDataGenerator implements IDataGenerator {
 
   @Override
   public String getDataName() {
-    return "blocks.json";
+    return "data/blocks.json";
   }
 
   @Override

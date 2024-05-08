@@ -98,41 +98,49 @@ public class DataGenerators {
       try {
         var outputFileName = dataGenerator.getDataName();
         var outputFilePath = outputDirectory.resolve(outputFileName);
+        var outputFolder = outputFilePath.getParent();
+        Files.createDirectories(outputFolder);
+
         var outputElement = dataGenerator.generateDataJson();
 
-        if (outputElement instanceof JsonElement jsonElement) {
-          try (var writer =
-                 Files.newBufferedWriter(
-                   outputFilePath,
-                   StandardOpenOption.CREATE,
-                   StandardOpenOption.TRUNCATE_EXISTING)) {
-            var jsonWriter = new JsonWriter(writer);
-            jsonWriter.setIndent("  ");
-            Streams.write(jsonElement, jsonWriter);
+        switch (outputElement) {
+          case JsonElement jsonElement -> {
+            try (var writer =
+                   Files.newBufferedWriter(
+                     outputFilePath,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.TRUNCATE_EXISTING)) {
+              var jsonWriter = new JsonWriter(writer);
+              jsonWriter.setIndent("  ");
+              Streams.write(jsonElement, jsonWriter);
+            }
           }
-        } else if (outputElement instanceof String string) {
-          try (var writer =
-                 Files.newBufferedWriter(
-                   outputFilePath,
-                   StandardOpenOption.CREATE,
-                   StandardOpenOption.TRUNCATE_EXISTING)) {
-            writer.write(string);
+          case String string -> {
+            try (var writer =
+                   Files.newBufferedWriter(
+                     outputFilePath,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.TRUNCATE_EXISTING)) {
+              writer.write(string);
+            }
           }
-        } else if (outputElement instanceof byte[] bytes) {
-          try (var outputStream =
-                 Files.newOutputStream(
-                   outputFilePath,
-                   StandardOpenOption.CREATE,
-                   StandardOpenOption.TRUNCATE_EXISTING)) {
-            outputStream.write(bytes);
+          case byte[] bytes -> {
+            try (var outputStream =
+                   Files.newOutputStream(
+                     outputFilePath,
+                     StandardOpenOption.CREATE,
+                     StandardOpenOption.TRUNCATE_EXISTING)) {
+              outputStream.write(bytes);
+            }
           }
-        } else {
-          log.error("Unknown output type for data generator {}", dataGenerator.getDataName());
-          generatorsFailed++;
-          continue;
+          default -> {
+            log.error("Unknown output type for data generator {}", dataGenerator.getDataName());
+            generatorsFailed++;
+            continue;
+          }
         }
 
-        log.info("Generator: {} -> {}", dataGenerator.getDataName(), outputFileName);
+        log.info("Generator: {} -> {}", dataGenerator.getClass().getSimpleName(), outputFileName);
       } catch (Throwable exception) {
         log.error("Failed to run data generator {}", dataGenerator.getDataName(), exception);
         generatorsFailed++;

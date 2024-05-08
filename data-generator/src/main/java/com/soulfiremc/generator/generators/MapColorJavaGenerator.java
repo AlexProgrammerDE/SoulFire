@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.MapColor;
 public class MapColorJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "MapColor.java";
+    return "java/MapColor.java";
   }
 
   @SneakyThrows

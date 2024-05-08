@@ -43,7 +43,7 @@ public class WorldExporterGenerator implements IDataGenerator {
 
   @Override
   public String getDataName() {
-    return "world_data.json.zip";
+    return "jmh/world_data.json.zip";
   }
 
   @Override

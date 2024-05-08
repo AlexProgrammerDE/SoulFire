@@ -22,7 +22,7 @@ import com.soulfiremc.generator.util.ResourceHelper;
 public class LanguageDataGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "en_us.json";
+    return "data/en_us.json";
   }
 
   @Override

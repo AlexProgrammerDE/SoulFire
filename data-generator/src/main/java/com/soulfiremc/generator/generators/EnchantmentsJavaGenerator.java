@@ -26,7 +26,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class EnchantmentsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "EnchantmentType.java";
+    return "java/EnchantmentType.java";
   }
 
   @Override

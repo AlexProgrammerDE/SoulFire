@@ -34,7 +34,7 @@ public class FluidsDataGenerator implements IDataGenerator {
 
   @Override
   public String getDataName() {
-    return "fluids.json";
+    return "data/fluids.json";
   }
 
   @Override

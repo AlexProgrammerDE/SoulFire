@@ -25,7 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class FluidsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "FluidType.java";
+    return "java/FluidType.java";
   }
 
   @Override

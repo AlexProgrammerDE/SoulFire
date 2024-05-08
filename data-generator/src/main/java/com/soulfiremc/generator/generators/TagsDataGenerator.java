@@ -50,7 +50,7 @@ public class TagsDataGenerator {
   public static class BlockTagsDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "BlockTags.java";
+      return "java/BlockTags.java";
     }
 
     @Override
@@ -75,7 +75,7 @@ public class TagsDataGenerator {
   public static class ItemTagsDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "ItemTags.java";
+      return "java/ItemTags.java";
     }
 
     @Override
@@ -100,7 +100,7 @@ public class TagsDataGenerator {
   public static class EntityTypeTagsDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "EntityTypeTags.java";
+      return "java/EntityTypeTags.java";
     }
 
     @Override
@@ -125,7 +125,7 @@ public class TagsDataGenerator {
   public static class FluidTagsDataGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "FluidTags.java";
+      return "java/FluidTags.java";
     }
 
     @Override

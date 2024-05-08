@@ -52,7 +52,7 @@ public class ItemsDataGenerator implements IDataGenerator {
 
   @Override
   public String getDataName() {
-    return "items.json";
+    return "data/items.json";
   }
 
   @Override

@@ -163,7 +163,7 @@ public class BlockCollisionShapesDataGenerator {
   public static final class BlockShapesGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "blockshapes.txt";
+      return "data/blockshapes.txt";
     }
 
     @Override
@@ -175,7 +175,7 @@ public class BlockCollisionShapesDataGenerator {
   public static final class BlockStatesGenerator implements IDataGenerator {
     @Override
     public String getDataName() {
-      return "blockstates.txt";
+      return "data/blockstates.txt";
     }
 
     @Override

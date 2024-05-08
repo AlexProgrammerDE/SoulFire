@@ -27,7 +27,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class RegistryKeysDataGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "RegistryKeys.java";
+    return "java/RegistryKeys.java";
   }
 
   @Override

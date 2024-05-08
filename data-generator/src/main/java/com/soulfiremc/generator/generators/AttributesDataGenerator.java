@@ -44,7 +44,7 @@ public class AttributesDataGenerator implements IDataGenerator {
 
   @Override
   public String getDataName() {
-    return "attributes.json";
+    return "data/attributes.json";
   }
 
   @Override

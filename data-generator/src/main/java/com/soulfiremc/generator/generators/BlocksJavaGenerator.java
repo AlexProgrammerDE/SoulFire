@@ -25,7 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 public class BlocksJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "BlockType.java";
+    return "java/BlockType.java";
   }
 
   @Override

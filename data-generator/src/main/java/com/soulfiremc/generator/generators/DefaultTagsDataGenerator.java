@@ -37,7 +37,7 @@ import net.minecraft.tags.TagNetworkSerialization;
 public class DefaultTagsDataGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "default_tags.json.zip";
+    return "data/default_tags.json.zip";
   }
 
   @SuppressWarnings("unchecked")
