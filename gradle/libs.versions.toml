@@ -13,7 +13,7 @@ via-bedrock = "0.0.6-SNAPSHOT"
 flatlaf = "3.4.1"
 flatlaf-inter-version = "4.0"
 flatlaf-jetbrains-mono-version = "2.304"
-kyori = "4.16.0"
+kyori = "4.17.0"
 reactor = "1.1.18"
 armeria = "1.28.4"
 
