@@ -23,6 +23,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.util.GsonInstance;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
@@ -50,7 +51,7 @@ public record JsonDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> 
           }
           case "minecraft:rarity" -> {
             var rarity = value.getAsString();
-            map.put(DataComponentType.RARITY, new IntDataComponent(DataComponentType.RARITY, Rarity.valueOf(rarity).ordinal()));
+            map.put(DataComponentType.RARITY, new IntDataComponent(DataComponentType.RARITY, Rarity.valueOf(rarity.toUpperCase(Locale.ROOT)).ordinal()));
           }
           case "minecraft:attribute_modifiers" -> {
 
