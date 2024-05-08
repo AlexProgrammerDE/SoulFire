@@ -24,9 +24,12 @@ import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.util.GsonInstance;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.type.IntDataComponent;
 
+@Slf4j
 public record JsonDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> components) {
   public static final TypeAdapter<JsonDataComponents> SERIALIZER = new TypeAdapter<>() {
     @Override
@@ -39,7 +42,26 @@ public record JsonDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> 
       var parsedJson = GsonInstance.GSON.<JsonObject>fromJson(in, JsonObject.class);
       var map = new HashMap<DataComponentType<?>, DataComponent<?, ?>>();
       for (var entry : parsedJson.entrySet()) {
-        System.out.println(entry.getKey());
+        var value = entry.getValue();
+        switch (entry.getKey()) {
+          case "minecraft:max_stack_size" -> {
+            var maxStackSize = value.getAsInt();
+            map.put(DataComponentType.MAX_STACK_SIZE, new IntDataComponent(DataComponentType.MAX_STACK_SIZE, maxStackSize));
+          }
+          case "minecraft:rarity" -> {
+            var rarity = value.getAsString();
+            map.put(DataComponentType.RARITY, new IntDataComponent(DataComponentType.RARITY, Rarity.valueOf(rarity).ordinal()));
+          }
+          case "minecraft:attribute_modifiers" -> {
+
+          }
+          case "minecraft:tool" -> {
+
+          }
+          case "minecraft:food" -> {
+          }
+          default -> log.trace("Unknown DataComponentType: {}", entry.getKey());
+        }
       }
 
       return new JsonDataComponents(map);

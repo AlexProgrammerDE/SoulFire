@@ -21,6 +21,7 @@ import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Objects;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -40,7 +41,9 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundPongPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
@@ -141,6 +144,8 @@ public class SFBaseListener extends SessionAdapter {
     } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
       if (packet instanceof ClientboundFinishConfigurationPacket) {
         session.send(new ServerboundFinishConfigurationPacket());
+      } else if (packet instanceof ClientboundSelectKnownPacks) {
+        session.send(new ServerboundSelectKnownPacks(new ArrayList<>()));
       }
     }
   }
