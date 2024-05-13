@@ -35,7 +35,24 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
-  private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
+  private static final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
+
+  public static void broadcastMessage(String message) {
+    for (var sender : subscribers.values()) {
+      sender.sendMessage(message);
+    }
+  }
+
+  public static void sendMessage(UUID uuid, String message) {
+    var sender = subscribers.get(uuid);
+    if (sender != null) {
+      sender.sendMessage(message);
+    }
+  }
+
+  static {
+    SFLogAppender.INSTANCE.logConsumers().add(LogServiceImpl::broadcastMessage);
+  }
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
@@ -46,7 +63,6 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       subscribers.put(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(), sender);
 
       sendPreviousLogs(request.getPrevious(), sender);
-      SFLogAppender.INSTANCE.logConsumers().add(sender::sendMessage);
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));

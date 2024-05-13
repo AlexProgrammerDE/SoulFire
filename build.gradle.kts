@@ -7,7 +7,6 @@ allprojects {
   version = property("maven_version")!!
   description = "Advanced Minecraft Server-Stresser Tool."
 
-
   repositories {
     maven("https://repo.opencollab.dev/maven-releases") {
       name = "OpenCollab Releases"

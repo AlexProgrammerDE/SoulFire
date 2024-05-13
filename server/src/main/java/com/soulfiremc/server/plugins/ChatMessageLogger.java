@@ -39,7 +39,7 @@ import org.fusesource.jansi.AnsiConsole;
 
 @Slf4j
 public class ChatMessageLogger implements InternalPlugin {
-  private static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
+  public static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
     ANSIComponentSerializer.builder()
       .flattener(SoulFireServer.FLATTENER)
       .colorLevel(

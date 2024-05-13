@@ -47,6 +47,9 @@ dependencies {
     exclude("org.slf4j", "slf4j-api")
   }
 
+  // For profiling
+  api(libs.spark)
+
   testImplementation(libs.junit)
 }
 

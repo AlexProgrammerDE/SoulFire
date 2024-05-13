@@ -17,12 +17,25 @@
  */
 package com.soulfiremc.brigadier;
 
+import org.fusesource.jansi.Ansi;
+import org.slf4j.helpers.MessageFormatter;
+
 public interface CommandSource {
-  void sendInfo(String message, Object... args);
+  default void sendInfo(String message, Object... args) {
+    sendMessage(format(message, args, null));
+  }
 
-  void sendWarn(String message, Object... args);
+  default void sendWarn(String message, Object... args) {
+    sendMessage(Ansi.ansi().fgYellow() + format(message, args, null));
+  }
 
-  void sendError(String message, Object... args);
+  default void sendError(String message, Throwable t) {
+    sendMessage(Ansi.ansi().fgRed() + format(message, new Object[0], t));
+  }
 
-  void sendError(String message, Throwable t);
+  void sendMessage(String message);
+
+  static String format(String format, Object[] params, Throwable t) {
+    return MessageFormatter.arrayFormat(format, params, t).getMessage();
+  }
 }

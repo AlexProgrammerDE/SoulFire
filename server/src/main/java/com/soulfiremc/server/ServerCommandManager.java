@@ -55,6 +55,8 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.spark.SFSparkCommandSender;
+import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -78,13 +80,11 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
-@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
@@ -472,6 +472,27 @@ public class ServerCommandManager implements PlatformCommandManager {
                   return Command.SINGLE_SUCCESS;
                 }))));
 
+    // Spark
+    dispatcher.register(
+      literal("spark")
+        .then(argument("command", StringArgumentType.greedyString())
+          .executes(
+            help(
+              "Runs a spark subcommand",
+              c -> {
+                var command = StringArgumentType.getString(c, "command");
+                SFSparkPlugin.INSTANCE.platform()
+                  .executeCommand(new SFSparkCommandSender(c.getSource()), command.split(ARGUMENT_SEPARATOR));
+                return Command.SINGLE_SUCCESS;
+              })))
+        .executes(
+          help(
+            "Get spark help",
+            c -> {
+              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[]{});
+              return Command.SINGLE_SUCCESS;
+            })));
+
     // Utility commands
     dispatcher.register(
       literal("online")
@@ -851,7 +872,7 @@ public class ServerCommandManager implements PlatformCommandManager {
 
       return result;
     } catch (CommandSyntaxException e) {
-      log.warn(e.getMessage());
+      source.sendWarn(e.getMessage());
       return Command.SINGLE_SUCCESS;
     } finally {
       COMMAND_CONTEXT.get().clear();

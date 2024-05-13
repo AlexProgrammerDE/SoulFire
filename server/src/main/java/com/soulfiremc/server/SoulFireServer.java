@@ -52,6 +52,7 @@ import com.soulfiremc.server.settings.DevSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.viaversion.SFViaLoader;
@@ -108,6 +109,7 @@ public class SoulFireServer {
 
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
+  @Getter
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Int2ObjectMap<AttackManager> attacks =
@@ -196,6 +198,12 @@ public class SoulFireServer {
 
           manager.onServerLoaded();
         });
+    var sparkStart =
+      CompletableFuture.runAsync(
+        () -> {
+          var sparkPlugin = new SFSparkPlugin(configDirectory.resolve("spark"), this);
+          sparkPlugin.init();
+        });
 
     var newVersion = new AtomicReference<String>();
     var updateCheck =
@@ -205,7 +213,7 @@ public class SoulFireServer {
           newVersion.set(SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null));
         });
 
-    CompletableFuture.allOf(rpcServerStart, viaStart, updateCheck).join();
+    CompletableFuture.allOf(rpcServerStart, viaStart, sparkStart, updateCheck).join();
 
     if (newVersion.get() != null) {
       log.warn(

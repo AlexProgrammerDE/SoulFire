@@ -28,10 +28,16 @@ import net.kyori.adventure.util.TriState;
 public class DefaultAuthSystem implements AuthSystem {
   @Override
   public AuthenticatedUser authenticate(String subject, Date issuedAt) {
+    var uuid = UUID.nameUUIDFromBytes("RemoteUser:%s".formatted(subject).getBytes(StandardCharsets.UTF_8));
     return new AuthenticatedUser() {
       @Override
+      public void sendMessage(String message) {
+        LogServiceImpl.sendMessage(uuid, message);
+      }
+
+      @Override
       public UUID getUniqueId() {
-        return UUID.nameUUIDFromBytes("RemoteUser:%s".formatted(subject).getBytes(StandardCharsets.UTF_8));
+        return uuid;
       }
 
       @Override

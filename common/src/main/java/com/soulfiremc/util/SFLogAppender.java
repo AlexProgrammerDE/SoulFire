@@ -34,10 +34,11 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
+@Getter
 public class SFLogAppender extends AbstractAppender {
   public static final SFLogAppender INSTANCE = new SFLogAppender();
 
-  private final AbstractStringLayout.Serializer formatter =
+  private static final AbstractStringLayout.Serializer formatter =
     new PatternLayout.SerializerBuilder()
       .setAlwaysWriteExceptions(true)
       .setDisableAnsi(false)
@@ -45,7 +46,7 @@ public class SFLogAppender extends AbstractAppender {
       .setDefaultPattern(
         "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
       .build();
-  private final AbstractStringLayout.Serializer builtInFormatter =
+  private static final AbstractStringLayout.Serializer builtInFormatter =
     new PatternLayout.SerializerBuilder()
       .setAlwaysWriteExceptions(true)
       .setDisableAnsi(false)
@@ -53,9 +54,7 @@ public class SFLogAppender extends AbstractAppender {
       .setDefaultPattern(
         "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
       .build();
-  @Getter
   private final List<Consumer<String>> logConsumers = new CopyOnWriteArrayList<>();
-  @Getter
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
   private SFLogAppender() {

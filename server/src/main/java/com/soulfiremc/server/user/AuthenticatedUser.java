@@ -17,12 +17,13 @@
  */
 package com.soulfiremc.server.user;
 
+import com.soulfiremc.brigadier.CommandSource;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.UUID;
 import net.kyori.adventure.util.TriState;
 
-public interface AuthenticatedUser {
+public interface AuthenticatedUser extends CommandSource {
   UUID getUniqueId();
 
   String getUsername();

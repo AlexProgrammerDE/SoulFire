@@ -35,12 +35,12 @@ public class LocalConsole implements CommandSource {
   }
 
   @Override
-  public void sendError(String message, Object... args) {
-    log.error(message, args);
+  public void sendError(String message, Throwable t) {
+    log.error(message, t);
   }
 
   @Override
-  public void sendError(String message, Throwable t) {
-    log.error(message, t);
+  public void sendMessage(String message) {
+    log.info(message);
   }
 }

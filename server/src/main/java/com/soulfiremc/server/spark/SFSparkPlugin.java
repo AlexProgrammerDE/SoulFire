@@ -1,0 +1,73 @@
+package com.soulfiremc.server.spark;
+
+import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.SoulFireServer;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.lucko.spark.common.SparkPlatform;
+import me.lucko.spark.common.SparkPlugin;
+import me.lucko.spark.common.platform.PlatformInfo;
+
+@Slf4j
+@RequiredArgsConstructor
+public class SFSparkPlugin implements SparkPlugin {
+  private final Path sparkDirectory;
+  private final SoulFireServer server;
+  public static SFSparkPlugin INSTANCE;
+  @Getter
+  private SparkPlatform platform;
+
+  public void init() {
+    platform = new SparkPlatform(this);
+    platform.enable();
+
+    INSTANCE = this;
+  }
+
+  @Override
+  public String getVersion() {
+    return BuildData.VERSION;
+  }
+
+  @Override
+  public Path getPluginDirectory() {
+    return sparkDirectory;
+  }
+
+  @Override
+  public String getCommandName() {
+    return "spark";
+  }
+
+  @Override
+  public Stream<SFSparkCommandSender> getCommandSenders() {
+    return Stream.of();
+  }
+
+  @Override
+  public void executeAsync(final Runnable task) {
+    server.threadPool().submit(task);
+  }
+
+  @Override
+  public void log(final Level level, final String msg) {
+    if (level == Level.INFO) {
+      log.info(msg);
+    } else if (level == Level.WARNING) {
+      log.warn(msg);
+    } else if (level == Level.SEVERE) {
+      log.error(msg);
+    } else {
+      throw new IllegalArgumentException(level.getName());
+    }
+  }
+
+  @Override
+  public PlatformInfo getPlatformInfo() {
+    return new SFSparkPlatformInfo();
+  }
+}
