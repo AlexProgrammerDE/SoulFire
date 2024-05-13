@@ -50,7 +50,7 @@ flatlaf-extras = { module = "com.formdev:flatlaf-extras", version.ref = "flatlaf
 flatlaf-intellij-themes = { module = "com.formdev:flatlaf-intellij-themes", version.ref = "flatlaf" }
 flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version.ref = "flatlaf-inter-version" }
 flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version.ref = "flatlaf-jetbrains-mono-version" }
-xchart = "org.knowm.xchart:xchart:3.8.7"
+xchart = "org.knowm.xchart:xchart:3.8.8"
 miglayout-swing = "com.miglayout:miglayout-swing:11.3"
 mcprotocollib = "com.github.GeyserMC:MCProtocolLib:42ea4a4"
 velocity-native = "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
