@@ -26,6 +26,7 @@ task("runSFClient", JavaExec::class) {
 
   jvmArgs = listOf(
     "-Xmx2G",
+    "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseG1GC",
     "-XX:G1NewSizePercent=20",
@@ -46,6 +47,7 @@ task("runSFClientLocal", JavaExec::class) {
 
   jvmArgs = listOf(
     "-Xmx2G",
+    "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseG1GC",
     "-XX:G1NewSizePercent=20",

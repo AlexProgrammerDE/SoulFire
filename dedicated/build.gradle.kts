@@ -26,6 +26,7 @@ task("runSFDedicated", JavaExec::class) {
 
   jvmArgs = listOf(
     "-Xmx2G",
+    "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseG1GC",
     "-XX:G1NewSizePercent=20",
