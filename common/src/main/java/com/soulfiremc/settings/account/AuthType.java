@@ -20,6 +20,7 @@ package com.soulfiremc.settings.account;
 import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.account.service.OfflineJavaData;
+import com.soulfiremc.settings.account.service.OnlineChainJavaData;
 import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-  MICROSOFT_JAVA("Microsoft Java", OnlineSimpleJavaData.class),
+  MICROSOFT_JAVA("Microsoft Java", OnlineChainJavaData.class),
   MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class),
   THE_ALTENING("The Altening", OnlineSimpleJavaData.class),
   EASY_MC("EasyMC", OnlineSimpleJavaData.class),
