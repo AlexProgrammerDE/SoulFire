@@ -31,10 +31,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
+import net.lenni0451.reflect.Fields;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -109,7 +113,11 @@ public abstract class SoulFireAbstractBootstrap {
     }
   }
 
+  @SneakyThrows
   protected void internalBootstrap(String[] args, List<ClassLoader> classLoaders) {
+    // Ensure the ForkJoinPool uses our custom thread factory
+    Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), new CustomThreadFactory());
+
     SFLogAppender.INSTANCE.start();
 
     AnsiConsole.systemInstall();
@@ -161,4 +169,19 @@ public abstract class SoulFireAbstractBootstrap {
   protected abstract void postMixinMain(String[] args);
 
   protected abstract Path getBaseDirectory();
+
+  private static class CustomThreadFactory implements ForkJoinPool.ForkJoinWorkerThreadFactory {
+    @Override
+    public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+      var thread = new CustomForkJoinWorkerThread(pool);
+      thread.setContextClassLoader(Thread.currentThread().getContextClassLoader());
+      return thread;
+    }
+  }
+
+  private static class CustomForkJoinWorkerThread extends ForkJoinWorkerThread {
+    protected CustomForkJoinWorkerThread(ForkJoinPool pool) {
+      super(pool);
+    }
+  }
 }
