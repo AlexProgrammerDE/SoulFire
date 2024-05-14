@@ -115,8 +115,10 @@ public abstract class SoulFireAbstractBootstrap {
 
   @SneakyThrows
   protected void internalBootstrap(String[] args, List<ClassLoader> classLoaders) {
+    var forkJoinPoolFactory = new CustomThreadFactory();
     // Ensure the ForkJoinPool uses our custom thread factory
-    Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), new CustomThreadFactory());
+    Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), forkJoinPoolFactory);
+    Fields.set(null, ForkJoinPool.class.getDeclaredField("defaultForkJoinWorkerThreadFactory"), forkJoinPoolFactory);
 
     SFLogAppender.INSTANCE.start();
 
