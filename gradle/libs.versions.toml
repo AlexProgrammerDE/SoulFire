@@ -14,7 +14,7 @@ flatlaf = "3.4.1"
 flatlaf-inter-version = "4.0"
 flatlaf-jetbrains-mono-version = "2.304"
 kyori = "4.17.0"
-reactor = "1.1.18"
+reactor = "1.1.19"
 armeria = "1.28.4"
 
 [plugins]
