@@ -41,8 +41,8 @@ public class ItemsDataGenerator implements IDataGenerator {
 
     var sortedComponentObj = new JsonObject();
     DataComponentMap.CODEC.encodeStart(
-      MCHelper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE),
-      item.components()).result().orElseThrow().getAsJsonObject()
+        MCHelper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE),
+        item.components()).result().orElseThrow().getAsJsonObject()
       .entrySet().stream().sorted(Map.Entry.comparingByKey())
       .forEach(e -> sortedComponentObj.add(e.getKey(), e.getValue()));
     itemDesc.add("components", sortedComponentObj);

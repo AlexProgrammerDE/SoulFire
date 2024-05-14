@@ -43,5 +43,10 @@ public final class SFOfflineAuthService
     return new OfflineAuthData(data);
   }
 
+  @Override
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+    return CompletableFuture.completedFuture(account);
+  }
+
   public record OfflineAuthData(String username) {}
 }

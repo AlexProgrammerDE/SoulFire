@@ -32,10 +32,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttribut
 public class EntityAttributeState {
   private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
-  public AttributeState getOrCreateAttribute(AttributeType type) {
-    return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
-  }
-
   private static boolean isNotPartOf(ItemAttributeModifiers.EquipmentSlotGroup itemSlot, EquipmentSlot comparedTo) {
     return !switch (itemSlot) {
       case ANY -> true;
@@ -49,6 +45,10 @@ public class EntityAttributeState {
       case ARMOR -> comparedTo == EquipmentSlot.CHEST || comparedTo == EquipmentSlot.LEGS || comparedTo == EquipmentSlot.FEET;
       case BODY -> comparedTo == EquipmentSlot.HEAD || comparedTo == EquipmentSlot.CHEST || comparedTo == EquipmentSlot.LEGS || comparedTo == EquipmentSlot.FEET;
     };
+  }
+
+  public AttributeState getOrCreateAttribute(AttributeType type) {
+    return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
   }
 
   public void putItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {

@@ -489,7 +489,7 @@ public class ServerCommandManager implements PlatformCommandManager {
           help(
             "Get spark help",
             c -> {
-              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[]{});
+              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[] {});
               return Command.SINGLE_SUCCESS;
             })));
 

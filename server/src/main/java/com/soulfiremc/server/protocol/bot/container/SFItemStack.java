@@ -53,6 +53,10 @@ public class SFItemStack extends ItemStack {
     return new SFItemStack(itemStack);
   }
 
+  public static SFItemStack forTypeSingle(ItemType itemType) {
+    return new SFItemStack(itemType, 1);
+  }
+
   @Deprecated
   @Override
   @SuppressWarnings("DeprecatedIsStillUsed")
@@ -73,22 +77,18 @@ public class SFItemStack extends ItemStack {
     return newComponents;
   }
 
-  public static SFItemStack forTypeSingle(ItemType itemType) {
-    return new SFItemStack(itemType, 1);
-  }
-
   public int getEnchantmentLevel(EnchantmentType enchantment) {
     return components().getOptional(DataComponentType.ENCHANTMENTS)
-        .map(enchantments -> {
-          for (var itemEnchantment : enchantments.getEnchantments().entrySet()) {
-            if (itemEnchantment.getKey() == enchantment.id()) {
-              return itemEnchantment.getValue();
-            }
+      .map(enchantments -> {
+        for (var itemEnchantment : enchantments.getEnchantments().entrySet()) {
+          if (itemEnchantment.getKey() == enchantment.id()) {
+            return itemEnchantment.getValue();
           }
+        }
 
-          return 0;
-        })
-        .orElse(0);
+        return 0;
+      })
+      .orElse(0);
   }
 
   public SFItemStack withAmount(int amount) {

@@ -20,17 +20,17 @@ package com.soulfiremc.settings.account;
 import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.account.service.OfflineJavaData;
-import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-  MICROSOFT_JAVA("Microsoft Java", OnlineJavaData.class),
+  MICROSOFT_JAVA("Microsoft Java", OnlineSimpleJavaData.class),
   MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class),
-  THE_ALTENING("The Altening", OnlineJavaData.class),
-  EASY_MC("EasyMC", OnlineJavaData.class),
+  THE_ALTENING("The Altening", OnlineSimpleJavaData.class),
+  EASY_MC("EasyMC", OnlineSimpleJavaData.class),
   OFFLINE("Offline", OfflineJavaData.class);
 
   private final String displayName;

@@ -32,9 +32,9 @@ import me.lucko.spark.common.platform.PlatformInfo;
 @Slf4j
 @RequiredArgsConstructor
 public class SFSparkPlugin implements SparkPlugin {
+  public static SFSparkPlugin INSTANCE;
   private final Path sparkDirectory;
   private final SoulFireServer server;
-  public static SFSparkPlugin INSTANCE;
   @Getter
   private SparkPlatform platform;
 

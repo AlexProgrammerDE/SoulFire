@@ -20,7 +20,7 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
@@ -62,7 +62,7 @@ public final class SFTheAlteningAuthService
                   AuthType.THE_ALTENING,
                   UUIDHelper.convertToDashed(response.selectedProfile().id()),
                   response.selectedProfile().name(),
-                  new OnlineJavaData(response.accessToken(), -1));
+                  new OnlineSimpleJavaData(response.accessToken(), -1));
               }))
       .toFuture();
   }
@@ -70,6 +70,12 @@ public final class SFTheAlteningAuthService
   @Override
   public TheAlteningAuthData createData(String data) {
     return new TheAlteningAuthData(data);
+  }
+
+  @Override
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+    // TODO: Figure out The Altening refreshing
+    return CompletableFuture.completedFuture(account);
   }
 
   public record TheAlteningAuthData(String altToken) {}

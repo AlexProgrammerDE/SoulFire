@@ -4,6 +4,8 @@ option java_multiple_files = true;
 
 package com.soulfiremc.grpc.generated;
 
+import "google/protobuf/struct.proto";
+
 message ProxyProto {
   enum Type {
     HTTP = 0;
@@ -26,9 +28,15 @@ message MinecraftAccountProto {
     OFFLINE = 4;
   }
 
-  message OnlineJavaData {
+  message OnlineSimpleJavaData {
     string authToken = 1;
     int64 tokenExpireAt = 2;
+  }
+
+  message OnlineChainJavaData {
+    string authToken = 1;
+    int64 tokenExpireAt = 2;
+    google.protobuf.Struct authChain = 3;
   }
 
   message OfflineJavaData {
@@ -41,14 +49,16 @@ message MinecraftAccountProto {
     string privateKey = 4;
     string deviceId = 5;
     string playFabId = 6;
+    google.protobuf.Struct authChain = 7;
   }
 
   AccountTypeProto type = 1;
   string profileId = 2;
   string lastKnownName = 3;
   oneof accountData {
-    OnlineJavaData onlineJavaData = 4;
-    OfflineJavaData offlineJavaData = 5;
-    BedrockData bedrockData = 6;
+    OnlineSimpleJavaData onlineSimpleJavaData = 4;
+    OnlineChainJavaData onlineChainJavaData = 5;
+    OfflineJavaData offlineJavaData = 6;
+    BedrockData bedrockData = 7;
   }
 }

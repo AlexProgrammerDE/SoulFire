@@ -19,7 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
@@ -68,7 +68,7 @@ public final class SFEasyMCAuthService
                   AuthType.EASY_MC,
                   UUID.fromString(response.uuid()),
                   response.mcName(),
-                  new OnlineJavaData(response.session(), -1));
+                  new OnlineSimpleJavaData(response.session(), -1));
               }))
       .toFuture();
   }
@@ -82,6 +82,12 @@ public final class SFEasyMCAuthService
     }
 
     return new EasyMCAuthData(split[0].trim());
+  }
+
+  @Override
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+    // TODO: Figure out EasyMC refreshing
+    return CompletableFuture.completedFuture(account);
   }
 
   public record EasyMCAuthData(String altToken) {}

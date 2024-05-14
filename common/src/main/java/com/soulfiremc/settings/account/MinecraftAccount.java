@@ -21,7 +21,8 @@ import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.account.service.OfflineJavaData;
-import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.account.service.OnlineChainJavaData;
+import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import java.util.UUID;
 import lombok.NonNull;
 
@@ -45,7 +46,8 @@ public record MinecraftAccount(
       UUID.fromString(account.getProfileId()),
       account.getLastKnownName(),
       switch (account.getAccountDataCase()) {
-        case ONLINEJAVADATA -> OnlineJavaData.fromProto(account.getOnlineJavaData());
+        case ONLINESIMPLEJAVADATA -> OnlineSimpleJavaData.fromProto(account.getOnlineSimpleJavaData());
+        case ONLINECHAINJAVADATA -> OnlineChainJavaData.fromProto(account.getOnlineChainJavaData());
         case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
         case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
         case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
@@ -59,7 +61,7 @@ public record MinecraftAccount(
   }
 
   public boolean isPremiumJava() {
-    return accountData instanceof OnlineJavaData;
+    return accountData instanceof OnlineSimpleJavaData;
   }
 
   public boolean isPremiumBedrock() {
@@ -80,8 +82,11 @@ public record MinecraftAccount(
       case OfflineJavaData offlineJavaData -> {
         builder.setOfflineJavaData(offlineJavaData.toProto());
       }
-      case OnlineJavaData onlineJavaData -> {
-        builder.setOnlineJavaData(onlineJavaData.toProto());
+      case OnlineSimpleJavaData onlineSimpleJavaData -> {
+        builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
+      }
+      case OnlineChainJavaData onlineChainJavaData -> {
+        builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
       }
     }
 

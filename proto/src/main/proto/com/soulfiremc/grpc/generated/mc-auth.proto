@@ -16,6 +16,16 @@ message AuthResponse {
   MinecraftAccountProto account = 1;
 }
 
+message RefreshRequest {
+  MinecraftAccountProto account = 1;
+  optional ProxyProto proxy = 2;
+}
+
+message RefreshResponse {
+  MinecraftAccountProto account = 1;
+}
+
 service MCAuthService {
   rpc login(AuthRequest) returns (AuthResponse);
+  rpc refresh(RefreshRequest) returns (RefreshResponse);
 }

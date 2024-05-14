@@ -37,6 +37,10 @@ import lombok.extern.slf4j.Slf4j;
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private static final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
+  static {
+    SFLogAppender.INSTANCE.logConsumers().add(LogServiceImpl::broadcastMessage);
+  }
+
   public static void broadcastMessage(String message) {
     for (var sender : subscribers.values()) {
       sender.sendMessage(message);
@@ -48,10 +52,6 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     if (sender != null) {
       sender.sendMessage(message);
     }
-  }
-
-  static {
-    SFLogAppender.INSTANCE.logConsumers().add(LogServiceImpl::broadcastMessage);
   }
 
   @Override

@@ -32,7 +32,7 @@ import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.OnlineJavaData;
+import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
@@ -186,7 +186,7 @@ public final class BotConnection {
 
   public void joinServerId(String serverId, ViaClientSession session) {
     try {
-      var javaData = (OnlineJavaData) minecraftAccount.accountData();
+      var javaData = (OnlineSimpleJavaData) minecraftAccount.accountData();
       sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
       session.logger().debug("Successfully sent mojang join request!");
     } catch (Exception e) {

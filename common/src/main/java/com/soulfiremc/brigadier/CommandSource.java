@@ -21,6 +21,10 @@ import org.fusesource.jansi.Ansi;
 import org.slf4j.helpers.MessageFormatter;
 
 public interface CommandSource {
+  static String format(String format, Object[] params, Throwable t) {
+    return MessageFormatter.arrayFormat(format, params, t).getMessage();
+  }
+
   default void sendInfo(String message, Object... args) {
     sendMessage(format(message, args, null));
   }
@@ -34,8 +38,4 @@ public interface CommandSource {
   }
 
   void sendMessage(String message);
-
-  static String format(String format, Object[] params, Throwable t) {
-    return MessageFormatter.arrayFormat(format, params, t).getMessage();
-  }
 }

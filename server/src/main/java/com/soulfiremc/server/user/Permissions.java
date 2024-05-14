@@ -31,7 +31,7 @@ public class Permissions {
   public static final Permission STOP_ATTACK =
     new Permission("soulfire.stop_attack", "Allows the client to stop an attack");
   public static final Permission AUTHENTICATE_MC_ACCOUNT =
-    new Permission("soulfire.authenticate_mc_account", "Allows the client to authenticate a Minecraft account");
+    new Permission("soulfire.authenticate_mc_account", "Allows the client to authenticate or refresh a Minecraft account");
   public static final Permission CHECK_PROXY =
     new Permission("soulfire.check_proxy", "Allows the client to check if a proxy is valid");
   public static final Permission SUBSCRIBE_LOGS =

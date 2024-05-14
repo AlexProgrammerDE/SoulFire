@@ -34,4 +34,6 @@ public sealed interface MCAuthService<T>
   default CompletableFuture<MinecraftAccount> createDataAndLogin(String data, SFProxy proxyData) {
     return login(createData(data), proxyData);
   }
+
+  CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData);
 }
