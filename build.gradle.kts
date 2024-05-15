@@ -35,6 +35,9 @@ allprojects {
     maven("https://repo.spring.io/milestone") {
       name = "Spring Milestone Repository"
     }
+    maven("https://repo.spring.io/snapshot") {
+      name = "Spring Snapshot Repository"
+    }
     mavenCentral()
   }
 }

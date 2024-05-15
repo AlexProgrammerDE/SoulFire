@@ -65,7 +65,7 @@ public class ReactorHttpHelper {
                 case SOCKS4 -> ProxyProvider.Proxy.SOCKS4;
                 case SOCKS5 -> ProxyProvider.Proxy.SOCKS5;
               })
-            .address(proxyData.address())
+            .socketAddress(proxyData.address())
             .nonProxyHosts("localhost")
             .connectTimeoutMillis(20_000);
 

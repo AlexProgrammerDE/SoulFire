@@ -281,7 +281,7 @@ public class ViaClientSession extends TcpSession {
   }
 
   private void addHAProxySupport(ChannelPipeline pipeline) {
-    InetSocketAddress clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
+    var clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
     if (getFlag(BuiltinFlags.ENABLE_CLIENT_PROXY_PROTOCOL, false) && clientAddress != null) {
       pipeline.addFirst(
         "proxy-protocol-packet-sender",

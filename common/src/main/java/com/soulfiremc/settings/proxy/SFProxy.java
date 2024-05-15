@@ -19,14 +19,13 @@ package com.soulfiremc.settings.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.util.SocketAddressHelper;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 public record SFProxy(
   @NonNull ProxyType type,
-  @NonNull InetSocketAddress address,
+  @NonNull SocketAddress address,
   @Nullable String username,
   @Nullable String password) {
   public SFProxy {
@@ -48,7 +47,7 @@ public record SFProxy(
   public static SFProxy fromProto(ProxyProto proto) {
     return new SFProxy(
       ProxyType.valueOf(proto.getType().name()),
-      (InetSocketAddress) SocketAddressHelper.deserialize(proto.getAddress()),
+      SocketAddressHelper.deserialize(proto.getAddress()),
       proto.hasUsername() ? proto.getUsername() : null,
       proto.hasPassword() ? proto.getPassword() : null);
   }

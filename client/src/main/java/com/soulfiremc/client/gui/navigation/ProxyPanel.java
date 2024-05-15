@@ -31,7 +31,6 @@ import com.soulfiremc.util.SocketAddressHelper;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
@@ -134,7 +133,7 @@ public class ProxyPanel extends NavigationItem {
           var enabled = (boolean) rowData[4];
 
           proxies.add(
-            new EnabledWrapper<>(enabled, new SFProxy(type, (InetSocketAddress) SocketAddressHelper.deserialize(address), username, password)));
+            new EnabledWrapper<>(enabled, new SFProxy(type, SocketAddressHelper.deserialize(address), username, password)));
         }
 
         proxyRegistry.setProxies(proxies);
