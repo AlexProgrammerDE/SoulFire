@@ -23,12 +23,13 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record EffectType(int id, ResourceKey key, EffectCategory category, boolean beneficial, boolean instantenous) {
+public record EffectType(int id, Key key, EffectCategory category, boolean beneficial, boolean instantenous) {
   public static final Int2ReferenceMap<EffectType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<ResourceKey, EffectType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<Key, EffectType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   public static final EffectType SPEED = register("minecraft:speed");
@@ -85,7 +86,7 @@ public record EffectType(int id, ResourceKey key, EffectCategory category, boole
     return FROM_ID.get(id);
   }
 
-  public static EffectType getByKey(ResourceKey key) {
+  public static EffectType getByKey(Key key) {
     return FROM_KEY.get(key);
   }
 

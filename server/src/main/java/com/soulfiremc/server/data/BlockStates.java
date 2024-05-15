@@ -20,9 +20,10 @@ package com.soulfiremc.server.data;
 import com.google.gson.JsonArray;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 
 public record BlockStates(BlockState defaultState, List<BlockState> possibleStates) {
-  public static BlockStates fromJsonArray(BlockType blockType, ResourceKey key, JsonArray array) {
+  public static BlockStates fromJsonArray(BlockType blockType, Key key, JsonArray array) {
     BlockState defaultState = null;
     List<BlockState> possibleStates = new ArrayList<>();
     var i = 0;

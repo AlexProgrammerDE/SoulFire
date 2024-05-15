@@ -19,10 +19,11 @@ package com.soulfiremc.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 public class ItemTags {
-  public static final List<ResourceKey> TAGS = new ArrayList<>();
+  public static final List<Key> TAGS = new ArrayList<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -30,8 +31,8 @@ public class ItemTags {
 
   private ItemTags() {}
 
-  public static ResourceKey register(String key) {
-    var resourceKey = ResourceKey.fromString(key);
+  public static Key register(String key) {
+    var resourceKey = Key.key(key);
     TAGS.add(resourceKey);
     return resourceKey;
   }

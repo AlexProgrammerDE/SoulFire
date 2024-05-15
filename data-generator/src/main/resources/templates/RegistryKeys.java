@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.data;
 
+import net.kyori.adventure.key.Key;
+
 @SuppressWarnings("unused")
 public class RegistryKeys {
   //@formatter:off

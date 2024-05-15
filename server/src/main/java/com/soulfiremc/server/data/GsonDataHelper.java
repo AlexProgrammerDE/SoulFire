@@ -28,25 +28,27 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import net.kyori.adventure.key.Key;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
-  private static final TypeAdapter<ResourceKey> RESOURCE_KEY_ADAPTER =
-    new TypeAdapter<ResourceKey>() {
+  private static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
+    new TypeAdapter<Key>() {
       @Override
-      public void write(JsonWriter out, ResourceKey value) throws IOException {
-        out.value(value.toString());
+      public void write(JsonWriter out, Key value) throws IOException {
+        out.value(value.asString());
       }
 
       @Override
-      public ResourceKey read(JsonReader in) throws IOException {
+      @SuppressWarnings("PatternValidation")
+      public Key read(JsonReader in) throws IOException {
         var key = in.nextString();
-        return ResourceKey.fromString(key);
+        return Key.key(key);
       }
     };
   private static final Function<Map<Class<?>, TypeAdapter<?>>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
-      .registerTypeAdapter(ResourceKey.class, RESOURCE_KEY_ADAPTER)
+      .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
       .registerTypeAdapter(JsonDataComponents.class, JsonDataComponents.SERIALIZER);
 
     for (var entry : typeAdapters.entrySet()) {

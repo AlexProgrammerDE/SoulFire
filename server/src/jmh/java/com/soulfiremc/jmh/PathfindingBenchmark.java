@@ -19,7 +19,6 @@ package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
@@ -36,6 +35,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -72,7 +72,7 @@ public class PathfindingBenchmark {
         for (var y = 0; y < xArray.length; y++) {
           var yArray = xArray[y];
           for (var z = 0; z < yArray.length; z++) {
-            accessor.setBlockAt(x, y, z, BlockType.getByKey(ResourceKey.fromString(blockDefinitions[yArray[z]])));
+            accessor.setBlockAt(x, y, z, BlockType.getByKey(Key.key(blockDefinitions[yArray[z]])));
             maxY = Math.max(maxY, y);
           }
         }

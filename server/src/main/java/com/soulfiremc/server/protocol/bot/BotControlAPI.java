@@ -19,7 +19,6 @@ package com.soulfiremc.server.protocol.bot;
 
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
@@ -38,6 +37,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
@@ -127,7 +127,7 @@ public class BotControlAPI {
     }
   }
 
-  public void registerPluginChannels(ResourceKey... channels) {
+  public void registerPluginChannels(Key... channels) {
     var buffer = Unpooled.buffer();
     for (var i = 0; i < channels.length; i++) {
       var channel = channels[i];
@@ -141,14 +141,14 @@ public class BotControlAPI {
     sendPluginMessage(SFProtocolConstants.REGISTER_KEY, buffer);
   }
 
-  public void sendPluginMessage(ResourceKey channel, ByteBuf data) {
+  public void sendPluginMessage(Key channel, ByteBuf data) {
     var array = new byte[data.readableBytes()];
     data.readBytes(array);
 
     sendPluginMessage(channel, array);
   }
 
-  public void sendPluginMessage(ResourceKey channel, byte[] data) {
+  public void sendPluginMessage(Key channel, byte[] data) {
     connection.sendPacket(new ServerboundCustomPayloadPacket(channel.toString(), data));
   }
 

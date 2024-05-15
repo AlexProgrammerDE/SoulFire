@@ -19,7 +19,6 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
@@ -30,6 +29,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -120,7 +120,7 @@ public abstract class Entity {
     };
   }
 
-  public boolean isEyeInFluid(ResourceKey fluid) {
+  public boolean isEyeInFluid(Key fluid) {
     var eyePos = eyePosition();
     var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
     var breathingCoords = breathingPos.toInt();

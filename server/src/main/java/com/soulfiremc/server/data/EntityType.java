@@ -19,11 +19,12 @@ package com.soulfiremc.server.data;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 public record EntityType(
   int id,
-  ResourceKey key,
+  Key key,
   float width,
   float height,
   String category,

@@ -23,12 +23,13 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record AttributeType(int id, ResourceKey key, double min, double max, double defaultValue) {
+public record AttributeType(int id, Key key, double min, double max, double defaultValue) {
   public static final Int2ReferenceMap<AttributeType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<ResourceKey, AttributeType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<Key, AttributeType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -47,7 +48,7 @@ public record AttributeType(int id, ResourceKey key, double min, double max, dou
     return FROM_ID.get(id);
   }
 
-  public static AttributeType getByKey(ResourceKey key) {
+  public static AttributeType getByKey(Key key) {
     return FROM_KEY.get(key);
   }
 

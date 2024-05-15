@@ -19,11 +19,12 @@ package com.soulfiremc.server.data;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 public record ItemType(
   int id,
-  ResourceKey key,
+  Key key,
   JsonDataComponents components,
   TierType tierType) {
   public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();

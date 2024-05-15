@@ -13,6 +13,7 @@ dependencies {
     exclude("io.netty")
   }
   api(libs.bundles.kyori)
+  api(libs.datafixerupper)
 
   // For advanced encryption and compression
   api(libs.velocity.native)

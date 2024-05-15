@@ -31,11 +31,6 @@ unimined.minecraft {
   defaultRemapJar = true
 }
 
-tasks.create("generateData") {
-  group = "data-generator"
-  description = "Generates data for SoulFire"
-}
-
 tasks {
   processResources {
     inputs.property("version", project.version)

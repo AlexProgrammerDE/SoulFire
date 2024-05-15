@@ -39,9 +39,9 @@ public class RegistryKeysDataGenerator implements IDataGenerator {
         "\n  ",
         BuiltInRegistries.REGISTRY.stream().map(
             s ->
-              "public static final ResourceKey "
+              "public static final Key "
                 + s.key().location().getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                + " = ResourceKey.fromString(\""
+                + " = Key.key(\""
                 + s.key().location()
                 + "\");")
           .toArray(String[]::new)));

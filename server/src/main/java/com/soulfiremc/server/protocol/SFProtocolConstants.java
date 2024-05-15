@@ -17,19 +17,19 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.data.ResourceKey;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import javax.crypto.SecretKey;
+import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.network.Flag;
 
 public class SFProtocolConstants {
   public static final Flag<SecretKey> ENCRYPTION_SECRET_KEY = new Flag<>("encryption-secret-key", SecretKey.class);
   public static final Flag<UserConnection> VIA_USER_CONNECTION = new Flag<>("via-user-connection", UserConnection.class);
   public static final Flag<GlobalTrafficShapingHandler> TRAFFIC_HANDLER = new Flag<>("netty-traffic-handler", GlobalTrafficShapingHandler.class);
-  public static final ResourceKey BRAND_PAYLOAD_KEY = ResourceKey.fromString("minecraft:brand");
-  public static final ResourceKey REGISTER_KEY = ResourceKey.fromString("minecraft:register");
-  public static final ResourceKey UNREGISTER_KEY = ResourceKey.fromString("minecraft:unregister");
+  public static final Key BRAND_PAYLOAD_KEY = Key.key("minecraft:brand");
+  public static final Key REGISTER_KEY = Key.key("minecraft:register");
+  public static final Key UNREGISTER_KEY = Key.key("minecraft:unregister");
 
   private SFProtocolConstants() {}
 }

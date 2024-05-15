@@ -43,6 +43,7 @@ terminalconsoleappender = "net.minecrell:terminalconsoleappender:1.3.0"
 slf4j = "org.slf4j:slf4j-api:2.0.13"
 disruptor = "com.lmax:disruptor:4.0.0"
 brigadier = "com.mojang:brigadier:1.1.8"
+datafixerupper = "com.mojang:datafixerupper:7.0.14"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
 flatlaf = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }

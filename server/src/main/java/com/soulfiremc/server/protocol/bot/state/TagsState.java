@@ -22,47 +22,47 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.data.RegistryKeys;
-import com.soulfiremc.server.data.ResourceKey;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 
 @Getter
 public class TagsState {
-  private final Map<ResourceKey, Map<ResourceKey, IntSet>> tags = new Object2ObjectOpenHashMap<>();
+  private final Map<Key, Map<Key, IntSet>> tags = new Object2ObjectOpenHashMap<>();
 
   public void handleTagData(Map<String, Map<String, int[]>> updateTags) {
     for (var entry : updateTags.entrySet()) {
-      var tagMap = new Object2ObjectOpenHashMap<ResourceKey, IntSet>();
+      var tagMap = new Object2ObjectOpenHashMap<Key, IntSet>();
       for (var tagEntry : entry.getValue().entrySet()) {
         var set = new IntOpenHashSet(tagEntry.getValue());
-        tagMap.put(ResourceKey.fromString(tagEntry.getKey()), set);
+        tagMap.put(Key.key(tagEntry.getKey()), set);
       }
-      tags.put(ResourceKey.fromString(entry.getKey()), tagMap);
+      tags.put(Key.key(entry.getKey()), tagMap);
     }
   }
 
-  public boolean isBlockInTag(BlockType blockType, ResourceKey tagKey) {
+  public boolean isBlockInTag(BlockType blockType, Key tagKey) {
     return tags.getOrDefault(RegistryKeys.BLOCK, Map.of())
       .getOrDefault(tagKey, IntSet.of())
       .contains(blockType.id());
   }
 
-  public boolean isItemInTag(ItemType itemType, ResourceKey tagKey) {
+  public boolean isItemInTag(ItemType itemType, Key tagKey) {
     return tags.getOrDefault(RegistryKeys.ITEM, Map.of())
       .getOrDefault(tagKey, IntSet.of())
       .contains(itemType.id());
   }
 
-  public boolean isEntityInTag(EntityType entityType, ResourceKey tagKey) {
+  public boolean isEntityInTag(EntityType entityType, Key tagKey) {
     return tags.getOrDefault(RegistryKeys.ENTITY_TYPE, Map.of())
       .getOrDefault(tagKey, IntSet.of())
       .contains(entityType.id());
   }
 
-  public boolean isFluidInTag(FluidType fluidType, ResourceKey tagKey) {
+  public boolean isFluidInTag(FluidType fluidType, Key tagKey) {
     return tags.getOrDefault(RegistryKeys.FLUID, Map.of())
       .getOrDefault(tagKey, IntSet.of())
       .contains(fluidType.id());

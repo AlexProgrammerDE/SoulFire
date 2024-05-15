@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import net.kyori.adventure.key.Key;
 
 public class BlockShapeLoader {
-  public static final Map<ResourceKey, List<BlockShapeGroup>> BLOCK_SHAPES =
+  public static final Map<Key, List<BlockShapeGroup>> BLOCK_SHAPES =
     new Object2ObjectOpenHashMap<>();
 
   static {
@@ -40,7 +41,7 @@ public class BlockShapeLoader {
         .forEach(
           line -> {
             var parts = line.split("\\|");
-            var key = ResourceKey.fromString(parts[0]);
+            var key = Key.key(parts[0]);
 
             var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
             if (parts.length > 1) {

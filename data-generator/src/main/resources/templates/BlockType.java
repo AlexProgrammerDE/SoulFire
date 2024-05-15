@@ -28,11 +28,12 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 public record BlockType(
   int id,
-  ResourceKey key,
+  Key key,
   float destroyTime,
   float explosionResistance,
   boolean air,
@@ -51,11 +52,11 @@ public record BlockType(
 
     @Override
     public FluidType read(JsonReader in) throws IOException {
-      return FluidType.getByKey(ResourceKey.fromString(in.nextString()));
+      return FluidType.getByKey(Key.key(in.nextString()));
     }
   };
   public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<ResourceKey, BlockType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<Key, BlockType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -84,7 +85,7 @@ public record BlockType(
     return FROM_ID.get(id);
   }
 
-  public static BlockType getByKey(ResourceKey key) {
+  public static BlockType getByKey(Key key) {
     return FROM_KEY.get(key);
   }
 

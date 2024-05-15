@@ -27,7 +27,6 @@ import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
@@ -78,6 +77,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.ToString;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -251,14 +251,14 @@ public final class SessionDataManager {
         var entries = packet.getEntries();
         for (var i = 0; i < entries.size(); i++) {
           var dimension = entries.get(i);
-          dimensions.register(ResourceKey.fromString(dimension.getId()), i, new DimensionType(Objects.requireNonNull(dimension.getData())));
+          dimensions.register(Key.key(dimension.getId()), i, new DimensionType(Objects.requireNonNull(dimension.getData())));
         }
       }
       case "minecraft:worldgen/biome" -> {
         var entries = packet.getEntries();
         for (var i = 0; i < entries.size(); i++) {
           var biome = entries.get(i);
-          biomes.register(ResourceKey.fromString(biome.getId()), i, new Biome(Objects.requireNonNull(biome.getData())));
+          biomes.register(Key.key(biome.getId()), i, new Biome(Objects.requireNonNull(biome.getData())));
         }
         biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
       }
@@ -291,7 +291,7 @@ public final class SessionDataManager {
       new Level(
         tagsState,
         dimensions.get(spawnInfo.getDimension()),
-        ResourceKey.fromString(spawnInfo.getWorldName()),
+        Key.key(spawnInfo.getWorldName()),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
         spawnInfo.isFlat());
@@ -388,7 +388,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
-    var channelKey = ResourceKey.fromString(packet.getChannel());
+    var channelKey = Key.key(packet.getChannel());
     log.debug("Received plugin message on channel {}", channelKey);
     if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
       serverBrand = codecHelper.readString(Unpooled.wrappedBuffer(packet.getData()));
@@ -843,7 +843,7 @@ public final class SessionDataManager {
     }
 
     for (var entry : packet.getAttributes()) {
-      var key = ResourceKey.fromString(entry.getType().getIdentifier());
+      var key = Key.key(entry.getType().getIdentifier());
       var attributeType = AttributeType.getByKey(key);
       if (attributeType == null) {
         log.warn("Received unknown attribute type {}", key);

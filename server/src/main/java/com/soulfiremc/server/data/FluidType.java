@@ -21,11 +21,12 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record FluidType(int id, ResourceKey key) {
-  public static final Object2ReferenceMap<ResourceKey, FluidType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+public record FluidType(int id, Key key) {
+  public static final Object2ReferenceMap<Key, FluidType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   public static final FluidType EMPTY = register("minecraft:empty");
@@ -43,7 +44,7 @@ public record FluidType(int id, ResourceKey key) {
     return instance;
   }
 
-  public static FluidType getByKey(ResourceKey key) {
+  public static FluidType getByKey(Key key) {
     return FROM_KEY.get(key);
   }
 

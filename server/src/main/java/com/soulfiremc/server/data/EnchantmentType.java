@@ -22,22 +22,23 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.With;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record EnchantmentType(
   int id,
-  ResourceKey key,
+  Key key,
   int minLevel,
   int maxLevel,
-  List<ResourceKey> incompatible,
-  ResourceKey supportedItems,
+  List<Key> incompatible,
+  Key supportedItems,
   boolean tradeable,
   boolean discoverable,
   boolean curse,
   boolean treasureOnly,
   List<EquipmentSlot> slots) {
-  public static final Object2ReferenceMap<ResourceKey, EnchantmentType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  public static final Object2ReferenceMap<Key, EnchantmentType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
 
   //@formatter:off
   public static final EnchantmentType PROTECTION = register("minecraft:protection");
@@ -92,7 +93,7 @@ public record EnchantmentType(
     return instance;
   }
 
-  public static EnchantmentType getByKey(ResourceKey key) {
+  public static EnchantmentType getByKey(Key key) {
     return FROM_KEY.get(key);
   }
 

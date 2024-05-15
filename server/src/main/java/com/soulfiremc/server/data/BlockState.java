@@ -19,6 +19,7 @@ package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public record BlockState(
@@ -32,7 +33,7 @@ public record BlockState(
     boolean defaultState,
     BlockStateProperties properties,
     BlockType blockType,
-    ResourceKey key,
+    Key key,
     int stateIndex) {
     this(id, blockType, defaultState, properties, getBlockShapeGroup(key, stateIndex));
   }
@@ -41,7 +42,7 @@ public record BlockState(
     return blockType.statesData().defaultState();
   }
 
-  private static BlockShapeGroup getBlockShapeGroup(ResourceKey key, int stateIndex) {
+  private static BlockShapeGroup getBlockShapeGroup(Key key, int stateIndex) {
     var shapeGroups = BlockShapeLoader.BLOCK_SHAPES.get(key);
     var size = shapeGroups.size();
     if (size == 0) {

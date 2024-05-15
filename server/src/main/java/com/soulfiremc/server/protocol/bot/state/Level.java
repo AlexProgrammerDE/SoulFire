@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.BlockState;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.util.MathHelper;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
@@ -33,7 +33,7 @@ public class Level {
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final DimensionType dimensionType;
-  private final ResourceKey worldKey;
+  private final Key worldKey;
   private final long hashedSeed;
   private final boolean debug;
   private final boolean flat;
@@ -46,7 +46,7 @@ public class Level {
   public Level(
     TagsState tagsState,
     DimensionType dimensionType,
-    ResourceKey worldKey,
+    Key worldKey,
     long hashedSeed,
     boolean debug,
     boolean flat) {

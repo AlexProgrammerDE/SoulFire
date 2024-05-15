@@ -22,7 +22,6 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
-import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
@@ -34,6 +33,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
@@ -42,13 +42,13 @@ import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundC
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ModLoaderSupport implements InternalPlugin {
-  private static final ResourceKey FML_HS_KEY = ResourceKey.fromString("fml:hs");
-  private static final ResourceKey FML_FML_KEY = ResourceKey.fromString("fml:fml");
-  private static final ResourceKey FML_MP_KEY = ResourceKey.fromString("fml:mp");
-  private static final ResourceKey FML_FORGE_KEY = ResourceKey.fromString("fml:forge");
-  private static final ResourceKey FML2_LOGIN_WRAPPER_KEY =
-    ResourceKey.fromString("fml:loginwrapper");
-  private static final ResourceKey FML2_HANDSHAKE_KEY = ResourceKey.fromString("fml:handshake");
+  private static final Key FML_HS_KEY = Key.key("fml:hs");
+  private static final Key FML_FML_KEY = Key.key("fml:fml");
+  private static final Key FML_MP_KEY = Key.key("fml:mp");
+  private static final Key FML_FORGE_KEY = Key.key("fml:forge");
+  private static final Key FML2_LOGIN_WRAPPER_KEY =
+    Key.key("fml:loginwrapper");
+  private static final Key FML2_HANDSHAKE_KEY = Key.key("fml:handshake");
   private static final char HOSTNAME_SEPARATOR = '\0';
 
   @EventHandler
@@ -92,13 +92,13 @@ public class ModLoaderSupport implements InternalPlugin {
     var settingsHolder = connection.settingsHolder();
 
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
-      var channelKey = ResourceKey.fromString(pluginMessage.getChannel());
+      var channelKey = Key.key(pluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML) {
         handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
-      var channelKey = ResourceKey.fromString(loginPluginMessage.getChannel());
+      var channelKey = Key.key(loginPluginMessage.getChannel());
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML2) {
         handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
@@ -107,7 +107,7 @@ public class ModLoaderSupport implements InternalPlugin {
   }
 
   private void handleFMLPluginMessage(
-    BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    BotConnection botConnection, Key channelKey, byte[] data) {
     if (!channelKey.equals(FML_HS_KEY)) {
       return;
     }
@@ -186,7 +186,7 @@ public class ModLoaderSupport implements InternalPlugin {
   }
 
   private void handleFML2PluginMessage(
-    BotConnection botConnection, ResourceKey channelKey, byte[] data) {
+    BotConnection botConnection, Key channelKey, byte[] data) {
     if (!channelKey.equals(FML2_LOGIN_WRAPPER_KEY)) {
       return;
     }
@@ -195,7 +195,7 @@ public class ModLoaderSupport implements InternalPlugin {
     var buffer = Unpooled.wrappedBuffer(data);
 
     var innerChannel = helper.readString(buffer);
-    var innerChannelKey = ResourceKey.fromString(innerChannel);
+    var innerChannelKey = Key.key(innerChannel);
     if (!innerChannelKey.equals(FML2_HANDSHAKE_KEY)) {
       return;
     }

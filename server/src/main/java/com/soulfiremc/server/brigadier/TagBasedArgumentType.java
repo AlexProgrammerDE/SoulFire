@@ -25,7 +25,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.soulfiremc.server.data.ResourceKey;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -33,14 +32,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.key.Key;
 
 @RequiredArgsConstructor
 public class TagBasedArgumentType<R extends TagResolvable<?>> implements ArgumentType<R> {
   private static final String TAG_PREFIX = "#";
-  private final Function<ResourceKey, R> directSupplier;
-  private final Function<ResourceKey, R> tagSupplier;
-  private final List<ResourceKey> directKeys;
-  private final List<ResourceKey> tagKeys;
+  private final Function<Key, R> directSupplier;
+  private final Function<Key, R> tagSupplier;
+  private final List<Key> directKeys;
+  private final List<Key> tagKeys;
 
   public static boolean isAllowedInUnquotedString(final char c) {
     return c >= '0' && c <= '9'
@@ -87,7 +87,7 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
     }
 
     for (var key : currentKeys) {
-      if (key.path().equals(string) || key.toString().equals(string)) {
+      if (key.value().equals(string) || key.toString().equals(string)) {
         return currentSupplier.apply(key);
       }
     }
@@ -101,14 +101,14 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     var remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
     for (var key : directKeys) {
-      var keyPath = key.path();
+      var keyPath = key.value();
       if (keyPath.startsWith(remaining)) {
         builder.suggest(keyPath);
       }
     }
 
     for (var key : tagKeys) {
-      var keyPath = "#" + key.path();
+      var keyPath = "#" + key.value();
       if (keyPath.startsWith(remaining)) {
         builder.suggest(keyPath);
       }
@@ -122,10 +122,10 @@ public class TagBasedArgumentType<R extends TagResolvable<?>> implements Argumen
     return Stream.concat(
         directKeys.stream()
           .limit(2)
-          .map(ResourceKey::path),
+          .map(Key::value),
         tagKeys.stream()
           .limit(1)
-          .map(ResourceKey::path)
+          .map(Key::value)
           .map(s -> TAG_PREFIX + s))
       .toList();
   }
