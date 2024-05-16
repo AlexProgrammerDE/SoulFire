@@ -39,6 +39,7 @@ import com.soulfiremc.generator.generators.ItemsDataGenerator;
 import com.soulfiremc.generator.generators.ItemsJavaGenerator;
 import com.soulfiremc.generator.generators.LanguageDataGenerator;
 import com.soulfiremc.generator.generators.MapColorJavaGenerator;
+import com.soulfiremc.generator.generators.PacketsGenerator;
 import com.soulfiremc.generator.generators.RegistryKeysDataGenerator;
 import com.soulfiremc.generator.generators.TagsDataGenerator;
 import com.soulfiremc.generator.generators.WorldExporterGenerator;
@@ -146,6 +147,8 @@ public class DataGenerators {
         generatorsFailed++;
       }
     }
+
+    PacketsGenerator.generatePackets(outputDirectory.resolve("packets"));
 
     log.info("Finishing running data generators");
     return generatorsFailed == 0;
