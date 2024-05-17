@@ -39,11 +39,7 @@ public class BlocksJavaGenerator implements IDataGenerator {
           .map(
             s -> {
               var key = BuiltInRegistries.BLOCK.getKey(s);
-              return "public static final BlockType "
-                + key.getPath().toUpperCase(Locale.ROOT)
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final BlockType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
             })
           .toArray(String[]::new)));
   }

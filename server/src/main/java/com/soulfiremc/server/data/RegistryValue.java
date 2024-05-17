@@ -15,26 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.data;
+package com.soulfiremc.server.data;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.KeyPattern;
 
-@SuppressWarnings("unused")
-public class BlockTags {
-  public static final List<Key> TAGS = new ArrayList<>();
+public interface RegistryValue {
+  int id();
 
-  //@formatter:off
-  // VALUES REPLACE
-  //@formatter:on
-
-  private BlockTags() {}
-
-  public static Key register(@KeyPattern String key) {
-    var resourceKey = Key.key(key);
-    TAGS.add(resourceKey);
-    return resourceKey;
-  }
+  Key key();
 }

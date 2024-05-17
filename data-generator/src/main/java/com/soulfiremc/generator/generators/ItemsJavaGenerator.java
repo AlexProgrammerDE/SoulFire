@@ -39,11 +39,7 @@ public class ItemsJavaGenerator implements IDataGenerator {
           .map(
             s -> {
               var key = BuiltInRegistries.ITEM.getKey(s);
-              return "public static final ItemType "
-                + key.getPath().toUpperCase(Locale.ROOT)
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final ItemType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
             })
           .toArray(String[]::new)));
   }

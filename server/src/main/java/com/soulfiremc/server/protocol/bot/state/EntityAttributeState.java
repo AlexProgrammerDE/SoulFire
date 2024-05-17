@@ -58,7 +58,7 @@ public class EntityAttributeState {
         continue;
       }
 
-      getOrCreateAttribute(AttributeType.getById(modifier.getAttribute()))
+      getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
         .modifiers()
         .put(modifier.getModifier().getId(), new Attribute.Modifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), switch (modifier.getModifier().getOperation()) {
           case ADD_VALUE -> ModifierOperation.ADD_VALUE;
@@ -75,7 +75,7 @@ public class EntityAttributeState {
         continue;
       }
 
-      getOrCreateAttribute(AttributeType.getById(modifier.getAttribute()))
+      getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
         .modifiers()
         .remove(modifier.getModifier().getId());
     }

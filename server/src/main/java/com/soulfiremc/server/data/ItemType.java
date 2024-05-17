@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.data;
 
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
@@ -26,8 +24,8 @@ public record ItemType(
   int id,
   Key key,
   JsonDataComponents components,
-  TierType tierType) {
-  public static final Int2ReferenceMap<ItemType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+  TierType tierType) implements RegistryValue {
+  public static final Registry<ItemType> REGISTRY = new Registry<>();
 
   //@formatter:off
   public static final ItemType AIR = register("minecraft:air");
@@ -1366,12 +1364,7 @@ public record ItemType(
     var instance =
       GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
 
-    FROM_ID.put(instance.id(), instance);
-    return instance;
-  }
-
-  public static ItemType getById(int id) {
-    return FROM_ID.get(id);
+    return REGISTRY.register(instance);
   }
 
   @Override

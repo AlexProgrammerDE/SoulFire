@@ -21,9 +21,11 @@ import com.google.common.primitives.UnsignedBytes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.function.Function;
+import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("SameParameterValue")
 public class ExtraCodecs {
+  public static final Codec<Key> KYORI_KEY_CODEC = Codec.STRING.xmap(Key::key, Key::toString);
   public static final Codec<Integer> UNSIGNED_BYTE = Codec.BYTE
     .flatComapMap(
       UnsignedBytes::toInt,

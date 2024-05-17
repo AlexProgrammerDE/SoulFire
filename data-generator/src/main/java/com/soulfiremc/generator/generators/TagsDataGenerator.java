@@ -63,11 +63,7 @@ public class TagsDataGenerator {
           generateTag(BlockTags.class).stream()
             .map(
               s ->
-                "public static final Key "
-                  + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = register(\""
-                  + s
-                  + "\");")
+                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -88,11 +84,7 @@ public class TagsDataGenerator {
           generateTag(ItemTags.class).stream()
             .map(
               s ->
-                "public static final Key "
-                  + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = register(\""
-                  + s
-                  + "\");")
+                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -113,11 +105,7 @@ public class TagsDataGenerator {
           generateTag(EntityTypeTags.class).stream()
             .map(
               s ->
-                "public static final Key "
-                  + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = register(\""
-                  + s
-                  + "\");")
+                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -138,11 +126,7 @@ public class TagsDataGenerator {
           generateTag(FluidTags.class).stream()
             .map(
               s ->
-                "public static final Key "
-                  + s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_")
-                  + " = register(\""
-                  + s
-                  + "\");")
+                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }

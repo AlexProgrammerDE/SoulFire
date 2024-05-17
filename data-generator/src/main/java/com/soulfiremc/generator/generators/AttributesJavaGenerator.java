@@ -41,11 +41,7 @@ public class AttributesJavaGenerator implements IDataGenerator {
             s -> {
               var key =
                 Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s));
-              return "public static final AttributeType "
-                + key.getPath().toUpperCase(Locale.ROOT).replace(".", "_")
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final AttributeType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT).replace(".", "_"), key);
             })
           .toArray(String[]::new)));
   }

@@ -21,10 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +39,7 @@ public record BlockType(
   FluidType fluidType,
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
-  BlockStates statesData) {
+  BlockStates statesData) implements RegistryValue {
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
     @Override
     public void write(JsonWriter out, FluidType value) throws IOException {
@@ -52,11 +48,10 @@ public record BlockType(
 
     @Override
     public FluidType read(JsonReader in) throws IOException {
-      return FluidType.getByKey(Key.key(in.nextString()));
+      return FluidType.REGISTRY.getByKey(Key.key(in.nextString()));
     }
   };
-  public static final Int2ReferenceMap<BlockType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<Key, BlockType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  public static final Registry<BlockType> REGISTRY = new Registry<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -76,17 +71,7 @@ public record BlockType(
       CUSTOM_FLUID_TYPE
     ));
 
-    FROM_ID.put(instance.id(), instance);
-    FROM_KEY.put(instance.key(), instance);
-    return instance;
-  }
-
-  public static BlockType getById(int id) {
-    return FROM_ID.get(id);
-  }
-
-  public static BlockType getByKey(Key key) {
-    return FROM_KEY.get(key);
+    return REGISTRY.register(instance);
   }
 
   @Override

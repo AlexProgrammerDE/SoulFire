@@ -20,6 +20,7 @@ package com.soulfiremc.data;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.KeyPattern;
 
 @SuppressWarnings("unused")
 public class ItemTags {
@@ -31,7 +32,7 @@ public class ItemTags {
 
   private ItemTags() {}
 
-  public static Key register(String key) {
+  public static Key register(@KeyPattern String key) {
     var resourceKey = Key.key(key);
     TAGS.add(resourceKey);
     return resourceKey;

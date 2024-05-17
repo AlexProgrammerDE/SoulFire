@@ -17,19 +17,14 @@
  */
 package com.soulfiremc.server.data;
 
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import lombok.AccessLevel;
 import lombok.With;
 import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record AttributeType(int id, Key key, double min, double max, double defaultValue) {
-  public static final Int2ReferenceMap<AttributeType> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  public static final Object2ReferenceMap<Key, AttributeType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+public record AttributeType(int id, Key key, double min, double max, double defaultValue) implements RegistryValue {
+  public static final Registry<AttributeType> REGISTRY = new Registry<>();
 
   //@formatter:off
   public static final AttributeType GENERIC_ARMOR = register("minecraft:generic.armor");
@@ -60,17 +55,7 @@ public record AttributeType(int id, Key key, double min, double max, double defa
     var instance =
       GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
 
-    FROM_ID.put(instance.id(), instance);
-    FROM_KEY.put(instance.key(), instance);
-    return instance;
-  }
-
-  public static AttributeType getById(int id) {
-    return FROM_ID.get(id);
-  }
-
-  public static AttributeType getByKey(Key key) {
-    return FROM_KEY.get(key);
+    return REGISTRY.register(instance);
   }
 
   @Override

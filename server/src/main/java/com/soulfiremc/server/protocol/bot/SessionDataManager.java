@@ -787,7 +787,7 @@ public final class SessionDataManager {
       new RawEntity(
         packet.getEntityId(),
         packet.getUuid(),
-        EntityType.getById(packet.getType().ordinal()),
+        EntityType.REGISTRY.getById(packet.getType().ordinal()),
         packet.getData(),
         currentLevel(),
         packet.getX(),
@@ -844,7 +844,7 @@ public final class SessionDataManager {
 
     for (var entry : packet.getAttributes()) {
       var key = Key.key(entry.getType().getIdentifier());
-      var attributeType = AttributeType.getByKey(key);
+      var attributeType = AttributeType.REGISTRY.getByKey(key);
       if (attributeType == null) {
         log.warn("Received unknown attribute type {}", key);
         continue;

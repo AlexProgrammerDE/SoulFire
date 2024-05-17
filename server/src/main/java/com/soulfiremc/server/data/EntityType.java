@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.data;
 
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
@@ -30,8 +28,8 @@ public record EntityType(
   String category,
   boolean friendly,
   boolean summonable,
-  boolean attackable) {
-  public static final Int2ReferenceMap<EntityType> FROM_ID = new Int2ReferenceOpenHashMap<>();
+  boolean attackable) implements RegistryValue {
+  public static final Registry<EntityType> REGISTRY = new Registry<>();
 
   //@formatter:off
   public static final EntityType ALLAY = register("minecraft:allay");
@@ -170,12 +168,7 @@ public record EntityType(
     var instance =
       GsonDataHelper.fromJson("/minecraft/entities.json", key, EntityType.class);
 
-    FROM_ID.put(instance.id(), instance);
-    return instance;
-  }
-
-  public static EntityType getById(int id) {
-    return FROM_ID.get(id);
+    return REGISTRY.register(instance);
   }
 
   @Override

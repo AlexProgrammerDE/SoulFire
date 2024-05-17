@@ -1,0 +1,60 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.data;
+
+import com.mojang.serialization.Codec;
+import com.soulfiremc.server.protocol.codecs.ExtraCodecs;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import java.util.Collection;
+import lombok.Getter;
+import net.kyori.adventure.key.Key;
+
+public class Registry<T extends RegistryValue> {
+  @Getter
+  private final Codec<T> keyCodec = ExtraCodecs.KYORI_KEY_CODEC.xmap(this::getByKey, RegistryValue::key);
+  @Getter
+  private final Codec<T> idCodec = Codec.INT.xmap(this::getById, RegistryValue::id);
+  private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  private final Int2ReferenceMap<T> FROM_ID = new Int2ReferenceOpenHashMap<>();
+
+  public T register(final T value) {
+    FROM_KEY.put(value.key(), value);
+    FROM_ID.put(value.id(), value);
+
+    return value;
+  }
+
+  public T getById(int id) {
+    return FROM_ID.get(id);
+  }
+
+  public T getByKey(Key key) {
+    return FROM_KEY.get(key);
+  }
+
+  public Collection<T> values() {
+    return FROM_KEY.values();
+  }
+
+  public int size() {
+    return FROM_KEY.size();
+  }
+}

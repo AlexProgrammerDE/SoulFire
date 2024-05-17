@@ -44,13 +44,11 @@ public class MapColorJavaGenerator implements IDataGenerator {
         continue;
       }
 
-      colorArray[i] = "new MapColor(" + i + ", " + colField.get(registry[i]) + ")";
+      colorArray[i] = "new MapColor(%d, %s)".formatted(i, colField.get(registry[i]));
     }
 
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      "public static final MapColor[] COLORS = new MapColor[] {\n    "
-        + String.join(",\n    ", colorArray)
-        + "\n  };");
+      "public static final MapColor[] COLORS = new MapColor[] {\n    %s\n  };".formatted(String.join(",\n    ", colorArray)));
   }
 }

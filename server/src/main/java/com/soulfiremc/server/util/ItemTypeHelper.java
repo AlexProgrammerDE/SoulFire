@@ -39,7 +39,7 @@ public class ItemTypeHelper {
     var components = itemStack.components();
     return components.getOptional(DataComponentType.FOOD).map(f -> {
       for (var effect : f.getEffects()) {
-        if (EffectType.getById(effect.getEffect().getEffect().ordinal()).category()
+        if (EffectType.REGISTRY.getById(effect.getEffect().getEffect().ordinal()).category()
           == EffectType.EffectCategory.HARMFUL) {
           return false;
         }

@@ -21,12 +21,12 @@ import com.soulfiremc.server.util.BlockTypeHelper;
 import java.util.Optional;
 
 public class BlockItems {
-  public static final BlockType[] VALUES = new BlockType[ItemType.FROM_ID.size()];
-  public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.FROM_ID.size()];
+  public static final BlockType[] VALUES = new BlockType[BlockType.REGISTRY.size()];
+  public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.REGISTRY.size()];
 
   static {
-    for (var itemType : ItemType.FROM_ID.values()) {
-      for (var blockType : BlockType.FROM_ID.values()) {
+    for (var itemType : ItemType.REGISTRY.values()) {
+      for (var blockType : BlockType.REGISTRY.values()) {
         var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockShapeGroup();
 
         // Let's not use bedrock as a building block

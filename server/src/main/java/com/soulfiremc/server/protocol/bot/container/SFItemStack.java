@@ -37,7 +37,7 @@ public class SFItemStack extends ItemStack {
 
   private SFItemStack(ItemStack itemStack) {
     super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponents());
-    this.type = ItemType.getById(itemStack.getId());
+    this.type = ItemType.REGISTRY.getById(itemStack.getId());
   }
 
   private SFItemStack(ItemType itemType, int amount) {

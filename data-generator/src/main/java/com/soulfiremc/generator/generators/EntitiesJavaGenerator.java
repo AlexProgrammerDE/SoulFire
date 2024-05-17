@@ -39,11 +39,7 @@ public class EntitiesJavaGenerator implements IDataGenerator {
           .map(
             s -> {
               var key = BuiltInRegistries.ENTITY_TYPE.getKey(s);
-              return "public static final EntityType "
-                + key.getPath().toUpperCase(Locale.ROOT)
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final EntityType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
             })
           .toArray(String[]::new)));
   }

@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.data;
 
-import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.With;
@@ -37,8 +35,8 @@ public record EnchantmentType(
   boolean discoverable,
   boolean curse,
   boolean treasureOnly,
-  List<EquipmentSlot> slots) {
-  public static final Object2ReferenceMap<Key, EnchantmentType> FROM_KEY = new Object2ReferenceOpenHashMap<>();
+  List<EquipmentSlot> slots) implements RegistryValue {
+  public static final Registry<EnchantmentType> REGISTRY = new Registry<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -48,12 +46,7 @@ public record EnchantmentType(
     var instance =
       GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
 
-    FROM_KEY.put(instance.key(), instance);
-    return instance;
-  }
-
-  public static EnchantmentType getByKey(Key key) {
-    return FROM_KEY.get(key);
+    return REGISTRY.register(instance);
   }
 
   @Override

@@ -218,7 +218,7 @@ public class ServerCommandManager implements PlatformCommandManager {
         .then(argument("block", new TagBasedArgumentType<BlockTagResolvable>(
           key -> tags -> block -> block.key().equals(key),
           key -> tags -> block -> tags.isBlockInTag(block, key),
-          BlockType.FROM_KEY.keySet().stream().toList(),
+          BlockType.REGISTRY.values().stream().map(BlockType::key).toList(),
           BlockTags.TAGS
         ))
           .then(argument("amount", IntegerArgumentType.integer(1))

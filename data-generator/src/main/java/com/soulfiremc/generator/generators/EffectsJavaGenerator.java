@@ -40,11 +40,7 @@ public class EffectsJavaGenerator implements IDataGenerator {
           .map(
             s -> {
               var key = Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(s));
-              return "public static final EffectType "
-                + key.getPath().toUpperCase(Locale.ROOT)
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final EffectType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
             })
           .toArray(String[]::new)));
   }

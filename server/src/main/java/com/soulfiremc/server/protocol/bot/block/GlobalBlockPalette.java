@@ -31,7 +31,7 @@ public class GlobalBlockPalette {
 
   static {
     var stateMap = new Int2ObjectOpenHashMap<BlockState>();
-    for (var blockEntry : BlockType.FROM_ID.values()) {
+    for (var blockEntry : BlockType.REGISTRY.values()) {
       for (var state : blockEntry.statesData().possibleStates()) {
         stateMap.put(state.id(), state);
       }

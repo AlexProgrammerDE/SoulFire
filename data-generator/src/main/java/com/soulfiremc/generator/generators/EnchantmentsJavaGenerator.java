@@ -40,11 +40,7 @@ public class EnchantmentsJavaGenerator implements IDataGenerator {
           .map(
             s -> {
               var key = Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(s));
-              return "public static final EnchantmentType "
-                + key.getPath().toUpperCase(Locale.ROOT)
-                + " = register(\""
-                + key
-                + "\");";
+              return "public static final EnchantmentType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
             })
           .toArray(String[]::new)));
   }
