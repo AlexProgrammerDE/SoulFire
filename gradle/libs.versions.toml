@@ -89,6 +89,7 @@ grpc-services = { module = "io.grpc:grpc-services", version.ref = "grpc" }
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 protobuf-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf" }
+netty-bom = "io.netty:netty-bom:4.1.109.Final"
 armeria = { module = "com.linecorp.armeria:armeria", version.ref = "armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc", version.ref = "armeria" }
 armeria-grpc-protocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "armeria" }

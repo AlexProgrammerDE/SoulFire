@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+  implementation(enforcedPlatform(libs.netty.bom))
+
   implementation(projects.buildData)
   api(projects.proto)
 
