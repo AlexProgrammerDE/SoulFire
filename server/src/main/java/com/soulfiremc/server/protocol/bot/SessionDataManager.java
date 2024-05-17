@@ -279,11 +279,11 @@ public final class SessionDataManager {
       var providedData = entry.getData();
       NbtMap usedData;
       if (providedData == null) {
-        System.out.println("Searching for " + registryKey + " " + holderKey + " in " + serverKnownPacks);
         usedData = BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks);
       } else {
         usedData = providedData;
       }
+
       registryWriter.register(holderKey, i, usedData);
     }
   }
