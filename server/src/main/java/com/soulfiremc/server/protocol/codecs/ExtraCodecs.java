@@ -22,6 +22,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.function.Function;
 
+@SuppressWarnings("SameParameterValue")
 public class ExtraCodecs {
   public static final Codec<Integer> UNSIGNED_BYTE = Codec.BYTE
     .flatComapMap(
@@ -29,7 +30,7 @@ public class ExtraCodecs {
       integer -> integer > 255 ? DataResult.error(() -> "Unsigned byte was too large: " + integer + " > 255") : DataResult.success(integer.byteValue())
     );
   public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
-  public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
+  public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, floatValue -> "Value must be positive: " + floatValue);
 
   private static Codec<Integer> intRangeWithMessage(int min, int max, Function<Integer, String> errorMessage) {
     return Codec.INT
@@ -43,7 +44,7 @@ public class ExtraCodecs {
   private static Codec<Float> floatRangeMinExclusiveWithMessage(float min, float max, Function<Float, String> errorMessage) {
     return Codec.FLOAT
       .validate(
-        float_ -> float_.compareTo(min) > 0 && float_.compareTo(max) <= 0 ? DataResult.success(float_) : DataResult.error(() -> errorMessage.apply(float_))
+        floatValue -> floatValue.compareTo(min) > 0 && floatValue.compareTo(max) <= 0 ? DataResult.success(floatValue) : DataResult.error(() -> errorMessage.apply(floatValue))
       );
   }
 }
