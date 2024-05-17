@@ -61,9 +61,9 @@ public class EntityAttributeState {
       getOrCreateAttribute(AttributeType.getById(modifier.getAttribute()))
         .modifiers()
         .put(modifier.getModifier().getId(), new Attribute.Modifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), switch (modifier.getModifier().getOperation()) {
-          case ADD -> ModifierOperation.ADDITION;
-          case ADD_MULTIPLIED_BASE -> ModifierOperation.MULTIPLY_BASE;
-          case ADD_MULTIPLIED_TOTAL -> ModifierOperation.MULTIPLY_TOTAL;
+          case ADD_VALUE -> ModifierOperation.ADD_VALUE;
+          case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
+          case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
         }));
     }
   }

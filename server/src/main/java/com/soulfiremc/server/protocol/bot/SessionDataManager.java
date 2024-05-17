@@ -864,9 +864,9 @@ public final class SessionDataManager {
                   modifier.getUuid(),
                   modifier.getAmount(),
                   switch (modifier.getOperation()) {
-                    case ADD -> ModifierOperation.ADDITION;
-                    case ADD_MULTIPLIED_BASE -> ModifierOperation.MULTIPLY_BASE;
-                    case ADD_MULTIPLIED_TOTAL -> ModifierOperation.MULTIPLY_TOTAL;
+                    case ADD_VALUE -> ModifierOperation.ADD_VALUE;
+                    case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
+                    case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
                   }))
             .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
     }

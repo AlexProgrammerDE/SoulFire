@@ -489,7 +489,7 @@ public class BotMovementManager {
         .putIfAbsent(
           physics.sprintingUUID,
           new Attribute.Modifier(
-            physics.sprintingUUID, physics.sprintSpeed, ModifierOperation.MULTIPLY_TOTAL));
+            physics.sprintingUUID, physics.sprintSpeed, ModifierOperation.ADD_MULTIPLIED_TOTAL));
     } else {
       // Client-side sprinting (don't rely on server-side sprinting)
       // setSprinting in LivingEntity.java

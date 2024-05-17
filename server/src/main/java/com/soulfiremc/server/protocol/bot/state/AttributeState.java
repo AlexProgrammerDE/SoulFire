@@ -39,17 +39,17 @@ public class AttributeState {
   public double calculateValue() {
     var value = baseValue;
 
-    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADDITION)) {
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_VALUE)) {
       value += attributeModifier.amount();
     }
 
     var finalValue = value;
 
-    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_BASE)) {
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_MULTIPLIED_BASE)) {
       finalValue += value * attributeModifier.amount();
     }
 
-    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.MULTIPLY_TOTAL)) {
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_MULTIPLIED_TOTAL)) {
       finalValue *= 1.0 + attributeModifier.amount();
     }
 

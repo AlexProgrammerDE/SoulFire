@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data;
 
 public enum ModifierOperation {
-  ADDITION,
-  MULTIPLY_BASE,
-  MULTIPLY_TOTAL
+  ADD_VALUE,
+  ADD_MULTIPLIED_BASE,
+  ADD_MULTIPLIED_TOTAL
 }
