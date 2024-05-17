@@ -17,15 +17,21 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 
 @Getter
-public class Biome {
+public class Biome implements RegistryValue {
+  private final Key key;
+  private final int id;
   private final float temperature;
   private final float downfall;
 
-  public Biome(NbtMap biomeData) {
+  public Biome(Key key, int id, NbtMap biomeData) {
+    this.key = key;
+    this.id = id;
     this.temperature = biomeData.getFloat("temperature");
     this.downfall = biomeData.getFloat("downfall");
   }

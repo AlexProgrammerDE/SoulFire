@@ -26,6 +26,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.Collection;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+import org.cloudburstmc.nbt.NbtMap;
 
 public class Registry<T extends RegistryValue> {
   @Getter
@@ -56,5 +57,17 @@ public class Registry<T extends RegistryValue> {
 
   public int size() {
     return FROM_KEY.size();
+  }
+
+  public RegistryDataWriter<T> writer(FromRegistryDataFactory<T> factory) {
+    return (key, id, data) -> register(factory.create(key, id, data));
+  }
+
+  public interface RegistryDataWriter<T extends RegistryValue> {
+    void register(Key key, int id, NbtMap data);
+  }
+
+  public interface FromRegistryDataFactory<T extends RegistryValue> {
+    T create(Key key, int id, NbtMap data);
   }
 }

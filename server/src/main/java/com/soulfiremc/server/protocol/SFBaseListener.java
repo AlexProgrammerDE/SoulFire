@@ -19,9 +19,7 @@ package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
-import com.viaversion.viaversion.api.connection.UserConnection;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Objects;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -73,7 +71,7 @@ public class SFBaseListener extends SessionAdapter {
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
     if (protocol.getState() == ProtocolState.LOGIN) {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
-        UserConnection viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
+        var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
         var authSupport = botConnection.minecraftAccount().isPremiumJava();
         if (!authSupport) {
@@ -144,8 +142,9 @@ public class SFBaseListener extends SessionAdapter {
     } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
       if (packet instanceof ClientboundFinishConfigurationPacket) {
         session.send(new ServerboundFinishConfigurationPacket());
-      } else if (packet instanceof ClientboundSelectKnownPacks) {
-        session.send(new ServerboundSelectKnownPacks(new ArrayList<>()));
+      } else if (packet instanceof ClientboundSelectKnownPacks selectKnownPacks) {
+        session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
+          .getMatchingPacks(selectKnownPacks.getKnownPacks())));
       }
     }
   }

@@ -180,7 +180,7 @@ public class PacketsGenerator {
   private static void processPacket(Path finalDir, Path path) {
     StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_18);
     var className = path.getFileName().toString().replace(".java", "");
-    log.info("Processing packet {}", className);
+    log.debug("Processing packet {}", className);
 
     var unit = StaticJavaParser.parse(path);
     var packageName = unit.getPackageDeclaration().map(p -> p.getName().asString()).orElseThrow();
@@ -191,7 +191,7 @@ public class PacketsGenerator {
       .filter(field -> field.isStatic() && field.isFinal() && field.getElementType().isPrimitiveType() && field.getElementType().asPrimitiveType().getType().asString().equals("int"))
       .collect(Collectors.toMap(field -> Integer.parseInt(field.getVariable(0).getInitializer().orElseThrow().toString()), field -> field.getVariable(0).getNameAsString()));
 
-    log.info("Found fields: {}", fields);
+    log.debug("Found fields: {}", fields);
 
     // Reverse constant folding by replacing the uses of the int constants with the field names
     unit.findAll(Node.class).forEach(node -> {
@@ -207,7 +207,7 @@ public class PacketsGenerator {
         }
 
         node.replace(StaticJavaParser.parseExpression(fields.get(number)));
-        log.info("Replaced integer literal {} with {}", integerLiteralExpr, fields.get(number));
+        log.debug("Replaced integer literal {} with {}", integerLiteralExpr, fields.get(number));
       } else if (node instanceof UnaryExpr unaryExpr && unaryExpr.getOperator() == UnaryExpr.Operator.MINUS && isInteger(unaryExpr.toString())) {
         var number = Integer.parseInt(unaryExpr.toString());
         if (!fields.containsKey(number)) {
@@ -215,7 +215,7 @@ public class PacketsGenerator {
         }
 
         node.replace(StaticJavaParser.parseExpression("-" + fields.get(number)));
-        log.info("Replaced unary {} with {}", unaryExpr, fields.get(number));
+        log.debug("Replaced unary {} with {}", unaryExpr, fields.get(number));
       }
     });
 
@@ -223,7 +223,7 @@ public class PacketsGenerator {
     mainClass.findAll(MethodDeclaration.class).forEach(method -> {
       if (method.getNameAsString().equals("handle") || method.getNameAsString().equals("type")) {
         method.remove();
-        log.info("Removed method {}", method.getNameAsString());
+        log.debug("Removed method {}", method.getNameAsString());
       }
     });
 

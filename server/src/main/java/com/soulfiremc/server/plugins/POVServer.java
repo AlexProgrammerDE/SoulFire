@@ -575,7 +575,7 @@ public class POVServer implements InternalPlugin {
 
                   var spawnInfo =
                     new PlayerSpawnInfo(
-                      dataManager.dimensions().getId(dataManager.currentLevel().dimensionType()),
+                      dataManager.currentLevel().dimensionType().id(),
                       dataManager.currentLevel().worldKey().toString(),
                       dataManager.currentLevel().hashedSeed(),
                       dataManager.gameMode(),

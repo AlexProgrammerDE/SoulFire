@@ -17,12 +17,16 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-public class DimensionType {
+public class DimensionType implements RegistryValue {
+  private final Key key;
+  private final int id;
   private final String infiniburn;
   private final String effects;
   private final byte ultrawarm;
@@ -41,7 +45,9 @@ public class DimensionType {
   private final byte hasRaids;
   private final byte respawnAnchorWorks;
 
-  public DimensionType(NbtMap dimensionTypeData) {
+  public DimensionType(Key key, int id, NbtMap dimensionTypeData) {
+    this.key = key;
+    this.id = id;
     this.infiniburn = dimensionTypeData.getString("infiniburn");
     this.effects = dimensionTypeData.getString("effects");
     this.ultrawarm = dimensionTypeData.getByte("ultrawarm");

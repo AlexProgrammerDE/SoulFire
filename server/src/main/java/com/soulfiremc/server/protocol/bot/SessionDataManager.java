@@ -27,7 +27,9 @@ import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
+import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
@@ -44,13 +46,11 @@ import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.state.Biome;
 import com.soulfiremc.server.protocol.bot.state.BorderState;
-import com.soulfiremc.server.protocol.bot.state.ChunkData;
 import com.soulfiremc.server.protocol.bot.state.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.EntityTrackerState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.MapDataState;
 import com.soulfiremc.server.protocol.bot.state.PlayerListState;
-import com.soulfiremc.server.protocol.bot.state.Registry;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.bot.state.WeatherState;
@@ -81,10 +81,12 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
 import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
+import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
 import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
@@ -102,6 +104,7 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
@@ -165,6 +168,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.Serve
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -187,6 +191,7 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
+  private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
@@ -206,7 +211,6 @@ public final class SessionDataManager {
   private @Nullable AbilitiesData abilitiesData;
   private @Nullable DefaultSpawnData defaultSpawnData;
   private @Nullable ExperienceData experienceData;
-  private int biomesEntryBitsSize = -1;
   private @Nullable ChunkKey centerChunk;
   private boolean isDead = false;
   private boolean joinedWorld = false;
@@ -245,24 +249,42 @@ public final class SessionDataManager {
   }
 
   @EventHandler
+  public void onKnownPacks(ClientboundSelectKnownPacks packet) {
+    serverKnownPacks = packet.getKnownPacks();
+  }
+
+  @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
+    @Subst("empty") var registry = packet.getRegistry();
+    var registryKey = Key.key(registry);
+    Registry.RegistryDataWriter<?> registryWriter;
     switch (packet.getRegistry()) {
       case "minecraft:dimension_type" -> {
-        var entries = packet.getEntries();
-        for (var i = 0; i < entries.size(); i++) {
-          var dimension = entries.get(i);
-          dimensions.register(Key.key(dimension.getId()), i, new DimensionType(Objects.requireNonNull(dimension.getData())));
-        }
+        registryWriter = dimensions.writer(DimensionType::new);
       }
       case "minecraft:worldgen/biome" -> {
-        var entries = packet.getEntries();
-        for (var i = 0; i < entries.size(); i++) {
-          var biome = entries.get(i);
-          biomes.register(Key.key(biome.getId()), i, new Biome(Objects.requireNonNull(biome.getData())));
-        }
-        biomesEntryBitsSize = ChunkData.log2RoundUp(biomes.size());
+        registryWriter = biomes.writer(Biome::new);
       }
-      default -> log.debug("Received registry data for unknown registry {}", packet.getRegistry());
+      default -> {
+        log.debug("Received registry data for unknown registry {}", packet.getRegistry());
+        return;
+      }
+    }
+
+    var entries = packet.getEntries();
+    for (var i = 0; i < entries.size(); i++) {
+      var entry = entries.get(i);
+      @Subst("empty") var key = entry.getId();
+      var holderKey = Key.key(key);
+      var providedData = entry.getData();
+      NbtMap usedData;
+      if (providedData == null) {
+        System.out.println("Searching for " + registryKey + " " + holderKey + " in " + serverKnownPacks);
+        usedData = BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks);
+      } else {
+        usedData = providedData;
+      }
+      registryWriter.register(holderKey, i, usedData);
     }
   }
 
@@ -290,7 +312,7 @@ public final class SessionDataManager {
     lastSpawnedInLevel =
       new Level(
         tagsState,
-        dimensions.get(spawnInfo.getDimension()),
+        dimensions.getById(spawnInfo.getDimension()),
         Key.key(spawnInfo.getWorldName()),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
