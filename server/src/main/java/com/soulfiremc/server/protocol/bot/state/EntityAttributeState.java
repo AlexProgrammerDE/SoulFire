@@ -35,8 +35,8 @@ public class EntityAttributeState {
   private static boolean isNotPartOf(ItemAttributeModifiers.EquipmentSlotGroup itemSlot, EquipmentSlot comparedTo) {
     return !switch (itemSlot) {
       case ANY -> true;
-      case MAIN_HAND -> comparedTo == EquipmentSlot.MAINHAND;
-      case OFF_HAND -> comparedTo == EquipmentSlot.OFFHAND;
+      case MAINHAND -> comparedTo == EquipmentSlot.MAINHAND;
+      case OFFHAND -> comparedTo == EquipmentSlot.OFFHAND;
       case HAND -> comparedTo == EquipmentSlot.MAINHAND || comparedTo == EquipmentSlot.OFFHAND;
       case FEET -> comparedTo == EquipmentSlot.FEET;
       case LEGS -> comparedTo == EquipmentSlot.LEGS;
