@@ -27,8 +27,8 @@ public class FluidTags {
   public static final List<Key> TAGS = new ArrayList<>();
 
   //@formatter:off
-  public static final Key WATER = register(Key.key("minecraft:water"));
-  public static final Key LAVA = register(Key.key("minecraft:lava"));
+  public static final Key WATER = register("minecraft:water");
+  public static final Key LAVA = register("minecraft:lava");
   //@formatter:on
 
   private FluidTags() {}
