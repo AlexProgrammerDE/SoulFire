@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class BlockItems {
   public static final BlockType[] VALUES = new BlockType[BlockType.REGISTRY.size()];
-  public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.REGISTRY.size()];
+  public static final ItemType[] VALUES_REVERSE = new ItemType[ItemType.REGISTRY.size()];
 
   static {
     for (var itemType : ItemType.REGISTRY.values()) {
