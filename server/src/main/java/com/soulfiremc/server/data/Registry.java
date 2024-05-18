@@ -33,12 +33,12 @@ import org.cloudburstmc.nbt.NbtMap;
 public class Registry<T extends RegistryValue> {
   @Getter
   private final Key key;
+  private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
   @Getter
   private final Codec<T> keyCodec = ExtraCodecs.KYORI_KEY_CODEC.xmap(this::getByKey, RegistryValue::key);
+  private final Int2ReferenceMap<T> FROM_ID = new Int2ReferenceOpenHashMap<>();
   @Getter
   private final Codec<T> idCodec = Codec.INT.xmap(this::getById, RegistryValue::id);
-  private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
-  private final Int2ReferenceMap<T> FROM_ID = new Int2ReferenceOpenHashMap<>();
 
   public T register(final T value) {
     FROM_KEY.put(value.key(), value);
