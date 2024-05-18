@@ -33,7 +33,7 @@ public class SFViaBedrock implements ViaBedrockPlatform {
 
   public void init() {
     var configFile = dataFolder.resolve("config.yml").toFile();
-    var config = new ViaBedrockConfig(configFile);
+    var config = new ViaBedrockConfig(configFile, logger);
     config.reload();
     config.set("translate-resource-packs", false);
     config.save();
