@@ -55,9 +55,9 @@ public class BuiltInKnownPackRegistry {
         var registryKey = Key.key(string);
         var holders = new HashMap<Key, Pair<KnownPack, NbtMap>>();
         helper.readList(in, buf2 -> {
-          @Subst("empty") var string1 = helper.readResourceLocation(buf);
           var knownPack = new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf));
           supportedPacks.add(knownPack);
+          @Subst("empty") var string1 = helper.readResourceLocation(buf);
           return Pair.of(Key.key(string1), Pair.of(
             knownPack,
             helper.readNullable(in, helper::readCompoundTag)
