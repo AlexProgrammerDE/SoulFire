@@ -51,10 +51,10 @@ public class AboutPopup extends JDialog {
     content.add(
       SFSwingUtils.createHtmlPane(
         "Commit: <b><code>"
-          + BuildData.COMMIT.substring(0, 7)
+          + BuildData.COMMIT_HASH.substring(0, 7)
           + "</code></b> "
           + "(<b><a href='https://github.com/AlexProgrammerDE/SoulFire/commit/"
-          + BuildData.COMMIT
+          + BuildData.COMMIT_HASH
           + "'>Click to show</a></b>)"));
     content.setBorder(new EmptyBorder(10, 10, 10, 10));
 
