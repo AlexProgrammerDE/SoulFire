@@ -24,7 +24,7 @@ public record ItemType(
   int id,
   Key key,
   JsonDataComponents components,
-  TierType tierType) implements RegistryValue {
+  TierType tierType) implements RegistryValue<ItemType> {
   public static final Registry<ItemType> REGISTRY = new Registry<>(RegistryKeys.ITEM);
 
   //@formatter:off
@@ -52,5 +52,10 @@ public record ItemType(
   @Override
   public int hashCode() {
     return id;
+  }
+
+  @Override
+  public Registry<ItemType> registry() {
+    return REGISTRY;
   }
 }

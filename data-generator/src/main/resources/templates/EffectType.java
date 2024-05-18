@@ -23,7 +23,7 @@ import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record EffectType(int id, Key key, EffectCategory category, boolean beneficial, boolean instantenous) implements RegistryValue {
+public record EffectType(int id, Key key, EffectCategory category, boolean beneficial, boolean instantenous) implements RegistryValue<EffectType> {
   public static final Registry<EffectType> REGISTRY = new Registry<>(RegistryKeys.MOB_EFFECT);
 
   //@formatter:off
@@ -57,5 +57,10 @@ public record EffectType(int id, Key key, EffectCategory category, boolean benef
     BENEFICIAL,
     HARMFUL,
     NEUTRAL
+  }
+
+  @Override
+  public Registry<EffectType> registry() {
+    return REGISTRY;
   }
 }

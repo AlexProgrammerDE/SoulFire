@@ -36,7 +36,7 @@ public enum MineableType {
 
   public static Optional<MineableType> getFromTool(TagsState tagsState, ItemType itemType) {
     for (var mineableType : VALUES) {
-      if (tagsState.isValueInTag(ItemType.REGISTRY, itemType, mineableType.itemTagKey)) {
+      if (tagsState.isValueInTag(itemType, mineableType.itemTagKey)) {
         return Optional.of(mineableType);
       }
     }

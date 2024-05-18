@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.data.TagKey;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -43,8 +42,8 @@ public class TagsState {
     }
   }
 
-  public <T extends RegistryValue> boolean isValueInTag(Registry<T> registryKey, T value, TagKey<T> tagKey) {
-    return tags.getOrDefault(registryKey.key(), Map.of())
+  public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
+    return tags.getOrDefault(value.registry().key(), Map.of())
       .getOrDefault(tagKey.key(), IntSet.of())
       .contains(value.id());
   }

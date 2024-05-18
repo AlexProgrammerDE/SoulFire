@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.Key;
 
 @RequiredArgsConstructor
-public class TagBasedArgumentType<T extends RegistryValue, R extends TagResolvable<T>> implements ArgumentType<R> {
+public class TagBasedArgumentType<T extends RegistryValue<T>, R extends TagResolvable<T>> implements ArgumentType<R> {
   private static final String TAG_PREFIX = "#";
   private final Function<Key, R> directSupplier;
   private final Function<TagKey<T>, R> tagSupplier;

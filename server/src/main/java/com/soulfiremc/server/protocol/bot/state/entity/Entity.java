@@ -126,7 +126,7 @@ public abstract class Entity {
     var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
     var breathingCoords = breathingPos.toInt();
 
-    return level.tagsState().isValueInTag(FluidType.REGISTRY, level.getBlockState(breathingCoords).blockType().fluidType(), fluid);
+    return level.tagsState().isValueInTag(level.getBlockState(breathingCoords).blockType().fluidType(), fluid);
   }
 
   /**

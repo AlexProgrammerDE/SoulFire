@@ -31,7 +31,7 @@ public class ItemTags {
 
   private ItemTags() {}
 
-  public static <T extends RegistryValue> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
+  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
     var resourceKey = TagKey.<T>key(key);
     values.add(resourceKey);
     return resourceKey;

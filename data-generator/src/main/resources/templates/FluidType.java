@@ -23,7 +23,7 @@ import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record FluidType(int id, Key key) implements RegistryValue {
+public record FluidType(int id, Key key) implements RegistryValue<FluidType> {
   public static final Registry<FluidType> REGISTRY = new Registry<>(RegistryKeys.FLUID);
 
   //@formatter:off
@@ -51,5 +51,10 @@ public record FluidType(int id, Key key) implements RegistryValue {
   @Override
   public int hashCode() {
     return id;
+  }
+
+  @Override
+  public Registry<FluidType> registry() {
+    return REGISTRY;
   }
 }

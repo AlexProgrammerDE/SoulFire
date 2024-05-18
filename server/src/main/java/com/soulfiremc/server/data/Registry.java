@@ -30,7 +30,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 
 @RequiredArgsConstructor
-public class Registry<T extends RegistryValue> {
+public class Registry<T extends RegistryValue<T>> {
   @Getter
   private final Key key;
   private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
@@ -64,14 +64,14 @@ public class Registry<T extends RegistryValue> {
   }
 
   public RegistryDataWriter<T> writer(FromRegistryDataFactory<T> factory) {
-    return (key, id, data) -> register(factory.create(key, id, data));
+    return (key, id, data) -> register(factory.create(this, key, id, data));
   }
 
-  public interface RegistryDataWriter<T extends RegistryValue> {
+  public interface RegistryDataWriter<T extends RegistryValue<T>> {
     void register(Key key, int id, NbtMap data);
   }
 
-  public interface FromRegistryDataFactory<T extends RegistryValue> {
-    T create(Key key, int id, NbtMap data);
+  public interface FromRegistryDataFactory<T extends RegistryValue<T>> {
+    T create(Registry<T> registry, Key key, int id, NbtMap data);
   }
 }

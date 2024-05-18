@@ -35,7 +35,7 @@ public record EnchantmentType(
   boolean discoverable,
   boolean curse,
   boolean treasureOnly,
-  List<EquipmentSlot> slots) implements RegistryValue {
+  List<EquipmentSlot> slots) implements RegistryValue<EnchantmentType> {
   public static final Registry<EnchantmentType> REGISTRY = new Registry<>(RegistryKeys.ENCHANTMENT);
 
   //@formatter:off
@@ -63,5 +63,10 @@ public record EnchantmentType(
   @Override
   public int hashCode() {
     return id;
+  }
+
+  @Override
+  public Registry<EnchantmentType> registry() {
+    return REGISTRY;
   }
 }
