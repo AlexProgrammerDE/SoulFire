@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  implementation(enforcedPlatform(libs.netty.bom))
+  libs.bundles.bom.get().forEach { api(platform(it)) }
 
   implementation(projects.buildData)
   api(projects.proto)
