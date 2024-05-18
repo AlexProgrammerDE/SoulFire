@@ -1,3 +1,5 @@
+import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+
 plugins {
   `sf-java-conventions`
   id("xyz.wagyourtail.unimined")
@@ -44,5 +46,8 @@ tasks {
       expand(getProperties())
       expand(mutableMapOf("version" to project.version))
     }
+  }
+  withType<RemapJarTask> {
+    onlyIf { false}
   }
 }
