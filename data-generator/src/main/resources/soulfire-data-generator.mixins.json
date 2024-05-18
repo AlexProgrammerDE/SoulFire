@@ -7,7 +7,7 @@
     "BlockAccessor",
     "BlockSettingsOffsetMixin",
     "EULAMixin",
-    "FeatureFlagSetMixin",
+    "DataPackConfigMixin",
     "ReadyMixin"
   ],
   "client": [
