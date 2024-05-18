@@ -50,24 +50,22 @@ public class BuiltInKnownPackRegistry {
       var in = Unpooled.wrappedBuffer(bytes);
       var helper = new MinecraftCodecHelper(Int2ObjectMaps.emptyMap(), Map.of());
 
-      var registriesSize = helper.readVarInt(in);
-      for (var i = 0; i < registriesSize; i++) {
+      helper.readList(in, buf -> {
         @Subst("empty") var string = helper.readResourceLocation(in);
         var registryKey = Key.key(string);
-        var holdersSize = helper.readVarInt(in);
         var holders = new HashMap<Key, Pair<KnownPack, NbtMap>>();
-        for (var j = 0; j < holdersSize; j++) {
-          var knownPack = new KnownPack(helper.readString(in), helper.readString(in), helper.readString(in));
+        helper.readList(in, buf2 -> {
+          @Subst("empty") var string1 = helper.readResourceLocation(buf);
+          var knownPack = new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf));
           supportedPacks.add(knownPack);
-          @Subst("empty") var string1 = helper.readResourceLocation(in);
-          holders.put(Key.key(string1), Pair.of(
+          return Pair.of(Key.key(string1), Pair.of(
             knownPack,
             helper.readNullable(in, helper::readCompoundTag)
           ));
-        }
+        }).forEach(p -> holders.put(p.left(), p.right()));
 
-        builtInRegistry.put(registryKey, holders);
-      }
+        return Pair.of(registryKey, holders);
+      }).forEach(p -> builtInRegistry.put(p.left(), p.right()));
     } catch (Exception e) {
       log.error("Failed to load known packs", e);
     }

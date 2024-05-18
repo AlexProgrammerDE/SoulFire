@@ -22,6 +22,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.soulfiremc.server.protocol.codecs.ExtraCodecs;
+import com.soulfiremc.server.util.DualMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -66,10 +67,25 @@ public class JsonToMCPLCodecs {
     .comapFlatMap(uuids -> fixedSize(uuids, 4).map(JsonToMCPLCodecs::uuidFromIntArray), uuid -> Arrays.stream(uuidToIntArray(uuid)));
   @SuppressWarnings("PatternValidation")
   private static final Codec<Effect> MCPL_EFFECT_CODEC = Codec.STRING.xmap(s -> Effect.valueOf(Key.key(s).value().toUpperCase(Locale.ROOT)), e -> Key.key(e.name().toLowerCase(Locale.ROOT)).toString());
-  private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = Codec.STRING.xmap(
-    s -> ItemAttributeModifiers.EquipmentSlotGroup.valueOf(s.toUpperCase(Locale.ROOT)), g -> g.name().toLowerCase(Locale.ROOT));
-  private static final Codec<org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation> MCPL_MODIFIER_OPERATION_CODEC = Codec.STRING.xmap(
-    s -> ModifierOperation.valueOf(s.toUpperCase(Locale.ROOT)), g -> g.name().toLowerCase(Locale.ROOT));
+  private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = DualMap.keyCodec(
+    DualMap.forEnumSwitch(ItemAttributeModifiers.EquipmentSlotGroup.class, g -> switch (g) {
+      case ANY -> "any";
+      case MAIN_HAND -> "mainhand";
+      case OFF_HAND -> "offhand";
+      case HAND -> "hand";
+      case FEET -> "feet";
+      case LEGS -> "legs";
+      case CHEST -> "chest";
+      case HEAD -> "head";
+      case ARMOR -> "armor";
+      case BODY -> "body";
+    }));
+  private static final Codec<ModifierOperation> MCPL_MODIFIER_OPERATION_CODEC = DualMap.keyCodec(
+    DualMap.forEnumSwitch(ModifierOperation.class, g -> switch (g) {
+      case ADD -> "add_value";
+      case ADD_MULTIPLIED_BASE -> "add_multiplied_base";
+      case ADD_MULTIPLIED_TOTAL -> "add_multiplied_total";
+    }));
   public static final MapCodec<ItemAttributeModifiers.AttributeModifier> ATTRIBUTE_MODIFIER_MAP_CODEC = RecordCodecBuilder.mapCodec(
     instance -> instance.group(
         UUID_CODEC.fieldOf("uuid").forGetter(ItemAttributeModifiers.AttributeModifier::getId),
