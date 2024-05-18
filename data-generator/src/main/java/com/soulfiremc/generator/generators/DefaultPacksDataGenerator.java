@@ -50,6 +50,11 @@ public class DefaultPacksDataGenerator implements IDataGenerator {
     try (var gzipOutputStream = new GZIPOutputStream(byteOutputStream)) {
       var buf = Unpooled.buffer();
       var friendlyByteBuf = new FriendlyByteBuf(buf);
+      friendlyByteBuf.writeCollection(
+        MCHelper.getServer().getResourceManager().listPacks().flatMap(arg -> arg.location().knownPackInfo().stream()).toList(),
+        KnownPack.STREAM_CODEC
+      );
+
       var registries = MCHelper.getServer().registries();
       packRegistries(
         friendlyByteBuf,

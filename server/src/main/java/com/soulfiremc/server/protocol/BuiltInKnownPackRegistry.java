@@ -24,10 +24,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
@@ -39,7 +37,7 @@ import org.intellij.lang.annotations.Subst;
 @Slf4j
 public class BuiltInKnownPackRegistry {
   public static final BuiltInKnownPackRegistry INSTANCE = new BuiltInKnownPackRegistry();
-  private final Set<KnownPack> supportedPacks = new HashSet<>();
+  private final List<KnownPack> supportedPacks;
   private final Map<Key, Map<Key, Pair<KnownPack, NbtMap>>> builtInRegistry = new HashMap<>();
 
   public BuiltInKnownPackRegistry() {
@@ -49,6 +47,7 @@ public class BuiltInKnownPackRegistry {
       var bytes = gzipInputStream.readAllBytes();
       var in = Unpooled.wrappedBuffer(bytes);
       var helper = new MinecraftCodecHelper(Int2ObjectMaps.emptyMap(), Map.of());
+      supportedPacks = helper.readList(in, buf -> new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf)));
 
       helper.readList(in, buf -> {
         @Subst("empty") var string = helper.readResourceLocation(in);
@@ -56,7 +55,6 @@ public class BuiltInKnownPackRegistry {
         var holders = new HashMap<Key, Pair<KnownPack, NbtMap>>();
         helper.readList(in, buf2 -> {
           var knownPack = new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf));
-          supportedPacks.add(knownPack);
           @Subst("empty") var string1 = helper.readResourceLocation(buf);
           return Pair.of(Key.key(string1), Pair.of(
             knownPack,
@@ -67,7 +65,7 @@ public class BuiltInKnownPackRegistry {
         return Pair.of(registryKey, holders);
       }).forEach(p -> builtInRegistry.put(p.left(), p.right()));
     } catch (Exception e) {
-      log.error("Failed to load known packs", e);
+      throw new RuntimeException("Failed to load known packs", e);
     }
   }
 
