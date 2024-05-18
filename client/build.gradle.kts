@@ -35,6 +35,8 @@ task("runSFClient", JavaExec::class) {
     "-XX:G1HeapRegionSize=32M"
   )
 
+  standardInput = System.`in`
+
   outputs.upToDateWhen { false }
 }
 
@@ -56,6 +58,8 @@ task("runSFClientLocal", JavaExec::class) {
     "-XX:G1HeapRegionSize=32M",
     "-Dsf.disableServerSelect=true"
   )
+
+  standardInput = System.`in`
 
   outputs.upToDateWhen { false }
 }

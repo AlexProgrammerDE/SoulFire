@@ -35,6 +35,8 @@ task("runSFDedicated", JavaExec::class) {
     "-XX:G1HeapRegionSize=32M"
   )
 
+  standardInput = System.`in`
+
   outputs.upToDateWhen { false }
 }
 
