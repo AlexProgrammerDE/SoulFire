@@ -37,6 +37,10 @@ task("runSFDedicated", JavaExec::class) {
 
   standardInput = System.`in`
 
+  val runDir = projectDir.resolve("run")
+  runDir.mkdirs()
+  workingDir = runDir
+
   outputs.upToDateWhen { false }
 }
 
