@@ -21,7 +21,6 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.key.Key;
 
 @RequiredArgsConstructor
 public enum MineableType {
@@ -31,13 +30,13 @@ public enum MineableType {
   HOE(ItemTags.HOES, BlockTags.MINEABLE_WITH_HOE);
 
   public static MineableType[] VALUES = values();
-  private final Key itemTagKey;
+  private final TagKey<ItemType> itemTagKey;
   @Getter
-  private final Key blockTagKey;
+  private final TagKey<BlockType> blockTagKey;
 
   public static Optional<MineableType> getFromTool(TagsState tagsState, ItemType itemType) {
     for (var mineableType : VALUES) {
-      if (tagsState.isItemInTag(itemType, mineableType.itemTagKey)) {
+      if (tagsState.isValueInTag(ItemType.REGISTRY, itemType, mineableType.itemTagKey)) {
         return Optional.of(mineableType);
       }
     }

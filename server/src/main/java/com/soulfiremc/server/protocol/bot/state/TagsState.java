@@ -17,11 +17,9 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.FluidType;
-import com.soulfiremc.server.data.ItemType;
-import com.soulfiremc.server.data.RegistryKeys;
+import com.soulfiremc.server.data.Registry;
+import com.soulfiremc.server.data.RegistryValue;
+import com.soulfiremc.server.data.TagKey;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -33,6 +31,7 @@ import net.kyori.adventure.key.Key;
 public class TagsState {
   private final Map<Key, Map<Key, IntSet>> tags = new Object2ObjectOpenHashMap<>();
 
+  @SuppressWarnings("PatternValidation")
   public void handleTagData(Map<String, Map<String, int[]>> updateTags) {
     for (var entry : updateTags.entrySet()) {
       var tagMap = new Object2ObjectOpenHashMap<Key, IntSet>();
@@ -44,28 +43,10 @@ public class TagsState {
     }
   }
 
-  public boolean isBlockInTag(BlockType blockType, Key tagKey) {
-    return tags.getOrDefault(RegistryKeys.BLOCK, Map.of())
-      .getOrDefault(tagKey, IntSet.of())
-      .contains(blockType.id());
-  }
-
-  public boolean isItemInTag(ItemType itemType, Key tagKey) {
-    return tags.getOrDefault(RegistryKeys.ITEM, Map.of())
-      .getOrDefault(tagKey, IntSet.of())
-      .contains(itemType.id());
-  }
-
-  public boolean isEntityInTag(EntityType entityType, Key tagKey) {
-    return tags.getOrDefault(RegistryKeys.ENTITY_TYPE, Map.of())
-      .getOrDefault(tagKey, IntSet.of())
-      .contains(entityType.id());
-  }
-
-  public boolean isFluidInTag(FluidType fluidType, Key tagKey) {
-    return tags.getOrDefault(RegistryKeys.FLUID, Map.of())
-      .getOrDefault(tagKey, IntSet.of())
-      .contains(fluidType.id());
+  public <T extends RegistryValue> boolean isValueInTag(Registry<T> registryKey, T value, TagKey<T> tagKey) {
+    return tags.getOrDefault(registryKey.key(), Map.of())
+      .getOrDefault(tagKey.key(), IntSet.of())
+      .contains(value.id());
   }
 
   public Map<String, Map<String, int[]>> exportTags() {

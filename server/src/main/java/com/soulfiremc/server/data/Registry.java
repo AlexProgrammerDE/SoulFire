@@ -25,10 +25,14 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.Collection;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 
+@RequiredArgsConstructor
 public class Registry<T extends RegistryValue> {
+  @Getter
+  private final Key key;
   @Getter
   private final Codec<T> keyCodec = ExtraCodecs.KYORI_KEY_CODEC.xmap(this::getByKey, RegistryValue::key);
   @Getter

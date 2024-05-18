@@ -29,7 +29,7 @@ public record EntityType(
   boolean friendly,
   boolean summonable,
   boolean attackable) implements RegistryValue {
-  public static final Registry<EntityType> REGISTRY = new Registry<>();
+  public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
 
   //@formatter:off
   // VALUES REPLACE

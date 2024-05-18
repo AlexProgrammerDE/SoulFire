@@ -19,23 +19,22 @@ package com.soulfiremc.server.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
 @SuppressWarnings("unused")
 public class FluidTags {
-  public static final List<Key> TAGS = new ArrayList<>();
+  public static final List<TagKey<FluidType>> TAGS = new ArrayList<>();
 
   //@formatter:off
-  public static final Key WATER = register("minecraft:water");
-  public static final Key LAVA = register("minecraft:lava");
+  public static final TagKey<FluidType> WATER = register("minecraft:water", TAGS);
+  public static final TagKey<FluidType> LAVA = register("minecraft:lava", TAGS);
   //@formatter:on
 
   private FluidTags() {}
 
-  public static Key register(@KeyPattern String key) {
-    var resourceKey = Key.key(key);
-    TAGS.add(resourceKey);
+  public static <T extends RegistryValue> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
+    var resourceKey = TagKey.<T>key(key);
+    values.add(resourceKey);
     return resourceKey;
   }
 }

@@ -215,9 +215,9 @@ public class ServerCommandManager implements PlatformCommandManager {
                         }))))));
     dispatcher.register(
       literal("collect")
-        .then(argument("block", new TagBasedArgumentType<BlockTagResolvable>(
+        .then(argument("block", new TagBasedArgumentType<BlockType, BlockTagResolvable>(
           key -> tags -> block -> block.key().equals(key),
-          key -> tags -> block -> tags.isBlockInTag(block, key),
+          key -> tags -> block -> tags.isValueInTag(BlockType.REGISTRY, block, key),
           BlockType.REGISTRY.values().stream().map(BlockType::key).toList(),
           BlockTags.TAGS
         ))

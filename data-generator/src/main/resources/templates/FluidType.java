@@ -24,7 +24,7 @@ import net.kyori.adventure.key.Key;
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
 public record FluidType(int id, Key key) implements RegistryValue {
-  public static final Registry<FluidType> REGISTRY = new Registry<>();
+  public static final Registry<FluidType> REGISTRY = new Registry<>(RegistryKeys.FLUID);
 
   //@formatter:off
   // VALUES REPLACE

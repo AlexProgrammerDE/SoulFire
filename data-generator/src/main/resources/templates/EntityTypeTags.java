@@ -19,12 +19,11 @@ package com.soulfiremc.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
 @SuppressWarnings("unused")
 public class EntityTypeTags {
-  public static final List<Key> TAGS = new ArrayList<>();
+  public static final List<TagKey<EntityType>> TAGS = new ArrayList<>();
 
   //@formatter:off
   // VALUES REPLACE
@@ -32,9 +31,9 @@ public class EntityTypeTags {
 
   private EntityTypeTags() {}
 
-  public static Key register(@KeyPattern String key) {
-    var resourceKey = Key.key(key);
-    TAGS.add(resourceKey);
+  public static <T extends RegistryValue> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
+    var resourceKey = TagKey.<T>key(key);
+    values.add(resourceKey);
     return resourceKey;
   }
 }

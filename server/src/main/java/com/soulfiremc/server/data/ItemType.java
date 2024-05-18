@@ -25,7 +25,7 @@ public record ItemType(
   Key key,
   JsonDataComponents components,
   TierType tierType) implements RegistryValue {
-  public static final Registry<ItemType> REGISTRY = new Registry<>();
+  public static final Registry<ItemType> REGISTRY = new Registry<>(RegistryKeys.ITEM);
 
   //@formatter:off
   public static final ItemType AIR = register("minecraft:air");

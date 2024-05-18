@@ -36,7 +36,7 @@ public record EnchantmentType(
   boolean curse,
   boolean treasureOnly,
   List<EquipmentSlot> slots) implements RegistryValue {
-  public static final Registry<EnchantmentType> REGISTRY = new Registry<>();
+  public static final Registry<EnchantmentType> REGISTRY = new Registry<>(RegistryKeys.ENCHANTMENT);
 
   //@formatter:off
   public static final EnchantmentType PROTECTION = register("minecraft:protection");

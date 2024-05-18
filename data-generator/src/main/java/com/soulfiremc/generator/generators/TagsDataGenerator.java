@@ -63,7 +63,7 @@ public class TagsDataGenerator {
           generateTag(BlockTags.class).stream()
             .map(
               s ->
-                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<BlockType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -84,7 +84,7 @@ public class TagsDataGenerator {
           generateTag(ItemTags.class).stream()
             .map(
               s ->
-                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<ItemType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -105,7 +105,7 @@ public class TagsDataGenerator {
           generateTag(EntityTypeTags.class).stream()
             .map(
               s ->
-                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<EntityType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }
@@ -126,7 +126,7 @@ public class TagsDataGenerator {
           generateTag(FluidTags.class).stream()
             .map(
               s ->
-                "public static final Key %s = register(\"%s\");".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<FluidType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
             .toArray(String[]::new)));
     }
   }

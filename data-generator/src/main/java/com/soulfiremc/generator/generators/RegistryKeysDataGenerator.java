@@ -19,9 +19,11 @@ package com.soulfiremc.generator.generators;
 
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
+import it.unimi.dsi.fastutil.Pair;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 
 @Slf4j
 public class RegistryKeysDataGenerator implements IDataGenerator {
@@ -37,9 +39,19 @@ public class RegistryKeysDataGenerator implements IDataGenerator {
       GeneratorConstants.VALUES_REPLACE,
       String.join(
         "\n  ",
-        BuiltInRegistries.REGISTRY.stream().map(
-            s ->
-              "public static final Key %s = Key.key(\"%s\");".formatted(s.key().location().getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s.key().location()))
+        Arrays.stream(Registries.class.getDeclaredFields()).map(f -> {
+            try {
+              return Pair.of(f.getName(), f.get(null));
+            } catch (ReflectiveOperationException e) {
+              throw new RuntimeException(e);
+            }
+          })
+          .filter(p -> p.right() instanceof ResourceKey<?>)
+          .map(
+            p -> {
+              var value = (ResourceKey<?>) p.right();
+              return "public static final Key %s = Key.key(\"%s\");".formatted(p.left(), value.location());
+            })
           .toArray(String[]::new)));
   }
 }

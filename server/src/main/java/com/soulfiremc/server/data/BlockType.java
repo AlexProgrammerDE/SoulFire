@@ -51,7 +51,7 @@ public record BlockType(
       return FluidType.REGISTRY.getByKey(Key.key(in.nextString()));
     }
   };
-  public static final Registry<BlockType> REGISTRY = new Registry<>();
+  public static final Registry<BlockType> REGISTRY = new Registry<>(RegistryKeys.BLOCK);
 
   //@formatter:off
   public static final BlockType AIR = register("minecraft:air");

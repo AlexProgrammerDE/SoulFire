@@ -28,6 +28,7 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.data.Registry;
+import com.soulfiremc.server.data.RegistryKeys;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -183,8 +184,8 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
-  private final Registry<DimensionType> dimensions = new Registry<>();
-  private final Registry<Biome> biomes = new Registry<>();
+  private final Registry<DimensionType> dimensions = new Registry<>(RegistryKeys.DIMENSION_TYPE);
+  private final Registry<Biome> biomes = new Registry<>(RegistryKeys.BIOME);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final InventoryManager inventoryManager;
@@ -258,17 +259,13 @@ public final class SessionDataManager {
     @Subst("empty") var registry = packet.getRegistry();
     var registryKey = Key.key(registry);
     Registry.RegistryDataWriter<?> registryWriter;
-    switch (packet.getRegistry()) {
-      case "minecraft:dimension_type" -> {
-        registryWriter = dimensions.writer(DimensionType::new);
-      }
-      case "minecraft:worldgen/biome" -> {
-        registryWriter = biomes.writer(Biome::new);
-      }
-      default -> {
-        log.debug("Received registry data for unknown registry {}", packet.getRegistry());
-        return;
-      }
+    if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
+      registryWriter = dimensions.writer(DimensionType::new);
+    } else if (registryKey.equals(RegistryKeys.BIOME)) {
+      registryWriter = biomes.writer(Biome::new);
+    } else {
+      log.debug("Received registry data for unknown registry {}", registryKey);
+      return;
     }
 
     var entries = packet.getEntries();
