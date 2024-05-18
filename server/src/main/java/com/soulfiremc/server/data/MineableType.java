@@ -29,7 +29,7 @@ public enum MineableType {
   AXE(ItemTags.AXES, BlockTags.MINEABLE_WITH_AXE),
   HOE(ItemTags.HOES, BlockTags.MINEABLE_WITH_HOE);
 
-  public static MineableType[] VALUES = values();
+  public static final MineableType[] VALUES = values();
   private final TagKey<ItemType> itemTagKey;
   @Getter
   private final TagKey<BlockType> blockTagKey;

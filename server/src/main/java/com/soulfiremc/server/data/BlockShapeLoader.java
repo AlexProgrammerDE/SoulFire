@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.key.Key;
+import org.intellij.lang.annotations.Subst;
 
 public class BlockShapeLoader {
   public static final Map<Key, List<BlockShapeGroup>> BLOCK_SHAPES =
@@ -41,7 +42,8 @@ public class BlockShapeLoader {
         .forEach(
           line -> {
             var parts = line.split("\\|");
-            var key = Key.key(parts[0]);
+            @Subst("empty") var keyString = parts[0];
+            var key = Key.key(keyString);
 
             var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
             if (parts.length > 1) {

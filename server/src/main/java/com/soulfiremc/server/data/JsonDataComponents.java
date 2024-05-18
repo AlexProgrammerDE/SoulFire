@@ -47,23 +47,13 @@ public record JsonDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> 
       for (var entry : parsedJson.entrySet()) {
         var value = entry.getValue();
         switch (entry.getKey()) {
-          case "minecraft:max_stack_size" -> {
-            var maxStackSize = value.getAsInt();
-            map.put(DataComponentType.MAX_STACK_SIZE, new IntDataComponent(DataComponentType.MAX_STACK_SIZE, maxStackSize));
-          }
-          case "minecraft:rarity" -> {
-            var rarity = value.getAsString();
-            map.put(DataComponentType.RARITY, new IntDataComponent(DataComponentType.RARITY, Rarity.valueOf(rarity.toUpperCase(Locale.ROOT)).ordinal()));
-          }
-          case "minecraft:attribute_modifiers" -> {
-            map.put(DataComponentType.ATTRIBUTE_MODIFIERS, new ObjectDataComponent<>(DataComponentType.ATTRIBUTE_MODIFIERS, JsonToMCPLCodecs.ITEM_ATTRIBUTE_MODIFIERS_CODEC.decode(JsonOps.INSTANCE, value).result().orElseThrow().getFirst()));
-          }
+          case "minecraft:max_stack_size" -> map.put(DataComponentType.MAX_STACK_SIZE, new IntDataComponent(DataComponentType.MAX_STACK_SIZE, value.getAsInt()));
+          case "minecraft:rarity" -> map.put(DataComponentType.RARITY, new IntDataComponent(DataComponentType.RARITY, Rarity.valueOf(value.getAsString().toUpperCase(Locale.ROOT)).ordinal()));
+          case "minecraft:attribute_modifiers" -> map.put(DataComponentType.ATTRIBUTE_MODIFIERS, new ObjectDataComponent<>(DataComponentType.ATTRIBUTE_MODIFIERS, JsonToMCPLCodecs.ITEM_ATTRIBUTE_MODIFIERS_CODEC.decode(JsonOps.INSTANCE, value).result().orElseThrow().getFirst()));
           case "minecraft:tool" -> {
             // TODO: Implement
           }
-          case "minecraft:food" -> {
-            map.put(DataComponentType.FOOD, new ObjectDataComponent<>(DataComponentType.FOOD, JsonToMCPLCodecs.FOOD_PROPERTIES_CODEC.decode(JsonOps.INSTANCE, value).result().orElseThrow().getFirst()));
-          }
+          case "minecraft:food" -> map.put(DataComponentType.FOOD, new ObjectDataComponent<>(DataComponentType.FOOD, JsonToMCPLCodecs.FOOD_PROPERTIES_CODEC.decode(JsonOps.INSTANCE, value).result().orElseThrow().getFirst()));
           default -> log.trace("Unknown DataComponentType: {}", entry.getKey());
         }
       }

@@ -70,6 +70,7 @@ import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.tcp.TcpSession;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 public class ViaClientSession extends TcpSession {
@@ -155,7 +156,7 @@ public class ViaClientSession extends TcpSession {
       bootstrap.handler(
         new ChannelInitializer<>() {
           @Override
-          public void initChannel(Channel channel) {
+          public void initChannel(@NotNull Channel channel) {
             var protocol = getPacketProtocol();
             protocol.newClientSession(ViaClientSession.this, false);
 
@@ -287,7 +288,7 @@ public class ViaClientSession extends TcpSession {
         "proxy-protocol-packet-sender",
         new ChannelInboundHandlerAdapter() {
           @Override
-          public void channelActive(ChannelHandlerContext ctx) throws Exception {
+          public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
             var proxiedProtocol =
               clientAddress.getAddress() instanceof Inet4Address
                 ? HAProxyProxiedProtocol.TCP4

@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ResolveUtil {
   private static final DirContext DIR_CONTEXT;
-  public static int MC_DEFAULT_PORT = 25565;
+  public static final int MC_DEFAULT_PORT = 25565;
 
   static {
     try {

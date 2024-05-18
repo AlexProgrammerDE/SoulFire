@@ -171,9 +171,7 @@ public class SFMenuBar extends JMenuBar {
     for (var theme : THEMES) {
       var themeItem = new JRadioButtonMenuItem(theme.getSimpleName());
       themeUpdateCallbacks.add(
-        () -> {
-          themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName()));
-        });
+        () -> themeItem.setSelected(theme.getName().equals(ThemeUtil.getThemeClassName())));
       themeItem.addActionListener(
         e -> {
           GUIClientProps.setString("theme", theme.getName());
@@ -191,9 +189,7 @@ public class SFMenuBar extends JMenuBar {
     for (var terminal : TerminalTheme.THEMES) {
       var terminalItem = new JRadioButtonMenuItem(terminal.name());
       terminalUpdateCallbacks.add(
-        () -> {
-          terminalItem.setSelected(terminal == ThemeUtil.getTerminal());
-        });
+        () -> terminalItem.setSelected(terminal == ThemeUtil.getTerminal()));
       terminalItem.addActionListener(
         e -> {
           GUIClientProps.setString("terminal", terminal.name());

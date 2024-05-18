@@ -68,7 +68,6 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.tcp.TcpServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
-import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -95,7 +94,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengt
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.ServerStatusInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
-import org.geysermc.mcprotocollib.protocol.data.status.handler.ServerInfoBuilder;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundPingPacket;
@@ -221,99 +219,98 @@ public class POVServer implements InternalPlugin {
 
       server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
       server.setGlobalFlag(
-        MinecraftConstants.SERVER_INFO_BUILDER_KEY, (ServerInfoBuilder) session -> pong);
+        MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> pong);
 
       server.setGlobalFlag(
         MinecraftConstants.SERVER_LOGIN_HANDLER_KEY,
-        (ServerLoginHandler)
-          session -> {
-            session.send(
-              new ClientboundLoginPacket(
+        session -> {
+          session.send(
+            new ClientboundLoginPacket(
+              0,
+              false,
+              new String[] {"minecraft:the_end"},
+              1,
+              0,
+              0,
+              false,
+              false,
+              false,
+              new PlayerSpawnInfo(
                 0,
+                "minecraft:the_end",
+                100,
+                GameMode.SPECTATOR,
+                GameMode.SPECTATOR,
                 false,
-                new String[] {"minecraft:the_end"},
-                1,
-                0,
-                0,
                 false,
-                false,
-                false,
-                new PlayerSpawnInfo(
-                  0,
-                  "minecraft:the_end",
-                  100,
-                  GameMode.SPECTATOR,
-                  GameMode.SPECTATOR,
-                  false,
-                  false,
-                  null,
-                  0),
-                false));
+                null,
+                0),
+              false));
 
-            session.send(
-              new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
+          session.send(
+            new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
 
-            // this packet is also required to let our player spawn, but the location itself
-            // doesn't matter
-            session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
+          // this packet is also required to let our player spawn, but the location itself
+          // doesn't matter
+          session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
 
-            // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
-            // request packet spam,
-            // so send it after calling ConnectedEvent which adds the PacketHandler as listener
-            session.send(new ClientboundPlayerPositionPacket(0, 0, 0, 0, 0, 0));
+          // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
+          // request packet spam,
+          // so send it after calling ConnectedEvent which adds the PacketHandler as listener
+          session.send(new ClientboundPlayerPositionPacket(0, 0, 0, 0, 0, 0));
 
-            // this packet is required since 1.20.3
-            session.send(
-              new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+          // this packet is required since 1.20.3
+          session.send(
+            new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
-            var sectionCount = 16;
-            var buf = Unpooled.buffer();
-            for (var i = 0; i < sectionCount; i++) {
-              var chunk = DataPalette.createForChunk();
-              chunk.set(0, 0, 0, 0);
-              var biome = DataPalette.createForBiome();
-              biome.set(0, 0, 0, 0);
-              SFProtocolHelper.writeChunkSection(
-                buf,
-                new ChunkSection(0, chunk, biome),
-                (MinecraftCodecHelper) session.getCodecHelper());
-            }
+          var sectionCount = 16;
+          var buf = Unpooled.buffer();
+          for (var i = 0; i < sectionCount; i++) {
+            var chunk = DataPalette.createForChunk();
+            chunk.set(0, 0, 0, 0);
+            var biome = DataPalette.createForBiome();
+            biome.set(0, 0, 0, 0);
+            SFProtocolHelper.writeChunkSection(
+              buf,
+              new ChunkSection(0, chunk, biome),
+              (MinecraftCodecHelper) session.getCodecHelper());
+          }
 
-            var chunkBytes = new byte[buf.readableBytes()];
-            buf.readBytes(chunkBytes);
+          var chunkBytes = new byte[buf.readableBytes()];
+          buf.readBytes(chunkBytes);
 
-            var lightMask = new BitSet();
-            lightMask.set(0, sectionCount + 2);
-            var skyUpdateList = new ArrayList<byte[]>();
-            for (var i = 0; i < sectionCount + 2; i++) {
-              skyUpdateList.add(FULL_LIGHT); // sky light
-            }
+          var lightMask = new BitSet();
+          lightMask.set(0, sectionCount + 2);
+          var skyUpdateList = new ArrayList<byte[]>();
+          for (var i = 0; i < sectionCount + 2; i++) {
+            skyUpdateList.add(FULL_LIGHT); // sky light
+          }
 
-            var lightUpdateData =
-              new LightUpdateData(
-                lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
+          var lightUpdateData =
+            new LightUpdateData(
+              lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
 
-            session.send(
-              new ClientboundLevelChunkWithLightPacket(
-                0,
-                0,
-                chunkBytes,
-                NbtMap.EMPTY,
-                new BlockEntityInfo[0],
-                lightUpdateData));
+          session.send(
+            new ClientboundLevelChunkWithLightPacket(
+              0,
+              0,
+              chunkBytes,
+              NbtMap.EMPTY,
+              new BlockEntityInfo[0],
+              lightUpdateData));
 
-            // Manually call the connect event
-            session.callEvent(new ConnectedEvent(session));
+          // Manually call the connect event
+          session.callEvent(new ConnectedEvent(session));
 
-            var brandBuffer = Unpooled.buffer();
-            session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
+          var brandBuffer = Unpooled.buffer();
+          session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
 
-            var brandBytes = new byte[brandBuffer.readableBytes()];
-            brandBuffer.readBytes(brandBytes);
+          var brandBytes = new byte[brandBuffer.readableBytes()];
+          brandBuffer.readBytes(brandBytes);
 
-            session.send(
-              new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
-          });
+          session.send(
+            new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
+        });
       server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
 
       server.addListener(
@@ -694,7 +691,7 @@ public class POVServer implements InternalPlugin {
                   }
 
                   var currentId =
-                    session.<GameProfile>getFlag(MinecraftConstants.PROFILE_KEY).getId();
+                    session.getFlag(MinecraftConstants.PROFILE_KEY).getId();
                   session.send(
                     new ClientboundPlayerInfoUpdatePacket(
                       EnumSet.of(

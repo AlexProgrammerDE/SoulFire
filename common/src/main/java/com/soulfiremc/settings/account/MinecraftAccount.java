@@ -76,18 +76,10 @@ public record MinecraftAccount(
         .setLastKnownName(lastKnownName);
 
     switch (accountData) {
-      case BedrockData bedrockData -> {
-        builder.setBedrockData(bedrockData.toProto());
-      }
-      case OfflineJavaData offlineJavaData -> {
-        builder.setOfflineJavaData(offlineJavaData.toProto());
-      }
-      case OnlineSimpleJavaData onlineSimpleJavaData -> {
-        builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
-      }
-      case OnlineChainJavaData onlineChainJavaData -> {
-        builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
-      }
+      case BedrockData bedrockData -> builder.setBedrockData(bedrockData.toProto());
+      case OfflineJavaData offlineJavaData -> builder.setOfflineJavaData(offlineJavaData.toProto());
+      case OnlineSimpleJavaData onlineSimpleJavaData -> builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
+      case OnlineChainJavaData onlineChainJavaData -> builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
     }
 
     return builder.build();
