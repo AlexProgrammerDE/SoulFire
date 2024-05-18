@@ -35,8 +35,8 @@ public class EntityAttributeState {
   private static boolean isNotPartOf(ItemAttributeModifiers.EquipmentSlotGroup itemSlot, EquipmentSlot comparedTo) {
     return !switch (itemSlot) {
       case ANY -> true;
-      case MAINHAND -> comparedTo == EquipmentSlot.MAINHAND;
-      case OFFHAND -> comparedTo == EquipmentSlot.OFFHAND;
+      case MAIN_HAND -> comparedTo == EquipmentSlot.MAINHAND;
+      case OFF_HAND -> comparedTo == EquipmentSlot.OFFHAND;
       case HAND -> comparedTo == EquipmentSlot.MAINHAND || comparedTo == EquipmentSlot.OFFHAND;
       case FEET -> comparedTo == EquipmentSlot.FEET;
       case LEGS -> comparedTo == EquipmentSlot.LEGS;
@@ -61,7 +61,7 @@ public class EntityAttributeState {
       getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
         .modifiers()
         .put(modifier.getModifier().getId(), new Attribute.Modifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), switch (modifier.getModifier().getOperation()) {
-          case ADD_VALUE -> ModifierOperation.ADD_VALUE;
+          case ADD -> ModifierOperation.ADD_VALUE;
           case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
           case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
         }));

@@ -922,7 +922,7 @@ public class POVServer implements InternalPlugin {
                                         modifier.uuid(),
                                         modifier.amount(),
                                         switch (modifier.operation()) {
-                                          case ADD_VALUE -> ModifierOperation.ADD_VALUE;
+                                          case ADD_VALUE -> ModifierOperation.ADD;
                                           case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
                                           case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
                                         }))

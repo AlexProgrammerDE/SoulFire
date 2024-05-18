@@ -886,7 +886,7 @@ public final class SessionDataManager {
                   modifier.getUuid(),
                   modifier.getAmount(),
                   switch (modifier.getOperation()) {
-                    case ADD_VALUE -> ModifierOperation.ADD_VALUE;
+                    case ADD -> ModifierOperation.ADD_VALUE;
                     case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
                     case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
                   }))
