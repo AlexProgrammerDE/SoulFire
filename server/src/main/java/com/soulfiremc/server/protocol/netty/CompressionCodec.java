@@ -35,7 +35,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
   // taken from Krypton (GPL) and modified
   // https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
   private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
-  private final int compressionLevel = 6; // TODO: make configurable
+  private static final int COMPRESSION_LEVEL = Integer.getInteger("velocity.compression-level", 6);
   @Setter
   private int threshold;
   private VelocityCompressor compressor;
@@ -59,9 +59,9 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
   private VelocityCompressor createCompressor(boolean allowNative) {
     if (!allowNative) {
-      return JavaVelocityCompressor.FACTORY.create(Math.min(compressionLevel, 9));
+      return JavaVelocityCompressor.FACTORY.create(Math.min(COMPRESSION_LEVEL, 9));
     }
-    return Natives.compress.get().create(compressionLevel);
+    return Natives.compress.get().create(COMPRESSION_LEVEL);
   }
 
   @Override
