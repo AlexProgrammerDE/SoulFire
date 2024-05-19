@@ -11,7 +11,6 @@ sourceSets {
         property("description", rootProject.description)
         property("url", "https://soulfiremc.com")
         property("commit_hash", project.latestCommitHash())
-        property("commit_message", project.latestCommitMessage())
         property("branch_name", project.branchName())
       }
     }

@@ -23,7 +23,6 @@ public class BuildData {
   public static final String DESCRIPTION = "{{ description }}";
   public static final String URL = "{{ url }}";
   public static final String COMMIT_HASH = "{{ commit_hash }}";
-  public static final String COMMIT_MESSAGE = "{{ commit_message }}";
   public static final String BRANCH_NAME = "{{ branch_name }}";
 
   private BuildData() {
