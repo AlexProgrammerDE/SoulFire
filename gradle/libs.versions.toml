@@ -52,7 +52,7 @@ flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version.ref 
 flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version.ref = "flatlaf-jetbrains-mono-version" }
 xchart = "org.knowm.xchart:xchart:3.8.8"
 miglayout-swing = "com.miglayout:miglayout-swing:11.3"
-mcprotocollib = "com.github.AlexProgrammerDE:MCProtocolLib:0f52621"
+mcprotocollib = "com.github.AlexProgrammerDE:MCProtocolLib:1.16.5-2"
 velocity-native = "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
