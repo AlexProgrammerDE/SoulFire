@@ -68,7 +68,7 @@ public class SFViaPlatform implements ViaPlatform<UserConnection> {
 
   public void init() {
     config =
-      new AbstractViaConfig(dataFolder.resolve("config.yml").toFile()) {
+      new AbstractViaConfig(dataFolder.resolve("config.yml").toFile(), logger) {
         private static final List<String> UNSUPPORTED =
           List.of(
             "checkforupdates",

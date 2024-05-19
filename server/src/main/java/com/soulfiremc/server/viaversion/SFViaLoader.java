@@ -26,12 +26,12 @@ import com.soulfiremc.server.viaversion.providers.SFViaVersionProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.Protocol1_13To1_12_2;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
+import com.viaversion.viaversion.protocols.v1_12_2to1_13.Protocol1_12_2To1_13;
+import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
-import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
-import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
+import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
+import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
+import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
 
 public class SFViaLoader implements ViaPlatformLoader {
   @Override
@@ -50,15 +50,15 @@ public class SFViaLoader implements ViaPlatformLoader {
       .use(NettyPipelineProvider.class, new SFViaNettyPipelineProvider());
 
     // For Forge
-    Protocol1_13To1_12_2.MAPPINGS
+    Protocol1_12_2To1_13.MAPPINGS
       .getChannelMappings()
       .put("FML|HS", "fml:hs"); // Forge 1.7 - 1.12.2
-    Protocol1_13To1_12_2.MAPPINGS
+    Protocol1_12_2To1_13.MAPPINGS
       .getChannelMappings()
       .put("FML|MP", "fml:mp"); // Forge 1.7 - 1.12.2
-    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
-    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
-    Protocol1_13To1_12_2.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
+    Protocol1_12_2To1_13.MAPPINGS.getChannelMappings().put("FML", "fml:fml"); // Forge 1.7
+    Protocol1_12_2To1_13.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
+    Protocol1_12_2To1_13.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
   }
 
   @Override

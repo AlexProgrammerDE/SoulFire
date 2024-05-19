@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.exception.CancelDecoderException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -53,7 +53,7 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
       return; // not readable
     }
 
-    var length = Type.VAR_INT.readPrimitive(in);
+    var length = Types.VAR_INT.readPrimitive(in);
 
     if (length >= 2097152 || length < 0) {
       throw getBadLength();
@@ -71,7 +71,7 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
     if (msg.readableBytes() >= 2097152) {
       throw getBadLength();
     }
-    Type.VAR_INT.writePrimitive(out, msg.readableBytes());
+    Types.VAR_INT.writePrimitive(out, msg.readableBytes());
     out.writeBytes(msg);
   }
 
