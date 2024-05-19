@@ -24,18 +24,18 @@ import lombok.extern.slf4j.Slf4j;
 public class ToolSpeedType {
   public static float getBlockToolSpeed(
     TagsState tagsState, ItemType itemType, BlockType blockType) {
-    if (tagsState.isItemInTag(itemType, ItemTags.SWORDS)) {
+    if (tagsState.isValueInTag(itemType, ItemTags.SWORDS)) {
       if (blockType == BlockType.COBWEB) {
         return 15;
-      } else if (tagsState.isBlockInTag(blockType, BlockTags.SWORD_EFFICIENT)) {
+      } else if (tagsState.isValueInTag(blockType, BlockTags.SWORD_EFFICIENT)) {
         return 1.5F;
       } else {
         return 1;
       }
     } else if (itemType == ItemType.SHEARS) {
-      if (blockType == BlockType.COBWEB || tagsState.isBlockInTag(blockType, BlockTags.LEAVES)) {
+      if (blockType == BlockType.COBWEB || tagsState.isValueInTag(blockType, BlockTags.LEAVES)) {
         return 15;
-      } else if (tagsState.isBlockInTag(blockType, BlockTags.WOOL)) {
+      } else if (tagsState.isValueInTag(blockType, BlockTags.WOOL)) {
         return 5;
       } else if (blockType == BlockType.VINE || blockType == BlockType.GLOW_LICHEN) {
         return 1;
@@ -52,7 +52,7 @@ public class ToolSpeedType {
     var tierType = itemType.tierType();
     if (tierType != null) {
       var tagName = MineableType.getFromTool(tagsState, itemType);
-      if (tagName.isPresent() && tagsState.isBlockInTag(blockType, tagName.get().blockTagKey())) {
+      if (tagName.isPresent() && tagsState.isValueInTag(blockType, tagName.get().blockTagKey())) {
         return tierType.miningSpeed();
       }
     }
@@ -63,7 +63,7 @@ public class ToolSpeedType {
 
   public static boolean isRightToolFor(
     TagsState tagsState, ItemType itemType, BlockType blockType) {
-    if (tagsState.isItemInTag(itemType, ItemTags.SWORDS)) {
+    if (tagsState.isValueInTag(itemType, ItemTags.SWORDS)) {
       return blockType == BlockType.COBWEB;
     } else if (itemType == ItemType.SHEARS) {
       return blockType == BlockType.COBWEB
@@ -76,16 +76,16 @@ public class ToolSpeedType {
       }
 
       var level = tier.level();
-      if (level < 3 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_DIAMOND_TOOL)) {
+      if (level < 3 && tagsState.isValueInTag(blockType, BlockTags.NEEDS_DIAMOND_TOOL)) {
         return false;
-      } else if (level < 2 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_IRON_TOOL)) {
+      } else if (level < 2 && tagsState.isValueInTag(blockType, BlockTags.NEEDS_IRON_TOOL)) {
         return false;
-      } else if (level < 1 && tagsState.isBlockInTag(blockType, BlockTags.NEEDS_STONE_TOOL)) {
+      } else if (level < 1 && tagsState.isValueInTag(blockType, BlockTags.NEEDS_STONE_TOOL)) {
         return false;
       }
 
       return MineableType.getFromTool(tagsState, itemType)
-        .filter(type -> tagsState.isBlockInTag(blockType, type.blockTagKey()))
+        .filter(type -> tagsState.isValueInTag(blockType, type.blockTagKey()))
         .isPresent();
     }
   }

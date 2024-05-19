@@ -35,12 +35,16 @@ task("runSFDedicated", JavaExec::class) {
     "-XX:G1HeapRegionSize=32M"
   )
 
+  standardInput = System.`in`
+
+  val runDir = projectDir.resolve("run")
+  runDir.mkdirs()
+  workingDir = runDir
+
   outputs.upToDateWhen { false }
 }
 
 dependencies {
-  libs.bundles.bom.get().forEach { api(platform(it)) }
-
   implementation(projects.buildData)
   api(projects.proto)
   api(projects.common)

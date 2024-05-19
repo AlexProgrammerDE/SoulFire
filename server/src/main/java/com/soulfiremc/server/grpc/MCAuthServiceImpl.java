@@ -84,7 +84,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
       var account = convertService(request.getAccount().getType()).refresh(receivedAccount,
-          convertProxy(request::hasProxy, request::getProxy)).join();
+        convertProxy(request::hasProxy, request::getProxy)).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

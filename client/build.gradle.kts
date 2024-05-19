@@ -35,6 +35,8 @@ task("runSFClient", JavaExec::class) {
     "-XX:G1HeapRegionSize=32M"
   )
 
+  standardInput = System.`in`
+
   outputs.upToDateWhen { false }
 }
 
@@ -57,12 +59,12 @@ task("runSFClientLocal", JavaExec::class) {
     "-Dsf.disableServerSelect=true"
   )
 
+  standardInput = System.`in`
+
   outputs.upToDateWhen { false }
 }
 
 dependencies {
-  libs.bundles.bom.get().forEach { api(platform(it)) }
-
   implementation(projects.buildData)
   api(projects.proto)
   api(projects.common)

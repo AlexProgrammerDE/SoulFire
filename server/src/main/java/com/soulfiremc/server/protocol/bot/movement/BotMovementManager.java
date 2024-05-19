@@ -229,7 +229,7 @@ public class BotMovementManager {
 
   public boolean isClimbable(Level world, Vector3i pos) {
     var blockType = world.getBlockState(pos).blockType();
-    return tagsState.isBlockInTag(blockType, BlockTags.CLIMBABLE)
+    return tagsState.isValueInTag(blockType, BlockTags.CLIMBABLE)
       || blockType == BlockType.POWDER_SNOW;
   }
 

@@ -39,7 +39,7 @@ public record BlockType(
   FluidType fluidType,
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
-  BlockStates statesData) implements RegistryValue {
+  BlockStates statesData) implements RegistryValue<BlockType> {
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
     @Override
     public void write(JsonWriter out, FluidType value) throws IOException {
@@ -51,7 +51,7 @@ public record BlockType(
       return FluidType.REGISTRY.getByKey(Key.key(in.nextString()));
     }
   };
-  public static final Registry<BlockType> REGISTRY = new Registry<>();
+  public static final Registry<BlockType> REGISTRY = new Registry<>(RegistryKeys.BLOCK);
 
   //@formatter:off
   public static final BlockType AIR = register("minecraft:air");
@@ -1155,5 +1155,10 @@ public record BlockType(
       XZ,
       XYZ
     }
+  }
+
+  @Override
+  public Registry<BlockType> registry() {
+    return REGISTRY;
   }
 }

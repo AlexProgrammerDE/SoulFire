@@ -31,37 +31,37 @@ import lombok.RequiredArgsConstructor;
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
 public class DualMap<L, R> {
-    private final Map<L, R> map;
-    private final Map<R, L> reverseMap;
+  private final Map<L, R> map;
+  private final Map<R, L> reverseMap;
 
-    public DualMap(Map<L, R> map) {
-        this.map = map;
-        this.reverseMap = new HashMap<>();
-        for (var entry : map.entrySet()) {
-          reverseMap.put(entry.getValue(), entry.getKey());
-        }
+  public DualMap(Map<L, R> map) {
+    this.map = map;
+    this.reverseMap = new HashMap<>();
+    for (var entry : map.entrySet()) {
+      reverseMap.put(entry.getValue(), entry.getKey());
     }
+  }
 
-    public static <L extends Enum<L>, R> DualMap<L, R> forEnumSwitch(Class<L> clazz, Function<L, R> mapper) {
-      return new DualMap<>(
-        Arrays.stream(clazz.getEnumConstants())
-          .collect(Collectors.toMap(Function.identity(), mapper))
-      );
-    }
+  public static <L extends Enum<L>, R> DualMap<L, R> forEnumSwitch(Class<L> clazz, Function<L, R> mapper) {
+    return new DualMap<>(
+      Arrays.stream(clazz.getEnumConstants())
+        .collect(Collectors.toMap(Function.identity(), mapper))
+    );
+  }
 
-    public R getRight(L key) {
-      return map.get(key);
-    }
+  public static <T> Codec<T> keyCodec(DualMap<T, String> map) {
+    return Codec.STRING.xmap(map::getLeft, map::getRight);
+  }
 
-    public L getLeft(R value) {
-      return reverseMap.get(value);
-    }
+  public static <T> Codec<T> valueCodec(DualMap<String, T> map) {
+    return Codec.STRING.xmap(map::getRight, map::getLeft);
+  }
 
-    public static <T> Codec<T> keyCodec(DualMap<T, String> map) {
-        return Codec.STRING.xmap(map::getLeft, map::getRight);
-    }
+  public R getRight(L key) {
+    return map.get(key);
+  }
 
-    public static <T> Codec<T> valueCodec(DualMap<String, T> map) {
-        return Codec.STRING.xmap(map::getRight, map::getLeft);
-    }
+  public L getLeft(R value) {
+    return reverseMap.get(value);
+  }
 }

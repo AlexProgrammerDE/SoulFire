@@ -19,55 +19,54 @@ package com.soulfiremc.server.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
 @SuppressWarnings("unused")
 public class EntityTypeTags {
-  public static final List<Key> TAGS = new ArrayList<>();
+  public static final List<TagKey<EntityType>> TAGS = new ArrayList<>();
 
   //@formatter:off
-  public static final Key SKELETONS = register("minecraft:skeletons");
-  public static final Key ZOMBIES = register("minecraft:zombies");
-  public static final Key RAIDERS = register("minecraft:raiders");
-  public static final Key UNDEAD = register("minecraft:undead");
-  public static final Key BEEHIVE_INHABITORS = register("minecraft:beehive_inhabitors");
-  public static final Key ARROWS = register("minecraft:arrows");
-  public static final Key IMPACT_PROJECTILES = register("minecraft:impact_projectiles");
-  public static final Key POWDER_SNOW_WALKABLE_MOBS = register("minecraft:powder_snow_walkable_mobs");
-  public static final Key AXOLOTL_ALWAYS_HOSTILES = register("minecraft:axolotl_always_hostiles");
-  public static final Key AXOLOTL_HUNT_TARGETS = register("minecraft:axolotl_hunt_targets");
-  public static final Key FREEZE_IMMUNE_ENTITY_TYPES = register("minecraft:freeze_immune_entity_types");
-  public static final Key FREEZE_HURTS_EXTRA_TYPES = register("minecraft:freeze_hurts_extra_types");
-  public static final Key CAN_BREATHE_UNDER_WATER = register("minecraft:can_breathe_under_water");
-  public static final Key FROG_FOOD = register("minecraft:frog_food");
-  public static final Key FALL_DAMAGE_IMMUNE = register("minecraft:fall_damage_immune");
-  public static final Key DISMOUNTS_UNDERWATER = register("minecraft:dismounts_underwater");
-  public static final Key NON_CONTROLLING_RIDER = register("minecraft:non_controlling_rider");
-  public static final Key DEFLECTS_PROJECTILES = register("minecraft:deflects_projectiles");
-  public static final Key CAN_TURN_IN_BOATS = register("minecraft:can_turn_in_boats");
-  public static final Key ILLAGER = register("minecraft:illager");
-  public static final Key AQUATIC = register("minecraft:aquatic");
-  public static final Key ARTHROPOD = register("minecraft:arthropod");
-  public static final Key IGNORES_POISON_AND_REGEN = register("minecraft:ignores_poison_and_regen");
-  public static final Key INVERTED_HEALING_AND_HARM = register("minecraft:inverted_healing_and_harm");
-  public static final Key WITHER_FRIENDS = register("minecraft:wither_friends");
-  public static final Key ILLAGER_FRIENDS = register("minecraft:illager_friends");
-  public static final Key NOT_SCARY_FOR_PUFFERFISH = register("minecraft:not_scary_for_pufferfish");
-  public static final Key SENSITIVE_TO_IMPALING = register("minecraft:sensitive_to_impaling");
-  public static final Key SENSITIVE_TO_BANE_OF_ARTHROPODS = register("minecraft:sensitive_to_bane_of_arthropods");
-  public static final Key SENSITIVE_TO_SMITE = register("minecraft:sensitive_to_smite");
-  public static final Key NO_ANGER_FROM_WIND_CHARGE = register("minecraft:no_anger_from_wind_charge");
-  public static final Key IMMUNE_TO_OOZING = register("minecraft:immune_to_oozing");
-  public static final Key IMMUNE_TO_INFESTED = register("minecraft:immune_to_infested");
-  public static final Key REDIRECTABLE_PROJECTILE = register("minecraft:redirectable_projectile");
+  public static final TagKey<EntityType> SKELETONS = register("minecraft:skeletons", TAGS);
+  public static final TagKey<EntityType> ZOMBIES = register("minecraft:zombies", TAGS);
+  public static final TagKey<EntityType> RAIDERS = register("minecraft:raiders", TAGS);
+  public static final TagKey<EntityType> UNDEAD = register("minecraft:undead", TAGS);
+  public static final TagKey<EntityType> BEEHIVE_INHABITORS = register("minecraft:beehive_inhabitors", TAGS);
+  public static final TagKey<EntityType> ARROWS = register("minecraft:arrows", TAGS);
+  public static final TagKey<EntityType> IMPACT_PROJECTILES = register("minecraft:impact_projectiles", TAGS);
+  public static final TagKey<EntityType> POWDER_SNOW_WALKABLE_MOBS = register("minecraft:powder_snow_walkable_mobs", TAGS);
+  public static final TagKey<EntityType> AXOLOTL_ALWAYS_HOSTILES = register("minecraft:axolotl_always_hostiles", TAGS);
+  public static final TagKey<EntityType> AXOLOTL_HUNT_TARGETS = register("minecraft:axolotl_hunt_targets", TAGS);
+  public static final TagKey<EntityType> FREEZE_IMMUNE_ENTITY_TYPES = register("minecraft:freeze_immune_entity_types", TAGS);
+  public static final TagKey<EntityType> FREEZE_HURTS_EXTRA_TYPES = register("minecraft:freeze_hurts_extra_types", TAGS);
+  public static final TagKey<EntityType> CAN_BREATHE_UNDER_WATER = register("minecraft:can_breathe_under_water", TAGS);
+  public static final TagKey<EntityType> FROG_FOOD = register("minecraft:frog_food", TAGS);
+  public static final TagKey<EntityType> FALL_DAMAGE_IMMUNE = register("minecraft:fall_damage_immune", TAGS);
+  public static final TagKey<EntityType> DISMOUNTS_UNDERWATER = register("minecraft:dismounts_underwater", TAGS);
+  public static final TagKey<EntityType> NON_CONTROLLING_RIDER = register("minecraft:non_controlling_rider", TAGS);
+  public static final TagKey<EntityType> DEFLECTS_PROJECTILES = register("minecraft:deflects_projectiles", TAGS);
+  public static final TagKey<EntityType> CAN_TURN_IN_BOATS = register("minecraft:can_turn_in_boats", TAGS);
+  public static final TagKey<EntityType> ILLAGER = register("minecraft:illager", TAGS);
+  public static final TagKey<EntityType> AQUATIC = register("minecraft:aquatic", TAGS);
+  public static final TagKey<EntityType> ARTHROPOD = register("minecraft:arthropod", TAGS);
+  public static final TagKey<EntityType> IGNORES_POISON_AND_REGEN = register("minecraft:ignores_poison_and_regen", TAGS);
+  public static final TagKey<EntityType> INVERTED_HEALING_AND_HARM = register("minecraft:inverted_healing_and_harm", TAGS);
+  public static final TagKey<EntityType> WITHER_FRIENDS = register("minecraft:wither_friends", TAGS);
+  public static final TagKey<EntityType> ILLAGER_FRIENDS = register("minecraft:illager_friends", TAGS);
+  public static final TagKey<EntityType> NOT_SCARY_FOR_PUFFERFISH = register("minecraft:not_scary_for_pufferfish", TAGS);
+  public static final TagKey<EntityType> SENSITIVE_TO_IMPALING = register("minecraft:sensitive_to_impaling", TAGS);
+  public static final TagKey<EntityType> SENSITIVE_TO_BANE_OF_ARTHROPODS = register("minecraft:sensitive_to_bane_of_arthropods", TAGS);
+  public static final TagKey<EntityType> SENSITIVE_TO_SMITE = register("minecraft:sensitive_to_smite", TAGS);
+  public static final TagKey<EntityType> NO_ANGER_FROM_WIND_CHARGE = register("minecraft:no_anger_from_wind_charge", TAGS);
+  public static final TagKey<EntityType> IMMUNE_TO_OOZING = register("minecraft:immune_to_oozing", TAGS);
+  public static final TagKey<EntityType> IMMUNE_TO_INFESTED = register("minecraft:immune_to_infested", TAGS);
+  public static final TagKey<EntityType> REDIRECTABLE_PROJECTILE = register("minecraft:redirectable_projectile", TAGS);
   //@formatter:on
 
   private EntityTypeTags() {}
 
-  public static Key register(@KeyPattern String key) {
-    var resourceKey = Key.key(key);
-    TAGS.add(resourceKey);
+  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
+    var resourceKey = TagKey.<T>key(key);
+    values.add(resourceKey);
     return resourceKey;
   }
 }

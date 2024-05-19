@@ -35,6 +35,7 @@ public class MCHelper {
     return (DedicatedServer) FabricLoader.getInstance().getGameInstance();
   }
 
+  @SuppressWarnings("DataFlowIssue")
   public static GameTestHelper getGameTestHelper() {
     return new GameTestHelper(null) {
       @Override

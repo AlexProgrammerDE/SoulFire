@@ -42,8 +42,6 @@ import java.util.Objects;
 import javax.crypto.Cipher;
 
 public class EncryptionUtils {
-  ;
-
   public static final Pair<String, String> PEM_RSA_PUBLIC_KEY_DESCRIPTOR =
     Pair.of("-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
   public static final Pair<String, String> PEM_RSA_PRIVATE_KEY_DESCRIPTOR =

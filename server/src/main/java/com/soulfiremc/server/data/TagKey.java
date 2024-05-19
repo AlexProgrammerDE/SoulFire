@@ -15,25 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.data;
+package com.soulfiremc.server.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
-@SuppressWarnings("unused")
-public class EntityTypeTags {
-  public static final List<TagKey<EntityType>> TAGS = new ArrayList<>();
-
-  //@formatter:off
-  // VALUES REPLACE
-  //@formatter:on
-
-  private EntityTypeTags() {}
-
-  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key);
-    values.add(resourceKey);
-    return resourceKey;
+public record TagKey<T extends RegistryValue<T>>(Key key) {
+  public static <T extends RegistryValue<T>> TagKey<T> key(@KeyPattern String key) {
+    return new TagKey<>(Key.key(key));
   }
 }

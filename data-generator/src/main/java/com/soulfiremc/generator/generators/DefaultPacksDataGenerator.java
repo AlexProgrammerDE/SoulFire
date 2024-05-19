@@ -38,6 +38,36 @@ import net.minecraft.server.packs.repository.KnownPack;
 
 @Slf4j
 public class DefaultPacksDataGenerator implements IDataGenerator {
+  public static void packRegistries(
+    FriendlyByteBuf friendlyByteBuf,
+    DynamicOps<Tag> ops,
+    RegistryAccess registryAccess
+  ) {
+    friendlyByteBuf.writeCollection(RegistryDataLoader.SYNCHRONIZED_REGISTRIES, (buf, registry) -> {
+      friendlyByteBuf.writeResourceKey(registry.key());
+      packRegistry(friendlyByteBuf, ops, (RegistryDataLoader.RegistryData<?>) registry, registryAccess);
+    });
+  }
+
+  private static <T> void packRegistry(
+    FriendlyByteBuf friendlyByteBuf,
+    DynamicOps<Tag> ops,
+    RegistryDataLoader.RegistryData<T> registryData,
+    RegistryAccess registryAccess
+  ) {
+    var registry = registryAccess.registry(registryData.key()).orElseThrow();
+    friendlyByteBuf.writeCollection(registry.holders().toList(), (buf, holder) -> {
+      var holderPack = registry.registrationInfo(holder.key()).flatMap(RegistrationInfo::knownPackInfo).orElseThrow();
+      var holderData = registryData.elementCodec()
+        .encodeStart(ops, holder.value())
+        .getOrThrow(string -> new IllegalArgumentException("Failed to serialize " + holder.key() + ": " + string));
+
+      KnownPack.STREAM_CODEC.encode(friendlyByteBuf, holderPack);
+      RegistrySynchronization.PackedRegistryEntry.STREAM_CODEC.encode(friendlyByteBuf,
+        new RegistrySynchronization.PackedRegistryEntry(holder.key().location(), Optional.of(holderData)));
+    });
+  }
+
   @Override
   public String getDataName() {
     return "data/builtin_packs.bin.zip";
@@ -72,35 +102,5 @@ public class DefaultPacksDataGenerator implements IDataGenerator {
     }
 
     return byteOutputStream.toByteArray();
-  }
-
-  public static void packRegistries(
-    FriendlyByteBuf friendlyByteBuf,
-    DynamicOps<Tag> ops,
-    RegistryAccess registryAccess
-  ) {
-    friendlyByteBuf.writeCollection(RegistryDataLoader.SYNCHRONIZED_REGISTRIES, (buf, registry) -> {
-      friendlyByteBuf.writeResourceKey(registry.key());
-      packRegistry(friendlyByteBuf, ops, (RegistryDataLoader.RegistryData<?>) registry, registryAccess);
-    });
-  }
-
-  private static <T> void packRegistry(
-    FriendlyByteBuf friendlyByteBuf,
-    DynamicOps<Tag> ops,
-    RegistryDataLoader.RegistryData<T> registryData,
-    RegistryAccess registryAccess
-  ) {
-    var registry = registryAccess.registry(registryData.key()).orElseThrow();
-    friendlyByteBuf.writeCollection(registry.holders().toList(), (buf, holder) -> {
-      var holderPack = registry.registrationInfo(holder.key()).flatMap(RegistrationInfo::knownPackInfo).orElseThrow();
-      var holderData = registryData.elementCodec()
-        .encodeStart(ops, holder.value())
-        .getOrThrow(string -> new IllegalArgumentException("Failed to serialize " + holder.key() + ": " + string));
-
-      KnownPack.STREAM_CODEC.encode(friendlyByteBuf, holderPack);
-      RegistrySynchronization.PackedRegistryEntry.STREAM_CODEC.encode(friendlyByteBuf,
-        new RegistrySynchronization.PackedRegistryEntry(holder.key().location(), Optional.of(holderData)));
-    });
   }
 }

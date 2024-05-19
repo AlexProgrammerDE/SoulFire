@@ -29,7 +29,7 @@ public class ShutdownManager {
   private final Runnable shutdownHook;
   private final PluginManager pluginManager;
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-  private CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
+  private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
   /**
    * Shuts down the software if it is running.

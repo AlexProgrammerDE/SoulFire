@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PortHelper {
-  public static int SF_DEFAULT_PORT = 38765;
+  public static final int SF_DEFAULT_PORT = 38765;
 
   public static int getAvailablePort(int startPort) {
     while (true) {

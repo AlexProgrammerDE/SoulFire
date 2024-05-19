@@ -21,14 +21,13 @@ import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.util.Objects;
-import javax.crypto.SecretKey;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 
 public class SFViaEncryptionProvider extends EncryptionProvider {
   @Override
   public void enableDecryption(UserConnection user) {
     var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
-    SecretKey key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
+    var key = session.getFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY);
     Objects.requireNonNull(key, "Key is null!");
     session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
 

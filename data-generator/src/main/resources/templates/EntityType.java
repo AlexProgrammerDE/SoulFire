@@ -28,8 +28,8 @@ public record EntityType(
   String category,
   boolean friendly,
   boolean summonable,
-  boolean attackable) implements RegistryValue {
-  public static final Registry<EntityType> REGISTRY = new Registry<>();
+  boolean attackable) implements RegistryValue<EntityType> {
+  public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
 
   //@formatter:off
   // VALUES REPLACE
@@ -56,5 +56,10 @@ public record EntityType(
   @Override
   public int hashCode() {
     return id;
+  }
+
+  @Override
+  public Registry<EntityType> registry() {
+    return REGISTRY;
   }
 }
