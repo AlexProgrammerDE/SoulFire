@@ -84,12 +84,12 @@ public class BuiltInKnownPackRegistry {
   public NbtMap mustFindData(ResourceKey<?> registryKey, Key holderKey, List<KnownPack> allowedPacks) {
     var holders = builtInRegistry.get(registryKey.key());
     if (holders == null) {
-      throw new RuntimeException("Unknown registry registry: " + registryKey);
+      throw new RuntimeException("Unknown registry value: " + registryKey);
     }
 
     var holder = holders.get(holderKey);
     if (holder == null) {
-      throw new RuntimeException("Unknown holder registry: " + holderKey);
+      throw new RuntimeException("Unknown holder value: " + holderKey);
     }
 
     if (!allowedPacks.contains(holder.left())) {
