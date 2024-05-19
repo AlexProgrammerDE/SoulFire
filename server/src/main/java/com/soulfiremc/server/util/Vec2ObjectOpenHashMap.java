@@ -44,6 +44,7 @@ import org.jetbrains.annotations.NotNull;
 // Fork of Object2ObjectCustomOpenHashMap
 // The main difference is that it uses native equals and hashcode methods
 // It also does not support null keys, if you provide one, the map will behave unexpectedly
+@SuppressWarnings("MagicConstant")
 public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2ObjectMap<K, V>
   implements Serializable, Cloneable, Hash {
   @Serial
@@ -694,10 +695,10 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
 
     MapSpliterator() {}
 
-    MapSpliterator(int pos, int max, boolean hasSplit) {
+    MapSpliterator(int pos, int max) {
       this.pos = pos;
       this.max = max;
-      this.hasSplit = hasSplit;
+      this.hasSplit = true;
     }
 
     abstract void acceptOnIndex(final C action, final int index);
@@ -789,7 +790,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     EntrySpliterator() {}
 
     EntrySpliterator(int pos, int max) {
-      super(pos, max, true);
+      super(pos, max);
     }
 
     @Override
@@ -827,7 +828,6 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
       return new EntrySpliterator();
     }
 
-    //
     @Override
     @SuppressWarnings("unchecked")
     public boolean contains(final Object o) {
