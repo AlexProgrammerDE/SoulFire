@@ -80,7 +80,6 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     }
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
     if (PipelineUtil.containsCause(cause, CancelCodecException.class)

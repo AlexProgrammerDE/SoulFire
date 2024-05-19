@@ -279,7 +279,6 @@ public class SoulFireServer {
     }
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
     Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
     setupLogging(settingsHolder);
