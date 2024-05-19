@@ -48,28 +48,28 @@ public final class SFEasyMCAuthService
         (res, content) ->
           content
             .asString()
-            .map(
-              responseText -> {
-                var response =
-                  GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
+            .<MinecraftAccount>handle((responseText, sink) -> {
+              var response =
+                GsonInstance.GSON.fromJson(responseText, TokenRedeemResponse.class);
 
-                if (response.error() != null) {
-                  log.error("EasyMC has returned a error: {}", response.error());
-                  throw new RuntimeException(response.error());
-                }
+              if (response.error() != null) {
+                log.error("EasyMC has returned a error: {}", response.error());
+                sink.error(new RuntimeException(response.error()));
+                return;
+              }
 
-                if (response.message() != null) {
-                  log.info(
-                    "EasyMC has a message for you (This is not a error): {}",
-                    response.message());
-                }
+              if (response.message() != null) {
+                log.info(
+                  "EasyMC has a message for you (This is not a error): {}",
+                  response.message());
+              }
 
-                return new MinecraftAccount(
-                  AuthType.EASY_MC,
-                  UUID.fromString(response.uuid()),
-                  response.mcName(),
-                  new OnlineSimpleJavaData(response.session(), -1));
-              }))
+              sink.next(new MinecraftAccount(
+                AuthType.EASY_MC,
+                UUID.fromString(response.uuid()),
+                response.mcName(),
+                new OnlineSimpleJavaData(response.session(), -1)));
+            }))
       .toFuture();
   }
 
