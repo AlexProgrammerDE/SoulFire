@@ -25,20 +25,23 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.Collection;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 
-@RequiredArgsConstructor
 public class Registry<T extends RegistryValue<T>> {
   @Getter
-  private final Key key;
+  private final ResourceKey<? extends Registry<T>> registryKey;
   private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
   @Getter
   private final Codec<T> keyCodec = ExtraCodecs.KYORI_KEY_CODEC.xmap(this::getByKey, RegistryValue::key);
   private final Int2ReferenceMap<T> FROM_ID = new Int2ReferenceOpenHashMap<>();
   @Getter
   private final Codec<T> idCodec = Codec.INT.xmap(this::getById, RegistryValue::id);
+
+  @SuppressWarnings("unchecked")
+  public Registry(ResourceKey<?> registryKey) {
+    this.registryKey = (ResourceKey<? extends Registry<T>>) registryKey;
+  }
 
   public T register(final T value) {
     FROM_KEY.put(value.key(), value);
@@ -63,11 +66,11 @@ public class Registry<T extends RegistryValue<T>> {
     return FROM_KEY.size();
   }
 
-  public RegistryDataWriter<T> writer(FromRegistryDataFactory<T> factory) {
+  public RegistryDataWriter writer(FromRegistryDataFactory<T> factory) {
     return (key, id, data) -> register(factory.create(this, key, id, data));
   }
 
-  public interface RegistryDataWriter<T extends RegistryValue<T>> {
+  public interface RegistryDataWriter {
     void register(Key key, int id, NbtMap data);
   }
 

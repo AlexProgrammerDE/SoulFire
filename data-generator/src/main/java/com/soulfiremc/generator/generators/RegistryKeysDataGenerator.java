@@ -50,7 +50,7 @@ public class RegistryKeysDataGenerator implements IDataGenerator {
           .map(
             p -> {
               var value = (ResourceKey<?>) p.right();
-              return "public static final Key %s = Key.key(\"%s\");".formatted(p.left(), value.location());
+              return "public static final ResourceKey<?> %s = ResourceKey.key(\"%s\");".formatted(p.left(), value.location());
             })
           .toArray(String[]::new)));
   }

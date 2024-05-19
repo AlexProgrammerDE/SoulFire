@@ -20,8 +20,6 @@ package com.soulfiremc.server.data;
 import net.kyori.adventure.key.Key;
 
 public interface RegistryValue<T extends RegistryValue<T>> {
-  Registry<T> registry();
-
   int id();
 
   Key key();

@@ -83,7 +83,7 @@ public class TagBasedArgumentType<T extends RegistryValue<T>, R extends TagResol
     if (string.startsWith(TAG_PREFIX)) {
       string = string.substring(TAG_PREFIX.length());
       for (var key : tagKeys) {
-        if (key.key().value().equals(string) || key.toString().equals(string)) {
+        if (key.key().value().equals(string) || key.key().toString().equals(string)) {
           return tagSupplier.apply(key);
         }
       }

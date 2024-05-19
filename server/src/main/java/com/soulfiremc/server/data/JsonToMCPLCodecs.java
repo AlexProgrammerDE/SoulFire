@@ -18,18 +18,13 @@
 package com.soulfiremc.server.data;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.soulfiremc.server.protocol.codecs.ExtraCodecs;
 import com.soulfiremc.server.util.DualMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
@@ -37,10 +32,9 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.FoodProperti
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectDetails;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectInstance;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.ToolData;
 
 public class JsonToMCPLCodecs {
-  public static final Codec<UUID> UUID_CODEC = Codec.INT_STREAM
-    .comapFlatMap(uuids -> fixedSize(uuids, 4).map(JsonToMCPLCodecs::uuidFromIntArray), uuid -> Arrays.stream(uuidToIntArray(uuid)));
   public static final MapCodec<MobEffectDetails> MOB_EFFECT_DETAILS_MAP_CODEC = MapCodec.recursive(
     "MobEffectInstance.Details",
     codec -> RecordCodecBuilder.mapCodec(
@@ -81,6 +75,22 @@ public class JsonToMCPLCodecs {
       )
       .apply(instance, FoodProperties::new)
   );
+  public static final Codec<ToolData.Rule> TOOL_RULE_CODEC = RecordCodecBuilder.create(
+    instance -> instance.group(
+        ExtraCodecs.holderSetCodec(BlockType.REGISTRY).fieldOf("blocks").forGetter(ToolData.Rule::getHolderSet),
+        ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed").forGetter(arg -> Optional.ofNullable(arg.getSpeed())),
+        Codec.BOOL.optionalFieldOf("correct_for_drops").forGetter(arg -> Optional.ofNullable(arg.getCorrectForDrops()))
+      )
+      .apply(instance, (a, b, c) -> new ToolData.Rule(a, b.orElse(null), c.orElse(null)))
+  );
+  public static final Codec<ToolData> TOOL_CODEC = RecordCodecBuilder.create(
+    instance -> instance.group(
+        TOOL_RULE_CODEC.listOf().fieldOf("rules").forGetter(ToolData::getRules),
+        Codec.FLOAT.optionalFieldOf("default_mining_speed", 1.0F).forGetter(ToolData::getDefaultMiningSpeed),
+        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("damage_per_block", 1).forGetter(ToolData::getDamagePerBlock)
+      )
+      .apply(instance, ToolData::new)
+  );
   private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = DualMap.keyCodec(
     DualMap.forEnumSwitch(ItemAttributeModifiers.EquipmentSlotGroup.class, g -> switch (g) {
       case ANY -> "any";
@@ -102,7 +112,7 @@ public class JsonToMCPLCodecs {
     }));
   public static final MapCodec<ItemAttributeModifiers.AttributeModifier> ATTRIBUTE_MODIFIER_MAP_CODEC = RecordCodecBuilder.mapCodec(
     instance -> instance.group(
-        UUID_CODEC.fieldOf("uuid").forGetter(ItemAttributeModifiers.AttributeModifier::getId),
+        ExtraCodecs.UUID_CODEC.fieldOf("uuid").forGetter(ItemAttributeModifiers.AttributeModifier::getId),
         Codec.STRING.fieldOf("name").forGetter(ItemAttributeModifiers.AttributeModifier::getName),
         Codec.DOUBLE.fieldOf("amount").forGetter(ItemAttributeModifiers.AttributeModifier::getAmount),
         MCPL_MODIFIER_OPERATION_CODEC.fieldOf("operation").forGetter(ItemAttributeModifiers.AttributeModifier::getOperation)
@@ -127,28 +137,4 @@ public class JsonToMCPLCodecs {
   public static final Codec<ItemAttributeModifiers> ITEM_ATTRIBUTE_MODIFIERS_CODEC = Codec.withAlternative(
     ITEM_ATTRIBUTE_MODIFIERS_FULL_CODEC, Item_ATTRIBUTE_MODIFIERS_ENTRY_CODEC.listOf(), list -> new ItemAttributeModifiers(list, true)
   );
-
-  public static UUID uuidFromIntArray(int[] bits) {
-    return new UUID((long) bits[0] << 32 | (long) bits[1] & 4294967295L, (long) bits[2] << 32 | (long) bits[3] & 4294967295L);
-  }
-
-  public static int[] uuidToIntArray(UUID uuid) {
-    var l = uuid.getMostSignificantBits();
-    var m = uuid.getLeastSignificantBits();
-    return leastMostToIntArray(l, m);
-  }
-
-  private static int[] leastMostToIntArray(long most, long least) {
-    return new int[] {(int) (most >> 32), (int) most, (int) (least >> 32), (int) least};
-  }
-
-  public static DataResult<int[]> fixedSize(IntStream stream, int size) {
-    var is = stream.limit(size + 1).toArray();
-    if (is.length != size) {
-      Supplier<String> supplier = () -> "Input is not a list of " + size + " ints";
-      return is.length >= size ? DataResult.error(supplier, Arrays.copyOf(is, size)) : DataResult.error(supplier);
-    } else {
-      return DataResult.success(is);
-    }
-  }
 }

@@ -58,9 +58,4 @@ public record EffectType(int id, Key key, EffectCategory category, boolean benef
     HARMFUL,
     NEUTRAL
   }
-
-  @Override
-  public Registry<EffectType> registry() {
-    return REGISTRY;
-  }
 }

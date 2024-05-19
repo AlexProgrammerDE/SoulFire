@@ -52,9 +52,4 @@ public record AttributeType(int id, Key key, double min, double max, double defa
   public int hashCode() {
     return id;
   }
-
-  @Override
-  public Registry<AttributeType> registry() {
-    return REGISTRY;
-  }
 }

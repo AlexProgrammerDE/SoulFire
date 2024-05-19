@@ -213,7 +213,7 @@ public class BlockTags {
   private BlockTags() {}
 
   public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key);
+    var resourceKey = TagKey.<T>key(key, RegistryKeys.BLOCK);
     values.add(resourceKey);
     return resourceKey;
   }

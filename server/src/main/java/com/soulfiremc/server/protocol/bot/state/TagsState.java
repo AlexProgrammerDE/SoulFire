@@ -43,7 +43,7 @@ public class TagsState {
   }
 
   public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
-    return tags.getOrDefault(value.registry().key(), Map.of())
+    return tags.getOrDefault(tagKey.registry().key(), Map.of())
       .getOrDefault(tagKey.key(), IntSet.of())
       .contains(value.id());
   }

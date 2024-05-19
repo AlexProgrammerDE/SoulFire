@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.util.ResourceHelper;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
@@ -80,15 +81,15 @@ public class BuiltInKnownPackRegistry {
     return returned;
   }
 
-  public NbtMap mustFindData(Key registryKey, Key holderKey, List<KnownPack> allowedPacks) {
-    var holders = builtInRegistry.get(registryKey);
+  public NbtMap mustFindData(ResourceKey<?> registryKey, Key holderKey, List<KnownPack> allowedPacks) {
+    var holders = builtInRegistry.get(registryKey.key());
     if (holders == null) {
-      throw new RuntimeException("Unknown registry key: " + registryKey);
+      throw new RuntimeException("Unknown registry registry: " + registryKey);
     }
 
     var holder = holders.get(holderKey);
     if (holder == null) {
-      throw new RuntimeException("Unknown holder key: " + holderKey);
+      throw new RuntimeException("Unknown holder registry: " + holderKey);
     }
 
     if (!allowedPacks.contains(holder.left())) {

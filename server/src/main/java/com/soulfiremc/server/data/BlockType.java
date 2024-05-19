@@ -1156,9 +1156,4 @@ public record BlockType(
       XYZ
     }
   }
-
-  @Override
-  public Registry<BlockType> registry() {
-    return REGISTRY;
-  }
 }

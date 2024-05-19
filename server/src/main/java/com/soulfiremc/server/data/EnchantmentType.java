@@ -105,9 +105,4 @@ public record EnchantmentType(
   public int hashCode() {
     return id;
   }
-
-  @Override
-  public Registry<EnchantmentType> registry() {
-    return REGISTRY;
-  }
 }

@@ -57,9 +57,4 @@ public record EntityType(
   public int hashCode() {
     return id;
   }
-
-  @Override
-  public Registry<EntityType> registry() {
-    return REGISTRY;
-  }
 }

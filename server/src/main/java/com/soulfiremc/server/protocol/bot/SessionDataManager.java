@@ -29,6 +29,7 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryKeys;
+import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -257,8 +258,8 @@ public final class SessionDataManager {
   @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
     @Subst("empty") var registry = packet.getRegistry();
-    var registryKey = Key.key(registry);
-    Registry.RegistryDataWriter<?> registryWriter;
+    var registryKey = ResourceKey.key(registry);
+    Registry.RegistryDataWriter registryWriter;
     if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
       registryWriter = dimensions.writer(DimensionType::new);
     } else if (registryKey.equals(RegistryKeys.BIOME)) {
