@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.container;
 import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import java.util.HashMap;
+import java.util.Optional;
 import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
@@ -79,15 +80,7 @@ public class SFItemStack extends ItemStack {
 
   public int getEnchantmentLevel(EnchantmentType enchantment) {
     return components().getOptional(DataComponentType.ENCHANTMENTS)
-      .map(enchantments -> {
-        for (var itemEnchantment : enchantments.getEnchantments().entrySet()) {
-          if (itemEnchantment.getKey() == enchantment.id()) {
-            return itemEnchantment.getValue();
-          }
-        }
-
-        return 0;
-      })
+      .flatMap(enchantments -> Optional.ofNullable(enchantments.getEnchantments().get(enchantment.id())))
       .orElse(0);
   }
 
