@@ -170,6 +170,11 @@ public class Costs {
                                              boolean onGround,
                                              @Nullable SFItemStack itemStack,
                                              BlockType blockType) {
+    if (entity != null && entity.abilities().creativeModeBreak()) {
+      // We instantly break any block in creative mode
+      return 1.0F;
+    }
+
     var blockDestroyTime = blockType.destroyTime();
     if (blockDestroyTime == -1.0F) {
       return 0.0F;
@@ -186,7 +191,6 @@ public class Costs {
                                                    boolean onGround,
                                                    @Nullable SFItemStack itemStack,
                                                    BlockType blockType) {
-
     var speedMultiplier = getSpeedMultiplier(tagsState, itemStack, blockType);
 
     if (itemStack != null && speedMultiplier > 1) {
