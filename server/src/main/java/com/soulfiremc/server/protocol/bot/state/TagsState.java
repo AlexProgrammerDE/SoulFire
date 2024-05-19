@@ -43,9 +43,12 @@ public class TagsState {
   }
 
   public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
+    return getValuesOfTag(value, tagKey).contains(value.id());
+  }
+
+  public <T extends RegistryValue<T>> IntSet getValuesOfTag(T value, TagKey<T> tagKey) {
     return tags.getOrDefault(tagKey.registry().key(), Map.of())
-      .getOrDefault(tagKey.key(), IntSet.of())
-      .contains(value.id());
+      .getOrDefault(tagKey.key(), IntSet.of());
   }
 
   public Map<String, Map<String, int[]>> exportTags() {

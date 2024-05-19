@@ -31,8 +31,8 @@ public class ItemTypeHelper {
     return blockType.isPresent() && !blockType.get().fallingBlock();
   }
 
-  public static boolean isTool(ItemType type) {
-    return type.tierType() != null || type == ItemType.SHEARS;
+  public static boolean isTool(SFItemStack itemStack) {
+    return itemStack.components().getOptional(DataComponentType.TOOL).isPresent();
   }
 
   public static boolean isGoodEdibleFood(SFItemStack itemStack) {

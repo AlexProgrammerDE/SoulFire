@@ -23,8 +23,7 @@ import net.kyori.adventure.key.Key;
 public record ItemType(
   int id,
   Key key,
-  JsonDataComponents components,
-  TierType tierType) implements RegistryValue<ItemType> {
+  JsonDataComponents components) implements RegistryValue<ItemType> {
   public static final Registry<ItemType> REGISTRY = new Registry<>(RegistryKeys.ITEM);
 
   //@formatter:off

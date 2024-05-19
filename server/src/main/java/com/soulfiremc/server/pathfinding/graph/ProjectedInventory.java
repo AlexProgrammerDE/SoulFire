@@ -67,7 +67,7 @@ public class ProjectedInventory {
     for (var item : items) {
       if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
         blockItems += item.getAmount();
-      } else if (ItemTypeHelper.isTool(item.type())) {
+      } else if (ItemTypeHelper.isTool(item)) {
         usableToolsAndNull.add(item);
       }
     }

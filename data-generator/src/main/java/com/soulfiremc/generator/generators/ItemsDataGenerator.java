@@ -25,8 +25,6 @@ import java.util.Map;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.Tiers;
 
 public class ItemsDataGenerator implements IDataGenerator {
   public static JsonObject generateItem(Item item) {
@@ -34,10 +32,6 @@ public class ItemsDataGenerator implements IDataGenerator {
 
     itemDesc.addProperty("id", BuiltInRegistries.ITEM.getId(item));
     itemDesc.addProperty("key", BuiltInRegistries.ITEM.getKey(item).toString());
-
-    if (item instanceof TieredItem tieredItem) {
-      itemDesc.addProperty("tierType", ((Tiers) tieredItem.getTier()).name());
-    }
 
     var sortedComponentObj = new JsonObject();
     DataComponentMap.CODEC.encodeStart(
