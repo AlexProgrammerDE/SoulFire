@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding;
 
+import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EnchantmentType;
@@ -29,7 +30,6 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
-import com.soulfiremc.server.util.MathHelper;
 import java.util.Arrays;
 import java.util.OptionalInt;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
@@ -192,8 +192,6 @@ public class Costs {
     if (itemStack != null && speedMultiplier > 1) {
       var efficiency = itemStack.getEnchantmentLevel(EnchantmentType.EFFICIENCY);
       if (efficiency > 0) {
-        // Efficiency is capped at 255
-        efficiency = MathHelper.shortClamp((short) efficiency, (short) 0, (short) 255);
         speedMultiplier += (float) (efficiency * efficiency + 1);
       }
     }
@@ -215,6 +213,7 @@ public class Costs {
           };
       }
 
+      speedMultiplier *= (float) entity.attributeValue(AttributeType.PLAYER_BLOCK_BREAK_SPEED);
       if (inventoryContainer != null && entity.isEyeInFluid(FluidTags.WATER)
         && !inventoryContainer.hasEnchantment(EnchantmentType.AQUA_AFFINITY)) {
         speedMultiplier /= 5.0F;
