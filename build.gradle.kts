@@ -8,6 +8,7 @@ allprojects {
   description = "Advanced Minecraft Server-Stresser Tool."
 
   repositories {
+    mavenCentral()
     maven("https://repo.opencollab.dev/maven-releases") {
       name = "OpenCollab Releases"
     }
@@ -20,11 +21,8 @@ allprojects {
     maven("https://repo.viaversion.com/") {
       name = "ViaVersion Repository"
     }
-    maven("https://maven.lenni0451.net/releases") {
+    maven("https://maven.lenni0451.net/everything") {
       name = "Lenni0451"
-    }
-    maven("https://maven.lenni0451.net/snapshots") {
-      name = "Lenni0451 Snapshots"
     }
     maven("https://oss.sonatype.org/content/repositories/snapshots/") {
       name = "Sonatype Repository"
@@ -38,6 +36,5 @@ allprojects {
     maven("https://repo.spring.io/snapshot") {
       name = "Spring Snapshot Repository"
     }
-    mavenCentral()
   }
 }
