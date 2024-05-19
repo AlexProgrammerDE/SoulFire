@@ -18,8 +18,8 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.user.AuthenticatedUser;
 import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.ServerCommandSource;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
@@ -27,28 +27,32 @@ import net.kyori.adventure.util.TriState;
 
 public class DefaultAuthSystem implements AuthSystem {
   @Override
-  public AuthenticatedUser authenticate(String subject, Date issuedAt) {
-    var uuid = UUID.nameUUIDFromBytes("RemoteUser:%s".formatted(subject).getBytes(StandardCharsets.UTF_8));
-    return new AuthenticatedUser() {
-      @Override
-      public void sendMessage(String message) {
-        LogServiceImpl.sendMessage(uuid, message);
-      }
+  public ServerCommandSource authenticate(String subject, Date issuedAt) {
+    return new GrpcUser(
+      subject,
+      UUID.nameUUIDFromBytes("RemoteUser:%s".formatted(subject).getBytes(StandardCharsets.UTF_8))
+    );
+  }
 
-      @Override
-      public UUID getUniqueId() {
-        return uuid;
-      }
+  private record GrpcUser(String subject, UUID uuid) implements ServerCommandSource {
+    @Override
+    public void sendMessage(String message) {
+      LogServiceImpl.sendMessage(uuid, message);
+    }
 
-      @Override
-      public String getUsername() {
-        return subject;
-      }
+    @Override
+    public UUID getUniqueId() {
+      return uuid;
+    }
 
-      @Override
-      public TriState getPermission(Permission permission) {
-        return TriState.TRUE;
-      }
-    };
+    @Override
+    public String getUsername() {
+      return subject;
+    }
+
+    @Override
+    public TriState getPermission(Permission permission) {
+      return TriState.TRUE;
+    }
   }
 }

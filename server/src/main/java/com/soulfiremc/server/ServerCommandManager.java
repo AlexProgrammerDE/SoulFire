@@ -18,11 +18,11 @@
 package com.soulfiremc.server;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static com.soulfiremc.brigadier.BrigadierHelper.argument;
-import static com.soulfiremc.brigadier.BrigadierHelper.help;
-import static com.soulfiremc.brigadier.BrigadierHelper.helpRedirect;
-import static com.soulfiremc.brigadier.BrigadierHelper.literal;
-import static com.soulfiremc.brigadier.BrigadierHelper.privateCommand;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.argument;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.help;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.helpRedirect;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.literal;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.privateCommand;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -34,7 +34,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
-import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -57,6 +56,7 @@ import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
+import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -86,11 +86,11 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ServerCommandManager implements PlatformCommandManager {
+public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
     ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
   @Getter
-  private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+  private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
   private final List<Map.Entry<Instant, String>> commandHistory =
     Collections.synchronizedList(new ArrayList<>());
@@ -720,7 +720,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   private int exportMap(
-    CommandContext<CommandSource> context, Function<BotConnection, IntSet> idProvider) {
+    CommandContext<ServerCommandSource> context, Function<BotConnection, IntSet> idProvider) {
     // Inside here to capture a time for the file name
     var currentTime = System.currentTimeMillis();
     return forEveryBot(
@@ -751,12 +751,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryAttack(
-    CommandContext<CommandSource> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ServerCommandSource> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
 
   private int forEveryAttack(
-    CommandContext<CommandSource> context,
+    CommandContext<ServerCommandSource> context,
     ToIntFunction<AttackManager> consumer,
     boolean printMessages) {
     if (soulFireServer.attacks().isEmpty()) {
@@ -792,12 +792,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryAttackEnsureHasBots(
-    CommandContext<CommandSource> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ServerCommandSource> context, ToIntFunction<AttackManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
 
   private int forEveryAttackEnsureHasBots(
-    CommandContext<CommandSource> context,
+    CommandContext<ServerCommandSource> context,
     ToIntFunction<AttackManager> consumer,
     boolean printMessages) {
     return forEveryAttack(
@@ -816,12 +816,12 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   public int forEveryBot(
-    CommandContext<CommandSource> context, ToIntFunction<BotConnection> consumer) {
+    CommandContext<ServerCommandSource> context, ToIntFunction<BotConnection> consumer) {
     return forEveryBot(context, consumer, true);
   }
 
   private int forEveryBot(
-    CommandContext<CommandSource> context,
+    CommandContext<ServerCommandSource> context,
     ToIntFunction<BotConnection> consumer,
     boolean printMessages) {
     return forEveryAttackEnsureHasBots(
@@ -852,7 +852,7 @@ public class ServerCommandManager implements PlatformCommandManager {
       printMessages);
   }
 
-  public int executePathfinding(CommandContext<CommandSource> context,
+  public int executePathfinding(CommandContext<ServerCommandSource> context,
                                 Function<BotConnection, GoalScorer> goalScorerFactory) {
     return forEveryBot(
       context,
@@ -863,7 +863,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public int execute(String command, CommandSource source) {
+  public int execute(String command, ServerCommandSource source) {
     command = command.strip();
 
     try {
@@ -880,7 +880,7 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   @Override
-  public List<String> getCompletionSuggestions(String command, CommandSource source) {
+  public List<String> getCompletionSuggestions(String command, ServerCommandSource source) {
     try {
       return dispatcher
         .getCompletionSuggestions(dispatcher.parse(command, source))
@@ -895,15 +895,15 @@ public class ServerCommandManager implements PlatformCommandManager {
   }
 
   private HelpData[] getAllUsage(
-    final CommandNode<CommandSource> node, final CommandSource source) {
+    final CommandNode<ServerCommandSource> node, final ServerCommandSource source) {
     final var result = new ArrayList<HelpData>();
     getAllUsage(node, source, result, "");
     return result.toArray(new HelpData[0]);
   }
 
   private void getAllUsage(
-    final CommandNode<CommandSource> node,
-    final CommandSource source,
+    final CommandNode<ServerCommandSource> node,
+    final ServerCommandSource source,
     final ArrayList<HelpData> result,
     final String prefix) {
     if (!node.canUse(source)) {
@@ -911,14 +911,14 @@ public class ServerCommandManager implements PlatformCommandManager {
     }
 
     if (node.getCommand() != null) {
-      var helpWrapper = (CommandHelpWrapper) node.getCommand();
+      var helpWrapper = (CommandHelpWrapper<?>) node.getCommand();
       if (!helpWrapper.privateCommand()) {
         result.add(new HelpData(prefix, helpWrapper.help()));
       }
     }
 
     if (node.getRedirect() != null) {
-      var redirectHelpWrapper = (RedirectHelpWrapper) node.getRedirectModifier();
+      var redirectHelpWrapper = (RedirectHelpWrapper<?>) node.getRedirectModifier();
       if (!redirectHelpWrapper.privateCommand()) {
         final var redirect =
           node.getRedirect() == dispatcher.getRoot()

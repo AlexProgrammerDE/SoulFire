@@ -19,6 +19,7 @@ package com.soulfiremc.client.gui;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
+import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
@@ -97,7 +98,7 @@ public class GUIManager {
 
     SwingUtilities.invokeLater(() -> guiFrame.open(injector));
 
-    new GenericTerminalConsole(shutdownManager, clientCommandManager, commandHistoryManager).start();
+    new GenericTerminalConsole<>(shutdownManager, ClientConsoleCommandSource.INSTANCE, clientCommandManager, commandHistoryManager).start();
 
     shutdownManager.awaitShutdown();
   }

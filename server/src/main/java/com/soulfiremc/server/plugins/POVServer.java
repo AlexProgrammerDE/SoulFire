@@ -34,6 +34,8 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.util.PortHelper;
 import io.netty.buffer.Unpooled;
@@ -43,6 +45,7 @@ import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
@@ -51,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
@@ -937,6 +941,28 @@ public class POVServer implements InternalPlugin {
         });
 
       server.bind();
+    }
+  }
+
+  private record PovServerUser(Session session) implements ServerCommandSource {
+    @Override
+    public UUID getUniqueId() {
+      return null;
+    }
+
+    @Override
+    public String getUsername() {
+      return "";
+    }
+
+    @Override
+    public TriState getPermission(Permission permission) {
+      return null;
+    }
+
+    @Override
+    public void sendMessage(String message) {
+
     }
   }
 }

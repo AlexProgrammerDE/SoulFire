@@ -29,5 +29,5 @@ public interface AuthSystem {
    *                 the token should be invalidated by raising the required issuedAt date to the current date.
    * @return The authenticated user
    */
-  AuthenticatedUser authenticate(String subject, Date issuedAt);
+  ServerCommandSource authenticate(String subject, Date issuedAt);
 }

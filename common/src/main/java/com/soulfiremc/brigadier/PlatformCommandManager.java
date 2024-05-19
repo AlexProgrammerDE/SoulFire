@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.brigadier;
 
-public interface PlatformCommandManager {
-  int execute(String command, CommandSource source);
+public interface PlatformCommandManager<S extends CommandSource> {
+  int execute(String command, S source);
 
-  Iterable<String> getCompletionSuggestions(String line, CommandSource source);
+  Iterable<String> getCompletionSuggestions(String line, S source);
 }

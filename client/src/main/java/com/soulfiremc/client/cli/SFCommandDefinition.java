@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.client.cli;
 
+import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.brigadier.GenericTerminalConsole;
-import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.settings.account.AuthType;
@@ -153,13 +153,14 @@ public class SFCommandDefinition implements Callable<Integer> {
     }
 
     if (start) {
-      cliManager.clientCommandManager().execute("start-attack", new LocalConsole());
+      cliManager.clientCommandManager().execute("start-attack", new ClientConsoleCommandSource());
     } else {
       log.info(
         "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
 
-    new GenericTerminalConsole(cliManager.shutdownManager(), cliManager.clientCommandManager(), cliManager.commandHistoryManager())
+    new GenericTerminalConsole<>(cliManager.shutdownManager(), ClientConsoleCommandSource.INSTANCE,
+      cliManager.clientCommandManager(), cliManager.commandHistoryManager())
       .start();
 
     cliManager.shutdownManager().awaitShutdown();

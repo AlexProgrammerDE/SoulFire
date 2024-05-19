@@ -21,11 +21,11 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-public record CommandHelpWrapper(
-  Command<CommandSource> command, String help, boolean privateCommand)
-  implements Command<CommandSource> {
+public record CommandHelpWrapper<S extends CommandSource>(
+  Command<S> command, String help, boolean privateCommand)
+  implements Command<S> {
   @Override
-  public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+  public int run(CommandContext<S> context) throws CommandSyntaxException {
     return command.run(context);
   }
 }

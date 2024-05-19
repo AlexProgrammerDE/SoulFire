@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.Property;
@@ -49,7 +49,7 @@ public class ChatControl implements InternalPlugin {
         .soulFireServer()
         .injector()
         .getSingleton(ServerCommandManager.class)
-        .execute(command, new LocalConsole());
+        .execute(command, ServerConsoleCommandSource.INSTANCE);
 
       connection.botControl().sendMessage("Command \"%s\" executed! (Code: %d)".formatted(command, code));
     }

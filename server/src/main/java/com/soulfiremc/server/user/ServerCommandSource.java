@@ -23,7 +23,7 @@ import io.grpc.StatusRuntimeException;
 import java.util.UUID;
 import net.kyori.adventure.util.TriState;
 
-public interface AuthenticatedUser extends CommandSource {
+public interface ServerCommandSource extends CommandSource {
   UUID getUniqueId();
 
   String getUsername();

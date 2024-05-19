@@ -19,7 +19,7 @@ package com.soulfiremc.server.spark;
 
 import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.server.plugins.ChatMessageLogger;
-import com.soulfiremc.server.user.AuthenticatedUser;
+import com.soulfiremc.server.user.ServerCommandSource;
 import java.util.UUID;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
@@ -31,7 +31,7 @@ public class SFSparkCommandSender extends AbstractCommandSender<CommandSource> {
 
   @Override
   public String getName() {
-    if (delegate instanceof AuthenticatedUser user) {
+    if (delegate instanceof ServerCommandSource user) {
       return user.getUsername();
     }
 

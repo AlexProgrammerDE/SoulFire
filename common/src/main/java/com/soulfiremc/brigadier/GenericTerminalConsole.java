@@ -32,10 +32,11 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.history.DefaultHistory;
 
 @RequiredArgsConstructor
-public class GenericTerminalConsole extends SimpleTerminalConsole {
+public class GenericTerminalConsole<S extends CommandSource> extends SimpleTerminalConsole {
   private static final Logger logger = LogManager.getLogger("SoulFireConsole");
   private final ShutdownManager shutdownManager;
-  private final PlatformCommandManager commandManager;
+  private final S commandSource;
+  private final PlatformCommandManager<S> commandManager;
   private final CommandHistoryManager commandHistoryManager;
 
   /**
@@ -53,7 +54,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
 
   @Override
   protected void runCommand(String command) {
-    var result = commandManager.execute(command, LocalConsole.INSTANCE);
+    var result = commandManager.execute(command, commandSource);
     if (result == Command.SINGLE_SUCCESS) {
       commandHistoryManager.newCommandHistoryEntry(command);
     }
@@ -77,7 +78,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
         .completer(
           (reader, parsedLine, list) -> {
             for (var suggestion :
-              commandManager.getCompletionSuggestions(parsedLine.line(), LocalConsole.INSTANCE)) {
+              commandManager.getCompletionSuggestions(parsedLine.line(), commandSource)) {
               list.add(new Candidate(suggestion));
             }
           })

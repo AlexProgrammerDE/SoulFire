@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.client;
 
-import static com.soulfiremc.brigadier.BrigadierHelper.help;
-import static com.soulfiremc.brigadier.BrigadierHelper.literal;
+import static com.soulfiremc.brigadier.ClientBrigadierHelper.help;
+import static com.soulfiremc.brigadier.ClientBrigadierHelper.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.brigadier.CommandSource;
-import com.soulfiremc.brigadier.LocalConsole;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientCommandManager implements PlatformCommandManager {
+public class ClientCommandManager implements PlatformCommandManager<CommandSource> {
   @Getter
   private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
   private final RPCClient rpcClient;
@@ -84,7 +84,7 @@ public class ClientCommandManager implements PlatformCommandManager {
     try {
       if (isClientCommand(command)) {
         log.debug("Executing command {} on client", command);
-        return dispatcher.execute(command, new LocalConsole());
+        return dispatcher.execute(command, new ClientConsoleCommandSource());
       } else {
         log.debug("Executing command {} on server", command);
         return rpcClient

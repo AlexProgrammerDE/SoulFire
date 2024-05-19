@@ -23,8 +23,8 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 
-public class BrigadierHelper {
-  private BrigadierHelper() {}
+public class ClientBrigadierHelper {
+  private ClientBrigadierHelper() {}
 
   public static LiteralArgumentBuilder<CommandSource> literal(String name) {
     return LiteralArgumentBuilder.literal(name);
@@ -36,15 +36,15 @@ public class BrigadierHelper {
   }
 
   public static Command<CommandSource> help(String help, Command<CommandSource> command) {
-    return new CommandHelpWrapper(command, help, false);
+    return new CommandHelpWrapper<>(command, help, false);
   }
 
   public static RedirectModifier<CommandSource> helpRedirect(
     String help, RedirectModifier<CommandSource> redirect) {
-    return new RedirectHelpWrapper(redirect, help, false);
+    return new RedirectHelpWrapper<>(redirect, help, false);
   }
 
   public static Command<CommandSource> privateCommand(Command<CommandSource> command) {
-    return new CommandHelpWrapper(command, null, true);
+    return new CommandHelpWrapper<>(command, null, true);
   }
 }

@@ -22,11 +22,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
 
-public record RedirectHelpWrapper(
-  RedirectModifier<CommandSource> command, String help, boolean privateCommand)
-  implements RedirectModifier<CommandSource> {
+public record RedirectHelpWrapper<S extends CommandSource>(
+  RedirectModifier<S> command, String help, boolean privateCommand)
+  implements RedirectModifier<S> {
   @Override
-  public Collection<CommandSource> apply(CommandContext<CommandSource> context)
+  public Collection<S> apply(CommandContext<S> context)
     throws CommandSyntaxException {
     return command.apply(context);
   }

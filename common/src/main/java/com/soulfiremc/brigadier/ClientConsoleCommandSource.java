@@ -20,8 +20,8 @@ package com.soulfiremc.brigadier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LocalConsole implements CommandSource {
-  public static final LocalConsole INSTANCE = new LocalConsole();
+public class ClientConsoleCommandSource implements CommandSource {
+  public static final ClientConsoleCommandSource INSTANCE = new ClientConsoleCommandSource();
   private static final Logger log = LoggerFactory.getLogger("Console");
 
   @Override
