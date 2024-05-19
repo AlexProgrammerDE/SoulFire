@@ -41,6 +41,7 @@ public final class BlockBreakAction implements WorldAction {
   private boolean didLook = false;
   private boolean putInHand = false;
   private int remainingTicks = -1;
+  private int totalTicks = -1;
 
   public BlockBreakAction(MovementMiningCost movementMiningCost) {
     this(movementMiningCost.block(), movementMiningCost.blockBreakSideHint(), movementMiningCost.willDrop());
@@ -96,7 +97,7 @@ public final class BlockBreakAction implements WorldAction {
         return;
       }
 
-      remainingTicks =
+      remainingTicks = totalTicks =
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
             dataManager.clientEntity(),
@@ -118,8 +119,7 @@ public final class BlockBreakAction implements WorldAction {
 
   @Override
   public int getAllowedTicks() {
-    // 20-seconds max to break a block
-    return 20 * 20;
+    return totalTicks == -1 ? 20 : totalTicks + 20;
   }
 
   @Override
