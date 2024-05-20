@@ -22,9 +22,8 @@ import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
-import com.soulfiremc.server.protocol.BotConnection;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import net.lenni0451.lambdaevents.LambdaManager;
 
 /**
  * This class contains helper methods for plugins to use to make their life easier.
@@ -71,17 +70,8 @@ public class PluginHelper {
           () -> event.attackManager().eventBus().registerConsumer(consumer, clazz)));
   }
 
-  public static void registerBotContextFactory(
-    Function<BotConnection, ObjectContext> contextFactory) {
-    registerAttackEventConsumer(
-      BotConnectionInitEvent.class,
-      event ->
-        EventUtil.runAndAssertChanged(
-          event.connection().eventBus(),
-          () ->
-            event
-              .connection()
-              .eventBus()
-              .register(contextFactory.apply(event.connection()))));
+  public static <T extends SoulFireAttackEvent> void registerSafeEventConsumer(
+    LambdaManager eventBus, Class<T> clazz, Consumer<T> consumer) {
+    eventBus.registerConsumer(consumer, clazz);
   }
 }

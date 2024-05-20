@@ -19,7 +19,6 @@ package com.soulfiremc.util;
 
 public class SFFeatureFlags {
   public static final boolean MOD_SUPPORT = Boolean.getBoolean("sf.mod_support");
-  public static final boolean POV_SERVER = true;
 
   private SFFeatureFlags() {}
 }

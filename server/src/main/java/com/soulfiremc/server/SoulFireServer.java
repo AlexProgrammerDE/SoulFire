@@ -267,7 +267,7 @@ public class SoulFireServer {
           : null, // Needs to be before ForwardingBypass to not break it
         new ForwardingBypass(),
         new KillAura(),
-        SFFeatureFlags.POV_SERVER ? new POVServer() : null
+        new POVServer()
       };
 
     for (var plugin : plugins) {
