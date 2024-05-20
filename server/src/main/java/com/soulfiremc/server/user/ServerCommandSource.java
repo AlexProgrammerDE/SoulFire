@@ -21,9 +21,33 @@ import com.soulfiremc.brigadier.CommandSource;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.TriState;
 
 public interface ServerCommandSource extends CommandSource {
+  @Override
+  default void sendInfo(String message, Object... args) {
+    sendMessage(Component.text(CommandSource.format(message, args, null)));
+  }
+
+  @Override
+  default void sendWarn(String message, Object... args) {
+    sendMessage(Component.text(CommandSource.format(message, args, null)).color(NamedTextColor.YELLOW));
+  }
+
+  @Override
+  default void sendError(String message, Throwable t) {
+    sendMessage(Component.text(CommandSource.format(message, new Object[0], t)).color(NamedTextColor.RED));
+  }
+
+  @Override
+  default void sendMessage(String message) {
+    sendMessage(Component.text(message));
+  }
+
+  void sendMessage(Component message);
+
   UUID getUniqueId();
 
   String getUsername();

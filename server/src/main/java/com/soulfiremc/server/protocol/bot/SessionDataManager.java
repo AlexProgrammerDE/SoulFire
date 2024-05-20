@@ -72,8 +72,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,6 +91,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
 import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
 import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
+import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
@@ -107,6 +110,7 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundResourcePackPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundSelectKnownPacks;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCooldownPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDisguisedChatPacket;
@@ -185,6 +189,7 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
+  private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new HashMap<>();
   private final Registry<DimensionType> dimensions = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomes = new Registry<>(RegistryKeys.BIOME);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
@@ -193,6 +198,7 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
+  private String[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
   private @Nullable ServerPlayData serverPlayData;
@@ -256,9 +262,16 @@ public final class SessionDataManager {
   }
 
   @EventHandler
+  public void onUpdateEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket packet) {
+    serverEnabledFeatures = packet.getFeatures();
+  }
+
+  @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
     @Subst("empty") var registry = packet.getRegistry();
     var registryKey = ResourceKey.key(registry);
+    rawRegistryData.put(registryKey, packet.getEntries());
+
     Registry.RegistryDataWriter registryWriter;
     if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
       registryWriter = dimensions.writer(DimensionType::new);

@@ -19,6 +19,7 @@ package com.soulfiremc.server.plugins;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
@@ -30,15 +31,18 @@ import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
+import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.util.PortHelper;
 import io.netty.buffer.Unpooled;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -58,7 +62,6 @@ import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
-import org.cloudburstmc.nbt.NbtType;
 import org.geysermc.mcprotocollib.network.Server;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
@@ -77,7 +80,6 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
-import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -106,6 +108,7 @@ import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundPongPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundRegistryDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
@@ -179,7 +182,7 @@ public class POVServer implements InternalPlugin {
 
         var freePort =
           PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
-        new POVServerInstance(freePort, attackManager);
+        new POVServerInstance(settingsHolder, freePort, attackManager);
         log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
       });
   }
@@ -204,10 +207,24 @@ public class POVServer implements InternalPlugin {
         1,
         65535,
         1);
+    public static final BooleanProperty ENABLE_COMMANDS =
+      BUILDER.ofBoolean(
+        "enable-commands",
+        "Enable commands",
+        new String[] {"--pov-enable-commands"},
+        "Allow users connected to the POV server to execute commands in the SF server shell",
+        true);
+    public static final StringProperty COMMAND_PREFIX =
+      BUILDER.ofString(
+        "command-prefix",
+        "Command Prefix",
+        new String[] {"--pov-command-prefix"},
+        "The prefix to use for commands executed in the SF server shell",
+        "#");
   }
 
   private static class POVServerInstance {
-    public POVServerInstance(int port, AttackManager attackManager) {
+    public POVServerInstance(SettingsHolder settingsHolder, int port, AttackManager attackManager) {
       var pong =
         new ServerStatusInfo(
           new VersionInfo(
@@ -476,6 +493,24 @@ public class POVServer implements InternalPlugin {
                           return;
                         }
                       }
+                      case ServerboundChatPacket chatPacket -> {
+                        if (settingsHolder.get(POVServerSettings.ENABLE_COMMANDS)) {
+                          var message = chatPacket.getMessage();
+                          var prefix = settingsHolder.get(POVServerSettings.COMMAND_PREFIX);
+                          if (message.startsWith(prefix)) {
+                            var command = message.substring(prefix.length());
+                            var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
+                            var code = attackManager
+                              .soulFireServer()
+                              .injector()
+                              .getSingleton(ServerCommandManager.class)
+                              .execute(command, source);
+
+                            log.info("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+                            return;
+                          }
+                        }
+                      }
                       default -> {
                       }
                     }
@@ -549,24 +584,23 @@ public class POVServer implements InternalPlugin {
                   ((MinecraftProtocol) session.getPacketProtocol())
                     .setState(ProtocolState.CONFIGURATION);
 
-                  session.send(
-                    new ClientboundUpdateEnabledFeaturesPacket(
-                      new String[] {"minecraft:vanilla"}));
-                  for (var entry : MinecraftProtocol.loadNetworkCodec().entrySet()) {
-                    var entryTag = (NbtMap) entry.getValue();
-                    var typeTag = entryTag.getString("type");
-                    var valueTag = entryTag.getList("value", NbtType.COMPOUND);
-                    List<RegistryEntry> entries = new ArrayList<>();
-                    for (var compoundTag : valueTag) {
-                      var nameTag = compoundTag.getString("name");
-                      var id = compoundTag.getInt("id");
-                      entries.add(id, new RegistryEntry(nameTag, compoundTag.getCompound("element")));
-                    }
-
-                    session.send(new ClientboundRegistryDataPacket(typeTag, entries));
+                  if (dataManager.serverEnabledFeatures() != null) {
+                    session.send(
+                      new ClientboundUpdateEnabledFeaturesPacket(
+                        dataManager.serverEnabledFeatures()));
                   }
+
+                  if (dataManager.serverKnownPacks() != null) {
+                    session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
+                  }
+
+                  for (var entry : dataManager.rawRegistryData().entrySet()) {
+                    session.send(new ClientboundRegistryDataPacket(entry.getKey().key().toString(), entry.getValue()));
+                  }
+
                   var tagsPacket = new ClientboundUpdateTagsPacket();
                   tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
+                  session.send(tagsPacket);
 
                   session.send(new ClientboundFinishConfigurationPacket());
                   awaitReceived(ServerboundFinishConfigurationPacket.class);
@@ -944,25 +978,25 @@ public class POVServer implements InternalPlugin {
     }
   }
 
-  private record PovServerUser(Session session) implements ServerCommandSource {
+  private record PovServerUser(Session session, String username) implements ServerCommandSource {
     @Override
     public UUID getUniqueId() {
-      return null;
+      return UUID.nameUUIDFromBytes("POVUser:%s".formatted(username).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public String getUsername() {
-      return "";
+      return username;
     }
 
     @Override
     public TriState getPermission(Permission permission) {
-      return null;
+      return TriState.TRUE;
     }
 
     @Override
-    public void sendMessage(String message) {
-
+    public void sendMessage(Component message) {
+      session.send(new ClientboundSystemChatPacket(message, false));
     }
   }
 }

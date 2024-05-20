@@ -17,12 +17,14 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 
 public class DefaultAuthSystem implements AuthSystem {
@@ -36,8 +38,8 @@ public class DefaultAuthSystem implements AuthSystem {
 
   private record GrpcUser(String subject, UUID uuid) implements ServerCommandSource {
     @Override
-    public void sendMessage(String message) {
-      LogServiceImpl.sendMessage(uuid, message);
+    public void sendMessage(Component message) {
+      LogServiceImpl.sendMessage(uuid, ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
     }
 
     @Override

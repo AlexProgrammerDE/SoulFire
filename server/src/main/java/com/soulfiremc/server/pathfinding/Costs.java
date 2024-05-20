@@ -243,7 +243,7 @@ public class Costs {
     }
 
     for (var rule : tool.get().getRules()) {
-      if (rule.getSpeed() != null && isInHolderSet(tagsState, rule.getHolderSet(), blockType)) {
+      if (rule.getSpeed() != null && isInHolderSet(tagsState, rule.getBlocks(), blockType)) {
         return rule.getSpeed();
       }
     }
@@ -266,7 +266,7 @@ public class Costs {
     }
 
     for (var rule : tool.get().getRules()) {
-      if (rule.getCorrectForDrops() != null && isInHolderSet(tagsState, rule.getHolderSet(), blockType)) {
+      if (rule.getCorrectForDrops() != null && isInHolderSet(tagsState, rule.getBlocks(), blockType)) {
         return rule.getCorrectForDrops();
       }
     }

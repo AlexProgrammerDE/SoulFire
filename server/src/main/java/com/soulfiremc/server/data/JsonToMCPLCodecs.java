@@ -77,7 +77,7 @@ public class JsonToMCPLCodecs {
   );
   public static final Codec<ToolData.Rule> TOOL_RULE_CODEC = RecordCodecBuilder.create(
     instance -> instance.group(
-        ExtraCodecs.holderSetCodec(BlockType.REGISTRY).fieldOf("blocks").forGetter(ToolData.Rule::getHolderSet),
+        ExtraCodecs.holderSetCodec(BlockType.REGISTRY).fieldOf("blocks").forGetter(ToolData.Rule::getBlocks),
         ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed").forGetter(arg -> Optional.ofNullable(arg.getSpeed())),
         Codec.BOOL.optionalFieldOf("correct_for_drops").forGetter(arg -> Optional.ofNullable(arg.getCorrectForDrops()))
       )

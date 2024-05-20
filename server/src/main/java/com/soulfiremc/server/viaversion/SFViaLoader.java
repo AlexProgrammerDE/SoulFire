@@ -28,7 +28,7 @@ import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_12_2to1_13.Protocol1_12_2To1_13;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
-import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
+import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;

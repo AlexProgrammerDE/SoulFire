@@ -21,7 +21,7 @@ import org.fusesource.jansi.Ansi;
 import org.slf4j.helpers.MessageFormatter;
 
 public interface CommandSource {
-  private static String format(String format, Object[] params, Throwable t) {
+  static String format(String format, Object[] params, Throwable t) {
     return MessageFormatter.arrayFormat(format, params, t).getMessage();
   }
 

@@ -25,7 +25,7 @@ import javax.crypto.SecretKey;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
-import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
+import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 
 public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override
