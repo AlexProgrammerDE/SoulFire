@@ -32,6 +32,7 @@ import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
+import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
@@ -294,7 +295,19 @@ public class POVServer implements InternalPlugin {
         session.send(
           new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
 
-        var sectionCount = 16;
+        // End dimension height
+        var heightAccessor = new LevelHeightAccessor() {
+          @Override
+          public int getHeight() {
+            return 256;
+          }
+
+          @Override
+          public int getMinBuildHeight() {
+            return 0;
+          }
+        };
+        var sectionCount = heightAccessor.getSectionsCount();
         var buf = Unpooled.buffer();
         for (var i = 0; i < sectionCount; i++) {
           var chunk = DataPalette.createForChunk();
