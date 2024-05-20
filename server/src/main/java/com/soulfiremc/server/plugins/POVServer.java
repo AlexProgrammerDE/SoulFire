@@ -378,13 +378,13 @@ public class POVServer implements InternalPlugin {
 
               @Override
               public void packetSent(Session session, Packet packet) {
-                System.out.println("S -> C: " + packet.getClass().getSimpleName());
+                log.debug("S -> C: {}", packet.getClass().getSimpleName());
               }
 
               @Override
               public void packetReceived(Session session, Packet packet) {
+                log.debug("C -> S: {}", packet.getClass().getSimpleName());
                 if (botConnection == null) {
-                  System.out.println("C -> S: " + packet.getClass().getSimpleName());
                   if (packet instanceof ServerboundChatPacket chatPacket) {
                     var profile =
                       event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
@@ -613,24 +613,20 @@ public class POVServer implements InternalPlugin {
                 ((MinecraftProtocol) session.getPacketProtocol())
                   .setState(ProtocolState.CONFIGURATION);
 
-                System.out.println("Sending configuration packets");
                 if (dataManager.serverEnabledFeatures() != null) {
                   session.send(
                     new ClientboundUpdateEnabledFeaturesPacket(
                       dataManager.serverEnabledFeatures()));
                 }
 
-                System.out.println("Sending known packs");
                 if (dataManager.serverKnownPacks() != null) {
                   session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
                 }
 
-                System.out.println("Sending registry data");
                 for (var entry : dataManager.rawRegistryData().entrySet()) {
                   session.send(new ClientboundRegistryDataPacket(entry.getKey().key().toString(), entry.getValue()));
                 }
 
-                System.out.println("Sending tags");
                 var tagsPacket = new ClientboundUpdateTagsPacket();
                 tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
                 session.send(tagsPacket);
