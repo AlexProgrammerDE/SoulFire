@@ -268,7 +268,7 @@ public class POVServer implements InternalPlugin {
             false,
             false,
             new PlayerSpawnInfo(
-              0,
+              2,
               "minecraft:the_end",
               100,
               GameMode.SPECTATOR,
