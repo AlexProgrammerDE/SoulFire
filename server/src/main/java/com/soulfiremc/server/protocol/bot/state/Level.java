@@ -29,7 +29,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
-public class Level {
+public class Level implements LevelHeightAccessor {
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final DimensionType dimensionType;
@@ -57,19 +57,17 @@ public class Level {
     this.debug = debug;
     this.flat = flat;
 
-    this.chunks = new ChunkHolder(getMinBuildHeight(), getMaxBuildHeight());
+    this.chunks = new ChunkHolder(this);
   }
 
+  @Override
+  public int getHeight() {
+    return dimensionType.height();
+  }
+
+  @Override
   public int getMinBuildHeight() {
     return dimensionType.minY();
-  }
-
-  public int getMaxBuildHeight() {
-    return this.getMinBuildHeight() + dimensionType.height();
-  }
-
-  public boolean isOutSideBuildHeight(double y) {
-    return y < this.getMinBuildHeight() || y >= this.getMaxBuildHeight();
   }
 
   public void setBlockId(Vector3i block, int state) {

@@ -20,6 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.ServerCommandManager;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
@@ -68,7 +69,7 @@ import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
 import org.geysermc.mcprotocollib.network.event.server.ServerClosedEvent;
 import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
 import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
-import org.geysermc.mcprotocollib.network.event.session.DisconnectingEvent;
+import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -354,8 +355,14 @@ public class POVServer implements InternalPlugin {
                 private double lastZ;
 
                 @Override
+                public void packetSent(Session session, Packet packet) {
+                  System.out.println("S -> C: " + packet.getClass().getSimpleName());
+                }
+
+                @Override
                 public void packetReceived(Session session, Packet packet) {
                   if (botConnection == null) {
+                    System.out.println("C -> S: " + packet.getClass().getSimpleName());
                     if (packet instanceof ServerboundChatPacket chatPacket) {
                       var profile =
                         event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
@@ -555,8 +562,8 @@ public class POVServer implements InternalPlugin {
                 }
 
                 @Override
-                public void disconnecting(DisconnectingEvent event) {
-                  log.info("Disconnecting: {}", event.getReason(), event.getCause());
+                public void disconnected(DisconnectedEvent event) {
+                  log.info("Disconnected: {}", SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()), event.getCause());
                 }
 
                 private void awaitReceived(Class<?> clazz) {
@@ -584,20 +591,24 @@ public class POVServer implements InternalPlugin {
                   ((MinecraftProtocol) session.getPacketProtocol())
                     .setState(ProtocolState.CONFIGURATION);
 
+                  System.out.println("Sending configuration packets");
                   if (dataManager.serverEnabledFeatures() != null) {
                     session.send(
                       new ClientboundUpdateEnabledFeaturesPacket(
                         dataManager.serverEnabledFeatures()));
                   }
 
+                  System.out.println("Sending known packs");
                   if (dataManager.serverKnownPacks() != null) {
                     session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
                   }
 
+                  System.out.println("Sending registry data");
                   for (var entry : dataManager.rawRegistryData().entrySet()) {
                     session.send(new ClientboundRegistryDataPacket(entry.getKey().key().toString(), entry.getValue()));
                   }
 
+                  System.out.println("Sending tags");
                   var tagsPacket = new ClientboundUpdateTagsPacket();
                   tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
                   session.send(tagsPacket);

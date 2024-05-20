@@ -28,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
+import com.soulfiremc.test.utils.TestLevelHeightAccessor;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import java.io.ByteArrayInputStream;
@@ -95,7 +96,7 @@ public class PathfindingBenchmark {
       log.info("Initial state: {}", initialState.formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-        new ProjectedLevel(accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),
+        new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),
         true, true), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");

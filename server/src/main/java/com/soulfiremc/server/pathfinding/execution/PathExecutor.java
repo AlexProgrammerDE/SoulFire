@@ -73,6 +73,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
         var level = new ProjectedLevel(
+          dataManager.currentLevel(),
           dataManager.currentLevel()
             .chunks()
             .immutableCopy());

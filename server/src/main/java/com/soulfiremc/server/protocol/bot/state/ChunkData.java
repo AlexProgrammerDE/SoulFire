@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.Function;
@@ -27,12 +26,12 @@ import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 
 public class ChunkData {
   private static final Map<ChunkSection, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
-  private final int minSection;
+  private final LevelHeightAccessor levelHeightAccessor;
   private final ChunkSection[] sections;
 
-  public ChunkData(int minSection, int sectionsCount, boolean fillEmpty) {
-    this.minSection = minSection;
-    this.sections = new ChunkSection[sectionsCount];
+  public ChunkData(LevelHeightAccessor levelHeightAccessor, boolean fillEmpty) {
+    this.levelHeightAccessor = levelHeightAccessor;
+    this.sections = new ChunkSection[levelHeightAccessor.getSectionsCount()];
     if (fillEmpty) {
       fillEmpty();
     }
@@ -49,7 +48,7 @@ public class ChunkData {
   }
 
   public int getBlock(int x, int y, int z) {
-    return getSection(getSectionIndexByBlockY(y)).getBlock(x & 0xF, y & 0xF, z & 0xF);
+    return getSection(levelHeightAccessor.getSectionIndex(y)).getBlock(x & 0xF, y & 0xF, z & 0xF);
   }
 
   public ChunkSection getSection(int sectionIndex) {
@@ -59,10 +58,6 @@ public class ChunkData {
     }
 
     return section;
-  }
-
-  public boolean isSectionMissing(int sectionIndex) {
-    return sections[sectionIndex] == null;
   }
 
   public int getSectionCount() {
@@ -77,7 +72,7 @@ public class ChunkData {
 
   public void setBlock(Vector3i block, int state) {
     var y = block.getY();
-    var sectionIndex = getSectionIndexByBlockY(y);
+    var sectionIndex = levelHeightAccessor.getSectionIndex(y);
     var targetSection = getSection(sectionIndex);
     var clone =
       new ChunkSection(
@@ -88,9 +83,5 @@ public class ChunkData {
     clone.setBlock(block.getX() & 0xF, y & 0xF, block.getZ() & 0xF, state);
 
     setSection(sectionIndex, clone);
-  }
-
-  private int getSectionIndexByBlockY(int blockY) {
-    return SectionUtils.blockToSection(blockY) - this.minSection;
   }
 }

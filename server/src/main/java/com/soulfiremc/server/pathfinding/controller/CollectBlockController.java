@@ -68,7 +68,7 @@ public class CollectBlockController {
 
         for (var offset : BlockFace.VALUES) {
           var nextPos = offset.offset(blockPos);
-          if (level.isOutSideBuildHeight(nextPos.getY())) {
+          if (level.isOutsideBuildHeight(nextPos.getY())) {
             continue;
           }
 

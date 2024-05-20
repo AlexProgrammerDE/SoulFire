@@ -26,7 +26,6 @@ import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
 import com.soulfiremc.server.util.NoopLock;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import java.util.OptionalInt;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -38,34 +37,20 @@ public class ChunkHolder implements BlockAccessor {
   private final Long2ObjectOpenHashMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
   private final Lock readLock;
   private final Lock writeLock;
-  private final int minBuildHeight;
-  private final int maxBuildHeight;
-  private final int minSection;
-  private final int maxSection;
-  private final int sectionsCount;
+  private final LevelHeightAccessor levelHeightAccessor;
 
-  public ChunkHolder(int minBuildHeight, int maxBuildHeight) {
+  public ChunkHolder(LevelHeightAccessor levelHeightAccessor) {
     ReadWriteLock lock = new ReentrantReadWriteLock();
     this.readLock = lock.readLock();
     this.writeLock = lock.writeLock();
-    this.minBuildHeight = minBuildHeight;
-    this.maxBuildHeight = maxBuildHeight;
-
-    // Precalculate section values
-    this.minSection = SectionUtils.blockToSection(minBuildHeight);
-    this.maxSection = SectionUtils.blockToSection(maxBuildHeight - 1) + 1;
-    this.sectionsCount = this.maxSection - this.minSection;
+    this.levelHeightAccessor = levelHeightAccessor;
   }
 
   private ChunkHolder(ChunkHolder chunkHolder) {
     this.chunks.putAll(chunkHolder.chunks);
     this.readLock = new NoopLock();
     this.writeLock = new NoopLock();
-    this.minBuildHeight = chunkHolder.minBuildHeight;
-    this.maxBuildHeight = chunkHolder.maxBuildHeight;
-    this.minSection = chunkHolder.minSection;
-    this.maxSection = chunkHolder.maxSection;
-    this.sectionsCount = chunkHolder.sectionsCount;
+    this.levelHeightAccessor = chunkHolder.levelHeightAccessor;
   }
 
   public ChunkData getChunk(int chunkX, int chunkZ) {
@@ -113,7 +98,7 @@ public class ChunkHolder implements BlockAccessor {
     writeLock.lock();
     try {
       return chunks.computeIfAbsent(
-        ChunkKey.calculateKey(x, z), (key) -> new ChunkData(minSection, sectionsCount, false));
+        ChunkKey.calculateKey(x, z), (key) -> new ChunkData(levelHeightAccessor, false));
     } finally {
       writeLock.unlock();
     }
@@ -121,7 +106,7 @@ public class ChunkHolder implements BlockAccessor {
 
   @Override
   public BlockState getBlockState(int x, int y, int z) {
-    if (isOutsideBuildHeight(y)) {
+    if (levelHeightAccessor.isOutsideBuildHeight(y)) {
       return AIR_BLOCK_STATE;
     }
 
@@ -135,22 +120,8 @@ public class ChunkHolder implements BlockAccessor {
     return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(chunkData.getBlock(x, y, z));
   }
 
-  @Override
-  public OptionalInt minBuildHeight() {
-    return OptionalInt.of(minBuildHeight);
-  }
-
-  @Override
-  public OptionalInt maxBuildHeight() {
-    return OptionalInt.of(maxBuildHeight);
-  }
-
   public Long2ObjectMap<ChunkData> getChunks() {
     return chunks.clone();
-  }
-
-  public boolean isOutsideBuildHeight(int y) {
-    return y < minBuildHeight || y >= maxBuildHeight;
   }
 
   public ChunkHolder immutableCopy() {

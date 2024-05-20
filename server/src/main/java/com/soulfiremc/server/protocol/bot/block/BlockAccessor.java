@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.bot.block;
 
 import com.soulfiremc.server.data.BlockState;
-import java.util.OptionalInt;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public interface BlockAccessor {
@@ -27,8 +26,4 @@ public interface BlockAccessor {
   default BlockState getBlockState(Vector3i pos) {
     return getBlockState(pos.getX(), pos.getY(), pos.getZ());
   }
-
-  OptionalInt minBuildHeight();
-
-  OptionalInt maxBuildHeight();
 }

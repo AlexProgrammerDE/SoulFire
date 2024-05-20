@@ -15,11 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.test.utils;
 
-public class SFFeatureFlags {
-  public static final boolean MOD_SUPPORT = Boolean.getBoolean("sf.mod_support");
-  public static final boolean POV_SERVER = true;
+import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 
-  private SFFeatureFlags() {}
+public class TestLevelHeightAccessor implements LevelHeightAccessor {
+  public static final TestLevelHeightAccessor INSTANCE = new TestLevelHeightAccessor();
+
+  @Override
+  public int getHeight() {
+    return 256;
+  }
+
+  @Override
+  public int getMinBuildHeight() {
+    return 0;
+  }
 }
