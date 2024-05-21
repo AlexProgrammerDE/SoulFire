@@ -73,7 +73,7 @@ public class ChatType implements RegistryValue<ChatType> {
       var lenniStyleNbt = NBT_STYLE_SERIALIZER.deserialize(NbtIO.JAVA.getReader().readCompound(new DataInputStream(new ByteArrayInputStream(output.toByteArray())), NbtReadTracker.unlimited()));
       var lenniStyleJson = JSON_STYLE_SERIALIZER.serialize(lenniStyleNbt);
       this.style = GsonComponentSerializer.gson().serializer().fromJson(lenniStyleJson, Style.class);
-    } else{
+    } else {
       this.style = Style.empty();
     }
   }
