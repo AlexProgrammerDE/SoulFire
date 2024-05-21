@@ -12,6 +12,7 @@ dependencies {
   api(libs.mcprotocollib) {
     exclude("io.netty")
   }
+  api(libs.mcstructs)
   api(libs.bundles.kyori)
   api(libs.datafixerupper)
 

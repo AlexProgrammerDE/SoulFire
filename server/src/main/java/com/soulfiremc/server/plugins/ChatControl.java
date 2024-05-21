@@ -39,7 +39,7 @@ public class ChatControl implements InternalPlugin {
       return;
     }
 
-    var plainMessage = event.parseToText();
+    var plainMessage = event.parseToPlainText();
     var prefix = settingsHolder.get(ChatControlSettings.COMMAND_PREFIX);
 
     if (plainMessage.startsWith(prefix)) {

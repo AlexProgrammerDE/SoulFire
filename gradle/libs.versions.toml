@@ -53,6 +53,7 @@ flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-m
 xchart = "org.knowm.xchart:xchart:3.8.8"
 miglayout-swing = "com.miglayout:miglayout-swing:11.3"
 mcprotocollib = "com.github.GeyserMC:MCProtocolLib:a724a8f"
+mcstructs = "net.lenni0451.mcstructs:all:2.4.2"
 velocity-native = "com.velocitypowered:velocity-native:3.1.2-SNAPSHOT"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }

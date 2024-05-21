@@ -26,12 +26,10 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.ExpiringSet;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.ansi.ColorLevel;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -56,11 +54,7 @@ public class ChatMessageLogger implements InternalPlugin {
       return;
     }
 
-    var sender =
-      Optional.ofNullable(event.sender())
-        .map(ChatMessageReceiveEvent.ChatMessageSender::senderName)
-        .orElse("Server");
-    var message = Component.text("<%s> ".formatted(sender)).append(event.message());
+    var message = event.message();
 
     var ansiMessage = ANSI_MESSAGE_SERIALIZER.serialize(message);
 

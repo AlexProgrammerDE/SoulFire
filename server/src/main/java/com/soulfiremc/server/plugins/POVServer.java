@@ -117,6 +117,7 @@ import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.Clie
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundChangeDifficultyPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerInfoUpdatePacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundStartConfigurationPacket;
@@ -378,12 +379,12 @@ public class POVServer implements InternalPlugin {
 
               @Override
               public void packetSent(Session session, Packet packet) {
-                log.debug("S -> C: {}", packet.getClass().getSimpleName());
+                log.debug("POV -> C: {}", packet.getClass().getSimpleName());
               }
 
               @Override
               public void packetReceived(Session session, Packet packet) {
-                log.debug("C -> S: {}", packet.getClass().getSimpleName());
+                log.debug("C -> POV: {}", packet.getClass().getSimpleName());
                 if (botConnection == null) {
                   if (packet instanceof ServerboundChatPacket chatPacket) {
                     var profile =
@@ -415,6 +416,10 @@ public class POVServer implements InternalPlugin {
                             if (!enableForwarding
                               || NOT_SYNCED.contains(packet.getClass())) {
                               return;
+                            }
+
+                            if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+                              povSession.send(new ClientboundSystemChatPacket(chatPacket.getUnsignedContent(), false));
                             }
 
                             // MC Server of the bot -> MC Client

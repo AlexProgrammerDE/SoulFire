@@ -20,10 +20,7 @@ package com.soulfiremc.server.api.event.bot;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
-import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundPlayerChatPacket;
 
 /**
  * This event is called when a chat message is received from the server.
@@ -31,21 +28,10 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.Clientbound
  * @param connection The bot connection instance.
  * @param timestamp  The timestamp when the message was received.
  * @param message    The message that was received.
- * @param sender     The sender of the message or null if it's from the server.
  */
-public record ChatMessageReceiveEvent(
-  BotConnection connection, long timestamp, Component message, @Nullable ChatMessageSender sender)
+public record ChatMessageReceiveEvent(BotConnection connection, long timestamp, Component message)
   implements SoulFireBotEvent {
-  public String parseToText() {
+  public String parseToPlainText() {
     return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
-  }
-
-  public record ChatMessageSender(UUID senderUUID, String senderName) {
-    public static ChatMessageSender fromClientboundPlayerChatPacket(
-      ClientboundPlayerChatPacket packet) {
-      var senderUUID = packet.getSender();
-      var senderName = SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getName());
-      return new ChatMessageSender(senderUUID, senderName);
-    }
   }
 }

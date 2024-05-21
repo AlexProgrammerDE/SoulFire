@@ -37,7 +37,7 @@ public class AutoRegister implements InternalPlugin {
       return;
     }
 
-    var plainMessage = event.parseToText();
+    var plainMessage = event.parseToPlainText();
     var password = settingsHolder.get(AutoRegisterSettings.PASSWORD_FORMAT);
 
     // TODO: Add more password options

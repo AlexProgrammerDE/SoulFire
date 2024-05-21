@@ -46,9 +46,7 @@ import com.soulfiremc.server.protocol.bot.model.HealthData;
 import com.soulfiremc.server.protocol.bot.model.LoginPacketData;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
-import com.soulfiremc.server.protocol.bot.state.Biome;
 import com.soulfiremc.server.protocol.bot.state.BorderState;
-import com.soulfiremc.server.protocol.bot.state.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.EntityTrackerState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.MapDataState;
@@ -59,6 +57,9 @@ import com.soulfiremc.server.protocol.bot.state.WeatherState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
+import com.soulfiremc.server.protocol.bot.state.registry.Biome;
+import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
+import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -190,8 +191,9 @@ public final class SessionDataManager {
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
   private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new HashMap<>();
-  private final Registry<DimensionType> dimensions = new Registry<>(RegistryKeys.DIMENSION_TYPE);
-  private final Registry<Biome> biomes = new Registry<>(RegistryKeys.BIOME);
+  private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
+  private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
+  private final Registry<ChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final InventoryManager inventoryManager;
@@ -269,14 +271,17 @@ public final class SessionDataManager {
   @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
     @Subst("empty") var registry = packet.getRegistry();
+    System.out.println(registry);
     var registryKey = ResourceKey.key(registry);
     rawRegistryData.put(registryKey, packet.getEntries());
 
     Registry.RegistryDataWriter registryWriter;
     if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
-      registryWriter = dimensions.writer(DimensionType::new);
+      registryWriter = dimensionTypeRegistry.writer(DimensionType::new);
     } else if (registryKey.equals(RegistryKeys.BIOME)) {
-      registryWriter = biomes.writer(Biome::new);
+      registryWriter = biomeRegistry.writer(Biome::new);
+    } else if (registryKey.equals(RegistryKeys.CHAT_TYPE)) {
+      registryWriter = chatTypeRegistry.writer(ChatType::new);
     } else {
       log.debug("Received registry data for unknown registry {}", registryKey);
       return;
@@ -323,7 +328,7 @@ public final class SessionDataManager {
     lastSpawnedInLevel =
       new Level(
         tagsState,
-        dimensions.getById(spawnInfo.getDimension()),
+        dimensionTypeRegistry.getById(spawnInfo.getDimension()),
         Key.key(spawnInfo.getWorldName()),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
@@ -439,14 +444,15 @@ public final class SessionDataManager {
   @EventHandler
   public void onPlayerChat(ClientboundPlayerChatPacket packet) {
     var message = packet.getUnsignedContent();
-    if (message != null) {
-      onChat(packet.getTimeStamp(), message);
-      return;
+    if (message == null) {
+      message = Component.text(packet.getContent());
     }
 
-    var sender = ChatMessageReceiveEvent.ChatMessageSender.fromClientboundPlayerChatPacket(packet);
-
-    onChat(packet.getTimeStamp(), Component.text(packet.getContent()), sender);
+    onChat(packet.getTimeStamp(), prepareChatTypeMessage(packet.getChatType(), new ChatType.BoundChatMessageInfo(
+      message,
+      packet.getName(),
+      packet.getTargetName()
+    )));
   }
 
   @EventHandler
@@ -455,15 +461,21 @@ public final class SessionDataManager {
   }
 
   @EventHandler
-  public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {}
-
-  private void onChat(long stamp, Component message) {
-    connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, null));
+  public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
+    onChat(System.currentTimeMillis(), prepareChatTypeMessage(packet.getChatType(), new ChatType.BoundChatMessageInfo(
+      packet.getMessage(),
+      packet.getName(),
+      packet.getTargetName()
+    )));
   }
 
-  private void onChat(
-    long stamp, Component message, ChatMessageReceiveEvent.ChatMessageSender sender) {
-    connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message, sender));
+  private Component prepareChatTypeMessage(int chatType, ChatType.BoundChatMessageInfo chatInfo) {
+    return chatTypeRegistry.getById(chatType).buildComponent(chatInfo);
+  }
+
+  private void onChat(long stamp, Component message) {
+    System.out.println("Chat message: " + message);
+    connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message));
   }
 
   @EventHandler

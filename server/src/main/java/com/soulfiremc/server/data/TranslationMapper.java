@@ -58,12 +58,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
   @Override
   public String apply(TranslatableComponent component) {
-    var translation = mojangTranslations.get(component.key());
-
-    if (translation == null) {
-      log.warn("Missing translation for key: {}", component.key());
-      return component.key();
-    }
+    var translation = mojangTranslations.getOrDefault(component.key(), Objects.requireNonNullElse(component.fallback(), component.key()));
 
     var args =
       component.arguments().stream()

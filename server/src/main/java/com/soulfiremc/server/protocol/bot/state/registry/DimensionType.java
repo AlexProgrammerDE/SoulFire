@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.protocol.bot.state;
+package com.soulfiremc.server.protocol.bot.state.registry;
 
-import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -26,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class DimensionType implements RegistryValue<DimensionType> {
-  private final Registry<DimensionType> registry;
   private final Key key;
   private final int id;
   private final String infiniburn;
@@ -47,8 +45,7 @@ public class DimensionType implements RegistryValue<DimensionType> {
   private final byte hasRaids;
   private final byte respawnAnchorWorks;
 
-  public DimensionType(Registry<DimensionType> registry, Key key, int id, NbtMap dimensionTypeData) {
-    this.registry = registry;
+  public DimensionType(Key key, int id, NbtMap dimensionTypeData) {
     this.key = key;
     this.id = id;
     this.infiniburn = dimensionTypeData.getString("infiniburn");
