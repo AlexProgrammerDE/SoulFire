@@ -271,7 +271,6 @@ public final class SessionDataManager {
   @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
     @Subst("empty") var registry = packet.getRegistry();
-    System.out.println(registry);
     var registryKey = ResourceKey.key(registry);
     rawRegistryData.put(registryKey, packet.getEntries());
 
@@ -443,13 +442,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPlayerChat(ClientboundPlayerChatPacket packet) {
-    var message = packet.getUnsignedContent();
-    if (message == null) {
-      message = Component.text(packet.getContent());
-    }
-
     onChat(packet.getTimeStamp(), prepareChatTypeMessage(packet.getChatType(), new ChatType.BoundChatMessageInfo(
-      message,
+      getComponentForPlayerChat(packet),
       packet.getName(),
       packet.getTargetName()
     )));
@@ -469,12 +463,20 @@ public final class SessionDataManager {
     )));
   }
 
-  private Component prepareChatTypeMessage(int chatType, ChatType.BoundChatMessageInfo chatInfo) {
+  public Component getComponentForPlayerChat(ClientboundPlayerChatPacket packet) {
+    var message = packet.getUnsignedContent();
+    if (message == null) {
+      message = Component.text(packet.getContent());
+    }
+
+    return message;
+  }
+
+  public Component prepareChatTypeMessage(int chatType, ChatType.BoundChatMessageInfo chatInfo) {
     return chatTypeRegistry.getById(chatType).buildComponent(chatInfo);
   }
 
   private void onChat(long stamp, Component message) {
-    System.out.println("Chat message: " + message);
     connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message));
   }
 

@@ -36,6 +36,7 @@ import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
+import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -419,7 +420,13 @@ public class POVServer implements InternalPlugin {
                             }
 
                             if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-                              povSession.send(new ClientboundSystemChatPacket(chatPacket.getUnsignedContent(), false));
+                              // To avoid signature issues since the signature is for the bot, not the connected user
+                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new ChatType.BoundChatMessageInfo(
+                                botConnection.dataManager().getComponentForPlayerChat(chatPacket),
+                                chatPacket.getName(),
+                                chatPacket.getTargetName()
+                              )), false));
+                              return;
                             }
 
                             // MC Server of the bot -> MC Client
