@@ -37,6 +37,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
+import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -47,6 +48,7 @@ import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.util.PortHelper;
+import com.soulfiremc.util.ResourceHelper;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -237,23 +240,29 @@ public class POVServer implements InternalPlugin {
         "#");
   }
 
+  private static GameProfile getFakePlayerListEntry(Component text) {
+    return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
+  }
+
   private static TcpServer startPOVServer(SettingsHolder settingsHolder, int port, AttackManager attackManager) {
-    var pong =
-      new ServerStatusInfo(
-        new VersionInfo(
-          MinecraftCodec.CODEC.getMinecraftVersion(),
-          MinecraftCodec.CODEC.getProtocolVersion()),
-        new PlayerInfo(100, 0, new ArrayList<>()),
-        Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
-          .color(NamedTextColor.GREEN)
-          .decorate(TextDecoration.BOLD),
-        null,
-        false);
+    var faviconBytes = ResourceHelper.getResourceBytes("/assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
-    server.setGlobalFlag(
-      MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> pong);
+    server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
+      new VersionInfo(
+        MinecraftCodec.CODEC.getMinecraftVersion(),
+        MinecraftCodec.CODEC.getProtocolVersion()),
+      new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), attackManager.botConnections().size(), List.of(
+        getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
+        getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
+        getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
+      )),
+      Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
+        .color(NamedTextColor.GREEN)
+        .decorate(TextDecoration.BOLD),
+      faviconBytes,
+      false));
 
     server.setGlobalFlag(
       MinecraftConstants.SERVER_LOGIN_HANDLER_KEY,
@@ -357,7 +366,6 @@ public class POVServer implements InternalPlugin {
         session.send(
           new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
       });
-    server.setGlobalFlag(MinecraftConstants.SERVER_COMPRESSION_THRESHOLD, 256);
 
     server.addListener(
       new ServerAdapter() {
@@ -442,30 +450,41 @@ public class POVServer implements InternalPlugin {
 
                             var clientEntity =
                               botConnection.dataManager().clientEntity();
+                            System.out.println("Packet Bot -> Server: " + packet.getClass().getSimpleName());
                             // Bot -> MC Client
                             switch (packet) {
-                              case ServerboundMovePlayerPosRotPacket posRot -> povSession.send(
-                                new ClientboundMoveEntityPosRotPacket(
-                                  clientEntity.entityId(),
-                                  (posRot.getX() * 32 - lastX * 32) * 128,
-                                  (posRot.getY() * 32 - lastY * 32) * 128,
-                                  (posRot.getZ() * 32 - lastZ * 32) * 128,
-                                  posRot.getYaw(),
-                                  posRot.getPitch(),
-                                  clientEntity.onGround()));
-                              case ServerboundMovePlayerPosPacket pos -> povSession.send(
-                                new ClientboundMoveEntityPosPacket(
-                                  clientEntity.entityId(),
-                                  (pos.getX() * 32 - lastX * 32) * 128,
-                                  (pos.getY() * 32 - lastY * 32) * 128,
-                                  (pos.getZ() * 32 - lastZ * 32) * 128,
-                                  clientEntity.onGround()));
+                              case ServerboundMovePlayerPosRotPacket posRot -> {
+                                povSession.send(
+                                  new ClientboundMoveEntityPosRotPacket(
+                                    clientEntity.entityId(),
+                                    (posRot.getX() * 32 - lastX * 32) * 128,
+                                    (posRot.getY() * 32 - lastY * 32) * 128,
+                                    (posRot.getZ() * 32 - lastZ * 32) * 128,
+                                    posRot.getYaw(),
+                                    posRot.getPitch(),
+                                    clientEntity.onGround()));
+                                lastX = posRot.getX();
+                                lastY = posRot.getY();
+                                lastZ = posRot.getZ();
+                              }
+                              case ServerboundMovePlayerPosPacket pos -> {
+                                povSession.send(
+                                  new ClientboundMoveEntityPosPacket(
+                                    clientEntity.entityId(),
+                                    (pos.getX() * 32 - lastX * 32) * 128,
+                                    (pos.getY() * 32 - lastY * 32) * 128,
+                                    (pos.getZ() * 32 - lastZ * 32) * 128,
+                                    clientEntity.onGround()));
+                                lastX = pos.getX();
+                                lastY = pos.getY();
+                                lastZ = pos.getZ();
+                              }
                               case ServerboundMovePlayerRotPacket rot -> povSession.send(
                                 new ClientboundMoveEntityRotPacket(
                                   clientEntity.entityId(),
                                   rot.getYaw(),
                                   rot.getPitch(),
-                                  clientEntity.lastOnGround()));
+                                  clientEntity.onGround()));
                               default -> {
                               }
                             }
@@ -490,80 +509,75 @@ public class POVServer implements InternalPlugin {
                               false));
                         });
                   }
-                } else if (!NOT_SYNCED.contains(packet.getClass())) {
-                  switch (packet) {
-                    case ServerboundMovePlayerPosRotPacket posRot -> {
-                      lastX = posRot.getX();
-                      lastY = posRot.getY();
-                      lastZ = posRot.getZ();
-                    }
-                    case ServerboundMovePlayerPosPacket pos -> {
-                      lastX = pos.getX();
-                      lastY = pos.getY();
-                      lastZ = pos.getZ();
-                    }
-                    default -> {
-                    }
-                  }
+                } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
+                  // For data consistence, ensure all packets sent from client -> server are
+                  // handled on the bots tick event loop
+                  botConnection.preTickHooks().add(() -> {
+                    var clientEntity = botConnection.dataManager().clientEntity();
+                    switch (packet) {
+                      case ServerboundMovePlayerPosRotPacket posRot -> {
+                        lastX = posRot.getX();
+                        lastY = posRot.getY();
+                        lastZ = posRot.getZ();
 
-                  if (!enableForwarding) {
-                    return;
-                  }
-
-                  var clientEntity = botConnection.dataManager().clientEntity();
-                  switch (packet) {
-                    case ServerboundMovePlayerPosRotPacket posRot -> {
-                      clientEntity.x(posRot.getX());
-                      clientEntity.y(posRot.getY());
-                      clientEntity.z(posRot.getZ());
-                      clientEntity.yaw(posRot.getYaw());
-                      clientEntity.pitch(posRot.getPitch());
-                    }
-                    case ServerboundMovePlayerPosPacket pos -> {
-                      clientEntity.x(pos.getX());
-                      clientEntity.y(pos.getY());
-                      clientEntity.z(pos.getZ());
-                    }
-                    case ServerboundMovePlayerRotPacket rot -> {
-                      clientEntity.yaw(rot.getYaw());
-                      clientEntity.pitch(rot.getPitch());
-                    }
-                    case ServerboundAcceptTeleportationPacket teleportationPacket -> {
-                      // This was a forced teleport, the server should not know about it
-                      if (teleportationPacket.getId() == Integer.MIN_VALUE) {
-                        return;
+                        clientEntity.x(posRot.getX());
+                        clientEntity.y(posRot.getY());
+                        clientEntity.z(posRot.getZ());
+                        clientEntity.yaw(posRot.getYaw());
+                        clientEntity.pitch(posRot.getPitch());
+                        System.out.println("X: " + posRot.getX() + " Y: " + posRot.getY() + " Z: " + posRot.getZ());
                       }
-                    }
-                    case ServerboundChatPacket chatPacket -> {
-                      if (settingsHolder.get(POVServerSettings.ENABLE_COMMANDS)) {
-                        var message = chatPacket.getMessage();
-                        var prefix = settingsHolder.get(POVServerSettings.COMMAND_PREFIX);
-                        if (message.startsWith(prefix)) {
-                          var command = message.substring(prefix.length());
-                          var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
-                          var code = attackManager
-                            .soulFireServer()
-                            .injector()
-                            .getSingleton(ServerCommandManager.class)
-                            .execute(command, source);
+                      case ServerboundMovePlayerPosPacket pos -> {
+                        lastX = pos.getX();
+                        lastY = pos.getY();
+                        lastZ = pos.getZ();
 
-                          log.info("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+                        clientEntity.x(pos.getX());
+                        clientEntity.y(pos.getY());
+                        clientEntity.z(pos.getZ());
+                        System.out.println("X: " + pos.getX() + " Y: " + pos.getY() + " Z: " + pos.getZ());
+                      }
+                      case ServerboundMovePlayerRotPacket rot -> {
+                        clientEntity.yaw(rot.getYaw());
+                        clientEntity.pitch(rot.getPitch());
+                      }
+                      case ServerboundAcceptTeleportationPacket teleportationPacket -> {
+                        // This was a forced teleport, the server should not know about it
+                        if (teleportationPacket.getId() == Integer.MIN_VALUE) {
                           return;
                         }
                       }
-                    }
-                    default -> {
-                    }
-                  }
+                      case ServerboundChatPacket chatPacket -> {
+                        if (settingsHolder.get(POVServerSettings.ENABLE_COMMANDS)) {
+                          var message = chatPacket.getMessage();
+                          var prefix = settingsHolder.get(POVServerSettings.COMMAND_PREFIX);
+                          if (message.startsWith(prefix)) {
+                            var command = message.substring(prefix.length());
+                            var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
+                            var code = attackManager
+                              .soulFireServer()
+                              .injector()
+                              .getSingleton(ServerCommandManager.class)
+                              .execute(command, source);
 
-                  // The client spams too many packets when being force-moved,
-                  // so we'll just ignore them
-                  if (clientEntity.controlState().isActivelyControlling()) {
-                    return;
-                  }
+                            log.info("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+                            return;
+                          }
+                        }
+                      }
+                      default -> {
+                      }
+                    }
 
-                  // MC Client -> Server of the bot
-                  botConnection.session().send(packet);
+                    // The client spams too many packets when being force-moved,
+                    // so we'll just ignore them
+                    if (clientEntity.controlState().isActivelyControlling()) {
+                      return;
+                    }
+
+                    // MC Client -> Server of the bot
+                    botConnection.session().send(packet);
+                  });
                 }
               }
 
@@ -582,8 +596,7 @@ public class POVServer implements InternalPlugin {
                           .color(NamedTextColor.AQUA)
                           .decorate(TextDecoration.UNDERLINED))
                       .append(
-                        Component.text(
-                            "! To connect to the POV of a bot, please send the bot name as a chat message.")
+                        Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
                           .color(NamedTextColor.GREEN));
 
                   session.send(new ClientboundSystemChatPacket(msg, false));
@@ -752,6 +765,7 @@ public class POVServer implements InternalPlugin {
                       dataManager.experienceData().totalExperience()));
                 }
 
+                // Give initial coordinates to the client
                 session.send(
                   new ClientboundPlayerPositionPacket(
                     dataManager.clientEntity().x(),

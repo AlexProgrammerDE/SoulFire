@@ -38,8 +38,10 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
@@ -66,6 +68,7 @@ public final class BotConnection {
         }
       });
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
+  private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final AttackManager attackManager;
@@ -137,9 +140,14 @@ public final class BotConnection {
   }
 
   public void tick(long ticks) {
-    session.tick(); // Ensure all packets are handled before ticking
-    for (var i = 0; i < ticks; i++) {
-      try {
+    try {
+      session.tick(); // Ensure all packets are handled before ticking
+
+      while (!preTickHooks.isEmpty()) {
+        preTickHooks.poll().run();
+      }
+
+      for (var i = 0L; i < ticks; i++) {
         var tickHookState = TickHookContext.INSTANCE.get();
         tickHookState.clear();
 
@@ -151,9 +159,9 @@ public final class BotConnection {
 
         eventBus.call(new BotPostTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
-      } catch (Throwable t) {
-        logger.error("Error while ticking bot!", t);
       }
+    } catch (Throwable t) {
+      logger.error("Error while ticking bot!", t);
     }
   }
 
