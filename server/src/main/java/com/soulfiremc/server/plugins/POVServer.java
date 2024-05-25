@@ -213,7 +213,7 @@ public class POVServer implements InternalPlugin {
         "Enable POV server",
         new String[] {"--pov-server"},
         "Host a POV server for the bots",
-        true);
+        false);
     public static final IntProperty PORT_START =
       BUILDER.ofInt(
         "port-start",
