@@ -20,7 +20,7 @@ armeria = "1.28.4"
 blossom = "net.kyori.blossom:2.1.0"
 protobuf = "com.google.protobuf:0.9.4"
 jmh = "me.champeau.jmh:0.7.2"
-license-report = "com.github.jk1.dependency-license-report:2.7"
+license-report = "com.github.jk1.dependency-license-report:2.8"
 
 [libraries]
 gradle-plugin-shadow = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
