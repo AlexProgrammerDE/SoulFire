@@ -34,7 +34,7 @@ public class NavigationPanel extends JPanel {
     for (var item : container.panels()) {
       var button = new JButton(SFSwingUtils.htmlCenterText(item.getNavigationName()));
 
-      button.addActionListener(action -> container.show(item.getNavigationId()));
+      SFSwingUtils.addButtonPressAction(button, () -> container.show(item.getNavigationId()));
       container.putClientProperty(item.getNavigationId() + "-button", button);
 
       add(button);

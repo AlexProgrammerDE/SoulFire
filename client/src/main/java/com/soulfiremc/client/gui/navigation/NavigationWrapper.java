@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client.gui.navigation;
 
+import com.soulfiremc.client.gui.libs.SFSwingUtils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
@@ -32,7 +33,7 @@ public class NavigationWrapper {
     var topBar = new JPanel(new BorderLayout());
 
     var back = new JButton("Back");
-    back.addActionListener(action -> container.show(target));
+    SFSwingUtils.addButtonPressAction(back, () -> container.show(target));
 
     topBar.add(back, BorderLayout.PAGE_END);
     topBar.setSize(new Dimension(topBar.getWidth(), 20));

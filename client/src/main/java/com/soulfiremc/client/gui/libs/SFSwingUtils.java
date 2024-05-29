@@ -22,9 +22,12 @@ import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
@@ -120,5 +123,15 @@ public class SFSwingUtils {
 
   public static void setLogo(JFrame frame) {
     frame.setIconImages(FlatSVGUtils.createWindowIconImages("/icons/icon.svg"));
+  }
+
+  public static void addButtonPressAction(JButton button, Runnable action) {
+    button.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+          action.run();
+          e.consume();
+        }
+      });
   }
 }
