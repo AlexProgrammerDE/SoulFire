@@ -26,15 +26,15 @@ public class FluidTags {
   public static final List<TagKey<FluidType>> TAGS = new ArrayList<>();
 
   //@formatter:off
-  public static final TagKey<FluidType> WATER = register("minecraft:water", TAGS);
-  public static final TagKey<FluidType> LAVA = register("minecraft:lava", TAGS);
+  public static final TagKey<FluidType> WATER = register("minecraft:water");
+  public static final TagKey<FluidType> LAVA = register("minecraft:lava");
   //@formatter:on
 
   private FluidTags() {}
 
-  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key, RegistryKeys.FLUID);
-    values.add(resourceKey);
+  public static TagKey<FluidType> register(@KeyPattern String key) {
+    var resourceKey = TagKey.<FluidType>key(key, RegistryKeys.FLUID);
+    TAGS.add(resourceKey);
     return resourceKey;
   }
 }

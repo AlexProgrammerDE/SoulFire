@@ -31,9 +31,9 @@ public class BlockTags {
 
   private BlockTags() {}
 
-  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key, RegistryKeys.BLOCK);
-    values.add(resourceKey);
+  public static TagKey<BlockType> register(@KeyPattern String key) {
+    var resourceKey = TagKey.<BlockType>key(key, RegistryKeys.BLOCK);
+    TAGS.add(resourceKey);
     return resourceKey;
   }
 }

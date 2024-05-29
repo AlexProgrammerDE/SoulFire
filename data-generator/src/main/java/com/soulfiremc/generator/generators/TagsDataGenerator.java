@@ -19,9 +19,9 @@ package com.soulfiremc.generator.generators;
 
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import it.unimi.dsi.fastutil.Pair;
+import java.util.Arrays;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -34,17 +34,14 @@ import net.minecraft.tags.TagKey;
 public class TagsDataGenerator {
   private TagsDataGenerator() {}
 
-  public static List<ResourceLocation> generateTag(Class<?> tagClass) {
-    var resultArray = new ArrayList<ResourceLocation>();
-    for (var field : tagClass.getDeclaredFields()) {
+  public static Stream<Pair<String, ResourceLocation>> generateTag(Class<?> tagClass) {
+    return Arrays.stream(tagClass.getDeclaredFields()).map(f -> {
       try {
-        var tag = (TagKey<?>) field.get(null);
-        resultArray.add(tag.location());
-      } catch (IllegalAccessException e) {
-        log.error("Failed to generate tag", e);
+        return Pair.of(f.getName(), ((TagKey<?>) f.get(null)).location());
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
       }
-    }
-    return resultArray;
+    });
   }
 
   public static class BlockTagsDataGenerator implements IDataGenerator {
@@ -60,10 +57,10 @@ public class TagsDataGenerator {
         GeneratorConstants.VALUES_REPLACE,
         String.join(
           "\n  ",
-          generateTag(BlockTags.class).stream()
+          generateTag(BlockTags.class)
             .map(
               s ->
-                "public static final TagKey<BlockType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<BlockType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
             .toArray(String[]::new)));
     }
   }
@@ -81,10 +78,10 @@ public class TagsDataGenerator {
         GeneratorConstants.VALUES_REPLACE,
         String.join(
           "\n  ",
-          generateTag(ItemTags.class).stream()
+          generateTag(ItemTags.class)
             .map(
               s ->
-                "public static final TagKey<ItemType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<ItemType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
             .toArray(String[]::new)));
     }
   }
@@ -102,10 +99,10 @@ public class TagsDataGenerator {
         GeneratorConstants.VALUES_REPLACE,
         String.join(
           "\n  ",
-          generateTag(EntityTypeTags.class).stream()
+          generateTag(EntityTypeTags.class)
             .map(
               s ->
-                "public static final TagKey<EntityType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<EntityType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
             .toArray(String[]::new)));
     }
   }
@@ -123,10 +120,10 @@ public class TagsDataGenerator {
         GeneratorConstants.VALUES_REPLACE,
         String.join(
           "\n  ",
-          generateTag(FluidTags.class).stream()
+          generateTag(FluidTags.class)
             .map(
               s ->
-                "public static final TagKey<FluidType> %s = register(\"%s\", TAGS);".formatted(s.getPath().toUpperCase(Locale.ROOT).replace("/", "_WITH_"), s))
+                "public static final TagKey<FluidType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
             .toArray(String[]::new)));
     }
   }

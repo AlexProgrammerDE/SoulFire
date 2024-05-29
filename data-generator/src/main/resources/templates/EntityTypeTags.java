@@ -31,9 +31,9 @@ public class EntityTypeTags {
 
   private EntityTypeTags() {}
 
-  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key, RegistryKeys.ENTITY_TYPE);
-    values.add(resourceKey);
+  public static TagKey<EntityType> register(@KeyPattern String key) {
+    var resourceKey = TagKey.<EntityType>key(key, RegistryKeys.ENTITY_TYPE);
+    TAGS.add(resourceKey);
     return resourceKey;
   }
 }

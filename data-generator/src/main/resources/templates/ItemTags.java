@@ -31,9 +31,9 @@ public class ItemTags {
 
   private ItemTags() {}
 
-  public static <T extends RegistryValue<T>> TagKey<T> register(@KeyPattern String key, List<TagKey<T>> values) {
-    var resourceKey = TagKey.<T>key(key, RegistryKeys.ITEM);
-    values.add(resourceKey);
+  public static TagKey<ItemType> register(@KeyPattern String key) {
+    var resourceKey = TagKey.<ItemType>key(key, RegistryKeys.ITEM);
+    TAGS.add(resourceKey);
     return resourceKey;
   }
 }
