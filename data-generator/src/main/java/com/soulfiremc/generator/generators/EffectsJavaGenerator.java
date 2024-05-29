@@ -31,7 +31,7 @@ public class EffectsJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/EffectType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/EffectType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

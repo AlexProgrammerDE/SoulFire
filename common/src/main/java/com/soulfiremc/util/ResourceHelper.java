@@ -17,28 +17,19 @@
  */
 package com.soulfiremc.util;
 
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ResourceHelper {
   private ResourceHelper() {}
 
-  public static String getResource(String path) {
-    return new String(getResourceBytes(path), StandardCharsets.UTF_8);
+  public static String getResourceAsString(String path) {
+    return new String(getResourceAsBytes(path), StandardCharsets.UTF_8);
   }
 
-  public static byte[] getResourceBytes(String path) {
+  public static byte[] getResourceAsBytes(String path) {
     try {
-      return Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path)).readAllBytes();
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to get file", e);
-    }
-  }
-
-  public static URL getResourceUrl(String path) {
-    try {
-      return Objects.requireNonNull(ResourceHelper.class.getResource(path));
+      return Objects.requireNonNull(ResourceHelper.class.getClassLoader().getResourceAsStream(path), path).readAllBytes();
     } catch (Exception e) {
       throw new RuntimeException("Failed to get file", e);
     }

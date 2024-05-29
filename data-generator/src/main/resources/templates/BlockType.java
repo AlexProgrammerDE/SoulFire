@@ -61,12 +61,12 @@ public record BlockType(
     statesData = BlockStates.fromJsonArray(
       this,
       key,
-      GsonDataHelper.fromJson("/minecraft/blocks.json", key.toString(), JsonObject.class)
+      GsonDataHelper.fromJson("minecraft/blocks.json", key.toString(), JsonObject.class)
         .getAsJsonArray("states"));
   }
 
   public static BlockType register(String key) {
-    var instance = GsonDataHelper.fromJson("/minecraft/blocks.json", key, BlockType.class, Map.of(
+    var instance = GsonDataHelper.fromJson("minecraft/blocks.json", key, BlockType.class, Map.of(
       FluidType.class,
       CUSTOM_FLUID_TYPE
     ));

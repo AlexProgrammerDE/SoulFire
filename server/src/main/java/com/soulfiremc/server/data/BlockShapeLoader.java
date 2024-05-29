@@ -17,10 +17,9 @@
  */
 package com.soulfiremc.server.data;
 
+import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.key.Key;
@@ -31,36 +30,27 @@ public class BlockShapeLoader {
     new Object2ObjectOpenHashMap<>();
 
   static {
-    try (var inputStream =
-           BlockShapeGroup.class.getClassLoader().getResourceAsStream("minecraft/blockstates.txt")) {
-      if (inputStream == null) {
-        throw new IllegalStateException("blockstates.txt not found!");
-      }
+    ResourceHelper.getResourceAsString("minecraft/blockstates.txt")
+      .lines()
+      .forEach(
+        line -> {
+          var parts = line.split("\\|");
+          @Subst("empty") var keyString = parts[0];
+          var key = Key.key(keyString);
 
-      new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-        .lines()
-        .forEach(
-          line -> {
-            var parts = line.split("\\|");
-            @Subst("empty") var keyString = parts[0];
-            var key = Key.key(keyString);
+          var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
+          if (parts.length > 1) {
+            var part = parts[1];
 
-            var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
-            if (parts.length > 1) {
-              var part = parts[1];
-
-              var subParts = part.split(",");
-              for (var subPart : subParts) {
-                var id = Integer.parseInt(subPart);
-                var blockShapeType = BlockShapeGroup.getById(id);
-                blockShapeTypes.add(blockShapeType);
-              }
+            var subParts = part.split(",");
+            for (var subPart : subParts) {
+              var id = Integer.parseInt(subPart);
+              var blockShapeType = BlockShapeGroup.getById(id);
+              blockShapeTypes.add(blockShapeType);
             }
+          }
 
-            BLOCK_SHAPES.put(key, blockShapeTypes);
-          });
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+          BLOCK_SHAPES.put(key, blockShapeTypes);
+        });
   }
 }

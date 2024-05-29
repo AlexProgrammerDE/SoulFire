@@ -43,7 +43,7 @@ public class BuiltInKnownPackRegistry {
 
   public BuiltInKnownPackRegistry() {
     var byteArrayInputStream =
-      new ByteArrayInputStream(ResourceHelper.getResourceBytes("/minecraft/builtin_packs.bin.zip"));
+      new ByteArrayInputStream(ResourceHelper.getResourceAsBytes("minecraft/builtin_packs.bin.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
       var bytes = gzipInputStream.readAllBytes();
       var in = Unpooled.wrappedBuffer(bytes);

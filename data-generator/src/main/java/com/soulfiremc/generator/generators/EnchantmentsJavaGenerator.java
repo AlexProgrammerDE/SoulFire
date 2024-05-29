@@ -31,7 +31,7 @@ public class EnchantmentsJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/EnchantmentType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/EnchantmentType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

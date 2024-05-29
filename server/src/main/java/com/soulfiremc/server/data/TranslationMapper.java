@@ -20,9 +20,8 @@ package com.soulfiremc.server.data;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -37,15 +36,8 @@ public class TranslationMapper implements Function<TranslatableComponent, String
   public static final TranslationMapper INSTANCE;
 
   static {
-    JsonObject translations;
-    try (var stream =
-           TranslationMapper.class.getClassLoader().getResourceAsStream("minecraft/en_us.json")) {
-      Objects.requireNonNull(stream, "en_us.json not found");
-      translations = GsonInstance.GSON.fromJson(new InputStreamReader(stream), JsonObject.class);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
-
+    var translations = GsonInstance.GSON.fromJson(
+      ResourceHelper.getResourceAsString("minecraft/en_us.json"), JsonObject.class);
     var mojangTranslations = new Object2ObjectOpenHashMap<String, String>();
     for (var translationEntry : translations.entrySet()) {
       mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());

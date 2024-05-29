@@ -18,9 +18,8 @@
 package com.soulfiremc.server.util;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
+import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.Pair;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,7 +37,6 @@ import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Objects;
 import javax.crypto.Cipher;
 
 public class EncryptionUtils {
@@ -64,14 +62,8 @@ public class EncryptionUtils {
     }
 
     try {
-      var bytes =
-        ByteStreams.toByteArray(
-          Objects.requireNonNull(
-            EncryptionUtils.class
-              .getClassLoader()
-              .getResourceAsStream("yggdrasil_session_pubkey.der")));
-      YGGDRASIL_SESSION_KEY = parseRsaPublicKey(bytes);
-    } catch (IOException | NullPointerException err) {
+      YGGDRASIL_SESSION_KEY = parseRsaPublicKey(ResourceHelper.getResourceAsBytes("yggdrasil_session_pubkey.der"));
+    } catch (NullPointerException err) {
       throw new RuntimeException(err);
     }
   }

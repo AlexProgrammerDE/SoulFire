@@ -30,7 +30,7 @@ public class ItemsJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/ItemType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/ItemType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

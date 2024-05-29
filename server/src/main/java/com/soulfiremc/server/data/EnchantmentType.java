@@ -85,7 +85,7 @@ public record EnchantmentType(
 
   public static EnchantmentType register(String key) {
     var instance =
-      GsonDataHelper.fromJson("/minecraft/enchantments.json", key, EnchantmentType.class);
+      GsonDataHelper.fromJson("minecraft/enchantments.json", key, EnchantmentType.class);
 
     return REGISTRY.register(instance);
   }

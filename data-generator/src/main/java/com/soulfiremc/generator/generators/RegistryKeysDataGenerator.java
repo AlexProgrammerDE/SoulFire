@@ -34,7 +34,7 @@ public class RegistryKeysDataGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/RegistryKeys.java");
+    var base = ResourceHelper.getResourceAsString("/templates/RegistryKeys.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

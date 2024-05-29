@@ -52,7 +52,7 @@ public class PathfindingBenchmark {
   @Setup
   public void setup() {
     var byteArrayInputStream =
-      new ByteArrayInputStream(ResourceHelper.getResourceBytes("/world_data.json.zip"));
+      new ByteArrayInputStream(ResourceHelper.getResourceAsBytes("/world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
          var reader = new InputStreamReader(gzipInputStream)) {
       log.info("Reading world data...");

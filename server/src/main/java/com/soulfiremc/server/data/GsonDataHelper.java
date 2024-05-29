@@ -72,7 +72,7 @@ public class GsonDataHelper {
           var data = new JsonArray();
           try {
             data =
-              gson.fromJson(ResourceHelper.getResource(file), JsonArray.class);
+              gson.fromJson(ResourceHelper.getResourceAsString(file), JsonArray.class);
           } catch (Exception e) {
             throw new RuntimeException("Failed to load data file " + file, e);
           }

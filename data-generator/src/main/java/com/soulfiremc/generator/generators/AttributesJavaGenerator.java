@@ -31,7 +31,7 @@ public class AttributesJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/AttributeType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/AttributeType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

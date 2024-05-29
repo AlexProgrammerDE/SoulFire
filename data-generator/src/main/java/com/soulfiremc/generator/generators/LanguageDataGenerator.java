@@ -27,6 +27,6 @@ public class LanguageDataGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    return ResourceHelper.getResource("/assets/minecraft/lang/en_us.json");
+    return ResourceHelper.getResourceAsString("/assets/minecraft/lang/en_us.json");
   }
 }

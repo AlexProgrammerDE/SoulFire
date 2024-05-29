@@ -30,7 +30,7 @@ public class BlocksJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/BlockType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/BlockType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

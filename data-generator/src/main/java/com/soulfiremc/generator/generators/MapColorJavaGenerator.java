@@ -31,7 +31,7 @@ public class MapColorJavaGenerator implements IDataGenerator {
   @SneakyThrows
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/MapColor.java");
+    var base = ResourceHelper.getResourceAsString("/templates/MapColor.java");
     var registryField = MapColor.class.getDeclaredField("MATERIAL_COLORS");
     registryField.setAccessible(true);
     var registry = (MapColor[]) registryField.get(null);

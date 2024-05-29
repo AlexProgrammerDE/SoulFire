@@ -32,7 +32,7 @@ public record AttributeType(int id, Key key, double min, double max, double defa
 
   public static AttributeType register(String key) {
     var instance =
-      GsonDataHelper.fromJson("/minecraft/attributes.json", key, AttributeType.class);
+      GsonDataHelper.fromJson("minecraft/attributes.json", key, AttributeType.class);
 
     return REGISTRY.register(instance);
   }

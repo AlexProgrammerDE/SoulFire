@@ -52,7 +52,7 @@ public class TagsDataGenerator {
 
     @Override
     public String generateDataJson() {
-      var base = ResourceHelper.getResource("/templates/BlockTags.java");
+      var base = ResourceHelper.getResourceAsString("/templates/BlockTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
         String.join(
@@ -73,7 +73,7 @@ public class TagsDataGenerator {
 
     @Override
     public String generateDataJson() {
-      var base = ResourceHelper.getResource("/templates/ItemTags.java");
+      var base = ResourceHelper.getResourceAsString("/templates/ItemTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
         String.join(
@@ -94,7 +94,7 @@ public class TagsDataGenerator {
 
     @Override
     public String generateDataJson() {
-      var base = ResourceHelper.getResource("/templates/EntityTypeTags.java");
+      var base = ResourceHelper.getResourceAsString("/templates/EntityTypeTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
         String.join(
@@ -115,7 +115,7 @@ public class TagsDataGenerator {
 
     @Override
     public String generateDataJson() {
-      var base = ResourceHelper.getResource("/templates/FluidTags.java");
+      var base = ResourceHelper.getResourceAsString("/templates/FluidTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
         String.join(

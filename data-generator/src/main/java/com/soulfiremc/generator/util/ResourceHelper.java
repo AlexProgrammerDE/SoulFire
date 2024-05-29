@@ -23,7 +23,7 @@ import java.util.Objects;
 public class ResourceHelper {
   private ResourceHelper() {}
 
-  public static String getResource(String path) {
+  public static String getResourceAsString(String path) {
     try {
       var inputStream = Objects.requireNonNull(ResourceHelper.class.getResourceAsStream(path));
       return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);

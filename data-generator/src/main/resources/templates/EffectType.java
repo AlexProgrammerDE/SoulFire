@@ -32,7 +32,7 @@ public record EffectType(int id, Key key, EffectCategory category, boolean benef
 
   public static EffectType register(String key) {
     var instance =
-      GsonDataHelper.fromJson("/minecraft/effects.json", key, EffectType.class);
+      GsonDataHelper.fromJson("minecraft/effects.json", key, EffectType.class);
 
     return REGISTRY.register(instance);
   }

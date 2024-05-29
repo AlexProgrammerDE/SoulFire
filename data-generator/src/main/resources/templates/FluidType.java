@@ -32,7 +32,7 @@ public record FluidType(int id, Key key) implements RegistryValue<FluidType> {
 
   public static FluidType register(String key) {
     var instance =
-      GsonDataHelper.fromJson("/minecraft/fluids.json", key, FluidType.class);
+      GsonDataHelper.fromJson("minecraft/fluids.json", key, FluidType.class);
 
     return REGISTRY.register(instance);
   }

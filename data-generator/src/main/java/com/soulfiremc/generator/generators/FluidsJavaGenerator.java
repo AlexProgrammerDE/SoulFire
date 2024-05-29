@@ -30,7 +30,7 @@ public class FluidsJavaGenerator implements IDataGenerator {
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResource("/templates/FluidType.java");
+    var base = ResourceHelper.getResourceAsString("/templates/FluidType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       String.join(

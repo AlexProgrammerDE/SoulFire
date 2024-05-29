@@ -32,7 +32,7 @@ public record ItemType(
 
   public static ItemType register(String key) {
     var instance =
-      GsonDataHelper.fromJson("/minecraft/items.json", key, ItemType.class);
+      GsonDataHelper.fromJson("minecraft/items.json", key, ItemType.class);
 
     return REGISTRY.register(instance);
   }
