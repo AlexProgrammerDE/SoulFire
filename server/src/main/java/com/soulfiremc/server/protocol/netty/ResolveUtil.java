@@ -22,6 +22,7 @@ import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.util.ServerAddress;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Optional;
@@ -94,7 +95,7 @@ public class ResolveUtil {
     return Optional.empty();
   }
 
-  private static Optional<InetSocketAddress> resolveByHost(ServerAddress serverAddress) {
+  private static Optional<SocketAddress> resolveByHost(ServerAddress serverAddress) {
     try {
       var host = serverAddress.host();
       var resolved = InetAddress.getByName(host);
@@ -114,5 +115,5 @@ public class ResolveUtil {
     }
   }
 
-  public record ResolvedAddress(ServerAddress originalAddress, InetSocketAddress resolvedAddress) {}
+  public record ResolvedAddress(ServerAddress originalAddress, SocketAddress resolvedAddress) {}
 }

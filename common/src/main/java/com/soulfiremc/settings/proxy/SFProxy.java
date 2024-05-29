@@ -19,6 +19,7 @@ package com.soulfiremc.settings.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.util.SocketAddressHelper;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,10 @@ public record SFProxy(
 
     if (username == null && password != null) {
       throw new IllegalArgumentException("Username must be set if password is set!");
+    }
+
+    if (address instanceof InetSocketAddress inetSocketAddress && inetSocketAddress.isUnresolved()) {
+      throw new IllegalArgumentException("Address must be resolved!");
     }
   }
 

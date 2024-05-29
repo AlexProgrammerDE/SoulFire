@@ -44,6 +44,7 @@ import io.netty.handler.codec.haproxy.HAProxyProxiedProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -80,7 +81,7 @@ public class ViaClientSession extends TcpSession {
 
   @Getter
   private final Logger logger;
-  private final InetSocketAddress targetAddress;
+  private final SocketAddress targetAddress;
   private final String bindAddress;
   private final int bindPort;
   private final SFProxy proxy;
@@ -93,7 +94,7 @@ public class ViaClientSession extends TcpSession {
   private boolean delimiterBlockProcessing = false;
 
   public ViaClientSession(
-    InetSocketAddress targetAddress,
+    SocketAddress targetAddress,
     Logger logger,
     PacketProtocol protocol,
     SFProxy proxy,

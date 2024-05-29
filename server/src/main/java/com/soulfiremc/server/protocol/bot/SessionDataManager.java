@@ -1095,14 +1095,12 @@ public final class SessionDataManager {
     }
 
     if (cause.getClass() == UnexpectedEncryptionException.class) {
-      log.error("Server is online mode!");
+      log.error("Server is online mode!", cause);
     } else if (reason.contains("Connection refused")) {
-      log.error("Server is not reachable!");
+      log.error("Server is not reachable!", cause);
     } else {
-      log.error("Disconnected: {}", reason);
+      log.error("Disconnected: {}", reason, cause);
     }
-
-    log.error("Cause: {}", cause.getMessage());
   }
 
   private void handleTips(String message) {

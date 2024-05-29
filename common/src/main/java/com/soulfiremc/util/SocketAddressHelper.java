@@ -38,12 +38,11 @@ public class SocketAddressHelper {
   public static SocketAddress deserialize(String uriString) {
     var uri = URI.create(uriString);
     if ("inet".equals(uri.getScheme())) {
-      var parts = uri.getSchemeSpecificPart().split(":");
-      var host = parts[0];
-      var port = Integer.parseInt(parts[1]);
+      var host = uri.getHost();
+      var port = uri.getPort();
       return new InetSocketAddress(host, port);
     } else if ("unix".equals(uri.getScheme())) {
-      var path = uri.getSchemeSpecificPart();
+      var path = uri.getPath();
       return UnixDomainSocketAddress.of(path);
     } else {
       throw new IllegalArgumentException("Unsupported scheme: " + uri.getScheme());
