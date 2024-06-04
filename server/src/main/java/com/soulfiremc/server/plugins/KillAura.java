@@ -163,7 +163,7 @@ public class KillAura implements InternalPlugin {
         3.5d,
         0.0d,
         10.0d,
-        0.0d);
+        0.1d);
     public static final DoubleProperty LOOK_RANGE =
       BUILDER.ofDouble(
         "look-range",
@@ -173,7 +173,7 @@ public class KillAura implements InternalPlugin {
         4.8d,
         0.0d,
         25.0d,
-        0.0d);
+        0.1d);
     public static final BooleanProperty CHECK_WALLS =
       BUILDER.ofBoolean(
         "check-walls",
