@@ -63,7 +63,7 @@ message ClientPluginSettingEntrySingle {
   string uiName = 2;
   repeated string cliFlags = 3;
   string description = 4;
-  ClientPluginSettingType type = 5;
+  ClientPluginSettingType type = 6;
 }
 
 message ClientPluginSettingEntryMinMaxPairSingle {
@@ -72,7 +72,7 @@ message ClientPluginSettingEntryMinMaxPairSingle {
   string uiName = 2;
   repeated string cliFlags = 3;
   string description = 4;
-  IntSetting intSetting = 5;
+  IntSetting intSetting = 6;
 }
 
 // A paired option in the settings page
