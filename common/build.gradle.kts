@@ -23,6 +23,8 @@ dependencies {
   api(libs.commons.validator)
   api(libs.commons.io)
 
+  api(libs.oshi)
+
   api(libs.guava)
   api(libs.gson)
   api(libs.pf4j) {
