@@ -31,7 +31,9 @@ import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
+import com.soulfiremc.util.SocketAddressHelper;
 import java.lang.reflect.Type;
+import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -54,6 +56,7 @@ public record ProfileDataStructure(
       .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
       .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
       .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
+      .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
       .setPrettyPrinting()
       .create();
 

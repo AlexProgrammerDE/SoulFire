@@ -17,12 +17,29 @@
  */
 package com.soulfiremc.util;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnixDomainSocketAddress;
 
 public class SocketAddressHelper {
+  public static final TypeAdapter<SocketAddress> TYPE_ADAPTER =
+    new TypeAdapter<>() {
+      @Override
+      public void write(JsonWriter out, SocketAddress value) throws IOException {
+        out.value(serialize(value));
+      }
+
+      @Override
+      public SocketAddress read(JsonReader in) throws IOException {
+        return deserialize(in.nextString());
+      }
+    };
+
   private SocketAddressHelper() {}
 
   public static String serialize(SocketAddress address) {
