@@ -162,6 +162,11 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
+  public SFVec3i relativeTargetFeetBlock() {
+    return targetToMineBlock;
+  }
+
+  @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
     if (closestBlockToFallOn == Integer.MIN_VALUE || closestObstructingBlock > closestBlockToFallOn) {
       return Collections.emptyList();

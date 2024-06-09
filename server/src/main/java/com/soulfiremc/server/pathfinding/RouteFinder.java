@@ -28,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
-  private static List<WorldAction> getActionTrace(MinecraftRouteNode current) {
+  private static List<WorldAction> reconstructPath(MinecraftRouteNode current) {
     var actions = new ObjectArrayList<WorldAction>();
 
     var currentElement = current;
@@ -88,6 +89,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions that we need to look at
     var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
+    var shortestPathFound = new HashSet<SFVec3i>();
 
     {
       var startScore = scorer.computeScore(graph, from, List.of());
@@ -130,6 +132,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       var current = openSet.dequeue();
+      shortestPathFound.add(current.blockPosition());
       log.debug("Looking at node: {}", current.blockPosition());
 
       // If we found our destination, we can stop looking
@@ -137,7 +140,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-        return getActionTrace(current);
+        return reconstructPath(current);
       }
 
       Consumer<GraphInstructions> callback =
@@ -194,7 +197,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         };
 
       try {
-        graph.insertActions(current.blockPosition(), callback);
+        graph.insertActions(current.blockPosition(), callback, shortestPathFound::contains);
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.blockPosition());
         stopwatch.stop();
@@ -208,7 +211,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // This is the best node we found so far
         // We will add a recalculating action and return the best route
         var recalculateTrace =
-          getActionTrace(
+          reconstructPath(
             new MinecraftRouteNode(
               bestNode.blockPosition(),
               bestNode,

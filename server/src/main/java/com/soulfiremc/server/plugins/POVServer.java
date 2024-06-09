@@ -245,7 +245,7 @@ public class POVServer implements InternalPlugin {
   }
 
   private static TcpServer startPOVServer(SettingsHolder settingsHolder, int port, AttackManager attackManager) {
-    var faviconBytes = ResourceHelper.getResourceAsBytes("/assets/pov_favicon.png");
+    var faviconBytes = ResourceHelper.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);

@@ -35,6 +35,8 @@ public abstract sealed class GraphAction
     return --subscriptionCounter == 0;
   }
 
+  public abstract SFVec3i relativeTargetFeetBlock();
+
   public abstract List<GraphInstructions> getInstructions(SFVec3i node);
 
   public abstract GraphAction copy();

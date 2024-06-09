@@ -108,15 +108,22 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   public void insertActions(
-    SFVec3i node, Consumer<GraphInstructions> callback) {
+    SFVec3i node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> shouldIgnore) {
     log.debug("Inserting actions for node: {}", node);
-    calculateActions(node, generateTemplateActions(), callback);
+    calculateActions(node, generateTemplateActions(node, shouldIgnore), callback);
   }
 
-  private GraphAction[] generateTemplateActions() {
+  private GraphAction[] generateTemplateActions(SFVec3i node, Predicate<SFVec3i> shouldIgnore) {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-      actions[i] = ACTIONS_TEMPLATE[i].copy();
+      var action = ACTIONS_TEMPLATE[i];
+
+      // Do not calculate actions for blocks that should be ignored
+      if (shouldIgnore.test(action.relativeTargetFeetBlock().add(node))) {
+        continue;
+      }
+
+      actions[i] = action.copy();
     }
 
     return actions;

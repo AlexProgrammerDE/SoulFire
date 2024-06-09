@@ -373,6 +373,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
+  public SFVec3i relativeTargetFeetBlock() {
+    return targetFeetBlock;
+  }
+
+  @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
       return Collections.emptyList();

@@ -155,6 +155,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
+  public SFVec3i relativeTargetFeetBlock() {
+    return targetFeetBlock;
+  }
+
+  @Override
   public List<GraphInstructions> getInstructions(SFVec3i node) {
     var actions = new ObjectArrayList<WorldAction>();
     var cost = Costs.TOWER_COST;
