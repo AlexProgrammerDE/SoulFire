@@ -78,7 +78,7 @@ SoulFire has a built-in GUI for easy usage.
 ## ✨ Nightly builds
 
 You can download the latest development version of SoulFire
-through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main/SoulFire.zip).
+through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/build/main).
 
 ## 🔧 Build from source
 
