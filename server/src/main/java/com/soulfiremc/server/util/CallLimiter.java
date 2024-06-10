@@ -1,0 +1,43 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.util;
+
+import java.util.concurrent.TimeUnit;
+
+/**
+ * A class that only allows a call to be made once in a given interval.
+ */
+public class CallLimiter implements Runnable {
+  private final Runnable c;
+  private volatile long lastCalled;
+  private final long interval;
+
+  public CallLimiter(Runnable c, long interval, TimeUnit unit) {
+    this.c = c;
+    this.interval = unit.toMillis(interval);
+  }
+
+  @Override
+  public void run() {
+    if (lastCalled + interval < System.currentTimeMillis()) {
+      lastCalled = System.currentTimeMillis();
+      c.run();
+    }
+  }
+}
+

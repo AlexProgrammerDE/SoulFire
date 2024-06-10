@@ -25,6 +25,7 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
+import com.soulfiremc.server.util.CallLimiter;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -108,7 +109,19 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       openSet.enqueue(start);
     }
 
-    var nextLog = System.currentTimeMillis() + 1000;
+    var progressInfo = new CallLimiter(() -> {
+      if (!log.isInfoEnabled()) {
+        return;
+      }
+
+      var bestNode = findBestNode(routeIndex.valuesArray());
+      log.info("Still looking for route... {}ms time left, {} nodes left, closest position is {} with distance {}",
+        expireTime - System.currentTimeMillis(),
+        openSet.size(),
+        bestNode.blockPosition().formatXYZ(),
+        bestNode.totalRouteScore() - bestNode.sourceCost()
+      );
+    }, 1, TimeUnit.SECONDS);
     while (!openSet.isEmpty()) {
       if (pathCompletionFuture.isDone()) {
         stopwatch.stop();
@@ -120,16 +133,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return List.of();
       }
 
-      if (System.currentTimeMillis() > nextLog && log.isInfoEnabled()) {
-        var bestNode = findBestNode(routeIndex.valuesArray());
-        log.info("Still looking for route... {}ms time left, {} nodes left, closest position is {} with distance {}",
-          expireTime - System.currentTimeMillis(),
-          openSet.size(),
-          bestNode.blockPosition().formatXYZ(),
-          bestNode.totalRouteScore() - bestNode.sourceCost()
-        );
-        nextLog = System.currentTimeMillis() + 1000;
-      }
+      progressInfo.run();
 
       var current = openSet.dequeue();
       shortestPathFound.add(current.blockPosition());
