@@ -33,7 +33,6 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
-import org.intellij.lang.annotations.Subst;
 
 @Slf4j
 public class BuiltInKnownPackRegistry {
@@ -51,13 +50,12 @@ public class BuiltInKnownPackRegistry {
       supportedPacks = helper.readList(in, buf -> new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf)));
 
       helper.readList(in, buf -> {
-        @Subst("empty") var string = helper.readResourceLocation(in);
-        var registryKey = Key.key(string);
+        var registryKey = helper.readResourceLocation(in);
         var holders = new HashMap<Key, Pair<KnownPack, NbtMap>>();
         helper.readList(in, buf2 -> {
           var knownPack = new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf));
-          @Subst("empty") var string1 = helper.readResourceLocation(buf);
-          return Pair.of(Key.key(string1), Pair.of(
+          var packKey = helper.readResourceLocation(buf);
+          return Pair.of(packKey, Pair.of(
             knownPack,
             helper.readNullable(in, helper::readCompoundTag)
           ));

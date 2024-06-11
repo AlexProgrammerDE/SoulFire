@@ -17,12 +17,14 @@
  */
 package com.soulfiremc.server.util;
 
+import net.kyori.adventure.key.Key;
+
 /**
  * Various useful constants. Taken from <a
  * href="https://github.com/PaperMC/Velocity/blob/dev/3.0.0/proxy/src/main/java/com/velocitypowered/proxy/connection/VelocityConstants.java#L25">Velocity</a>
  */
 public class VelocityConstants {
-  public static final String VELOCITY_IP_FORWARDING_CHANNEL = "velocity:player_info";
+  public static final Key VELOCITY_IP_FORWARDING_CHANNEL = Key.key("velocity:player_info");
   public static final int MODERN_FORWARDING_DEFAULT = 1;
   public static final int MODERN_FORWARDING_WITH_KEY = 2;
   public static final int MODERN_FORWARDING_WITH_KEY_V2 = 3;

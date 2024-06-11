@@ -19,47 +19,31 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.data.TagKey;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Arrays;
 import java.util.Map;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
 
 @Getter
 public class TagsState {
-  private final Map<Key, Map<Key, IntSet>> tags = new Object2ObjectOpenHashMap<>();
+  private static final int[] EMPTY_INT_ARRAY = new int[0];
+  private final Map<Key, Map<Key, int[]>> tags = new Object2ObjectOpenHashMap<>();
 
-  @SuppressWarnings("PatternValidation")
-  public void handleTagData(Map<String, Map<String, int[]>> updateTags) {
-    for (var entry : updateTags.entrySet()) {
-      var tagMap = new Object2ObjectOpenHashMap<Key, IntSet>();
-      for (var tagEntry : entry.getValue().entrySet()) {
-        var set = new IntOpenHashSet(tagEntry.getValue());
-        tagMap.put(Key.key(tagEntry.getKey()), set);
-      }
-      tags.put(Key.key(entry.getKey()), tagMap);
-    }
+  public void handleTagData(Map<Key, Map<Key, int[]>> updateTags) {
+    tags.putAll(updateTags);
   }
 
   public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
-    return getValuesOfTag(value, tagKey).contains(value.id());
+    return Arrays.stream(getValuesOfTag(value, tagKey)).anyMatch(t -> t == value.id());
   }
 
-  public <T extends RegistryValue<T>> IntSet getValuesOfTag(T value, TagKey<T> tagKey) {
+  public <T extends RegistryValue<T>> int[] getValuesOfTag(T value, TagKey<T> tagKey) {
     return tags.getOrDefault(tagKey.registry().key(), Map.of())
-      .getOrDefault(tagKey.key(), IntSet.of());
+      .getOrDefault(tagKey.key(), EMPTY_INT_ARRAY);
   }
 
-  public Map<String, Map<String, int[]>> exportTags() {
-    var result = new Object2ObjectOpenHashMap<String, Map<String, int[]>>();
-    for (var entry : tags.entrySet()) {
-      var tagMap = new Object2ObjectOpenHashMap<String, int[]>();
-      for (var tagEntry : entry.getValue().entrySet()) {
-        tagMap.put(tagEntry.getKey().toString(), tagEntry.getValue().toIntArray());
-      }
-      result.put(entry.getKey().toString(), tagMap);
-    }
-    return result;
+  public Map<Key, Map<Key, int[]>> exportTags() {
+    return Map.copyOf(tags);
   }
 }

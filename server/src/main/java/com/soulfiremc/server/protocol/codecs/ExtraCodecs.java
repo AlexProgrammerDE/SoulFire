@@ -52,7 +52,6 @@ public class ExtraCodecs {
   public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
   public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, floatValue -> "Value must be positive: " + floatValue);
 
-  @SuppressWarnings("PatternValidation")
   public static <T extends RegistryValue<T>> Codec<HolderSet> holderSetCodec(Registry<T> registry) {
     return Codec.either(
       homogenousList(registry.keyCodec(), false)
@@ -60,8 +59,8 @@ public class ExtraCodecs {
         .xmap(HolderSet::new, HolderSet::getHolders),
       TagKey.hashedCodec(registry.registryKey())
         .xmap(
-          tagKey -> new HolderSet(tagKey.key().toString()),
-          holderSet -> new TagKey<>(registry.registryKey(), Key.key(Objects.requireNonNull(holderSet.getLocation())))
+          tagKey -> new HolderSet(tagKey.key()),
+          holderSet -> new TagKey<>(registry.registryKey(), Objects.requireNonNull(holderSet.getLocation()))
         )
     ).xmap(
       either -> either.left().orElseGet(() -> either.right().orElseThrow()),

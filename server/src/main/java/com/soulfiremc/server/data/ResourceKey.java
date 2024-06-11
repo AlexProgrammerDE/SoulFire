@@ -24,6 +24,10 @@ public record ResourceKey<T extends RegistryValue<T>>(Key registryKey, Key key) 
   public static final Key ROOT_REGISTRY_KEY = Key.key("minecraft:root");
 
   public static <T extends RegistryValue<T>> ResourceKey<T> key(@KeyPattern String key) {
-    return new ResourceKey<>(ROOT_REGISTRY_KEY, Key.key(key));
+    return key(Key.key(key));
+  }
+
+  public static <T extends RegistryValue<T>> ResourceKey<T> key(Key key) {
+    return new ResourceKey<>(ROOT_REGISTRY_KEY, key);
   }
 }

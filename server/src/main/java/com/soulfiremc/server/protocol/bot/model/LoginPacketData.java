@@ -18,5 +18,6 @@
 package com.soulfiremc.server.protocol.bot.model;
 
 import lombok.NonNull;
+import net.kyori.adventure.key.Key;
 
-public record LoginPacketData(boolean hardcore, @NonNull String[] worldNames, int maxPlayers, boolean enforcesSecureChat) {}
+public record LoginPacketData(boolean hardcore, @NonNull Key[] worldNames, int maxPlayers, boolean enforcesSecureChat) {}

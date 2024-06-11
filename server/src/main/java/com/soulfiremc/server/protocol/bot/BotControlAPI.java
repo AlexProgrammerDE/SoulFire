@@ -149,7 +149,7 @@ public class BotControlAPI {
   }
 
   public void sendPluginMessage(Key channel, byte[] data) {
-    connection.sendPacket(new ServerboundCustomPayloadPacket(channel.toString(), data));
+    connection.sendPacket(new ServerboundCustomPayloadPacket(channel, data));
   }
 
   public Vector3d getEntityVisiblePoint(Entity entity) {

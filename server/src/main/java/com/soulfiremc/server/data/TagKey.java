@@ -26,7 +26,12 @@ import net.kyori.adventure.key.KeyPattern;
 public record TagKey<T extends RegistryValue<T>>(ResourceKey<? extends Registry<T>> registry, Key key) {
   @SuppressWarnings("unchecked")
   public static <T extends RegistryValue<T>> TagKey<T> key(@KeyPattern String key, ResourceKey<?> registry) {
-    return new TagKey<>((ResourceKey<? extends Registry<T>>) registry, Key.key(key));
+    return key(Key.key(key), registry);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends RegistryValue<T>> TagKey<T> key(Key key, ResourceKey<?> registry) {
+    return new TagKey<>((ResourceKey<? extends Registry<T>>) registry, key);
   }
 
   public static <T extends RegistryValue<T>> Codec<TagKey<T>> codec(ResourceKey<? extends Registry<T>> registry) {

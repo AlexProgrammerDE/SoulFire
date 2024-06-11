@@ -92,13 +92,13 @@ public class ModLoaderSupport implements InternalPlugin {
     var settingsHolder = connection.settingsHolder();
 
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
-      var channelKey = Key.key(pluginMessage.getChannel());
+      var channelKey = pluginMessage.getChannel();
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML) {
         handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
-      var channelKey = Key.key(loginPluginMessage.getChannel());
+      var channelKey = loginPluginMessage.getChannel();
       if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML2) {
         handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
@@ -194,8 +194,7 @@ public class ModLoaderSupport implements InternalPlugin {
     var helper = botConnection.session().getCodecHelper();
     var buffer = Unpooled.wrappedBuffer(data);
 
-    var innerChannel = helper.readString(buffer);
-    var innerChannelKey = Key.key(innerChannel);
+    var innerChannelKey = helper.readResourceLocation(buffer);
     if (!innerChannelKey.equals(FML2_HANDSHAKE_KEY)) {
       return;
     }

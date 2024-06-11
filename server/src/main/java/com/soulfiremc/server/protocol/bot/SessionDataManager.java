@@ -175,7 +175,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.Serve
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
-import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -200,7 +199,7 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
-  private String[] serverEnabledFeatures;
+  private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
   private @Nullable ServerPlayData serverPlayData;
@@ -270,7 +269,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onRegistry(ClientboundRegistryDataPacket packet) {
-    @Subst("empty") var registry = packet.getRegistry();
+    var registry = packet.getRegistry();
     var registryKey = ResourceKey.key(registry);
     rawRegistryData.put(registryKey, packet.getEntries());
 
@@ -289,8 +288,7 @@ public final class SessionDataManager {
     var entries = packet.getEntries();
     for (var i = 0; i < entries.size(); i++) {
       var entry = entries.get(i);
-      @Subst("empty") var key = entry.getId();
-      var holderKey = Key.key(key);
+      var holderKey = entry.getId();
       var providedData = entry.getData();
       NbtMap usedData;
       if (providedData == null) {
@@ -328,7 +326,7 @@ public final class SessionDataManager {
       new Level(
         tagsState,
         dimensionTypeRegistry.getById(spawnInfo.getDimension()),
-        Key.key(spawnInfo.getWorldName()),
+        spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
         spawnInfo.isFlat());
@@ -425,7 +423,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPluginMessage(ClientboundCustomPayloadPacket packet) {
-    var channelKey = Key.key(packet.getChannel());
+    var channelKey = packet.getChannel();
     log.debug("Received plugin message on channel {}", channelKey);
     if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
       serverBrand = codecHelper.readString(Unpooled.wrappedBuffer(packet.getData()));
@@ -890,7 +888,7 @@ public final class SessionDataManager {
     }
 
     for (var entry : packet.getAttributes()) {
-      var key = Key.key(entry.getType().getIdentifier());
+      var key = entry.getType().getIdentifier();
       var attributeType = AttributeType.REGISTRY.getByKey(key);
       if (attributeType == null) {
         log.warn("Received unknown attribute type {}", key);

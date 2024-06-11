@@ -43,9 +43,10 @@ public record BlockType(
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {
     @Override
     public void write(JsonWriter out, FluidType value) throws IOException {
-      out.value(value.key().toString());
+      out.value(value.key().asString());
     }
 
+    @SuppressWarnings("PatternValidation")
     @Override
     public FluidType read(JsonReader in) throws IOException {
       return FluidType.REGISTRY.getByKey(Key.key(in.nextString()));

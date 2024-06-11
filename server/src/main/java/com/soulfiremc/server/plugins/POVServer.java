@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -271,7 +272,7 @@ public class POVServer implements InternalPlugin {
           new ClientboundLoginPacket(
             0,
             false,
-            new String[] {"minecraft:the_end"},
+            new Key[] {Key.key("minecraft:the_end")},
             1,
             0,
             0,
@@ -280,7 +281,7 @@ public class POVServer implements InternalPlugin {
             false,
             new PlayerSpawnInfo(
               2,
-              "minecraft:the_end",
+              Key.key("minecraft:the_end"),
               100,
               GameMode.SPECTATOR,
               GameMode.SPECTATOR,
@@ -364,7 +365,7 @@ public class POVServer implements InternalPlugin {
         brandBuffer.readBytes(brandBytes);
 
         session.send(
-          new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(), brandBytes));
+          new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, brandBytes));
       });
 
     server.addListener(
@@ -450,7 +451,6 @@ public class POVServer implements InternalPlugin {
 
                             var clientEntity =
                               botConnection.dataManager().clientEntity();
-                            System.out.println("Packet Bot -> Server: " + packet.getClass().getSimpleName());
                             // Bot -> MC Client
                             switch (packet) {
                               case ServerboundMovePlayerPosRotPacket posRot -> {
@@ -525,7 +525,6 @@ public class POVServer implements InternalPlugin {
                         clientEntity.z(posRot.getZ());
                         clientEntity.yaw(posRot.getYaw());
                         clientEntity.pitch(posRot.getPitch());
-                        System.out.println("X: " + posRot.getX() + " Y: " + posRot.getY() + " Z: " + posRot.getZ());
                       }
                       case ServerboundMovePlayerPosPacket pos -> {
                         lastX = pos.getX();
@@ -535,7 +534,6 @@ public class POVServer implements InternalPlugin {
                         clientEntity.x(pos.getX());
                         clientEntity.y(pos.getY());
                         clientEntity.z(pos.getZ());
-                        System.out.println("X: " + pos.getX() + " Y: " + pos.getY() + " Z: " + pos.getZ());
                       }
                       case ServerboundMovePlayerRotPacket rot -> {
                         clientEntity.yaw(rot.getYaw());
@@ -649,7 +647,7 @@ public class POVServer implements InternalPlugin {
                 }
 
                 for (var entry : dataManager.rawRegistryData().entrySet()) {
-                  session.send(new ClientboundRegistryDataPacket(entry.getKey().key().toString(), entry.getValue()));
+                  session.send(new ClientboundRegistryDataPacket(entry.getKey().key(), entry.getValue()));
                 }
 
                 var tagsPacket = new ClientboundUpdateTagsPacket();
@@ -665,7 +663,7 @@ public class POVServer implements InternalPlugin {
                 var spawnInfo =
                   new PlayerSpawnInfo(
                     dataManager.currentLevel().dimensionType().id(),
-                    dataManager.currentLevel().worldKey().toString(),
+                    dataManager.currentLevel().worldKey(),
                     dataManager.currentLevel().hashedSeed(),
                     dataManager.gameMode(),
                     dataManager.previousGameMode(),
@@ -995,8 +993,8 @@ public class POVServer implements InternalPlugin {
                             new Attribute(
                               new AttributeType() {
                                 @Override
-                                public String getIdentifier() {
-                                  return attributeState.type().key().toString();
+                                public Key getIdentifier() {
+                                  return attributeState.type().key();
                                 }
 
                                 @Override

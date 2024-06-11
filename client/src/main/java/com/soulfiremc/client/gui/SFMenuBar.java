@@ -210,7 +210,7 @@ public class SFMenuBar extends JMenuBar {
     var windowMenu = new JMenu("Window");
     var trafficGraph = new JMenuItem("Traffic Monitor");
     trafficGraph.addActionListener(e -> {
-        System.out.println("TODO: Open traffic graph");
+        log.info("TODO: Open traffic graph");
     });
     windowMenu.add(trafficGraph);
     viewMenu.add(windowMenu);

@@ -52,8 +52,7 @@ public class ClientBrand implements InternalPlugin {
 
       connection
         .session()
-        .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY.toString(),
-          ByteBufUtil.getBytes(buf)));
+        .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, ByteBufUtil.getBytes(buf)));
     }
   }
 
