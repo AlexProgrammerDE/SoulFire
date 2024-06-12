@@ -51,6 +51,7 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
 
 @Getter
 public final class BotConnection {
@@ -85,6 +86,8 @@ public final class BotConnection {
   private final SFSessionService sessionService;
   private final SessionDataManager dataManager;
   private final BotControlAPI botControl;
+  private final Object shutdownLock = new Object();
+  private boolean running = true;
 
   public BotConnection(
     BotConnectionFactory factory,
@@ -125,6 +128,9 @@ public final class BotConnection {
       resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, this);
     this.dataManager = new SessionDataManager(this);
     this.botControl = new BotControlAPI(this, dataManager);
+
+    // Start the tick loop
+    scheduler.schedule(this::tickLoop);
   }
 
   public CompletableFuture<?> connect() {
@@ -139,7 +145,29 @@ public final class BotConnection {
     return session.isConnected();
   }
 
-  public void tick(long ticks) {
+  private void tickLoop() {
+    MDC.put("connectionId", connectionId.toString());
+    MDC.put("botName", accountName);
+    MDC.put("botUuid", accountProfileId.toString());
+
+    while (this.running) {
+      var tickTimer = dataManager.tickTimer();
+      var ticks = tickTimer.advanceTime(System.currentTimeMillis());
+
+      if (session.isDisconnected()) {
+        wasDisconnected();
+        break;
+      }
+
+      try {
+        tick(ticks);
+      } catch (Throwable t) {
+        logger.error("Exception ticking bot", t);
+      }
+    }
+  }
+
+  public void tick(int ticks) {
     try {
       session.tick(); // Ensure all packets are handled before ticking
 
@@ -147,7 +175,7 @@ public final class BotConnection {
         preTickHooks.poll().run();
       }
 
-      for (var i = 0L; i < ticks; i++) {
+      for (var i = 0L; i < Math.min(ticks, 10); i++) {
         var tickHookState = TickHookContext.INSTANCE.get();
         tickHookState.clear();
 
@@ -169,23 +197,44 @@ public final class BotConnection {
     return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
   }
 
-  public CompletableFuture<?> gracefulDisconnect() {
-    return CompletableFuture.runAsync(
-      () -> {
-        // Run all shutdown hooks
-        shutdownHooks.forEach(Runnable::run);
+  public void gracefulDisconnect() {
+    synchronized (shutdownLock) {
+      if (!running) {
+        return;
+      }
 
-        session.disconnect("Disconnect");
+      running = false;
 
-        // Give the server one second to handle the disconnect
-        TimeUtil.waitTime(1, TimeUnit.SECONDS);
+      // Run all shutdown hooks
+      shutdownHooks.forEach(Runnable::run);
 
-        // Shut down all executors
-        scheduler.shutdown();
+      session.disconnect("Disconnect");
 
-        // Let threads finish that didn't immediately interrupt
-        TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
-      });
+      // Give the server one second to handle the disconnect
+      TimeUtil.waitTime(1, TimeUnit.SECONDS);
+
+      // Shut down all executors
+      scheduler.shutdown();
+
+      // Let threads finish that didn't immediately interrupt
+      TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
+    }
+  }
+
+  public void wasDisconnected() {
+    synchronized (shutdownLock) {
+      if (!running) {
+        return;
+      }
+
+      running = false;
+
+      // Run all shutdown hooks
+      shutdownHooks.forEach(Runnable::run);
+
+      // Shut down all executors
+      scheduler.shutdown();
+    }
   }
 
   public IdentifiedKey identifiedKey() {

@@ -63,7 +63,7 @@ public class AutoReconnect implements InternalPlugin {
             return;
           }
 
-          connection.gracefulDisconnect().join();
+          connection.gracefulDisconnect();
           var newConnection = connection.factory().prepareConnection();
 
           connection

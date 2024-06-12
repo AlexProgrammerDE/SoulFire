@@ -37,6 +37,8 @@ public class EntitiesDataGenerator implements IDataGenerator {
 
     entityDesc.addProperty("width", dimensions.width());
     entityDesc.addProperty("height", dimensions.height());
+    entityDesc.addProperty("updateInterval", entityType.updateInterval());
+    entityDesc.addProperty("clientTrackingRange", entityType.clientTrackingRange());
 
     var category = entityType.getCategory();
     entityDesc.addProperty("category", category.getName());

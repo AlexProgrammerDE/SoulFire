@@ -62,6 +62,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.PrimitiveHelper;
+import com.soulfiremc.server.util.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -123,6 +124,8 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundServerDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundSystemChatPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTabListPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTickingStatePacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundTickingStepPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundMoveEntityPosRotPacket;
@@ -199,6 +202,7 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
+  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
@@ -211,7 +215,7 @@ public final class SessionDataManager {
   private LoginPacketData loginData;
   private boolean enableRespawnScreen;
   private boolean doLimitedCrafting;
-  private Level lastSpawnedInLevel;
+  private Level level;
   private int serverViewDistance = -1;
   private int serverSimulationDistance = -1;
   private @Nullable GlobalPos lastDeathPos;
@@ -232,6 +236,17 @@ public final class SessionDataManager {
     this.connection = connection;
     this.inventoryManager = new InventoryManager(this, connection);
     this.botActionManager = new BotActionManager(this, connection);
+  }
+
+  private float getTickTargetMillis(float defaultValue) {
+    if (this.level != null) {
+      var lv = this.level.tickRateManager();
+      if (lv.runsNormally()) {
+        return Math.max(defaultValue, lv.millisecondsPerTick());
+      }
+    }
+
+    return defaultValue;
   }
 
   private static String toPlainText(Component component) {
@@ -322,7 +337,7 @@ public final class SessionDataManager {
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
-    lastSpawnedInLevel =
+    level =
       new Level(
         tagsState,
         dimensionTypeRegistry.getById(spawnInfo.getDimension()),
@@ -334,6 +349,25 @@ public final class SessionDataManager {
     previousGameMode = spawnInfo.getPreviousGamemode();
     lastDeathPos = spawnInfo.getLastDeathPos();
     portalCooldown = spawnInfo.getPortalCooldown();
+  }
+
+  @EventHandler
+  public void onTickingState(ClientboundTickingStatePacket packet) {
+    if (this.level != null) {
+      var tickRateManager = level.tickRateManager();
+
+      tickRateManager.setTickRate(packet.getTickRate());
+      tickRateManager.setFrozen(packet.isFrozen());
+    }
+  }
+
+  @EventHandler
+  public void onTickingStep(ClientboundTickingStepPacket packet) {
+    if (this.level != null) {
+      var tickRateManager = level.tickRateManager();
+
+      tickRateManager.setFrozenTicksToRun(packet.getTickSteps());
+    }
   }
 
   @EventHandler
@@ -1110,10 +1144,14 @@ public final class SessionDataManager {
   }
 
   public @NotNull Level currentLevel() {
-    return Objects.requireNonNull(lastSpawnedInLevel, "Current level is not set");
+    return Objects.requireNonNull(level, "Current level is not set");
   }
 
   public void tick() {
+    if (this.level != null) {
+      this.level.tickRateManager().tick();
+    }
+
     // Tick border changes
     if (borderState != null) {
       borderState.tick();

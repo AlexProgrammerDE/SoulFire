@@ -24,6 +24,9 @@ import java.util.function.BooleanSupplier;
  * Simple class to make waiting easier and less verbose.
  */
 public class TimeUtil {
+  public static final long NANOSECONDS_PER_SECOND = TimeUnit.SECONDS.toNanos(1L);
+  public static final long NANOSECONDS_PER_MILLISECOND = TimeUnit.MILLISECONDS.toNanos(1L);
+
   private TimeUtil() {}
 
   public static void waitTime(long time, TimeUnit unit) {

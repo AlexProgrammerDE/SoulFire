@@ -25,6 +25,8 @@ public record EntityType(
   Key key,
   float width,
   float height,
+  int updateInterval,
+  int clientTrackingRange,
   String category,
   boolean friendly,
   boolean summonable,

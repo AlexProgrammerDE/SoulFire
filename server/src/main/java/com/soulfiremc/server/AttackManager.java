@@ -293,7 +293,7 @@ public class AttackManager {
       var eventLoopGroups = new HashSet<EventLoopGroup>();
       var disconnectFuture = new ArrayList<CompletableFuture<?>>();
       for (var entry : Map.copyOf(botConnections).entrySet()) {
-        disconnectFuture.add(entry.getValue().gracefulDisconnect());
+        disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect));
         eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
         botConnections.remove(entry.getKey());
       }

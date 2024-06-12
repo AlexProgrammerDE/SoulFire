@@ -111,6 +111,10 @@ public class ViaClientSession extends TcpSession {
     this.botConnection = botConnection;
   }
 
+  public boolean isDisconnected() {
+    return this.disconnected;
+  }
+
   @Override
   public void connect(boolean wait) {
     if (this.disconnected) {

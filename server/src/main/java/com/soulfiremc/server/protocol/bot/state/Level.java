@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.TickRateManager;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -31,6 +32,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
 public class Level implements LevelHeightAccessor {
+  private final TickRateManager tickRateManager = new TickRateManager();
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final DimensionType dimensionType;
