@@ -40,6 +40,10 @@ public class SFPathConstants {
     return baseFolder.resolve("config");
   }
 
+  public static Path getSecretKeyFile(Path baseFolder) {
+    return baseFolder.resolve("secret-key.ser");
+  }
+
   public static Path getMapsDirectory(Path baseFolder) {
     return baseFolder.resolve("maps");
   }

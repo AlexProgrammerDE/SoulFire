@@ -61,6 +61,7 @@ import com.soulfiremc.server.viaversion.platform.SFViaBedrock;
 import com.soulfiremc.server.viaversion.platform.SFViaLegacy;
 import com.soulfiremc.server.viaversion.platform.SFViaPlatform;
 import com.soulfiremc.server.viaversion.platform.SFViaRewind;
+import com.soulfiremc.util.KeyHelper;
 import com.soulfiremc.util.SFFeatureFlags;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
@@ -73,7 +74,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -85,7 +85,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -139,12 +138,7 @@ public class SoulFireServer {
 
     injector.register(ShutdownManager.class, shutdownManager);
 
-    try {
-      var keyGen = KeyGenerator.getInstance("HmacSHA256");
-      this.jwtSecretKey = keyGen.generateKey();
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
+    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
 
     rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
     var rpcServerStart =

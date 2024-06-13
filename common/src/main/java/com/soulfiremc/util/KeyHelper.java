@@ -18,6 +18,9 @@
 package com.soulfiremc.util;
 
 import com.google.gson.JsonParseException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -26,6 +29,9 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class KeyHelper {
   private KeyHelper() {}
@@ -56,5 +62,17 @@ public class KeyHelper {
 
   private static byte[] decodeBase64String(String key) {
     return Base64.getDecoder().decode(key);
+  }
+
+  public static SecretKey getOrCreateJWTSecretKey(Path path) {
+    try {
+      if (!Files.exists(path)) {
+        Files.writeString(path, encodeBase64Key(KeyGenerator.getInstance("HmacSHA256").generateKey()));
+      }
+
+      return new SecretKeySpec(decodeBase64String(Files.readString(path)), "HmacSHA256");
+    } catch (IOException | GeneralSecurityException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
