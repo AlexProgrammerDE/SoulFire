@@ -67,10 +67,10 @@ public class KeyHelper {
   public static SecretKey getOrCreateJWTSecretKey(Path path) {
     try {
       if (!Files.exists(path)) {
-        Files.writeString(path, encodeBase64Key(KeyGenerator.getInstance("HmacSHA256").generateKey()));
+        Files.write(path, KeyGenerator.getInstance("HmacSHA256").generateKey().getEncoded());
       }
 
-      return new SecretKeySpec(decodeBase64String(Files.readString(path)), "HmacSHA256");
+      return new SecretKeySpec(Files.readAllBytes(path), "HmacSHA256");
     } catch (IOException | GeneralSecurityException e) {
       throw new RuntimeException(e);
     }

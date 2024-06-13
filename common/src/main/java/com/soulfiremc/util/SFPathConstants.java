@@ -41,7 +41,7 @@ public class SFPathConstants {
   }
 
   public static Path getSecretKeyFile(Path baseFolder) {
-    return baseFolder.resolve("secret-key.ser");
+    return baseFolder.resolve("secret-key.bin");
   }
 
   public static Path getMapsDirectory(Path baseFolder) {
