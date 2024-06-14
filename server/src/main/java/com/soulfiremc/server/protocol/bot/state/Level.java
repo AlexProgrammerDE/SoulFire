@@ -73,7 +73,11 @@ public class Level implements LevelHeightAccessor {
     return dimensionType.minY();
   }
 
-  public void setBlockId(Vector3i block, int state) {
+  public void setBlock(Vector3i block, BlockState state) {
+    setBlockId(block, state.id());
+  }
+
+  public void setBlockId(Vector3i block, int stateId) {
     var chunkData = chunks.getChunk(block);
 
     // Ignore block updates for unloaded chunks; that's what vanilla does.
@@ -81,7 +85,7 @@ public class Level implements LevelHeightAccessor {
       return;
     }
 
-    chunkData.setBlock(block, state);
+    chunkData.setBlock(block, stateId);
   }
 
   public boolean isChunkLoaded(Vector3i block) {

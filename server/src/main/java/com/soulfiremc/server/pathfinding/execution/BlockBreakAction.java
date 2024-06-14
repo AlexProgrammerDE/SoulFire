@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -106,6 +107,16 @@ public final class BlockBreakAction implements WorldAction {
           .ticks();
       dataManager.botActionManager()
         .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
+
+      // We instamine or are in creative mode
+      // In that case don't send finish and no swing animation
+      if (remainingTicks == 0) {
+        finishedDigging = true;
+
+        // Predict state change
+        // This only happens with instamine
+        dataManager.currentLevel().setBlock(blockPosition.toVector3i(), BlockState.forDefaultBlockType(BlockType.AIR));
+      }
     } else if (--remainingTicks == 0) {
       dataManager.botActionManager()
         .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());

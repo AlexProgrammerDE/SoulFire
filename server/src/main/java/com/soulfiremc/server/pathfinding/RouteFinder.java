@@ -177,8 +177,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               // Get distance from the current element
               // and add the distance from the current element to the next element
               var newSourceCost = current.sourceCost() + actionCost;
-              var newTotalRouteScore =
-                newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+              var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
 
               // The first time we see this node
               if (v == null) {

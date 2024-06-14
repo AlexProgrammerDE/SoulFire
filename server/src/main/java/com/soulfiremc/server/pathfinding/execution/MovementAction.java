@@ -49,7 +49,10 @@ public final class MovementAction implements WorldAction {
       return false;
     } else {
       var halfDiagonal = clientEntity.boundingBox().diagonalXZLength() / 2;
-      return botPosition.distance(targetMiddleBlock) < halfDiagonal;
+
+      // Leave more space to allow falling
+      var adjustedHalfDiagonal = halfDiagonal - 0.05;
+      return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
     }
   }
 
