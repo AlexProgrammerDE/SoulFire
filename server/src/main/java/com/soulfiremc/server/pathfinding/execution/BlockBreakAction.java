@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -36,7 +35,6 @@ public final class BlockBreakAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockFace blockBreakSideHint;
-  private final boolean willDrop;
   boolean finishedDigging = false;
   private boolean didLook = false;
   private boolean putInHand = false;
@@ -44,7 +42,7 @@ public final class BlockBreakAction implements WorldAction {
   private int totalTicks = -1;
 
   public BlockBreakAction(MovementMiningCost movementMiningCost) {
-    this(movementMiningCost.block(), movementMiningCost.blockBreakSideHint(), movementMiningCost.willDrop());
+    this(movementMiningCost.block(), movementMiningCost.blockBreakSideHint());
   }
 
   @Override
@@ -120,13 +118,6 @@ public final class BlockBreakAction implements WorldAction {
   @Override
   public int getAllowedTicks() {
     return totalTicks == -1 ? 20 : totalTicks + 20;
-  }
-
-  @Override
-  public BotEntityState simulate(BotEntityState state) {
-    return new BotEntityState(state.blockPosition(),
-      state.level().withChangeToAir(blockPosition),
-      willDrop ? state.inventory().withOneMoreBlock() : state.inventory());
   }
 
   @Override

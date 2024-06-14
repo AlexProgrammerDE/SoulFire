@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 
@@ -35,6 +34,4 @@ public sealed interface WorldAction
   void tick(BotConnection connection);
 
   int getAllowedTicks();
-
-  BotEntityState simulate(BotEntityState state);
 }

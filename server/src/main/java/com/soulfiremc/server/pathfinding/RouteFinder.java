@@ -99,7 +99,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       var start =
         new MinecraftRouteNode(
           from,
-          new BotEntityState(from, graph.level(), graph.inventory()),
           requiresRepositioning
             ? List.of(new MovementAction(from, false))
             : List.of(),
@@ -174,15 +173,13 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
                 log.debug("Found a new node: {}", actionTargetBlockPosition);
 
-                if (node.predicatedStateValid()) {
-                  openSet.enqueue(node);
-                }
+                openSet.enqueue(node);
 
                 return node;
               }
 
               // If we found a better route to this node, update it
-              if (!v.predicatedStateValid() || newSourceCost < v.sourceCost()) {
+              if (newSourceCost < v.sourceCost()) {
                 v.parent(current);
                 v.actions(worldActions);
                 v.sourceCost(newSourceCost);
@@ -191,9 +188,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                 log.debug(
                   "Found a better route to node: {}", actionTargetBlockPosition);
 
-                if (v.predicatedStateValid()) {
-                  openSet.enqueue(v);
-                }
+                openSet.enqueue(v);
               }
 
               return v;

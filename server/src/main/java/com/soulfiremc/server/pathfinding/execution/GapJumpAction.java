@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.MathHelper;
@@ -103,11 +102,6 @@ public final class GapJumpAction implements WorldAction {
   public int getAllowedTicks() {
     // 5-seconds max to walk to a block
     return 5 * 20;
-  }
-
-  @Override
-  public BotEntityState simulate(BotEntityState state) {
-    return new BotEntityState(blockPosition, state.level(), state.inventory());
   }
 
   @Override
