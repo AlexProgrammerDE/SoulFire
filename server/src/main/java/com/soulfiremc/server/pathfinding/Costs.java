@@ -131,7 +131,6 @@ public class Costs {
       throw new IllegalStateException("No way found to break block!");
     }
 
-    System.out.println("Mining cost: " + lowestMiningTicks / TICKS_PER_BLOCK + " " + bestItem + " " + willDropUsableBlockItem);
     return new BlockMiningCosts(
       (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, willDropUsableBlockItem);
   }

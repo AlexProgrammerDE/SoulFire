@@ -42,6 +42,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class PathfindingTest {
   // TODO: Implement default tagstate for testing
+  private static final TagsState TAGS_STATE = new TagsState();
 
   @Test
   public void testPathfindingStraight() {
@@ -51,7 +52,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor), inventory,
       true, true), new PosGoal(2, 1, 0));
 
@@ -72,7 +73,7 @@ public class PathfindingTest {
     var inventory = new ProjectedInventory(List.of());
     var routeFinder =
       new RouteFinder(
-        new MinecraftGraph(new TagsState(),
+        new MinecraftGraph(TAGS_STATE,
           new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
           inventory,
           true, true),
@@ -93,7 +94,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(2, 1, 2));
@@ -113,7 +114,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(1, height + 1, 0));
@@ -137,7 +138,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(1, height + 1, 1));
@@ -161,7 +162,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, -height, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(1, -height + 1, 0));
@@ -185,7 +186,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(1, -height + 1, 1));
@@ -209,7 +210,7 @@ public class PathfindingTest {
     accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of());
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(gapLength + 1, 1, 0));
@@ -232,7 +233,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(0, 2, 0));
@@ -250,7 +251,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(0, 21, 0));
@@ -273,7 +274,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(0, 0, 0));
@@ -294,7 +295,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(2, 1, 0));
@@ -316,7 +317,7 @@ public class PathfindingTest {
     }
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(0, 0, 0));
@@ -345,7 +346,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -level, 0, BlockType.STONE);
 
     var inventory = new ProjectedInventory(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)));
-    var routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
       inventory,
       true, true), new PosGoal(0, 0, 0));
