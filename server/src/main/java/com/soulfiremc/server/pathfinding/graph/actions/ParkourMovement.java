@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -115,16 +116,11 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetFeetBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
-    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
+  public List<GraphInstructions> getInstructions(NodeState node) {
+    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock,
+      new NodeState(absoluteTargetFeetBlock, node.usableBlockItems()),
       Costs.ONE_GAP_JUMP,
       List.of(new GapJumpAction(absoluteTargetFeetBlock))));
   }

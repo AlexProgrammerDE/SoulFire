@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -162,12 +163,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetToMineBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(NodeState node) {
     if (closestBlockToFallOn == Integer.MIN_VALUE || closestObstructingBlock > closestBlockToFallOn) {
       return Collections.emptyList();
     }
@@ -184,10 +180,10 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     cost += breakCost.miningCost();
 
-    var absoluteTargetFeetBlock = node.add(0, closestBlockToFallOn + 1, 0);
+    var absoluteTargetFeetBlock = node.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock,
+      new NodeState(absoluteTargetFeetBlock, node.usableBlockItems() + (breakCost.willDropUsableBlockItem() ? 1 : 0)),
       cost,
       List.of(new BlockBreakAction(breakCost))));
   }

@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
@@ -155,15 +156,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetFeetBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(NodeState node) {
     var actions = new ObjectArrayList<WorldAction>();
     var cost = Costs.TOWER_COST;
 
+    var usableBlockItemsDiff = 0;
     for (var breakCost : blockBreakCosts) {
       if (breakCost == null) {
         continue;
@@ -171,19 +168,32 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
       cost += breakCost.miningCost();
       actions.add(new BlockBreakAction(breakCost));
+
+      if (breakCost.willDropUsableBlockItem()) {
+        usableBlockItemsDiff++;
+      }
     }
 
-    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
+    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
+    var afterBreakUsableBlockItems = node.usableBlockItems() + usableBlockItemsDiff;
+
+    // We need a block to place below us
+    if (afterBreakUsableBlockItems < 1) {
+      return Collections.emptyList();
+    } else {
+      // After the place we'll have one less usable block item
+      afterBreakUsableBlockItems--;
+    }
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(
       new JumpAndPlaceBelowAction(
-        node,
+        node.blockPosition(),
         new BotActionManager.BlockPlaceAgainstData(
-          node.sub(0, 1, 0), BlockFace.TOP)));
+          node.blockPosition().sub(0, 1, 0), BlockFace.TOP)));
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock, cost, actions));
+      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems), cost, actions));
   }
 
   @Override

@@ -15,22 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding.goals;
+package com.soulfiremc.server.pathfinding;
 
-import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
-import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.execution.WorldAction;
-import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import java.util.List;
+import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 
-public record YGoal(int y) implements GoalScorer {
-  @Override
-  public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return Math.abs(blockPosition.y - y);
-  }
-
-  @Override
-  public boolean isFinished(MinecraftRouteNode current) {
-    return current.node().blockPosition().y == y;
+/**
+ * Represents the minimal state we are in the Minecraft world.
+ *
+ */
+public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
+  public static NodeState forInfo(SFVec3i blockPosition, ProjectedInventory inventory) {
+    return new NodeState(blockPosition, inventory.usableBlockItems());
   }
 }

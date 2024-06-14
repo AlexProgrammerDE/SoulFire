@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
@@ -373,12 +374,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetFeetBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(NodeState node) {
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
       return Collections.emptyList();
     }
@@ -388,6 +384,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
 
+    var usableBlockItemsDiff = 0;
     var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
     if (blockBreakCosts != null) {
       for (var breakCost : blockBreakCosts) {
@@ -397,12 +394,23 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
         cost += breakCost.miningCost();
         actions.add(new BlockBreakAction(breakCost));
+
+        if (breakCost.willDropUsableBlockItem()) {
+          usableBlockItemsDiff++;
+        }
       }
     }
 
-    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
+    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
+    var afterBreakUsableBlockItems = node.usableBlockItems() + usableBlockItemsDiff;
 
     if (requiresAgainstBlock) {
+      if (afterBreakUsableBlockItems < 1) {
+        return Collections.emptyList();
+      } else {
+        afterBreakUsableBlockItems--;
+      }
+
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       cost += Costs.PLACE_BLOCK;
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
@@ -411,7 +419,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock, cost, actions));
+      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems), cost, actions));
   }
 
   @Override

@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
@@ -107,30 +108,22 @@ public record MinecraftGraph(TagsState tagsState,
     return !canBreakBlockPredicate.test(position);
   }
 
-  public void insertActions(
-    SFVec3i node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> shouldIgnore) {
+  public void insertActions(NodeState node, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
-    calculateActions(node, generateTemplateActions(node, shouldIgnore), callback);
+    calculateActions(node, generateTemplateActions(), callback);
   }
 
-  private GraphAction[] generateTemplateActions(SFVec3i node, Predicate<SFVec3i> shouldIgnore) {
+  private GraphAction[] generateTemplateActions() {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-      var action = ACTIONS_TEMPLATE[i];
-
-      // Do not calculate actions for blocks that should be ignored
-      if (shouldIgnore.test(action.relativeTargetFeetBlock().add(node))) {
-        continue;
-      }
-
-      actions[i] = action.copy();
+      actions[i] = ACTIONS_TEMPLATE[i].copy();
     }
 
     return actions;
   }
 
   private void calculateActions(
-    SFVec3i node,
+    NodeState node,
     GraphAction[] actions,
     Consumer<GraphInstructions> callback) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
@@ -139,7 +132,7 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   private void processSubscription(
-    SFVec3i node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+    NodeState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
     var key = SUBSCRIPTION_KEYS[i];
     var value = SUBSCRIPTION_VALUES[i];
 
@@ -156,7 +149,7 @@ public record MinecraftGraph(TagsState tagsState,
 
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
-        absolutePositionBlock = node.add(key);
+        absolutePositionBlock = node.blockPosition().add(key);
         blockState = level.getBlockState(absolutePositionBlock);
 
         if (blockState.blockType() == BlockType.VOID_AIR) {

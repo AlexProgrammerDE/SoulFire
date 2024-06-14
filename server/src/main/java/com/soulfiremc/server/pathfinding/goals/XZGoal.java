@@ -37,6 +37,6 @@ public record XZGoal(Vector2i goal) implements GoalScorer {
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return Vector2i.from(current.blockPosition().x, current.blockPosition().z).equals(goal);
+    return Vector2i.from(current.node().blockPosition().x, current.node().blockPosition().z).equals(goal);
   }
 }

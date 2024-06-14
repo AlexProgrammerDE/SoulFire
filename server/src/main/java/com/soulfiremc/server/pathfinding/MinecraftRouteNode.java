@@ -33,7 +33,7 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The world state of this node.
    */
-  private final SFVec3i blockPosition;
+  private final NodeState node;
 
   /**
    * The currently best known node to this node.
@@ -57,9 +57,9 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
 
   private List<MinecraftRouteNode> children;
 
-  public MinecraftRouteNode(SFVec3i blockPosition, MinecraftRouteNode parent, List<WorldAction> actions,
+  public MinecraftRouteNode(NodeState node, MinecraftRouteNode parent, List<WorldAction> actions,
                             double sourceCost, double totalRouteScore) {
-    this.blockPosition = blockPosition;
+    this.node = node;
     this.parent = parent;
     this.actions = actions;
     this.sourceCost = sourceCost;
@@ -67,9 +67,9 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     this.children = new ArrayList<>();
   }
 
-  public MinecraftRouteNode(SFVec3i blockPosition, List<WorldAction> actions,
+  public MinecraftRouteNode(NodeState node, List<WorldAction> actions,
                             double sourceCost, double totalRouteScore) {
-    this.blockPosition = blockPosition;
+    this.node = node;
     this.parent = null;
     this.actions = actions;
     this.sourceCost = sourceCost;

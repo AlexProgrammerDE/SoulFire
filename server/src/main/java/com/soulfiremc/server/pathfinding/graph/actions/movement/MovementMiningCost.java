@@ -21,5 +21,6 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import lombok.NonNull;
 
-public record MovementMiningCost(@NonNull SFVec3i block, double miningCost, boolean willDrop,
+// TODO: Make willDropUsableBlockItem work properly
+public record MovementMiningCost(@NonNull SFVec3i block, double miningCost, boolean willDropUsableBlockItem,
                                  @NonNull BlockFace blockBreakSideHint) {}
