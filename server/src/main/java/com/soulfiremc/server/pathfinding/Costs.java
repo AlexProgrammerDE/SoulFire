@@ -131,6 +131,7 @@ public class Costs {
       throw new IllegalStateException("No way found to break block!");
     }
 
+    System.out.println("Mining cost: " + lowestMiningTicks / TICKS_PER_BLOCK + " " + bestItem + " " + willDropUsableBlockItem);
     return new BlockMiningCosts(
       (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, willDropUsableBlockItem);
   }
@@ -148,13 +149,13 @@ public class Costs {
     // If this value adds up over all ticks to 1, the block is fully mined
     var damage = getBlockDamagePerTick(tagsState, entity, inventoryContainer, onGround, itemStack, blockType);
 
-    // Insta mine
-    if (damage >= 1) {
-      return new TickResult(0, correctToolUsed);
-    }
-
     var creativeMode = entity != null && entity.abilities().creativeModeBreak();
     var willDropUsableBlockItem = correctToolUsed && !creativeMode && BlockTypeHelper.isUsableBlockItem(blockType);
+
+    // Insta mine
+    if (damage >= 1) {
+      return new TickResult(0, willDropUsableBlockItem);
+    }
 
     return new TickResult((int) Math.ceil(1 / damage), willDropUsableBlockItem);
   }
