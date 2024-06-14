@@ -116,7 +116,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(NodeState node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
     var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
 
     return Collections.singletonList(new GraphInstructions(

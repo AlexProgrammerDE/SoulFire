@@ -18,11 +18,9 @@
 package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
-import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
@@ -35,33 +33,8 @@ import lombok.ToString;
 public class ProjectedLevel {
   private final LevelHeightAccessor levelHeightAccessor;
   private final BlockAccessor blockAccessor;
-  @ToString.Include
-  private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blockChanges;
-
-  public ProjectedLevel(LevelHeightAccessor levelHeightAccessor, BlockAccessor blockAccessor) {
-    this(levelHeightAccessor, blockAccessor, new Vec2ObjectOpenHashMap<>());
-  }
-
-  public ProjectedLevel withChangeToSolidBlock(SFVec3i position) {
-    var blockChanges = this.blockChanges.clone();
-    blockChanges.put(position, Costs.SOLID_PLACED_BLOCK_STATE);
-
-    return new ProjectedLevel(levelHeightAccessor, blockAccessor, blockChanges);
-  }
-
-  public ProjectedLevel withChangeToAir(SFVec3i position) {
-    var blockChanges = this.blockChanges.clone();
-    blockChanges.put(position, Costs.AIR_BLOCK_STATE);
-
-    return new ProjectedLevel(levelHeightAccessor, blockAccessor, blockChanges);
-  }
 
   public BlockState getBlockState(SFVec3i position) {
-    var blockChange = blockChanges.get(position);
-    if (blockChange != null) {
-      return blockChange;
-    }
-
     return blockAccessor.getBlockState(position.x, position.y, position.z);
   }
 

@@ -19,13 +19,13 @@ package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.test.utils.TestLevelHeightAccessor;
@@ -33,6 +33,7 @@ import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Benchmark)
 public class PathfindingBenchmark {
   private RouteFinder routeFinder;
-  private SFVec3i initialState;
+  private NodeState initialState;
 
   @Setup
   public void setup() {
@@ -92,11 +93,13 @@ public class PathfindingBenchmark {
         }
       }
 
-      initialState = new SFVec3i(0, safeY, 0);
-      log.info("Initial state: {}", initialState.formatXYZ());
+      var inventory = new ProjectedInventory(List.of());
+      initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
+      log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-        new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor), new ProjectedInventory(new PlayerInventoryContainer(null)),
+        new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
+        inventory,
         true, true), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");

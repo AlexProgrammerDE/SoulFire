@@ -27,4 +27,24 @@ public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
   public static NodeState forInfo(SFVec3i blockPosition, ProjectedInventory inventory) {
     return new NodeState(blockPosition, inventory.usableBlockItems());
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof NodeState nodeState)) {
+      return false;
+    }
+
+    return usableBlockItems == nodeState.usableBlockItems && blockPosition.equals(nodeState.blockPosition);
+  }
+
+  @Override
+  public int hashCode() {
+    var result = blockPosition.hashCode();
+    result = 31 * result + usableBlockItems;
+    return result;
+  }
 }

@@ -79,8 +79,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
             .chunks()
             .immutableCopy());
         var inventory =
-          new ProjectedInventory(
-            dataManager.inventoryManager().playerInventory());
+          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity());
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =

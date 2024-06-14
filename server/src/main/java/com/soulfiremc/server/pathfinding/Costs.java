@@ -18,7 +18,6 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.FluidTags;
@@ -30,6 +29,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import java.util.Arrays;
 import java.util.OptionalInt;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
@@ -78,7 +78,6 @@ public class Costs {
    * It takes ~9 ticks for a player to jump up, decelerate and then land one block higher.
    */
   public static final double JUMP_UP_BLOCK = 9 / TICKS_PER_BLOCK;
-  public static final double TOWER_COST = JUMP_UP_BLOCK + PLACE_BLOCK;
   /**
    * It takes ~8 ticks for a player to jump up, decelerate and then land on the same y level.
    */
@@ -107,30 +106,23 @@ public class Costs {
    */
   public static final double CORNER_SLIDE = 2 - DIAGONAL;
 
-  public static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
-
-  /**
-   * For performance reasons, we do not want to calculate new costs for every possible block placed.
-   * This is the state every placed block on the graph has. This allows the inventory to just store
-   * the number of blocks and tools instead of the actual items. Although this decreases the result
-   * "quality" a bit, it is a good tradeoff for performance.
-   */
-  public static final BlockState SOLID_PLACED_BLOCK_STATE =
-    BlockState.forDefaultBlockType(BlockType.STONE);
-
   private Costs() {}
 
   public static BlockMiningCosts calculateBlockBreakCost(
-    TagsState tagsState, ProjectedInventory inventory, BlockType blockType) {
+    TagsState tagsState,
+    @Nullable ClientEntity entity,
+    @Nullable PlayerInventoryContainer playerInventory,
+    ProjectedInventory inventory,
+    BlockType blockType) {
     var lowestMiningTicks = Integer.MAX_VALUE;
     SFItemStack bestItem = null;
-    var correctToolUsed = false;
+    var willDropUsableBlockItem = false;
     for (var slot : inventory.usableToolsAndNull()) {
-      var miningTicks = getRequiredMiningTicks(tagsState, null, null, true, slot, blockType);
+      var miningTicks = getRequiredMiningTicks(tagsState, entity, playerInventory, true, slot, blockType);
       if (miningTicks.ticks() < lowestMiningTicks) {
         lowestMiningTicks = miningTicks.ticks();
         bestItem = slot;
-        correctToolUsed = miningTicks.willDrop();
+        willDropUsableBlockItem = miningTicks.willDropUsableBlockItem();
       }
     }
 
@@ -140,7 +132,7 @@ public class Costs {
     }
 
     return new BlockMiningCosts(
-      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, correctToolUsed);
+      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, willDropUsableBlockItem);
   }
 
   // Time in ticks
@@ -161,7 +153,10 @@ public class Costs {
       return new TickResult(0, correctToolUsed);
     }
 
-    return new TickResult((int) Math.ceil(1 / damage), correctToolUsed);
+    var creativeMode = entity != null && entity.abilities().creativeModeBreak();
+    var willDropUsableBlockItem = correctToolUsed && !creativeMode && BlockTypeHelper.isUsableBlockItem(blockType);
+
+    return new TickResult((int) Math.ceil(1 / damage), willDropUsableBlockItem);
   }
 
   private static float getBlockDamagePerTick(TagsState tagsState,
@@ -307,7 +302,7 @@ public class Costs {
   }
 
   public record BlockMiningCosts(
-    double miningCost, @Nullable SFItemStack usedTool, boolean willDrop) {}
+    double miningCost, @Nullable SFItemStack usedTool, boolean willDropUsableBlockItem) {}
 
-  public record TickResult(int ticks, boolean willDrop) {}
+  public record TickResult(int ticks, boolean willDropUsableBlockItem) {}
 }

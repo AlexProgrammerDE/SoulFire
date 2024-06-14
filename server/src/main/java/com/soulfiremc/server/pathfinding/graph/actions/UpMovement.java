@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.NodeState;
@@ -32,7 +31,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -156,9 +154,9 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(NodeState node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
     var actions = new ObjectArrayList<WorldAction>();
-    var cost = Costs.TOWER_COST;
+    var cost = Costs.JUMP_UP_BLOCK;
 
     var usableBlockItemsDiff = 0;
     for (var breakCost : blockBreakCosts) {
@@ -180,9 +178,10 @@ public final class UpMovement extends GraphAction implements Cloneable {
     // We need a block to place below us
     if (afterBreakUsableBlockItems < 1) {
       return Collections.emptyList();
-    } else {
+    } else if (graph.doUsableBlocksDecreaseWhenPlaced()) {
       // After the place we'll have one less usable block item
       afterBreakUsableBlockItems--;
+      cost += Costs.PLACE_BLOCK;
     }
 
     // Where we are standing right now, we'll place the target block below us after jumping
@@ -249,9 +248,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
-            || !BlockTypeHelper.isDiggable(blockState.blockType())
-            || upMovement.unsafeToBreak()[blockArrayIndex]
-            || !BlockItems.hasItemType(blockState.blockType())) {
+            || graph.disallowedToBreakType(blockState.blockType())
+            || upMovement.unsafeToBreak()[blockArrayIndex]) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
@@ -262,7 +260,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
             new MovementMiningCost(
               absoluteKey,
               cacheableMiningCost.miningCost(),
-              cacheableMiningCost.willDrop(),
+              cacheableMiningCost.willDropUsableBlockItem(),
               blockBreakSideHint);
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }

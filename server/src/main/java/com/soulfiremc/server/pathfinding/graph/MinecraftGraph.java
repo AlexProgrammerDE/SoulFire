@@ -28,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.SimpleMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.UpMovement;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
@@ -50,6 +51,7 @@ public record MinecraftGraph(TagsState tagsState,
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
+  private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
 
   static {
     var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, ObjectList<WrappedActionSubscription>>();
@@ -96,6 +98,10 @@ public record MinecraftGraph(TagsState tagsState,
     });
   }
 
+  public boolean doUsableBlocksDecreaseWhenPlaced() {
+    return !inventory.creativeModeBreak();
+  }
+
   public static boolean isBlockFree(BlockState blockState) {
     return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
   }
@@ -106,6 +112,14 @@ public record MinecraftGraph(TagsState tagsState,
 
   public boolean disallowedToBreakBlock(SFVec3i position) {
     return !canBreakBlockPredicate.test(position);
+  }
+
+  public boolean disallowedToBreakType(BlockType blockType) {
+    if (!ALLOW_BREAKING_UNDIGGABLE) {
+      return !BlockTypeHelper.isDiggable(blockType);
+    }
+
+    return false;
   }
 
   public void insertActions(NodeState node, Consumer<GraphInstructions> callback) {
@@ -168,7 +182,7 @@ public record MinecraftGraph(TagsState tagsState,
             continue;
           }
 
-          for (var instruction : action.getInstructions(node)) {
+          for (var instruction : action.getInstructions(this, node)) {
             callback.accept(instruction);
           }
         }

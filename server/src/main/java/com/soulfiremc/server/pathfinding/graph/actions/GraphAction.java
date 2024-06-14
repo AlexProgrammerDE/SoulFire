@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import java.util.List;
 import lombok.Setter;
 
@@ -35,7 +36,7 @@ public abstract sealed class GraphAction
     return --subscriptionCounter == 0;
   }
 
-  public abstract List<GraphInstructions> getInstructions(NodeState node);
+  public abstract List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node);
 
   public abstract GraphAction copy();
 }
