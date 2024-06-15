@@ -49,6 +49,22 @@ public class JsonToMCPLCodecs {
         .apply(instance, (a, b, c, d, e, f) -> new MobEffectDetails(a, b, c, d, e.orElse(d), f.orElse(null)))
     )
   );
+  public static final Codec<ToolData.Rule> TOOL_RULE_CODEC = RecordCodecBuilder.create(
+    instance -> instance.group(
+        ExtraCodecs.holderSetCodec(BlockType.REGISTRY).fieldOf("blocks").forGetter(ToolData.Rule::getBlocks),
+        ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed").forGetter(arg -> Optional.ofNullable(arg.getSpeed())),
+        Codec.BOOL.optionalFieldOf("correct_for_drops").forGetter(arg -> Optional.ofNullable(arg.getCorrectForDrops()))
+      )
+      .apply(instance, (a, b, c) -> new ToolData.Rule(a, b.orElse(null), c.orElse(null)))
+  );
+  public static final Codec<ToolData> TOOL_CODEC = RecordCodecBuilder.create(
+    instance -> instance.group(
+        TOOL_RULE_CODEC.listOf().fieldOf("rules").forGetter(ToolData::getRules),
+        Codec.FLOAT.optionalFieldOf("default_mining_speed", 1.0F).forGetter(ToolData::getDefaultMiningSpeed),
+        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("damage_per_block", 1).forGetter(ToolData::getDamagePerBlock)
+      )
+      .apply(instance, ToolData::new)
+  );
   @SuppressWarnings("PatternValidation")
   private static final Codec<Effect> MCPL_EFFECT_CODEC = Codec.STRING.xmap(s -> Effect.valueOf(Key.key(s).value().toUpperCase(Locale.ROOT)), e -> Key.key(e.name().toLowerCase(Locale.ROOT)).toString());
   public static final Codec<MobEffectInstance> MOB_EFFECT_INSTANCE_CODEC = RecordCodecBuilder.create(
@@ -74,22 +90,6 @@ public class JsonToMCPLCodecs {
         POSSIBLE_EFFECT_CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(FoodProperties::getEffects)
       )
       .apply(instance, FoodProperties::new)
-  );
-  public static final Codec<ToolData.Rule> TOOL_RULE_CODEC = RecordCodecBuilder.create(
-    instance -> instance.group(
-        ExtraCodecs.holderSetCodec(BlockType.REGISTRY).fieldOf("blocks").forGetter(ToolData.Rule::getBlocks),
-        ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed").forGetter(arg -> Optional.ofNullable(arg.getSpeed())),
-        Codec.BOOL.optionalFieldOf("correct_for_drops").forGetter(arg -> Optional.ofNullable(arg.getCorrectForDrops()))
-      )
-      .apply(instance, (a, b, c) -> new ToolData.Rule(a, b.orElse(null), c.orElse(null)))
-  );
-  public static final Codec<ToolData> TOOL_CODEC = RecordCodecBuilder.create(
-    instance -> instance.group(
-        TOOL_RULE_CODEC.listOf().fieldOf("rules").forGetter(ToolData::getRules),
-        Codec.FLOAT.optionalFieldOf("default_mining_speed", 1.0F).forGetter(ToolData::getDefaultMiningSpeed),
-        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("damage_per_block", 1).forGetter(ToolData::getDamagePerBlock)
-      )
-      .apply(instance, ToolData::new)
   );
   private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = DualMap.keyCodec(
     DualMap.forEnumSwitch(ItemAttributeModifiers.EquipmentSlotGroup.class, g -> switch (g) {

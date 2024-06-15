@@ -204,7 +204,6 @@ public final class SessionDataManager {
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
-  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
@@ -218,6 +217,7 @@ public final class SessionDataManager {
   private boolean enableRespawnScreen;
   private boolean doLimitedCrafting;
   private Level level;
+  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private int serverViewDistance = -1;
   private int serverSimulationDistance = -1;
   private @Nullable GlobalPos lastDeathPos;
@@ -240,17 +240,6 @@ public final class SessionDataManager {
     this.botActionManager = new BotActionManager(this, connection);
   }
 
-  private float getTickTargetMillis(float defaultValue) {
-    if (this.level != null) {
-      var lv = this.level.tickRateManager();
-      if (lv.runsNormally()) {
-        return Math.max(defaultValue, lv.millisecondsPerTick());
-      }
-    }
-
-    return defaultValue;
-  }
-
   private static String toPlainText(Component component) {
     return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
   }
@@ -267,6 +256,17 @@ public final class SessionDataManager {
     }
 
     return list;
+  }
+
+  private float getTickTargetMillis(float defaultValue) {
+    if (this.level != null) {
+      var lv = this.level.tickRateManager();
+      if (lv.runsNormally()) {
+        return Math.max(defaultValue, lv.millisecondsPerTick());
+      }
+    }
+
+    return defaultValue;
   }
 
   @EventHandler

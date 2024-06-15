@@ -26,9 +26,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 
 public class ServerConsoleCommandSource extends ClientConsoleCommandSource implements ServerCommandSource {
+  public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();
   private static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   private static final String CONSOLE_NAME = "CONSOLE";
-  public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();
 
   @Override
   public void sendMessage(Component message) {

@@ -20,11 +20,11 @@ package com.soulfiremc.server.util;
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
 
 public class TickTimer {
+  private final float msPerTick;
+  private final FloatUnaryOperator targetMsptProvider;
   public float partialTick;
   public float tickDelta;
   private long lastMs;
-  private final float msPerTick;
-  private final FloatUnaryOperator targetMsptProvider;
 
   public TickTimer(float f, long l, FloatUnaryOperator floatUnaryOperator) {
     this.msPerTick = 1000.0F / f;
