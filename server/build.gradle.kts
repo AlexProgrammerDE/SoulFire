@@ -16,6 +16,9 @@ dependencies {
   api(libs.bundles.kyori)
   api(libs.datafixerupper)
 
+  // Custom networking layer
+  api(libs.netminecraft)
+
   // For advanced encryption and compression
   api(libs.velocity.native)
 

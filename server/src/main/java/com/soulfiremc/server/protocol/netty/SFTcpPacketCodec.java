@@ -17,90 +17,40 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
+import com.soulfiremc.server.protocol.SFProtocolHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.mcprotocollib.network.Session;
-import org.geysermc.mcprotocollib.network.codec.PacketDefinition;
-import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
-import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
-import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
-import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
+import net.raphimc.netminecraft.packet.PacketTypes;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 
 @RequiredArgsConstructor
-public class SFTcpPacketCodec extends ByteToMessageCodec<Packet> {
-  private final Session session;
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
+public class SFTcpPacketCodec extends ByteToMessageCodec<MinecraftPacket> {
   @Override
-  public void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf buf) throws Exception {
-    var initial = buf.writerIndex();
-
-    var packetProtocol = this.session.getPacketProtocol();
-    var codecHelper = this.session.getCodecHelper();
-    try {
-      var packetId = packetProtocol.getServerboundId(packet);
-      PacketDefinition definition = packetProtocol.getServerboundDefinition(packetId);
-
-      packetProtocol.getPacketHeader().writePacketId(buf, codecHelper, packetId);
-      definition.getSerializer().serialize(buf, codecHelper, packet);
-
-      // Change protocol here before it hits the via codec
-      var protocol = (MinecraftProtocol) this.session.getPacketProtocol();
-      if (packet instanceof ServerboundLoginAcknowledgedPacket) {
-        protocol.setState(ProtocolState.CONFIGURATION); // LOGIN -> CONFIGURATION
-      } else if (packet instanceof ServerboundFinishConfigurationPacket) {
-        protocol.setState(ProtocolState.GAME); // CONFIGURATION -> GAME
-      } else if (packet instanceof ServerboundConfigurationAcknowledgedPacket) {
-        protocol.setState(ProtocolState.CONFIGURATION); // GAME -> CONFIGURATION
+  protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
+    if (in.readableBytes() != 0) {
+      final var registry = ctx.channel().attr(SFProtocolHelper.SF_PACKET_REGISTRY_ATTRIBUTE_KEY).get();
+      final var packetId = PacketTypes.readVarInt(in);
+      final var factory = registry.getPacketFactoryById(packetId);
+      if (factory == null) {
+        throw new IllegalStateException("Tried to read not registered packet: " + packetId);
       }
-    } catch (Throwable t) {
-      // Reset writer index to make sure incomplete data is not written out.
-      buf.writerIndex(initial);
 
-      var e = new PacketErrorEvent(this.session, t);
-      this.session.callEvent(e);
-      if (!e.shouldSuppress()) {
-        throw t;
-      }
+      out.add(factory.apply(in));
     }
   }
 
   @Override
-  protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
-    var initial = buf.readerIndex();
-
-    var packetProtocol = this.session.getPacketProtocol();
-    var codecHelper = this.session.getCodecHelper();
-    try {
-      var id = packetProtocol.getPacketHeader().readPacketId(buf, codecHelper);
-      if (id == -1) {
-        buf.readerIndex(initial);
-        return;
-      }
-
-      var packet = packetProtocol.createClientboundPacket(id, buf, codecHelper);
-
-      if (buf.readableBytes() > 0) {
-        throw new IllegalStateException(
-          "Packet \"%s\" not fully read.".formatted(packet.getClass().getSimpleName()));
-      }
-
-      out.add(packet);
-    } catch (Throwable t) {
-      // Advance buffer to end to make sure remaining data in this packet is skipped.
-      buf.readerIndex(buf.readerIndex() + buf.readableBytes());
-
-      var e = new PacketErrorEvent(this.session, t);
-      this.session.callEvent(e);
-      if (!e.shouldSuppress()) {
-        throw t;
-      }
+  protected void encode(ChannelHandlerContext ctx, MinecraftPacket in, ByteBuf out) {
+    final var registry = ctx.channel().attr(SFProtocolHelper.SF_PACKET_REGISTRY_ATTRIBUTE_KEY).get();
+    final var packetId = registry.getIdByPacket(in);
+    if (packetId == -1) {
+      throw new IllegalStateException("Tried to write not registered packet: " + in.getClass().getName());
     }
+
+    PacketTypes.writeVarInt(out, packetId);
+    registry.writePacket(out, in);
   }
 }

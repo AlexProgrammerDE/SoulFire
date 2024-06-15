@@ -218,7 +218,7 @@ public class ViaClientSession extends TcpSession {
             // Inject Via codec
             pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-            pipeline.addLast("codec", new SFTcpPacketCodec(ViaClientSession.this));
+            pipeline.addLast("codec", new SFTcpPacketCodec());
             pipeline.addLast("manager", ViaClientSession.this);
 
             addHAProxySupport(pipeline);
