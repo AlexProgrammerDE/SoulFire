@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.state.registry;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.server.data.RegistryValue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,15 +34,11 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.lenni0451.mcstructs.nbt.INbtTag;
 import net.lenni0451.mcstructs.nbt.io.NbtIO;
 import net.lenni0451.mcstructs.nbt.io.NbtReadTracker;
-import net.lenni0451.mcstructs.nbt.tags.CompoundTag;
-import net.lenni0451.mcstructs.snbt.SNbtSerializer;
 import net.lenni0451.mcstructs.text.serializer.TextComponentCodec;
-import net.lenni0451.mcstructs.text.serializer.v1_20_3.json.JsonStyleSerializer_v1_20_3;
-import net.lenni0451.mcstructs.text.serializer.v1_20_3.json.JsonTextSerializer_v1_20_3;
-import net.lenni0451.mcstructs.text.serializer.v1_20_3.nbt.NbtStyleSerializer_v1_20_3;
-import net.lenni0451.mcstructs.text.serializer.v1_20_3.nbt.NbtTextSerializer_v1_20_3;
+import net.lenni0451.mcstructs.text.serializer.subtypes.IStyleSerializer;
 import org.cloudburstmc.nbt.NBTOutputStream;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtType;
@@ -51,11 +48,9 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class SFChatType implements RegistryValue<SFChatType> {
-  private static final SNbtSerializer<CompoundTag> SNBT_SERIALIZER = SNbtSerializer.V1_14;
-  private static final NbtStyleSerializer_v1_20_3 NBT_STYLE_SERIALIZER = new NbtStyleSerializer_v1_20_3(TextComponentCodec.V1_20_3,
-    new NbtTextSerializer_v1_20_3(TextComponentCodec.V1_20_3, SNBT_SERIALIZER), SNBT_SERIALIZER);
-  private static final JsonStyleSerializer_v1_20_3 JSON_STYLE_SERIALIZER = new JsonStyleSerializer_v1_20_3(TextComponentCodec.V1_20_3,
-    new JsonTextSerializer_v1_20_3(TextComponentCodec.V1_20_3, SNBT_SERIALIZER), SNBT_SERIALIZER);
+  private static final TextComponentCodec CODEC = TextComponentCodec.LATEST;
+  private static final IStyleSerializer<INbtTag> NBT_STYLE_SERIALIZER = CODEC.getNbtSerializer().getStyleSerializer();
+  private static final IStyleSerializer<JsonElement> JSON_STYLE_SERIALIZER = CODEC.getJsonSerializer().getStyleSerializer();
   private final Key key;
   private final int id;
   private final ChatType mcplChatType;
