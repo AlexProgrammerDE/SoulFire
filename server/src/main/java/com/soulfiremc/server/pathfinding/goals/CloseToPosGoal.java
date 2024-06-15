@@ -35,6 +35,6 @@ public record CloseToPosGoal(SFVec3i goal, int maxRadius) implements GoalScorer 
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return current.blockPosition().distance(goal) <= maxRadius;
+    return current.node().blockPosition().distance(goal) <= maxRadius;
   }
 }

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
+import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockShapeGroup;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
@@ -58,6 +59,10 @@ public class BlockTypeHelper {
 
   public static boolean isDiggable(BlockType type) {
     return type.destroyTime() != -1;
+  }
+
+  public static boolean isUsableBlockItem(BlockType blockType) {
+    return BlockItems.hasItemType(blockType);
   }
 
   public static boolean isEmptyBlock(BlockType type) {

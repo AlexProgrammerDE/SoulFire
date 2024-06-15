@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import java.util.List;
 
 public record GraphInstructions(
-  SFVec3i blockPosition, double actionCost, List<WorldAction> actions) {}
+  NodeState node, double actionCost, List<WorldAction> actions) {}

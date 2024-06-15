@@ -19,10 +19,7 @@ package com.soulfiremc.server.protocol.bot.block;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.protocol.bot.state.ChunkData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lombok.Getter;
+import java.util.Collection;
 import lombok.ToString;
 
 @ToString
@@ -30,28 +27,20 @@ public class GlobalBlockPalette {
   public static final GlobalBlockPalette INSTANCE;
 
   static {
-    var stateMap = new Int2ObjectOpenHashMap<BlockState>();
-    for (var blockEntry : BlockType.REGISTRY.values()) {
-      for (var state : blockEntry.statesData().possibleStates()) {
-        stateMap.put(state.id(), state);
-      }
-    }
-
-    INSTANCE = new GlobalBlockPalette(stateMap);
+    INSTANCE = new GlobalBlockPalette(BlockType.REGISTRY.values()
+      .stream().<BlockState>mapMulti((blockEntry, consumer) -> {
+        for (var state : blockEntry.statesData().possibleStates()) {
+          consumer.accept(state);
+        }
+      }).toList());
   }
 
-  @Getter
-  private final int maxStates;
-  @Getter
-  private final int blockBitsPerEntry;
   private final BlockState[] stateIdToBlockState;
 
-  public GlobalBlockPalette(Int2ObjectMap<BlockState> states) {
-    this.maxStates = states.size();
-    this.blockBitsPerEntry = ChunkData.log2RoundUp(maxStates);
-    this.stateIdToBlockState = new BlockState[maxStates];
-    for (var entry : states.int2ObjectEntrySet()) {
-      this.stateIdToBlockState[entry.getIntKey()] = entry.getValue();
+  public GlobalBlockPalette(Collection<BlockState> states) {
+    this.stateIdToBlockState = new BlockState[states.size()];
+    for (var entry : states) {
+      this.stateIdToBlockState[entry.id()] = entry;
     }
   }
 
