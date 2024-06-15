@@ -502,7 +502,7 @@ public final class SessionDataManager {
   }
 
   public Component prepareChatTypeMessage(Holder<ChatType> chatTypeHolder, SFChatType.BoundChatMessageInfo chatInfo) {
-    return chatTypeRegistry.getByMappedHolder(chatTypeHolder, SFChatType::new).buildChatComponent(chatInfo);
+    return SFChatType.buildChatComponent(chatTypeHolder.getOrCompute(id -> chatTypeRegistry.getById(id).mcplChatType()), chatInfo);
   }
 
   private void onChat(long stamp, Component message) {

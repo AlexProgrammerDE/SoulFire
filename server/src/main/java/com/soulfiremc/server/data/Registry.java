@@ -24,11 +24,9 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.util.Collection;
-import java.util.function.Function;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
-import org.geysermc.mcprotocollib.protocol.data.game.Holder;
 
 public class Registry<T extends RegistryValue<T>> {
   @Getter
@@ -58,14 +56,6 @@ public class Registry<T extends RegistryValue<T>> {
 
   public T getByKey(Key key) {
     return FROM_KEY.get(key);
-  }
-
-  public <M> T getByMappedHolder(Holder<M> holder, Function<M, T> mapper) {
-    if (holder.isCustom()) {
-      return mapper.apply(holder.custom());
-    } else {
-      return getById(holder.id());
-    }
   }
 
   public Collection<T> values() {
