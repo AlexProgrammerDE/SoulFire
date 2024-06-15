@@ -36,7 +36,7 @@ import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
-import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
+import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -430,7 +430,7 @@ public class POVServer implements InternalPlugin {
 
                             if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
                               // To avoid signature issues since the signature is for the bot, not the connected user
-                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new ChatType.BoundChatMessageInfo(
+                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
                                 botConnection.dataManager().getComponentForPlayerChat(chatPacket),
                                 chatPacket.getName(),
                                 chatPacket.getTargetName()
@@ -1007,7 +1007,7 @@ public class POVServer implements InternalPlugin {
                                 .map(
                                   modifier ->
                                     new AttributeModifier(
-                                      modifier.uuid(),
+                                      modifier.id(),
                                       modifier.amount(),
                                       switch (modifier.operation()) {
                                         case ADD_VALUE -> ModifierOperation.ADD;

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.movement;
 
-import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
@@ -60,7 +59,6 @@ public class PlayerMovementState {
   public int dolphinsGrace;
   public int slowFalling;
   public int levitation;
-  public int depthStrider;
 
   // Inventory
   public boolean elytraEquipped;
@@ -76,8 +74,6 @@ public class PlayerMovementState {
     dolphinsGrace = effectState.getEffectAmplifier(Effect.DOLPHINS_GRACE);
     slowFalling = effectState.getEffectAmplifier(Effect.SLOW_FALLING);
     levitation = effectState.getEffectAmplifier(Effect.LEVITATION);
-
-    depthStrider = inventoryContainer.getEnchantmentLevel(EnchantmentType.DEPTH_STRIDER);
 
     var chestItem = inventoryContainer.getChestplate().item();
     elytraEquipped = chestItem != null && chestItem.type() == ItemType.ELYTRA;

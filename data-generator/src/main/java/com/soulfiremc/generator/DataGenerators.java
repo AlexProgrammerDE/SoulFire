@@ -29,8 +29,6 @@ import com.soulfiremc.generator.generators.DefaultPacksDataGenerator;
 import com.soulfiremc.generator.generators.DefaultTagsDataGenerator;
 import com.soulfiremc.generator.generators.EffectsDataGenerator;
 import com.soulfiremc.generator.generators.EffectsJavaGenerator;
-import com.soulfiremc.generator.generators.EnchantmentsDataGenerator;
-import com.soulfiremc.generator.generators.EnchantmentsJavaGenerator;
 import com.soulfiremc.generator.generators.EntitiesDataGenerator;
 import com.soulfiremc.generator.generators.EntitiesJavaGenerator;
 import com.soulfiremc.generator.generators.FluidsDataGenerator;
@@ -64,8 +62,6 @@ public class DataGenerators {
       new FluidsJavaGenerator(),
       new EffectsDataGenerator(),
       new EffectsJavaGenerator(),
-      new EnchantmentsDataGenerator(),
-      new EnchantmentsJavaGenerator(),
       new EntitiesDataGenerator(),
       new EntitiesJavaGenerator(),
       new ItemsDataGenerator(),

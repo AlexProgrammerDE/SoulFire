@@ -17,12 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.movement;
 
-import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
@@ -344,7 +342,6 @@ public class BotMovementManager {
     var pos = movementState.pos;
 
     var gravityMultiplier = (vel.y <= 0 && movementState.slowFalling > 0) ? physics.slowFalling : 1;
-    var speed = getSpeed();
 
     if (movementState.isInWater || movementState.isInLava) {
       // Water / Lava movement
@@ -354,19 +351,15 @@ public class BotMovementManager {
       var horizontalInertia = typeSpeed;
 
       if (movementState.isInWater) {
-        var depthStrider = (float) movementState.depthStrider;
-
-        if (depthStrider > 3) {
-          depthStrider = 3;
-        }
+        var waterMovementEfficiency = (float) clientEntity.attributeValue(AttributeType.GENERIC_WATER_MOVEMENT_EFFICIENCY);
 
         if (!movementState.onGround) {
-          depthStrider *= 0.5F;
+          waterMovementEfficiency *= 0.5F;
         }
 
-        if (depthStrider > 0) {
-          horizontalInertia += ((0.54600006F - horizontalInertia) * depthStrider) / 3;
-          liquidSpeed += (speed - liquidSpeed) * depthStrider / 3;
+        if (waterMovementEfficiency > 0) {
+          horizontalInertia += (0.54600006F - horizontalInertia) * waterMovementEfficiency;
+          liquidSpeed += (this.getSpeed() - liquidSpeed) * waterMovementEfficiency;
         }
 
         if (movementState.dolphinsGrace > 0) {
@@ -436,7 +429,7 @@ public class BotMovementManager {
       if (movementState.onGround) {
         var friction = getBlockFriction(blockUnder.blockType());
         xzMultiplier *= friction;
-        frictionInfluencedSpeed = speed * (0.21600002F / (friction * friction * friction));
+        frictionInfluencedSpeed = this.getSpeed() * (0.21600002F / (friction * friction * friction));
       } else {
         frictionInfluencedSpeed = getFlyingSpeed();
       }
@@ -484,16 +477,11 @@ public class BotMovementManager {
     var playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
 
     if (controlState.sprinting()) {
-      playerSpeedAttribute
-        .modifiers()
-        .putIfAbsent(
-          physics.sprintingUUID,
-          new Attribute.Modifier(
-            physics.sprintingUUID, physics.sprintSpeed, ModifierOperation.ADD_MULTIPLIED_TOTAL));
+      playerSpeedAttribute.modifiers().putIfAbsent(PhysicsData.SPRINTING_MODIFIER_ID, PhysicsData.SPEED_MODIFIER_SPRINTING);
     } else {
       // Client-side sprinting (don't rely on server-side sprinting)
       // setSprinting in LivingEntity.java
-      playerSpeedAttribute.modifiers().remove(physics.sprintingUUID);
+      playerSpeedAttribute.modifiers().remove(PhysicsData.SPRINTING_MODIFIER_ID);
     }
 
     return (float) clientEntity.attributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);

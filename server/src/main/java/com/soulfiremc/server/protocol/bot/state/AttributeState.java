@@ -23,17 +23,17 @@ import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
 
 @Setter
 @Getter
 @AllArgsConstructor
 public class AttributeState {
   private final AttributeType type;
-  private final Map<UUID, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
+  private final Map<Key, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
   private double baseValue;
 
   public double calculateValue() {

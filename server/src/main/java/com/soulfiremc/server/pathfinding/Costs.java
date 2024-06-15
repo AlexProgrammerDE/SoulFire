@@ -20,7 +20,6 @@ package com.soulfiremc.server.pathfinding;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.data.RegistryKeys;
 import com.soulfiremc.server.data.TagKey;
@@ -193,14 +192,11 @@ public class Costs {
                                                    BlockType blockType) {
     var speedMultiplier = getSpeedMultiplier(tagsState, itemStack, blockType);
 
-    if (itemStack != null && speedMultiplier > 1) {
-      var efficiency = itemStack.getEnchantmentLevel(EnchantmentType.EFFICIENCY);
-      if (efficiency > 0) {
-        speedMultiplier += (float) (efficiency * efficiency + 1);
-      }
-    }
-
     if (entity != null) {
+      if (speedMultiplier > 1) {
+        speedMultiplier += (float) entity.attributeValue(AttributeType.PLAYER_MINING_EFFICIENCY);
+      }
+
       var digSpeedAmplifier = getDigSpeedAmplifier(entity.effectState());
       if (digSpeedAmplifier.isPresent()) {
         speedMultiplier *= 1.0F + (float) (digSpeedAmplifier.getAsInt() + 1) * 0.2F;
@@ -218,9 +214,8 @@ public class Costs {
       }
 
       speedMultiplier *= (float) entity.attributeValue(AttributeType.PLAYER_BLOCK_BREAK_SPEED);
-      if (inventoryContainer != null && entity.isEyeInFluid(FluidTags.WATER)
-        && !inventoryContainer.hasEnchantment(EnchantmentType.AQUA_AFFINITY)) {
-        speedMultiplier /= 5.0F;
+      if (entity.isEyeInFluid(FluidTags.WATER)) {
+        speedMultiplier *= (float) entity.attributeValue(AttributeType.PLAYER_SUBMERGED_MINING_SPEED);
       }
     }
 

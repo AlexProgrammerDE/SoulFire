@@ -112,8 +112,7 @@ public class JsonToMCPLCodecs {
     }));
   public static final MapCodec<ItemAttributeModifiers.AttributeModifier> ATTRIBUTE_MODIFIER_MAP_CODEC = RecordCodecBuilder.mapCodec(
     instance -> instance.group(
-        ExtraCodecs.UUID_CODEC.fieldOf("uuid").forGetter(ItemAttributeModifiers.AttributeModifier::getId),
-        Codec.STRING.fieldOf("name").forGetter(ItemAttributeModifiers.AttributeModifier::getName),
+        ExtraCodecs.KYORI_KEY_CODEC.fieldOf("id").forGetter(ItemAttributeModifiers.AttributeModifier::getId),
         Codec.DOUBLE.fieldOf("amount").forGetter(ItemAttributeModifiers.AttributeModifier::getAmount),
         MCPL_MODIFIER_OPERATION_CODEC.fieldOf("operation").forGetter(ItemAttributeModifiers.AttributeModifier::getOperation)
       )

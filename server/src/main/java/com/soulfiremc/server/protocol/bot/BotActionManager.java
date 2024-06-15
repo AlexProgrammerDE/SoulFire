@@ -90,7 +90,7 @@ public class BotActionManager {
 
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
-    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber));
+    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yaw(), dataManager.clientEntity().pitch()));
   }
 
   public void placeBlock(Hand hand, BlockPlaceAgainstData blockPlaceAgainstData) {

@@ -65,7 +65,7 @@ public class BlocksDataGenerator implements IDataGenerator {
     if (lootTableKey == BuiltInLootTables.EMPTY) {
       poolsArray = new JsonArray();
     } else {
-      var lootTableFilePath = "/data/minecraft/loot_tables/%s.json".formatted(block.getLootTable().location().getPath());
+      var lootTableFilePath = "/data/minecraft/loot_table/%s.json".formatted(block.getLootTable().location().getPath());
       try (var in = Objects.requireNonNull(BlocksDataGenerator.class.getResourceAsStream(lootTableFilePath))) {
         var data = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         var dataJsonObject = GsonInstance.GSON.fromJson(data, JsonObject.class);

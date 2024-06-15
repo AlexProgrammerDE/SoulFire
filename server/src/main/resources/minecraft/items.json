@@ -1372,7 +1372,7 @@
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 64,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "epic",
       "minecraft:repair_cost": 0
     }
   },
@@ -12830,6 +12830,22 @@
   },
   {
     "id": 799,
+    "key": "minecraft:bowl",
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": []
+      },
+      "minecraft:enchantments": {
+        "levels": {}
+      },
+      "minecraft:lore": [],
+      "minecraft:max_stack_size": 64,
+      "minecraft:rarity": "common",
+      "minecraft:repair_cost": 0
+    }
+  },
+  {
+    "id": 800,
     "key": "minecraft:apple",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12849,7 +12865,7 @@
     }
   },
   {
-    "id": 800,
+    "id": 801,
     "key": "minecraft:bow",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12867,7 +12883,7 @@
     }
   },
   {
-    "id": 801,
+    "id": 802,
     "key": "minecraft:arrow",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12883,7 +12899,7 @@
     }
   },
   {
-    "id": 802,
+    "id": 803,
     "key": "minecraft:coal",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12899,7 +12915,7 @@
     }
   },
   {
-    "id": 803,
+    "id": 804,
     "key": "minecraft:charcoal",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12915,7 +12931,7 @@
     }
   },
   {
-    "id": 804,
+    "id": 805,
     "key": "minecraft:diamond",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12931,7 +12947,7 @@
     }
   },
   {
-    "id": 805,
+    "id": 806,
     "key": "minecraft:emerald",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12947,7 +12963,7 @@
     }
   },
   {
-    "id": 806,
+    "id": 807,
     "key": "minecraft:lapis_lazuli",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12963,7 +12979,7 @@
     }
   },
   {
-    "id": 807,
+    "id": 808,
     "key": "minecraft:quartz",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12979,7 +12995,7 @@
     }
   },
   {
-    "id": 808,
+    "id": 809,
     "key": "minecraft:amethyst_shard",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -12995,7 +13011,7 @@
     }
   },
   {
-    "id": 809,
+    "id": 810,
     "key": "minecraft:raw_iron",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13011,7 +13027,7 @@
     }
   },
   {
-    "id": 810,
+    "id": 811,
     "key": "minecraft:iron_ingot",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13027,7 +13043,7 @@
     }
   },
   {
-    "id": 811,
+    "id": 812,
     "key": "minecraft:raw_copper",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13043,7 +13059,7 @@
     }
   },
   {
-    "id": 812,
+    "id": 813,
     "key": "minecraft:copper_ingot",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13059,7 +13075,7 @@
     }
   },
   {
-    "id": 813,
+    "id": 814,
     "key": "minecraft:raw_gold",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13075,7 +13091,7 @@
     }
   },
   {
-    "id": 814,
+    "id": 815,
     "key": "minecraft:gold_ingot",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13091,7 +13107,7 @@
     }
   },
   {
-    "id": 815,
+    "id": 816,
     "key": "minecraft:netherite_ingot",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13108,7 +13124,7 @@
     }
   },
   {
-    "id": 816,
+    "id": 817,
     "key": "minecraft:netherite_scrap",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -13125,33 +13141,21 @@
     }
   },
   {
-    "id": 817,
+    "id": 818,
     "key": "minecraft:wooden_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 3.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13184,33 +13188,21 @@
     }
   },
   {
-    "id": 818,
+    "id": 819,
     "key": "minecraft:wooden_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 1.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13242,33 +13234,21 @@
     }
   },
   {
-    "id": 819,
+    "id": 820,
     "key": "minecraft:wooden_pickaxe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 1.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.799999952316284,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13300,33 +13280,21 @@
     }
   },
   {
-    "id": 820,
+    "id": 821,
     "key": "minecraft:wooden_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 6.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.200000047683716,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13358,33 +13326,21 @@
     }
   },
   {
-    "id": 821,
+    "id": 822,
     "key": "minecraft:wooden_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13416,33 +13372,21 @@
     }
   },
   {
-    "id": 822,
+    "id": 823,
     "key": "minecraft:stone_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 4.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13475,33 +13419,21 @@
     }
   },
   {
-    "id": 823,
+    "id": 824,
     "key": "minecraft:stone_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 2.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13533,33 +13465,21 @@
     }
   },
   {
-    "id": 824,
+    "id": 825,
     "key": "minecraft:stone_pickaxe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 2.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.799999952316284,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13591,33 +13511,21 @@
     }
   },
   {
-    "id": 825,
+    "id": 826,
     "key": "minecraft:stone_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 8.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.200000047683716,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13649,33 +13557,21 @@
     }
   },
   {
-    "id": 826,
+    "id": 827,
     "key": "minecraft:stone_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13707,33 +13603,21 @@
     }
   },
   {
-    "id": 827,
+    "id": 828,
     "key": "minecraft:golden_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 3.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13766,33 +13650,21 @@
     }
   },
   {
-    "id": 828,
+    "id": 829,
     "key": "minecraft:golden_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 1.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13824,33 +13696,21 @@
     }
   },
   {
-    "id": 829,
+    "id": 830,
     "key": "minecraft:golden_pickaxe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 1.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.799999952316284,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13882,33 +13742,21 @@
     }
   },
   {
-    "id": 830,
+    "id": 831,
     "key": "minecraft:golden_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 6.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13940,33 +13788,21 @@
     }
   },
   {
-    "id": 831,
+    "id": 832,
     "key": "minecraft:golden_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -13998,33 +13834,21 @@
     }
   },
   {
-    "id": 832,
+    "id": 833,
     "key": "minecraft:iron_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 5.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14057,33 +13881,21 @@
     }
   },
   {
-    "id": 833,
+    "id": 834,
     "key": "minecraft:iron_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 3.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14115,33 +13927,21 @@
     }
   },
   {
-    "id": 834,
+    "id": 835,
     "key": "minecraft:iron_pickaxe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 3.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.799999952316284,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14173,33 +13973,21 @@
     }
   },
   {
-    "id": 835,
+    "id": 836,
     "key": "minecraft:iron_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 8.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0999999046325684,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14231,33 +14019,21 @@
     }
   },
   {
-    "id": 836,
+    "id": 837,
     "key": "minecraft:iron_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -1.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14289,33 +14065,21 @@
     }
   },
   {
-    "id": 837,
+    "id": 838,
     "key": "minecraft:diamond_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 6.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14348,33 +14112,21 @@
     }
   },
   {
-    "id": 838,
+    "id": 839,
     "key": "minecraft:diamond_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 4.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14398,64 +14150,6 @@
           },
           {
             "blocks": "#minecraft:mineable/shovel",
-            "speed": 8.0,
-            "correct_for_drops": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "id": 839,
-    "key": "minecraft:diamond_pickaxe",
-    "components": {
-      "minecraft:attribute_modifiers": {
-        "modifiers": [
-          {
-            "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
-            "amount": 4.0,
-            "operation": "add_value",
-            "slot": "mainhand"
-          },
-          {
-            "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
-            "amount": -2.799999952316284,
-            "operation": "add_value",
-            "slot": "mainhand"
-          }
-        ]
-      },
-      "minecraft:damage": 0,
-      "minecraft:enchantments": {
-        "levels": {}
-      },
-      "minecraft:lore": [],
-      "minecraft:max_damage": 1561,
-      "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
-      "minecraft:repair_cost": 0,
-      "minecraft:tool": {
-        "rules": [
-          {
-            "blocks": "#minecraft:incorrect_for_diamond_tool",
-            "correct_for_drops": false
-          },
-          {
-            "blocks": "#minecraft:mineable/pickaxe",
             "speed": 8.0,
             "correct_for_drops": true
           }
@@ -14465,32 +14159,66 @@
   },
   {
     "id": 840,
+    "key": "minecraft:diamond_pickaxe",
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "type": "minecraft:generic.attack_damage",
+            "id": "minecraft:base_attack_damage",
+            "amount": 4.0,
+            "operation": "add_value",
+            "slot": "mainhand"
+          },
+          {
+            "type": "minecraft:generic.attack_speed",
+            "id": "minecraft:base_attack_speed",
+            "amount": -2.799999952316284,
+            "operation": "add_value",
+            "slot": "mainhand"
+          }
+        ]
+      },
+      "minecraft:damage": 0,
+      "minecraft:enchantments": {
+        "levels": {}
+      },
+      "minecraft:lore": [],
+      "minecraft:max_damage": 1561,
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "common",
+      "minecraft:repair_cost": 0,
+      "minecraft:tool": {
+        "rules": [
+          {
+            "blocks": "#minecraft:incorrect_for_diamond_tool",
+            "correct_for_drops": false
+          },
+          {
+            "blocks": "#minecraft:mineable/pickaxe",
+            "speed": 8.0,
+            "correct_for_drops": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": 841,
     "key": "minecraft:diamond_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 8.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14522,33 +14250,21 @@
     }
   },
   {
-    "id": 841,
+    "id": 842,
     "key": "minecraft:diamond_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14580,33 +14296,21 @@
     }
   },
   {
-    "id": 842,
+    "id": 843,
     "key": "minecraft:netherite_sword",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 7.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14640,33 +14344,21 @@
     }
   },
   {
-    "id": 843,
+    "id": 844,
     "key": "minecraft:netherite_shovel",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 5.5,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14699,33 +14391,21 @@
     }
   },
   {
-    "id": 844,
+    "id": 845,
     "key": "minecraft:netherite_pickaxe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 5.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.799999952316284,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14758,33 +14438,21 @@
     }
   },
   {
-    "id": 845,
+    "id": 846,
     "key": "minecraft:netherite_axe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 9.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -3.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14817,33 +14485,21 @@
     }
   },
   {
-    "id": 846,
+    "id": 847,
     "key": "minecraft:netherite_hoe",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": 0.0,
             "operation": "add_value",
             "slot": "mainhand"
@@ -14876,24 +14532,8 @@
     }
   },
   {
-    "id": 847,
-    "key": "minecraft:stick",
-    "components": {
-      "minecraft:attribute_modifiers": {
-        "modifiers": []
-      },
-      "minecraft:enchantments": {
-        "levels": {}
-      },
-      "minecraft:lore": [],
-      "minecraft:max_stack_size": 64,
-      "minecraft:rarity": "common",
-      "minecraft:repair_cost": 0
-    }
-  },
-  {
     "id": 848,
-    "key": "minecraft:bowl",
+    "key": "minecraft:stick",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
@@ -14918,6 +14558,9 @@
         "levels": {}
       },
       "minecraft:food": {
+        "using_converts_to": {
+          "id": "minecraft:bowl"
+        },
         "nutrition": 6,
         "saturation": 7.2000003
       },
@@ -15546,7 +15189,6 @@
         "levels": {}
       },
       "minecraft:food": {
-        "can_always_eat": true,
         "effects": [
           {
             "effect": {
@@ -15565,7 +15207,8 @@
           }
         ],
         "nutrition": 4,
-        "saturation": 9.6
+        "saturation": 9.6,
+        "can_always_eat": true
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 64,
@@ -15585,7 +15228,6 @@
         "levels": {}
       },
       "minecraft:food": {
-        "can_always_eat": true,
         "effects": [
           {
             "effect": {
@@ -15619,7 +15261,8 @@
           }
         ],
         "nutrition": 4,
-        "saturation": 9.6
+        "saturation": 9.6,
+        "can_always_eat": true
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 64,
@@ -19105,27 +18748,15 @@
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Weapon modifier",
-            "amount": 6.0,
+            "id": "minecraft:base_attack_damage",
+            "amount": 5.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Weapon modifier",
-            "amount": -2.4000000953674316,
+            "id": "minecraft:base_attack_speed",
+            "amount": -3.4000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
           }
@@ -19136,9 +18767,9 @@
         "levels": {}
       },
       "minecraft:lore": [],
-      "minecraft:max_damage": 250,
+      "minecraft:max_damage": 500,
       "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "epic",
       "minecraft:repair_cost": 0,
       "minecraft:tool": {
         "rules": [],
@@ -19623,6 +19254,9 @@
         "levels": {}
       },
       "minecraft:food": {
+        "using_converts_to": {
+          "id": "minecraft:bowl"
+        },
         "nutrition": 10,
         "saturation": 12.0
       },
@@ -20132,9 +19766,9 @@
         "levels": {}
       },
       "minecraft:food": {
-        "can_always_eat": true,
         "nutrition": 4,
-        "saturation": 2.4
+        "saturation": 2.4,
+        "can_always_eat": true
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 64,
@@ -20237,6 +19871,9 @@
         "levels": {}
       },
       "minecraft:food": {
+        "using_converts_to": {
+          "id": "minecraft:bowl"
+        },
         "nutrition": 6,
         "saturation": 7.2000003
       },
@@ -20441,6 +20078,9 @@
       "minecraft:enchantments": {
         "levels": {}
       },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:13"
+      },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "rare",
@@ -20456,6 +20096,9 @@
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:cat"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20473,6 +20116,9 @@
       "minecraft:enchantments": {
         "levels": {}
       },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:blocks"
+      },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "rare",
@@ -20489,6 +20135,9 @@
       "minecraft:enchantments": {
         "levels": {}
       },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:chirp"
+      },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "rare",
@@ -20497,13 +20146,16 @@
   },
   {
     "id": 1172,
-    "key": "minecraft:music_disc_far",
+    "key": "minecraft:music_disc_creator",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:creator"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20513,13 +20165,16 @@
   },
   {
     "id": 1173,
-    "key": "minecraft:music_disc_mall",
+    "key": "minecraft:music_disc_creator_music_box",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:creator_music_box"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20529,13 +20184,16 @@
   },
   {
     "id": 1174,
-    "key": "minecraft:music_disc_mellohi",
+    "key": "minecraft:music_disc_far",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:far"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20545,13 +20203,16 @@
   },
   {
     "id": 1175,
-    "key": "minecraft:music_disc_stal",
+    "key": "minecraft:music_disc_mall",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:mall"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20561,13 +20222,16 @@
   },
   {
     "id": 1176,
-    "key": "minecraft:music_disc_strad",
+    "key": "minecraft:music_disc_mellohi",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:mellohi"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20577,13 +20241,16 @@
   },
   {
     "id": 1177,
-    "key": "minecraft:music_disc_ward",
+    "key": "minecraft:music_disc_stal",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:stal"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20593,13 +20260,16 @@
   },
   {
     "id": 1178,
-    "key": "minecraft:music_disc_11",
+    "key": "minecraft:music_disc_strad",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:strad"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20609,13 +20279,16 @@
   },
   {
     "id": 1179,
-    "key": "minecraft:music_disc_wait",
+    "key": "minecraft:music_disc_ward",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:ward"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20625,13 +20298,16 @@
   },
   {
     "id": 1180,
-    "key": "minecraft:music_disc_otherside",
+    "key": "minecraft:music_disc_11",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:11"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20641,13 +20317,16 @@
   },
   {
     "id": 1181,
-    "key": "minecraft:music_disc_relic",
+    "key": "minecraft:music_disc_wait",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:wait"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20657,13 +20336,16 @@
   },
   {
     "id": 1182,
-    "key": "minecraft:music_disc_5",
+    "key": "minecraft:music_disc_otherside",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:otherside"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20673,13 +20355,16 @@
   },
   {
     "id": 1183,
-    "key": "minecraft:music_disc_pigstep",
+    "key": "minecraft:music_disc_relic",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": []
       },
       "minecraft:enchantments": {
         "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:relic"
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20689,6 +20374,63 @@
   },
   {
     "id": 1184,
+    "key": "minecraft:music_disc_5",
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": []
+      },
+      "minecraft:enchantments": {
+        "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:5"
+      },
+      "minecraft:lore": [],
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "rare",
+      "minecraft:repair_cost": 0
+    }
+  },
+  {
+    "id": 1185,
+    "key": "minecraft:music_disc_pigstep",
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": []
+      },
+      "minecraft:enchantments": {
+        "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:pigstep"
+      },
+      "minecraft:lore": [],
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "rare",
+      "minecraft:repair_cost": 0
+    }
+  },
+  {
+    "id": 1186,
+    "key": "minecraft:music_disc_precipice",
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": []
+      },
+      "minecraft:enchantments": {
+        "levels": {}
+      },
+      "minecraft:jukebox_playable": {
+        "song": "minecraft:precipice"
+      },
+      "minecraft:lore": [],
+      "minecraft:max_stack_size": 1,
+      "minecraft:rarity": "rare",
+      "minecraft:repair_cost": 0
+    }
+  },
+  {
+    "id": 1187,
     "key": "minecraft:disc_fragment_5",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20704,33 +20446,21 @@
     }
   },
   {
-    "id": 1185,
+    "id": 1188,
     "key": "minecraft:trident",
     "components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
           {
             "type": "minecraft:generic.attack_damage",
-            "uuid": [
-              -885041709,
-              1683771192,
-              -1533567981,
-              -1556236849
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_damage",
             "amount": 8.0,
             "operation": "add_value",
             "slot": "mainhand"
           },
           {
             "type": "minecraft:generic.attack_speed",
-            "uuid": [
-              -98353636,
-              1098926181,
-              -1340359474,
-              -1752847197
-            ],
-            "name": "Tool modifier",
+            "id": "minecraft:base_attack_speed",
             "amount": -2.9000000953674316,
             "operation": "add_value",
             "slot": "mainhand"
@@ -20744,7 +20474,7 @@
       "minecraft:lore": [],
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "epic",
       "minecraft:repair_cost": 0,
       "minecraft:tool": {
         "rules": [],
@@ -20753,7 +20483,7 @@
     }
   },
   {
-    "id": 1186,
+    "id": 1189,
     "key": "minecraft:phantom_membrane",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20769,7 +20499,7 @@
     }
   },
   {
-    "id": 1187,
+    "id": 1190,
     "key": "minecraft:nautilus_shell",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20785,7 +20515,7 @@
     }
   },
   {
-    "id": 1188,
+    "id": 1191,
     "key": "minecraft:heart_of_the_sea",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20801,7 +20531,7 @@
     }
   },
   {
-    "id": 1189,
+    "id": 1192,
     "key": "minecraft:crossbow",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20820,7 +20550,7 @@
     }
   },
   {
-    "id": 1190,
+    "id": 1193,
     "key": "minecraft:suspicious_stew",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20830,9 +20560,12 @@
         "levels": {}
       },
       "minecraft:food": {
-        "can_always_eat": true,
+        "using_converts_to": {
+          "id": "minecraft:bowl"
+        },
         "nutrition": 6,
-        "saturation": 7.2000003
+        "saturation": 7.2000003,
+        "can_always_eat": true
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
@@ -20842,7 +20575,7 @@
     }
   },
   {
-    "id": 1191,
+    "id": 1194,
     "key": "minecraft:loom",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20858,7 +20591,7 @@
     }
   },
   {
-    "id": 1192,
+    "id": 1195,
     "key": "minecraft:flower_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20874,7 +20607,7 @@
     }
   },
   {
-    "id": 1193,
+    "id": 1196,
     "key": "minecraft:creeper_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20890,7 +20623,7 @@
     }
   },
   {
-    "id": 1194,
+    "id": 1197,
     "key": "minecraft:skull_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20906,7 +20639,7 @@
     }
   },
   {
-    "id": 1195,
+    "id": 1198,
     "key": "minecraft:mojang_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20922,7 +20655,7 @@
     }
   },
   {
-    "id": 1196,
+    "id": 1199,
     "key": "minecraft:globe_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20938,7 +20671,7 @@
     }
   },
   {
-    "id": 1197,
+    "id": 1200,
     "key": "minecraft:piglin_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20949,12 +20682,12 @@
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "uncommon",
       "minecraft:repair_cost": 0
     }
   },
   {
-    "id": 1198,
+    "id": 1201,
     "key": "minecraft:flow_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20965,12 +20698,12 @@
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "rare",
       "minecraft:repair_cost": 0
     }
   },
   {
-    "id": 1199,
+    "id": 1202,
     "key": "minecraft:guster_banner_pattern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -20981,12 +20714,12 @@
       },
       "minecraft:lore": [],
       "minecraft:max_stack_size": 1,
-      "minecraft:rarity": "common",
+      "minecraft:rarity": "rare",
       "minecraft:repair_cost": 0
     }
   },
   {
-    "id": 1200,
+    "id": 1203,
     "key": "minecraft:goat_horn",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21002,7 +20735,7 @@
     }
   },
   {
-    "id": 1201,
+    "id": 1204,
     "key": "minecraft:composter",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21018,7 +20751,7 @@
     }
   },
   {
-    "id": 1202,
+    "id": 1205,
     "key": "minecraft:barrel",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21035,7 +20768,7 @@
     }
   },
   {
-    "id": 1203,
+    "id": 1206,
     "key": "minecraft:smoker",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21052,7 +20785,7 @@
     }
   },
   {
-    "id": 1204,
+    "id": 1207,
     "key": "minecraft:blast_furnace",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21069,7 +20802,7 @@
     }
   },
   {
-    "id": 1205,
+    "id": 1208,
     "key": "minecraft:cartography_table",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21085,7 +20818,7 @@
     }
   },
   {
-    "id": 1206,
+    "id": 1209,
     "key": "minecraft:fletching_table",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21101,7 +20834,7 @@
     }
   },
   {
-    "id": 1207,
+    "id": 1210,
     "key": "minecraft:grindstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21117,7 +20850,7 @@
     }
   },
   {
-    "id": 1208,
+    "id": 1211,
     "key": "minecraft:smithing_table",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21133,7 +20866,7 @@
     }
   },
   {
-    "id": 1209,
+    "id": 1212,
     "key": "minecraft:stonecutter",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21149,7 +20882,7 @@
     }
   },
   {
-    "id": 1210,
+    "id": 1213,
     "key": "minecraft:bell",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21165,7 +20898,7 @@
     }
   },
   {
-    "id": 1211,
+    "id": 1214,
     "key": "minecraft:lantern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21181,7 +20914,7 @@
     }
   },
   {
-    "id": 1212,
+    "id": 1215,
     "key": "minecraft:soul_lantern",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21197,7 +20930,7 @@
     }
   },
   {
-    "id": 1213,
+    "id": 1216,
     "key": "minecraft:sweet_berries",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21217,7 +20950,7 @@
     }
   },
   {
-    "id": 1214,
+    "id": 1217,
     "key": "minecraft:glow_berries",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21237,7 +20970,7 @@
     }
   },
   {
-    "id": 1215,
+    "id": 1218,
     "key": "minecraft:campfire",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21254,7 +20987,7 @@
     }
   },
   {
-    "id": 1216,
+    "id": 1219,
     "key": "minecraft:soul_campfire",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21271,7 +21004,7 @@
     }
   },
   {
-    "id": 1217,
+    "id": 1220,
     "key": "minecraft:shroomlight",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21287,7 +21020,7 @@
     }
   },
   {
-    "id": 1218,
+    "id": 1221,
     "key": "minecraft:honeycomb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21303,7 +21036,7 @@
     }
   },
   {
-    "id": 1219,
+    "id": 1222,
     "key": "minecraft:bee_nest",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21320,7 +21053,7 @@
     }
   },
   {
-    "id": 1220,
+    "id": 1223,
     "key": "minecraft:beehive",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21337,7 +21070,7 @@
     }
   },
   {
-    "id": 1221,
+    "id": 1224,
     "key": "minecraft:honey_bottle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21357,7 +21090,7 @@
     }
   },
   {
-    "id": 1222,
+    "id": 1225,
     "key": "minecraft:honeycomb_block",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21373,7 +21106,7 @@
     }
   },
   {
-    "id": 1223,
+    "id": 1226,
     "key": "minecraft:lodestone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21389,7 +21122,7 @@
     }
   },
   {
-    "id": 1224,
+    "id": 1227,
     "key": "minecraft:crying_obsidian",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21405,7 +21138,7 @@
     }
   },
   {
-    "id": 1225,
+    "id": 1228,
     "key": "minecraft:blackstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21421,7 +21154,7 @@
     }
   },
   {
-    "id": 1226,
+    "id": 1229,
     "key": "minecraft:blackstone_slab",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21437,7 +21170,7 @@
     }
   },
   {
-    "id": 1227,
+    "id": 1230,
     "key": "minecraft:blackstone_stairs",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21453,7 +21186,7 @@
     }
   },
   {
-    "id": 1228,
+    "id": 1231,
     "key": "minecraft:gilded_blackstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21469,7 +21202,7 @@
     }
   },
   {
-    "id": 1229,
+    "id": 1232,
     "key": "minecraft:polished_blackstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21485,7 +21218,7 @@
     }
   },
   {
-    "id": 1230,
+    "id": 1233,
     "key": "minecraft:polished_blackstone_slab",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21501,7 +21234,7 @@
     }
   },
   {
-    "id": 1231,
+    "id": 1234,
     "key": "minecraft:polished_blackstone_stairs",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21517,7 +21250,7 @@
     }
   },
   {
-    "id": 1232,
+    "id": 1235,
     "key": "minecraft:chiseled_polished_blackstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21533,7 +21266,7 @@
     }
   },
   {
-    "id": 1233,
+    "id": 1236,
     "key": "minecraft:polished_blackstone_bricks",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21549,7 +21282,7 @@
     }
   },
   {
-    "id": 1234,
+    "id": 1237,
     "key": "minecraft:polished_blackstone_brick_slab",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21565,7 +21298,7 @@
     }
   },
   {
-    "id": 1235,
+    "id": 1238,
     "key": "minecraft:polished_blackstone_brick_stairs",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21581,7 +21314,7 @@
     }
   },
   {
-    "id": 1236,
+    "id": 1239,
     "key": "minecraft:cracked_polished_blackstone_bricks",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21597,7 +21330,7 @@
     }
   },
   {
-    "id": 1237,
+    "id": 1240,
     "key": "minecraft:respawn_anchor",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21613,7 +21346,7 @@
     }
   },
   {
-    "id": 1238,
+    "id": 1241,
     "key": "minecraft:candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21629,7 +21362,7 @@
     }
   },
   {
-    "id": 1239,
+    "id": 1242,
     "key": "minecraft:white_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21645,7 +21378,7 @@
     }
   },
   {
-    "id": 1240,
+    "id": 1243,
     "key": "minecraft:orange_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21661,7 +21394,7 @@
     }
   },
   {
-    "id": 1241,
+    "id": 1244,
     "key": "minecraft:magenta_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21677,7 +21410,7 @@
     }
   },
   {
-    "id": 1242,
+    "id": 1245,
     "key": "minecraft:light_blue_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21693,7 +21426,7 @@
     }
   },
   {
-    "id": 1243,
+    "id": 1246,
     "key": "minecraft:yellow_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21709,7 +21442,7 @@
     }
   },
   {
-    "id": 1244,
+    "id": 1247,
     "key": "minecraft:lime_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21725,7 +21458,7 @@
     }
   },
   {
-    "id": 1245,
+    "id": 1248,
     "key": "minecraft:pink_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21741,7 +21474,7 @@
     }
   },
   {
-    "id": 1246,
+    "id": 1249,
     "key": "minecraft:gray_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21757,7 +21490,7 @@
     }
   },
   {
-    "id": 1247,
+    "id": 1250,
     "key": "minecraft:light_gray_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21773,7 +21506,7 @@
     }
   },
   {
-    "id": 1248,
+    "id": 1251,
     "key": "minecraft:cyan_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21789,7 +21522,7 @@
     }
   },
   {
-    "id": 1249,
+    "id": 1252,
     "key": "minecraft:purple_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21805,7 +21538,7 @@
     }
   },
   {
-    "id": 1250,
+    "id": 1253,
     "key": "minecraft:blue_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21821,7 +21554,7 @@
     }
   },
   {
-    "id": 1251,
+    "id": 1254,
     "key": "minecraft:brown_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21837,7 +21570,7 @@
     }
   },
   {
-    "id": 1252,
+    "id": 1255,
     "key": "minecraft:green_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21853,7 +21586,7 @@
     }
   },
   {
-    "id": 1253,
+    "id": 1256,
     "key": "minecraft:red_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21869,7 +21602,7 @@
     }
   },
   {
-    "id": 1254,
+    "id": 1257,
     "key": "minecraft:black_candle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21885,7 +21618,7 @@
     }
   },
   {
-    "id": 1255,
+    "id": 1258,
     "key": "minecraft:small_amethyst_bud",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21901,7 +21634,7 @@
     }
   },
   {
-    "id": 1256,
+    "id": 1259,
     "key": "minecraft:medium_amethyst_bud",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21917,7 +21650,7 @@
     }
   },
   {
-    "id": 1257,
+    "id": 1260,
     "key": "minecraft:large_amethyst_bud",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21933,7 +21666,7 @@
     }
   },
   {
-    "id": 1258,
+    "id": 1261,
     "key": "minecraft:amethyst_cluster",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21949,7 +21682,7 @@
     }
   },
   {
-    "id": 1259,
+    "id": 1262,
     "key": "minecraft:pointed_dripstone",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21965,7 +21698,7 @@
     }
   },
   {
-    "id": 1260,
+    "id": 1263,
     "key": "minecraft:ochre_froglight",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21981,7 +21714,7 @@
     }
   },
   {
-    "id": 1261,
+    "id": 1264,
     "key": "minecraft:verdant_froglight",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -21997,7 +21730,7 @@
     }
   },
   {
-    "id": 1262,
+    "id": 1265,
     "key": "minecraft:pearlescent_froglight",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22013,7 +21746,7 @@
     }
   },
   {
-    "id": 1263,
+    "id": 1266,
     "key": "minecraft:frogspawn",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22029,7 +21762,7 @@
     }
   },
   {
-    "id": 1264,
+    "id": 1267,
     "key": "minecraft:echo_shard",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22045,7 +21778,7 @@
     }
   },
   {
-    "id": 1265,
+    "id": 1268,
     "key": "minecraft:brush",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22063,7 +21796,7 @@
     }
   },
   {
-    "id": 1266,
+    "id": 1269,
     "key": "minecraft:netherite_upgrade_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22079,7 +21812,7 @@
     }
   },
   {
-    "id": 1267,
+    "id": 1270,
     "key": "minecraft:sentry_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22095,7 +21828,7 @@
     }
   },
   {
-    "id": 1268,
+    "id": 1271,
     "key": "minecraft:dune_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22111,7 +21844,7 @@
     }
   },
   {
-    "id": 1269,
+    "id": 1272,
     "key": "minecraft:coast_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22127,7 +21860,7 @@
     }
   },
   {
-    "id": 1270,
+    "id": 1273,
     "key": "minecraft:wild_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22143,7 +21876,7 @@
     }
   },
   {
-    "id": 1271,
+    "id": 1274,
     "key": "minecraft:ward_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22159,7 +21892,7 @@
     }
   },
   {
-    "id": 1272,
+    "id": 1275,
     "key": "minecraft:eye_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22175,7 +21908,7 @@
     }
   },
   {
-    "id": 1273,
+    "id": 1276,
     "key": "minecraft:vex_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22191,7 +21924,7 @@
     }
   },
   {
-    "id": 1274,
+    "id": 1277,
     "key": "minecraft:tide_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22207,7 +21940,7 @@
     }
   },
   {
-    "id": 1275,
+    "id": 1278,
     "key": "minecraft:snout_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22223,7 +21956,7 @@
     }
   },
   {
-    "id": 1276,
+    "id": 1279,
     "key": "minecraft:rib_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22239,7 +21972,7 @@
     }
   },
   {
-    "id": 1277,
+    "id": 1280,
     "key": "minecraft:spire_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22255,7 +21988,7 @@
     }
   },
   {
-    "id": 1278,
+    "id": 1281,
     "key": "minecraft:wayfinder_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22271,7 +22004,7 @@
     }
   },
   {
-    "id": 1279,
+    "id": 1282,
     "key": "minecraft:shaper_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22287,7 +22020,7 @@
     }
   },
   {
-    "id": 1280,
+    "id": 1283,
     "key": "minecraft:silence_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22303,7 +22036,7 @@
     }
   },
   {
-    "id": 1281,
+    "id": 1284,
     "key": "minecraft:raiser_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22319,7 +22052,7 @@
     }
   },
   {
-    "id": 1282,
+    "id": 1285,
     "key": "minecraft:host_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22335,7 +22068,7 @@
     }
   },
   {
-    "id": 1283,
+    "id": 1286,
     "key": "minecraft:flow_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22351,7 +22084,7 @@
     }
   },
   {
-    "id": 1284,
+    "id": 1287,
     "key": "minecraft:bolt_armor_trim_smithing_template",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22367,7 +22100,7 @@
     }
   },
   {
-    "id": 1285,
+    "id": 1288,
     "key": "minecraft:angler_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22383,7 +22116,7 @@
     }
   },
   {
-    "id": 1286,
+    "id": 1289,
     "key": "minecraft:archer_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22399,7 +22132,7 @@
     }
   },
   {
-    "id": 1287,
+    "id": 1290,
     "key": "minecraft:arms_up_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22415,7 +22148,7 @@
     }
   },
   {
-    "id": 1288,
+    "id": 1291,
     "key": "minecraft:blade_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22431,7 +22164,7 @@
     }
   },
   {
-    "id": 1289,
+    "id": 1292,
     "key": "minecraft:brewer_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22447,7 +22180,7 @@
     }
   },
   {
-    "id": 1290,
+    "id": 1293,
     "key": "minecraft:burn_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22463,7 +22196,7 @@
     }
   },
   {
-    "id": 1291,
+    "id": 1294,
     "key": "minecraft:danger_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22479,7 +22212,7 @@
     }
   },
   {
-    "id": 1292,
+    "id": 1295,
     "key": "minecraft:explorer_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22495,7 +22228,7 @@
     }
   },
   {
-    "id": 1293,
+    "id": 1296,
     "key": "minecraft:flow_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22511,7 +22244,7 @@
     }
   },
   {
-    "id": 1294,
+    "id": 1297,
     "key": "minecraft:friend_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22527,7 +22260,7 @@
     }
   },
   {
-    "id": 1295,
+    "id": 1298,
     "key": "minecraft:guster_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22543,7 +22276,7 @@
     }
   },
   {
-    "id": 1296,
+    "id": 1299,
     "key": "minecraft:heart_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22559,7 +22292,7 @@
     }
   },
   {
-    "id": 1297,
+    "id": 1300,
     "key": "minecraft:heartbreak_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22575,7 +22308,7 @@
     }
   },
   {
-    "id": 1298,
+    "id": 1301,
     "key": "minecraft:howl_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22591,7 +22324,7 @@
     }
   },
   {
-    "id": 1299,
+    "id": 1302,
     "key": "minecraft:miner_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22607,7 +22340,7 @@
     }
   },
   {
-    "id": 1300,
+    "id": 1303,
     "key": "minecraft:mourner_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22623,7 +22356,7 @@
     }
   },
   {
-    "id": 1301,
+    "id": 1304,
     "key": "minecraft:plenty_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22639,7 +22372,7 @@
     }
   },
   {
-    "id": 1302,
+    "id": 1305,
     "key": "minecraft:prize_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22655,7 +22388,7 @@
     }
   },
   {
-    "id": 1303,
+    "id": 1306,
     "key": "minecraft:scrape_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22671,7 +22404,7 @@
     }
   },
   {
-    "id": 1304,
+    "id": 1307,
     "key": "minecraft:sheaf_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22687,7 +22420,7 @@
     }
   },
   {
-    "id": 1305,
+    "id": 1308,
     "key": "minecraft:shelter_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22703,7 +22436,7 @@
     }
   },
   {
-    "id": 1306,
+    "id": 1309,
     "key": "minecraft:skull_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22719,7 +22452,7 @@
     }
   },
   {
-    "id": 1307,
+    "id": 1310,
     "key": "minecraft:snort_pottery_sherd",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22735,7 +22468,7 @@
     }
   },
   {
-    "id": 1308,
+    "id": 1311,
     "key": "minecraft:copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22751,7 +22484,7 @@
     }
   },
   {
-    "id": 1309,
+    "id": 1312,
     "key": "minecraft:exposed_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22767,7 +22500,7 @@
     }
   },
   {
-    "id": 1310,
+    "id": 1313,
     "key": "minecraft:weathered_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22783,7 +22516,7 @@
     }
   },
   {
-    "id": 1311,
+    "id": 1314,
     "key": "minecraft:oxidized_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22799,7 +22532,7 @@
     }
   },
   {
-    "id": 1312,
+    "id": 1315,
     "key": "minecraft:waxed_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22815,7 +22548,7 @@
     }
   },
   {
-    "id": 1313,
+    "id": 1316,
     "key": "minecraft:waxed_exposed_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22831,7 +22564,7 @@
     }
   },
   {
-    "id": 1314,
+    "id": 1317,
     "key": "minecraft:waxed_weathered_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22847,7 +22580,7 @@
     }
   },
   {
-    "id": 1315,
+    "id": 1318,
     "key": "minecraft:waxed_oxidized_copper_grate",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22863,7 +22596,7 @@
     }
   },
   {
-    "id": 1316,
+    "id": 1319,
     "key": "minecraft:copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22879,7 +22612,7 @@
     }
   },
   {
-    "id": 1317,
+    "id": 1320,
     "key": "minecraft:exposed_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22895,7 +22628,7 @@
     }
   },
   {
-    "id": 1318,
+    "id": 1321,
     "key": "minecraft:weathered_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22911,7 +22644,7 @@
     }
   },
   {
-    "id": 1319,
+    "id": 1322,
     "key": "minecraft:oxidized_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22927,7 +22660,7 @@
     }
   },
   {
-    "id": 1320,
+    "id": 1323,
     "key": "minecraft:waxed_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22943,7 +22676,7 @@
     }
   },
   {
-    "id": 1321,
+    "id": 1324,
     "key": "minecraft:waxed_exposed_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22959,7 +22692,7 @@
     }
   },
   {
-    "id": 1322,
+    "id": 1325,
     "key": "minecraft:waxed_weathered_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22975,7 +22708,7 @@
     }
   },
   {
-    "id": 1323,
+    "id": 1326,
     "key": "minecraft:waxed_oxidized_copper_bulb",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -22991,7 +22724,7 @@
     }
   },
   {
-    "id": 1324,
+    "id": 1327,
     "key": "minecraft:trial_spawner",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -23007,7 +22740,7 @@
     }
   },
   {
-    "id": 1325,
+    "id": 1328,
     "key": "minecraft:trial_key",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -23023,7 +22756,7 @@
     }
   },
   {
-    "id": 1326,
+    "id": 1329,
     "key": "minecraft:ominous_trial_key",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -23039,7 +22772,7 @@
     }
   },
   {
-    "id": 1327,
+    "id": 1330,
     "key": "minecraft:vault",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -23055,7 +22788,7 @@
     }
   },
   {
-    "id": 1328,
+    "id": 1331,
     "key": "minecraft:ominous_bottle",
     "components": {
       "minecraft:attribute_modifiers": {
@@ -23076,7 +22809,7 @@
     }
   },
   {
-    "id": 1329,
+    "id": 1332,
     "key": "minecraft:breeze_rod",
     "components": {
       "minecraft:attribute_modifiers": {

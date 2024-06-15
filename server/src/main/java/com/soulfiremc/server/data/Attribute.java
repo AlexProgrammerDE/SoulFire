@@ -18,8 +18,8 @@
 package com.soulfiremc.server.data;
 
 import java.util.List;
-import java.util.UUID;
+import net.kyori.adventure.key.Key;
 
 public record Attribute(AttributeType type, List<Modifier> modifiers) {
-  public record Modifier(UUID uuid, double amount, ModifierOperation operation) {}
+  public record Modifier(Key id, double amount, ModifierOperation operation) {}
 }
