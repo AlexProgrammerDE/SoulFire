@@ -22,6 +22,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -50,6 +51,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
   @Override
   public String apply(TranslatableComponent component) {
+    System.out.println(component.key());
     var translation = mojangTranslations.getOrDefault(component.key(), Objects.requireNonNullElse(component.fallback(), component.key()));
 
     var args =
@@ -57,6 +59,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
         .map(TranslationArgumentLike::asComponent)
         .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
         .toArray(String[]::new);
+    System.out.println(translation + " " + Arrays.toString(args));
     return String.format(translation, (Object[]) args);
   }
 }

@@ -130,7 +130,7 @@ public class SFBaseListener extends SessionAdapter {
       } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
         session.disconnect(loginDisconnectPacket.getReason());
       } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
-        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold());
+        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold(), true);
       }
     } else if (protocol.getInboundState() == ProtocolState.STATUS) {
       if (packet instanceof ClientboundStatusResponsePacket) {

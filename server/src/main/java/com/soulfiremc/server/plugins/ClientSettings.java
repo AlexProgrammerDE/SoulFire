@@ -19,7 +19,7 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
+import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -37,12 +37,12 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreferenc
 import org.geysermc.mcprotocollib.protocol.data.game.setting.ChatVisibility;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.SkinPart;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundLoginAcknowledgedPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalPlugin {
-  public static void onPacket(SFPacketSentEvent event) {
-    if (event.packet() instanceof ServerboundLoginAcknowledgedPacket) {
+  public static void onPacket(SFPacketReceiveEvent event) {
+    if (event.packet() instanceof ClientboundGameProfilePacket) {
       var connection = event.connection();
       var settingsHolder = connection.settingsHolder();
       if (!settingsHolder.get(ClientSettingsSettings.ENABLED)) {
@@ -96,7 +96,7 @@ public class ClientSettings implements InternalPlugin {
   @Override
   public void onLoad() {
     SoulFireAPI.registerListeners(ClientSettings.class);
-    PluginHelper.registerBotEventConsumer(SFPacketSentEvent.class, ClientSettings::onPacket);
+    PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, ClientSettings::onPacket);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
