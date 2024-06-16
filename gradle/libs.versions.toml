@@ -55,7 +55,7 @@ xchart = "org.knowm.xchart:xchart:3.8.8"
 miglayout-swing = "com.miglayout:miglayout-swing:11.3"
 mcprotocollib = { module = "com.github.AlexProgrammerDE:MCProtocolLib", version.ref = "mcprotocollib" }
 mcstructs = "net.lenni0451.mcstructs:all:2.5.0-SNAPSHOT"
-netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT"
+netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
 via-rewind = { module = "com.viaversion:viarewind-common", version.ref = "via-rewind" }
