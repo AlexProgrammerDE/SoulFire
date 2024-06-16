@@ -570,8 +570,7 @@ public class POVServer implements InternalPlugin {
 
                 session.send(new ClientboundStartConfigurationPacket());
                 awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
-                ((MinecraftProtocol) session.getPacketProtocol())
-                  .setState(ProtocolState.CONFIGURATION);
+                session.switchOutboundProtocol(() -> ((MinecraftProtocol)session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
 
                 if (dataManager.serverEnabledFeatures() != null) {
                   session.send(
@@ -593,9 +592,6 @@ public class POVServer implements InternalPlugin {
 
                 session.send(new ClientboundFinishConfigurationPacket());
                 awaitReceived(ServerboundFinishConfigurationPacket.class);
-
-                ((MinecraftProtocol) session.getPacketProtocol())
-                  .setState(ProtocolState.GAME);
 
                 var spawnInfo =
                   new PlayerSpawnInfo(

@@ -48,7 +48,6 @@ import java.net.SocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.crypto.SecretKey;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
@@ -68,6 +67,8 @@ import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
+import org.geysermc.mcprotocollib.network.tcp.TcpPacketCodec;
+import org.geysermc.mcprotocollib.network.tcp.TcpPacketEncryptor;
 import org.geysermc.mcprotocollib.network.tcp.TcpSession;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
@@ -218,7 +219,7 @@ public class ViaClientSession extends TcpSession {
             // Inject Via codec
             pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-            pipeline.addLast("codec", new SFTcpPacketCodec(ViaClientSession.this));
+            pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
             pipeline.addLast("manager", ViaClientSession.this);
 
             addHAProxySupport(pipeline);
@@ -278,7 +279,16 @@ public class ViaClientSession extends TcpSession {
 
   @Override
   public void enableEncryption(PacketEncryption encryption) {
-    throw new UnsupportedOperationException("Not supported method.");
+    var pipeline = getChannel().pipeline();
+    var encryptor = new TcpPacketEncryptor(encryption);
+
+    if (pipeline.get("vl-prenetty") != null) {
+      logger.debug("Enabling legacy decryption");
+      pipeline.addBefore("vl-prenetty", ENCRYPTION_NAME, encryptor);
+    } else {
+      logger.debug("Enabling decryption");
+      pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, encryptor);
+    }
   }
 
   @Override
@@ -399,18 +409,5 @@ public class ViaClientSession extends TcpSession {
     super.exceptionCaught(ctx, cause);
 
     logger.debug("Exception caught in Netty session.", cause);
-  }
-
-  public void enableJavaEncryption(SecretKey key) {
-    var codec = new CryptoCodec(key, key);
-    var pipeline = getChannel().pipeline();
-
-    if (pipeline.get("vl-prenetty") != null) {
-      logger.debug("Enabling legacy decryption");
-      pipeline.addBefore("vl-prenetty", ENCRYPTION_NAME, codec);
-    } else {
-      logger.debug("Enabling decryption");
-      pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, codec);
-    }
   }
 }

@@ -21,9 +21,12 @@ import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import java.util.Objects;
+import lombok.SneakyThrows;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
+import org.geysermc.mcprotocollib.network.crypt.AESEncryption;
 
 public class SFViaEncryptionProvider extends EncryptionProvider {
+  @SneakyThrows
   @Override
   public void enableDecryption(UserConnection user) {
     var session = Objects.requireNonNull(user.get(StorableSession.class)).session();
@@ -31,6 +34,6 @@ public class SFViaEncryptionProvider extends EncryptionProvider {
     Objects.requireNonNull(key, "Key is null!");
     session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, null);
 
-    session.enableJavaEncryption(key);
+    session.enableEncryption(new AESEncryption(key));
   }
 }
