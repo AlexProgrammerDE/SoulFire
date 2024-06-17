@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class BlocksJavaGenerator implements IDataGenerator {
   @Override
@@ -33,14 +35,9 @@ public class BlocksJavaGenerator implements IDataGenerator {
     var base = ResourceHelper.getResourceAsString("/templates/BlockType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      String.join(
-        "\n  ",
-        BuiltInRegistries.BLOCK.stream()
-          .map(
-            s -> {
-              var key = BuiltInRegistries.BLOCK.getKey(s);
-              return "public static final BlockType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
-            })
+      String.join("\n  ",
+        FieldGenerationHelper.mapFields(Blocks.class, Block.class)
+          .map(f -> "public static final BlockType %s = register(\"%s\");".formatted(f.name(), BuiltInRegistries.BLOCK.getKey(f.value())))
           .toArray(String[]::new)));
   }
 }

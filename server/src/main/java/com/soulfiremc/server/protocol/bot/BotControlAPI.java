@@ -313,7 +313,7 @@ public class BotControlAPI {
 
     return (float)
       (1.0
-        / dataManager.clientEntity().attributeValue(AttributeType.GENERIC_ATTACK_SPEED)
+        / dataManager.clientEntity().attributeValue(AttributeType.ATTACK_SPEED)
         * 20.0);
   }
 }

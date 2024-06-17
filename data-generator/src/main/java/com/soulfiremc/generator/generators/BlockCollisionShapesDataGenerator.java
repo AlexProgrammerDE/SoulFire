@@ -131,10 +131,8 @@ public class BlockCollisionShapesDataGenerator {
           if (isAllTheSame(blockCollisions)) {
             resultBuilder.append(blockCollisions.getInt(0));
           } else {
-            resultBuilder.append(
-              String.join(
-                ",",
-                blockCollisions.intStream().mapToObj(String::valueOf).toArray(String[]::new)));
+            resultBuilder.append(String.join(",",
+              blockCollisions.intStream().mapToObj(String::valueOf).toArray(String[]::new)));
           }
         }
 

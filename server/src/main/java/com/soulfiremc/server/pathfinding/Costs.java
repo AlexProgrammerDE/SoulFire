@@ -189,7 +189,7 @@ public class Costs {
 
     if (entity != null) {
       if (speedMultiplier > 1) {
-        speedMultiplier += (float) entity.attributeValue(AttributeType.PLAYER_MINING_EFFICIENCY);
+        speedMultiplier += (float) entity.attributeValue(AttributeType.MINING_EFFICIENCY);
       }
 
       var digSpeedAmplifier = getDigSpeedAmplifier(entity.effectState());
@@ -208,9 +208,9 @@ public class Costs {
           };
       }
 
-      speedMultiplier *= (float) entity.attributeValue(AttributeType.PLAYER_BLOCK_BREAK_SPEED);
+      speedMultiplier *= (float) entity.attributeValue(AttributeType.BLOCK_BREAK_SPEED);
       if (entity.isEyeInFluid(FluidTags.WATER)) {
-        speedMultiplier *= (float) entity.attributeValue(AttributeType.PLAYER_SUBMERGED_MINING_SPEED);
+        speedMultiplier *= (float) entity.attributeValue(AttributeType.SUBMERGED_MINING_SPEED);
       }
     }
 

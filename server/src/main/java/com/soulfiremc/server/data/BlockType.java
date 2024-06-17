@@ -1103,8 +1103,8 @@ public record BlockType(
   public static final BlockType RAW_IRON_BLOCK = register("minecraft:raw_iron_block");
   public static final BlockType RAW_COPPER_BLOCK = register("minecraft:raw_copper_block");
   public static final BlockType RAW_GOLD_BLOCK = register("minecraft:raw_gold_block");
-  public static final BlockType POTTED_AZALEA_BUSH = register("minecraft:potted_azalea_bush");
-  public static final BlockType POTTED_FLOWERING_AZALEA_BUSH = register("minecraft:potted_flowering_azalea_bush");
+  public static final BlockType POTTED_AZALEA = register("minecraft:potted_azalea_bush");
+  public static final BlockType POTTED_FLOWERING_AZALEA = register("minecraft:potted_flowering_azalea_bush");
   public static final BlockType OCHRE_FROGLIGHT = register("minecraft:ochre_froglight");
   public static final BlockType VERDANT_FROGLIGHT = register("minecraft:verdant_froglight");
   public static final BlockType PEARLESCENT_FROGLIGHT = register("minecraft:pearlescent_froglight");

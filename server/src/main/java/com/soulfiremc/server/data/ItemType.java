@@ -294,7 +294,7 @@ public record ItemType(
   public static final ItemType STONE_SLAB = register("minecraft:stone_slab");
   public static final ItemType SMOOTH_STONE_SLAB = register("minecraft:smooth_stone_slab");
   public static final ItemType SANDSTONE_SLAB = register("minecraft:sandstone_slab");
-  public static final ItemType CUT_SANDSTONE_SLAB = register("minecraft:cut_sandstone_slab");
+  public static final ItemType CUT_STANDSTONE_SLAB = register("minecraft:cut_sandstone_slab");
   public static final ItemType PETRIFIED_OAK_SLAB = register("minecraft:petrified_oak_slab");
   public static final ItemType COBBLESTONE_SLAB = register("minecraft:cobblestone_slab");
   public static final ItemType BRICK_SLAB = register("minecraft:brick_slab");

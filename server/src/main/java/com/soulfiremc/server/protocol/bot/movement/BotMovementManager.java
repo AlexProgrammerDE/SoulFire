@@ -351,7 +351,7 @@ public class BotMovementManager {
       var horizontalInertia = typeSpeed;
 
       if (movementState.isInWater) {
-        var waterMovementEfficiency = (float) clientEntity.attributeValue(AttributeType.GENERIC_WATER_MOVEMENT_EFFICIENCY);
+        var waterMovementEfficiency = (float) clientEntity.attributeValue(AttributeType.WATER_MOVEMENT_EFFICIENCY);
 
         if (!movementState.onGround) {
           waterMovementEfficiency *= 0.5F;
@@ -474,7 +474,7 @@ public class BotMovementManager {
 
   public float getSpeed() {
     var attribute = movementState.entity().attributeState();
-    var playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED);
+    var playerSpeedAttribute = attribute.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
 
     if (controlState.sprinting()) {
       playerSpeedAttribute.modifiers().putIfAbsent(PhysicsData.SPRINTING_MODIFIER_ID, PhysicsData.SPEED_MODIFIER_SPRINTING);
@@ -484,7 +484,7 @@ public class BotMovementManager {
       playerSpeedAttribute.modifiers().remove(PhysicsData.SPRINTING_MODIFIER_ID);
     }
 
-    return (float) clientEntity.attributeValue(AttributeType.GENERIC_MOVEMENT_SPEED);
+    return (float) clientEntity.attributeValue(AttributeType.MOVEMENT_SPEED);
   }
 
   public void moveEntity(Level world, double dx, double dy, double dz) {

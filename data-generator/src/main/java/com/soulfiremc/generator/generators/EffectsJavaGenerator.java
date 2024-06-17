@@ -17,11 +17,13 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
-import java.util.Objects;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 
 public class EffectsJavaGenerator implements IDataGenerator {
   @Override
@@ -34,14 +36,9 @@ public class EffectsJavaGenerator implements IDataGenerator {
     var base = ResourceHelper.getResourceAsString("/templates/EffectType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      String.join(
-        "\n  ",
-        BuiltInRegistries.MOB_EFFECT.stream()
-          .map(
-            s -> {
-              var key = Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.getKey(s));
-              return "public static final EffectType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
-            })
+      String.join("\n  ",
+        FieldGenerationHelper.mapFields(MobEffects.class, Holder.class, h -> (MobEffect) h.value())
+          .map(f -> "public static final EffectType %s = register(\"%s\");".formatted(f.name(), BuiltInRegistries.MOB_EFFECT.getKey(f.value())))
           .toArray(String[]::new)));
   }
 }

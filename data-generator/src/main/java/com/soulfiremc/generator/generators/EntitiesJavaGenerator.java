@@ -17,10 +17,11 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EntityType;
 
 public class EntitiesJavaGenerator implements IDataGenerator {
   @Override
@@ -33,14 +34,9 @@ public class EntitiesJavaGenerator implements IDataGenerator {
     var base = ResourceHelper.getResourceAsString("/templates/EntityType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      String.join(
-        "\n  ",
-        BuiltInRegistries.ENTITY_TYPE.stream()
-          .map(
-            s -> {
-              var key = BuiltInRegistries.ENTITY_TYPE.getKey(s);
-              return "public static final EntityType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
-            })
+      String.join("\n  ",
+        FieldGenerationHelper.mapFields(EntityType.class, EntityType.class)
+          .map(f -> "public static final EntityType %s = register(\"%s\");".formatted(f.name(), BuiltInRegistries.ENTITY_TYPE.getKey(f.value())))
           .toArray(String[]::new)));
   }
 }

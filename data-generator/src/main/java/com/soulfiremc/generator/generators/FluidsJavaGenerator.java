@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 public class FluidsJavaGenerator implements IDataGenerator {
   @Override
@@ -33,14 +35,9 @@ public class FluidsJavaGenerator implements IDataGenerator {
     var base = ResourceHelper.getResourceAsString("/templates/FluidType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      String.join(
-        "\n  ",
-        BuiltInRegistries.FLUID.stream()
-          .map(
-            s -> {
-              var key = BuiltInRegistries.FLUID.getKey(s);
-              return "public static final FluidType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT), key);
-            })
+      String.join("\n  ",
+        FieldGenerationHelper.mapFields(Fluids.class, Fluid.class)
+          .map(f -> "public static final FluidType %s = register(\"%s\");".formatted(f.name(), BuiltInRegistries.FLUID.getKey(f.value())))
           .toArray(String[]::new)));
   }
 }

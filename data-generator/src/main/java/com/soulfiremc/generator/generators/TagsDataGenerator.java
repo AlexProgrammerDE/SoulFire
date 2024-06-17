@@ -17,13 +17,10 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import it.unimi.dsi.fastutil.Pair;
-import java.util.Arrays;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
@@ -33,16 +30,6 @@ import net.minecraft.tags.TagKey;
 @Slf4j
 public class TagsDataGenerator {
   private TagsDataGenerator() {}
-
-  public static Stream<Pair<String, ResourceLocation>> generateTag(Class<?> tagClass) {
-    return Arrays.stream(tagClass.getDeclaredFields()).map(f -> {
-      try {
-        return Pair.of(f.getName(), ((TagKey<?>) f.get(null)).location());
-      } catch (ReflectiveOperationException e) {
-        throw new RuntimeException(e);
-      }
-    });
-  }
 
   public static class BlockTagsDataGenerator implements IDataGenerator {
     @Override
@@ -55,12 +42,9 @@ public class TagsDataGenerator {
       var base = ResourceHelper.getResourceAsString("/templates/BlockTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
-        String.join(
-          "\n  ",
-          generateTag(BlockTags.class)
-            .map(
-              s ->
-                "public static final TagKey<BlockType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
+        String.join("\n  ",
+          FieldGenerationHelper.mapFields(BlockTags.class, TagKey.class, TagKey::location)
+            .map(f -> "public static final TagKey<BlockType> %s = register(\"%s\");".formatted(f.name(), f.value()))
             .toArray(String[]::new)));
     }
   }
@@ -76,12 +60,9 @@ public class TagsDataGenerator {
       var base = ResourceHelper.getResourceAsString("/templates/ItemTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
-        String.join(
-          "\n  ",
-          generateTag(ItemTags.class)
-            .map(
-              s ->
-                "public static final TagKey<ItemType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
+        String.join("\n  ",
+          FieldGenerationHelper.mapFields(ItemTags.class, TagKey.class, TagKey::location)
+            .map(f -> "public static final TagKey<ItemType> %s = register(\"%s\");".formatted(f.name(), f.value()))
             .toArray(String[]::new)));
     }
   }
@@ -97,12 +78,9 @@ public class TagsDataGenerator {
       var base = ResourceHelper.getResourceAsString("/templates/EntityTypeTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
-        String.join(
-          "\n  ",
-          generateTag(EntityTypeTags.class)
-            .map(
-              s ->
-                "public static final TagKey<EntityType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
+        String.join("\n  ",
+          FieldGenerationHelper.mapFields(EntityTypeTags.class, TagKey.class, TagKey::location)
+            .map(f -> "public static final TagKey<EntityType> %s = register(\"%s\");".formatted(f.name(), f.value()))
             .toArray(String[]::new)));
     }
   }
@@ -118,12 +96,9 @@ public class TagsDataGenerator {
       var base = ResourceHelper.getResourceAsString("/templates/FluidTags.java");
       return base.replace(
         GeneratorConstants.VALUES_REPLACE,
-        String.join(
-          "\n  ",
-          generateTag(FluidTags.class)
-            .map(
-              s ->
-                "public static final TagKey<FluidType> %s = register(\"%s\");".formatted(s.left(), s.right().toString()))
+        String.join("\n  ",
+          FieldGenerationHelper.mapFields(FluidTags.class, TagKey.class, TagKey::location)
+            .map(f -> "public static final TagKey<FluidType> %s = register(\"%s\");".formatted(f.name(), f.value()))
             .toArray(String[]::new)));
     }
   }

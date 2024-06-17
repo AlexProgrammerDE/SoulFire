@@ -17,11 +17,13 @@
  */
 package com.soulfiremc.generator.generators;
 
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import java.util.Locale;
-import java.util.Objects;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class AttributesJavaGenerator implements IDataGenerator {
   @Override
@@ -34,15 +36,9 @@ public class AttributesJavaGenerator implements IDataGenerator {
     var base = ResourceHelper.getResourceAsString("/templates/AttributeType.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
-      String.join(
-        "\n  ",
-        BuiltInRegistries.ATTRIBUTE.stream()
-          .map(
-            s -> {
-              var key =
-                Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getKey(s));
-              return "public static final AttributeType %s = register(\"%s\");".formatted(key.getPath().toUpperCase(Locale.ROOT).replace(".", "_"), key);
-            })
+      String.join("\n  ",
+        FieldGenerationHelper.mapFields(Attributes.class, Holder.class, h -> (Attribute) h.value())
+          .map(f -> "public static final AttributeType %s = register(\"%s\");".formatted(f.name(), BuiltInRegistries.ATTRIBUTE.getKey(f.value())))
           .toArray(String[]::new)));
   }
 }

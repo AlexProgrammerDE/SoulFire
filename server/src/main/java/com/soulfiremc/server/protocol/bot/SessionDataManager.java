@@ -572,10 +572,10 @@ public final class SessionDataManager {
 
     var attributeState = clientEntity.attributeState();
     attributeState
-      .getOrCreateAttribute(AttributeType.GENERIC_MOVEMENT_SPEED)
+      .getOrCreateAttribute(AttributeType.MOVEMENT_SPEED)
       .baseValue(abilitiesData.walkSpeed());
     attributeState
-      .getOrCreateAttribute(AttributeType.GENERIC_FLYING_SPEED)
+      .getOrCreateAttribute(AttributeType.FLYING_SPEED)
       .baseValue(abilitiesData.flySpeed());
 
     controlState.flying(abilitiesData.flying());
