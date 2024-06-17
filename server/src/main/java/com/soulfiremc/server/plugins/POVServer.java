@@ -569,8 +569,8 @@ public class POVServer implements InternalPlugin {
                 var dataManager = botConnection.dataManager();
 
                 session.send(new ClientboundStartConfigurationPacket());
-                awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
                 session.switchOutboundProtocol(() -> ((MinecraftProtocol) session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
+                awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
 
                 if (dataManager.serverEnabledFeatures() != null) {
                   session.send(

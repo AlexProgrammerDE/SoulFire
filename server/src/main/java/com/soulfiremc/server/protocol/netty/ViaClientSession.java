@@ -338,7 +338,7 @@ public class ViaClientSession extends TcpSession {
 
   @Override
   public void callPacketReceived(Packet packet) {
-    if (packet.isPriority()) {
+    if (packet.isTerminal()) {
       super.callPacketReceived(packet);
       return;
     }
@@ -347,7 +347,7 @@ public class ViaClientSession extends TcpSession {
       // Block or unlock packets for processing
       delimiterBlockProcessing = !delimiterBlockProcessing;
     } else {
-      packetTickQueue.add(packet);
+      super.callPacketReceived(packet);
     }
   }
 
