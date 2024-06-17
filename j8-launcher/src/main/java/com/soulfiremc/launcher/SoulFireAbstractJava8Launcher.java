@@ -22,10 +22,8 @@ public abstract class SoulFireAbstractJava8Launcher {
     } catch (UnsupportedClassVersionError e) {
       System.out.println("[SoulFire] SoulFire requires Java 21 or higher!");
       System.out.println("[SoulFire] Please update your Java version!");
-      System.out.println(
-        "[SoulFire] You are currently using Java " + System.getProperty("java.version"));
-      System.out.println(
-        "[SoulFire] You can download the latest version of Java at https://adoptopenjdk.net/");
+      System.out.println("[SoulFire] You are currently using Java " + System.getProperty("java.version"));
+      System.out.println("[SoulFire] You can download the latest version of Java at https://adoptopenjdk.net/");
 
       if (!GraphicsEnvironment.isHeadless() && args.length == 0) {
         try {

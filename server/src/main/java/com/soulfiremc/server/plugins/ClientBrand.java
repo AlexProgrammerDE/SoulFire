@@ -31,7 +31,6 @@ import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 
@@ -51,7 +50,6 @@ public class ClientBrand implements InternalPlugin {
         .getCodecHelper()
         .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
 
-      System.out.println(((MinecraftProtocol)connection.session().getPacketProtocol()).getOutboundState());
       connection
         .session()
         .send(new ServerboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, ByteBufUtil.getBytes(buf)));
