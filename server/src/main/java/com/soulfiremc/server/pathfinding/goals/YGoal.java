@@ -31,6 +31,6 @@ public record YGoal(int y) implements GoalScorer {
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return current.blockPosition().y == y;
+    return current.node().blockPosition().y == y;
   }
 }

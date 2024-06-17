@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
@@ -80,13 +79,6 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   public int getAllowedTicks() {
     // 3-seconds max to place a block
     return 3 * 20;
-  }
-
-  @Override
-  public BotEntityState simulate(BotEntityState state) {
-    return new BotEntityState(blockPlacePosition.add(0, 1, 0),
-      state.level().withChangeToSolidBlock(blockPlacePosition),
-      state.inventory().withOneLessBlock());
   }
 
   @Override

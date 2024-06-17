@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.DownMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.GraphAction;
@@ -27,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.ParkourMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.SimpleMovement;
 import com.soulfiremc.server.pathfinding.graph.actions.UpMovement;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
@@ -49,6 +51,7 @@ public record MinecraftGraph(TagsState tagsState,
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
+  private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
 
   static {
     var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, ObjectList<WrappedActionSubscription>>();
@@ -95,6 +98,10 @@ public record MinecraftGraph(TagsState tagsState,
     });
   }
 
+  public boolean doUsableBlocksDecreaseWhenPlaced() {
+    return !inventory.creativeModeBreak();
+  }
+
   public static boolean isBlockFree(BlockState blockState) {
     return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
   }
@@ -107,30 +114,30 @@ public record MinecraftGraph(TagsState tagsState,
     return !canBreakBlockPredicate.test(position);
   }
 
-  public void insertActions(
-    SFVec3i node, Consumer<GraphInstructions> callback, Predicate<SFVec3i> shouldIgnore) {
-    log.debug("Inserting actions for node: {}", node);
-    calculateActions(node, generateTemplateActions(node, shouldIgnore), callback);
+  public boolean disallowedToBreakType(BlockType blockType) {
+    if (!ALLOW_BREAKING_UNDIGGABLE) {
+      return !BlockTypeHelper.isDiggable(blockType);
+    }
+
+    return false;
   }
 
-  private GraphAction[] generateTemplateActions(SFVec3i node, Predicate<SFVec3i> shouldIgnore) {
+  public void insertActions(NodeState node, Consumer<GraphInstructions> callback) {
+    log.debug("Inserting actions for node: {}", node);
+    calculateActions(node, generateTemplateActions(), callback);
+  }
+
+  private GraphAction[] generateTemplateActions() {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
-      var action = ACTIONS_TEMPLATE[i];
-
-      // Do not calculate actions for blocks that should be ignored
-      if (shouldIgnore.test(action.relativeTargetFeetBlock().add(node))) {
-        continue;
-      }
-
-      actions[i] = action.copy();
+      actions[i] = ACTIONS_TEMPLATE[i].copy();
     }
 
     return actions;
   }
 
   private void calculateActions(
-    SFVec3i node,
+    NodeState node,
     GraphAction[] actions,
     Consumer<GraphInstructions> callback) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
@@ -139,7 +146,7 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   private void processSubscription(
-    SFVec3i node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+    NodeState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
     var key = SUBSCRIPTION_KEYS[i];
     var value = SUBSCRIPTION_VALUES[i];
 
@@ -156,7 +163,7 @@ public record MinecraftGraph(TagsState tagsState,
 
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
-        absolutePositionBlock = node.add(key);
+        absolutePositionBlock = node.blockPosition().add(key);
         blockState = level.getBlockState(absolutePositionBlock);
 
         if (blockState.blockType() == BlockType.VOID_AIR) {
@@ -175,7 +182,7 @@ public record MinecraftGraph(TagsState tagsState,
             continue;
           }
 
-          for (var instruction : action.getInstructions(node)) {
+          for (var instruction : action.getInstructions(this, node)) {
             callback.accept(instruction);
           }
         }

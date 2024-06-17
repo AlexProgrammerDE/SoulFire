@@ -18,17 +18,33 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 
 /**
- * Represents the state of the bot in the level. This means the positions and in the future also
- * inventory.
+ * Represents the minimal state we are in the Minecraft world.
  *
- * @param blockPosition The position of the bot in block coordinates. This is the block the bottom
- *                      of the bot is in, so the "feet" block.
- * @param level         The level state of the world the bot is in.
- * @param inventory     The inventory state of the bot.
  */
-public record BotEntityState(
-  SFVec3i blockPosition, ProjectedLevel level, ProjectedInventory inventory) {
+public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
+  public static NodeState forInfo(SFVec3i blockPosition, ProjectedInventory inventory) {
+    return new NodeState(blockPosition, inventory.usableBlockItems());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof NodeState nodeState)) {
+      return false;
+    }
+
+    return usableBlockItems == nodeState.usableBlockItems && blockPosition.equals(nodeState.blockPosition);
+  }
+
+  @Override
+  public int hashCode() {
+    var result = blockPosition.hashCode();
+    result = 31 * result + usableBlockItems;
+    return result;
+  }
 }

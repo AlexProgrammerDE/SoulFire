@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.pathfinding.BotEntityState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.MathHelper;
@@ -50,7 +49,10 @@ public final class MovementAction implements WorldAction {
       return false;
     } else {
       var halfDiagonal = clientEntity.boundingBox().diagonalXZLength() / 2;
-      return botPosition.distance(targetMiddleBlock) < halfDiagonal;
+
+      // Leave more space to allow falling
+      var adjustedHalfDiagonal = halfDiagonal - 0.05;
+      return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
     }
   }
 
@@ -112,13 +114,6 @@ public final class MovementAction implements WorldAction {
   public int getAllowedTicks() {
     // 5-seconds max to walk to a block
     return 5 * 20;
-  }
-
-  @Override
-  public BotEntityState simulate(BotEntityState state) {
-    return new BotEntityState(blockPosition,
-      state.level(),
-      state.inventory());
   }
 
   @Override

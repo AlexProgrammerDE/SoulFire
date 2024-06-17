@@ -21,17 +21,14 @@ import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
-import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
-import com.soulfiremc.server.pathfinding.graph.BlockFace;
+import com.soulfiremc.server.pathfinding.goals.BreakAnyBlockPosGoal;
 import com.soulfiremc.server.protocol.BotConnection;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.math.vector.Vector3i;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,62 +38,48 @@ public class CollectBlockController {
   private final int maxRadius;
   private int collectedAmount;
 
-  public static Optional<Vector3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker,
-                                                             int iterations) {
+  public static Set<SFVec3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker, int radius) {
     var clientEntity = botConnection.dataManager().clientEntity();
-    var clientPosition = clientEntity.pos().toInt();
     var level = clientEntity.level();
-    var checkedPositions = new HashSet<Vector3i>();
-    var blockCheckQueue = new LinkedBlockingQueue<Vector3i>();
-    blockCheckQueue.add(clientPosition);
+    var rootPosition = SFVec3i.fromInt(clientEntity.pos().toInt());
 
-    while (iterations-- > 0) {
-      for (var i = 0; i < blockCheckQueue.size(); i++) {
-        var blockPos = blockCheckQueue.poll();
-        if (blockPos == null) {
-          break;
-        }
+    var list = new HashSet<SFVec3i>();
+    for (var y = -radius; y <= radius; y++) {
+      if (level.isOutsideBuildHeight(rootPosition.y + y)) {
+        continue;
+      }
 
-        var blockState = level.getBlockState(blockPos);
-        if (checker.test(blockState)) {
-          return Optional.of(blockPos);
-        }
-
-        if (blockState.blockType() == BlockType.VOID_AIR) {
-          continue;
-        }
-
-        for (var offset : BlockFace.VALUES) {
-          var nextPos = offset.offset(blockPos);
-          if (level.isOutsideBuildHeight(nextPos.getY())) {
+      for (var x = -radius; x <= radius; x++) {
+        for (var z = -radius; z <= radius; z++) {
+          var blockPos = rootPosition.add(x, y, z);
+          var blockState = level.getBlockState(blockPos);
+          if (blockState.blockType() == BlockType.VOID_AIR) {
             continue;
           }
 
-          if (checkedPositions.contains(nextPos)) {
-            continue;
+          if (checker.test(blockState)) {
+            list.add(blockPos);
           }
-
-          checkedPositions.add(nextPos);
-          blockCheckQueue.add(nextPos);
         }
       }
     }
 
-    return Optional.empty();
+    return list;
   }
 
   public void start(BotConnection bot) {
     while (collectedAmount < requestedAmount) {
-      log.info("Searching for block to collect");
-      var blockPos =
-        searchWithinRadiusLayered(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius)
-          .orElseThrow(
-            () -> new IllegalStateException("Could not find matching block within radius " + maxRadius));
+      log.info("Searching for blocks to collect");
+      var blockPos = searchWithinRadiusLayered(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius);
 
-      log.info("Found block to collect at {}", blockPos);
+      if (blockPos.isEmpty()) {
+        throw new IllegalStateException("Could not find matching block within radius " + maxRadius);
+      }
+
+      log.info("Found {} possible blocks to collect", blockPos.size());
 
       var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new BreakBlockPosGoal(SFVec3i.fromInt(blockPos)), pathFuture);
+      PathExecutor.executePathfinding(bot, new BreakAnyBlockPosGoal(blockPos), pathFuture);
 
       try {
         pathFuture.get();

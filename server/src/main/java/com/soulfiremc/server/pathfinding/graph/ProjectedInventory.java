@@ -24,6 +24,7 @@ import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.util.ItemTypeHelper;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -48,16 +49,25 @@ public class ProjectedInventory {
   @ToString.Include
   private final SFItemStack[] usableToolsAndNull;
   private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
+  private final ClientEntity entity;
+  private final PlayerInventoryContainer playerInventory;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory) {
+  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
         .filter(item -> item != null && item.getAmount() > 0)
-        .toList());
+        .toList(), entity, playerInventory);
   }
 
   public ProjectedInventory(List<SFItemStack> items) {
+    this(items, null, null);
+  }
+
+  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory) {
+    this.entity = entity;
+    this.playerInventory = playerInventory;
+
     var blockItems = 0;
     var usableToolsAndNull = new HashSet<SFItemStack>();
 
@@ -79,20 +89,12 @@ public class ProjectedInventory {
     this.sharedMiningCosts = new ConcurrentHashMap<>();
   }
 
-  public ProjectedInventory withOneLessBlock() {
-    return new ProjectedInventory(usableBlockItems - 1, usableToolsAndNull, sharedMiningCosts);
-  }
-
-  public ProjectedInventory withOneMoreBlock() {
-    return new ProjectedInventory(usableBlockItems + 1, usableToolsAndNull, sharedMiningCosts);
-  }
-
-  public boolean isValid() {
-    return usableBlockItems >= 0;
+  public boolean creativeModeBreak() {
+    return entity != null && entity.abilities().creativeModeBreak();
   }
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
     return sharedMiningCosts.computeIfAbsent(
-      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, this, type));
+      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, entity, playerInventory, this, type));
   }
 }

@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
@@ -373,12 +373,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetFeetBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
       return Collections.emptyList();
     }
@@ -388,6 +383,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
 
+    var usableBlockItemsDiff = 0;
     var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
     if (blockBreakCosts != null) {
       for (var breakCost : blockBreakCosts) {
@@ -397,21 +393,33 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
         cost += breakCost.miningCost();
         actions.add(new BlockBreakAction(breakCost));
+
+        if (breakCost.willDropUsableBlockItem()) {
+          usableBlockItemsDiff++;
+        }
       }
     }
 
-    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
+    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
+    var afterBreakUsableBlockItems = node.usableBlockItems() + usableBlockItemsDiff;
 
     if (requiresAgainstBlock) {
+      if (afterBreakUsableBlockItems < 1) {
+        return Collections.emptyList();
+      } else if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+        // After the place we'll have one less usable block item
+        afterBreakUsableBlockItems--;
+        cost += Costs.PLACE_BLOCK;
+      }
+
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
-      cost += Costs.PLACE_BLOCK;
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
     }
 
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock, cost, actions));
+      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems), cost, actions));
   }
 
   @Override
@@ -482,12 +490,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
             || !simpleMovement.allowBlockActions()
-            // Narrow this down to blocks that can be broken
-            || !BlockTypeHelper.isDiggable(blockState.blockType())
+            || graph.disallowedToBreakType(blockState.blockType())
             // Check if we previously found out this block is unsafe to break
-            || simpleMovement.unsafeToBreak()[blockArrayIndex]
-            // Narrows the list down to a reasonable size
-            || !BlockItems.hasItemType(blockState.blockType())) {
+            || simpleMovement.unsafeToBreak()[blockArrayIndex]) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
@@ -498,7 +503,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             new MovementMiningCost(
               absoluteKey,
               cacheableMiningCost.miningCost(),
-              cacheableMiningCost.willDrop(),
+              cacheableMiningCost.willDropUsableBlockItem(),
               blockBreakSideHint);
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }

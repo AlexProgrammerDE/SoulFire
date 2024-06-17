@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -162,12 +162,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public SFVec3i relativeTargetFeetBlock() {
-    return targetToMineBlock;
-  }
-
-  @Override
-  public List<GraphInstructions> getInstructions(SFVec3i node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
     if (closestBlockToFallOn == Integer.MIN_VALUE || closestObstructingBlock > closestBlockToFallOn) {
       return Collections.emptyList();
     }
@@ -184,10 +179,10 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     cost += breakCost.miningCost();
 
-    var absoluteTargetFeetBlock = node.add(0, closestBlockToFallOn + 1, 0);
+    var absoluteTargetFeetBlock = node.blockPosition().add(0, closestBlockToFallOn + 1, 0);
 
     return Collections.singletonList(new GraphInstructions(
-      absoluteTargetFeetBlock,
+      new NodeState(absoluteTargetFeetBlock, node.usableBlockItems() + (breakCost.willDropUsableBlockItem() ? 1 : 0)),
       cost,
       List.of(new BlockBreakAction(breakCost))));
   }
@@ -232,9 +227,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (graph.disallowedToBreakBlock(absoluteKey)
-            || !BlockTypeHelper.isDiggable(blockState.blockType())
-            // Narrows the list down to a reasonable size
-            || !BlockItems.hasItemType(blockState.blockType())) {
+            || graph.disallowedToBreakType(blockState.blockType())) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
@@ -245,7 +238,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
             new MovementMiningCost(
               absoluteKey,
               cacheableMiningCost.miningCost(),
-              cacheableMiningCost.willDrop(),
+              cacheableMiningCost.willDropUsableBlockItem(),
               blockBreakSideHint));
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }

@@ -23,17 +23,19 @@ import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import java.util.List;
+import java.util.Set;
 
-public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
+public record BreakAnyBlockPosGoal(Set<SFVec3i> goals) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return blockPosition.distance(goal);
+    return goals.stream().mapToDouble(blockPosition::distance)
+      .min().orElseThrow(() -> new IllegalStateException("No goals provided"));
   }
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
     for (var action : current.actions()) {
-      if (action instanceof BlockBreakAction breakBlockAction && breakBlockAction.blockPosition().equals(goal)) {
+      if (action instanceof BlockBreakAction breakBlockAction && goals.contains(breakBlockAction.blockPosition())) {
         return true;
       }
     }

@@ -35,6 +35,6 @@ public record PosGoal(SFVec3i goal) implements GoalScorer {
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return current.blockPosition().equals(goal);
+    return current.node().blockPosition().equals(goal);
   }
 }
