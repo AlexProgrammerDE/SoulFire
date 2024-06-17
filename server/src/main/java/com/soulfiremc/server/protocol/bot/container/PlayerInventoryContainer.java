@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
-import com.soulfiremc.server.data.EnchantmentType;
 import com.soulfiremc.server.data.EquipmentSlot;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -138,26 +137,5 @@ public class PlayerInventoryContainer extends Container {
     }
 
     return Optional.empty();
-  }
-
-  public boolean hasEnchantment(EnchantmentType enchantmentType) {
-    return getEnchantmentLevel(enchantmentType) > 0;
-  }
-
-  public int getEnchantmentLevel(EnchantmentType enchantmentType) {
-    var highestLevel = 0;
-    for (var equipmentSlot : enchantmentType.slots()) {
-      var item = getEquipmentSlot(equipmentSlot).item();
-      if (item == null) {
-        continue;
-      }
-
-      var level = item.getEnchantmentLevel(enchantmentType);
-      if (level > highestLevel) {
-        highestLevel = level;
-      }
-    }
-
-    return highestLevel;
   }
 }

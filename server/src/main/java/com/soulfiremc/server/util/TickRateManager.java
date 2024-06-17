@@ -58,12 +58,12 @@ public class TickRateManager {
     return this.frozenTicksToRun;
   }
 
-  public void setFrozen(boolean frozen) {
-    this.isFrozen = frozen;
-  }
-
   public boolean isFrozen() {
     return this.isFrozen;
+  }
+
+  public void setFrozen(boolean frozen) {
+    this.isFrozen = frozen;
   }
 
   public void tick() {

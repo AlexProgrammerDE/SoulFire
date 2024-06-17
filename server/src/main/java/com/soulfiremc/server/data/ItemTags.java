@@ -121,7 +121,6 @@ public class ItemTags {
   public static final TagKey<ItemType> CHEST_BOATS = register("minecraft:chest_boats");
   public static final TagKey<ItemType> FISHES = register("minecraft:fishes");
   public static final TagKey<ItemType> SIGNS = register("minecraft:signs");
-  public static final TagKey<ItemType> MUSIC_DISCS = register("minecraft:music_discs");
   public static final TagKey<ItemType> CREEPER_DROP_MUSIC_DISCS = register("minecraft:creeper_drop_music_discs");
   public static final TagKey<ItemType> COALS = register("minecraft:coals");
   public static final TagKey<ItemType> ARROWS = register("minecraft:arrows");

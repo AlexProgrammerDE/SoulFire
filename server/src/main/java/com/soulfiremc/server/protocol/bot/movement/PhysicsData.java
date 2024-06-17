@@ -17,11 +17,18 @@
  */
 package com.soulfiremc.server.protocol.bot.movement;
 
-import java.util.UUID;
+import com.soulfiremc.server.data.Attribute;
+import com.soulfiremc.server.data.ModifierOperation;
 import lombok.Data;
+import net.kyori.adventure.key.Key;
 
 @Data
 public class PhysicsData {
+  // From LivingEntity.java
+  public static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
+  public static final Attribute.Modifier SPEED_MODIFIER_SPRINTING = new Attribute.Modifier(
+    SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
+  );
   public double gravity = 0.08;
   public float airdrag = 0.98F;
   public double sprintSpeed = 0.3F;
@@ -42,8 +49,6 @@ public class PhysicsData {
   public BubbleColumnDrag bubbleColumnSurfaceDrag = new BubbleColumnDrag(0.03, -0.9, 0.1, 1.8);
   public BubbleColumnDrag bubbleColumnDrag = new BubbleColumnDrag(0.03, -0.3, 0.06, 0.7);
   public double slowFalling = 0.125;
-  // SPEED_MODIFIER_SPRINTING_UUID is from LivingEntity.java
-  public UUID sprintingUUID = UUID.fromString("662a6b8d-da3e-4c1c-8813-96ea6097278d");
   public double waterGravity = gravity / 16;
   public double lavaGravity = gravity / 4;
 }

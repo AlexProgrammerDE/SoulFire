@@ -58,8 +58,8 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
-import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
+import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.util.TickTimer;
@@ -92,9 +92,11 @@ import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
 import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
+import org.geysermc.mcprotocollib.protocol.data.game.Holder;
 import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
 import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.ResourcePackStatus;
+import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatType;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
@@ -195,14 +197,13 @@ public final class SessionDataManager {
   private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new HashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
-  private final Registry<ChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
+  private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final InventoryManager inventoryManager;
   private final BotActionManager botActionManager;
   private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
-  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private ClientEntity clientEntity;
@@ -216,6 +217,7 @@ public final class SessionDataManager {
   private boolean enableRespawnScreen;
   private boolean doLimitedCrafting;
   private Level level;
+  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private int serverViewDistance = -1;
   private int serverSimulationDistance = -1;
   private @Nullable GlobalPos lastDeathPos;
@@ -238,17 +240,6 @@ public final class SessionDataManager {
     this.botActionManager = new BotActionManager(this, connection);
   }
 
-  private float getTickTargetMillis(float defaultValue) {
-    if (this.level != null) {
-      var lv = this.level.tickRateManager();
-      if (lv.runsNormally()) {
-        return Math.max(defaultValue, lv.millisecondsPerTick());
-      }
-    }
-
-    return defaultValue;
-  }
-
   private static String toPlainText(Component component) {
     return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
   }
@@ -265,6 +256,17 @@ public final class SessionDataManager {
     }
 
     return list;
+  }
+
+  private float getTickTargetMillis(float defaultValue) {
+    if (this.level != null) {
+      var lv = this.level.tickRateManager();
+      if (lv.runsNormally()) {
+        return Math.max(defaultValue, lv.millisecondsPerTick());
+      }
+    }
+
+    return defaultValue;
   }
 
   @EventHandler
@@ -294,7 +296,7 @@ public final class SessionDataManager {
     } else if (registryKey.equals(RegistryKeys.BIOME)) {
       registryWriter = biomeRegistry.writer(Biome::new);
     } else if (registryKey.equals(RegistryKeys.CHAT_TYPE)) {
-      registryWriter = chatTypeRegistry.writer(ChatType::new);
+      registryWriter = chatTypeRegistry.writer(SFChatType::new);
     } else {
       log.debug("Received registry data for unknown registry {}", registryKey);
       return;
@@ -474,7 +476,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPlayerChat(ClientboundPlayerChatPacket packet) {
-    onChat(packet.getTimeStamp(), prepareChatTypeMessage(packet.getChatType(), new ChatType.BoundChatMessageInfo(
+    onChat(packet.getTimeStamp(), prepareChatTypeMessage(packet.getChatType(), new SFChatType.BoundChatMessageInfo(
       getComponentForPlayerChat(packet),
       packet.getName(),
       packet.getTargetName()
@@ -488,7 +490,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onDisguisedChat(ClientboundDisguisedChatPacket packet) {
-    onChat(System.currentTimeMillis(), prepareChatTypeMessage(packet.getChatType(), new ChatType.BoundChatMessageInfo(
+    onChat(System.currentTimeMillis(), prepareChatTypeMessage(packet.getChatType(), new SFChatType.BoundChatMessageInfo(
       packet.getMessage(),
       packet.getName(),
       packet.getTargetName()
@@ -496,16 +498,11 @@ public final class SessionDataManager {
   }
 
   public Component getComponentForPlayerChat(ClientboundPlayerChatPacket packet) {
-    var message = packet.getUnsignedContent();
-    if (message == null) {
-      message = Component.text(packet.getContent());
-    }
-
-    return message;
+    return Objects.requireNonNullElseGet(packet.getUnsignedContent(), () -> Component.text(packet.getContent()));
   }
 
-  public Component prepareChatTypeMessage(int chatType, ChatType.BoundChatMessageInfo chatInfo) {
-    return chatTypeRegistry.getById(chatType).buildComponent(chatInfo);
+  public Component prepareChatTypeMessage(Holder<ChatType> chatTypeHolder, SFChatType.BoundChatMessageInfo chatInfo) {
+    return SFChatType.buildChatComponent(chatTypeHolder.getOrCompute(id -> chatTypeRegistry.getById(id).mcplChatType()), chatInfo);
   }
 
   private void onChat(long stamp, Component message) {
@@ -940,14 +937,14 @@ public final class SessionDataManager {
             .map(
               modifier ->
                 new Attribute.Modifier(
-                  modifier.getUuid(),
+                  modifier.getId(),
                   modifier.getAmount(),
                   switch (modifier.getOperation()) {
                     case ADD -> ModifierOperation.ADD_VALUE;
                     case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
                     case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
                   }))
-            .collect(Collectors.toMap(Attribute.Modifier::uuid, Function.identity())));
+            .collect(Collectors.toMap(Attribute.Modifier::id, Function.identity())));
     }
   }
 

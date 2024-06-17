@@ -36,7 +36,7 @@ import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
-import com.soulfiremc.server.protocol.bot.state.registry.ChatType;
+import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -176,69 +176,6 @@ public class POVServer implements InternalPlugin {
   @EventHandler
   public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(POVServerSettings.class, "POV Server");
-  }
-
-  @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(POVServer.class);
-    SoulFireAPI.registerListener(
-      AttackInitEvent.class,
-      event -> {
-        var attackManager = event.attackManager();
-        var settingsHolder = attackManager.settingsHolder();
-        if (!settingsHolder.get(POVServerSettings.ENABLED)) {
-          return;
-        }
-
-        var freePort =
-          PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
-        var serverInstance = startPOVServer(settingsHolder, freePort, attackManager);
-        log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
-
-        EventUtil.runAndAssertChanged(attackManager.eventBus(), () -> PluginHelper.registerSafeEventConsumer(
-          attackManager.eventBus(),
-          AttackEndedEvent.class,
-          e -> {
-            log.info("Stopping POV server for attack {}", attackManager.id());
-            serverInstance.close();
-          }));
-      });
-  }
-
-  @NoArgsConstructor(access = AccessLevel.NONE)
-  private static class POVServerSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("pov-server");
-    public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable POV server",
-        new String[] {"--pov-server"},
-        "Host a POV server for the bots",
-        false);
-    public static final IntProperty PORT_START =
-      BUILDER.ofInt(
-        "port-start",
-        "Port Start",
-        new String[] {"--port-start"},
-        "What port to start with to host the POV server",
-        31765,
-        1,
-        65535,
-        1);
-    public static final BooleanProperty ENABLE_COMMANDS =
-      BUILDER.ofBoolean(
-        "enable-commands",
-        "Enable commands",
-        new String[] {"--pov-enable-commands"},
-        "Allow users connected to the POV server to execute commands in the SF server shell",
-        true);
-    public static final StringProperty COMMAND_PREFIX =
-      BUILDER.ofString(
-        "command-prefix",
-        "Command Prefix",
-        new String[] {"--pov-command-prefix"},
-        "The prefix to use for commands executed in the SF server shell",
-        "#");
   }
 
   private static GameProfile getFakePlayerListEntry(Component text) {
@@ -430,7 +367,7 @@ public class POVServer implements InternalPlugin {
 
                             if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
                               // To avoid signature issues since the signature is for the bot, not the connected user
-                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new ChatType.BoundChatMessageInfo(
+                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
                                 botConnection.dataManager().getComponentForPlayerChat(chatPacket),
                                 chatPacket.getName(),
                                 chatPacket.getTargetName()
@@ -633,8 +570,7 @@ public class POVServer implements InternalPlugin {
 
                 session.send(new ClientboundStartConfigurationPacket());
                 awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
-                ((MinecraftProtocol) session.getPacketProtocol())
-                  .setState(ProtocolState.CONFIGURATION);
+                session.switchOutboundProtocol(() -> ((MinecraftProtocol)session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
 
                 if (dataManager.serverEnabledFeatures() != null) {
                   session.send(
@@ -656,9 +592,6 @@ public class POVServer implements InternalPlugin {
 
                 session.send(new ClientboundFinishConfigurationPacket());
                 awaitReceived(ServerboundFinishConfigurationPacket.class);
-
-                ((MinecraftProtocol) session.getPacketProtocol())
-                  .setState(ProtocolState.GAME);
 
                 var spawnInfo =
                   new PlayerSpawnInfo(
@@ -1007,7 +940,7 @@ public class POVServer implements InternalPlugin {
                                 .map(
                                   modifier ->
                                     new AttributeModifier(
-                                      modifier.uuid(),
+                                      modifier.id(),
                                       modifier.amount(),
                                       switch (modifier.operation()) {
                                         case ADD_VALUE -> ModifierOperation.ADD;
@@ -1030,6 +963,69 @@ public class POVServer implements InternalPlugin {
     server.bind();
 
     return server;
+  }
+
+  @Override
+  public void onLoad() {
+    SoulFireAPI.registerListeners(POVServer.class);
+    SoulFireAPI.registerListener(
+      AttackInitEvent.class,
+      event -> {
+        var attackManager = event.attackManager();
+        var settingsHolder = attackManager.settingsHolder();
+        if (!settingsHolder.get(POVServerSettings.ENABLED)) {
+          return;
+        }
+
+        var freePort =
+          PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
+        var serverInstance = startPOVServer(settingsHolder, freePort, attackManager);
+        log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
+
+        EventUtil.runAndAssertChanged(attackManager.eventBus(), () -> PluginHelper.registerSafeEventConsumer(
+          attackManager.eventBus(),
+          AttackEndedEvent.class,
+          e -> {
+            log.info("Stopping POV server for attack {}", attackManager.id());
+            serverInstance.close();
+          }));
+      });
+  }
+
+  @NoArgsConstructor(access = AccessLevel.NONE)
+  private static class POVServerSettings implements SettingsObject {
+    private static final Property.Builder BUILDER = Property.builder("pov-server");
+    public static final BooleanProperty ENABLED =
+      BUILDER.ofBoolean(
+        "enabled",
+        "Enable POV server",
+        new String[] {"--pov-server"},
+        "Host a POV server for the bots",
+        false);
+    public static final IntProperty PORT_START =
+      BUILDER.ofInt(
+        "port-start",
+        "Port Start",
+        new String[] {"--port-start"},
+        "What port to start with to host the POV server",
+        31765,
+        1,
+        65535,
+        1);
+    public static final BooleanProperty ENABLE_COMMANDS =
+      BUILDER.ofBoolean(
+        "enable-commands",
+        "Enable commands",
+        new String[] {"--pov-enable-commands"},
+        "Allow users connected to the POV server to execute commands in the SF server shell",
+        true);
+    public static final StringProperty COMMAND_PREFIX =
+      BUILDER.ofString(
+        "command-prefix",
+        "Command Prefix",
+        new String[] {"--pov-command-prefix"},
+        "The prefix to use for commands executed in the SF server shell",
+        "#");
   }
 
   private record PovServerUser(Session session, String username) implements ServerCommandSource {

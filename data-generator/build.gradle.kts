@@ -18,12 +18,11 @@ dependencies {
 }
 
 unimined.minecraft {
-  version("1.20.6")
+  version("1.21")
 
   mappings {
     intermediary()
     mojmap()
-    parchment("1.20.6", "2024.05.01")
 
     devFallbackNamespace("intermediary")
   }

@@ -25,8 +25,11 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import net.kyori.adventure.text.Component;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.crypt.AESEncryption;
 import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -62,6 +65,7 @@ public class SFBaseListener extends SessionAdapter {
   private final BotConnection botConnection;
   private final @NonNull ProtocolState targetState;
 
+  @SneakyThrows
   @Override
   public void packetReceived(Session session, Packet packet) {
     if (!(session instanceof ViaClientSession viaSession)) {
@@ -69,7 +73,7 @@ public class SFBaseListener extends SessionAdapter {
     }
 
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
-    if (protocol.getState() == ProtocolState.LOGIN) {
+    if (protocol.getInboundState() == ProtocolState.LOGIN) {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
         var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
@@ -107,29 +111,34 @@ public class SFBaseListener extends SessionAdapter {
           botConnection.joinServerId(serverId, viaSession);
         }
 
-        session.send(
-          new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge()));
+        var keyPacket = new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge());
 
-        if (!isLegacy) { // Legacy encryption is handled in SFViaEncryptionProvider
-          viaSession.enableJavaEncryption(key);
+        if (!isLegacy) {
+          var encryption = new AESEncryption(key);
+          session.send(keyPacket, () -> session.enableEncryption(encryption));
         } else {
           botConnection.logger().debug("Storing legacy secret key.");
           session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
         }
       } else if (packet instanceof ClientboundGameProfilePacket) {
+        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
         session.send(new ServerboundLoginAcknowledgedPacket());
+        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+
+        // Send client brand here
+        // Send client information here
       } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
         session.disconnect(loginDisconnectPacket.getReason());
       } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
-        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold());
+        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold(), true);
       }
-    } else if (protocol.getState() == ProtocolState.STATUS) {
+    } else if (protocol.getInboundState() == ProtocolState.STATUS) {
       if (packet instanceof ClientboundStatusResponsePacket) {
         session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
       } else if (packet instanceof ClientboundPongResponsePacket) {
-        session.disconnect("Finished");
+        session.disconnect(Component.translatable("multiplayer.status.finished"));
       }
-    } else if (protocol.getState() == ProtocolState.GAME) {
+    } else if (protocol.getInboundState() == ProtocolState.GAME) {
       if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket) {
         session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
       } else if (packet instanceof ClientboundPingPacket pingPacket) {
@@ -137,11 +146,15 @@ public class SFBaseListener extends SessionAdapter {
       } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
         session.disconnect(disconnectPacket.getReason());
       } else if (packet instanceof ClientboundStartConfigurationPacket) {
+        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
         session.send(new ServerboundConfigurationAcknowledgedPacket());
+        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
       }
-    } else if (protocol.getState() == ProtocolState.CONFIGURATION) {
+    } else if (protocol.getInboundState() == ProtocolState.CONFIGURATION) {
       if (packet instanceof ClientboundFinishConfigurationPacket) {
+        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.GAME));
         session.send(new ServerboundFinishConfigurationPacket());
+        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.GAME));
       } else if (packet instanceof ClientboundSelectKnownPacks selectKnownPacks) {
         session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
           .getMatchingPacks(selectKnownPacks.getKnownPacks())));
@@ -150,38 +163,32 @@ public class SFBaseListener extends SessionAdapter {
   }
 
   @Override
-  public void packetSent(Session session, Packet packet) {
+  public void connected(ConnectedEvent event) {
+    var originalAddress = botConnection.resolvedAddress().originalAddress();
+    var session = event.getSession();
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
-    if (packet instanceof ClientIntentionPacket) {
-      // Once the HandshakePacket has been sent, switch to the next protocol mode.
-      protocol.setState(this.targetState);
+    var intention = new ClientIntentionPacket(protocol.getCodec().getProtocolVersion(),
+      originalAddress.host(),
+      originalAddress.port(),
+      switch (this.targetState) {
+        case LOGIN -> HandshakeIntent.LOGIN;
+        case STATUS -> HandshakeIntent.STATUS;
+        default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
+      });
 
-      if (this.targetState == ProtocolState.LOGIN) {
-        session.send(
-          new ServerboundHelloPacket(
-            botConnection.accountName(), botConnection.accountProfileId()));
-      } else {
+    switch (this.targetState) {
+      case LOGIN -> {
+        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.LOGIN));
+        session.send(intention);
+        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.LOGIN));
+        session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
+      }
+      case STATUS -> {
+        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.STATUS));
+        session.send(intention);
+        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.STATUS));
         session.send(new ServerboundStatusRequestPacket());
       }
     }
-  }
-
-  @Override
-  public void connected(ConnectedEvent event) {
-    var protocol = (MinecraftProtocol) event.getSession().getPacketProtocol();
-    var originalAddress = botConnection.resolvedAddress().originalAddress();
-
-    event
-      .getSession()
-      .send(
-        new ClientIntentionPacket(
-          protocol.getCodec().getProtocolVersion(),
-          originalAddress.host(),
-          originalAddress.port(),
-          switch (this.targetState) {
-            case LOGIN -> HandshakeIntent.LOGIN;
-            case STATUS -> HandshakeIntent.STATUS;
-            default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
-          }));
   }
 }

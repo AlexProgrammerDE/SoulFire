@@ -39,7 +39,11 @@ public class RegistryKeys {
   public static final ResourceKey<?> CUSTOM_STAT = ResourceKey.key("minecraft:custom_stat");
   public static final ResourceKey<?> DAMAGE_TYPE = ResourceKey.key("minecraft:damage_type");
   public static final ResourceKey<?> DENSITY_FUNCTION_TYPE = ResourceKey.key("minecraft:worldgen/density_function_type");
-  public static final ResourceKey<?> ENCHANTMENT = ResourceKey.key("minecraft:enchantment");
+  public static final ResourceKey<?> ENCHANTMENT_ENTITY_EFFECT_TYPE = ResourceKey.key("minecraft:enchantment_entity_effect_type");
+  public static final ResourceKey<?> ENCHANTMENT_LEVEL_BASED_VALUE_TYPE = ResourceKey.key("minecraft:enchantment_level_based_value_type");
+  public static final ResourceKey<?> ENCHANTMENT_LOCATION_BASED_EFFECT_TYPE = ResourceKey.key("minecraft:enchantment_location_based_effect_type");
+  public static final ResourceKey<?> ENCHANTMENT_PROVIDER_TYPE = ResourceKey.key("minecraft:enchantment_provider_type");
+  public static final ResourceKey<?> ENCHANTMENT_VALUE_EFFECT_TYPE = ResourceKey.key("minecraft:enchantment_value_effect_type");
   public static final ResourceKey<?> ENTITY_TYPE = ResourceKey.key("minecraft:entity_type");
   public static final ResourceKey<?> FEATURE = ResourceKey.key("minecraft:worldgen/feature");
   public static final ResourceKey<?> FEATURE_SIZE_TYPE = ResourceKey.key("minecraft:worldgen/feature_size_type");
@@ -52,6 +56,7 @@ public class RegistryKeys {
   public static final ResourceKey<?> INSTRUMENT = ResourceKey.key("minecraft:instrument");
   public static final ResourceKey<?> INT_PROVIDER_TYPE = ResourceKey.key("minecraft:int_provider_type");
   public static final ResourceKey<?> ITEM = ResourceKey.key("minecraft:item");
+  public static final ResourceKey<?> JUKEBOX_SONG = ResourceKey.key("minecraft:jukebox_song");
   public static final ResourceKey<?> LOOT_CONDITION_TYPE = ResourceKey.key("minecraft:loot_condition_type");
   public static final ResourceKey<?> LOOT_FUNCTION_TYPE = ResourceKey.key("minecraft:loot_function_type");
   public static final ResourceKey<?> LOOT_NBT_PROVIDER_TYPE = ResourceKey.key("minecraft:loot_nbt_provider_type");
@@ -89,19 +94,22 @@ public class RegistryKeys {
   public static final ResourceKey<?> TRUNK_PLACER_TYPE = ResourceKey.key("minecraft:worldgen/trunk_placer_type");
   public static final ResourceKey<?> VILLAGER_PROFESSION = ResourceKey.key("minecraft:villager_profession");
   public static final ResourceKey<?> VILLAGER_TYPE = ResourceKey.key("minecraft:villager_type");
-  public static final ResourceKey<?> DECORATED_POT_PATTERNS = ResourceKey.key("minecraft:decorated_pot_patterns");
+  public static final ResourceKey<?> DECORATED_POT_PATTERN = ResourceKey.key("minecraft:decorated_pot_pattern");
   public static final ResourceKey<?> NUMBER_FORMAT_TYPE = ResourceKey.key("minecraft:number_format_type");
   public static final ResourceKey<?> ARMOR_MATERIAL = ResourceKey.key("minecraft:armor_material");
   public static final ResourceKey<?> DATA_COMPONENT_TYPE = ResourceKey.key("minecraft:data_component_type");
   public static final ResourceKey<?> ENTITY_SUB_PREDICATE_TYPE = ResourceKey.key("minecraft:entity_sub_predicate_type");
   public static final ResourceKey<?> ITEM_SUB_PREDICATE_TYPE = ResourceKey.key("minecraft:item_sub_predicate_type");
   public static final ResourceKey<?> MAP_DECORATION_TYPE = ResourceKey.key("minecraft:map_decoration_type");
+  public static final ResourceKey<?> ENCHANTMENT_EFFECT_COMPONENT_TYPE = ResourceKey.key("minecraft:enchantment_effect_component_type");
   public static final ResourceKey<?> BIOME = ResourceKey.key("minecraft:worldgen/biome");
   public static final ResourceKey<?> CHAT_TYPE = ResourceKey.key("minecraft:chat_type");
   public static final ResourceKey<?> CONFIGURED_CARVER = ResourceKey.key("minecraft:worldgen/configured_carver");
   public static final ResourceKey<?> CONFIGURED_FEATURE = ResourceKey.key("minecraft:worldgen/configured_feature");
   public static final ResourceKey<?> DENSITY_FUNCTION = ResourceKey.key("minecraft:worldgen/density_function");
   public static final ResourceKey<?> DIMENSION_TYPE = ResourceKey.key("minecraft:dimension_type");
+  public static final ResourceKey<?> ENCHANTMENT = ResourceKey.key("minecraft:enchantment");
+  public static final ResourceKey<?> ENCHANTMENT_PROVIDER = ResourceKey.key("minecraft:enchantment_provider");
   public static final ResourceKey<?> FLAT_LEVEL_GENERATOR_PRESET = ResourceKey.key("minecraft:worldgen/flat_level_generator_preset");
   public static final ResourceKey<?> NOISE_SETTINGS = ResourceKey.key("minecraft:worldgen/noise_settings");
   public static final ResourceKey<?> NOISE = ResourceKey.key("minecraft:worldgen/noise");
@@ -120,6 +128,8 @@ public class RegistryKeys {
   public static final ResourceKey<?> LOOT_TABLE = ResourceKey.key("minecraft:loot_table");
   public static final ResourceKey<?> ITEM_MODIFIER = ResourceKey.key("minecraft:item_modifier");
   public static final ResourceKey<?> PREDICATE = ResourceKey.key("minecraft:predicate");
+  public static final ResourceKey<?> ADVANCEMENT = ResourceKey.key("minecraft:advancement");
+  public static final ResourceKey<?> RECIPE = ResourceKey.key("minecraft:recipe");
   //@formatter:on
 
   private RegistryKeys() {}

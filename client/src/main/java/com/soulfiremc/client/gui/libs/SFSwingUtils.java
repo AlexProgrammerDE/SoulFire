@@ -127,11 +127,11 @@ public class SFSwingUtils {
 
   public static void addButtonPressAction(JButton button, Runnable action) {
     button.addMouseListener(new MouseAdapter() {
-        @Override
-        public void mousePressed(MouseEvent e) {
-          action.run();
-          e.consume();
-        }
-      });
+      @Override
+      public void mousePressed(MouseEvent e) {
+        action.run();
+        e.consume();
+      }
+    });
   }
 }

@@ -34,6 +34,7 @@ public class BlockTags {
   public static final TagKey<BlockType> BUTTONS = register("minecraft:buttons");
   public static final TagKey<BlockType> WOOL_CARPETS = register("minecraft:wool_carpets");
   public static final TagKey<BlockType> WOODEN_DOORS = register("minecraft:wooden_doors");
+  public static final TagKey<BlockType> MOB_INTERACTABLE_DOORS = register("minecraft:mob_interactable_doors");
   public static final TagKey<BlockType> WOODEN_STAIRS = register("minecraft:wooden_stairs");
   public static final TagKey<BlockType> WOODEN_SLABS = register("minecraft:wooden_slabs");
   public static final TagKey<BlockType> WOODEN_FENCES = register("minecraft:wooden_fences");
@@ -208,6 +209,7 @@ public class BlockTags {
   public static final TagKey<BlockType> MAINTAINS_FARMLAND = register("minecraft:maintains_farmland");
   public static final TagKey<BlockType> BLOCKS_WIND_CHARGE_EXPLOSIONS = register("minecraft:blocks_wind_charge_explosions");
   public static final TagKey<BlockType> DOES_NOT_BLOCK_HOPPERS = register("minecraft:does_not_block_hoppers");
+  public static final TagKey<BlockType> AIR = register("minecraft:air");
   //@formatter:on
 
   private BlockTags() {}

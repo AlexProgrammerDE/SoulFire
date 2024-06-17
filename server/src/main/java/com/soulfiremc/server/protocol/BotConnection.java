@@ -45,6 +45,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -208,7 +209,7 @@ public final class BotConnection {
       // Run all shutdown hooks
       shutdownHooks.forEach(Runnable::run);
 
-      session.disconnect("Disconnect");
+      session.disconnect(Component.translatable("multiplayer.status.quitting"));
 
       // Give the server one second to handle the disconnect
       TimeUtil.waitTime(1, TimeUnit.SECONDS);
@@ -247,7 +248,7 @@ public final class BotConnection {
       sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
       session.logger().debug("Successfully sent mojang join request!");
     } catch (Exception e) {
-      session.disconnect("Login failed: Authentication error: " + e.getMessage(), e);
+      session.disconnect(Component.translatable("disconnect.loginFailedInfo", e.getMessage()), e);
     }
   }
 

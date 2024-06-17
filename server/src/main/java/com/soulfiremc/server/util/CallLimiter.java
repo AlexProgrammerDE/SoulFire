@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class CallLimiter implements Runnable {
   private final Runnable c;
-  private volatile long lastCalled;
   private final long interval;
+  private volatile long lastCalled;
 
   public CallLimiter(Runnable c, long interval, TimeUnit unit) {
     this.c = c;

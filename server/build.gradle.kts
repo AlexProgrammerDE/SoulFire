@@ -16,9 +16,6 @@ dependencies {
   api(libs.bundles.kyori)
   api(libs.datafixerupper)
 
-  // For advanced encryption and compression
-  api(libs.velocity.native)
-
   // Netty raknet support for ViaBedrock
   api(libs.netty.raknet) {
     isTransitive = false
