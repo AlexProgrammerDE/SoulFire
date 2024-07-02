@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -52,19 +53,22 @@ public class ProjectedInventory {
   private final ClientEntity entity;
   private final PlayerInventoryContainer playerInventory;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity) {
+  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity,
+                            Predicate<SFItemStack> isPlaceable, Predicate<SFItemStack> isTool) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
         .filter(item -> item != null && item.getAmount() > 0)
-        .toList(), entity, playerInventory);
+        .toList(), entity, playerInventory,
+      isPlaceable, isTool);
   }
 
   public ProjectedInventory(List<SFItemStack> items) {
-    this(items, null, null);
+    this(items, null, null, ItemTypeHelper::isSafeFullBlockItem, ItemTypeHelper::isTool);
   }
 
-  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory) {
+  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory,
+                            Predicate<SFItemStack> isPlaceable, Predicate<SFItemStack> isTool) {
     this.entity = entity;
     this.playerInventory = playerInventory;
 
@@ -75,17 +79,15 @@ public class ProjectedInventory {
     usableToolsAndNull.add(null);
 
     for (var item : items) {
-      if (ItemTypeHelper.isSafeFullBlockItem(item.type())) {
+      if (isPlaceable.test(item)) {
         blockItems += item.getAmount();
-      } else if (ItemTypeHelper.isTool(item)) {
+      } else if (isTool.test(item)) {
         usableToolsAndNull.add(item);
       }
     }
 
     this.usableBlockItems = blockItems;
-
     this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
-
     this.sharedMiningCosts = new ConcurrentHashMap<>();
   }
 

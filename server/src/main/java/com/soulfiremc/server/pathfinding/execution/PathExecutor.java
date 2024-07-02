@@ -27,6 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.ItemTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import java.util.List;
@@ -79,7 +80,8 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
             .chunks()
             .immutableCopy());
         var inventory =
-          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity());
+          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(),
+            ItemTypeHelper::isSafeFullBlockItem, ItemTypeHelper::isTool);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =

@@ -19,15 +19,14 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.EffectType;
-import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 
 public class ItemTypeHelper {
   private ItemTypeHelper() {}
 
-  public static boolean isSafeFullBlockItem(ItemType type) {
-    var blockType = BlockItems.getBlockType(type);
+  public static boolean isSafeFullBlockItem(SFItemStack itemStack) {
+    var blockType = BlockItems.getBlockType(itemStack.type());
     return blockType.isPresent() && !blockType.get().fallingBlock();
   }
 

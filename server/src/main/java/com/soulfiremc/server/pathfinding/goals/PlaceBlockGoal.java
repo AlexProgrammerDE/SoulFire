@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.goals;
 
-import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
@@ -26,9 +25,9 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import java.util.List;
 
 // TODO: Extract into having more fine behaviour control
-public record PlaceBlockGoal(SFVec3i goal, BlockType blockType) implements GoalScorer {
-  public PlaceBlockGoal(int x, int y, int z, BlockType blockType) {
-    this(new SFVec3i(x, y, z), blockType);
+public record PlaceBlockGoal(SFVec3i goal) implements GoalScorer {
+  public PlaceBlockGoal(int x, int y, int z) {
+    this(new SFVec3i(x, y, z));
   }
 
   @Override
