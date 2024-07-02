@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.settings.lib;
 
+import com.google.gson.JsonElement;
+import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
@@ -26,36 +28,27 @@ import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import com.soulfiremc.util.GsonInstance;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import lombok.SneakyThrows;
 
 public record SettingsHolder(
-  Object2ObjectMap<PropertyKey, Number> numberProperties,
-  Object2BooleanMap<PropertyKey> booleanProperties,
-  Object2ObjectMap<PropertyKey, String> stringProperties,
+  Object2ObjectMap<PropertyKey, JsonElement> settingsProperties,
   List<MinecraftAccount> accounts,
   List<SFProxy> proxies) {
+  @SneakyThrows
   public static SettingsHolder deserialize(AttackStartRequest request) {
-    var numberProperties = new Object2ObjectOpenHashMap<PropertyKey, Number>();
-    var booleanProperties = new Object2BooleanOpenHashMap<PropertyKey>();
-    var stringProperties = new Object2ObjectOpenHashMap<PropertyKey, String>();
+    var settingsProperties = new Object2ObjectOpenHashMap<PropertyKey, JsonElement>();
 
     for (var namespace : request.getSettingsList()) {
       for (var entry : namespace.getEntriesList()) {
         var propertyKey = new PropertyKey(namespace.getNamespace(), entry.getKey());
 
-        switch (entry.getValueCase()) {
-          case STRINGVALUE -> stringProperties.put(propertyKey, entry.getStringValue());
-          case INTVALUE -> numberProperties.put(propertyKey, entry.getIntValue());
-          case BOOLVALUE -> booleanProperties.put(propertyKey, entry.getBoolValue());
-          case DOUBLEVALUE -> numberProperties.put(propertyKey, entry.getDoubleValue());
-          case VALUE_NOT_SET -> throw new IllegalArgumentException("Value not set");
-        }
+        settingsProperties.put(propertyKey, GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
       }
     }
 
@@ -69,37 +62,34 @@ public record SettingsHolder(
       proxies.add(SFProxy.fromProto(proxy));
     }
 
-    return new SettingsHolder(
-      numberProperties, booleanProperties, stringProperties, accounts, proxies);
+    return new SettingsHolder(settingsProperties, accounts, proxies);
   }
 
   public int get(IntProperty property) {
-    return numberProperties
-      .getOrDefault(property.propertyKey(), property.defaultValue())
-      .intValue();
+    return getAsType(property.propertyKey(), property.defaultValue(), Integer.class);
   }
 
   public double get(DoubleProperty property) {
-    return numberProperties
-      .getOrDefault(property.propertyKey(), property.defaultValue())
-      .doubleValue();
+    return getAsType(property.propertyKey(), property.defaultValue(), Double.class);
   }
 
   public boolean get(BooleanProperty property) {
-    return booleanProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    return getAsType(property.propertyKey(), property.defaultValue(), Boolean.class);
   }
 
   public String get(StringProperty property) {
-    return stringProperties.getOrDefault(property.propertyKey(), property.defaultValue());
+    return getAsType(property.propertyKey(), property.defaultValue(), String.class);
   }
 
   public <T> T get(ComboProperty property, Function<String, T> converter) {
-    return converter.apply(
-      stringProperties.getOrDefault(
-        property.propertyKey(), property.options()[property.defaultValue()].id()));
+    return converter.apply(getAsType(property.propertyKey(), property.options()[property.defaultValue()].id(), String.class));
   }
 
   public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
     return get(property, s -> Enum.valueOf(clazz, s));
+  }
+
+  public <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
+    return GsonInstance.GSON.fromJson(settingsProperties.getOrDefault(key, GsonInstance.GSON.toJsonTree(defaultValue)), clazz);
   }
 }

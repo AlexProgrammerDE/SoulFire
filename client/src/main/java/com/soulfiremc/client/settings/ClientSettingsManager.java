@@ -20,6 +20,8 @@ package com.soulfiremc.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
+import com.google.protobuf.Struct;
+import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.AttackStartRequest;
 import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
@@ -28,6 +30,7 @@ import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
+import com.soulfiremc.util.GsonInstance;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +42,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -103,6 +107,7 @@ public class ClientSettingsManager {
       .serialize();
   }
 
+  @SneakyThrows
   public AttackStartRequest exportSettingsProto() {
     var namespaces = new ArrayList<SettingsNamespace>();
 
@@ -114,41 +119,13 @@ public class ClientSettingsManager {
         var key = entry.getKey();
         var value = entry.getValue().get();
 
-        if (!value.isJsonPrimitive()) {
-          log.warn("Skipping non-primitive setting: {}#{}", namespace, key);
-          continue;
-        }
-
-        var primitive = value.getAsJsonPrimitive();
-        if (primitive.isBoolean()) {
-          namespaceSettings.add(
-            SettingsEntry.newBuilder()
-              .setKey(key)
-              .setBoolValue(primitive.getAsBoolean())
-              .build());
-        } else if (primitive.isNumber()) {
-          var number = primitive.getAsNumber();
-          if (number instanceof Integer) {
-            namespaceSettings.add(
-              SettingsEntry.newBuilder().setKey(key).setIntValue(number.intValue()).build());
-          } else if (number instanceof Double) {
-            namespaceSettings.add(
-              SettingsEntry.newBuilder()
-                .setKey(key)
-                .setDoubleValue(number.doubleValue())
-                .build());
-          } else {
-            log.warn("Skipping unsupported number setting: {}#{}", namespace, key);
-          }
-        } else if (primitive.isString()) {
-          namespaceSettings.add(
-            SettingsEntry.newBuilder()
-              .setKey(key)
-              .setStringValue(primitive.getAsString())
-              .build());
-        } else {
-          log.warn("Skipping unsupported primitive setting: {}#{}", namespace, key);
-        }
+        var settingsValueBuilder = Struct.newBuilder();
+        JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), settingsValueBuilder);
+        namespaceSettings.add(
+          SettingsEntry.newBuilder()
+            .setKey(key)
+            .setValue(settingsValueBuilder)
+            .build());
       }
 
       namespaces.add(
