@@ -19,14 +19,18 @@ package com.soulfiremc.server.grpc;
 
 import ch.jalu.injector.Injector;
 import com.linecorp.armeria.common.HttpHeaderNames;
+import com.linecorp.armeria.common.HttpHeaders;
 import com.linecorp.armeria.common.HttpMethod;
 import com.linecorp.armeria.common.SessionProtocol;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.server.RedirectService;
 import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.cors.CorsService;
+import com.linecorp.armeria.server.docs.DocService;
 import com.linecorp.armeria.server.grpc.GrpcService;
+import com.linecorp.armeria.server.healthcheck.HealthCheckService;
 import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
@@ -102,6 +106,11 @@ public class RPCServer {
     server =
       serverBuilder
         .service(grpcService, corsBuilder.newDecorator())
+        .service("/health", HealthCheckService.builder().build())
+        .service("/", new RedirectService("/docs"))
+        .serviceUnder("/docs", DocService.builder()
+          .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "bearer <jwt>"))
+          .build())
         .build();
   }
 
