@@ -15,6 +15,7 @@ flatlaf-inter-version = "4.0"
 flatlaf-jetbrains-mono-version = "2.304"
 kyori = "4.17.0"
 reactor = "1.2.0-SNAPSHOT"
+classtransform = "1.14.0"
 armeria = "1.29.1"
 
 [plugins]
@@ -76,9 +77,9 @@ pf4j = "org.pf4j:pf4j:3.12.0"
 fastutil = "it.unimi.dsi:fastutil:8.5.13"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.8"
 jetbrains-annotations = "org.jetbrains:annotations:24.1.0"
-classtransform-mixinstranslator = "net.lenni0451.classtransform:mixinstranslator:1.14.0"
-classtransform-mixinsdummy = "net.lenni0451.classtransform:mixinsdummy:1.14.0"
-classtransform-additionalclassprovider = "net.lenni0451.classtransform:additionalclassprovider:1.14.0"
+classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
+classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdummy", version.ref = "classtransform" }
+classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
 reflect = "net.lenni0451:Reflect:1.3.4"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
 commons-swing = "net.lenni0451.commons:swing:1.5.1"
