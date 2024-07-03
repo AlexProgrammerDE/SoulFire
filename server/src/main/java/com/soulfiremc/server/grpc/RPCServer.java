@@ -51,9 +51,7 @@ public class RPCServer {
     String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
     this(
       jwtKey,
-      Server.builder()
-        .tlsSelfSigned()
-        .port(new InetSocketAddress(host, port), SessionProtocol.HTTP, SessionProtocol.HTTPS),
+      Server.builder().port(new InetSocketAddress(host, port), SessionProtocol.HTTP),
       host,
       port,
       injector,
