@@ -97,6 +97,7 @@ armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "arme
 armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
 armeria-grpc-protocol = { module = "com.linecorp.armeria:armeria-grpc-protocol" }
+armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
@@ -111,5 +112,5 @@ mixins = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "clas
 flatlaf = ["flatlaf", "flatlaf-extras", "flatlaf-intellij-themes", "flatlaf-fonts-inter", "flatlaf-fonts-jetbrains-mono"]
 kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
-armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol"]
+armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]

@@ -22,15 +22,18 @@ import com.linecorp.armeria.common.HttpHeaderNames;
 import com.linecorp.armeria.common.HttpHeaders;
 import com.linecorp.armeria.common.HttpMethod;
 import com.linecorp.armeria.common.SessionProtocol;
+import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.common.prometheus.PrometheusMeterRegistries;
 import com.linecorp.armeria.server.RedirectService;
 import com.linecorp.armeria.server.Server;
-import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.docs.DocService;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.server.healthcheck.HealthCheckService;
+import com.linecorp.armeria.server.metric.MetricCollectingService;
+import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
@@ -46,12 +49,12 @@ public class RPCServer {
   @Getter
   private final int port;
   private final Server server;
+  private final Server prometheusServer;
 
   public RPCServer(
     String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
     this(
       jwtKey,
-      Server.builder().port(new InetSocketAddress(host, port), SessionProtocol.HTTP),
       host,
       port,
       injector,
@@ -60,7 +63,6 @@ public class RPCServer {
 
   public RPCServer(
     SecretKey jwtKey,
-    ServerBuilder serverBuilder,
     String host,
     int port,
     Injector injector,
@@ -68,6 +70,7 @@ public class RPCServer {
     this.host = host;
     this.port = port;
 
+    var meterRegistry = PrometheusMeterRegistries.defaultRegistry();
     var corsBuilder =
       CorsService.builderForAnyOrigin()
         .allowRequestMethods(HttpMethod.POST) // Allow POST method.
@@ -102,14 +105,27 @@ public class RPCServer {
         .enableHealthCheckService(true)
         .build();
     server =
-      serverBuilder
-        .service(grpcService, corsBuilder.newDecorator())
+      Server.builder()
+        .port(new InetSocketAddress(host, port), SessionProtocol.HTTP)
+        .meterRegistry(meterRegistry)
+        .service(grpcService,
+          corsBuilder.newDecorator(),
+          MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "bearer <jwt>"))
           .build())
         .build();
+    if (Boolean.getBoolean("sf.prometheus.enabled")) {
+      prometheusServer =
+        Server.builder()
+          .port(new InetSocketAddress(host, Integer.getInteger("sf.prometheus.port", 9090)), SessionProtocol.HTTP)
+          .service("/metrics", PrometheusExpositionService.of(meterRegistry.getPrometheusRegistry()))
+          .build();
+    } else {
+      prometheusServer = null;
+    }
   }
 
   public void start() throws IOException {
@@ -118,9 +134,19 @@ public class RPCServer {
     server.start().join();
 
     log.info("RPC Server started, listening on {}", server.activeLocalPort());
+
+    if (prometheusServer != null) {
+      prometheusServer.closeOnJvmShutdown();
+      prometheusServer.start().join();
+      log.info("Prometheus Server started, listening on {}", prometheusServer.activeLocalPort());
+    }
   }
 
   public void shutdown() throws InterruptedException {
     server.stop().join();
+
+    if (prometheusServer != null) {
+      prometheusServer.stop().join();
+    }
   }
 }
