@@ -3,6 +3,9 @@ FROM eclipse-temurin:21 AS soulfire-builder
 # Get soulfire data
 COPY --chown=root:root . /soulfire
 
+# Install git
+RUN apt-get update && apt-get install -y git
+
 # Build soulfire
 WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
@@ -40,7 +43,7 @@ COPY --from=jre-no-javac-builder --chown=soulfire:soulfire /soulfire/java $JAVA_
 COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/dedicated/build/libs/SoulFireDedicated-*.jar /soulfire/soulfire.jar
 
 # Use the soulfire's home directory as our work directory
-WORKDIR /soulfire
+WORKDIR /soulfire/data
 
 # Copy over the start script
 COPY start.sh /soulfire/start.sh
