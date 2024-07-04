@@ -6,6 +6,8 @@ plugins {
 }
 
 dependencies {
+  libs.bundles.bom.get().forEach { api(platform(it)) }
+
   // gRPC
   api(libs.bundles.grpc)
 
