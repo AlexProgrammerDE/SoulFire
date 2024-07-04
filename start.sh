@@ -6,4 +6,4 @@ if [ -z "$SF_RAM" ]; then
 fi
 
 echo "Starting SoulFire dedicated server..."
-java -Xmx$SF_RAM -XX:+EnableDynamicAgentLoading -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -jar /soulfire/soulfire.jar
+java -Xmx$SF_RAM $SF_JVM_FLAGS -XX:+EnableDynamicAgentLoading -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -jar /soulfire/soulfire.jar
