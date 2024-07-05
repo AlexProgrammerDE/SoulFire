@@ -24,8 +24,6 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
-import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.Pair;
 import java.util.ArrayList;

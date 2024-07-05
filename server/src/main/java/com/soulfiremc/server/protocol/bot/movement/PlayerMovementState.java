@@ -19,7 +19,6 @@ package com.soulfiremc.server.protocol.bot.movement;
 
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

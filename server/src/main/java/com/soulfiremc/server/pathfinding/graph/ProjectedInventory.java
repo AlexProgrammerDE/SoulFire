@@ -24,7 +24,6 @@ import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.util.ItemTypeHelper;
 import java.util.Arrays;
 import java.util.HashSet;
