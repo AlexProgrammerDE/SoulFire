@@ -1,0 +1,56 @@
+
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2024-06-02T14:43:51+00:00",
+  "name": "SoulFire",
+  "author": "mail@pistonmaster.net",
+  "uuid": "dcbaf5f6-1418-40cc-9563-8fa1c3460cb2",
+  "description": "Creates a container that runs a SoulFire dedicated server.",
+  "features": null,
+  "docker_images": {
+    "alexprogrammerde\/soulfire": "alexprogrammerde\/soulfire"
+  },
+  "file_denylist": [],
+  "startup": "/bin/sh /soulfire/start.sh",
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"Finished loading!\"\r\n}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!\/bin\/bash\r\n# Java Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\nPROJECT=java\r\n\r\napt update\r\napt install -y curl jq\r\n\r\ncd \/mnt\/server",
+      "container": "ghcr.io\/parkervcp\/yolks:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "JVM RAM",
+      "description": "How much RAM should the JVM use? (e.g. 2G)",
+      "env_variable": "SF_RAM",
+      "default_value": "2G",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:15",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
+      "name": "JVM FLAGS",
+      "description": "Extra flags for the JVM (e.g. -Dsf.prometheus.enabled=true)",
+      "env_variable": "SF_JVM_FLAGS",
+      "default_value": "-Dterminal.jline=false -Dterminal.ansi=true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:9999",
+      "sort": null,
+      "field_type": "text"
+    }
+  ]
+}
