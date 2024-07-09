@@ -19,7 +19,7 @@ package com.soulfiremc.server.data;
 
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.key.Key;
@@ -38,7 +38,7 @@ public class BlockShapeLoader {
           @Subst("empty") var keyString = parts[0];
           var key = Key.key(keyString);
 
-          var blockShapeTypes = new ObjectArrayList<BlockShapeGroup>();
+          var blockShapeTypes = new ArrayList<BlockShapeGroup>();
           if (parts.length > 1) {
             var part = parts[1];
 

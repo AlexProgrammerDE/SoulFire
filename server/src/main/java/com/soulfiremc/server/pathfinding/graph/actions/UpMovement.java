@@ -33,7 +33,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -117,7 +117,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
+    var requiredFreeBlocks = new ArrayList<Pair<SFVec3i, BlockFace>>();
 
     // The one above the head to jump
     requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
@@ -155,7 +155,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
   @Override
   public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
-    var actions = new ObjectArrayList<WorldAction>();
+    var actions = new ArrayList<WorldAction>();
     var cost = Costs.JUMP_UP_BLOCK;
 
     var usableBlockItemsDiff = 0;

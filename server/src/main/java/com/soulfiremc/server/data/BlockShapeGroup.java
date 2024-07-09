@@ -21,7 +21,7 @@ import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -38,7 +38,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
           var parts = line.split("\\|");
 
           var id = Integer.parseInt(parts[0]);
-          var blockShapes = new ObjectArrayList<BlockShape>();
+          var blockShapes = new ArrayList<BlockShape>();
 
           if (parts.length > 1) {
             for (var i = 1; i < parts.length; i++) {
@@ -72,7 +72,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
   }
 
   public List<AABB> getCollisionBoxes(Vector3i block, BlockType blockType) {
-    var collisionBoxes = new ObjectArrayList<AABB>(blockShapes.size());
+    var collisionBoxes = new ArrayList<AABB>(blockShapes.size());
     for (var shape : blockShapes) {
       var shapeBB =
         new AABB(

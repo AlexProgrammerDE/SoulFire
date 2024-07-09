@@ -31,7 +31,7 @@ import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -82,7 +82,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   public List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
+    var requiredFreeBlocks = new ArrayList<Pair<SFVec3i, BlockFace>>();
 
     // Make block above the head block free for jump
     requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));

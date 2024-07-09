@@ -38,7 +38,7 @@ import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -191,7 +191,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<Pair<SFVec3i, BlockFace>>();
+    var requiredFreeBlocks = new ArrayList<Pair<SFVec3i, BlockFace>>();
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       // Make block above the head block free for jump
@@ -233,7 +233,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return List.of();
     }
 
-    var list = new ObjectArrayList<Pair<SFVec3i, MovementSide>>(4);
+    var list = new ArrayList<Pair<SFVec3i, MovementSide>>(4);
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
@@ -384,7 +384,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
 
     var usableBlockItemsDiff = 0;
-    var actions = new ObjectArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
+    var actions = new ArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
     if (blockBreakCosts != null) {
       for (var breakCost : blockBreakCosts) {
         if (breakCost == null) {

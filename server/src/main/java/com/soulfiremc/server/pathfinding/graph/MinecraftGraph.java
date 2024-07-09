@@ -32,8 +32,8 @@ import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -46,16 +46,16 @@ public record MinecraftGraph(TagsState tagsState,
                              Predicate<SFVec3i> canBreakBlockPredicate,
                              Predicate<SFVec3i> canPlaceBlockPredicate) {
   private static final Object2ObjectFunction<
-    ? super SFVec3i, ? extends ObjectList<WrappedActionSubscription>>
-    CREATE_MISSING_FUNCTION = k -> new ObjectArrayList<>();
+    ? super SFVec3i, ? extends List<WrappedActionSubscription>>
+    CREATE_MISSING_FUNCTION = k -> new ArrayList<>();
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
 
   static {
-    var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, ObjectList<WrappedActionSubscription>>();
-    var actions = new ObjectArrayList<GraphAction>();
+    var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, List<WrappedActionSubscription>>();
+    var actions = new ArrayList<GraphAction>();
     var currentSubscriptions = new AtomicInteger(0);
     BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) -> {
       currentSubscriptions.incrementAndGet();

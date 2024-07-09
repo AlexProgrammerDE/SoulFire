@@ -27,8 +27,8 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.CallLimiter;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -40,15 +40,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   private static List<WorldAction> reconstructPath(MinecraftRouteNode current) {
-    var actions = new ObjectArrayList<WorldAction>();
+    var actions = new ArrayList<WorldAction>();
 
     var currentElement = current;
     do {
-      var previousActions = new ObjectArrayList<>(currentElement.actions());
+      var previousActions = new ArrayList<>(currentElement.actions());
 
       // Insert the actions in reversed order
       for (var i = previousActions.size() - 1; i >= 0; i--) {
-        actions.add(0, previousActions.get(i));
+        actions.addFirst(previousActions.get(i));
       }
 
       currentElement = currentElement.parent();

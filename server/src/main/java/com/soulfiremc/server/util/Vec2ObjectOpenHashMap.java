@@ -27,7 +27,6 @@ import it.unimi.dsi.fastutil.HashCommon;
 import it.unimi.dsi.fastutil.objects.AbstractObject2ObjectMap;
 import it.unimi.dsi.fastutil.objects.AbstractObjectSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
@@ -35,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
 import it.unimi.dsi.fastutil.objects.ObjectSpliterators;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -533,7 +533,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
     int pos = elements;
     int last = -1;
     int current = size;
-    ObjectArrayList<K> wrapped;
+    ArrayList<K> wrapped;
 
     @SuppressWarnings("unused")
     abstract void acceptOnIndex(final C action, final int index);
@@ -607,7 +607,7 @@ public class Vec2ObjectOpenHashMap<K extends SFVec3i, V> extends AbstractObject2
         }
         if (pos < last) { // Wrapped entry.
           if (wrapped == null) {
-            wrapped = new ObjectArrayList<>(2);
+            wrapped = new ArrayList<>(2);
           }
           wrapped.add(key[pos]);
         }

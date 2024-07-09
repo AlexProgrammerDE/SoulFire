@@ -31,7 +31,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -112,7 +112,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
   // These blocks are possibly safe blocks we can fall on top of
   public List<SFVec3i> listSafetyCheckBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+    var requiredFreeBlocks = new ArrayList<SFVec3i>();
 
     // Falls one block
     requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
@@ -127,7 +127,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   public List<SFVec3i> listObstructFallCheckBlocks() {
-    var requiredFreeBlocks = new ObjectArrayList<SFVec3i>();
+    var requiredFreeBlocks = new ArrayList<SFVec3i>();
 
     // Block below the block we mine can obstruct a 2 block fall
     requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
