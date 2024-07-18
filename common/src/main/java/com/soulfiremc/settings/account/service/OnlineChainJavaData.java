@@ -24,7 +24,7 @@ import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.util.GsonInstance;
 import lombok.SneakyThrows;
 
-public record OnlineChainJavaData(String authToken, long tokenExpireAt, JsonObject authChain) implements AccountData {
+public record OnlineChainJavaData(String authToken, long tokenExpireAt, JsonObject authChain) implements AccountData, OnlineJavaDataLike {
   @SneakyThrows
   public static OnlineChainJavaData fromProto(MinecraftAccountProto.OnlineChainJavaData data) {
     return new OnlineChainJavaData(

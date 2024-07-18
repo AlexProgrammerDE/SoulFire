@@ -22,6 +22,7 @@ import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.account.service.OfflineJavaData;
 import com.soulfiremc.settings.account.service.OnlineChainJavaData;
+import com.soulfiremc.settings.account.service.OnlineJavaDataLike;
 import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import java.util.UUID;
 import lombok.NonNull;
@@ -61,7 +62,7 @@ public record MinecraftAccount(
   }
 
   public boolean isPremiumJava() {
-    return accountData instanceof OnlineSimpleJavaData;
+    return accountData instanceof OnlineJavaDataLike;
   }
 
   public boolean isPremiumBedrock() {
