@@ -87,7 +87,7 @@ dependencies {
   api(libs.miglayout.swing)
   api(libs.commons.swing)
 
-  val lwjglVersion = "3.3.3"
+  val lwjglVersion = "3.3.4"
   val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
   lwjglPlatforms.forEach { platform ->
     api("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
