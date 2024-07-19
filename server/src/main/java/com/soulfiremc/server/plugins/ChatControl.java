@@ -41,18 +41,21 @@ public class ChatControl implements InternalPlugin {
 
     var plainMessage = event.parseToPlainText();
     var prefix = settingsHolder.get(ChatControlSettings.COMMAND_PREFIX);
-
-    if (plainMessage.startsWith(prefix)) {
-      var command = plainMessage.substring(prefix.length());
-      connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
-      var code = connection.attackManager()
-        .soulFireServer()
-        .injector()
-        .getSingleton(ServerCommandManager.class)
-        .execute(command, ServerConsoleCommandSource.INSTANCE);
-
-      connection.botControl().sendMessage("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+    var prefixIndex = plainMessage.indexOf(prefix);
+    if (prefixIndex == -1) {
+      return;
     }
+
+    plainMessage = plainMessage.substring(prefixIndex);
+    var command = plainMessage.substring(prefix.length());
+    connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
+    var code = connection.attackManager()
+      .soulFireServer()
+      .injector()
+      .getSingleton(ServerCommandManager.class)
+      .execute(command, ServerConsoleCommandSource.INSTANCE);
+
+    connection.botControl().sendMessage("Command \"%s\" executed! (Code: %d)".formatted(command, code));
   }
 
   @EventHandler
