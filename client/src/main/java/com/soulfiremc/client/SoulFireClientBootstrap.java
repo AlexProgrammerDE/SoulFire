@@ -19,20 +19,16 @@ package com.soulfiremc.client;
 
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.client.gui.GUIManager;
-import com.soulfiremc.client.gui.popups.ServerSelectDialog;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ServerAddress;
-import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,9 +44,6 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
 
   @Override
   protected void postMixinMain(String[] args) {
-    // We may split client and server mixins in the future
-    var runHeadless = GraphicsEnvironment.isHeadless() || args.length > 0;
-
     Consumer<RemoteServerData> remoteServerConsumer =
       remoteServerData -> {
         var rpcClient =
@@ -59,15 +52,9 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
             remoteServerData.serverAddress().port(),
             remoteServerData.token());
 
-        if (runHeadless) {
-          log.info("Starting CLI");
-          var cliManager = new CLIManager(rpcClient, pluginManager);
-          cliManager.initCLI(args);
-        } else {
-          log.info("Starting GUI");
-          var guiManager = new GUIManager(rpcClient, pluginManager);
-          guiManager.initGUI();
-        }
+        log.info("Starting CLI");
+        var cliManager = new CLIManager(rpcClient, pluginManager);
+        cliManager.initCLI(args);
       };
     Runnable runIntegratedServer =
       () -> {
@@ -82,32 +69,20 @@ public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
         remoteServerConsumer.accept(
           new RemoteServerData(ServerAddress.fromStringAndPort(host, port), jwtToken));
       };
-    if (runHeadless) {
-      var address = System.getProperty("sf.remoteAddress");
-      if (address == null) {
-        runIntegratedServer.run();
-      } else {
-        var token = System.getProperty("sf.remoteToken");
-
-        Objects.requireNonNull(address, "Remote address must be set");
-        Objects.requireNonNull(token, "Remote token must be set");
-
-        log.info("Using remote server on {}", address);
-
-        remoteServerConsumer.accept(
-          new RemoteServerData(ServerAddress.fromStringDefaultPort(
-            address, PortHelper.SF_DEFAULT_PORT), token));
-      }
+    var address = System.getProperty("sf.remoteAddress");
+    if (address == null) {
+      runIntegratedServer.run();
     } else {
-      GUIManager.loadGUIProperties();
-      GUIManager.injectTheme();
+      var token = System.getProperty("sf.remoteToken");
 
-      if (Boolean.getBoolean("sf.disableServerSelect")) {
-        runIntegratedServer.run();
-      } else {
-        SwingUtilities.invokeLater(
-          () -> new ServerSelectDialog(runIntegratedServer, remoteServerConsumer));
-      }
+      Objects.requireNonNull(address, "Remote address must be set");
+      Objects.requireNonNull(token, "Remote token must be set");
+
+      log.info("Using remote server on {}", address);
+
+      remoteServerConsumer.accept(
+        new RemoteServerData(ServerAddress.fromStringDefaultPort(
+          address, PortHelper.SF_DEFAULT_PORT), token));
     }
   }
 
