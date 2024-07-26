@@ -21,7 +21,6 @@ import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.util.ResourceHelper;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +45,7 @@ public class BuiltInKnownPackRegistry {
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
       var bytes = gzipInputStream.readAllBytes();
       var in = Unpooled.wrappedBuffer(bytes);
-      var helper = new MinecraftCodecHelper(Int2ObjectMaps.emptyMap(), Map.of());
+      var helper = new MinecraftCodecHelper();
       supportedPacks = helper.readList(in, buf -> new KnownPack(helper.readString(buf), helper.readString(buf), helper.readString(buf)));
 
       helper.readList(in, buf -> {

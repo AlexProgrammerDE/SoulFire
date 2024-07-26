@@ -122,11 +122,7 @@ public class SFBaseListener extends SessionAdapter {
         }
       } else if (packet instanceof ClientboundGameProfilePacket) {
         session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
-        session.send(new ServerboundLoginAcknowledgedPacket());
-        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
-
-        // Send client brand here
-        // Send client information here
+        session.send(new ServerboundLoginAcknowledgedPacket(), () -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
       } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
         session.disconnect(loginDisconnectPacket.getReason());
       } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
@@ -147,14 +143,12 @@ public class SFBaseListener extends SessionAdapter {
         session.disconnect(disconnectPacket.getReason());
       } else if (packet instanceof ClientboundStartConfigurationPacket) {
         session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
-        session.send(new ServerboundConfigurationAcknowledgedPacket());
-        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+        session.send(new ServerboundConfigurationAcknowledgedPacket(), () -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
       }
     } else if (protocol.getInboundState() == ProtocolState.CONFIGURATION) {
       if (packet instanceof ClientboundFinishConfigurationPacket) {
         session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.GAME));
-        session.send(new ServerboundFinishConfigurationPacket());
-        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.GAME));
+        session.send(new ServerboundFinishConfigurationPacket(), () -> protocol.setOutboundState(ProtocolState.GAME));
       } else if (packet instanceof ClientboundSelectKnownPacks selectKnownPacks) {
         session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
           .getMatchingPacks(selectKnownPacks.getKnownPacks())));
@@ -170,25 +164,24 @@ public class SFBaseListener extends SessionAdapter {
     var intention = new ClientIntentionPacket(protocol.getCodec().getProtocolVersion(),
       originalAddress.host(),
       originalAddress.port(),
-      switch (this.targetState) {
+      switch (targetState) {
         case LOGIN -> HandshakeIntent.LOGIN;
         case STATUS -> HandshakeIntent.STATUS;
-        default -> throw new IllegalStateException("Unexpected value: " + this.targetState);
+        default -> throw new IllegalStateException("Unexpected value: " + targetState);
       });
 
     switch (this.targetState) {
       case LOGIN -> {
         session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.LOGIN));
-        session.send(intention);
-        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.LOGIN));
+        session.send(intention, () -> protocol.setOutboundState(ProtocolState.LOGIN));
         session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
       }
       case STATUS -> {
         session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.STATUS));
-        session.send(intention);
-        session.switchOutboundProtocol(() -> protocol.setOutboundState(ProtocolState.STATUS));
+        session.send(intention, () -> protocol.setOutboundState(ProtocolState.STATUS));
         session.send(new ServerboundStatusRequestPacket());
       }
+      default -> throw new IllegalStateException("Unexpected value: " + targetState);
     }
   }
 }

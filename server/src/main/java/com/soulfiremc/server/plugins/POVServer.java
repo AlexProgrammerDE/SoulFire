@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
 import com.soulfiremc.server.AttackManager;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
@@ -72,6 +71,7 @@ import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
+import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
 import org.geysermc.mcprotocollib.network.event.server.ServerClosedEvent;
@@ -188,17 +188,17 @@ public class POVServer implements InternalPlugin {
 
     server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
-      new VersionInfo(
-        MinecraftCodec.CODEC.getMinecraftVersion(),
-        MinecraftCodec.CODEC.getProtocolVersion()),
+      Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
+        .color(NamedTextColor.GREEN)
+        .decorate(TextDecoration.BOLD),
       new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), attackManager.botConnections().size(), List.of(
         getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
       )),
-      Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
-        .color(NamedTextColor.GREEN)
-        .decorate(TextDecoration.BOLD),
+      new VersionInfo(
+        MinecraftCodec.CODEC.getMinecraftVersion(),
+        MinecraftCodec.CODEC.getProtocolVersion()),
       faviconBytes,
       false));
 
@@ -568,8 +568,8 @@ public class POVServer implements InternalPlugin {
                 Objects.requireNonNull(botConnection);
                 var dataManager = botConnection.dataManager();
 
-                session.send(new ClientboundStartConfigurationPacket());
-                session.switchOutboundProtocol(() -> ((MinecraftProtocol) session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
+                session.send(new ClientboundStartConfigurationPacket(), () ->
+                  ((MinecraftProtocol) session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
                 awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
 
                 if (dataManager.serverEnabledFeatures() != null) {

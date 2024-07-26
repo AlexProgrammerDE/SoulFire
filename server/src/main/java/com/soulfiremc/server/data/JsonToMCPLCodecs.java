@@ -89,7 +89,7 @@ public class JsonToMCPLCodecs {
         ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("eat_seconds", 1.6F).forGetter(FoodProperties::getEatSeconds),
         POSSIBLE_EFFECT_CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(FoodProperties::getEffects)
       )
-      .apply(instance, FoodProperties::new)
+      .apply(instance, (a, b, c, d, e) -> new FoodProperties(a, b, c, d, null, e))
   );
   private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = DualMap.keyCodec(
     DualMap.forEnumSwitch(ItemAttributeModifiers.EquipmentSlotGroup.class, g -> switch (g) {

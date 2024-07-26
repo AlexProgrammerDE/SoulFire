@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
@@ -88,6 +87,7 @@ import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.nbt.NbtMap;
+import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
