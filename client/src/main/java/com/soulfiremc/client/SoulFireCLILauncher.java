@@ -19,13 +19,13 @@ package com.soulfiremc.client;
 
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 
-public class SoulFireClientLauncher extends SoulFireAbstractLauncher {
+public class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   public static void main(String[] args) {
-    new SoulFireClientLauncher().run(args);
+    new SoulFireCLILauncher().run(args);
   }
 
   @Override
   protected String getBootstrapClassName() {
-    return "com.soulfiremc.client.SoulFireClientBootstrap";
+    return "com.soulfiremc.client.SoulFireCLIBootstrap";
   }
 }

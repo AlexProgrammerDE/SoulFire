@@ -27,14 +27,14 @@ jobs:
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
 
           mkdir client/build/upload
-          cp client/build/libs/SoulFireClient-$projectVersion.jar client/build/upload
+          cp client/build/libs/SoulFireCLI-$projectVersion.jar client/build/upload
 
           mkdir dedicated/build/upload
           cp dedicated/build/libs/SoulFireDedicated-$projectVersion.jar dedicated/build/upload
       - name: Upload client Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SoulFireClient
+          name: SoulFireCLI
           if-no-files-found: error
           path: |
             client/build/upload/*.jar
@@ -45,102 +45,3 @@ jobs:
           if-no-files-found: error
           path: |
             dedicated/build/upload/*.jar
-  jpackage-linux:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: SoulFireClient
-          path: build/libs
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Install rpm
-        run: sudo apt-get install rpm
-      - name: Package with jpackage
-        run: |
-          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
-          projectVersionStripped=${projectVersion/-SNAPSHOT/}
-
-          echo "Building rpm package"
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type rpm
-          echo "Finished building rpm package"
-
-          echo "Building deb package"
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-linux.cfg" --type deb
-          echo "Finished building deb package"
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-installer
-          if-no-files-found: error
-          path: |
-            build/distributions/*
-  jpackage-windows:
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: SoulFireClient
-          path: build/libs
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Package with jpackage
-        run: |
-          $projectVersion = Select-String -Path gradle.properties -Pattern '^maven_version=' | ForEach-Object { $_.ToString().Split('=')[1] }
-          $projectVersionStripped = $projectVersion -replace '-SNAPSHOT', ''
-
-          echo "Building exe package"
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-windows.cfg"
-          echo "Finished building exe package"
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          if-no-files-found: error
-          path: |
-            build/distributions/*
-  jpackage-mac:
-    needs: build
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: SoulFireClient
-          path: build/libs
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Package with jpackage
-        run: |
-          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
-          projectVersionStripped=${projectVersion/-SNAPSHOT/}
-
-          echo "Building dmg package"
-          jpackage --app-version $projectVersionStripped --main-jar "SoulFireClient-$projectVersion.jar" "@installer/jpackage.cfg" "@installer/jpackage-mac.cfg"
-          echo "Finished building dmg package"
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-installer
-          if-no-files-found: error
-          path: |
-            build/distributions/*

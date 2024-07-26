@@ -32,14 +32,14 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SoulFireClientBootstrap extends SoulFireAbstractBootstrap {
-  private SoulFireClientBootstrap() {
+public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
+  private SoulFireCLIBootstrap() {
     super();
   }
 
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
-    new SoulFireClientBootstrap().internalBootstrap(args, classLoaders);
+    new SoulFireCLIBootstrap().internalBootstrap(args, classLoaders);
   }
 
   @Override

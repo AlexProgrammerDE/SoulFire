@@ -11,13 +11,13 @@ plugins {
 // Rename all artifacts
 tasks.withType<AbstractArchiveTask> {
   if (archiveBaseName.isPresent && archiveBaseName.get() == "client") {
-    archiveBaseName.set("SoulFireClient")
+    archiveBaseName.set("SoulFireCLI")
   }
 }
 
-val projectMainClass = "com.soulfiremc.launcher.SoulFireClientJava8Launcher"
+val projectMainClass = "com.soulfiremc.launcher.SoulFireCLIJava8Launcher"
 
-task("runSFClient", JavaExec::class) {
+task("runSFCLI", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
 
@@ -40,30 +40,6 @@ task("runSFClient", JavaExec::class) {
   outputs.upToDateWhen { false }
 }
 
-task("runSFClientLocal", JavaExec::class) {
-  group = "application"
-  description = "Runs the SoulFire client"
-
-  mainClass = projectMainClass
-  classpath = sourceSets["main"].runtimeClasspath
-
-  jvmArgs = listOf(
-    "-Xmx2G",
-    "-XX:+EnableDynamicAgentLoading",
-    "-XX:+UnlockExperimentalVMOptions",
-    "-XX:+UseG1GC",
-    "-XX:G1NewSizePercent=20",
-    "-XX:G1ReservePercent=20",
-    "-XX:MaxGCPauseMillis=50",
-    "-XX:G1HeapRegionSize=32M",
-    "-Dsf.disableServerSelect=true"
-  )
-
-  standardInput = System.`in`
-
-  outputs.upToDateWhen { false }
-}
-
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
@@ -78,22 +54,6 @@ dependencies {
   // For CLI support
   api(libs.picoli)
   annotationProcessor(libs.picoli.codegen)
-
-  // For GUI support
-  api(libs.bundles.flatlaf)
-  api(libs.xchart) {
-    exclude("org.junit.jupiter")
-  }
-  api(libs.miglayout.swing)
-  api(libs.commons.swing)
-
-  val lwjglVersion = "3.3.4"
-  val lwjglPlatforms = listOf("linux", "macos", "macos-arm64", "windows")
-  lwjglPlatforms.forEach { platform ->
-    api("org.lwjgl:lwjgl-nfd:$lwjglVersion:natives-$platform")
-    api("org.lwjgl:lwjgl:$lwjglVersion:natives-$platform")
-  }
-  api("org.lwjgl:lwjgl-nfd:$lwjglVersion")
 }
 
 fun Manifest.applySFAttributes() {
