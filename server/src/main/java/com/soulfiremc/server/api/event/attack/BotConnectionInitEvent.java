@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.api.event.attack;
 
-import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 
@@ -31,7 +31,7 @@ import com.soulfiremc.server.protocol.BotConnection;
  */
 public record BotConnectionInitEvent(BotConnection connection) implements SoulFireAttackEvent {
   @Override
-  public AttackManager attackManager() {
-    return connection.attackManager();
+  public InstanceManager instanceManager() {
+    return connection.instanceManager();
   }
 }

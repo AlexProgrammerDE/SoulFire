@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -698,7 +699,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 forEveryAttack(
                   c,
                   attackManager -> {
-                    b.suggest(attackManager.id());
+                    b.suggest(attackManager.id().toString());
 
                     return Command.SINGLE_SUCCESS;
                   },
@@ -751,15 +752,15 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
   }
 
   public int forEveryAttack(
-    CommandContext<ServerCommandSource> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ServerCommandSource> context, ToIntFunction<InstanceManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
 
   private int forEveryAttack(
     CommandContext<ServerCommandSource> context,
-    ToIntFunction<AttackManager> consumer,
+    ToIntFunction<InstanceManager> consumer,
     boolean printMessages) {
-    if (soulFireServer.attacks().isEmpty()) {
+    if (soulFireServer.instances().isEmpty()) {
       if (printMessages) {
         context.getSource().sendWarn("No attacks found!");
       }
@@ -768,11 +769,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     }
 
     var resultCode = Command.SINGLE_SUCCESS;
-    for (var attackManager : soulFireServer.attacks().values()) {
+    for (var attackManager : soulFireServer.instances().values()) {
       if (COMMAND_CONTEXT.get().containsKey("attack_ids")
         && Arrays.stream(COMMAND_CONTEXT.get().get("attack_ids").split(","))
-        .mapToInt(Integer::parseInt)
-        .noneMatch(i -> i == attackManager.id())) {
+        .map(UUIDHelper::tryParseUniqueId)
+        .filter(Optional::isPresent)
+        .noneMatch(i -> i.orElseThrow().equals(attackManager.id()))) {
         continue;
       }
 
@@ -792,13 +794,13 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
   }
 
   public int forEveryAttackEnsureHasBots(
-    CommandContext<ServerCommandSource> context, ToIntFunction<AttackManager> consumer) {
+    CommandContext<ServerCommandSource> context, ToIntFunction<InstanceManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
 
   private int forEveryAttackEnsureHasBots(
     CommandContext<ServerCommandSource> context,
-    ToIntFunction<AttackManager> consumer,
+    ToIntFunction<InstanceManager> consumer,
     boolean printMessages) {
     return forEveryAttack(
       context,

@@ -47,12 +47,12 @@ public class AutoReconnect implements InternalPlugin {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
     if (!settingsHolder.get(AutoReconnectSettings.ENABLED)
-      || connection.attackManager().attackState().isInactive()) {
+      || connection.instanceManager().attackState().isInactive()) {
       return;
     }
 
     connection
-      .attackManager()
+      .instanceManager()
       .scheduler()
       .schedule(
         () -> {
@@ -67,7 +67,7 @@ public class AutoReconnect implements InternalPlugin {
           var newConnection = connection.factory().prepareConnection();
 
           connection
-            .attackManager()
+            .instanceManager()
             .botConnections()
             .put(connection.connectionId(), newConnection);
 

@@ -20,8 +20,8 @@ package com.soulfiremc.server.api;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.api.event.attack.AttackInitEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
+import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import java.util.function.Consumer;
 import net.lenni0451.lambdaevents.LambdaManager;
 
@@ -63,11 +63,11 @@ public class PluginHelper {
   public static <T extends SoulFireAttackEvent> void registerAttackEventConsumer(
     Class<T> clazz, Consumer<T> consumer) {
     SoulFireAPI.registerListener(
-      AttackInitEvent.class,
+      InstanceInitEvent.class,
       event ->
         EventUtil.runAndAssertChanged(
-          event.attackManager().eventBus(),
-          () -> event.attackManager().eventBus().registerConsumer(consumer, clazz)));
+          event.instanceManager().eventBus(),
+          () -> event.instanceManager().eventBus().registerConsumer(consumer, clazz)));
   }
 
   public static <T extends SoulFireAttackEvent> void registerSafeEventConsumer(

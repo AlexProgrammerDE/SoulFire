@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
@@ -56,9 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.inject.Inject;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
@@ -67,12 +66,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Getter
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class AttackManager {
+public class InstanceManager {
   private static final AtomicInteger ID_COUNTER = new AtomicInteger();
-  private final int id = ID_COUNTER.getAndIncrement();
-  private final Logger logger = LoggerFactory.getLogger("AttackManager-" + id);
-  private final SoulFireScheduler scheduler = new SoulFireScheduler(logger);
+  private final UUID id;
+  private final Logger logger;
+  private final SoulFireScheduler scheduler;
+  @Setter
+  private String friendlyName;
+  @Setter
+  private SettingsHolder settingsHolder;
+  @Setter
+  private AttackState attackState = AttackState.STOPPED;
   private final LambdaManager eventBus =
     LambdaManager.basic(new ASMGenerator())
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
@@ -86,9 +90,15 @@ public class AttackManager {
         });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final SoulFireServer soulFireServer;
-  private final SettingsHolder settingsHolder;
-  @Setter
-  private AttackState attackState = AttackState.STOPPED;
+
+  public InstanceManager(UUID id, String friendlyName, SoulFireServer soulFireServer, SettingsHolder settingsHolder) {
+    this.id = id;
+    this.friendlyName = friendlyName;
+    this.logger = LoggerFactory.getLogger("AttackManager-" + id);
+    this.scheduler = new SoulFireScheduler(logger);
+    this.soulFireServer = soulFireServer;
+    this.settingsHolder = settingsHolder;
+  }
 
   private static MinecraftAccount getAccount(
     SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
@@ -117,6 +127,31 @@ public class AttackManager {
     selectedProxy.setValue(selectedProxy.getIntValue() + 1);
 
     return Optional.of(selectedProxy.getKey());
+  }
+
+  public void switchToState(AttackState targetState) {
+    switch (targetState) {
+      case RUNNING -> {
+        switch (attackState) {
+          case RUNNING -> throw new IllegalStateException("Attack is already running");
+          case PAUSED -> this.attackState = AttackState.RUNNING;
+          case STOPPED -> start();
+        }
+      }
+      case PAUSED -> {
+        switch (attackState) {
+          case RUNNING -> this.attackState = AttackState.PAUSED;
+          case PAUSED -> throw new IllegalStateException("Attack is already paused");
+          case STOPPED -> throw new IllegalStateException("There is no attack to pause");
+        }
+      }
+      case STOPPED -> {
+        switch (attackState) {
+          case RUNNING, PAUSED -> stop();
+          case STOPPED -> throw new IllegalStateException("There is no attack to stop");
+        }
+      }
+    }
   }
 
   public CompletableFuture<?> start() {
@@ -174,7 +209,7 @@ public class AttackManager {
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
-      SFNettyHelper.createEventLoopGroup(0, "Attack-%d".formatted(id));
+      SFNettyHelper.createEventLoopGroup(0, "Attack-%s".formatted(id));
 
     var protocolVersion =
       settingsHolder.get(BotSettings.PROTOCOL_VERSION, s -> {
@@ -321,5 +356,12 @@ public class AttackManager {
     eventBus.call(new AttackEndedEvent(this));
 
     logger.info("Attack stopped");
+  }
+
+  public InstanceListResponse.Instance toProto() {
+    return InstanceListResponse.Instance.newBuilder()
+      .setId(id.toString())
+      .setFriendlyName(friendlyName)
+      .build();
   }
 }

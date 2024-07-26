@@ -23,7 +23,7 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.ServerPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.attack.AttackInitEvent;
+import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
@@ -69,17 +69,16 @@ import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -110,8 +109,7 @@ public class SoulFireServer {
   @Getter
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final Map<String, String> serviceServerConfig = new HashMap<>();
-  private final Int2ObjectMap<AttackManager> attacks =
-    Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
+  private final Map<UUID, InstanceManager> instances = Collections.synchronizedMap(new HashMap<>());
   private final RPCServer rpcServer;
   private final ServerSettingsRegistry settingsRegistry;
   private final SecretKey jwtSecretKey;
@@ -320,31 +318,39 @@ public class SoulFireServer {
     }
   }
 
-  public int startAttack(SettingsHolder settingsHolder) {
-    var attackManager = new AttackManager(this, settingsHolder);
-    SoulFireAPI.postEvent(new AttackInitEvent(attackManager));
+  public UUID createInstance(String friendlyName) {
+    var attackManager = new InstanceManager(UUID.randomUUID(), friendlyName, this, SettingsHolder.EMPTY);
+    SoulFireAPI.postEvent(new InstanceInitEvent(attackManager));
 
-    attacks.put(attackManager.id(), attackManager);
+    instances.put(attackManager.id(), attackManager);
 
     attackManager.start();
 
-    log.debug("Started attack with id {}", attackManager.id());
+    log.debug("Started instance with id {}", attackManager.id());
 
     return attackManager.id();
   }
 
   public void toggleAttackState(int id, boolean pause) {
-    attacks.get(id).attackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
+    instances.get(id).attackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
   }
 
   public CompletableFuture<?> stopAllAttacks() {
     return CompletableFuture.allOf(
-      Set.copyOf(attacks.keySet()).stream()
+      Set.copyOf(instances.keySet()).stream()
         .map(this::stopAttack)
         .toArray(CompletableFuture[]::new));
   }
 
-  public CompletableFuture<?> stopAttack(int id) {
-    return attacks.remove(id).stop();
+  public CompletableFuture<?> stopAttack(UUID id) {
+    return instances.get(id).stop();
+  }
+
+  public CompletableFuture<?> deleteInstance(UUID id) {
+    return instances.remove(id).stop();
+  }
+
+  public InstanceManager getInstance(UUID id) {
+    return instances.get(id);
   }
 }

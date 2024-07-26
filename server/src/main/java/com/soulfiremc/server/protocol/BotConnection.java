@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
@@ -73,7 +73,7 @@ public final class BotConnection {
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
-  private final AttackManager attackManager;
+  private final InstanceManager instanceManager;
   private final SettingsHolder settingsHolder;
   private final Logger logger;
   private final MinecraftProtocol protocol;
@@ -92,7 +92,7 @@ public final class BotConnection {
 
   public BotConnection(
     BotConnectionFactory factory,
-    AttackManager attackManager,
+    InstanceManager instanceManager,
     SettingsHolder settingsHolder,
     Logger logger,
     MinecraftProtocol protocol,
@@ -103,7 +103,7 @@ public final class BotConnection {
     SFProxy proxyData,
     EventLoopGroup eventLoopGroup) {
     this.factory = factory;
-    this.attackManager = attackManager;
+    this.instanceManager = instanceManager;
     this.settingsHolder = settingsHolder;
     this.logger = logger;
     this.scheduler = new SoulFireScheduler(logger, runnable -> () -> {
@@ -137,7 +137,7 @@ public final class BotConnection {
   public CompletableFuture<?> connect() {
     return CompletableFuture.runAsync(
       () -> {
-        attackManager.eventBus().call(new PreBotConnectEvent(this));
+        instanceManager.eventBus().call(new PreBotConnectEvent(this));
         session.connect(true);
       });
   }

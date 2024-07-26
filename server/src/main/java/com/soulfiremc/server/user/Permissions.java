@@ -22,14 +22,14 @@ public class Permissions {
     new Permission("soulfire.command_execution", "Allows the client to execute commands");
   public static final Permission COMMAND_COMPLETION =
     new Permission("soulfire.command_completion", "Allows the client to tab complete commands");
-  public static final Permission COMMAND_HISTORY =
-    new Permission("soulfire.command_history", "Allows the client to view command history");
-  public static final Permission START_ATTACK =
-    new Permission("soulfire.start_attack", "Allows the client to start an attack");
-  public static final Permission TOGGLE_ATTACK =
-    new Permission("soulfire.toggle_attack", "Allows the client to toggle an attack");
-  public static final Permission STOP_ATTACK =
-    new Permission("soulfire.stop_attack", "Allows the client to stop an attack");
+  public static final Permission CREATE_INSTANCES =
+    new Permission("soulfire.create_instances", "Allows the client to create an instance");
+  public static final Permission UPDATE_INSTANCES =
+    new Permission("soulfire.update_instances", "Allows the client to update an instance");
+  public static final Permission DELETE_INSTANCES =
+    new Permission("soulfire.delete_instances", "Allows the client to delete an instance");
+  public static final Permission CHANGE_INSTANCE_STATE =
+    new Permission("soulfire.change_instance_state", "Allows the client to change the state of an instance");
   public static final Permission AUTHENTICATE_MC_ACCOUNT =
     new Permission("soulfire.authenticate_mc_account", "Allows the client to authenticate or refresh a Minecraft account");
   public static final Permission CHECK_PROXY =

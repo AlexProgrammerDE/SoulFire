@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.api.event.attack;
 
-import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 
 /**
- * This event is called right after an AttackManager is created and before any attack is scheduled.
- * This is intentionally in a global scope for any listener to subscribe to this AttackManager.
+ * This event is called right after an InstanceManager is created and before any attack is scheduled.
+ * This is intentionally in a global scope for any listener to subscribe to this InstanceManager.
  *
- * @param attackManager The attack manager instance.
+ * @param instanceManager The instance manager instance.
  */
-public record AttackInitEvent(AttackManager attackManager) implements SoulFireGlobalEvent {}
+public record InstanceInitEvent(InstanceManager instanceManager) implements SoulFireGlobalEvent {}

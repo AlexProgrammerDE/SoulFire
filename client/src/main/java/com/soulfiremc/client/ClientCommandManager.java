@@ -28,9 +28,15 @@ import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
-import com.soulfiremc.grpc.generated.AttackStartResponse;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandRequest;
+import com.soulfiremc.grpc.generated.InstanceCreateRequest;
+import com.soulfiremc.grpc.generated.InstanceCreateResponse;
+import com.soulfiremc.grpc.generated.InstanceState;
+import com.soulfiremc.grpc.generated.InstanceStateChangeRequest;
+import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
+import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
+import com.soulfiremc.grpc.generated.InstanceUpdateConfigResponse;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -56,19 +62,54 @@ public class ClientCommandManager implements PlatformCommandManager<CommandSourc
             "Start a attack using the current settings",
             c -> {
               rpcClient
-                .attackStub()
-                .startAttack(
-                  clientSettingsManager.exportSettingsProto(),
+                .instanceStub()
+                .createInstance(
+                  InstanceCreateRequest.newBuilder().setFriendlyName("cli-attack").build(),
                   new StreamObserver<>() {
                     @Override
-                    public void onNext(AttackStartResponse value) {
-                      log.debug("Started bot attack with id {}", value.getId());
-                      // TODO: Sync with GUI state somehow
+                    public void onNext(InstanceCreateResponse value) {
+                      rpcClient
+                        .instanceStub().updateInstanceConfig(InstanceUpdateConfigRequest.newBuilder()
+                          .setId(value.getId())
+                          .setConfig(clientSettingsManager.exportSettingsProto())
+                          .build(), new StreamObserver<>() {
+                          @Override
+                          public void onNext(InstanceUpdateConfigResponse instanceUpdateResponse) {
+                            rpcClient
+                              .instanceStub().changeInstanceState(InstanceStateChangeRequest.newBuilder()
+                                .setId(value.getId())
+                                .setState(InstanceState.RUNNING)
+                                .build(), new StreamObserver<>() {
+                                @Override
+                                public void onNext(InstanceStateChangeResponse instanceStateChangeResponse) {
+                                  log.info("Attack started!");
+                                }
+
+                                @Override
+                                public void onError(Throwable throwable) {
+                                  log.error("Error while starting attack!", throwable);
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                }
+                              });
+                          }
+
+                          @Override
+                          public void onError(Throwable throwable) {
+                            log.error("Error while updating instance!", throwable);
+                          }
+
+                          @Override
+                          public void onCompleted() {
+                          }
+                        });
                     }
 
                     @Override
                     public void onError(Throwable t) {
-                      log.error("Error while starting bot attack!", t);
+                      log.error("Error while creating instance!", t);
                     }
 
                     @Override

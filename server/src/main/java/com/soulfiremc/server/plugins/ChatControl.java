@@ -49,7 +49,7 @@ public class ChatControl implements InternalPlugin {
     plainMessage = plainMessage.substring(prefixIndex);
     var command = plainMessage.substring(prefix.length());
     connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
-    var code = connection.attackManager()
+    var code = connection.instanceManager()
       .soulFireServer()
       .injector()
       .getSingleton(ServerCommandManager.class)

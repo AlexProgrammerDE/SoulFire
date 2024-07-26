@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
-import com.soulfiremc.server.api.event.attack.AttackInitEvent;
+import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -182,16 +182,16 @@ public class POVServer implements InternalPlugin {
     return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
   }
 
-  private static TcpServer startPOVServer(SettingsHolder settingsHolder, int port, AttackManager attackManager) {
+  private static TcpServer startPOVServer(SettingsHolder settingsHolder, int port, InstanceManager instanceManager) {
     var faviconBytes = ResourceHelper.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
-      Component.text("Attack POV server for attack %d!".formatted(attackManager.id()))
+      Component.text("Attack POV server for attack %d!".formatted(instanceManager.id()))
         .color(NamedTextColor.GREEN)
         .decorate(TextDecoration.BOLD),
-      new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), attackManager.botConnections().size(), List.of(
+      new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
         getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
@@ -341,7 +341,7 @@ public class POVServer implements InternalPlugin {
                     log.info("{}: {}", profile.getName(), selectedName);
 
                     var first =
-                      attackManager.botConnections().values().stream()
+                      instanceManager.botConnections().values().stream()
                         .filter(c -> c.accountName().equals(selectedName))
                         .findFirst();
                     if (first.isEmpty()) {
@@ -489,7 +489,7 @@ public class POVServer implements InternalPlugin {
                           if (message.startsWith(prefix)) {
                             var command = message.substring(prefix.length());
                             var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
-                            var code = attackManager
+                            var code = instanceManager
                               .soulFireServer()
                               .injector()
                               .getSingleton(ServerCommandManager.class)
@@ -969,9 +969,9 @@ public class POVServer implements InternalPlugin {
   public void onLoad() {
     SoulFireAPI.registerListeners(POVServer.class);
     SoulFireAPI.registerListener(
-      AttackInitEvent.class,
+      InstanceInitEvent.class,
       event -> {
-        var attackManager = event.attackManager();
+        var attackManager = event.instanceManager();
         var settingsHolder = attackManager.settingsHolder();
         if (!settingsHolder.get(POVServerSettings.ENABLED)) {
           return;

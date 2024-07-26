@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.AttackManager;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.settings.BotSettings;
@@ -32,7 +32,7 @@ import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.slf4j.Logger;
 
 public record BotConnectionFactory(
-  AttackManager attackManager,
+  InstanceManager instanceManager,
   UUID botConnectionId,
   ResolveUtil.ResolvedAddress resolvedAddress,
   SettingsHolder settingsHolder,
@@ -50,7 +50,7 @@ public record BotConnectionFactory(
     var botConnection =
       new BotConnection(
         this,
-        attackManager,
+        instanceManager,
         settingsHolder,
         logger,
         protocol,
@@ -69,7 +69,7 @@ public record BotConnectionFactory(
     session.addListener(new SFBaseListener(botConnection, targetState));
     session.addListener(new SFSessionListener(botConnection));
 
-    attackManager.eventBus().call(new BotConnectionInitEvent(botConnection));
+    instanceManager.eventBus().call(new BotConnectionInitEvent(botConnection));
 
     return botConnection;
   }

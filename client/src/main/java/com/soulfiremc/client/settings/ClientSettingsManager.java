@@ -22,7 +22,7 @@ import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
-import com.soulfiremc.grpc.generated.AttackStartRequest;
+import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.settings.ProfileDataStructure;
@@ -108,7 +108,7 @@ public class ClientSettingsManager {
   }
 
   @SneakyThrows
-  public AttackStartRequest exportSettingsProto() {
+  public InstanceConfig exportSettingsProto() {
     var namespaces = new ArrayList<SettingsNamespace>();
 
     for (var namespaceEntry : providers.entrySet()) {
@@ -135,7 +135,7 @@ public class ClientSettingsManager {
           .build());
     }
 
-    return AttackStartRequest.newBuilder()
+    return InstanceConfig.newBuilder()
       .addAllSettings(namespaces)
       .addAllAccounts(
         accountRegistry.accounts().stream()

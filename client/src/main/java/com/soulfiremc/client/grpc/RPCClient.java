@@ -23,9 +23,9 @@ import com.linecorp.armeria.client.grpc.GrpcClients;
 import com.linecorp.armeria.common.HttpHeaderNames;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.grpc.generated.AttackServiceGrpc;
 import com.soulfiremc.grpc.generated.CommandServiceGrpc;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
+import com.soulfiremc.grpc.generated.InstanceServiceGrpc;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
 import com.soulfiremc.grpc.generated.MCAuthServiceGrpc;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
@@ -44,7 +44,7 @@ public class RPCClient {
   private final LogsServiceGrpc.LogsServiceBlockingStub logStubBlocking;
   private final CommandServiceGrpc.CommandServiceStub commandStub;
   private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
-  private final AttackServiceGrpc.AttackServiceStub attackStub;
+  private final InstanceServiceGrpc.InstanceServiceStub instanceStub;
   private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
   private final MCAuthServiceGrpc.MCAuthServiceBlockingStub mcAuthServiceBlocking;
   private final ProxyCheckServiceGrpc.ProxyCheckServiceBlockingStub proxyCheckServiceBlocking;
@@ -72,7 +72,7 @@ public class RPCClient {
     logStubBlocking = clientBuilder.build(LogsServiceGrpc.LogsServiceBlockingStub.class);
     commandStub = clientBuilder.build(CommandServiceGrpc.CommandServiceStub.class);
     commandStubBlocking = clientBuilder.build(CommandServiceGrpc.CommandServiceBlockingStub.class);
-    attackStub = clientBuilder.build(AttackServiceGrpc.AttackServiceStub.class);
+    instanceStub = clientBuilder.build(InstanceServiceGrpc.InstanceServiceStub.class);
     configStubBlocking = clientBuilder.build(ConfigServiceGrpc.ConfigServiceBlockingStub.class);
     mcAuthServiceBlocking = clientBuilder.build(MCAuthServiceGrpc.MCAuthServiceBlockingStub.class);
     proxyCheckServiceBlocking =

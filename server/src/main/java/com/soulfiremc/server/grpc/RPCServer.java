@@ -93,7 +93,7 @@ public class RPCServer {
         .addService(injector.getSingleton(LogServiceImpl.class))
         .addService(injector.getSingleton(ConfigServiceImpl.class))
         .addService(injector.getSingleton(CommandServiceImpl.class))
-        .addService(injector.getSingleton(AttackServiceImpl.class))
+        .addService(injector.getSingleton(InstanceServiceImpl.class))
         .addService(injector.getSingleton(MCAuthServiceImpl.class))
         .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
         // Allow collecting info about callable methods.

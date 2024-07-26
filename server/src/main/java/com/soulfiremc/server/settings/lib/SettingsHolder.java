@@ -18,8 +18,11 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
+import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
-import com.soulfiremc.grpc.generated.AttackStartRequest;
+import com.soulfiremc.grpc.generated.InstanceConfig;
+import com.soulfiremc.grpc.generated.SettingsEntry;
+import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
 import com.soulfiremc.server.settings.property.DoubleProperty;
@@ -29,20 +32,22 @@ import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import lombok.SneakyThrows;
 
 public record SettingsHolder(
-  Object2ObjectMap<PropertyKey, JsonElement> settingsProperties,
+  Map<PropertyKey, JsonElement> settingsProperties,
   List<MinecraftAccount> accounts,
   List<SFProxy> proxies) {
+  public static final SettingsHolder EMPTY = new SettingsHolder(Map.of(), List.of(), List.of());
+
   @SneakyThrows
-  public static SettingsHolder deserialize(AttackStartRequest request) {
-    var settingsProperties = new Object2ObjectOpenHashMap<PropertyKey, JsonElement>();
+  public static SettingsHolder fromProto(InstanceConfig request) {
+    var settingsProperties = new HashMap<PropertyKey, JsonElement>();
 
     for (var namespace : request.getSettingsList()) {
       for (var entry : namespace.getEntriesList()) {
@@ -63,6 +68,44 @@ public record SettingsHolder(
     }
 
     return new SettingsHolder(settingsProperties, accounts, proxies);
+  }
+
+  @SneakyThrows
+  public InstanceConfig toProto() {
+    Map<String, Map<String, Value>> settingsProperties = new HashMap<>();
+    for (var entry : this.settingsProperties.entrySet()) {
+      var key = entry.getKey();
+      var value = entry.getValue();
+
+      var namespace = key.namespace();
+      var innerKey = key.key();
+
+      var valueProto = Value.newBuilder();
+      JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), valueProto);
+
+      settingsProperties.computeIfAbsent(namespace, k -> new HashMap<>())
+        .put(innerKey, valueProto.build());
+    }
+
+    return InstanceConfig.newBuilder()
+      .addAllSettings(settingsProperties.entrySet().stream().map(entry -> {
+        var namespace = entry.getKey();
+
+        return SettingsNamespace.newBuilder()
+          .setNamespace(namespace)
+          .addAllEntries(entry.getValue().entrySet().stream().map(innerEntry -> {
+            var key = innerEntry.getKey();
+            var value = innerEntry.getValue();
+            return SettingsEntry.newBuilder()
+              .setKey(key)
+              .setValue(value)
+              .build();
+          }).toList())
+          .build();
+      }).toList())
+      .addAllAccounts(accounts.stream().map(MinecraftAccount::toProto).toList())
+      .addAllProxies(proxies.stream().map(SFProxy::toProto).toList())
+      .build();
   }
 
   public int get(IntProperty property) {

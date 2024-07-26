@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.soulfiremc.grpc.generated;
+
+import "com/soulfiremc/grpc/generated/common.proto";
+import "google/protobuf/struct.proto";
+
+message SettingsEntry {
+  string key = 1;
+  google.protobuf.Value value = 2;
+}
+
+message SettingsNamespace {
+  string namespace = 1;
+  repeated SettingsEntry entries = 2;
+}
+
+message InstanceConfig {
+  repeated SettingsNamespace settings = 3;
+  repeated MinecraftAccountProto accounts = 4;
+  repeated ProxyProto proxies = 5;
+}
+
+message InstanceCreateRequest {
+  string friendlyName = 1;
+}
+
+message InstanceCreateResponse {
+  string id = 1;
+}
+
+message InstanceDeleteRequest {
+  string id = 1;
+}
+
+message InstanceDeleteResponse {
+}
+
+message InstanceListRequest {
+}
+
+message InstanceListResponse {
+  message Instance {
+    string id = 1;
+    string friendlyName = 2;
+  }
+
+  repeated Instance instances = 1;
+}
+
+message InstanceInfoRequest {
+  string id = 1;
+}
+
+message InstanceInfoResponse {
+  string friendlyName = 1;
+  InstanceConfig config = 2;
+}
+
+message InstanceUpdateFriendlyNameRequest {
+  string id = 1;
+  string friendlyName = 2;
+}
+
+message InstanceUpdateFriendlyNameResponse {
+}
+
+message InstanceUpdateConfigRequest {
+  string id = 1;
+  InstanceConfig config = 2;
+}
+
+message InstanceUpdateConfigResponse {
+}
+
+message InstanceStateRequest {
+  string id = 1;
+}
+
+enum InstanceState {
+  STOPPED = 0;
+  RUNNING = 1;
+  PAUSED = 2;
+}
+
+message InstanceStateResponse {
+  InstanceState state = 1;
+}
+
+message InstanceStateChangeRequest {
+  string id = 1;
+  InstanceState state = 2;
+}
+
+message InstanceStateChangeResponse {
+}
+
+service InstanceService {
+  rpc createInstance(InstanceCreateRequest) returns (InstanceCreateResponse);
+  rpc deleteInstance(InstanceDeleteRequest) returns (InstanceDeleteResponse);
+  rpc listInstances(InstanceListRequest) returns (InstanceListResponse);
+  rpc getInstanceInfo(InstanceInfoRequest) returns (InstanceInfoResponse);
+  rpc updateInstanceFriendlyName(InstanceUpdateFriendlyNameRequest) returns (InstanceUpdateFriendlyNameResponse);
+  rpc updateInstanceConfig(InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse);
+  rpc getInstanceState(InstanceStateRequest) returns (InstanceStateResponse);
+  rpc changeInstanceState(InstanceStateChangeRequest) returns (InstanceStateChangeResponse);
+}
