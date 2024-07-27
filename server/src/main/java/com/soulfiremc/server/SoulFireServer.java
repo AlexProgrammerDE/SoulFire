@@ -324,9 +324,7 @@ public class SoulFireServer {
 
     instances.put(attackManager.id(), attackManager);
 
-    attackManager.start();
-
-    log.debug("Started instance with id {}", attackManager.id());
+    log.debug("Created instance with id {}", attackManager.id());
 
     return attackManager.id();
   }
