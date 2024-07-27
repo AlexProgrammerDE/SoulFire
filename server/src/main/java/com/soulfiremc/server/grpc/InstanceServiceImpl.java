@@ -29,8 +29,6 @@ import com.soulfiremc.grpc.generated.InstanceServiceGrpc;
 import com.soulfiremc.grpc.generated.InstanceState;
 import com.soulfiremc.grpc.generated.InstanceStateChangeRequest;
 import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
-import com.soulfiremc.grpc.generated.InstanceStateRequest;
-import com.soulfiremc.grpc.generated.InstanceStateResponse;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigResponse;
 import com.soulfiremc.grpc.generated.InstanceUpdateFriendlyNameRequest;
@@ -104,6 +102,11 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsHolder().toProto())
+        .setState(switch (soulFireServer.getInstance(instanceId).attackState()) {
+          case RUNNING -> InstanceState.RUNNING;
+          case PAUSED -> InstanceState.PAUSED;
+          case STOPPED -> InstanceState.STOPPED;
+        })
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -142,25 +145,6 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance state", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
-  }
-
-  @Override
-  public void getInstanceState(InstanceStateRequest request, StreamObserver<InstanceStateResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getId());
-
-    try {
-      responseObserver.onNext(InstanceStateResponse.newBuilder()
-        .setState(switch (soulFireServer.getInstance(instanceId).attackState()) {
-          case RUNNING -> InstanceState.RUNNING;
-          case PAUSED -> InstanceState.PAUSED;
-          case STOPPED -> InstanceState.STOPPED;
-        })
-        .build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error getting instance state", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
