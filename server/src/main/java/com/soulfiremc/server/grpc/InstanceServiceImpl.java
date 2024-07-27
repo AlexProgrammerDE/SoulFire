@@ -102,7 +102,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsHolder().toProto())
-        .setState(switch (soulFireServer.getInstance(instanceId).attackState()) {
+        .setState(switch (instance.attackState()) {
           case RUNNING -> InstanceState.RUNNING;
           case PAUSED -> InstanceState.PAUSED;
           case STOPPED -> InstanceState.STOPPED;
