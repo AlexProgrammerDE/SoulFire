@@ -67,7 +67,7 @@ public class SFSparkPlugin implements SparkPlugin {
 
   @Override
   public void executeAsync(final Runnable task) {
-    server.threadPool().submit(task);
+    server.scheduler().schedule(task);
   }
 
   @Override

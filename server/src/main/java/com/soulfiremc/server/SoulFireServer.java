@@ -80,8 +80,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.crypto.SecretKey;
 import lombok.Getter;
@@ -105,8 +103,7 @@ public class SoulFireServer {
 
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
-  @Getter
-  private final ExecutorService threadPool = Executors.newCachedThreadPool();
+  private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
   private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Map<UUID, InstanceManager> instances = Collections.synchronizedMap(new HashMap<>());
   private final RPCServer rpcServer;
@@ -307,7 +304,7 @@ public class SoulFireServer {
     stopAllAttacks().join();
 
     // Shutdown scheduled tasks
-    threadPool.shutdown();
+    scheduler.shutdown();
 
     // Shut down RPC
     try {
