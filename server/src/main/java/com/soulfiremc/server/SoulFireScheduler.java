@@ -24,6 +24,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 
 @RequiredArgsConstructor
@@ -34,7 +35,8 @@ public class SoulFireScheduler {
   private final ForkJoinPool mainThreadExecutor;
   private final Logger logger;
   private final Function<Runnable, Runnable> runnableWrapper;
-  private boolean shutdown = false;
+  @Setter
+  private boolean blockNewTasks = false;
 
   public SoulFireScheduler(Logger logger) {
     this(logger, r -> r);
@@ -53,7 +55,7 @@ public class SoulFireScheduler {
   @SuppressWarnings("BusyWait")
   public void managementTask() {
     try {
-      while (!shutdown) {
+      while (!blockNewTasks) {
         synchronized (executionQueue) {
           while (!executionQueue.isEmpty() && executionQueue.first().isReady()) {
             var timedRunnable = executionQueue.dequeue();
@@ -69,7 +71,7 @@ public class SoulFireScheduler {
   }
 
   public void schedule(Runnable command) {
-    if (shutdown) {
+    if (blockNewTasks) {
       return;
     }
 
@@ -77,7 +79,7 @@ public class SoulFireScheduler {
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
-    if (shutdown) {
+    if (blockNewTasks) {
       return;
     }
 
@@ -87,7 +89,7 @@ public class SoulFireScheduler {
   }
 
   public void scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
-    if (shutdown) {
+    if (blockNewTasks) {
       return;
     }
 
@@ -98,7 +100,7 @@ public class SoulFireScheduler {
   }
 
   public void scheduleWithFixedDelay(Runnable command, long delay, long period, TimeUnit unit) {
-    if (shutdown) {
+    if (blockNewTasks) {
       return;
     }
 
@@ -109,7 +111,7 @@ public class SoulFireScheduler {
   }
 
   public void scheduleWithRandomDelay(Runnable command, long minDelay, long maxDelay, TimeUnit unit) {
-    if (shutdown) {
+    if (blockNewTasks) {
       return;
     }
 
@@ -119,14 +121,14 @@ public class SoulFireScheduler {
     }, RandomUtil.getRandomLong(minDelay, maxDelay), unit);
   }
 
-  public void drain() {
+  public void drainQueue() {
     synchronized (executionQueue) {
       executionQueue.clear();
     }
   }
 
   public void shutdown() {
-    shutdown = true;
+    blockNewTasks = true;
     mainThreadExecutor.shutdown();
   }
 

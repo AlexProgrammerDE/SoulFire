@@ -321,7 +321,8 @@ public class InstanceManager {
 
   private void stopInternal() {
     logger.info("Draining attack executor");
-    scheduler.drain();
+    scheduler.blockNewTasks(true);
+    scheduler.drainQueue();
 
     logger.info("Disconnecting bots");
     do {
@@ -355,6 +356,7 @@ public class InstanceManager {
     // Notify plugins of state change
     eventBus.call(new AttackEndedEvent(this));
 
+    scheduler.blockNewTasks(false);
     logger.info("Attack stopped");
   }
 
