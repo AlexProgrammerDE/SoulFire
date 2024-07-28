@@ -67,6 +67,7 @@ import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
+import org.geysermc.mcprotocollib.network.tcp.TcpFlowControlHandler;
 import org.geysermc.mcprotocollib.network.tcp.TcpPacketCodec;
 import org.geysermc.mcprotocollib.network.tcp.TcpPacketCompression;
 import org.geysermc.mcprotocollib.network.tcp.TcpPacketEncryptor;
@@ -221,6 +222,7 @@ public class ViaClientSession extends TcpSession {
             // Inject Via codec
             pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
+            pipeline.addLast("flow-control", new TcpFlowControlHandler());
             pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
             pipeline.addLast("manager", ViaClientSession.this);
 
