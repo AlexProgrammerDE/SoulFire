@@ -20,7 +20,6 @@ package com.soulfiremc.server;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.api.AttackState;
 import com.soulfiremc.server.api.ServerPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
@@ -327,10 +326,6 @@ public class SoulFireServer {
     log.debug("Created instance with id {}", attackManager.id());
 
     return attackManager.id();
-  }
-
-  public void toggleAttackState(int id, boolean pause) {
-    instances.get(id).attackState(pause ? AttackState.PAUSED : AttackState.RUNNING);
   }
 
   public CompletableFuture<?> stopAllAttacks() {

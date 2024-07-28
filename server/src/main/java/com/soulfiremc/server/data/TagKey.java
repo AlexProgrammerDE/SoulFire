@@ -24,7 +24,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
 public record TagKey<T extends RegistryValue<T>>(ResourceKey<? extends Registry<T>> registry, Key key) {
-  @SuppressWarnings("unchecked")
   public static <T extends RegistryValue<T>> TagKey<T> key(@KeyPattern String key, ResourceKey<?> registry) {
     return key(Key.key(key), registry);
   }

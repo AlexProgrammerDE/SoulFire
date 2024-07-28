@@ -399,7 +399,7 @@ public class ViaClientSession extends TcpSession {
   }
 
   @Override
-  public void disconnect(Component reason, Throwable cause) {
+  public void disconnect(@NotNull Component reason, Throwable cause) {
     super.disconnect(reason, cause);
   }
 

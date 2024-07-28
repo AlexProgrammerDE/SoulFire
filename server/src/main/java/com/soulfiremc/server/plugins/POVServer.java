@@ -24,7 +24,7 @@ import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
-import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
+import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -188,7 +188,7 @@ public class POVServer implements InternalPlugin {
 
     server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
-      Component.text("Attack POV server for attack %d!".formatted(instanceManager.id()))
+      Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
         .color(NamedTextColor.GREEN)
         .decorate(TextDecoration.BOLD),
       new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
@@ -968,8 +968,8 @@ public class POVServer implements InternalPlugin {
   @Override
   public void onLoad() {
     SoulFireAPI.registerListeners(POVServer.class);
-    SoulFireAPI.registerListener(
-      InstanceInitEvent.class,
+    PluginHelper.registerAttackEventConsumer(
+      AttackStartEvent.class,
       event -> {
         var attackManager = event.instanceManager();
         var settingsHolder = attackManager.settingsHolder();
