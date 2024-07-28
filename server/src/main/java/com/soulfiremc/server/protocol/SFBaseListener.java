@@ -121,7 +121,7 @@ public class SFBaseListener extends SessionAdapter {
           session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
         }
       } else if (packet instanceof ClientboundGameProfilePacket) {
-        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
+        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
         session.send(new ServerboundLoginAcknowledgedPacket(), () -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
       } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
         session.disconnect(loginDisconnectPacket.getReason());
@@ -142,12 +142,12 @@ public class SFBaseListener extends SessionAdapter {
       } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
         session.disconnect(disconnectPacket.getReason());
       } else if (packet instanceof ClientboundStartConfigurationPacket) {
-        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
+        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
         session.send(new ServerboundConfigurationAcknowledgedPacket(), () -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
       }
     } else if (protocol.getInboundState() == ProtocolState.CONFIGURATION) {
       if (packet instanceof ClientboundFinishConfigurationPacket) {
-        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.GAME));
+        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.GAME));
         session.send(new ServerboundFinishConfigurationPacket(), () -> protocol.setOutboundState(ProtocolState.GAME));
       } else if (packet instanceof ClientboundSelectKnownPacks selectKnownPacks) {
         session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
@@ -172,12 +172,12 @@ public class SFBaseListener extends SessionAdapter {
 
     switch (this.targetState) {
       case LOGIN -> {
-        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.LOGIN));
+        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.LOGIN));
         session.send(intention, () -> protocol.setOutboundState(ProtocolState.LOGIN));
         session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
       }
       case STATUS -> {
-        session.switchInboundProtocol(() -> protocol.setInboundState(ProtocolState.STATUS));
+        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.STATUS));
         session.send(intention, () -> protocol.setOutboundState(ProtocolState.STATUS));
         session.send(new ServerboundStatusRequestPacket());
       }

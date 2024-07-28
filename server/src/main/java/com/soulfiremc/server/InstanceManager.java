@@ -320,8 +320,8 @@ public class InstanceManager {
   }
 
   private void stopInternal() {
-    logger.info("Shutting down attack executor");
-    scheduler.shutdown();
+    logger.info("Draining attack executor");
+    scheduler.drain();
 
     logger.info("Disconnecting bots");
     do {

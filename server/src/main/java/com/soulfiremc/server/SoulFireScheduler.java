@@ -119,6 +119,12 @@ public class SoulFireScheduler {
     }, RandomUtil.getRandomLong(minDelay, maxDelay), unit);
   }
 
+  public void drain() {
+    synchronized (executionQueue) {
+      executionQueue.clear();
+    }
+  }
+
   public void shutdown() {
     shutdown = true;
     mainThreadExecutor.shutdown();
