@@ -23,7 +23,7 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.ServerPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.plugins.AutoArmor;
@@ -107,7 +107,7 @@ public class SoulFireServer {
   private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Map<UUID, InstanceManager> instances = Collections.synchronizedMap(new HashMap<>());
   private final RPCServer rpcServer;
-  private final ServerSettingsRegistry settingsRegistry;
+  private final ServerSettingsRegistry instanceSettingsRegistry;
   private final SecretKey jwtSecretKey;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
@@ -219,8 +219,8 @@ public class SoulFireServer {
     }
 
     SoulFireAPI.postEvent(
-      new SettingsRegistryInitEvent(
-        settingsRegistry =
+      new InstanceSettingsRegistryInitEvent(
+        instanceSettingsRegistry =
           new ServerSettingsRegistry()
             // Needs Via loaded to have all protocol versions
             .addClass(BotSettings.class, "Bot Settings", true)
@@ -301,7 +301,7 @@ public class SoulFireServer {
 
   private void shutdownHook() {
     // Shutdown the attacks if there is any
-    stopAllAttacks().join();
+    stopAllAttacksSessions().join();
 
     // Shutdown scheduled tasks
     scheduler.shutdown();
@@ -325,19 +325,19 @@ public class SoulFireServer {
     return attackManager.id();
   }
 
-  public CompletableFuture<?> stopAllAttacks() {
+  public CompletableFuture<?> stopAllAttacksSessions() {
     return CompletableFuture.allOf(
-      Set.copyOf(instances.keySet()).stream()
-        .map(this::stopAttack)
+      Set.copyOf(instances.values()).stream()
+        .map(InstanceManager::stopAttackSession)
         .toArray(CompletableFuture[]::new));
   }
 
   public CompletableFuture<?> stopAttack(UUID id) {
-    return instances.get(id).stop();
+    return instances.get(id).stopAttackPermanently();
   }
 
   public CompletableFuture<?> deleteInstance(UUID id) {
-    return instances.remove(id).stop();
+    return instances.remove(id).stopAttackPermanently();
   }
 
   public InstanceManager getInstance(UUID id) {

@@ -21,7 +21,7 @@ import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -59,7 +59,7 @@ public class ChatControl implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control");
   }
 

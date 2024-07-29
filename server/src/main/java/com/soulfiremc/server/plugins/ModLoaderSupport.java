@@ -21,7 +21,7 @@ import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
@@ -52,7 +52,7 @@ public class ModLoaderSupport implements InternalPlugin {
   private static final char HOSTNAME_SEPARATOR = '\0';
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support");
   }
 

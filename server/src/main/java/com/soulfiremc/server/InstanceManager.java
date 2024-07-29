@@ -147,7 +147,7 @@ public class InstanceManager {
       }
       case STOPPED -> {
         switch (attackState) {
-          case RUNNING, PAUSED -> stop();
+          case RUNNING, PAUSED -> stopAttackPermanently();
           case STOPPED -> throw new IllegalStateException("There is no attack to stop");
         }
       }
@@ -308,7 +308,7 @@ public class InstanceManager {
       });
   }
 
-  public CompletableFuture<?> stop() {
+  public CompletableFuture<?> stopAttackPermanently() {
     if (attackState.isStopped()) {
       return CompletableFuture.completedFuture(null);
     }
@@ -316,48 +316,54 @@ public class InstanceManager {
     logger.info("Stopping bot attack");
     this.attackState = AttackState.STOPPED;
 
-    return CompletableFuture.runAsync(this::stopInternal);
+    return this.stopAttackSession();
   }
 
-  private void stopInternal() {
-    logger.info("Draining attack executor");
-    scheduler.blockNewTasks(true);
-    scheduler.drainQueue();
-
-    logger.info("Disconnecting bots");
-    do {
-      var eventLoopGroups = new HashSet<EventLoopGroup>();
-      var disconnectFuture = new ArrayList<CompletableFuture<?>>();
-      for (var entry : Map.copyOf(botConnections).entrySet()) {
-        disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect));
-        eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
-        botConnections.remove(entry.getKey());
+  public CompletableFuture<?> stopAttackSession() {
+    return CompletableFuture.runAsync(() -> {
+      if (attackState.isStopped()) {
+        return;
       }
 
-      logger.info("Waiting for all bots to fully disconnect");
-      for (var future : disconnectFuture) {
-        try {
-          future.get();
-        } catch (InterruptedException | ExecutionException e) {
-          logger.error("Error while shutting down", e);
+      logger.info("Draining attack executor");
+      scheduler.blockNewTasks(true);
+      scheduler.drainQueue();
+
+      logger.info("Disconnecting bots");
+      do {
+        var eventLoopGroups = new HashSet<EventLoopGroup>();
+        var disconnectFuture = new ArrayList<CompletableFuture<?>>();
+        for (var entry : Map.copyOf(botConnections).entrySet()) {
+          disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect));
+          eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
+          botConnections.remove(entry.getKey());
         }
-      }
 
-      logger.info("Shutting down attack event loop groups");
-      for (var eventLoopGroup : eventLoopGroups) {
-        try {
-          eventLoopGroup.shutdownGracefully().get();
-        } catch (InterruptedException | ExecutionException e) {
-          logger.error("Error while shutting down", e);
+        logger.info("Waiting for all bots to fully disconnect");
+        for (var future : disconnectFuture) {
+          try {
+            future.get();
+          } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error while shutting down", e);
+          }
         }
-      }
-    } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
-    // Notify plugins of state change
-    eventBus.call(new AttackEndedEvent(this));
+        logger.info("Shutting down attack event loop groups");
+        for (var eventLoopGroup : eventLoopGroups) {
+          try {
+            eventLoopGroup.shutdownGracefully().get();
+          } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error while shutting down", e);
+          }
+        }
+      } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
-    scheduler.blockNewTasks(false);
-    logger.info("Attack stopped");
+      // Notify plugins of state change
+      eventBus.call(new AttackEndedEvent(this));
+
+      scheduler.blockNewTasks(false);
+      logger.info("Attack stopped");
+    });
   }
 
   public InstanceListResponse.Instance toProto() {

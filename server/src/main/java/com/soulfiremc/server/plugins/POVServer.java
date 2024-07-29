@@ -25,7 +25,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
@@ -174,7 +174,7 @@ public class POVServer implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(POVServerSettings.class, "POV Server");
   }
 

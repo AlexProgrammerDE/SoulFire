@@ -21,7 +21,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.Property;
@@ -73,7 +73,7 @@ public class ChatMessageLogger implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger");
   }
 

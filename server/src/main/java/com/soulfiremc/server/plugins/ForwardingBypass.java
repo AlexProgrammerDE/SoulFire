@@ -22,7 +22,7 @@ import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.IdentifiedKey;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -149,7 +149,7 @@ public class ForwardingBypass implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass");
   }
 

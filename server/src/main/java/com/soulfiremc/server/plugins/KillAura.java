@@ -20,7 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -39,7 +39,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 @Slf4j
 public class KillAura implements InternalPlugin {
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");
   }
 

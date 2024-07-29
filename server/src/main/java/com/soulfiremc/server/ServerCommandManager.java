@@ -469,7 +469,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryAttack(
                 c,
                 attackManager -> {
-                  soulFireServer.stopAttack(attackManager.id());
+                  soulFireServer.stopAttack(attackManager.id()).join();
                   return Command.SINGLE_SUCCESS;
                 }))));
 

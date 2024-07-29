@@ -84,7 +84,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
           .setUsername(ServerRPCConstants.USER_CONTEXT_KEY.get().getUsername())
           .addAllPermissions(getPermissions())
           .addAllPlugins(getExtensions())
-          .addAllPluginSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
+          .addAllPluginSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

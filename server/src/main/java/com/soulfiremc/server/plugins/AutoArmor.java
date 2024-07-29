@@ -20,7 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
-import com.soulfiremc.server.api.event.lifecycle.SettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.ArmorType;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -119,7 +119,7 @@ public class AutoArmor implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(SettingsRegistryInitEvent event) {
+  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor");
   }
 
