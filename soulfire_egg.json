@@ -51,6 +51,17 @@
       "rules": "required|string|max:9999",
       "sort": null,
       "field_type": "text"
+    },
+    {
+      "name": "JVM JAR",
+      "description": "Path to the SoulFire jar file to run. The default value points to the jar bundled with the image.",
+      "env_variable": "SF_JAR",
+      "default_value": "/soulfire/soulfire.jar",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:9999",
+      "sort": null,
+      "field_type": "text"
     }
   ]
 }
