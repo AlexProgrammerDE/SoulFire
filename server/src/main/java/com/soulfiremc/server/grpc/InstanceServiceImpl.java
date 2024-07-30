@@ -26,7 +26,6 @@ import com.soulfiremc.grpc.generated.InstanceInfoResponse;
 import com.soulfiremc.grpc.generated.InstanceListRequest;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.grpc.generated.InstanceServiceGrpc;
-import com.soulfiremc.grpc.generated.InstanceState;
 import com.soulfiremc.grpc.generated.InstanceStateChangeRequest;
 import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
@@ -102,11 +101,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsHolder().toProto())
-        .setState(switch (instance.attackState()) {
-          case RUNNING -> InstanceState.RUNNING;
-          case PAUSED -> InstanceState.PAUSED;
-          case STOPPED -> InstanceState.STOPPED;
-        })
+        .setState(instance.attackState().toProto())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -156,12 +151,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
     try {
       var instance = soulFireServer.getInstance(instanceId);
-      instance.switchToState(switch (request.getState()) {
-        case RUNNING -> AttackState.RUNNING;
-        case PAUSED -> AttackState.PAUSED;
-        case STOPPED -> AttackState.STOPPED;
-        case UNRECOGNIZED -> throw new IllegalArgumentException("Invalid state");
-      });
+      instance.switchToState(AttackState.fromProto(request.getState()));
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

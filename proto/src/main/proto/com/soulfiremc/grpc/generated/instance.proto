@@ -38,6 +38,12 @@ message InstanceDeleteRequest {
 message InstanceDeleteResponse {
 }
 
+enum InstanceState {
+  STOPPED = 0;
+  RUNNING = 1;
+  PAUSED = 2;
+}
+
 message InstanceListRequest {
 }
 
@@ -45,15 +51,10 @@ message InstanceListResponse {
   message Instance {
     string id = 1;
     string friendlyName = 2;
+    InstanceState state = 3;
   }
 
   repeated Instance instances = 1;
-}
-
-enum InstanceState {
-  STOPPED = 0;
-  RUNNING = 1;
-  PAUSED = 2;
 }
 
 message InstanceInfoRequest {

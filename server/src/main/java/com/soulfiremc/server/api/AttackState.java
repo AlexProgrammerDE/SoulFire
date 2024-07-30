@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.api;
 
+import com.soulfiremc.grpc.generated.InstanceState;
+
 public enum AttackState {
   RUNNING,
   PAUSED,
@@ -36,5 +38,22 @@ public enum AttackState {
 
   public boolean isInactive() {
     return isPaused() || isStopped();
+  }
+
+  public InstanceState toProto() {
+    return switch (this) {
+      case RUNNING -> InstanceState.RUNNING;
+      case PAUSED -> InstanceState.PAUSED;
+      case STOPPED -> InstanceState.STOPPED;
+    };
+  }
+
+  public static AttackState fromProto(InstanceState state) {
+    return switch (state) {
+      case RUNNING -> RUNNING;
+      case PAUSED -> PAUSED;
+      case STOPPED -> STOPPED;
+      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized state");
+    };
   }
 }

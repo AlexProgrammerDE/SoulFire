@@ -370,6 +370,7 @@ public class InstanceManager {
     return InstanceListResponse.Instance.newBuilder()
       .setId(id.toString())
       .setFriendlyName(friendlyName)
+      .setState(attackState.toProto())
       .build();
   }
 }
