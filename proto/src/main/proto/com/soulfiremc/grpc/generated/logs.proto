@@ -4,8 +4,15 @@ option java_multiple_files = true;
 
 package com.soulfiremc.grpc.generated;
 
+message PreviousLogRequest {
+  int32 count = 1;
+}
+
+message PreviousLogResponse {
+  repeated string messages = 1;
+}
+
 message LogRequest {
-  uint32 previous = 1;
 }
 
 message LogResponse {
@@ -13,5 +20,6 @@ message LogResponse {
 }
 
 service LogsService {
+  rpc getPrevious(PreviousLogRequest) returns (PreviousLogResponse);
   rpc subscribe(LogRequest) returns (stream LogResponse);
 }

@@ -20,6 +20,8 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.LogRequest;
 import com.soulfiremc.grpc.generated.LogResponse;
 import com.soulfiremc.grpc.generated.LogsServiceGrpc;
+import com.soulfiremc.grpc.generated.PreviousLogRequest;
+import com.soulfiremc.grpc.generated.PreviousLogResponse;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.util.SFLogAppender;
 import io.grpc.Status;
@@ -55,23 +57,30 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   }
 
   @Override
+  public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS);
+
+    try {
+      responseObserver.onNext(PreviousLogResponse.newBuilder()
+        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount()))
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting previous logs", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS);
 
     try {
       var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver);
       subscribers.put(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(), sender);
-
-      sendPreviousLogs(request.getPrevious(), sender);
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
-  }
-
-  private void sendPreviousLogs(int requestPrevious, ConnectionMessageSender sender) {
-    for (var log : SFLogAppender.INSTANCE.logs().getNewest(requestPrevious)) {
-      sender.sendMessage(log);
     }
   }
 
