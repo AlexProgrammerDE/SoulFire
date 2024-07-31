@@ -1,10 +1,11 @@
 syntax = "proto3";
 
+option java_package = "com.soulfiremc.grpc.generated";
 option java_multiple_files = true;
 
-package com.soulfiremc.grpc.generated;
+package soulfire.v1;
 
-import "com/soulfiremc/grpc/generated/common.proto";
+import "soulfire/common.proto";
 
 message AuthRequest {
   MinecraftAccountProto.AccountTypeProto service = 1;

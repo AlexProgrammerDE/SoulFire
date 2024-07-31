@@ -1,8 +1,9 @@
 syntax = "proto3";
 
+option java_package = "com.soulfiremc.grpc.generated";
 option java_multiple_files = true;
 
-package com.soulfiremc.grpc.generated;
+package soulfire.v1;
 
 import "google/protobuf/struct.proto";
 
