@@ -20,6 +20,8 @@
 Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
 performance.
 
+This repository only contains the CLI and server implementation. The official GUI client is in [another repository](https://github.com/AlexProgrammerDE/SoulFireClient).
+
 ---
 
 > [!WARNING]
