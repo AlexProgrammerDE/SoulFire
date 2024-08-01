@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
+import java.util.stream.IntStream;
+
 public class MathHelper {
   private MathHelper() {}
 
@@ -76,5 +78,21 @@ public class MathHelper {
 
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
+  }
+
+  /**
+   * Sums the values of the stream, returning Integer.MAX_VALUE if the sum overflows.
+   *
+   * @param stream The stream to sum
+   * @return The sum of the stream, or Integer.MAX_VALUE if the sum overflows
+   */
+  public static int sumCapOverflow(IntStream stream) {
+    return stream.reduce(0, (a, b) -> {
+      if (a > Integer.MAX_VALUE - b) {
+        return Integer.MAX_VALUE;
+      }
+
+      return a + b;
+    });
   }
 }

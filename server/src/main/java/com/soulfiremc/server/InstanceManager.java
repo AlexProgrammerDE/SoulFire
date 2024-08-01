@@ -32,6 +32,7 @@ import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -158,7 +159,7 @@ public class InstanceManager {
       .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
       .toList());
     {
-      var maxBots = proxies.stream().anyMatch(ProxyData::unlimited) ? Integer.MAX_VALUE : proxies.stream().mapToInt(ProxyData::maxBots).sum();
+      var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
       if (botAmount > maxBots) {
         logger.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
         logger.warn("Continuing with {} bots.", maxBots);
