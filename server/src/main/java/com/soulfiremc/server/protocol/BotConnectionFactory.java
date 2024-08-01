@@ -26,18 +26,15 @@ import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
-import java.util.UUID;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.slf4j.Logger;
 
 public record BotConnectionFactory(
   InstanceManager instanceManager,
-  UUID botConnectionId,
   ResolveUtil.ResolvedAddress resolvedAddress,
   SettingsHolder settingsHolder,
   Logger logger,
-  MinecraftProtocol protocol,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
   SFProxy proxyData,
@@ -47,6 +44,11 @@ public record BotConnectionFactory(
   }
 
   public BotConnection prepareConnectionInternal(ProtocolState targetState) {
+    var protocol = new MinecraftProtocol();
+
+    // Make sure this options is set to false, we have our own listeners
+    protocol.setUseDefaultListeners(false);
+
     var botConnection =
       new BotConnection(
         this,

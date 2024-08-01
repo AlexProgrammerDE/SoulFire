@@ -26,12 +26,25 @@ import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.BuiltinSettingsConstants;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.api.protocol.version.VersionType;
+import java.util.function.Function;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
+  public static final Function<String, ProtocolVersion> PROTOCOL_VERSION_PARSER =
+    version -> {
+      var split = version.split("\\|");
+      if (split.length == 1) {
+        return ProtocolVersion.getClosest(split[0]);
+      }
+
+      return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
+    };
+
   private static final Property.Builder BUILDER =
     Property.builder(BuiltinSettingsConstants.BOT_SETTINGS_ID);
   public static final StringProperty ADDRESS =

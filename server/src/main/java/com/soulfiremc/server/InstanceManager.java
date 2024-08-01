@@ -37,11 +37,7 @@ import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.protocol.version.VersionType;
 import io.netty.channel.EventLoopGroup;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -61,7 +57,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
-import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,33 +95,21 @@ public class InstanceManager {
     this.settingsHolder = settingsHolder;
   }
 
-  private static MinecraftAccount getAccount(
-    SettingsHolder settingsHolder, List<MinecraftAccount> accounts, int botId) {
-    if (accounts.isEmpty()) {
-      return SFOfflineAuthService.createAccount(
-        String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), botId));
-    }
-
-    return accounts.removeFirst();
-  }
-
-  private static Optional<SFProxy> getProxy(
-    int accountsPerProxy, Object2IntMap<SFProxy> proxyUseMap) {
-    if (proxyUseMap.isEmpty()) {
-      return Optional.empty(); // No proxies available
+  private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
+    if (proxies.isEmpty()) {
+      return Optional.empty();
     }
 
     var selectedProxy =
-      proxyUseMap.object2IntEntrySet().stream()
-        .filter(entry -> accountsPerProxy == -1 || entry.getIntValue() < accountsPerProxy)
-        .min(Comparator.comparingInt(Map.Entry::getValue))
+      proxies.stream()
+        .filter(ProxyData::isAvailable)
+        .min(Comparator.comparingInt(ProxyData::availableBots))
         .orElseThrow(
-          () -> new IllegalStateException("No proxies available!")); // Should never happen
+          () -> new IllegalStateException("No proxies available!"));
 
-    // Always present
-    selectedProxy.setValue(selectedProxy.getIntValue() + 1);
+    selectedProxy.useCount().incrementAndGet();
 
-    return Optional.of(selectedProxy.getKey());
+    return Optional.of(selectedProxy.proxy());
   }
 
   public void switchToState(AttackState targetState) {
@@ -170,93 +153,84 @@ public class InstanceManager {
     var botsPerProxy =
       settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
 
-    var proxies = new ArrayList<>(settingsHolder.proxies());
-    var availableProxiesCount = proxies.size(); // How many proxies are available?
-    var maxBots =
-      botsPerProxy > 0
-        ? botsPerProxy * availableProxiesCount
-        : botAmount; // How many bots can be used at max
+    var proxies = new ArrayList<>(settingsHolder.proxies()
+      .stream()
+      .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
+      .toList());
+    {
+      var maxBots = proxies.stream().anyMatch(ProxyData::unlimited) ? Integer.MAX_VALUE : proxies.stream().mapToInt(ProxyData::maxBots).sum();
+      if (botAmount > maxBots) {
+        logger.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
+        logger.warn("Continuing with {} bots.", maxBots);
+        botAmount = maxBots;
+      }
 
-    if (botAmount > maxBots) {
-      logger.warn("You have specified {} bots, but only {} are available.", botAmount, maxBots);
-      logger.warn(
-        "You need {} more proxies to run this amount of bots.",
-        (botAmount - maxBots) / botsPerProxy);
-      logger.warn("Continuing with {} bots.", maxBots);
-      botAmount = maxBots;
+      if (settingsHolder.get(ProxySettings.SHUFFLE_PROXIES)) {
+        Collections.shuffle(proxies);
+      }
     }
 
-    var accounts = new ArrayList<>(settingsHolder.accounts());
-    var availableAccounts = accounts.size();
+    var accountQueue = new ArrayBlockingQueue<MinecraftAccount>(botAmount);
+    {
+      var accounts = new ArrayList<>(settingsHolder.accounts());
+      var availableAccounts = accounts.size();
+      if (availableAccounts > 0) {
+        if (botAmount > availableAccounts) {
+          logger.warn(
+            "You have requested {} bots, but only {} are possible with the current amount of accounts.",
+            botAmount,
+            availableAccounts);
+          logger.warn("Continuing with {} bots.", availableAccounts);
+          botAmount = availableAccounts;
+        }
+      } else {
+        logger.info("No custom accounts provided, generating offline accounts based on name format");
+        for (var i = 0; i < botAmount; i++) {
+          accountQueue.add(SFOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), i + 1)));
+        }
+      }
 
-    if (availableAccounts > 0 && botAmount > availableAccounts) {
-      logger.warn(
-        "You have specified {} bots, but only {} accounts are available.",
-        botAmount,
-        availableAccounts);
-      logger.warn("Continuing with {} bots.", availableAccounts);
-      botAmount = availableAccounts;
-    }
+      if (settingsHolder.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
+        Collections.shuffle(accounts);
+      }
 
-    if (settingsHolder.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
-      Collections.shuffle(accounts);
-    }
-
-    var proxyUseMap = new Object2IntOpenHashMap<SFProxy>();
-    for (var proxy : proxies) {
-      proxyUseMap.put(proxy, 0);
+      accountQueue.addAll(accounts);
     }
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
       SFNettyHelper.createEventLoopGroup(0, "Attack-%s".formatted(id));
 
-    var protocolVersion =
-      settingsHolder.get(BotSettings.PROTOCOL_VERSION, s -> {
-        var split = s.split("\\|");
-        if (split.length == 1) {
-          return ProtocolVersion.getClosest(split[0]);
-        }
-
-        return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
-      });
+    var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
-    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder);
+    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder)
+      .orElseThrow(() -> new IllegalStateException("Could not resolve address"));
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
-    for (var botId = 1; botId <= botAmount; botId++) {
-      var proxyData = getProxy(botsPerProxy, proxyUseMap).orElse(null);
-      var minecraftAccount = getAccount(settingsHolder, accounts, botId);
-
-      // AuthData will be used internally instead of the MCProtocol data
-      var protocol = new MinecraftProtocol();
-
-      // Make sure this options is set to false, otherwise it will cause issues with ViaVersion
-      protocol.setUseDefaultListeners(false);
-
+    while (!accountQueue.isEmpty()) {
+      var minecraftAccount = accountQueue.poll();
+      var proxyData = getProxy(proxies).orElse(null);
       factories.add(
         new BotConnectionFactory(
           this,
-          UUID.randomUUID(),
-          targetAddress.orElseThrow(
-            () -> new IllegalStateException("Could not resolve address")),
+          targetAddress,
           settingsHolder,
           LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
-          protocol,
           minecraftAccount,
           protocolVersion,
           proxyData,
           attackEventLoopGroup));
     }
 
-    if (availableProxiesCount == 0) {
+    var usedProxies = proxies.stream().filter(ProxyData::hasBots).count();
+    if (usedProxies == 0) {
       logger.info("Starting attack at {} with {} bots", address, factories.size());
     } else {
       logger.info(
-        "Starting attack at {} with {} bots and {} proxies",
+        "Starting attack at {} with {} bots and {} active proxies",
         address,
         factories.size(),
-        availableProxiesCount);
+        usedProxies);
     }
 
     eventBus.call(new AttackStartEvent(this));
@@ -372,5 +346,23 @@ public class InstanceManager {
       .setFriendlyName(friendlyName)
       .setState(attackState.toProto())
       .build();
+  }
+
+  private record ProxyData(SFProxy proxy, int maxBots, AtomicInteger useCount) {
+    public boolean unlimited() {
+      return maxBots == -1;
+    }
+
+    public int availableBots() {
+      return unlimited() ? Integer.MAX_VALUE : maxBots - useCount.get();
+    }
+
+    public boolean isAvailable() {
+      return availableBots() > 0;
+    }
+
+    public boolean hasBots() {
+      return useCount.get() > 0;
+    }
   }
 }

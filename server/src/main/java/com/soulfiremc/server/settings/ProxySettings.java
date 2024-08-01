@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.util.BuiltinSettingsConstants;
@@ -26,10 +27,10 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProxySettings implements SettingsObject {
-  private static final Property.Builder builder =
+  private static final Property.Builder BUILDER =
     Property.builder(BuiltinSettingsConstants.PROXY_SETTINGS_ID);
   public static final IntProperty BOTS_PER_PROXY =
-    builder.ofInt(
+    BUILDER.ofInt(
       "bots-per-proxy",
       "Bots per proxy",
       new String[] {"--bots-per-proxy"},
@@ -38,4 +39,11 @@ public class ProxySettings implements SettingsObject {
       -1,
       Integer.MAX_VALUE,
       1);
+  public static final BooleanProperty SHUFFLE_PROXIES =
+    BUILDER.ofBoolean(
+      "shuffle-proxies",
+      "Shuffle proxies",
+      new String[] {"--shuffle-proxies"},
+      "Should the proxy order be random when connecting bots?",
+      false);
 }
