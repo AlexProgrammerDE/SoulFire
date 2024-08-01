@@ -81,18 +81,27 @@ public class MathHelper {
   }
 
   /**
+   * Sums two integers, returning Integer.MAX_VALUE if the sum overflows.
+   *
+   * @param a The first integer to sum
+   * @param b The second integer to sum
+   * @return The sum of the two integers, or Integer.MAX_VALUE if the sum overflows
+   */
+  public static int sumCapOverflow(int a, int b) {
+    if (a > Integer.MAX_VALUE - b) {
+      return Integer.MAX_VALUE;
+    }
+
+    return a + b;
+  }
+
+  /**
    * Sums the values of the stream, returning Integer.MAX_VALUE if the sum overflows.
    *
    * @param stream The stream to sum
    * @return The sum of the stream, or Integer.MAX_VALUE if the sum overflows
    */
   public static int sumCapOverflow(IntStream stream) {
-    return stream.reduce(0, (a, b) -> {
-      if (a > Integer.MAX_VALUE - b) {
-        return Integer.MAX_VALUE;
-      }
-
-      return a + b;
-    });
+    return stream.reduce(0, MathHelper::sumCapOverflow);
   }
 }
