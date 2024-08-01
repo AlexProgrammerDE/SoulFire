@@ -28,6 +28,7 @@ import com.soulfiremc.grpc.generated.ComboOption;
 import com.soulfiremc.grpc.generated.ComboSetting;
 import com.soulfiremc.grpc.generated.DoubleSetting;
 import com.soulfiremc.grpc.generated.IntSetting;
+import com.soulfiremc.grpc.generated.StringListSetting;
 import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
@@ -36,6 +37,7 @@ import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.SingleProperty;
+import com.soulfiremc.server.settings.property.StringListProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -209,6 +211,19 @@ public class ServerSettingsRegistry {
                     .build())
                 .build());
           }
+          case StringListProperty stringListProperty -> entries.add(
+            ClientPluginSettingEntry.newBuilder()
+              .setSingle(
+                fillSingleProperties(stringListProperty)
+                  .setType(
+                    ClientPluginSettingType.newBuilder()
+                      .setStringList(
+                        StringListSetting.newBuilder()
+                          .addAllDef(stringListProperty.defaultValue())
+                          .build())
+                      .build())
+                  .build())
+              .build());
         }
       }
 

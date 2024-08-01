@@ -17,11 +17,13 @@
  */
 package com.soulfiremc.server.settings.property;
 
-public sealed interface SingleProperty extends Property
-  permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, StringListProperty, StringProperty {
-  String uiName();
+import java.util.List;
 
-  String[] cliFlags();
-
-  String description();
-}
+public record StringListProperty(
+  String namespace,
+  String key,
+  String uiName,
+  String[] cliFlags,
+  String description,
+  List<String> defaultValue)
+  implements SingleProperty {}

@@ -46,6 +46,10 @@ message ComboSetting {
   int32 def = 2;
 }
 
+message StringListSetting {
+  repeated string def = 1;
+}
+
 // A single setting type with optional default value
 message ClientPluginSettingType {
   oneof value {
@@ -54,6 +58,7 @@ message ClientPluginSettingType {
     DoubleSetting double = 3;
     BoolSetting bool = 4;
     ComboSetting combo = 5;
+    StringListSetting stringList = 6;
   }
 }
 

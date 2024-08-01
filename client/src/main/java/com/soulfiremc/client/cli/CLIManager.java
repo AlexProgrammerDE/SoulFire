@@ -20,6 +20,8 @@ package com.soulfiremc.client.cli;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.google.common.util.concurrent.AtomicDouble;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
@@ -203,6 +205,43 @@ public class CLIManager {
                     propertyKey, s -> reference.set(s.getAsString()));
                   clientSettingsManager.registerProvider(
                     propertyKey, () -> new JsonPrimitive(reference.get()));
+
+                  yield optionSpec;
+                }
+                case STRINGLIST -> {
+                  var stringListEntry = settingType.getStringList();
+                  var reference = new AtomicReference<String[]>();
+                  var optionSpec =
+                    CommandLine.Model.OptionSpec.builder(
+                        singleEntry.getCliFlagsList().toArray(new String[0]))
+                      .description(description)
+                      .type(String[].class)
+                      .initialValue(stringListEntry.getDefList().toArray(new String[0]))
+                      .hasInitialValue(true)
+                      .setter(
+                        new CommandLine.Model.ISetter() {
+                          @Override
+                          public <T> T set(T value) {
+                            return (T) reference.getAndSet((String[]) value);
+                          }
+                        })
+                      .build();
+
+                  clientSettingsManager.registerListener(
+                    propertyKey, s -> reference.set(s.getAsJsonArray()
+                      .asList()
+                      .stream()
+                      .map(JsonElement::getAsString)
+                      .toArray(String[]::new)));
+                  clientSettingsManager.registerProvider(
+                    propertyKey, () -> {
+                      var array = new JsonArray();
+                      for (var element : reference.get()) {
+                        array.add(new JsonPrimitive(element));
+                      }
+
+                      return array;
+                    });
 
                   yield optionSpec;
                 }

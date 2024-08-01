@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.property;
 
 import com.soulfiremc.settings.PropertyKey;
+import java.util.List;
 import java.util.function.Function;
 
 public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
@@ -158,6 +159,11 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
         description,
         ComboProperty.ComboOption.fromEnum(values, mapper),
         defaultValue.ordinal());
+    }
+
+    public StringListProperty ofStringList(
+      String key, String uiName, String[] cliFlags, String description, List<String> defaultValue) {
+      return new StringListProperty(namespace, key, uiName, cliFlags, description, defaultValue);
     }
   }
 }

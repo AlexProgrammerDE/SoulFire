@@ -27,6 +27,7 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
 import com.soulfiremc.server.settings.property.DoubleProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.StringListProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -130,6 +131,10 @@ public record SettingsHolder(
 
   public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
     return get(property, s -> Enum.valueOf(clazz, s));
+  }
+
+  public List<String> get(StringListProperty property) {
+    return List.of(getAsType(property.propertyKey(), property.defaultValue().toArray(new String[0]), String[].class));
   }
 
   public <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
