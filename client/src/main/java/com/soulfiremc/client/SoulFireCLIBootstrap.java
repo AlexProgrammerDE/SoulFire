@@ -21,6 +21,8 @@ import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.Plugin;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
@@ -44,6 +46,8 @@ public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
   @Override
   protected void postMixinMain(String[] args) {
+    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
+
     Consumer<RemoteServerData> remoteServerConsumer =
       remoteServerData -> {
         var rpcClient =

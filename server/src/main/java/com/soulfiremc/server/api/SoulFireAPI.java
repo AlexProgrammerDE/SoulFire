@@ -17,12 +17,65 @@
  */
 package com.soulfiremc.server.api;
 
+import com.soulfiremc.server.plugins.AutoArmor;
+import com.soulfiremc.server.plugins.AutoChatMessage;
+import com.soulfiremc.server.plugins.AutoEat;
+import com.soulfiremc.server.plugins.AutoJump;
+import com.soulfiremc.server.plugins.AutoReconnect;
+import com.soulfiremc.server.plugins.AutoRegister;
+import com.soulfiremc.server.plugins.AutoRespawn;
+import com.soulfiremc.server.plugins.AutoTotem;
+import com.soulfiremc.server.plugins.ChatControl;
+import com.soulfiremc.server.plugins.ChatMessageLogger;
+import com.soulfiremc.server.plugins.ClientBrand;
+import com.soulfiremc.server.plugins.ClientSettings;
+import com.soulfiremc.server.plugins.FakeVirtualHost;
+import com.soulfiremc.server.plugins.ForwardingBypass;
+import com.soulfiremc.server.plugins.KillAura;
+import com.soulfiremc.server.plugins.ModLoaderSupport;
+import com.soulfiremc.server.plugins.POVServer;
+import com.soulfiremc.server.plugins.ServerListBypass;
+import com.soulfiremc.util.SFFeatureFlags;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class SoulFireAPI {
   private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
+
+  static {
+    var plugins =
+      new InternalPlugin[] {
+        new ClientBrand(),
+        new ClientSettings(),
+        new ChatControl(),
+        new AutoReconnect(),
+        new AutoRegister(),
+        new AutoRespawn(),
+        new AutoTotem(),
+        new AutoJump(),
+        new AutoChatMessage(),
+        new AutoArmor(),
+        new AutoEat(),
+        new ChatMessageLogger(),
+        new ServerListBypass(),
+        new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
+        SFFeatureFlags.MOD_SUPPORT
+          ? new ModLoaderSupport()
+          : null, // Needs to be before ForwardingBypass to not break it
+        new ForwardingBypass(),
+        new KillAura(),
+        new POVServer()
+      };
+
+    for (var plugin : plugins) {
+      if (plugin == null) {
+        continue;
+      }
+
+      SERVER_EXTENSIONS.add(plugin);
+    }
+  }
 
   private SoulFireAPI() {}
 

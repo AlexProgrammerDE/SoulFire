@@ -21,6 +21,8 @@ import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.Plugin;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.CommandHistoryManager;
@@ -43,6 +45,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
   @Override
   protected void postMixinMain(String[] args) {
+    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
+
     var host = getRPCHost("0.0.0.0");
     var port = getRPCPort(PortHelper.SF_DEFAULT_PORT);
 

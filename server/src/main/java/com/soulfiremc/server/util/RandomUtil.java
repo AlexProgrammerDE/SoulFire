@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
@@ -44,5 +46,10 @@ public class RandomUtil {
     }
 
     return ThreadLocalRandom.current().nextLong(min, max);
+  }
+
+  public static <E> E getRandomEntry(List<E> list) {
+    Random random = ThreadLocalRandom.current();
+    return list.get(random.nextInt(list.size()));
   }
 }

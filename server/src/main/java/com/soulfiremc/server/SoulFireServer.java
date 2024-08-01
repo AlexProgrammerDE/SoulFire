@@ -22,8 +22,6 @@ import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.SettingsPage;
 import com.soulfiremc.server.api.EventBusOwner;
-import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
@@ -32,23 +30,6 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
-import com.soulfiremc.server.plugins.AutoArmor;
-import com.soulfiremc.server.plugins.AutoEat;
-import com.soulfiremc.server.plugins.AutoJump;
-import com.soulfiremc.server.plugins.AutoReconnect;
-import com.soulfiremc.server.plugins.AutoRegister;
-import com.soulfiremc.server.plugins.AutoRespawn;
-import com.soulfiremc.server.plugins.AutoTotem;
-import com.soulfiremc.server.plugins.ChatControl;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
-import com.soulfiremc.server.plugins.ClientBrand;
-import com.soulfiremc.server.plugins.ClientSettings;
-import com.soulfiremc.server.plugins.FakeVirtualHost;
-import com.soulfiremc.server.plugins.ForwardingBypass;
-import com.soulfiremc.server.plugins.KillAura;
-import com.soulfiremc.server.plugins.ModLoaderSupport;
-import com.soulfiremc.server.plugins.POVServer;
-import com.soulfiremc.server.plugins.ServerListBypass;
 import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.DevSettings;
@@ -66,7 +47,6 @@ import com.soulfiremc.server.viaversion.platform.SFViaLegacy;
 import com.soulfiremc.server.viaversion.platform.SFViaPlatform;
 import com.soulfiremc.server.viaversion.platform.SFViaRewind;
 import com.soulfiremc.util.KeyHelper;
-import com.soulfiremc.util.SFFeatureFlags;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
 import com.viaversion.viaversion.ViaManagerImpl;
@@ -227,9 +207,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       log.info("SoulFire is up to date!");
     }
 
-    registerInternalServerExtensions();
-    registerServerExtensions();
-
     for (var serverExtension : SoulFireAPI.getServerExtensions()) {
       serverExtension.onServer(this);
     }
@@ -252,39 +229,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
-  private static void registerInternalServerExtensions() {
-    var plugins =
-      new InternalPlugin[] {
-        new ClientBrand(),
-        new ClientSettings(),
-        new ChatControl(),
-        new AutoReconnect(),
-        new AutoRegister(),
-        new AutoRespawn(),
-        new AutoTotem(),
-        new AutoJump(),
-        new AutoArmor(),
-        new AutoEat(),
-        new ChatMessageLogger(),
-        new ServerListBypass(),
-        new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
-        SFFeatureFlags.MOD_SUPPORT
-          ? new ModLoaderSupport()
-          : null, // Needs to be before ForwardingBypass to not break it
-        new ForwardingBypass(),
-        new KillAura(),
-        new POVServer()
-      };
-
-    for (var plugin : plugins) {
-      if (plugin == null) {
-        continue;
-      }
-
-      SoulFireAPI.registerServerExtension(plugin);
-    }
-  }
-
   public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
     Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
     setupLogging(settingsHolder);
@@ -297,10 +241,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     Configurator.setRootLevel(level);
     Configurator.setLevel("io.netty", nettyLevel);
     Configurator.setLevel("io.grpc", grpcLevel);
-  }
-
-  private void registerServerExtensions() {
-    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
   }
 
   public String generateRemoteUserJWT() {
