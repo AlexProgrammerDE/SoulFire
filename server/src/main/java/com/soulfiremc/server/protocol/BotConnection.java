@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
+import com.soulfiremc.server.api.EventBusOwner;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
@@ -55,7 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 @Getter
-public final class BotConnection {
+public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final UUID connectionId = UUID.randomUUID();
   private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())

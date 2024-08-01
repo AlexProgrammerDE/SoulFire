@@ -8,20 +8,10 @@ package soulfire.v1;
 import "soulfire/common.proto";
 import "google/protobuf/struct.proto";
 
-message SettingsEntry {
-  string key = 1;
-  google.protobuf.Value value = 2;
-}
-
-message SettingsNamespace {
-  string namespace = 1;
-  repeated SettingsEntry entries = 2;
-}
-
 message InstanceConfig {
-  repeated SettingsNamespace settings = 3;
-  repeated MinecraftAccountProto accounts = 4;
-  repeated ProxyProto proxies = 5;
+  repeated SettingsNamespace settings = 1;
+  repeated MinecraftAccountProto accounts = 2;
+  repeated ProxyProto proxies = 3;
 }
 
 message InstanceCreateRequest {

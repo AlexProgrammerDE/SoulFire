@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -41,6 +43,14 @@ import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundG
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ClientSettings implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "client-settings",
+    "1.0.0",
+    "Sends client settings to the server",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
+
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundGameProfilePacket) {
       var connection = event.connection();
@@ -90,13 +100,18 @@ public class ClientSettings implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings");
+    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", PLUGIN_INFO);
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(ClientSettings.class);
-    PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, ClientSettings::onPacket);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(ClientSettings.class);
+    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, ClientSettings::onPacket);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

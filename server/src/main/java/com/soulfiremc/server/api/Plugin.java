@@ -18,14 +18,19 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.server.SoulFireServer;
-import org.pf4j.ExtensionPoint;
 
 /**
- * This interface loads only when the JVM is running as a SoulFire server. Therefore, you can also
- * use this to load server-only classes.
+ * This interface is for any plugin that hooks into the server.
  */
-public interface ServerPlugin extends ExtensionPoint {
-  default void onLoad() {}
+public sealed interface Plugin permits ExternalPlugin, InternalPlugin {
+  PluginInfo pluginInfo();
 
-  default void onEnable(SoulFireServer soulFireServer) {}
+  /**
+   * When a new SoulFire server became ready for you to use.
+   * Be aware this method may be called multiple times.
+   * There is no guarantee that only one SoulFireServer may be created.
+   *
+   * @param soulFireServer The server instance.
+   */
+  void onServer(SoulFireServer soulFireServer);
 }

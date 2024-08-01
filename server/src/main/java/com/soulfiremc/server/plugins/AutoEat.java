@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -34,6 +36,14 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 
 public class AutoEat implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "auto-eat",
+    "1.0.0",
+    "Automatically eats food when hungry",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
+
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
@@ -91,13 +101,18 @@ public class AutoEat implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat");
+    event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat", PLUGIN_INFO);
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(AutoEat.class);
-    PluginHelper.registerBotEventConsumer(BotJoinedEvent.class, AutoEat::onJoined);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(AutoEat.class);
+    PluginHelper.registerBotEventConsumer(soulFireServer, BotJoinedEvent.class, AutoEat::onJoined);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

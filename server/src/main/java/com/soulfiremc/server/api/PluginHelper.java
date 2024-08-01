@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.api;
 
-import com.soulfiremc.server.api.event.EventUtil;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
@@ -38,36 +38,35 @@ public class PluginHelper {
    * creating a bot listener. Since most plugins only hook into the bot connection and not any
    * global or attack events, this is the easiest way to do it.
    *
+   * @param soulFireServer The instance of the SoulFire server.
    * @param clazz    The class of the bot event.
    * @param consumer The consumer that is called when the event is posted.
    * @param <T>      The type of the bot event.
-   * @see #registerAttackEventConsumer(Class, Consumer)
+   * @see #registerAttackEventConsumer(SoulFireServer, Class, Consumer)
    */
   public static <T extends SoulFireBotEvent> void registerBotEventConsumer(
+    SoulFireServer soulFireServer,
     Class<T> clazz, Consumer<T> consumer) {
     registerAttackEventConsumer(
+      soulFireServer,
       BotConnectionInitEvent.class,
-      event ->
-        EventUtil.runAndAssertChanged(
-          event.connection().eventBus(),
-          () -> event.connection().eventBus().registerConsumer(consumer, clazz)));
+      event -> event.connection().registerListener(clazz, consumer));
   }
 
   /**
    * Registers a consumer that is called when a specific attack event is posted.
    *
+   * @param soulFireServer The instance of the SoulFire server.
    * @param clazz    The class of the attack event.
    * @param consumer The consumer that is called when the event is posted.
    * @param <T>      The type of the attack event.
    */
   public static <T extends SoulFireAttackEvent> void registerAttackEventConsumer(
+    SoulFireServer soulFireServer,
     Class<T> clazz, Consumer<T> consumer) {
-    SoulFireAPI.registerListener(
+    soulFireServer.registerListener(
       InstanceInitEvent.class,
-      event ->
-        EventUtil.runAndAssertChanged(
-          event.instanceManager().eventBus(),
-          () -> event.instanceManager().eventBus().registerConsumer(consumer, clazz)));
+      event -> event.instanceManager().registerListener(clazz, consumer));
   }
 
   public static <T extends SoulFireAttackEvent> void registerSafeEventConsumer(

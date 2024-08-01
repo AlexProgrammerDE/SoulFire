@@ -18,8 +18,10 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.ServerCommandManager;
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
@@ -32,6 +34,14 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 
 public class ChatControl implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "chat-control",
+    "1.0.0",
+    "Control the bot with chat messages",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
+
   public static void onChat(ChatMessageReceiveEvent event) {
     var connection = event.connection();
     var settingsHolder = connection.settingsHolder();
@@ -60,13 +70,18 @@ public class ChatControl implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control");
+    event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control", PLUGIN_INFO);
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(ChatControl.class);
-    PluginHelper.registerBotEventConsumer(ChatMessageReceiveEvent.class, ChatControl::onChat);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(ChatControl.class);
+    PluginHelper.registerBotEventConsumer(soulFireServer, ChatMessageReceiveEvent.class, ChatControl::onChat);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

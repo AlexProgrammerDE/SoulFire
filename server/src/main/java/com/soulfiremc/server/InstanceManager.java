@@ -20,6 +20,7 @@ package com.soulfiremc.server;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
+import com.soulfiremc.server.api.EventBusOwner;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
@@ -62,7 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Getter
-public class InstanceManager {
+public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   private static final AtomicInteger ID_COUNTER = new AtomicInteger();
   private final UUID id;
   private final Logger logger;

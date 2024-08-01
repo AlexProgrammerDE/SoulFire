@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
@@ -38,15 +40,29 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
 public class KillAura implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "kill-aura",
+    "1.0.0",
+    "Automatically attacks entities",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
+
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura");
+    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", PLUGIN_INFO);
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(KillAura.class);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(KillAura.class);
     PluginHelper.registerBotEventConsumer(
+      soulFireServer,
       BotPreEntityTickEvent.class,
       event -> {
         var bot = event.connection();

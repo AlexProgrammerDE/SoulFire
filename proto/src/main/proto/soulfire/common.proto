@@ -63,3 +63,13 @@ message MinecraftAccountProto {
     BedrockData bedrockData = 7;
   }
 }
+
+message SettingsEntry {
+  string key = 1;
+  google.protobuf.Value value = 2;
+}
+
+message SettingsNamespace {
+  string namespace = 1;
+  repeated SettingsEntry entries = 2;
+}

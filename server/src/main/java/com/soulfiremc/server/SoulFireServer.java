@@ -20,10 +20,16 @@ package com.soulfiremc.server;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.api.ServerPlugin;
+import com.soulfiremc.grpc.generated.SettingsPage;
+import com.soulfiremc.server.api.EventBusOwner;
+import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.EventExceptionHandler;
+import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.plugins.AutoArmor;
@@ -39,7 +45,6 @@ import com.soulfiremc.server.plugins.ClientBrand;
 import com.soulfiremc.server.plugins.ClientSettings;
 import com.soulfiremc.server.plugins.FakeVirtualHost;
 import com.soulfiremc.server.plugins.ForwardingBypass;
-import com.soulfiremc.server.plugins.InternalPlugin;
 import com.soulfiremc.server.plugins.KillAura;
 import com.soulfiremc.server.plugins.ModLoaderSupport;
 import com.soulfiremc.server.plugins.POVServer;
@@ -87,13 +92,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.PluginManager;
 
 @Slf4j
 @Getter
-public class SoulFireServer {
+public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   public static final ComponentFlattener FLATTENER =
     ComponentFlattener.basic().toBuilder()
       .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
@@ -107,11 +114,23 @@ public class SoulFireServer {
   private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Map<UUID, InstanceManager> instances = Collections.synchronizedMap(new HashMap<>());
   private final RPCServer rpcServer;
+  private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerSettingsRegistry instanceSettingsRegistry;
   private final SecretKey jwtSecretKey;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final Path baseDirectory;
+  private final LambdaManager eventBus =
+    LambdaManager.basic(new ASMGenerator())
+      .setExceptionHandler(EventExceptionHandler.INSTANCE)
+      .setEventFilter(
+        (c, h) -> {
+          if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
+            return true;
+          } else {
+            throw new IllegalStateException("This event handler only accepts global events");
+          }
+        });
 
   public SoulFireServer(
     String host,
@@ -126,9 +145,6 @@ public class SoulFireServer {
 
     // Register into injector
     injector.register(SoulFireServer.class, this);
-
-    // Init API
-    SoulFireAPI.setSoulFire(this);
 
     injector.register(ShutdownManager.class, shutdownManager);
 
@@ -215,18 +231,22 @@ public class SoulFireServer {
     registerServerExtensions();
 
     for (var serverExtension : SoulFireAPI.getServerExtensions()) {
-      serverExtension.onEnable(this);
+      serverExtension.onServer(this);
     }
 
-    SoulFireAPI.postEvent(
+    eventBus.call(
+      new ServerSettingsRegistryInitEvent(
+        serverSettingsRegistry =
+          new ServerSettingsRegistry(SettingsPage.Type.SERVER)
+            .addClass(DevSettings.class, "Dev Settings")));
+    eventBus.call(
       new InstanceSettingsRegistryInitEvent(
         instanceSettingsRegistry =
-          new ServerSettingsRegistry()
+          new ServerSettingsRegistry(SettingsPage.Type.INSTANCE)
             // Needs Via loaded to have all protocol versions
-            .addClass(BotSettings.class, "Bot Settings", true)
-            .addClass(DevSettings.class, "Dev Settings", true)
-            .addClass(AccountSettings.class, "Account Settings", true)
-            .addClass(ProxySettings.class, "Proxy Settings", true)));
+            .addClass(BotSettings.class, "Bot Settings")
+            .addClass(AccountSettings.class, "Account Settings")
+            .addClass(ProxySettings.class, "Proxy Settings")));
 
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
@@ -280,7 +300,7 @@ public class SoulFireServer {
   }
 
   private void registerServerExtensions() {
-    pluginManager.getExtensions(ServerPlugin.class).forEach(SoulFireAPI::registerServerExtension);
+    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
   }
 
   public String generateRemoteUserJWT() {
@@ -316,7 +336,7 @@ public class SoulFireServer {
 
   public UUID createInstance(String friendlyName) {
     var attackManager = new InstanceManager(UUID.randomUUID(), friendlyName, this, SettingsHolder.EMPTY);
-    SoulFireAPI.postEvent(new InstanceInitEvent(attackManager));
+    eventBus.call(new InstanceInitEvent(attackManager));
 
     instances.put(attackManager.id(), attackManager);
 

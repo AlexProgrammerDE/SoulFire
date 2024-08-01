@@ -17,20 +17,5 @@
  */
 package com.soulfiremc.server.api;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class SoulFireAPI {
-  private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
-
-  private SoulFireAPI() {}
-
-  public static void registerServerExtension(Plugin plugin) {
-    SERVER_EXTENSIONS.add(plugin);
-  }
-
-  public static List<Plugin> getServerExtensions() {
-    return Collections.unmodifiableList(SERVER_EXTENSIONS);
-  }
+public non-sealed interface InternalPlugin extends Plugin {
 }

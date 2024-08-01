@@ -18,8 +18,9 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -36,6 +37,14 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.play
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 
 public class AutoRespawn implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "auto-respawn",
+    "1.0.0",
+    "Automatically respawns after death",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
+
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
       var connection = event.connection();
@@ -69,13 +78,18 @@ public class AutoRespawn implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn");
+    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", PLUGIN_INFO);
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(AutoRespawn.class);
-    PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, AutoRespawn::onPacket);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(AutoRespawn.class);
+    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, AutoRespawn::onPacket);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

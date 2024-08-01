@@ -17,20 +17,21 @@
  */
 package com.soulfiremc.server.api;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.soulfiremc.server.api.event.EventUtil;
+import com.soulfiremc.server.api.event.SoulFireEvent;
+import java.util.function.Consumer;
+import net.lenni0451.lambdaevents.LambdaManager;
 
-public class SoulFireAPI {
-  private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
-
-  private SoulFireAPI() {}
-
-  public static void registerServerExtension(Plugin plugin) {
-    SERVER_EXTENSIONS.add(plugin);
+public interface EventBusOwner<T extends SoulFireEvent> {
+  default <E extends T> void registerListener(Class<E> clazz, Consumer<E> consumer) {
+    var eventBus = eventBus();
+    EventUtil.runAndAssertChanged(eventBus, () -> eventBus.registerConsumer(consumer, clazz));
   }
 
-  public static List<Plugin> getServerExtensions() {
-    return Collections.unmodifiableList(SERVER_EXTENSIONS);
+  default void registerListeners(Class<?> clazz) {
+    var eventBus = eventBus();
+    EventUtil.runAndAssertChanged(eventBus, () -> eventBus.register(clazz));
   }
+
+  LambdaManager eventBus();
 }

@@ -20,8 +20,9 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
@@ -158,6 +159,13 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 
 @Slf4j
 public class POVServer implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "pov-server",
+    "1.0.0",
+    "A plugin that allows users to control bots from a first-person perspective.",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
   private static final List<Class<?>> NOT_SYNCED =
     List.of(
       ClientboundKeepAlivePacket.class,
@@ -175,7 +183,7 @@ public class POVServer implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server");
+    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", PLUGIN_INFO);
   }
 
   private static GameProfile getFakePlayerListEntry(Component text) {
@@ -966,9 +974,15 @@ public class POVServer implements InternalPlugin {
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(POVServer.class);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(POVServer.class);
     PluginHelper.registerAttackEventConsumer(
+      soulFireServer,
       AttackStartEvent.class,
       event -> {
         var attackManager = event.instanceManager();

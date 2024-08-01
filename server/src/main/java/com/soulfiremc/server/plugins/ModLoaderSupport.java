@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
-import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -42,6 +44,13 @@ import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundC
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ModLoaderSupport implements InternalPlugin {
+  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
+    "mod-loader-support",
+    "1.0.0",
+    "Supports mod loaders like Forge",
+    "AlexProgrammerDE",
+    "GPL-3.0"
+  );
   private static final Key FML_HS_KEY = Key.key("fml:hs");
   private static final Key FML_FML_KEY = Key.key("fml:fml");
   private static final Key FML_MP_KEY = Key.key("fml:mp");
@@ -53,7 +62,7 @@ public class ModLoaderSupport implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support");
+    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", PLUGIN_INFO);
   }
 
   private static String createFMLAddress(String initialHostname) {
@@ -65,10 +74,15 @@ public class ModLoaderSupport implements InternalPlugin {
   }
 
   @Override
-  public void onLoad() {
-    SoulFireAPI.registerListeners(ModLoaderSupport.class);
-    PluginHelper.registerBotEventConsumer(SFPacketSendingEvent.class, this::onPacket);
-    PluginHelper.registerBotEventConsumer(SFPacketReceiveEvent.class, this::onPacketReceive);
+  public PluginInfo pluginInfo() {
+    return PLUGIN_INFO;
+  }
+
+  @Override
+  public void onServer(SoulFireServer soulFireServer) {
+    soulFireServer.registerListeners(ModLoaderSupport.class);
+    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketSendingEvent.class, this::onPacket);
+    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, this::onPacketReceive);
   }
 
   public void onPacket(SFPacketSendingEvent event) {

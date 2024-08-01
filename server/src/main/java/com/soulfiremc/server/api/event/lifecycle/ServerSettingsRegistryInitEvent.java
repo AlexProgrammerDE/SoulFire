@@ -15,22 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api;
+package com.soulfiremc.server.api.event.lifecycle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
+import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 
-public class SoulFireAPI {
-  private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
-
-  private SoulFireAPI() {}
-
-  public static void registerServerExtension(Plugin plugin) {
-    SERVER_EXTENSIONS.add(plugin);
-  }
-
-  public static List<Plugin> getServerExtensions() {
-    return Collections.unmodifiableList(SERVER_EXTENSIONS);
-  }
-}
+public record ServerSettingsRegistryInitEvent(ServerSettingsRegistry settingsRegistry)
+  implements SoulFireGlobalEvent {}

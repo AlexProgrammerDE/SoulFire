@@ -5,6 +5,8 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
+import "soulfire/common.proto";
+
 message ClientDataRequest {
 }
 
@@ -51,7 +53,7 @@ message StringListSetting {
 }
 
 // A single setting type with optional default value
-message ClientPluginSettingType {
+message SettingType {
   oneof value {
     StringSetting string = 1;
     IntSetting int = 2;
@@ -63,47 +65,53 @@ message ClientPluginSettingType {
 }
 
 // A single option in the settings page
-message ClientPluginSettingEntrySingle {
+message SettingEntrySingle {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
   string uiName = 2;
   repeated string cliFlags = 3;
   string description = 4;
-  ClientPluginSettingType type = 6;
+  SettingType type = 5;
 }
 
-message ClientPluginSettingEntryMinMaxPairSingle {
+message SettingEntryMinMaxPairSingle {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
   string uiName = 2;
   repeated string cliFlags = 3;
   string description = 4;
-  IntSetting intSetting = 6;
+  IntSetting intSetting = 5;
 }
 
 // A paired option in the settings page
-message ClientPluginSettingEntryMinMaxPair {
+message SettingEntryMinMaxPair {
   // Required to be IntSetting
-  ClientPluginSettingEntryMinMaxPairSingle min = 1;
+  SettingEntryMinMaxPairSingle min = 1;
   // Required to be IntSetting
-  ClientPluginSettingEntryMinMaxPairSingle max = 2;
+  SettingEntryMinMaxPairSingle max = 2;
 }
 
 // A entry in the settings page
-message ClientPluginSettingEntry {
+message SettingEntry {
   oneof value {
-    ClientPluginSettingEntrySingle single = 1;
-    ClientPluginSettingEntryMinMaxPair minMaxPair = 2;
+    SettingEntrySingle single = 1;
+    SettingEntryMinMaxPair minMaxPair = 2;
   }
 }
 
-message ClientPluginSettingsPage {
-  bool hidden = 1;
+message SettingsPage {
+  enum Type {
+    SERVER = 0;
+    INSTANCE = 1;
+  }
+
+  Type type = 1;
+  optional string owningPlugin = 2;
   // The name of the page for these settings
-  string pageName = 2;
+  string pageName = 3;
   // What namespace the settings of this page represent
-  string namespace = 3;
-  repeated ClientPluginSettingEntry entries = 4;
+  string namespace = 4;
+  repeated SettingEntry entries = 5;
 }
 
 message PermissionMessage {
@@ -112,18 +120,26 @@ message PermissionMessage {
   bool granted = 3;
 }
 
-message ClientPlugin {
+message ServerPlugin {
   string id = 1;
   string version = 2;
   string description = 3;
-  string provider = 4;
+  string author = 4;
+  string license = 5;
 }
 
 message ClientDataResponse {
   string username = 1;
   repeated PermissionMessage permissions = 2;
-  repeated ClientPlugin plugins = 3;
-  repeated ClientPluginSettingsPage pluginSettings = 4;
+  repeated ServerPlugin plugins = 3;
+  repeated SettingsPage settings = 5;
+}
+
+message ServerUpdateConfigRequest {
+  repeated SettingsNamespace settings = 1;
+}
+
+message ServerUpdateConfigResponse {
 }
 
 service ConfigService {

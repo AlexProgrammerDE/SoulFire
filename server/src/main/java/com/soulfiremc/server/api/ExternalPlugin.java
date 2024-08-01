@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.plugins;
+package com.soulfiremc.server.api;
 
-import com.soulfiremc.api.MixinExtension;
-import com.soulfiremc.server.api.ServerPlugin;
-import java.util.Set;
+import org.pf4j.ExtensionPoint;
 
-public interface InternalPlugin extends ServerPlugin, MixinExtension {
+/**
+ * This interface is for external server plugins.
+ */
+public non-sealed interface ExternalPlugin extends Plugin, ExtensionPoint {
   @Override
-  default Set<String> getMixinPaths() {
-    return Set.of();
+  default PluginInfo pluginInfo() {
+    return PluginInfo.fromClassLoader(getClass());
   }
 }

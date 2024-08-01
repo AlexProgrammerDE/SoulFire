@@ -19,10 +19,13 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.ClientDataRequest;
 import com.soulfiremc.grpc.generated.ClientDataResponse;
-import com.soulfiremc.grpc.generated.ClientPlugin;
 import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
 import com.soulfiremc.grpc.generated.PermissionMessage;
+import com.soulfiremc.grpc.generated.ServerPlugin;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.Plugin;
+import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
@@ -53,24 +56,11 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
     return permissions;
   }
 
-  private Collection<ClientPlugin> getExtensions() {
-    var plugins = new ArrayList<ClientPlugin>();
-    for (var pluginWrapper : soulFireServer.pluginManager().getPlugins()) {
-      var id = pluginWrapper.getPluginId();
-      var description = pluginWrapper.getDescriptor().getPluginDescription();
-      var version = pluginWrapper.getDescriptor().getVersion();
-      var provider = pluginWrapper.getDescriptor().getProvider();
-
-      plugins.add(
-        ClientPlugin.newBuilder()
-          .setId(id)
-          .setDescription(description)
-          .setVersion(version)
-          .setProvider(provider)
-          .build());
-    }
-
-    return plugins;
+  private Collection<ServerPlugin> getPlugins() {
+    return SoulFireAPI.getServerExtensions().stream()
+      .map(Plugin::pluginInfo)
+      .map(PluginInfo::toProto)
+      .toList();
   }
 
   @Override
@@ -83,8 +73,9 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         ClientDataResponse.newBuilder()
           .setUsername(ServerRPCConstants.USER_CONTEXT_KEY.get().getUsername())
           .addAllPermissions(getPermissions())
-          .addAllPlugins(getExtensions())
-          .addAllPluginSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
+          .addAllPlugins(getPlugins())
+          .addAllSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
+          .addAllSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

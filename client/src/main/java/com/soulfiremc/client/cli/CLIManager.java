@@ -95,7 +95,7 @@ public class CLIManager {
       rpcClient
         .configStubBlocking()
         .getClientData(ClientDataRequest.getDefaultInstance())
-        .getPluginSettingsList()) {
+        .getSettingsList()) {
       for (var entry : page.getEntriesList()) {
         switch (entry.getValueCase()) {
           case SINGLE -> {

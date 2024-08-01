@@ -36,7 +36,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
-import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
@@ -717,7 +716,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 }),
               false)));
 
-    SoulFireAPI.postEvent(new CommandManagerInitEvent(this));
+    soulFireServer.eventBus().call(new CommandManagerInitEvent(this));
   }
 
   private int exportMap(
