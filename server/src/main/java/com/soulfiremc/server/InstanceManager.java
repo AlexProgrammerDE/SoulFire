@@ -103,7 +103,7 @@ public class InstanceManager {
     var selectedProxy =
       proxies.stream()
         .filter(ProxyData::isAvailable)
-        .min(Comparator.comparingInt(ProxyData::availableBots))
+        .min(Comparator.comparingInt(ProxyData::usedBots))
         .orElseThrow(
           () -> new IllegalStateException("No proxies available!"));
 
@@ -361,8 +361,12 @@ public class InstanceManager {
       return availableBots() > 0;
     }
 
+    public int usedBots() {
+      return useCount.get();
+    }
+
     public boolean hasBots() {
-      return useCount.get() > 0;
+      return usedBots() > 0;
     }
   }
 }
