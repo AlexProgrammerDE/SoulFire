@@ -22,4 +22,5 @@ dependencies {
   implementation(libs.gradle.plugin.lombok)
   implementation(libs.gradle.plugin.indra.git)
   implementation(libs.gradle.plugin.unimined)
+  implementation(libs.gradle.h2)
 }

@@ -1,6 +1,8 @@
 plugins {
   `sf-project-conventions`
   alias(libs.plugins.jmh)
+  alias(libs.plugins.flyway)
+  alias(libs.plugins.jooq)
 }
 
 dependencies {
@@ -51,6 +53,10 @@ dependencies {
   // For profiling
   api(libs.spark)
 
+  // For database
+  api(libs.flyway)
+  api(libs.jooq)
+
   testImplementation(libs.junit)
 }
 
@@ -64,4 +70,32 @@ jmh {
   warmupIterations = 2
   iterations = 2
   fork = 2
+}
+
+flyway {
+  url = "jdbc:h2:file:${System.getProperty("user.dir")}/build/db/soulfire"
+  user = "soulfire"
+  password = ""
+  locations = arrayOf("filesystem:src/main/resources/db/migration")
+}
+
+jooq {
+  configuration {
+    jdbc {
+      url = "jdbc:h2:file:${System.getProperty("user.dir")}/build/db/soulfire"
+      user = "soulfire"
+    }
+
+    generator {
+      database {
+        name = "org.jooq.meta.h2.H2Database"
+        inputSchema = "PUBLIC"
+      }
+
+      target {
+        packageName = "com.soulfiremc.server.db"
+        directory = "src/main/java"
+      }
+    }
+  }
 }
