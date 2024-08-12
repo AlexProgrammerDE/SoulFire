@@ -16,7 +16,7 @@ flatlaf-jetbrains-mono-version = "2.304"
 kyori = "4.17.0"
 reactor = "1.2.0-SNAPSHOT"
 classtransform = "1.14.0"
-armeria = "1.29.4"
+armeria = "1.30.0"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
