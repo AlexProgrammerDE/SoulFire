@@ -53,13 +53,16 @@ public class AutoRespawn implements InternalPlugin {
         return;
       }
 
+      if (combatKillPacket.getPlayerId() != connection.dataManager().clientEntity().entityId()) {
+        return;
+      }
+
       var message =
         SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
       connection
         .logger()
         .info(
-          "[AutoRespawn] Died with killer: {} and message: '{}'",
-          combatKillPacket.getPlayerId(),
+          "[AutoRespawn] Died with message: '{}'",
           message);
 
       connection
