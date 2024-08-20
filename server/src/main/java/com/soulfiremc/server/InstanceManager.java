@@ -159,16 +159,21 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       .stream()
       .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
       .toList());
+    var availableProxies = proxies.size();
     {
-      var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
-      if (botAmount > maxBots) {
-        logger.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
-        logger.warn("Continuing with {} bots.", maxBots);
-        botAmount = maxBots;
-      }
+      if (availableProxies == 0) {
+        logger.info("No proxies provided, attack will be performed without proxies");
+      } else {
+        var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
+        if (botAmount > maxBots) {
+          logger.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
+          logger.warn("Continuing with {} bots.", maxBots);
+          botAmount = maxBots;
+        }
 
-      if (settingsHolder.get(ProxySettings.SHUFFLE_PROXIES)) {
-        Collections.shuffle(proxies);
+        if (settingsHolder.get(ProxySettings.SHUFFLE_PROXIES)) {
+          Collections.shuffle(proxies);
+        }
       }
     }
 
