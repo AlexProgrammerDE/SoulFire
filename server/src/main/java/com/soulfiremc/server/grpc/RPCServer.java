@@ -25,6 +25,7 @@ import com.linecorp.armeria.common.SessionProtocol;
 import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.common.logging.LogWriter;
 import com.linecorp.armeria.common.prometheus.PrometheusMeterRegistries;
 import com.linecorp.armeria.server.RedirectService;
 import com.linecorp.armeria.server.Server;
@@ -32,6 +33,7 @@ import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.docs.DocService;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.server.healthcheck.HealthCheckService;
+import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.user.AuthSystem;
@@ -108,6 +110,7 @@ public class RPCServer {
       Server.builder()
         .port(new InetSocketAddress(host, port), SessionProtocol.HTTP)
         .meterRegistry(meterRegistry)
+        .decorator(LoggingService.builder().logWriter(LogWriter.of(log)).newDecorator())
         .service(grpcService,
           corsBuilder.newDecorator(),
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
