@@ -39,7 +39,7 @@ import org.apache.logging.log4j.core.layout.PatternMatch;
 public class SFLogAppender extends AbstractAppender {
   public static final SFLogAppender INSTANCE = new SFLogAppender();
 
-  private static final LoggerNamePatternSelector decider = LoggerNamePatternSelector.createSelector(
+  private static final LoggerNamePatternSelector selector = LoggerNamePatternSelector.createSelector(
     "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[] {
       new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
@@ -61,7 +61,7 @@ public class SFLogAppender extends AbstractAppender {
   @Override
   public void append(LogEvent event) {
     var formattedBuilder = new StringBuilder();
-    for (var formatter : decider.getFormatters(event)) {
+    for (var formatter : selector.getFormatters(event)) {
       formatter.format(event, formattedBuilder);
     }
 
