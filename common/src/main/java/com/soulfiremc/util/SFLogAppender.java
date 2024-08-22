@@ -26,34 +26,29 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import lombok.Getter;
+import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.NullConfiguration;
 import org.apache.logging.log4j.core.config.Property;
-import org.apache.logging.log4j.core.layout.AbstractStringLayout;
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.layout.PatternMatch;
 
 @Getter
 public class SFLogAppender extends AbstractAppender {
   public static final SFLogAppender INSTANCE = new SFLogAppender();
 
-  private static final AbstractStringLayout.Serializer formatter =
-    new PatternLayout.SerializerBuilder()
-      .setAlwaysWriteExceptions(true)
-      .setDisableAnsi(false)
-      .setNoConsoleNoAnsi(false)
-      .setDefaultPattern(
-        "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
-      .build();
-  private static final AbstractStringLayout.Serializer builtInFormatter =
-    new PatternLayout.SerializerBuilder()
-      .setAlwaysWriteExceptions(true)
-      .setDisableAnsi(false)
-      .setNoConsoleNoAnsi(false)
-      .setDefaultPattern(
-        "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}")
-      .build();
+  private static final LoggerNamePatternSelector decider = LoggerNamePatternSelector.createSelector(
+    "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
+    new PatternMatch[] {
+      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
+    },
+    true,
+    false,
+    false,
+    new NullConfiguration()
+  );
   private final List<Consumer<String>> logConsumers = new CopyOnWriteArrayList<>();
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
@@ -65,13 +60,12 @@ public class SFLogAppender extends AbstractAppender {
 
   @Override
   public void append(LogEvent event) {
-    String formatted;
-    if (event.getLoggerName().startsWith("com.soulfiremc")) {
-      formatted = builtInFormatter.toSerializable(event);
-    } else {
-      formatted = formatter.toSerializable(event);
+    var formattedBuilder = new StringBuilder();
+    for (var formatter : decider.getFormatters(event)) {
+      formatter.format(event, formattedBuilder);
     }
 
+    var formatted = formattedBuilder.toString();
     if (formatted.isBlank()) {
       return;
     }
