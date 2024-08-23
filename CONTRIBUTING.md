@@ -6,7 +6,8 @@ style.
 ## Code style
 
 This project does not have a strict code style.
-However we will only accept pull requests that use the format specified in `.editorconfig`.
+However, we will only accept pull requests that use the format specified in `.editorconfig`.
+Everything enforced by Spotless is also required.
 
 ### Var keyword
 
@@ -16,7 +17,5 @@ those should be abbreviated to `var map = new HashMap<String, String>()`
 
 ### IntelliJ inspections
 
-If you use IntelliJ you can import the file `config/checkstyle/checkstyle.xml` under `Settings -> Editor -> Code Style`.
-(Requires the Checkstyle plugin to be installed)
 You can also import the recommended inspections at `config/intellij_inspections.xml`
 at `Settings -> Editor -> Inspections`.

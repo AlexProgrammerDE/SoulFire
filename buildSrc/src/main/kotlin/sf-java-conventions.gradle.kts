@@ -2,7 +2,7 @@ plugins {
   idea
   `java-library`
   id("sf-license-conventions")
-  id("sf-checkstyle-conventions")
+  id("sf-formatting-conventions")
   id("io.freefair.lombok")
   id("net.kyori.indra.git")
 }
