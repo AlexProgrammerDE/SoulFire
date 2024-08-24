@@ -8,6 +8,6 @@ spotless {
         indentWithSpaces(2)
         endWithNewline()
 
-        importOrder("", "java|javax", "\\#")
+        importOrder("", "javax|java", "\\#")
     }
 }
