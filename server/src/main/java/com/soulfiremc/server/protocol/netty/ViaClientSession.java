@@ -33,12 +33,10 @@ import io.netty.handler.codec.haproxy.*;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
-import net.raphimc.vialegacy.api.protocol.PreNettyBaseProtocol;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.vialoader.netty.viabedrock.DisconnectHandler;
 import net.raphimc.vialoader.netty.viabedrock.RakMessageEncapsulationCodec;
@@ -171,6 +169,8 @@ public class ViaClientSession extends TcpSession {
 
             // This does the extra magic
             var userConnection = new UserConnectionImpl(channel, true);
+            new ProtocolPipelineImpl(userConnection);
+
             userConnection.put(new StorableSession(ViaClientSession.this));
 
             if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
@@ -187,13 +187,9 @@ public class ViaClientSession extends TcpSession {
 
             setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
 
-            var protocolPipeline = new ProtocolPipelineImpl(userConnection);
-
             if (SFVersionConstants.isLegacy(version)) {
-              protocolPipeline.add(PreNettyBaseProtocol.INSTANCE);
               pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
             } else if (isBedrock) {
-              protocolPipeline.add(BedrockBaseProtocol.INSTANCE);
               pipeline.addLast("vb-disconnect", new DisconnectHandler());
               pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
             }
