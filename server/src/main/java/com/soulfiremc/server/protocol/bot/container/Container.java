@@ -20,10 +20,11 @@ package com.soulfiremc.server.protocol.bot.container;
 import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import lombok.Getter;
+
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.Getter;
 
 @Getter
 public class Container {

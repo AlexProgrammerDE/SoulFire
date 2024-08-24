@@ -21,9 +21,10 @@ import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.cloudburstmc.math.vector.Vector3i;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.cloudburstmc.math.vector.Vector3i;
 
 @SuppressWarnings("unused")
 public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highestY) {

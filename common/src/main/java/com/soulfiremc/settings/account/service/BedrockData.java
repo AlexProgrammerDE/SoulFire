@@ -23,10 +23,11 @@ import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.KeyHelper;
+import lombok.SneakyThrows;
+
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.UUID;
-import lombok.SneakyThrows;
 
 public record BedrockData(
   String mojangJwt,

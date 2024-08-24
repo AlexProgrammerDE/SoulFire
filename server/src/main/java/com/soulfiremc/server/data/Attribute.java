@@ -17,8 +17,9 @@
  */
 package com.soulfiremc.server.data;
 
-import java.util.List;
 import net.kyori.adventure.key.Key;
+
+import java.util.List;
 
 public record Attribute(AttributeType type, List<Modifier> modifiers) {
   public record Modifier(Key id, double amount, ModifierOperation operation) {}

@@ -19,11 +19,12 @@ package com.soulfiremc.server.data;
 
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
+import org.intellij.lang.annotations.Subst;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.kyori.adventure.key.Key;
-import org.intellij.lang.annotations.Subst;
 
 public class BlockShapeLoader {
   public static final Map<Key, List<BlockShapeGroup>> BLOCK_SHAPES =

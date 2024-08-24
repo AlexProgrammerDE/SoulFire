@@ -17,12 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.function.Function;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
+
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.function.Function;
 
 public class ChunkData {
   private static final Map<ChunkSection, ChunkSection> SECTION_CACHE = new WeakHashMap<>();

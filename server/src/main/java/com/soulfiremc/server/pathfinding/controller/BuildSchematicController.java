@@ -19,9 +19,10 @@ package com.soulfiremc.server.pathfinding.controller;
 
 import com.soulfiremc.server.data.BlockType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class BuildSchematicController {

@@ -27,10 +27,11 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
-import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+
+import java.util.concurrent.TimeUnit;
 
 public class AutoJump implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(

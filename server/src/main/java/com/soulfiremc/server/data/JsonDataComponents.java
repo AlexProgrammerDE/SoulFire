@@ -23,14 +23,15 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.JsonOps;
 import com.soulfiremc.util.GsonInstance;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.type.IntDataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.type.ObjectDataComponent;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 public record JsonDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> components) {

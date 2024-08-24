@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import com.google.common.base.Preconditions;
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.Pair;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

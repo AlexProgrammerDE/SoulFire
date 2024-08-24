@@ -19,8 +19,9 @@ package com.soulfiremc.server.protocol.bot.block;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import java.util.Collection;
 import lombok.ToString;
+
+import java.util.Collection;
 
 @ToString
 public class GlobalBlockPalette {

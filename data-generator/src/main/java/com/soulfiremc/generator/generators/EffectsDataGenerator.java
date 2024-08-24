@@ -19,9 +19,10 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
+
+import java.util.Objects;
 
 public class EffectsDataGenerator implements IDataGenerator {
 

@@ -21,10 +21,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.soulfiremc.generator.util.MCHelper;
-import java.util.Map;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
+
+import java.util.Map;
 
 public class ItemsDataGenerator implements IDataGenerator {
   public static JsonObject generateItem(Item item) {

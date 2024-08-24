@@ -23,12 +23,13 @@ import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TickRateManager;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class Level implements LevelHeightAccessor {

@@ -28,13 +28,14 @@ import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.Pair;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Java port of prismarine-physics.

@@ -17,9 +17,10 @@
  */
 package com.soulfiremc.server.data;
 
+import net.kyori.adventure.key.KeyPattern;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.KeyPattern;
 
 @SuppressWarnings("unused")
 public class FluidTags {

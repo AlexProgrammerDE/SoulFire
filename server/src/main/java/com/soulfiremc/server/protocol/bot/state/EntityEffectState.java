@@ -18,14 +18,15 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.protocol.bot.model.EffectData;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Data
 public class EntityEffectState {

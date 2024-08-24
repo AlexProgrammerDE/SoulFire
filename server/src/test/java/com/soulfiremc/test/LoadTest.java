@@ -21,11 +21,12 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFLogAppender;
-import java.nio.file.Path;
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pf4j.DefaultPluginManager;
+
+import java.nio.file.Path;
+import java.time.Instant;
 
 public class LoadTest {
   @TempDir

@@ -21,17 +21,18 @@ import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.util.ResourceHelper;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
+import org.cloudburstmc.nbt.NbtMap;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.key.Key;
-import org.cloudburstmc.nbt.NbtMap;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
-import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
 
 @Slf4j
 public class BuiltInKnownPackRegistry {

@@ -22,11 +22,12 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+
+import java.util.Map;
 
 @Setter
 @Getter

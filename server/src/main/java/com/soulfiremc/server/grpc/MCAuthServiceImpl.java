@@ -36,12 +36,13 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

@@ -29,12 +29,13 @@ import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import java.util.Arrays;
-import java.util.OptionalInt;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.OptionalInt;
 
 /**
  * This class helps in calculating the costs of different actions. It is used in the pathfinding

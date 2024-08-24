@@ -19,10 +19,11 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+
+import java.util.Objects;
 
 public class AttributesDataGenerator implements IDataGenerator {
   public static JsonObject generateAttribute(Attribute attribute) {

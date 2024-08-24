@@ -17,8 +17,9 @@
  */
 package com.soulfiremc.server.util;
 
-import java.util.function.BooleanSupplier;
 import lombok.RequiredArgsConstructor;
+
+import java.util.function.BooleanSupplier;
 
 @RequiredArgsConstructor
 public class LazyBoolean {

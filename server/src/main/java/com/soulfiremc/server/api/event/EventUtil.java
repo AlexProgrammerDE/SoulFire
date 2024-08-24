@@ -17,11 +17,12 @@
  */
 package com.soulfiremc.server.api.event;
 
-import java.util.List;
-import java.util.Map;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.reflect.stream.RStream;
 import net.lenni0451.reflect.stream.field.FieldWrapper;
+
+import java.util.List;
+import java.util.Map;
 
 public class EventUtil {
   private static final FieldWrapper handlersWrapper =

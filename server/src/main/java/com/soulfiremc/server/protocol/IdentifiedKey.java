@@ -20,6 +20,11 @@ package com.soulfiremc.server.protocol;
 import com.google.common.collect.ImmutableSet;
 import com.soulfiremc.server.util.EncryptionUtils;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -27,10 +32,6 @@ import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class IdentifiedKey {
   private final Revision revision;

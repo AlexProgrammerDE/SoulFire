@@ -22,8 +22,6 @@ import com.google.gson.JsonObject;
 import com.soulfiremc.generator.mixin.BlockAccessor;
 import com.soulfiremc.generator.util.BlockSettingsAccessor;
 import com.soulfiremc.generator.util.GsonInstance;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import lombok.SneakyThrows;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,6 +29,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class BlocksDataGenerator implements IDataGenerator {
   @SneakyThrows

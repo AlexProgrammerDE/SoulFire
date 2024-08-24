@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
+
 import java.util.concurrent.CompletableFuture;
 
 public sealed interface MCAuthService<T>

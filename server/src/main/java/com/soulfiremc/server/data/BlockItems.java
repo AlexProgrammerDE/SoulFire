@@ -18,6 +18,7 @@
 package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.util.BlockTypeHelper;
+
 import java.util.Optional;
 
 public class BlockItems {

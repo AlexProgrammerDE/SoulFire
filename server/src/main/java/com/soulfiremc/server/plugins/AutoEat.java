@@ -29,11 +29,12 @@ import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.ItemTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
-import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
+
+import java.util.concurrent.TimeUnit;
 
 public class AutoEat implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(

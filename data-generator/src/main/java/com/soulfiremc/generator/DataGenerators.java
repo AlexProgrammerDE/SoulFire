@@ -42,12 +42,13 @@ import com.soulfiremc.generator.generators.PacketsGenerator;
 import com.soulfiremc.generator.generators.RegistryKeysDataGenerator;
 import com.soulfiremc.generator.generators.TagsDataGenerator;
 import com.soulfiremc.generator.generators.WorldExporterGenerator;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DataGenerators {

@@ -30,11 +30,12 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.TimeUtil;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class AutoArmor implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(

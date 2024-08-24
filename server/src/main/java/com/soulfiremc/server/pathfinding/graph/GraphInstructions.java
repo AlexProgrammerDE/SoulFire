@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+
 import java.util.List;
 
 public record GraphInstructions(

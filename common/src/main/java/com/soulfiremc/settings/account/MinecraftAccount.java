@@ -24,8 +24,9 @@ import com.soulfiremc.settings.account.service.OfflineJavaData;
 import com.soulfiremc.settings.account.service.OnlineChainJavaData;
 import com.soulfiremc.settings.account.service.OnlineJavaDataLike;
 import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
-import java.util.UUID;
 import lombok.NonNull;
+
+import java.util.UUID;
 
 /**
  * Represents an authenticated MC account. This can be a premium, offline or bedrock account. Beware

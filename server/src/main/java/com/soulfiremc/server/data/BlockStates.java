@@ -18,9 +18,10 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonArray;
+import net.kyori.adventure.key.Key;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.key.Key;
 
 public record BlockStates(BlockState defaultState, List<BlockState> possibleStates) {
   public static BlockStates fromJsonArray(BlockType blockType, Key key, JsonArray array) {

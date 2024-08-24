@@ -28,10 +28,11 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.BuiltinSettingsConstants;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
-import java.util.function.Function;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.raphimc.vialoader.util.ProtocolVersionList;
+
+import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {

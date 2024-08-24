@@ -24,6 +24,9 @@ import com.mojang.serialization.DataResult;
 import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.data.TagKey;
+import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -31,8 +34,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import net.kyori.adventure.key.Key;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
 
 @SuppressWarnings("SameParameterValue")
 public class ExtraCodecs {

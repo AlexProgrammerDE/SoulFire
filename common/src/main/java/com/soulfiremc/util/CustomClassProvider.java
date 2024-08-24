@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.util;
 
-import static net.lenni0451.classtransform.utils.ASMUtils.slash;
-import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;
-
 import com.google.common.reflect.ClassPath;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.lenni0451.classtransform.utils.tree.IClassProvider;
-import org.jetbrains.annotations.NotNull;
+
+import static net.lenni0451.classtransform.utils.ASMUtils.slash;
+import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;
 
 public class CustomClassProvider implements IClassProvider {
   private final ClassPath[] classPaths;

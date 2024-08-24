@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.client;
 
-import static com.soulfiremc.brigadier.ClientBrigadierHelper.help;
-import static com.soulfiremc.brigadier.ClientBrigadierHelper.literal;
-
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -38,12 +35,16 @@ import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigResponse;
 import io.grpc.stub.StreamObserver;
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import static com.soulfiremc.brigadier.ClientBrigadierHelper.help;
+import static com.soulfiremc.brigadier.ClientBrigadierHelper.literal;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

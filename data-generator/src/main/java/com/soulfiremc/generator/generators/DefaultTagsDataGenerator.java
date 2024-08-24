@@ -23,15 +23,16 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.generator.util.MCHelper;
 import it.unimi.dsi.fastutil.ints.IntList;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagNetworkSerialization;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagNetworkSerialization;
 
 @Slf4j
 public class DefaultTagsDataGenerator implements IDataGenerator {

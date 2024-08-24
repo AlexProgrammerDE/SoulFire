@@ -19,8 +19,9 @@ package com.soulfiremc.server.api;
 
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.SoulFireEvent;
-import java.util.function.Consumer;
 import net.lenni0451.lambdaevents.LambdaManager;
+
+import java.util.function.Consumer;
 
 public interface EventBusOwner<T extends SoulFireEvent> {
   default <E extends T> void registerListener(Class<E> clazz, Consumer<E> consumer) {

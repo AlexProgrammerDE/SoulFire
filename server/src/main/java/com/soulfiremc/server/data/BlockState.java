@@ -18,9 +18,10 @@
 package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.protocol.bot.movement.AABB;
-import java.util.List;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
+
+import java.util.List;
 
 public record BlockState(
   int id,

@@ -18,9 +18,10 @@
 package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public enum MineableType {

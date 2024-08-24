@@ -18,13 +18,14 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.MapColor;
-import java.awt.image.BufferedImage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.geysermc.mcprotocollib.protocol.data.game.level.map.MapData;
 import org.geysermc.mcprotocollib.protocol.data.game.level.map.MapIcon;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundMapItemDataPacket;
+
+import java.awt.image.BufferedImage;
 
 @Setter
 @Getter

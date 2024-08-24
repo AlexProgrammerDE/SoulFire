@@ -31,12 +31,13 @@ import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 public class KillAura implements InternalPlugin {

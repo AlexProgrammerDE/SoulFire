@@ -23,10 +23,11 @@ import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
 import lombok.Data;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
+
+import java.util.Map;
 
 @Data
 public class EntityAttributeState {

@@ -20,8 +20,9 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import java.util.List;
 import lombok.Setter;
+
+import java.util.List;
 
 /**
  * A calculated action that the bot can take on a graph world representation.

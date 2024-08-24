@@ -22,9 +22,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.soulfiremc.server.protocol.codecs.ExtraCodecs;
 import com.soulfiremc.server.util.DualMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
@@ -33,6 +30,10 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttribut
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectDetails;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectInstance;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ToolData;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public class JsonToMCPLCodecs {
   public static final MapCodec<MobEffectDetails> MOB_EFFECT_DETAILS_MAP_CODEC = MapCodec.recursive(

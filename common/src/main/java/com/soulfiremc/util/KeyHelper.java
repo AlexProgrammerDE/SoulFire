@@ -18,6 +18,7 @@
 package com.soulfiremc.util;
 
 import com.google.gson.JsonParseException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
