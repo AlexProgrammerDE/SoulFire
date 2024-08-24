@@ -10,8 +10,8 @@ sourceSets {
         property("version", rootProject.version.toString())
         property("description", rootProject.description)
         property("url", "https://soulfiremc.com")
-        property("commit_hash", indraGit.commit().toString())
-        property("branch_name", indraGit.branchName())
+        property("commit_hash", indraGit.commit()?.name ?: "unknown")
+        property("branch_name", indraGit.branch()?.name ?: "unknown")
       }
     }
   }
