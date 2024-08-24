@@ -19,8 +19,8 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import lombok.AllArgsConstructor;
 
-import java.util.Objects;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 @AllArgsConstructor
 public final class ContainerSlot {

@@ -33,10 +33,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Inject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

@@ -17,24 +17,7 @@
  */
 package com.soulfiremc.server.api;
 
-import com.soulfiremc.server.plugins.AutoArmor;
-import com.soulfiremc.server.plugins.AutoChatMessage;
-import com.soulfiremc.server.plugins.AutoEat;
-import com.soulfiremc.server.plugins.AutoJump;
-import com.soulfiremc.server.plugins.AutoReconnect;
-import com.soulfiremc.server.plugins.AutoRegister;
-import com.soulfiremc.server.plugins.AutoRespawn;
-import com.soulfiremc.server.plugins.AutoTotem;
-import com.soulfiremc.server.plugins.ChatControl;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
-import com.soulfiremc.server.plugins.ClientBrand;
-import com.soulfiremc.server.plugins.ClientSettings;
-import com.soulfiremc.server.plugins.FakeVirtualHost;
-import com.soulfiremc.server.plugins.ForwardingBypass;
-import com.soulfiremc.server.plugins.KillAura;
-import com.soulfiremc.server.plugins.ModLoaderSupport;
-import com.soulfiremc.server.plugins.POVServer;
-import com.soulfiremc.server.plugins.ServerListBypass;
+import com.soulfiremc.server.plugins.*;
 import com.soulfiremc.util.SFFeatureFlags;
 
 import java.util.ArrayList;

@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.CommandCompletionRequest;
-import com.soulfiremc.grpc.generated.CommandCompletionResponse;
-import com.soulfiremc.grpc.generated.CommandRequest;
-import com.soulfiremc.grpc.generated.CommandResponse;
-import com.soulfiremc.grpc.generated.CommandServiceGrpc;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;

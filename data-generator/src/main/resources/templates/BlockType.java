@@ -21,10 +21,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import net.kyori.adventure.key.Key;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 public record BlockType(

@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.LogRequest;
-import com.soulfiremc.grpc.generated.LogResponse;
-import com.soulfiremc.grpc.generated.LogsServiceGrpc;
-import com.soulfiremc.grpc.generated.PreviousLogRequest;
-import com.soulfiremc.grpc.generated.PreviousLogResponse;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.util.SFLogAppender;
 import io.grpc.Status;

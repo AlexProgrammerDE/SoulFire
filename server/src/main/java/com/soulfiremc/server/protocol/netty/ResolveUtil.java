@@ -22,14 +22,14 @@ import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.util.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Optional;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 
 @Slf4j
 public class ResolveUtil {

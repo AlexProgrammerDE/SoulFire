@@ -25,11 +25,7 @@ import com.soulfiremc.server.util.DualMap;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.FoodProperties;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectDetails;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.MobEffectInstance;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.ToolData;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.*;
 
 import java.util.List;
 import java.util.Locale;

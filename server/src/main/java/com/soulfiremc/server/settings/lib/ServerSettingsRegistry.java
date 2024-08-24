@@ -17,38 +17,14 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.soulfiremc.grpc.generated.BoolSetting;
-import com.soulfiremc.grpc.generated.ComboOption;
-import com.soulfiremc.grpc.generated.ComboSetting;
-import com.soulfiremc.grpc.generated.DoubleSetting;
-import com.soulfiremc.grpc.generated.IntSetting;
-import com.soulfiremc.grpc.generated.SettingEntry;
-import com.soulfiremc.grpc.generated.SettingEntryMinMaxPair;
-import com.soulfiremc.grpc.generated.SettingEntryMinMaxPairSingle;
-import com.soulfiremc.grpc.generated.SettingEntrySingle;
-import com.soulfiremc.grpc.generated.SettingType;
-import com.soulfiremc.grpc.generated.SettingsPage;
-import com.soulfiremc.grpc.generated.StringListSetting;
-import com.soulfiremc.grpc.generated.StringSetting;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ComboProperty;
-import com.soulfiremc.server.settings.property.DoubleProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.settings.property.SingleProperty;
-import com.soulfiremc.server.settings.property.StringListProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class ServerSettingsRegistry {

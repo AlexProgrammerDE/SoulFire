@@ -21,13 +21,13 @@ import com.google.common.reflect.ClassPath;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 import static net.lenni0451.classtransform.utils.ASMUtils.slash;
 import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;

@@ -39,8 +39,8 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 
-import java.util.List;
 import javax.inject.Inject;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

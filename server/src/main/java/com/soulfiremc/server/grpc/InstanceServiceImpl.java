@@ -17,21 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.InstanceCreateRequest;
-import com.soulfiremc.grpc.generated.InstanceCreateResponse;
-import com.soulfiremc.grpc.generated.InstanceDeleteRequest;
-import com.soulfiremc.grpc.generated.InstanceDeleteResponse;
-import com.soulfiremc.grpc.generated.InstanceInfoRequest;
-import com.soulfiremc.grpc.generated.InstanceInfoResponse;
-import com.soulfiremc.grpc.generated.InstanceListRequest;
-import com.soulfiremc.grpc.generated.InstanceListResponse;
-import com.soulfiremc.grpc.generated.InstanceServiceGrpc;
-import com.soulfiremc.grpc.generated.InstanceStateChangeRequest;
-import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
-import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
-import com.soulfiremc.grpc.generated.InstanceUpdateConfigResponse;
-import com.soulfiremc.grpc.generated.InstanceUpdateFriendlyNameRequest;
-import com.soulfiremc.grpc.generated.InstanceUpdateFriendlyNameResponse;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackState;
@@ -43,8 +29,8 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
 import javax.inject.Inject;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

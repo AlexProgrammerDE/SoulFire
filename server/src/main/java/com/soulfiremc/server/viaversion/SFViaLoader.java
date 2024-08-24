@@ -17,12 +17,7 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.soulfiremc.server.viaversion.providers.SFViaCompressionProvider;
-import com.soulfiremc.server.viaversion.providers.SFViaEncryptionProvider;
-import com.soulfiremc.server.viaversion.providers.SFViaGameProfileFetcher;
-import com.soulfiremc.server.viaversion.providers.SFViaNettyPipelineProvider;
-import com.soulfiremc.server.viaversion.providers.SFViaOldAuthProvider;
-import com.soulfiremc.server.viaversion.providers.SFViaVersionProvider;
+import com.soulfiremc.server.viaversion.providers.*;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;

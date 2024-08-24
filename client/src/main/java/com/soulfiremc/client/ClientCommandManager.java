@@ -25,23 +25,15 @@ import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
-import com.soulfiremc.grpc.generated.CommandCompletionRequest;
-import com.soulfiremc.grpc.generated.CommandRequest;
-import com.soulfiremc.grpc.generated.InstanceCreateRequest;
-import com.soulfiremc.grpc.generated.InstanceCreateResponse;
-import com.soulfiremc.grpc.generated.InstanceState;
-import com.soulfiremc.grpc.generated.InstanceStateChangeRequest;
-import com.soulfiremc.grpc.generated.InstanceStateChangeResponse;
-import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
-import com.soulfiremc.grpc.generated.InstanceUpdateConfigResponse;
+import com.soulfiremc.grpc.generated.*;
 import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.util.List;
 
 import static com.soulfiremc.brigadier.ClientBrigadierHelper.help;
 import static com.soulfiremc.brigadier.ClientBrigadierHelper.literal;

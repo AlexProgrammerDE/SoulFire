@@ -62,29 +62,20 @@ import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
+import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.argument;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.help;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.helpRedirect;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.literal;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.privateCommand;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {

@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.ClientDataRequest;
-import com.soulfiremc.grpc.generated.ClientDataResponse;
-import com.soulfiremc.grpc.generated.ConfigServiceGrpc;
-import com.soulfiremc.grpc.generated.PermissionMessage;
-import com.soulfiremc.grpc.generated.ServerPlugin;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.PluginInfo;
@@ -34,9 +30,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

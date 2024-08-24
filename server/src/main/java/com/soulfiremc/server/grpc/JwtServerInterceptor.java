@@ -19,18 +19,8 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.util.RPCConstants;
-import io.grpc.Context;
-import io.grpc.Contexts;
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
-import io.grpc.Status;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
+import io.grpc.*;
+import io.jsonwebtoken.*;
 
 import javax.crypto.SecretKey;
 

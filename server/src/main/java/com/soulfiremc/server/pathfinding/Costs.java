@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding;
 
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.FluidTags;
-import com.soulfiremc.server.data.RegistryKeys;
-import com.soulfiremc.server.data.TagKey;
+import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;

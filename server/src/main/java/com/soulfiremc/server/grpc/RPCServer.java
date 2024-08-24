@@ -41,9 +41,9 @@ import io.grpc.protobuf.services.ProtoReflectionService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import javax.crypto.SecretKey;
 
 @Slf4j
 public class RPCServer {

@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.util;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class XtermPalette256 {
   private static final int[] COLORS = {

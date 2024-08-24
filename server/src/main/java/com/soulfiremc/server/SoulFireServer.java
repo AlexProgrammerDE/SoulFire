@@ -40,12 +40,7 @@ import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.viaversion.SFViaLoader;
-import com.soulfiremc.server.viaversion.platform.SFViaAprilFools;
-import com.soulfiremc.server.viaversion.platform.SFViaBackwards;
-import com.soulfiremc.server.viaversion.platform.SFViaBedrock;
-import com.soulfiremc.server.viaversion.platform.SFViaLegacy;
-import com.soulfiremc.server.viaversion.platform.SFViaPlatform;
-import com.soulfiremc.server.viaversion.platform.SFViaRewind;
+import com.soulfiremc.server.viaversion.platform.*;
 import com.soulfiremc.util.KeyHelper;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
@@ -64,20 +59,15 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.PluginManager;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.crypto.SecretKey;
 
 @Slf4j
 @Getter

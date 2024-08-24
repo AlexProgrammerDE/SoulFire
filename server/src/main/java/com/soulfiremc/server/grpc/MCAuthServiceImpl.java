@@ -17,19 +17,8 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.AuthRequest;
-import com.soulfiremc.grpc.generated.AuthResponse;
-import com.soulfiremc.grpc.generated.MCAuthServiceGrpc;
-import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.grpc.generated.ProxyProto;
-import com.soulfiremc.grpc.generated.RefreshRequest;
-import com.soulfiremc.grpc.generated.RefreshResponse;
-import com.soulfiremc.server.account.MCAuthService;
-import com.soulfiremc.server.account.SFBedrockMicrosoftAuthService;
-import com.soulfiremc.server.account.SFEasyMCAuthService;
-import com.soulfiremc.server.account.SFJavaMicrosoftAuthService;
-import com.soulfiremc.server.account.SFOfflineAuthService;
-import com.soulfiremc.server.account.SFTheAlteningAuthService;
+import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.account.*;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -40,9 +29,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
+import javax.inject.Inject;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
