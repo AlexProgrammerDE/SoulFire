@@ -24,7 +24,6 @@ import java.nio.file.Path;
 public class SFPathConstants {
   public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
   public static final Path CLIENT_DATA_DIRECTORY = getApplicationDataDirectory();
-  public static final Path PROFILES_DIRECTORY = CLIENT_DATA_DIRECTORY.resolve("profiles");
   public static final Path INTEGRATED_SERVER_DIRECTORY = CLIENT_DATA_DIRECTORY.resolve("integrated-server");
 
   private SFPathConstants() {}
