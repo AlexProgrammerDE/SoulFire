@@ -24,15 +24,6 @@ import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFLogAppender;
 import com.soulfiremc.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.classtransform.TransformerManager;
@@ -42,6 +33,16 @@ import net.lenni0451.reflect.Fields;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 
 /**
  * This class prepares the earliest work possible, such as loading mixins and setting up logging.

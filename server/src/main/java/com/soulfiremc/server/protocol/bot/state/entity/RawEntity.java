@@ -19,11 +19,12 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
+
+import java.util.UUID;
 
 @Getter
 @Setter

@@ -29,8 +29,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
 import com.soulfiremc.server.settings.property.Property;
 import io.netty.buffer.Unpooled;
-import java.util.List;
-import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +38,9 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
+
+import java.util.List;
+import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

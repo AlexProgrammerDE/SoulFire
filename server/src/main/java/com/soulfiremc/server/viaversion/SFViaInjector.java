@@ -21,6 +21,7 @@ import com.viaversion.viaversion.api.platform.ViaInjector;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+
 import java.util.SortedSet;
 
 public class SFViaInjector implements ViaInjector {

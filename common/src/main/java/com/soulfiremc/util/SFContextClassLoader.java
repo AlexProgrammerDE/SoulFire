@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.util;
 
+import lombok.Getter;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -27,7 +29,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import lombok.Getter;
 
 public class SFContextClassLoader extends ClassLoader {
   @Getter

@@ -17,10 +17,11 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
-import java.util.Map;
-import java.util.Optional;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+
+import java.util.Map;
+import java.util.Optional;
 
 public record SFDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> dataComponents) {
   @SuppressWarnings("unchecked")

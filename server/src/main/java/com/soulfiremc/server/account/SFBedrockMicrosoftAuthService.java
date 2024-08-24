@@ -22,12 +22,13 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.proxy.SFProxy;
-import java.util.concurrent.CompletableFuture;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class SFBedrockMicrosoftAuthService
   implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {

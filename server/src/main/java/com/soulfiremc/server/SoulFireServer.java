@@ -53,6 +53,17 @@ import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.pf4j.PluginManager;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -67,16 +78,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.crypto.SecretKey;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.pf4j.PluginManager;
 
 @Slf4j
 @Getter

@@ -20,6 +20,8 @@ package com.soulfiremc.server.protocol.netty;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.util.ServerAddress;
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -28,7 +30,6 @@ import java.util.Hashtable;
 import java.util.Optional;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ResolveUtil {

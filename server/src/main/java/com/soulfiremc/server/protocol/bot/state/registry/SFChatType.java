@@ -19,13 +19,6 @@ package com.soulfiremc.server.protocol.bot.state.registry;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.data.RegistryValue;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.kyori.adventure.key.Key;
@@ -45,6 +38,14 @@ import org.cloudburstmc.nbt.NbtType;
 import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatType;
 import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatTypeDecoration;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Objects;
 
 @Getter
 public class SFChatType implements RegistryValue<SFChatType> {

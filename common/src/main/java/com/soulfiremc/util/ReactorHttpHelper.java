@@ -20,11 +20,12 @@ package com.soulfiremc.util;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.ProxyProvider;
+
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.transport.ProxyProvider;
 
 public class ReactorHttpHelper {
   private ReactorHttpHelper() {}

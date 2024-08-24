@@ -20,10 +20,11 @@ package com.soulfiremc.server.viaversion.providers;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import java.util.Objects;
 import lombok.SneakyThrows;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import org.geysermc.mcprotocollib.network.crypt.AESEncryption;
+
+import java.util.Objects;
 
 public class SFViaEncryptionProvider extends EncryptionProvider {
   @SneakyThrows

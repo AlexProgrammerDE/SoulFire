@@ -17,10 +17,11 @@
  */
 package com.soulfiremc.server.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import org.jetbrains.annotations.NotNull;
 
 public class NoopLock implements Lock {
   @Override

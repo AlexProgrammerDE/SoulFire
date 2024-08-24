@@ -19,9 +19,10 @@ package com.soulfiremc.server.protocol;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import javax.crypto.SecretKey;
 import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.network.Flag;
+
+import javax.crypto.SecretKey;
 
 public class SFProtocolConstants {
   public static final Flag<SecretKey> ENCRYPTION_SECRET_KEY = new Flag<>("encryption-secret-key", SecretKey.class);

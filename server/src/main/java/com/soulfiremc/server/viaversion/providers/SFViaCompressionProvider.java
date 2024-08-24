@@ -20,6 +20,7 @@ package com.soulfiremc.server.viaversion.providers;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
+
 import java.util.Objects;
 
 public class SFViaCompressionProvider extends CompressionProvider {

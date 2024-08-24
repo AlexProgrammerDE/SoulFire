@@ -20,10 +20,11 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.data.TagKey;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Arrays;
-import java.util.Map;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+
+import java.util.Arrays;
+import java.util.Map;
 
 @Getter
 public class TagsState {

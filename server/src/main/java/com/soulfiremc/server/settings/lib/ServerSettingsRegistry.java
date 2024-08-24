@@ -40,14 +40,15 @@ import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.SingleProperty;
 import com.soulfiremc.server.settings.property.StringListProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 
 @RequiredArgsConstructor
 public class ServerSettingsRegistry {

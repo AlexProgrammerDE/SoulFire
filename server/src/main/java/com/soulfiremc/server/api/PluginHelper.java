@@ -22,8 +22,9 @@ import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
-import java.util.function.Consumer;
 import net.lenni0451.lambdaevents.LambdaManager;
+
+import java.util.function.Consumer;
 
 /**
  * This class contains helper methods for plugins to use to make their life easier.

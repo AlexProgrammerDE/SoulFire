@@ -27,14 +27,15 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.data.TagKey;
+import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.key.Key;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.key.Key;
 
 @RequiredArgsConstructor
 public class TagBasedArgumentType<T extends RegistryValue<T>, R extends TagResolvable<T>> implements ArgumentType<R> {

@@ -23,6 +23,10 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpStatusClass;
+import lombok.AllArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.netty.ByteBufFlux;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -31,9 +35,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.UUID;
 import javax.crypto.SecretKey;
-import lombok.AllArgsConstructor;
-import reactor.core.publisher.Flux;
-import reactor.netty.ByteBufFlux;
 
 public class SFSessionService {
   private static final URI MOJANG_JOIN_URI =

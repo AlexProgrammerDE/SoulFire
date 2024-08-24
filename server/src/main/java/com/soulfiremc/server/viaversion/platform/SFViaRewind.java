@@ -19,11 +19,12 @@ package com.soulfiremc.server.viaversion.platform;
 
 import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
 import com.viaversion.viarewind.api.ViaRewindPlatform;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.logging.Logger;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class SFViaRewind implements ViaRewindPlatform {

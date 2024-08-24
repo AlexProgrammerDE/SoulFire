@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.server.util;
 
-import static it.unimi.dsi.fastutil.HashCommon.arraySize;
-import static it.unimi.dsi.fastutil.HashCommon.maxFill;
-
 import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import it.unimi.dsi.fastutil.Hash;
@@ -32,6 +29,8 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
 import it.unimi.dsi.fastutil.objects.ObjectSpliterators;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -39,7 +38,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
+
+import static it.unimi.dsi.fastutil.HashCommon.arraySize;
+import static it.unimi.dsi.fastutil.HashCommon.maxFill;
 
 // Fork of Object2ObjectCustomOpenHashMap
 // The main difference is that it uses native equals and hashcode methods

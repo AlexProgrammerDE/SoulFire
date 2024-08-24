@@ -19,15 +19,16 @@ package com.soulfiremc.server.spark;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.SoulFireServer;
-import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.lucko.spark.common.SparkPlatform;
 import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.platform.PlatformInfo;
+
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -31,11 +31,6 @@ import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.test.utils.TestLevelHeightAccessor;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.zip.GZIPInputStream;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import org.intellij.lang.annotations.Subst;
@@ -43,6 +38,12 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.zip.GZIPInputStream;
 
 @Slf4j
 @State(Scope.Benchmark)

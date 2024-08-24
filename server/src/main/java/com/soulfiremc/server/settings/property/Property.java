@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.property;
 
 import com.soulfiremc.settings.PropertyKey;
+
 import java.util.List;
 import java.util.function.Function;
 

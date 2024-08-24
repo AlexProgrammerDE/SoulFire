@@ -19,10 +19,11 @@ package com.soulfiremc.settings.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.util.SocketAddressHelper;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 public record SFProxy(
   @NonNull ProxyType type,

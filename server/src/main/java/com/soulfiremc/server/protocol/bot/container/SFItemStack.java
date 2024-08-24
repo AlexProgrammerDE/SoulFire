@@ -18,12 +18,13 @@
 package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.ItemType;
-import java.util.HashMap;
 import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
+
+import java.util.HashMap;
 
 @Getter
 public class SFItemStack extends ItemStack {

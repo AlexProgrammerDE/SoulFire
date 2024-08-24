@@ -20,9 +20,10 @@ package com.soulfiremc.server.spark;
 import com.soulfiremc.brigadier.CommandSource;
 import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.ServerCommandSource;
-import java.util.UUID;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
+
+import java.util.UUID;
 
 public class SFSparkCommandSender extends AbstractCommandSender<CommandSource> {
   public SFSparkCommandSender(final CommandSource delegate) {

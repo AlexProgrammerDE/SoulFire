@@ -36,9 +36,10 @@ import io.netty.incubator.channel.uring.IOUring;
 import io.netty.incubator.channel.uring.IOUringDatagramChannel;
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
+import org.geysermc.mcprotocollib.network.helper.TransportHelper;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
-import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 
 public class SFNettyHelper {
   public static final TransportMethod TRANSPORT_METHOD =

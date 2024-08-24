@@ -18,6 +18,7 @@
 package com.soulfiremc.settings.account.service;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 

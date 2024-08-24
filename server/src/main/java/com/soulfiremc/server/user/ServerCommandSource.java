@@ -20,10 +20,11 @@ package com.soulfiremc.server.user;
 import com.soulfiremc.brigadier.CommandSource;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.TriState;
+
+import java.util.UUID;
 
 public interface ServerCommandSource extends CommandSource {
   @Override

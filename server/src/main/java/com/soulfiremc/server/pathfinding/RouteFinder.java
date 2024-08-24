@@ -28,6 +28,8 @@ import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.CallLimiter;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,7 +37,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {

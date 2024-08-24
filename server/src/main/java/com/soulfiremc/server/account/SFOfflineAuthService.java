@@ -21,6 +21,7 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.OfflineJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
+
 import java.util.concurrent.CompletableFuture;
 
 public final class SFOfflineAuthService

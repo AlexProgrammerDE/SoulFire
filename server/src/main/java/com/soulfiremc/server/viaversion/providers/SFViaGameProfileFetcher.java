@@ -17,9 +17,10 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
-import java.util.UUID;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.model.GameProfile;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
+
+import java.util.UUID;
 
 public class SFViaGameProfileFetcher extends GameProfileFetcher {
   @Override

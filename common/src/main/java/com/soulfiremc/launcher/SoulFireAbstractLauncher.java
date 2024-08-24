@@ -18,6 +18,7 @@
 package com.soulfiremc.launcher;
 
 import com.soulfiremc.util.SFContextClassLoader;
+
 import java.util.List;
 
 public abstract class SoulFireAbstractLauncher {

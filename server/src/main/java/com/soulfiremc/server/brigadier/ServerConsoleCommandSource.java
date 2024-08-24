@@ -21,9 +21,10 @@ import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
-import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
+
+import java.util.UUID;
 
 public class ServerConsoleCommandSource extends ClientConsoleCommandSource implements ServerCommandSource {
   public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();

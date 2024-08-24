@@ -19,11 +19,12 @@ package com.soulfiremc.client.settings;
 
 import com.soulfiremc.settings.proxy.ProxyType;
 import com.soulfiremc.settings.proxy.SFProxy;
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class ProxyParser {

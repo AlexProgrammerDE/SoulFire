@@ -17,13 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.argument;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.help;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.helpRedirect;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.literal;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.privateCommand;
-
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -62,6 +55,13 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.raphimc.vialoader.util.ProtocolVersionList;
+import org.apache.commons.io.FileUtils;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -78,12 +78,13 @@ import java.util.function.ToIntFunction;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import net.raphimc.vialoader.util.ProtocolVersionList;
-import org.apache.commons.io.FileUtils;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+
+import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.argument;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.help;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.helpRedirect;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.literal;
+import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.privateCommand;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {

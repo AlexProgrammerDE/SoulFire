@@ -38,11 +38,12 @@ import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.protobuf.services.ProtoReflectionService;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import javax.crypto.SecretKey;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RPCServer {

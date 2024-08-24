@@ -18,6 +18,7 @@
 package com.soulfiremc.util;
 
 import com.google.common.net.HostAndPort;
+
 import java.net.IDN;
 
 public record ServerAddress(HostAndPort hostAndPort) {

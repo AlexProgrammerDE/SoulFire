@@ -17,8 +17,9 @@
  */
 package com.soulfiremc.util;
 
-import java.nio.file.Path;
 import net.harawata.appdirs.AppDirsFactory;
+
+import java.nio.file.Path;
 
 public class SFPathConstants {
   public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));

@@ -23,13 +23,14 @@ import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
-import java.net.URI;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
+
+import java.net.URI;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public final class SFEasyMCAuthService

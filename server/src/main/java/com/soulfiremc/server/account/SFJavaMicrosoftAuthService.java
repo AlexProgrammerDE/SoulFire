@@ -22,12 +22,13 @@ import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.OnlineChainJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
-import java.util.concurrent.CompletableFuture;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class SFJavaMicrosoftAuthService
   implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {

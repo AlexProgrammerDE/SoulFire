@@ -30,13 +30,14 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.ItemTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PathExecutor implements Consumer<BotPreTickEvent> {

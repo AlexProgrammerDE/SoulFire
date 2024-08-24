@@ -21,8 +21,9 @@ import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import java.util.List;
 import org.cloudburstmc.math.vector.Vector2i;
+
+import java.util.List;
 
 public record XZGoal(Vector2i goal) implements GoalScorer {
   public XZGoal(int x, int z) {

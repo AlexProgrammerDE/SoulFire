@@ -18,8 +18,9 @@
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.protocol.bot.movement.AABB;
-import java.util.List;
 import org.cloudburstmc.math.vector.Vector3d;
+
+import java.util.List;
 
 public record Segment(Vector3d startPoint, Vector3d endPoint) {
   public boolean intersects(List<AABB> boxes) {

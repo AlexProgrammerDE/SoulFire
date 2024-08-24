@@ -34,6 +34,11 @@ import com.viaversion.viaversion.configuration.AbstractViaConfig;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.util.VersionInfo;
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.raphimc.vialoader.commands.UserCommandSender;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
@@ -41,10 +46,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import net.raphimc.vialoader.commands.UserCommandSender;
-import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class SFViaPlatform implements ViaPlatform<UserConnection> {

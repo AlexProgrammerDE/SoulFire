@@ -17,12 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Data
 public class PlayerListState {

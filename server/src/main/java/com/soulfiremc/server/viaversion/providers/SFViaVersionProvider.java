@@ -21,6 +21,7 @@ import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+
 import java.util.Objects;
 
 public class SFViaVersionProvider implements VersionProvider {

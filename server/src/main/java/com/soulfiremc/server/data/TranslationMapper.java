@@ -22,13 +22,14 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgumentLike;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
 @Slf4j
 @RequiredArgsConstructor

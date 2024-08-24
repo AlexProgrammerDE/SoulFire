@@ -28,6 +28,13 @@ import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultConfigurationOption;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import net.minecraft.network.protocol.Packet;
+import org.jetbrains.java.decompiler.api.Decompiler;
+import org.jetbrains.java.decompiler.main.decompiler.DirectoryResultSaver;
+import org.jetbrains.java.decompiler.struct.DirectoryContextSource;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,12 +44,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import net.minecraft.network.protocol.Packet;
-import org.jetbrains.java.decompiler.api.Decompiler;
-import org.jetbrains.java.decompiler.main.decompiler.DirectoryResultSaver;
-import org.jetbrains.java.decompiler.struct.DirectoryContextSource;
 
 @Slf4j
 public class PacketsGenerator {

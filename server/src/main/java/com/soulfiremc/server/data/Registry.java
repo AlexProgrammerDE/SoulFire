@@ -23,10 +23,11 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import java.util.Collection;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
+
+import java.util.Collection;
 
 public class Registry<T extends RegistryValue<T>> {
   @Getter

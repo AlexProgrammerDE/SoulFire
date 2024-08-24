@@ -31,9 +31,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageCodec;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {

@@ -38,14 +38,15 @@ import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class SimpleMovement extends GraphAction implements Cloneable {

@@ -33,12 +33,13 @@ import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
+import lombok.SneakyThrows;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import lombok.SneakyThrows;
 
 public record SettingsHolder(
   Map<PropertyKey, JsonElement> settingsProperties,

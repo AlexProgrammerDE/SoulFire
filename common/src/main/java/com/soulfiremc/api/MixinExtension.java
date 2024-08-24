@@ -17,8 +17,9 @@
  */
 package com.soulfiremc.api;
 
-import java.util.Set;
 import org.pf4j.ExtensionPoint;
+
+import java.util.Set;
 
 /**
  * This interface is used to load mixins from third-party plugins. Use the direct class name for a

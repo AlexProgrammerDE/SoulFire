@@ -23,18 +23,19 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.proxy.ProxyType;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -21,6 +21,7 @@ import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+
 import java.util.List;
 
 public record YGoal(int y) implements GoalScorer {

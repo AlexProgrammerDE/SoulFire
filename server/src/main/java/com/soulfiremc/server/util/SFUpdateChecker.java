@@ -22,11 +22,12 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpStatusClass;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 public class SFUpdateChecker {

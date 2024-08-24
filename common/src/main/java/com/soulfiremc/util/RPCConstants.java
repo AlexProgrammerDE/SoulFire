@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.util;
 
-import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
-
 import io.grpc.Metadata;
+
+import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
 public class RPCConstants {
   public static final String BEARER_TYPE = "Bearer";

@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+
 import java.util.List;
 
 // TODO: Extract into having more fine behaviour control

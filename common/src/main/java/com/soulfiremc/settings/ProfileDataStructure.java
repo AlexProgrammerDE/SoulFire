@@ -32,6 +32,7 @@ import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.EnabledWrapper;
 import com.soulfiremc.util.SocketAddressHelper;
+
 import java.lang.reflect.Type;
 import java.net.SocketAddress;
 import java.security.GeneralSecurityException;

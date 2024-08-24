@@ -19,10 +19,6 @@ package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
-import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -59,6 +55,11 @@ import org.geysermc.mcprotocollib.protocol.packet.status.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.status.clientbound.ClientboundStatusResponsePacket;
 import org.geysermc.mcprotocollib.protocol.packet.status.serverbound.ServerboundPingRequestPacket;
 import org.geysermc.mcprotocollib.protocol.packet.status.serverbound.ServerboundStatusRequestPacket;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 @RequiredArgsConstructor
 public class SFBaseListener extends SessionAdapter {

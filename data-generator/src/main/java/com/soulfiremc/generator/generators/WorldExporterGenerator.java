@@ -22,16 +22,17 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.generator.Main;
 import com.soulfiremc.generator.util.GsonInstance;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Objects;
-import java.util.zip.GZIPOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Objects;
+import java.util.zip.GZIPOutputStream;
 
 @Slf4j
 public class WorldExporterGenerator implements IDataGenerator {

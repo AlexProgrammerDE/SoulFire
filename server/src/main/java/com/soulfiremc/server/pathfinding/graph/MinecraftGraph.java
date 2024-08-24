@@ -32,13 +32,14 @@ import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,

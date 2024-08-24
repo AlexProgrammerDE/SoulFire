@@ -17,9 +17,10 @@
  */
 package com.soulfiremc.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.ServerSocket;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PortHelper {

@@ -31,11 +31,12 @@ import com.soulfiremc.grpc.generated.MCAuthServiceGrpc;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
 import io.grpc.Codec;
 import io.grpc.Context;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter

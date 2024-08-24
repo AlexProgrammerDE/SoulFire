@@ -18,10 +18,11 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.ServerPlugin;
-import java.lang.reflect.Field;
 import lombok.SneakyThrows;
 import org.pf4j.PluginClassLoader;
 import org.pf4j.PluginDescriptor;
+
+import java.lang.reflect.Field;
 
 public record PluginInfo(String id, String version, String description, String author, String license) {
   private static final Field PLUGIN_DESCRIPTOR_FIELD;

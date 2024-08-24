@@ -27,11 +27,12 @@ import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.util.PortHelper;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ServerAddress;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {

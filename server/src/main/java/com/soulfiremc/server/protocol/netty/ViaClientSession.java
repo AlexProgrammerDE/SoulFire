@@ -42,12 +42,6 @@ import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
 import io.netty.handler.codec.haproxy.HAProxyProtocolVersion;
 import io.netty.handler.codec.haproxy.HAProxyProxiedProtocol;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.raphimc.viabedrock.api.protocol.BedrockBaseProtocol;
@@ -76,6 +70,13 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ViaClientSession extends TcpSession {
   public static final String SIZER_NAME = "sizer";
