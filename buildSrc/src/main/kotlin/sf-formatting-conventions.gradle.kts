@@ -5,10 +5,8 @@ plugins {
 spotless {
     java {
         trimTrailingWhitespace()
-        indentWithSpaces(4)
+        indentWithSpaces(2)
         endWithNewline()
-
-        palantirJavaFormat()
 
         importOrder("", "java|javax", "\\#")
     }
