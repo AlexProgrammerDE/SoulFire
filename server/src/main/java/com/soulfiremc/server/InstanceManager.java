@@ -290,10 +290,6 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
   public CompletableFuture<?> stopAttackSession() {
     return CompletableFuture.runAsync(() -> {
-      if (attackState.isStopped()) {
-        return;
-      }
-
       logger.info("Draining attack executor");
       scheduler.blockNewTasks(true);
       scheduler.drainQueue();
