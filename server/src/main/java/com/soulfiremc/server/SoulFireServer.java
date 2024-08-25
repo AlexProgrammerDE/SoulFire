@@ -257,12 +257,12 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
         .toArray(CompletableFuture[]::new));
   }
 
-  public CompletableFuture<?> stopAttack(UUID id) {
-    return instances.get(id).stopAttackPermanently();
+  public Optional<CompletableFuture<?>> stopAttack(UUID id) {
+    return Optional.ofNullable(instances.get(id)).map(InstanceManager::stopAttackPermanently);
   }
 
-  public CompletableFuture<?> deleteInstance(UUID id) {
-    return instances.remove(id).stopAttackPermanently();
+  public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
+    return Optional.ofNullable(instances.remove(id)).map(InstanceManager::stopAttackPermanently);
   }
 
   public Optional<InstanceManager> getInstance(UUID id) {
