@@ -122,7 +122,6 @@ public class SFCommandDefinition implements Callable<Integer> {
       try {
         cliManager
           .clientSettingsManager()
-          .accountRegistry()
           .loadFromString(Files.readString(accountFile), authType, null);
       } catch (IOException e) {
         log.error("Failed to load accounts!", e);
@@ -134,7 +133,6 @@ public class SFCommandDefinition implements Callable<Integer> {
       try {
         cliManager
           .clientSettingsManager()
-          .proxyRegistry()
           .loadFromString(
             Files.readString(proxyFile),
             proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));

@@ -6,8 +6,8 @@
   "mixins": [
     "BlockAccessor",
     "BlockSettingsOffsetMixin",
-    "EULAMixin",
     "DataPackConfigMixin",
+    "EULAMixin",
     "ReadyMixin"
   ],
   "client": [

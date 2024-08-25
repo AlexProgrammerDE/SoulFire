@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.InstanceConfig;
@@ -25,33 +25,60 @@ import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.settings.PropertyKey;
+import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
+import com.soulfiremc.settings.account.service.AccountData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.util.SocketAddressHelper;
 import lombok.SneakyThrows;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Type;
+import java.net.SocketAddress;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 import java.util.function.Function;
 
 public record SettingsHolder(
-  Map<PropertyKey, JsonElement> settingsProperties,
+  Map<String, Map<String, JsonElement>> settings,
   List<MinecraftAccount> accounts,
   List<SFProxy> proxies) {
   public static final SettingsHolder EMPTY = new SettingsHolder(Map.of(), List.of(), List.of());
+  private static final Gson PROFILE_GSON =
+    new GsonBuilder()
+      .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
+      .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
+      .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
+      .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
+      .setPrettyPrinting()
+      .create();
+
+  public static SettingsHolder deserialize(String json) {
+    return PROFILE_GSON.fromJson(json, SettingsHolder.class);
+  }
+
+  public String serialize() {
+    return PROFILE_GSON.toJson(this);
+  }
 
   @SneakyThrows
   public static SettingsHolder fromProto(InstanceConfig request) {
-    var settingsProperties = new HashMap<PropertyKey, JsonElement>();
+    var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
 
     for (var namespace : request.getSettingsList()) {
-      for (var entry : namespace.getEntriesList()) {
-        var propertyKey = new PropertyKey(namespace.getNamespace(), entry.getKey());
+      Map<String, JsonElement> namespaceProperties = new HashMap<>();
 
-        settingsProperties.put(propertyKey, GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+      for (var entry : namespace.getEntriesList()) {
+        namespaceProperties.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
       }
+
+      settingsProperties.put(namespace.getNamespace(), namespaceProperties);
     }
 
     var accounts = new ArrayList<MinecraftAccount>();
@@ -69,19 +96,22 @@ public record SettingsHolder(
 
   @SneakyThrows
   public InstanceConfig toProto() {
-    Map<String, Map<String, Value>> settingsProperties = new HashMap<>();
-    for (var entry : this.settingsProperties.entrySet()) {
-      var key = entry.getKey();
-      var value = entry.getValue();
+    var settingsProperties = new HashMap<String, Map<String, Value>>();
+    for (var entry : this.settings.entrySet()) {
+      var namespace = entry.getKey();
+      var innerMap = new HashMap<String, Value>();
 
-      var namespace = key.namespace();
-      var innerKey = key.key();
+      for (var innerEntry : entry.getValue().entrySet()) {
+        var key = innerEntry.getKey();
+        var value = innerEntry.getValue();
 
-      var valueProto = Value.newBuilder();
-      JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), valueProto);
+        var valueProto = Value.newBuilder();
+        JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), valueProto);
 
-      settingsProperties.computeIfAbsent(namespace, k -> new HashMap<>())
-        .put(innerKey, valueProto.build());
+        innerMap.put(key, valueProto.build());
+      }
+
+      settingsProperties.put(namespace, innerMap);
     }
 
     return InstanceConfig.newBuilder()
@@ -134,6 +164,92 @@ public record SettingsHolder(
   }
 
   public <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
-    return GsonInstance.GSON.fromJson(settingsProperties.getOrDefault(key, GsonInstance.GSON.toJsonTree(defaultValue)), clazz);
+    return get(key).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
+  }
+
+  private Optional<JsonElement> get(PropertyKey key) {
+    return Optional.ofNullable(settings.get(key.namespace()))
+      .flatMap(map -> Optional.ofNullable(map.get(key.key())));
+  }
+
+  private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
+    @Override
+    protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
+      try {
+        var keyFactory = KeyFactory.getInstance("EC");
+        return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
+      } catch (GeneralSecurityException e) {
+        throw new JsonParseException(e);
+      }
+    }
+  }
+
+  private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
+    @Override
+    protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
+      try {
+        var keyFactory = KeyFactory.getInstance("EC");
+        return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
+      } catch (GeneralSecurityException e) {
+        throw new JsonParseException(e);
+      }
+    }
+  }
+
+  private abstract static class AbstractKeyAdapter<T>
+    implements JsonSerializer<Key>, JsonDeserializer<T> {
+    @Override
+    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
+      return createKey(Base64.getDecoder().decode(json.getAsString()));
+    }
+
+    @Override
+    public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
+      return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
+    }
+
+    protected abstract T createKey(byte[] bytes) throws JsonParseException;
+  }
+
+  private static class MinecraftAccountAdapter
+    implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
+    @Override
+    public MinecraftAccount deserialize(
+      JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
+      var authType =
+        context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+
+      return createGson(authType).fromJson(json, MinecraftAccount.class);
+    }
+
+    @Override
+    public JsonElement serialize(
+      MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
+      return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
+    }
+
+    private Gson createGson(AuthType authType) {
+      return new GsonBuilder()
+        .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+        .create();
+    }
+
+    private record AccountDataAdapter(AuthType authType)
+      implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
+      @Override
+      public AccountData deserialize(
+        JsonElement json, Type typeOfT, JsonDeserializationContext context)
+        throws JsonParseException {
+        return PROFILE_GSON.fromJson(json, authType.accountDataClass());
+      }
+
+      @Override
+      public JsonElement serialize(
+        AccountData src, Type typeOfSrc, JsonSerializationContext context) {
+        return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
+      }
+    }
   }
 }
