@@ -265,7 +265,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     return instances.remove(id).stopAttackPermanently();
   }
 
-  public InstanceManager getInstance(UUID id) {
-    return instances.get(id);
+  public Optional<InstanceManager> getInstance(UUID id) {
+    return Optional.ofNullable(instances.get(id));
   }
 }

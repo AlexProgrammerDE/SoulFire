@@ -25,6 +25,7 @@ import com.linecorp.armeria.common.SessionProtocol;
 import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.common.logging.LogLevel;
 import com.linecorp.armeria.common.logging.LogWriter;
 import com.linecorp.armeria.common.prometheus.PrometheusMeterRegistries;
 import com.linecorp.armeria.server.RedirectService;
@@ -37,6 +38,8 @@ import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.user.AuthSystem;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -111,7 +114,19 @@ public class RPCServer {
       Server.builder()
         .port(new InetSocketAddress(host, port), SessionProtocol.HTTP)
         .meterRegistry(meterRegistry)
-        .decorator(LoggingService.builder().logWriter(LogWriter.of(log)).newDecorator())
+        .decorator(LoggingService.builder()
+          .logWriter(LogWriter.builder()
+            .logger(log)
+            .responseLogLevelMapper(l -> {
+              if (l.responseCause() instanceof StatusRuntimeException e
+                && (e.getStatus() == Status.CANCELLED || e.getStatus() == Status.NOT_FOUND)) {
+                return LogLevel.TRACE;
+              }
+
+              return null;
+            })
+            .build())
+          .newDecorator())
         .service(grpcService,
           corsBuilder.newDecorator(),
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))

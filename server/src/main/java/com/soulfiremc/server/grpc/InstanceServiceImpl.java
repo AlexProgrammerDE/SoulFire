@@ -84,7 +84,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     var instanceId = UUID.fromString(request.getId());
 
     try {
-      var instance = soulFireServer.getInstance(instanceId);
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+      }
+
+      var instance = optionalInstance.get();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsHolder().toProto())
@@ -103,7 +108,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     var instanceId = UUID.fromString(request.getId());
 
     try {
-      var instance = soulFireServer.getInstance(instanceId);
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+      }
+
+      var instance = optionalInstance.get();
       instance.friendlyName(request.getFriendlyName());
 
       responseObserver.onNext(InstanceUpdateFriendlyNameResponse.newBuilder().build());
@@ -120,7 +130,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     var instanceId = UUID.fromString(request.getId());
 
     try {
-      var instance = soulFireServer.getInstance(instanceId);
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+      }
+
+      var instance = optionalInstance.get();
       instance.settingsHolder(SettingsHolder.fromProto(request.getConfig()));
 
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
@@ -137,7 +152,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     var instanceId = UUID.fromString(request.getId());
 
     try {
-      var instance = soulFireServer.getInstance(instanceId);
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+      }
+
+      var instance = optionalInstance.get();
       instance.switchToState(AttackState.fromProto(request.getState()));
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
