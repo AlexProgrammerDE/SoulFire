@@ -24,14 +24,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class SoulFireScheduler {
-  private static final Thread.Builder.OfVirtual managementThreadBuilder = Thread.ofVirtual()
-    .name("SoulFireScheduler-Management-", 0);
+  private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
+    .name("SoulFireScheduler-Management-", 0)
+    .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final ForkJoinPool mainThreadExecutor;
   private final Logger logger;
@@ -50,25 +50,22 @@ public class SoulFireScheduler {
     this.logger = logger;
     this.runnableWrapper = runnableWrapper;
 
-    managementThreadBuilder.start(this::managementTask);
+    MANAGEMENT_SERVICE.submit(this::managementTask);
   }
 
-  @SuppressWarnings("BusyWait")
   public void managementTask() {
-    try {
-      while (!blockNewTasks) {
-        synchronized (executionQueue) {
-          while (!executionQueue.isEmpty() && executionQueue.first().isReady()) {
-            var timedRunnable = executionQueue.dequeue();
-            schedule(() -> runCommand(timedRunnable.runnable()));
-          }
-        }
-
-        Thread.sleep(1);
-      }
-    } catch (InterruptedException e) {
-      logger.info("Management thread interrupted");
+    if (mainThreadExecutor.isShutdown()) {
+      return;
     }
+
+    synchronized (executionQueue) {
+      while (!blockNewTasks && !executionQueue.isEmpty() && executionQueue.first().isReady()) {
+        var timedRunnable = executionQueue.dequeue();
+        schedule(() -> runCommand(timedRunnable.runnable()));
+      }
+    }
+
+    MANAGEMENT_SERVICE.schedule(this::managementTask, 1, TimeUnit.MILLISECONDS);
   }
 
   public void schedule(Runnable command) {
@@ -80,6 +77,10 @@ public class SoulFireScheduler {
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
+    if (blockNewTasks) {
+      return;
+    }
+
     synchronized (executionQueue) {
       if (blockNewTasks) {
         return;
@@ -90,10 +91,6 @@ public class SoulFireScheduler {
   }
 
   public void scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
-    if (blockNewTasks) {
-      return;
-    }
-
     schedule(() -> {
       scheduleAtFixedRate(command, period, period, unit);
       runCommand(command);
@@ -101,10 +98,6 @@ public class SoulFireScheduler {
   }
 
   public void scheduleWithFixedDelay(Runnable command, long delay, long period, TimeUnit unit) {
-    if (blockNewTasks) {
-      return;
-    }
-
     schedule(() -> {
       runCommand(command);
       scheduleWithFixedDelay(command, period, period, unit);
@@ -112,10 +105,6 @@ public class SoulFireScheduler {
   }
 
   public void scheduleWithRandomDelay(Runnable command, long minDelay, long maxDelay, TimeUnit unit) {
-    if (blockNewTasks) {
-      return;
-    }
-
     schedule(() -> {
       runCommand(command);
       scheduleWithRandomDelay(command, minDelay, maxDelay, unit);
@@ -131,9 +120,14 @@ public class SoulFireScheduler {
   public void shutdown() {
     blockNewTasks = true;
     mainThreadExecutor.shutdown();
+    drainQueue();
   }
 
   private void runCommand(Runnable command) {
+    if (blockNewTasks) {
+      return;
+    }
+
     try {
       runnableWrapper.apply(command).run();
     } catch (Throwable t) {
