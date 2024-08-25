@@ -118,9 +118,8 @@ public class RPCServer {
           .logWriter(LogWriter.builder()
             .logger(log)
             .responseLogLevelMapper(l -> {
-              if (l.responseCause() instanceof StatusRuntimeException e
-                && (e.getStatus() == Status.CANCELLED || e.getStatus() == Status.NOT_FOUND)) {
-                return LogLevel.TRACE;
+              if (l.responseCause() instanceof StatusRuntimeException e && e.getStatus().getCode() == Status.Code.CANCELLED) {
+                return LogLevel.DEBUG;
               }
 
               return null;
