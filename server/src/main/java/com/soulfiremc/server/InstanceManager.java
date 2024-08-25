@@ -79,7 +79,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   public InstanceManager(UUID id, String friendlyName, SoulFireServer soulFireServer, SettingsHolder settingsHolder) {
     this.id = id;
     this.friendlyName = friendlyName;
-    this.logger = LoggerFactory.getLogger("AttackManager-" + id);
+    this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
     this.settingsHolder = settingsHolder;
