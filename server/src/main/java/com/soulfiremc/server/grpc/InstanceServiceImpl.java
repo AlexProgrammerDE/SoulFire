@@ -57,12 +57,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     var instanceId = UUID.fromString(request.getId());
 
     try {
-      var optionalInstance = soulFireServer.deleteInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
+      var optionalDeletion = soulFireServer.deleteInstance(instanceId);
+      if (optionalDeletion.isEmpty()) {
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
       }
 
-      optionalInstance.get().join();
+      optionalDeletion.get().join();
       responseObserver.onNext(InstanceDeleteResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
