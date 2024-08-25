@@ -80,11 +80,11 @@ public class SoulFireScheduler {
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
-    if (blockNewTasks) {
-      return;
-    }
-
     synchronized (executionQueue) {
+      if (blockNewTasks) {
+        return;
+      }
+
       executionQueue.enqueue(TimedRunnable.of(command, delay, unit));
     }
   }
