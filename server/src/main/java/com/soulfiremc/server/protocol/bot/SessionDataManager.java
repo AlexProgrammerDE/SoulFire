@@ -1036,6 +1036,7 @@ public final class SessionDataManager {
     var reason = toPlainText(event.getReason());
     var cause = event.getCause();
     if (cause == null) { // Packet wise disconnects have no cause
+      log.error("Disconnected: {}", reason);
       return;
     }
 
