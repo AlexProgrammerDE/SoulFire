@@ -202,12 +202,10 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   }
 
   public static void setupLogging(SettingsHolder settingsHolder) {
-    var level = settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO;
-    var nettyLevel = settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO;
-    var grpcLevel = settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO;
-    Configurator.setRootLevel(level);
-    Configurator.setLevel("io.netty", nettyLevel);
-    Configurator.setLevel("io.grpc", grpcLevel);
+    Configurator.setRootLevel(settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.netty", settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.grpc", settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("org.geysermc.mcprotocollib", settingsHolder.get(DevSettings.MCPROTOCOLLIB_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
   public String generateRemoteUserJWT() {

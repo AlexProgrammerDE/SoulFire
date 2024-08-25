@@ -56,4 +56,11 @@ public class DevSettings implements SettingsObject {
       new String[] {"--grpc-debug"},
       "Enable gRPC debug logging",
       false);
+  public static final BooleanProperty MCPROTOCOLLIB_DEBUG =
+    BUILDER.ofBoolean(
+      "mcprotocollib-debug",
+      "MCProtocolLib debug",
+      new String[] {"--mcprotocollib-debug"},
+      "Enable MCProtocolLib debug logging",
+      false);
 }
