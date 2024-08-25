@@ -181,7 +181,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       } else {
         logger.info("No custom accounts provided, generating offline accounts based on name format");
         for (var i = 0; i < botAmount; i++) {
-          accountQueue.add(SFOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), i + 1)));
+          accounts.add(SFOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), i + 1)));
         }
       }
 
