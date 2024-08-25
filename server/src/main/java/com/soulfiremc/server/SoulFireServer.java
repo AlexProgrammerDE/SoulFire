@@ -39,14 +39,12 @@ import com.soulfiremc.server.settings.lib.SettingsHolder;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.SFUpdateChecker;
-import com.soulfiremc.server.viaversion.SFViaLoader;
-import com.soulfiremc.server.viaversion.platform.*;
+import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
+import com.soulfiremc.server.viaversion.SFViaPlatform;
 import com.soulfiremc.util.KeyHelper;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
-import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.protocol.ProtocolManagerImpl;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +53,8 @@ import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import net.raphimc.vialoader.ViaLoader;
+import net.raphimc.vialoader.impl.platform.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.PluginManager;
@@ -137,41 +137,17 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
       CompletableFuture.runAsync(
-        () -> {
-          // Init via
-          var platform = new SFViaPlatform(configDirectory.resolve("ViaVersion"));
-
-          Via.init(
-            ViaManagerImpl.builder()
-              .platform(platform)
-              .injector(platform.injector())
-              .loader(new SFViaLoader())
-              .build());
-
-          platform.init();
-
-          // For ViaLegacy
-          Via.getManager().getProtocolManager().setMaxProtocolPathSize(Integer.MAX_VALUE);
-          Via.getManager().getProtocolManager().setMaxPathDeltaIncrease(-1);
-          ((ProtocolManagerImpl) Via.getManager().getProtocolManager()).refreshVersions();
-
-          Via.getManager()
-            .addEnableListener(
-              () -> {
-                new SFViaRewind(configDirectory.resolve("ViaRewind")).init();
-                new SFViaBackwards(configDirectory.resolve("ViaBackwards")).init();
-                new SFViaAprilFools(configDirectory.resolve("ViaAprilFools")).init();
-                new SFViaLegacy(configDirectory.resolve("ViaLegacy")).init();
-                new SFViaBedrock(configDirectory.resolve("ViaBedrock")).init();
-              });
-
-          var manager = (ViaManagerImpl) Via.getManager();
-          manager.init();
-
-          manager.getPlatform().getConf().setCheckForUpdates(false);
-
-          manager.onServerLoaded();
-        });
+        () -> ViaLoader.init(
+          new SFViaPlatform(configDirectory.resolve("ViaVersion")),
+          new SFVLLoaderImpl(),
+          null,
+          null,
+          ViaBackwardsPlatformImpl::new,
+          ViaRewindPlatformImpl::new,
+          ViaLegacyPlatformImpl::new,
+          ViaAprilFoolsPlatformImpl::new,
+          ViaBedrockPlatformImpl::new
+        ));
     var sparkStart =
       CompletableFuture.runAsync(
         () -> {

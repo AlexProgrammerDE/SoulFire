@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
-  private static final AtomicInteger ID_COUNTER = new AtomicInteger();
   private final UUID id;
   private final Logger logger;
   private final SoulFireScheduler scheduler;

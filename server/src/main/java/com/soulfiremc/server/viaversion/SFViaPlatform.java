@@ -15,33 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.viaversion.platform;
+package com.soulfiremc.server.viaversion;
 
-import com.soulfiremc.server.viaversion.JLoggerToSLF4J;
-import com.viaversion.viarewind.api.ViaRewindPlatform;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
+import com.soulfiremc.builddata.BuildData;
+import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
-@RequiredArgsConstructor
-public class SFViaRewind implements ViaRewindPlatform {
-  private final JLoggerToSLF4J logger = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaRewind"));
-  private final Path dataFolder;
-
-  public void init() {
-    init(dataFolder.resolve("config.yml").toFile());
+public class SFViaPlatform extends ViaVersionPlatformImpl {
+  public SFViaPlatform(Path rootFolder) {
+    super(rootFolder.toFile());
   }
 
   @Override
-  public Logger getLogger() {
-    return logger;
+  public String getPlatformName() {
+    return "SoulFire";
   }
 
   @Override
-  public File getDataFolder() {
-    return dataFolder.toFile();
+  public String getPlatformVersion() {
+    return BuildData.VERSION;
   }
 }

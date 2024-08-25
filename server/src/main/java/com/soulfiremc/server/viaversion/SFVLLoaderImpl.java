@@ -19,7 +19,6 @@ package com.soulfiremc.server.viaversion;
 
 import com.soulfiremc.server.viaversion.providers.*;
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_12_2to1_13.Protocol1_12_2To1_13;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
@@ -27,10 +26,13 @@ import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
+import net.raphimc.vialoader.impl.viaversion.VLLoader;
 
-public class SFViaLoader implements ViaPlatformLoader {
+public class SFVLLoaderImpl extends VLLoader {
   @Override
   public void load() {
+    super.load();
+
     Via.getManager().getProviders().use(VersionProvider.class, new SFViaVersionProvider());
     Via.getManager().getProviders().use(CompressionProvider.class, new SFViaCompressionProvider());
 
@@ -55,7 +57,4 @@ public class SFViaLoader implements ViaPlatformLoader {
     Protocol1_12_2To1_13.MAPPINGS.getChannelMappings().put("FORGE", "fml:forge"); // Forge
     Protocol1_12_2To1_13.MAPPINGS.getChannelMappings().put("Forge", "fml:old_forge"); // Forge
   }
-
-  @Override
-  public void unload() {}
 }
