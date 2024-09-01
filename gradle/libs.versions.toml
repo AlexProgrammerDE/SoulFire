@@ -10,9 +10,6 @@ via-aprilfools = "3.0.2-SNAPSHOT"
 via-loader = "3.0.3-SNAPSHOT"
 via-bedrock = "0.0.11-SNAPSHOT"
 mcprotocollib = "324f066"
-flatlaf = "3.5.1"
-flatlaf-inter-version = "4.0"
-flatlaf-jetbrains-mono-version = "2.304"
 kyori = "4.17.0"
 reactor = "1.2.0-SNAPSHOT"
 classtransform = "1.14.0"
@@ -31,7 +28,6 @@ gradle-plugin-lombok = "io.freefair.gradle:lombok-plugin:8.10"
 gradle-plugin-indra-git = "net.kyori:indra-git:3.1.3"
 gradle-plugin-unimined = "xyz.wagyourtail.unimined:xyz.wagyourtail.unimined.gradle.plugin:1.3.9"
 gradle-plugin-spotless = "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
-checkstyle = "com.puppycrawl.tools:checkstyle:10.17.0"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
@@ -48,13 +44,6 @@ brigadier = "com.mojang:brigadier:1.1.8"
 datafixerupper = "com.mojang:datafixerupper:7.0.14"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
-flatlaf = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
-flatlaf-extras = { module = "com.formdev:flatlaf-extras", version.ref = "flatlaf" }
-flatlaf-intellij-themes = { module = "com.formdev:flatlaf-intellij-themes", version.ref = "flatlaf" }
-flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version.ref = "flatlaf-inter-version" }
-flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version.ref = "flatlaf-jetbrains-mono-version" }
-xchart = "org.knowm.xchart:xchart:3.8.8"
-miglayout-swing = "com.miglayout:miglayout-swing:11.4"
 mcprotocollib = { module = "com.github.AlexProgrammerDE:MCProtocolLib", version.ref = "mcprotocollib" }
 mcstructs = "net.lenni0451.mcstructs:all:2.5.1"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
@@ -83,7 +72,6 @@ classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdumm
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
 reflect = "net.lenni0451:Reflect:1.3.4"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
-commons-swing = "net.lenni0451.commons:swing:1.6.0"
 appdirs = "net.harawata:appdirs:1.2.2"
 minecraftauth = "net.raphimc:MinecraftAuth:4.1.0"
 injector = "ch.jalu:injector:1.0"
@@ -110,7 +98,6 @@ bom = ["netty-bom", "armeria-bom", "protobuf-bom"]
 log4j = ["log4j-api", "log4j-core", "log4j-slf4j2-impl", "log4j-iostreams", "log4j-jul"]
 grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty", "protobuf-util"]
 mixins = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "classtransform-additionalclassprovider"]
-flatlaf = ["flatlaf", "flatlaf-extras", "flatlaf-intellij-themes", "flatlaf-fonts-inter", "flatlaf-fonts-jetbrains-mono"]
 kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
