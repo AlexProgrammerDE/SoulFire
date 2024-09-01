@@ -54,7 +54,7 @@ via-legacy = { module = "net.raphimc:ViaLegacy", version.ref = "via-legacy" }
 via-aprilfools = { module = "net.raphimc:viaaprilfools-common", version.ref = "via-aprilfools" }
 via-loader = { module = "net.raphimc:ViaLoader", version.ref = "via-loader" }
 via-bedrock = { module = "net.raphimc:ViaBedrock", version.ref = "via-bedrock" }
-snakeyaml = "org.yaml:snakeyaml:2.2"
+snakeyaml = "org.yaml:snakeyaml:2.3"
 kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyori" }
 kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "kyori" }
 kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
