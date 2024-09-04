@@ -45,7 +45,8 @@ import java.util.stream.Collectors;
   version = "SoulFire v" + BuildData.VERSION,
   showDefaultValues = true,
   description = BuildData.DESCRIPTION,
-  sortOptions = false)
+  sortOptions = false,
+  showAtFileInUsageHelp = true)
 public class SFCommandDefinition implements Callable<Integer> {
   private final CLIManager cliManager;
   @Setter
@@ -75,11 +76,6 @@ public class SFCommandDefinition implements Callable<Integer> {
     names = {"--proxy-type"},
     description = "Type of proxies in the proxy file")
   private ProxyType proxyType;
-
-  @Option(
-    names = {"--profile-file"},
-    description = "File to load a profile from")
-  private Path profileFile;
 
   @Option(
     names = {"--generate-flags"},
@@ -138,15 +134,6 @@ public class SFCommandDefinition implements Callable<Integer> {
             proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
       } catch (IOException e) {
         log.error("Failed to load proxies!", e);
-        return 1;
-      }
-    }
-
-    if (profileFile != null) {
-      try {
-        cliManager.clientSettingsManager().loadProfile(profileFile);
-      } catch (IOException e) {
-        log.error("Failed to load profile!", e);
         return 1;
       }
     }
