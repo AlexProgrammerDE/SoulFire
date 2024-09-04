@@ -49,8 +49,8 @@ public class AutoRespawn implements InternalPlugin {
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
       var connection = event.connection();
-      var settingsHolder = connection.settingsHolder();
-      if (!settingsHolder.get(AutoRespawnSettings.ENABLED)) {
+      var settingsSource = connection.settingsSource();
+      if (!settingsSource.get(AutoRespawnSettings.ENABLED)) {
         return;
       }
 
@@ -74,8 +74,8 @@ public class AutoRespawn implements InternalPlugin {
               .session()
               .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
           RandomUtil.getRandomInt(
-            settingsHolder.get(AutoRespawnSettings.DELAY.min()),
-            settingsHolder.get(AutoRespawnSettings.DELAY.max())),
+            settingsSource.get(AutoRespawnSettings.DELAY.min()),
+            settingsSource.get(AutoRespawnSettings.DELAY.max())),
           TimeUnit.SECONDS);
     }
   }

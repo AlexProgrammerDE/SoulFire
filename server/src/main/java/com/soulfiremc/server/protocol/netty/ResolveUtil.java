@@ -18,7 +18,8 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.util.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,12 +54,12 @@ public class ResolveUtil {
   private ResolveUtil() {}
 
   public static Optional<ResolvedAddress> resolveAddress(
-    boolean isBedrock, SettingsHolder settingsHolder) {
+    boolean isBedrock, SettingsSource settingsSource) {
     var serverAddress =
       ServerAddress.fromStringDefaultPort(
-        settingsHolder.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
+        settingsSource.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
 
-    if (settingsHolder.get(BotSettings.RESOLVE_SRV)
+    if (settingsSource.get(BotSettings.RESOLVE_SRV)
       && serverAddress.port() == MC_DEFAULT_PORT
       && !isBedrock) {
       // SRVs can override address on Java, but not Bedrock.

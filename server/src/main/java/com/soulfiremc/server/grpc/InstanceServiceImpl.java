@@ -21,7 +21,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackState;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -97,7 +97,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       var instance = optionalInstance.get();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
-        .setConfig(instance.settingsHolder().toProto())
+        .setConfig(instance.settingsSource().source().toProto())
         .setState(instance.attackState().toProto())
         .build());
       responseObserver.onCompleted();
@@ -141,7 +141,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.settingsHolder(SettingsHolder.fromProto(request.getConfig()));
+      instance.settingsSource().source(SettingsImpl.fromProto(request.getConfig()));
 
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();

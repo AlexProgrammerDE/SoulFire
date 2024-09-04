@@ -35,7 +35,9 @@ import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.DevSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsDelegate;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.SFUpdateChecker;
@@ -196,16 +198,16 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
-  public static void setupLoggingAndVia(SettingsHolder settingsHolder) {
-    Via.getManager().debugHandler().setEnabled(settingsHolder.get(DevSettings.VIA_DEBUG));
-    setupLogging(settingsHolder);
+  public static void setupLoggingAndVia(SettingsSource settingsSource) {
+    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+    setupLogging(settingsSource);
   }
 
-  public static void setupLogging(SettingsHolder settingsHolder) {
-    Configurator.setRootLevel(settingsHolder.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("io.netty", settingsHolder.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("io.grpc", settingsHolder.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("org.geysermc.mcprotocollib", settingsHolder.get(DevSettings.MCPROTOCOLLIB_DEBUG) ? Level.DEBUG : Level.INFO);
+  public static void setupLogging(SettingsSource settingsSource) {
+    Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("org.geysermc.mcprotocollib", settingsSource.get(DevSettings.MCPROTOCOLLIB_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
   public String generateRemoteUserJWT() {
@@ -240,7 +242,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   }
 
   public UUID createInstance(String friendlyName) {
-    var attackManager = new InstanceManager(UUID.randomUUID(), friendlyName, this, SettingsHolder.EMPTY);
+    var attackManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
     eventBus.call(new InstanceInitEvent(attackManager));
 
     instances.put(attackManager.id(), attackManager);

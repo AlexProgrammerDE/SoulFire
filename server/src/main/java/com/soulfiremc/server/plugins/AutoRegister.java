@@ -42,23 +42,23 @@ public class AutoRegister implements InternalPlugin {
 
   public static void onChat(ChatMessageReceiveEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoRegisterSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoRegisterSettings.ENABLED)) {
       return;
     }
 
     var plainMessage = event.parseToPlainText();
-    var password = settingsHolder.get(AutoRegisterSettings.PASSWORD_FORMAT);
+    var password = settingsSource.get(AutoRegisterSettings.PASSWORD_FORMAT);
 
     // TODO: Add more password options
     if (plainMessage.contains("/register")) {
-      var registerCommand = settingsHolder.get(AutoRegisterSettings.REGISTER_COMMAND);
+      var registerCommand = settingsSource.get(AutoRegisterSettings.REGISTER_COMMAND);
       connection.botControl().sendMessage(registerCommand.replace("%password%", password));
     } else if (plainMessage.contains("/login")) {
-      var loginCommand = settingsHolder.get(AutoRegisterSettings.LOGIN_COMMAND);
+      var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
       connection.botControl().sendMessage(loginCommand.replace("%password%", password));
     } else if (plainMessage.contains("/captcha")) {
-      var captchaCommand = settingsHolder.get(AutoRegisterSettings.CAPTCHA_COMMAND);
+      var captchaCommand = settingsSource.get(AutoRegisterSettings.CAPTCHA_COMMAND);
       var split = plainMessage.split(" ");
 
       for (var i = 0; i < split.length; i++) {

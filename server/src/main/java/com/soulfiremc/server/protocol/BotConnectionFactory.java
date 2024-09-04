@@ -21,7 +21,8 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
 public record BotConnectionFactory(
   InstanceManager instanceManager,
   ResolveUtil.ResolvedAddress resolvedAddress,
-  SettingsHolder settingsHolder,
+  SettingsSource settingsSource,
   Logger logger,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
@@ -53,7 +54,7 @@ public record BotConnectionFactory(
       new BotConnection(
         this,
         instanceManager,
-        settingsHolder,
+        settingsSource,
         logger,
         protocol,
         resolvedAddress,
@@ -64,9 +65,9 @@ public record BotConnectionFactory(
         eventLoopGroup);
 
     var session = botConnection.session();
-    session.setConnectTimeout(settingsHolder.get(BotSettings.CONNECT_TIMEOUT));
-    session.setReadTimeout(settingsHolder.get(BotSettings.READ_TIMEOUT));
-    session.setWriteTimeout(settingsHolder.get(BotSettings.WRITE_TIMEOUT));
+    session.setConnectTimeout(settingsSource.get(BotSettings.CONNECT_TIMEOUT));
+    session.setReadTimeout(settingsSource.get(BotSettings.READ_TIMEOUT));
+    session.setWriteTimeout(settingsSource.get(BotSettings.WRITE_TIMEOUT));
 
     session.addListener(new SFBaseListener(botConnection, targetState));
     session.addListener(new SFSessionListener(botConnection));

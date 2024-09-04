@@ -61,8 +61,8 @@ public class AutoReconnect implements InternalPlugin {
 
   public void onDisconnect(BotDisconnectedEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoReconnectSettings.ENABLED)
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoReconnectSettings.ENABLED)
       || connection.instanceManager().attackState().isInactive()) {
       return;
     }
@@ -90,8 +90,8 @@ public class AutoReconnect implements InternalPlugin {
           newConnection.connect();
         },
         RandomUtil.getRandomInt(
-          settingsHolder.get(AutoReconnectSettings.DELAY.min()),
-          settingsHolder.get(AutoReconnectSettings.DELAY.max())),
+          settingsSource.get(AutoReconnectSettings.DELAY.min()),
+          settingsSource.get(AutoReconnectSettings.DELAY.max())),
         TimeUnit.SECONDS);
   }
 

@@ -47,8 +47,8 @@ public class AutoEat implements InternalPlugin {
 
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoEatSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoEatSettings.ENABLED)) {
       return;
     }
 
@@ -95,8 +95,8 @@ public class AutoEat implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      settingsHolder.get(AutoEatSettings.DELAY.min()),
-      settingsHolder.get(AutoEatSettings.DELAY.max()),
+      settingsSource.get(AutoEatSettings.DELAY.min()),
+      settingsSource.get(AutoEatSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

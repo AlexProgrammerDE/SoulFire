@@ -63,17 +63,17 @@ public class KillAura implements InternalPlugin {
       BotPreEntityTickEvent.class,
       event -> {
         var bot = event.connection();
-        if (!bot.settingsHolder().get(KillAuraSettings.ENABLE)) {
+        if (!bot.settingsSource().get(KillAuraSettings.ENABLE)) {
           return;
         }
 
         var control = bot.botControl();
 
-        var whitelistedUser = bot.settingsHolder().get(KillAuraSettings.WHITELISTED_USER);
+        var whitelistedUser = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USER);
 
-        var lookRange = bot.settingsHolder().get(KillAuraSettings.LOOK_RANGE);
-        var hitRange = bot.settingsHolder().get(KillAuraSettings.HIT_RANGE);
-        var swingRange = bot.settingsHolder().get(KillAuraSettings.SWING_RANGE);
+        var lookRange = bot.settingsSource().get(KillAuraSettings.LOOK_RANGE);
+        var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
+        var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
 
         var max = Math.max(lookRange, Math.max(hitRange, swingRange));
 
@@ -83,7 +83,7 @@ public class KillAura implements InternalPlugin {
             whitelistedUser,
             true,
             true,
-            bot.settingsHolder().get(KillAuraSettings.CHECK_WALLS));
+            bot.settingsSource().get(KillAuraSettings.CHECK_WALLS));
 
         if (target == null) {
           return;
@@ -130,13 +130,13 @@ public class KillAura implements InternalPlugin {
               }
 
               if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
-                || bot.settingsHolder().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+                || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
                 var randomTickDelay =
                   ThreadLocalRandom.current()
                     .nextDouble(
-                      bot.settingsHolder()
+                      bot.settingsSource()
                         .get(KillAuraSettings.ATTACK_DELAY_TICKS.min()),
-                      bot.settingsHolder()
+                      bot.settingsSource()
                         .get(KillAuraSettings.ATTACK_DELAY_TICKS.max()));
                 control.attackCooldownTicks((int) randomTickDelay);
               }

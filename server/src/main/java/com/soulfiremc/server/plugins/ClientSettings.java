@@ -51,31 +51,31 @@ public class ClientSettings implements InternalPlugin {
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundGameProfilePacket) {
       var connection = event.connection();
-      var settingsHolder = connection.settingsHolder();
-      if (!settingsHolder.get(ClientSettingsSettings.ENABLED)) {
+      var settingsSource = connection.settingsSource();
+      if (!settingsSource.get(ClientSettingsSettings.ENABLED)) {
         return;
       }
 
       var skinParts = new ArrayList<SkinPart>();
-      if (settingsHolder.get(ClientSettingsSettings.CAPE_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.CAPE_ENABLED)) {
         skinParts.add(SkinPart.CAPE);
       }
-      if (settingsHolder.get(ClientSettingsSettings.JACKET_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.JACKET_ENABLED)) {
         skinParts.add(SkinPart.JACKET);
       }
-      if (settingsHolder.get(ClientSettingsSettings.LEFT_SLEEVE_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.LEFT_SLEEVE_ENABLED)) {
         skinParts.add(SkinPart.LEFT_SLEEVE);
       }
-      if (settingsHolder.get(ClientSettingsSettings.RIGHT_SLEEVE_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.RIGHT_SLEEVE_ENABLED)) {
         skinParts.add(SkinPart.RIGHT_SLEEVE);
       }
-      if (settingsHolder.get(ClientSettingsSettings.LEFT_PANTS_LEG_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.LEFT_PANTS_LEG_ENABLED)) {
         skinParts.add(SkinPart.LEFT_PANTS_LEG);
       }
-      if (settingsHolder.get(ClientSettingsSettings.RIGHT_PANTS_LEG_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.RIGHT_PANTS_LEG_ENABLED)) {
         skinParts.add(SkinPart.RIGHT_PANTS_LEG);
       }
-      if (settingsHolder.get(ClientSettingsSettings.HAT_ENABLED)) {
+      if (settingsSource.get(ClientSettingsSettings.HAT_ENABLED)) {
         skinParts.add(SkinPart.HAT);
       }
 
@@ -84,14 +84,14 @@ public class ClientSettings implements InternalPlugin {
         .session()
         .send(
           new ServerboundClientInformationPacket(
-            settingsHolder.get(ClientSettingsSettings.CLIENT_LOCALE),
-            settingsHolder.get(ClientSettingsSettings.RENDER_DISTANCE),
-            settingsHolder.get(ClientSettingsSettings.CHAT_VISIBILITY, ChatVisibility.class),
-            settingsHolder.get(ClientSettingsSettings.USE_CHAT_COLORS),
+            settingsSource.get(ClientSettingsSettings.CLIENT_LOCALE),
+            settingsSource.get(ClientSettingsSettings.RENDER_DISTANCE),
+            settingsSource.get(ClientSettingsSettings.CHAT_VISIBILITY, ChatVisibility.class),
+            settingsSource.get(ClientSettingsSettings.USE_CHAT_COLORS),
             skinParts,
-            settingsHolder.get(ClientSettingsSettings.HAND_PREFERENCE, HandPreference.class),
-            settingsHolder.get(ClientSettingsSettings.TEXT_FILTERING_ENABLED),
-            settingsHolder.get(ClientSettingsSettings.ALLOWS_LISTING)));
+            settingsSource.get(ClientSettingsSettings.HAND_PREFERENCE, HandPreference.class),
+            settingsSource.get(ClientSettingsSettings.TEXT_FILTERING_ENABLED),
+            settingsSource.get(ClientSettingsSettings.ALLOWS_LISTING)));
     }
   }
 

@@ -113,8 +113,8 @@ public class AutoArmor implements InternalPlugin {
 
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoArmorSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoArmorSettings.ENABLED)) {
       return;
     }
 
@@ -124,8 +124,8 @@ public class AutoArmor implements InternalPlugin {
           putOn(connection.dataManager().inventoryManager(), type);
         }
       },
-      settingsHolder.get(AutoArmorSettings.DELAY.min()),
-      settingsHolder.get(AutoArmorSettings.DELAY.max()),
+      settingsSource.get(AutoArmorSettings.DELAY.min()),
+      settingsSource.get(AutoArmorSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

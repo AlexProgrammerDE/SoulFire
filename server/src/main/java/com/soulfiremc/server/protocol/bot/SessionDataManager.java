@@ -39,7 +39,8 @@ import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.util.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -103,7 +104,7 @@ import java.util.stream.Collectors;
 @Getter
 @ToString
 public final class SessionDataManager {
-  private final SettingsHolder settingsHolder;
+  private final SettingsSource settingsSource;
   private final Logger log;
   private final MinecraftCodecHelper codecHelper;
   private final BotConnection connection;
@@ -148,7 +149,7 @@ public final class SessionDataManager {
   private String serverBrand;
 
   public SessionDataManager(BotConnection connection) {
-    this.settingsHolder = connection.settingsHolder();
+    this.settingsSource = connection.settingsSource();
     this.log = connection.logger();
     this.codecHelper = connection.session().getCodecHelper();
     this.connection = connection;

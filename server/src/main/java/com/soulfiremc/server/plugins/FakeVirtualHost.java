@@ -44,16 +44,16 @@ public class FakeVirtualHost implements InternalPlugin {
 
   public static void onPacket(SFPacketSendingEvent event) {
     if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
-      var settingsHolder = event.connection().settingsHolder();
+      var settingsSource = event.connection().settingsSource();
 
-      if (!settingsHolder.get(FakeVirtualHostSettings.ENABLED)) {
+      if (!settingsSource.get(FakeVirtualHostSettings.ENABLED)) {
         return;
       }
 
       event.packet(
         intentionPacket
-          .withHostname(settingsHolder.get(FakeVirtualHostSettings.HOSTNAME))
-          .withPort(settingsHolder.get(FakeVirtualHostSettings.PORT)));
+          .withHostname(settingsSource.get(FakeVirtualHostSettings.HOSTNAME))
+          .withPort(settingsSource.get(FakeVirtualHostSettings.PORT)));
     }
   }
 

@@ -23,7 +23,6 @@ import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
-import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -43,13 +42,12 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-import java.util.function.Function;
 
-public record SettingsHolder(
+public record SettingsImpl(
   Map<String, Map<String, JsonElement>> settings,
   List<MinecraftAccount> accounts,
-  List<SFProxy> proxies) {
-  public static final SettingsHolder EMPTY = new SettingsHolder(Map.of(), List.of(), List.of());
+  List<SFProxy> proxies) implements SettingsSource {
+  public static final SettingsImpl EMPTY = new SettingsImpl(Map.of(), List.of(), List.of());
   private static final Gson PROFILE_GSON =
     new GsonBuilder()
       .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
@@ -59,16 +57,16 @@ public record SettingsHolder(
       .setPrettyPrinting()
       .create();
 
-  public static SettingsHolder deserialize(String json) {
-    return PROFILE_GSON.fromJson(json, SettingsHolder.class);
+  public static SettingsImpl deserialize(JsonElement json) {
+    return PROFILE_GSON.fromJson(json, SettingsImpl.class);
   }
 
-  public String serialize() {
-    return PROFILE_GSON.toJson(this);
+  public JsonObject serializeToTree() {
+    return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
   }
 
   @SneakyThrows
-  public static SettingsHolder fromProto(InstanceConfig request) {
+  public static SettingsImpl fromProto(InstanceConfig request) {
     var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
 
     for (var namespace : request.getSettingsList()) {
@@ -91,7 +89,7 @@ public record SettingsHolder(
       proxies.add(SFProxy.fromProto(proxy));
     }
 
-    return new SettingsHolder(settingsProperties, accounts, proxies);
+    return new SettingsImpl(settingsProperties, accounts, proxies);
   }
 
   @SneakyThrows
@@ -135,39 +133,8 @@ public record SettingsHolder(
       .build();
   }
 
-  public int get(IntProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Integer.class);
-  }
-
-  public double get(DoubleProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Double.class);
-  }
-
-  public boolean get(BooleanProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Boolean.class);
-  }
-
-  public String get(StringProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), String.class);
-  }
-
-  public <T> T get(ComboProperty property, Function<String, T> converter) {
-    return converter.apply(getAsType(property.propertyKey(), property.options()[property.defaultValue()].id(), String.class));
-  }
-
-  public <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
-    return get(property, s -> Enum.valueOf(clazz, s));
-  }
-
-  public List<String> get(StringListProperty property) {
-    return List.of(getAsType(property.propertyKey(), property.defaultValue().toArray(new String[0]), String[].class));
-  }
-
-  public <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
-    return get(key).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
-  }
-
-  private Optional<JsonElement> get(PropertyKey key) {
+  @Override
+  public Optional<JsonElement> get(PropertyKey key) {
     return Optional.ofNullable(settings.get(key.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(key.key())));
   }

@@ -92,10 +92,10 @@ public class ModLoaderSupport implements InternalPlugin {
     }
 
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
+    var settingsSource = connection.settingsSource();
     var hostname = handshake.getHostname();
 
-    switch (settingsHolder.get(
+    switch (settingsSource.get(
       ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
       case FML -> event.packet(handshake.withHostname(createFMLAddress(hostname)));
       case FML2 -> event.packet(handshake.withHostname(createFML2Address(hostname)));
@@ -104,17 +104,17 @@ public class ModLoaderSupport implements InternalPlugin {
 
   public void onPacketReceive(SFPacketReceiveEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
+    var settingsSource = connection.settingsSource();
 
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
       var channelKey = pluginMessage.getChannel();
-      if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+      if (settingsSource.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML) {
         handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
       var channelKey = loginPluginMessage.getChannel();
-      if (settingsHolder.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+      if (settingsSource.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML2) {
         handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
       }

@@ -44,8 +44,8 @@ public class AutoJump implements InternalPlugin {
 
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoJumpSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoJumpSettings.ENABLED)) {
       return;
     }
 
@@ -60,8 +60,8 @@ public class AutoJump implements InternalPlugin {
           clientEntity.jump();
         }
       },
-      settingsHolder.get(AutoJumpSettings.DELAY.min()),
-      settingsHolder.get(AutoJumpSettings.DELAY.max()),
+      settingsSource.get(AutoJumpSettings.DELAY.min()),
+      settingsSource.get(AutoJumpSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

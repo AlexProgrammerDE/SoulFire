@@ -48,9 +48,9 @@ public class ClientBrand implements InternalPlugin {
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundGameProfilePacket) {
       var connection = event.connection();
-      var settingsHolder = connection.settingsHolder();
+      var settingsSource = connection.settingsSource();
 
-      if (!settingsHolder.get(ClientBrandSettings.ENABLED)) {
+      if (!settingsSource.get(ClientBrandSettings.ENABLED)) {
         return;
       }
 
@@ -58,7 +58,7 @@ public class ClientBrand implements InternalPlugin {
       connection
         .session()
         .getCodecHelper()
-        .writeString(buf, settingsHolder.get(ClientBrandSettings.CLIENT_BRAND));
+        .writeString(buf, settingsSource.get(ClientBrandSettings.CLIENT_BRAND));
 
       connection
         .session()

@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackState;
@@ -32,7 +35,9 @@ import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.ProxySettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsDelegate;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
@@ -53,13 +58,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
+  private static final Gson GSON = new Gson();
   private final UUID id;
   private final Logger logger;
   private final SoulFireScheduler scheduler;
   @Setter
   private String friendlyName;
-  @Setter
-  private SettingsHolder settingsHolder;
+  private final SettingsDelegate settingsSource;
   @Setter
   private AttackState attackState = AttackState.STOPPED;
   private final LambdaManager eventBus =
@@ -76,13 +81,25 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final SoulFireServer soulFireServer;
 
-  public InstanceManager(UUID id, String friendlyName, SoulFireServer soulFireServer, SettingsHolder settingsHolder) {
+  public InstanceManager(SoulFireServer soulFireServer, UUID id, String friendlyName, SettingsImpl settingsSource) {
     this.id = id;
     this.friendlyName = friendlyName;
     this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
-    this.settingsHolder = settingsHolder;
+    this.settingsSource = new SettingsDelegate(settingsSource);
+  }
+
+  public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
+    var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
+    var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
+    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackState.class);
+    var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
+
+    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
+    instanceManager.switchToState(state);
+
+    return instanceManager;
   }
 
   private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
@@ -106,7 +123,9 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     switch (targetState) {
       case RUNNING -> {
         switch (attackState) {
-          case RUNNING -> throw new IllegalStateException("Attack is already running");
+          case RUNNING -> {
+            // NO-OP
+          }
           case PAUSED -> this.attackState = AttackState.RUNNING;
           case STOPPED -> start();
         }
@@ -114,14 +133,21 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       case PAUSED -> {
         switch (attackState) {
           case RUNNING -> this.attackState = AttackState.PAUSED;
-          case PAUSED -> throw new IllegalStateException("Attack is already paused");
-          case STOPPED -> throw new IllegalStateException("There is no attack to pause");
+          case PAUSED -> {
+            // NO-OP
+          }
+          case STOPPED -> {
+            start();
+            this.attackState = AttackState.PAUSED;
+          }
         }
       }
       case STOPPED -> {
         switch (attackState) {
           case RUNNING, PAUSED -> stopAttackPermanently();
-          case STOPPED -> throw new IllegalStateException("There is no attack to stop");
+          case STOPPED -> {
+            // NO-OP
+          }
         }
       }
     }
@@ -132,18 +158,18 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       throw new IllegalStateException("Attack is already running");
     }
 
-    SoulFireServer.setupLoggingAndVia(settingsHolder);
+    SoulFireServer.setupLoggingAndVia(settingsSource);
 
     this.attackState = AttackState.RUNNING;
 
-    var address = settingsHolder.get(BotSettings.ADDRESS);
+    var address = settingsSource.get(BotSettings.ADDRESS);
     logger.info("Preparing bot attack at {}", address);
 
-    var botAmount = settingsHolder.get(BotSettings.AMOUNT); // How many bots to connect
+    var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
-      settingsHolder.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
+      settingsSource.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
 
-    var proxies = new ArrayList<>(settingsHolder.proxies()
+    var proxies = new ArrayList<>(settingsSource.proxies()
       .stream()
       .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
       .toList());
@@ -159,7 +185,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
           botAmount = maxBots;
         }
 
-        if (settingsHolder.get(ProxySettings.SHUFFLE_PROXIES)) {
+        if (settingsSource.get(ProxySettings.SHUFFLE_PROXIES)) {
           Collections.shuffle(proxies);
         }
       }
@@ -167,7 +193,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
     var accountQueue = new ArrayBlockingQueue<MinecraftAccount>(botAmount);
     {
-      var accounts = new ArrayList<>(settingsHolder.accounts());
+      var accounts = new ArrayList<>(settingsSource.accounts());
       var availableAccounts = accounts.size();
       if (availableAccounts > 0) {
         if (botAmount > availableAccounts) {
@@ -181,11 +207,11 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       } else {
         logger.info("No custom accounts provided, generating offline accounts based on name format");
         for (var i = 0; i < botAmount; i++) {
-          accounts.add(SFOfflineAuthService.createAccount(String.format(settingsHolder.get(AccountSettings.NAME_FORMAT), i + 1)));
+          accounts.add(SFOfflineAuthService.createAccount(String.format(settingsSource.get(AccountSettings.NAME_FORMAT), i + 1)));
         }
       }
 
-      if (settingsHolder.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
+      if (settingsSource.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
         Collections.shuffle(accounts);
       }
 
@@ -196,9 +222,9 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     var attackEventLoopGroup =
       SFNettyHelper.createEventLoopGroup(0, "Attack-%s".formatted(id));
 
-    var protocolVersion = settingsHolder.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+    var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
-    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsHolder)
+    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsSource)
       .orElseThrow(() -> new IllegalStateException("Could not resolve address"));
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
@@ -209,7 +235,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         new BotConnectionFactory(
           this,
           targetAddress,
-          settingsHolder,
+          settingsSource,
           LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
           minecraftAccount,
           protocolVersion,
@@ -230,7 +256,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
     eventBus.call(new AttackStartEvent(this));
 
-    var connectSemaphore = new Semaphore(settingsHolder.get(BotSettings.CONCURRENT_CONNECTS));
+    var connectSemaphore = new Semaphore(settingsSource.get(BotSettings.CONCURRENT_CONNECTS));
     return CompletableFuture.runAsync(
       () -> {
         while (!factories.isEmpty()) {
@@ -270,8 +296,8 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
           TimeUtil.waitTime(
             RandomUtil.getRandomInt(
-              settingsHolder.get(BotSettings.JOIN_DELAY.min()),
-              settingsHolder.get(BotSettings.JOIN_DELAY.max())),
+              settingsSource.get(BotSettings.JOIN_DELAY.min()),
+              settingsSource.get(BotSettings.JOIN_DELAY.max())),
             TimeUnit.MILLISECONDS);
         }
       });
@@ -337,6 +363,17 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       .setFriendlyName(friendlyName)
       .setState(attackState.toProto())
       .build();
+  }
+
+  public JsonElement toJson() {
+    var json = new JsonObject();
+
+    json.addProperty("id", id.toString());
+    json.addProperty("friendlyName", friendlyName);
+    json.addProperty("state", attackState.name());
+    json.add("settings", settingsSource.source().serializeToTree());
+
+    return json;
   }
 
   private record ProxyData(SFProxy proxy, int maxBots, AtomicInteger useCount) {

@@ -38,8 +38,9 @@ import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.Property;
@@ -168,7 +169,7 @@ public class POVServer implements InternalPlugin {
     return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
   }
 
-  private static TcpServer startPOVServer(SettingsHolder settingsHolder, int port, InstanceManager instanceManager) {
+  private static TcpServer startPOVServer(SettingsSource settingsSource, int port, InstanceManager instanceManager) {
     var faviconBytes = ResourceHelper.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
@@ -177,7 +178,7 @@ public class POVServer implements InternalPlugin {
       Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
         .color(NamedTextColor.GREEN)
         .decorate(TextDecoration.BOLD),
-      new PlayerInfo(settingsHolder.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
+      new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
         getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
         getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
@@ -469,9 +470,9 @@ public class POVServer implements InternalPlugin {
                         }
                       }
                       case ServerboundChatPacket chatPacket -> {
-                        if (settingsHolder.get(POVServerSettings.ENABLE_COMMANDS)) {
+                        if (settingsSource.get(POVServerSettings.ENABLE_COMMANDS)) {
                           var message = chatPacket.getMessage();
-                          var prefix = settingsHolder.get(POVServerSettings.COMMAND_PREFIX);
+                          var prefix = settingsSource.get(POVServerSettings.COMMAND_PREFIX);
                           if (message.startsWith(prefix)) {
                             var command = message.substring(prefix.length());
                             var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
@@ -964,14 +965,14 @@ public class POVServer implements InternalPlugin {
       AttackStartEvent.class,
       event -> {
         var attackManager = event.instanceManager();
-        var settingsHolder = attackManager.settingsHolder();
-        if (!settingsHolder.get(POVServerSettings.ENABLED)) {
+        var settingsSource = attackManager.settingsSource();
+        if (!settingsSource.get(POVServerSettings.ENABLED)) {
           return;
         }
 
         var freePort =
-          PortHelper.getAvailablePort(settingsHolder.get(POVServerSettings.PORT_START));
-        var serverInstance = startPOVServer(settingsHolder, freePort, attackManager);
+          PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
+        var serverInstance = startPOVServer(settingsSource, freePort, attackManager);
         log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
 
         EventUtil.runAndAssertChanged(attackManager.eventBus(), () -> PluginHelper.registerSafeEventConsumer(

@@ -52,16 +52,16 @@ public class ServerListBypass implements InternalPlugin {
     }
 
     var factory = connection.factory();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(ServerListBypassSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(ServerListBypassSettings.ENABLED)) {
       return;
     }
 
     factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
     TimeUtil.waitTime(
       RandomUtil.getRandomInt(
-        settingsHolder.get(ServerListBypassSettings.DELAY.min()),
-        settingsHolder.get(ServerListBypassSettings.DELAY.max())),
+        settingsSource.get(ServerListBypassSettings.DELAY.min()),
+        settingsSource.get(ServerListBypassSettings.DELAY.max())),
       TimeUnit.SECONDS);
   }
 

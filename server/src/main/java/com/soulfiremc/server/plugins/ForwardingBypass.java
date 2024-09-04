@@ -181,11 +181,11 @@ public class ForwardingBypass implements InternalPlugin {
     }
 
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
+    var settingsSource = connection.settingsSource();
     var hostname = handshake.getHostname();
     var uuid = connection.accountProfileId();
 
-    switch (settingsHolder.get(
+    switch (settingsSource.get(
       ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
       case LEGACY -> event.packet(
         handshake.withHostname(
@@ -196,7 +196,7 @@ public class ForwardingBypass implements InternalPlugin {
             uuid,
             getForwardedIp(),
             hostname,
-            settingsHolder.get(ForwardingBypassSettings.SECRET))));
+            settingsSource.get(ForwardingBypassSettings.SECRET))));
     }
   }
 
@@ -210,8 +210,8 @@ public class ForwardingBypass implements InternalPlugin {
     }
 
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (settingsHolder.get(
+    var settingsSource = connection.settingsSource();
+    if (settingsSource.get(
       ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)
       != ForwardingBypassSettings.ForwardingMode.MODERN) {
       log.warn("Received modern forwarding request packet, but forwarding mode is not modern!");
@@ -228,7 +228,7 @@ public class ForwardingBypass implements InternalPlugin {
 
     var forwardingData =
       createForwardingData(
-        settingsHolder.get(ForwardingBypassSettings.SECRET),
+        settingsSource.get(ForwardingBypassSettings.SECRET),
         getForwardedIp(),
         connection,
         requestedForwardingVersion);

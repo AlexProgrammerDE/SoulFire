@@ -60,7 +60,7 @@ public class ChatMessageLogger implements InternalPlugin {
   private static final ExpiringSet<String> CHAT_MESSAGES = new ExpiringSet<>(5, TimeUnit.SECONDS);
 
   public static void onMessage(ChatMessageReceiveEvent event) {
-    if (!event.connection().settingsHolder().get(ChatMessageSettings.ENABLED)) {
+    if (!event.connection().settingsSource().get(ChatMessageSettings.ENABLED)) {
       return;
     }
 

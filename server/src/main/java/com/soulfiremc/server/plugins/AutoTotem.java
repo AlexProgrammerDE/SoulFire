@@ -46,8 +46,8 @@ public class AutoTotem implements InternalPlugin {
 
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(AutoTotemSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoTotemSettings.ENABLED)) {
       return;
     }
 
@@ -88,8 +88,8 @@ public class AutoTotem implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      settingsHolder.get(AutoTotemSettings.DELAY.min()),
-      settingsHolder.get(AutoTotemSettings.DELAY.max()),
+      settingsSource.get(AutoTotemSettings.DELAY.min()),
+      settingsSource.get(AutoTotemSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

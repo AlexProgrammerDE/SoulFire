@@ -24,11 +24,13 @@ import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
+import com.soulfiremc.util.GsonInstance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,7 +53,7 @@ public class ClientSettingsManager {
     Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();
   private final RPCClient rpcClient;
-  private SettingsHolder settingsHolder = SettingsHolder.EMPTY;
+  private SettingsImpl settingsSource = SettingsImpl.EMPTY;
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
     providers
@@ -64,7 +66,7 @@ public class ClientSettingsManager {
   }
 
   public void loadProfile(Path path) throws IOException {
-    settingsHolder = SettingsHolder.deserialize(Files.readString(path));
+    settingsSource = SettingsImpl.deserialize(GsonInstance.GSON.fromJson(Files.readString(path), JsonElement.class));
     handleProperties(
       (propertyKey, jsonElement) -> {
         for (var listener : listeners.get(propertyKey)) {
@@ -74,7 +76,7 @@ public class ClientSettingsManager {
   }
 
   public void handleProperties(BiConsumer<PropertyKey, JsonElement> consumer) {
-    for (var entry : settingsHolder.settings().entrySet()) {
+    for (var entry : settingsSource.settings().entrySet()) {
       var namespace = entry.getKey();
       for (var setting : entry.getValue().entrySet()) {
         var key = setting.getKey();
@@ -89,7 +91,7 @@ public class ClientSettingsManager {
   }
 
   public InstanceConfig exportSettingsProto() {
-    return settingsHolder.toProto();
+    return settingsSource.toProto();
   }
 
   public void loadFromString(String data, ProxyParser proxyParser) {
@@ -107,9 +109,9 @@ public class ClientSettingsManager {
         return;
       }
 
-      settingsHolder = new SettingsHolder(
-        settingsHolder.settings(),
-        settingsHolder.accounts(),
+      settingsSource = new SettingsImpl(
+        settingsSource.settings(),
+        settingsSource.accounts(),
         newProxies
       );
 
@@ -134,10 +136,10 @@ public class ClientSettingsManager {
         return;
       }
 
-      settingsHolder = new SettingsHolder(
-        settingsHolder.settings(),
+      settingsSource = new SettingsImpl(
+        settingsSource.settings(),
         newAccounts,
-        settingsHolder.proxies()
+        settingsSource.proxies()
       );
 
       log.info("Loaded {} accounts!", newAccounts.size());

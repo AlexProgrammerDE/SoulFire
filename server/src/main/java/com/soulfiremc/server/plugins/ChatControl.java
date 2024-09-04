@@ -44,13 +44,13 @@ public class ChatControl implements InternalPlugin {
 
   public static void onChat(ChatMessageReceiveEvent event) {
     var connection = event.connection();
-    var settingsHolder = connection.settingsHolder();
-    if (!settingsHolder.get(ChatControlSettings.ENABLED)) {
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(ChatControlSettings.ENABLED)) {
       return;
     }
 
     var plainMessage = event.parseToPlainText();
-    var prefix = settingsHolder.get(ChatControlSettings.COMMAND_PREFIX);
+    var prefix = settingsSource.get(ChatControlSettings.COMMAND_PREFIX);
     var prefixIndex = plainMessage.indexOf(prefix);
     if (prefixIndex == -1) {
       return;

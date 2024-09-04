@@ -30,7 +30,8 @@ import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
-import com.soulfiremc.server.settings.lib.SettingsHolder;
+import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.OnlineJavaDataLike;
@@ -76,7 +77,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
-  private final SettingsHolder settingsHolder;
+  private final SettingsSource settingsSource;
   private final Logger logger;
   private final MinecraftProtocol protocol;
   private final ViaClientSession session;
@@ -95,7 +96,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   public BotConnection(
     BotConnectionFactory factory,
     InstanceManager instanceManager,
-    SettingsHolder settingsHolder,
+    SettingsSource settingsSource,
     Logger logger,
     MinecraftProtocol protocol,
     ResolveUtil.ResolvedAddress resolvedAddress,
@@ -106,7 +107,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
     EventLoopGroup eventLoopGroup) {
     this.factory = factory;
     this.instanceManager = instanceManager;
-    this.settingsHolder = settingsHolder;
+    this.settingsSource = settingsSource;
     this.logger = logger;
     this.scheduler = new SoulFireScheduler(logger, runnable -> () -> {
       CURRENT.set(this);
