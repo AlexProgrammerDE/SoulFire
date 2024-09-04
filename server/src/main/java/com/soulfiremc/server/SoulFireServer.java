@@ -157,21 +157,21 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
           sparkPlugin.init();
         });
 
-    var newVersion = new AtomicReference<String>();
     var updateCheck =
-      CompletableFuture.runAsync(
+      CompletableFuture.supplyAsync(
         () -> {
           log.info("Checking for updates...");
-          newVersion.set(SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null));
+          return SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null);
         });
 
     CompletableFuture.allOf(rpcServerStart, viaStart, sparkStart, updateCheck).join();
 
-    if (newVersion.get() != null) {
+    var newVersion = updateCheck.join();
+    if (newVersion != null) {
       log.warn(
         "SoulFire is outdated! Current version: {}, latest version: {}",
         BuildData.VERSION,
-        newVersion.get());
+        newVersion);
     } else {
       log.info("SoulFire is up to date!");
     }
