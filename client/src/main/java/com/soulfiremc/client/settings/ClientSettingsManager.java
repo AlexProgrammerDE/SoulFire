@@ -25,24 +25,18 @@ import com.soulfiremc.grpc.generated.AuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
-import com.soulfiremc.util.GsonInstance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -63,31 +57,6 @@ public class ClientSettingsManager {
 
   public void registerListener(PropertyKey property, Consumer<JsonElement> listener) {
     listeners.put(property, listener);
-  }
-
-  public void loadProfile(Path path) throws IOException {
-    settingsSource = SettingsImpl.deserialize(GsonInstance.GSON.fromJson(Files.readString(path), JsonElement.class));
-    handleProperties(
-      (propertyKey, jsonElement) -> {
-        for (var listener : listeners.get(propertyKey)) {
-          listener.accept(jsonElement);
-        }
-      });
-  }
-
-  public void handleProperties(BiConsumer<PropertyKey, JsonElement> consumer) {
-    for (var entry : settingsSource.settings().entrySet()) {
-      var namespace = entry.getKey();
-      for (var setting : entry.getValue().entrySet()) {
-        var key = setting.getKey();
-        var settingData = setting.getValue();
-
-        var propertyKey = new PropertyKey(namespace, key);
-
-        // Notify all listeners that this setting has been loaded
-        consumer.accept(propertyKey, settingData);
-      }
-    }
   }
 
   public InstanceConfig exportSettingsProto() {
