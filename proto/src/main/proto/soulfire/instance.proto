@@ -6,7 +6,6 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
-import "google/protobuf/struct.proto";
 
 message InstanceConfig {
   repeated SettingsNamespace settings = 1;
