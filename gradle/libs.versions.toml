@@ -1,5 +1,5 @@
 [versions]
-log4j = "2.23.1"
+log4j = "2.24.0"
 grpc = "1.66.0"
 protobuf = "3.25.4"
 via-version = "5.0.4-SNAPSHOT"
@@ -81,7 +81,7 @@ grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 protobuf-bom = { module = "com.google.protobuf:protobuf-bom", version.ref = "protobuf" }
 protobuf-util = { module = "com.google.protobuf:protobuf-java-util" }
-netty-bom = "io.netty:netty-bom:4.1.112.Final"
+netty-bom = "io.netty:netty-bom:4.1.113.Final"
 armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
 armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
