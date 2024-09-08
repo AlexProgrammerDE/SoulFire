@@ -37,27 +37,25 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
 
   record Builder(String namespace) {
     public BooleanProperty ofBoolean(
-      String key, String uiName, String[] cliFlags, String description, boolean defaultValue) {
-      return new BooleanProperty(namespace, key, uiName, cliFlags, description, defaultValue);
+      String key, String uiName, String description, boolean defaultValue) {
+      return new BooleanProperty(namespace, key, uiName, description, defaultValue);
     }
 
     public IntProperty ofInt(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       int defaultValue,
       int minValue,
       int maxValue,
       int stepValue) {
       return ofInt(
-        key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+        key, uiName, description, defaultValue, minValue, maxValue, stepValue, null);
     }
 
     public IntProperty ofInt(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       int defaultValue,
       int minValue,
@@ -68,7 +66,6 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
         namespace,
         key,
         uiName,
-        cliFlags,
         description,
         defaultValue,
         minValue,
@@ -80,20 +77,18 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
     public DoubleProperty ofDouble(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       double defaultValue,
       double minValue,
       double maxValue,
       double stepValue) {
       return ofDouble(
-        key, uiName, cliFlags, description, defaultValue, minValue, maxValue, stepValue, null);
+        key, uiName, description, defaultValue, minValue, maxValue, stepValue, null);
     }
 
     public DoubleProperty ofDouble(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       double defaultValue,
       double minValue,
@@ -104,7 +99,6 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
         namespace,
         key,
         uiName,
-        cliFlags,
         description,
         defaultValue,
         minValue,
@@ -114,40 +108,37 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
     }
 
     public StringProperty ofString(
-      String key, String uiName, String[] cliFlags, String description, String defaultValue) {
-      return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, false);
+      String key, String uiName, String description, String defaultValue) {
+      return new StringProperty(namespace, key, uiName, description, defaultValue, false);
     }
 
     public StringProperty ofStringSecret(
-      String key, String uiName, String[] cliFlags, String description, String defaultValue) {
-      return new StringProperty(namespace, key, uiName, cliFlags, description, defaultValue, true);
+      String key, String uiName, String description, String defaultValue) {
+      return new StringProperty(namespace, key, uiName, description, defaultValue, true);
     }
 
     public ComboProperty ofCombo(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       ComboProperty.ComboOption[] values,
       int defaultValue) {
-      return new ComboProperty(namespace, key, uiName, cliFlags, description, values, defaultValue);
+      return new ComboProperty(namespace, key, uiName, description, values, defaultValue);
     }
 
     public <T extends Enum<T>> ComboProperty ofEnum(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       T[] values,
       T defaultValue) {
       return ofEnumMapped(
-        key, uiName, cliFlags, description, values, defaultValue, Object::toString);
+        key, uiName, description, values, defaultValue, Object::toString);
     }
 
     public <T extends Enum<T>> ComboProperty ofEnumMapped(
       String key,
       String uiName,
-      String[] cliFlags,
       String description,
       T[] values,
       T defaultValue,
@@ -156,7 +147,6 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
         namespace,
         key,
         uiName,
-        cliFlags,
         description,
         ComboProperty.ComboOption.fromEnum(values, mapper),
         defaultValue.ordinal());
@@ -164,7 +154,7 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
 
     public StringListProperty ofStringList(
       String key, String uiName, String[] cliFlags, String description, List<String> defaultValue) {
-      return new StringListProperty(namespace, key, uiName, cliFlags, description, defaultValue);
+      return new StringListProperty(namespace, key, uiName, description, defaultValue);
     }
   }
 }

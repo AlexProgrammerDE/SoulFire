@@ -136,7 +136,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
     results[freeBlockIndex(aboveHead)] =
-      new BlockSafetyData[] {
+      new BlockSafetyData[]{
         new BlockSafetyData(
           aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
         new BlockSafetyData(

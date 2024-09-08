@@ -69,9 +69,8 @@ message SettingEntrySingle {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
   string uiName = 2;
-  repeated string cliFlags = 3;
-  string description = 4;
-  SettingType type = 5;
+  string description = 3;
+  SettingType type = 4;
 }
 
 message SettingEntryMinMaxPairSingle {

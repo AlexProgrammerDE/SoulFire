@@ -85,7 +85,6 @@ public class AutoChatMessage implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Chat Message",
-        new String[] {"--auto-chat-message"},
         "Attempt to send chat messages automatically in random intervals",
         false);
     public static final MinMaxPropertyLink DELAY =
@@ -93,7 +92,6 @@ public class AutoChatMessage implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--chat-min-delay"},
           "Minimum delay between chat messages",
           2,
           0,
@@ -102,7 +100,6 @@ public class AutoChatMessage implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--chat-max-delay"},
           "Maximum delay between chat messages",
           5,
           0,
@@ -112,7 +109,7 @@ public class AutoChatMessage implements InternalPlugin {
       BUILDER.ofStringList(
         "messages",
         "Chat Messages",
-        new String[] {"--chat-messages"},
+        new String[]{"--chat-messages"},
         "List of chat messages to send",
         List.of("Hello", "Hi", "Hey", "How are you?"));
   }

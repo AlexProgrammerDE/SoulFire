@@ -265,7 +265,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
       results[freeBlockIndex(aboveHead)] =
-        new BlockSafetyData[] {
+        new BlockSafetyData[]{
           new BlockSafetyData(
             aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
           new BlockSafetyData(
@@ -285,7 +285,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       if (bodyOffset == BodyPart.HEAD) {
         results[index] =
-          new BlockSafetyData[] {
+          new BlockSafetyData[]{
             new BlockSafetyData(
               block.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
             new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
@@ -296,7 +296,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           };
       } else {
         results[index] =
-          new BlockSafetyData[] {
+          new BlockSafetyData[]{
             new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
             new BlockSafetyData(
               leftDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
@@ -310,7 +310,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     if (modifier == MovementModifier.FALL_1) {
       var fallFree = MovementModifier.FALL_1.offset(targetEdge);
       results[freeBlockIndex(fallFree)] =
-        new BlockSafetyData[] {
+        new BlockSafetyData[]{
           new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
           new BlockSafetyData(
             leftDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),

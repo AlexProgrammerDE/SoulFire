@@ -29,7 +29,7 @@ public class SoulFireAPI {
 
   static {
     var plugins =
-      new InternalPlugin[] {
+      new InternalPlugin[]{
         new ClientBrand(),
         new ClientSettings(),
         new ChatControl(),

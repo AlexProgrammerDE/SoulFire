@@ -21,7 +21,5 @@ public sealed interface SingleProperty extends Property
   permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, StringListProperty, StringProperty {
   String uiName();
 
-  String[] cliFlags();
-
   String description();
 }

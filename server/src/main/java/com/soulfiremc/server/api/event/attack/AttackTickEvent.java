@@ -15,13 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.property;
+package com.soulfiremc.server.api.event.attack;
 
-public record StringProperty(
-  String namespace,
-  String key,
-  String uiName,
-  String description,
-  String defaultValue,
-  boolean secret)
-  implements SingleProperty {}
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.api.event.SoulFireAttackEvent;
+
+public record AttackTickEvent(InstanceManager instanceManager) implements SoulFireAttackEvent {}

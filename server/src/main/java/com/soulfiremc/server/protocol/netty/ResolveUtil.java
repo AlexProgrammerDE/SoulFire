@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.util.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +78,7 @@ public class ResolveUtil {
     log.debug("Attempting SRV lookup for \"{}\".", name);
 
     try {
-      var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[] {"SRV"}).get("srv");
+      var srvAttribute = DIR_CONTEXT.getAttributes(name, new String[]{"SRV"}).get("srv");
       if (srvAttribute != null) {
         var attributeSplit = srvAttribute.get().toString().split(" ", 4);
         log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());

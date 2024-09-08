@@ -38,7 +38,6 @@ import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -196,7 +195,7 @@ public class POVServer implements InternalPlugin {
           new ClientboundLoginPacket(
             0,
             false,
-            new Key[] {Key.key("minecraft:the_end")},
+            new Key[]{Key.key("minecraft:the_end")},
             1,
             0,
             0,
@@ -992,14 +991,12 @@ public class POVServer implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable POV server",
-        new String[] {"--pov-server"},
         "Host a POV server for the bots",
         false);
     public static final IntProperty PORT_START =
       BUILDER.ofInt(
         "port-start",
         "Port Start",
-        new String[] {"--port-start"},
         "What port to start with to host the POV server",
         31765,
         1,
@@ -1009,14 +1006,12 @@ public class POVServer implements InternalPlugin {
       BUILDER.ofBoolean(
         "enable-commands",
         "Enable commands",
-        new String[] {"--pov-enable-commands"},
         "Allow users connected to the POV server to execute commands in the SF server shell",
         true);
     public static final StringProperty COMMAND_PREFIX =
       BUILDER.ofString(
         "command-prefix",
         "Command Prefix",
-        new String[] {"--pov-command-prefix"},
         "The prefix to use for commands executed in the SF server shell",
         "#");
   }

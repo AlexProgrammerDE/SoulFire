@@ -34,5 +34,9 @@ public interface EventBusOwner<T extends SoulFireEvent> {
     EventUtil.runAndAssertChanged(eventBus, () -> eventBus.register(clazz));
   }
 
+  default void postEvent(T event) {
+    eventBus().call(event);
+  }
+
   LambdaManager eventBus();
 }

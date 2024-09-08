@@ -148,7 +148,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     var rightDirectionSide = firstDirection.rightSide();
 
     results[0] =
-      new BlockSafetyData[] {
+      new BlockSafetyData[]{
         new BlockSafetyData(
           firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
         new BlockSafetyData(

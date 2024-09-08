@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
 import java.util.function.BooleanSupplier;
 
 @RequiredArgsConstructor

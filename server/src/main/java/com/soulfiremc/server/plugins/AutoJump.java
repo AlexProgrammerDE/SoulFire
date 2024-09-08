@@ -88,7 +88,6 @@ public class AutoJump implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Jump",
-        new String[] {"--auto-jump"},
         "Attempt to jump automatically in random intervals",
         false);
     public static final MinMaxPropertyLink DELAY =
@@ -96,7 +95,6 @@ public class AutoJump implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--jump-min-delay"},
           "Minimum delay between jumps",
           2,
           0,
@@ -105,7 +103,6 @@ public class AutoJump implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--jump-max-delay"},
           "Maximum delay between jumps",
           5,
           0,

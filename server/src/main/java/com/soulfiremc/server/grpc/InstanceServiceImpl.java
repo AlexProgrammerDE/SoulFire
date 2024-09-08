@@ -20,7 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.api.AttackState;
+import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
@@ -98,7 +98,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsSource().source().toProto())
-        .setState(instance.attackState().toProto())
+        .setState(instance.attackLifecycle().toProto())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -163,7 +163,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.switchToState(AttackState.fromProto(request.getState()));
+      instance.switchToState(AttackLifecycle.fromProto(request.getState()));
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

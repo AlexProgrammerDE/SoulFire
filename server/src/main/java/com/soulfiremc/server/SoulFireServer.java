@@ -35,7 +35,6 @@ import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.DevSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
-import com.soulfiremc.server.settings.lib.SettingsDelegate;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
@@ -69,7 +68,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Getter
@@ -180,12 +178,12 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       serverExtension.onServer(this);
     }
 
-    eventBus.call(
+    postEvent(
       new ServerSettingsRegistryInitEvent(
         serverSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.SERVER)
             .addClass(DevSettings.class, "Dev Settings")));
-    eventBus.call(
+    postEvent(
       new InstanceSettingsRegistryInitEvent(
         instanceSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.INSTANCE)
@@ -243,7 +241,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
 
   public UUID createInstance(String friendlyName) {
     var attackManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
-    eventBus.call(new InstanceInitEvent(attackManager));
+    postEvent(new InstanceInitEvent(attackManager));
 
     instances.put(attackManager.id(), attackManager);
 

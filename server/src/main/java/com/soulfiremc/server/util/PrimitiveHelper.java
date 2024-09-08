@@ -32,7 +32,7 @@ public class PrimitiveHelper {
     }
 
     if (count == 0) {
-      return new byte[][] {data};
+      return new byte[][]{data};
     }
 
     var result = new byte[count + 1][];

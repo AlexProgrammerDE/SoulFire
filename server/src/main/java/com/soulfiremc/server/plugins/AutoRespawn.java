@@ -103,7 +103,6 @@ public class AutoRespawn implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Respawn",
-        new String[] {"--auto-respawn"},
         "Respawn automatically after death",
         true);
     public static final MinMaxPropertyLink DELAY =
@@ -111,7 +110,6 @@ public class AutoRespawn implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--respawn-min-delay"},
           "Minimum delay between respawns",
           1,
           0,
@@ -120,7 +118,6 @@ public class AutoRespawn implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--respawn-max-delay"},
           "Maximum delay between respawns",
           3,
           0,

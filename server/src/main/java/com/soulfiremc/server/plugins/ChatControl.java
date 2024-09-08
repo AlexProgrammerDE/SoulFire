@@ -91,14 +91,12 @@ public class ChatControl implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Chat Control",
-        new String[] {"--chat-control"},
         "Enable controlling the bot with chat messages",
         false);
     public static final StringProperty COMMAND_PREFIX =
       BUILDER.ofString(
         "command-prefix",
         "Command Prefix",
-        new String[] {"--command-prefix"},
         "Word to put before a command to make the bot execute it",
         "$");
   }

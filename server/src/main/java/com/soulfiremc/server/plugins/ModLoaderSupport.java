@@ -250,7 +250,6 @@ public class ModLoaderSupport implements InternalPlugin {
       BUILDER.ofEnum(
         "mod-loader-mode",
         "Mod Loader mode",
-        new String[] {"--mod-loader-mode"},
         "What mod loader to use",
         ModLoaderMode.values(),
         ModLoaderMode.NONE);

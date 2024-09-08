@@ -116,7 +116,6 @@ public class AutoTotem implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Totem",
-        new String[] {"--auto-totem"},
         "Always put available totems in the offhand slot",
         true);
     public static final MinMaxPropertyLink DELAY =
@@ -124,7 +123,6 @@ public class AutoTotem implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--totem-min-delay"},
           "Minimum delay between using totems",
           1,
           0,
@@ -133,7 +131,6 @@ public class AutoTotem implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--totem-max-delay"},
           "Maximum delay between using totems",
           2,
           0,

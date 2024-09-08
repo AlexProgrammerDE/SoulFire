@@ -24,7 +24,10 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class ServerSettingsRegistry {
@@ -229,7 +232,6 @@ public class ServerSettingsRegistry {
     return SettingEntrySingle.newBuilder()
       .setKey(property.key())
       .setUiName(property.uiName())
-      .addAllCliFlags(Arrays.asList(property.cliFlags()))
       .setDescription(property.description());
   }
 
@@ -238,7 +240,6 @@ public class ServerSettingsRegistry {
     return SettingEntryMinMaxPairSingle.newBuilder()
       .setKey(property.key())
       .setUiName(property.uiName())
-      .addAllCliFlags(Arrays.asList(property.cliFlags()))
       .setDescription(property.description());
   }
 

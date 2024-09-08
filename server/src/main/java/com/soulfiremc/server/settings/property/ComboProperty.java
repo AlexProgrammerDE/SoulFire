@@ -25,7 +25,6 @@ public record ComboProperty(
   String namespace,
   String key,
   String uiName,
-  String[] cliFlags,
   String description,
   ComboOption[] options,
   int defaultValue)

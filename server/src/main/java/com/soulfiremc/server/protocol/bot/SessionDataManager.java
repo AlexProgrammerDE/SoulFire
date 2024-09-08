@@ -39,7 +39,6 @@ import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.PrimitiveHelper;
 import com.soulfiremc.server.util.TickTimer;
@@ -317,7 +316,7 @@ public final class SessionDataManager {
         position.getY(),
         position.getZ());
 
-      connection.eventBus().call(new BotJoinedEvent(connection));
+      connection.postEvent(new BotJoinedEvent(connection));
     } else {
       log.debug(
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
@@ -423,7 +422,7 @@ public final class SessionDataManager {
   }
 
   private void onChat(long stamp, Component message) {
-    connection.eventBus().call(new ChatMessageReceiveEvent(connection, stamp, message));
+    connection.postEvent(new ChatMessageReceiveEvent(connection, stamp, message));
   }
 
   @EventHandler
@@ -1077,13 +1076,13 @@ public final class SessionDataManager {
 
     var tickHookState = TickHookContext.INSTANCE.get();
 
-    connection.eventBus().call(new BotPreEntityTickEvent(connection));
+    connection.postEvent(new BotPreEntityTickEvent(connection));
     tickHookState.callHooks(TickHookContext.HookType.PRE_ENTITY_TICK);
 
     // Tick entities
     entityTrackerState.tick();
 
-    connection.eventBus().call(new BotPostEntityTickEvent(connection));
+    connection.postEvent(new BotPostEntityTickEvent(connection));
     tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
   }
 

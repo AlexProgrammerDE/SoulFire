@@ -21,7 +21,6 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -72,7 +71,7 @@ public record BotConnectionFactory(
     session.addListener(new SFBaseListener(botConnection, targetState));
     session.addListener(new SFSessionListener(botConnection));
 
-    instanceManager.eventBus().call(new BotConnectionInitEvent(botConnection));
+    instanceManager.postEvent(new BotConnectionInitEvent(botConnection));
 
     return botConnection;
   }

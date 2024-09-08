@@ -149,19 +149,17 @@ public class KillAura implements InternalPlugin {
     private static final Property.Builder BUILDER = Property.builder("kill-aura");
     public static final BooleanProperty ENABLE =
       BUILDER.ofBoolean(
-        "enable", "Enable", new String[] {"--kill-aura"}, "Enable KillAura", false);
+        "enable", "Enable", "Enable KillAura", false);
     public static final StringProperty WHITELISTED_USER =
       BUILDER.ofString(
         "whitelisted-user",
         "Whitelisted User",
-        new String[] {"--kill-aura-whitelisted-username"},
         "This user will be ignored by the kill aura",
         "Pansexuel");
     public static final DoubleProperty HIT_RANGE =
       BUILDER.ofDouble(
         "hit-range",
         "Hit Range",
-        new String[] {"--kill-aura-hit-range"},
         "Range for the kill aura where the bot will start hitting the entity",
         3.0d,
         0.5d,
@@ -171,7 +169,6 @@ public class KillAura implements InternalPlugin {
       BUILDER.ofDouble(
         "swing-range",
         "Swing Range",
-        new String[] {"--kill-aura-swing-range"},
         "Range for the kill aura where the bot will start swinging arm, set to 0 to disable",
         3.5d,
         0.0d,
@@ -181,7 +178,6 @@ public class KillAura implements InternalPlugin {
       BUILDER.ofDouble(
         "look-range",
         "Look Range",
-        new String[] {"--kill-aura-look-range"},
         "Range for the kill aura where the bot will start looking at the entity, set to 0 to disable",
         4.8d,
         0.0d,
@@ -191,14 +187,12 @@ public class KillAura implements InternalPlugin {
       BUILDER.ofBoolean(
         "check-walls",
         "Check Walls",
-        new String[] {"--kill-aura-check-walls"},
         "Check if the entity is behind a wall",
         true);
     public static final BooleanProperty IGNORE_COOLDOWN =
       BUILDER.ofBoolean(
         "ignore-cooldown",
         "Ignore Cooldown",
-        new String[] {"--kill-aura-ignore-cooldown"},
         "Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura",
         false);
     public static final MinMaxPropertyLink ATTACK_DELAY_TICKS =
@@ -206,7 +200,6 @@ public class KillAura implements InternalPlugin {
         BUILDER.ofInt(
           "attack-delay-ticks-min",
           "Attack Delay Ticks Min",
-          new String[] {"--kill-aura-adt-min"},
           "Minimum tick delay between attacks on pre-1.9 versions",
           8,
           1,
@@ -215,7 +208,6 @@ public class KillAura implements InternalPlugin {
         BUILDER.ofInt(
           "attack-delay-ticks-max",
           "Attack Delay Ticks Max",
-          new String[] {"--kill-aura-adt-max"},
           "Maximum tick delay between attacks on pre-1.9 versions",
           12,
           1,

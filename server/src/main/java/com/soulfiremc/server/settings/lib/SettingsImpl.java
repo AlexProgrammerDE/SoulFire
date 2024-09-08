@@ -61,10 +61,6 @@ public record SettingsImpl(
     return PROFILE_GSON.fromJson(json, SettingsImpl.class);
   }
 
-  public JsonObject serializeToTree() {
-    return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
-  }
-
   @SneakyThrows
   public static SettingsImpl fromProto(InstanceConfig request) {
     var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
@@ -90,6 +86,10 @@ public record SettingsImpl(
     }
 
     return new SettingsImpl(settingsProperties, accounts, proxies);
+  }
+
+  public JsonObject serializeToTree() {
+    return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
   }
 
   @SneakyThrows

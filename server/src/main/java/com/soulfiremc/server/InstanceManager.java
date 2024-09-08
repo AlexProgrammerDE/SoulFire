@@ -22,12 +22,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.SFOfflineAuthService;
-import com.soulfiremc.server.api.AttackState;
+import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.EventBusOwner;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireAttackEvent;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
+import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
@@ -37,7 +38,6 @@ import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.SettingsDelegate;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
@@ -62,11 +62,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   private final UUID id;
   private final Logger logger;
   private final SoulFireScheduler scheduler;
-  @Setter
-  private String friendlyName;
   private final SettingsDelegate settingsSource;
-  @Setter
-  private AttackState attackState = AttackState.STOPPED;
   private final LambdaManager eventBus =
     LambdaManager.basic(new ASMGenerator())
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
@@ -80,6 +76,10 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final SoulFireServer soulFireServer;
+  @Setter
+  private String friendlyName;
+  @Setter
+  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, UUID id, String friendlyName, SettingsImpl settingsSource) {
     this.id = id;
@@ -88,12 +88,20 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
     this.settingsSource = new SettingsDelegate(settingsSource);
+
+    this.scheduler.schedule(this::tick, 500, TimeUnit.MILLISECONDS);
+  }
+
+  private void tick() {
+    if (attackLifecycle.isTicking()) {
+      this.postEvent(new AttackTickEvent(this));
+    }
   }
 
   public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
     var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
     var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
-    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackState.class);
+    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
     var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
 
     var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
@@ -119,48 +127,44 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     return Optional.of(selectedProxy.proxy());
   }
 
-  public void switchToState(AttackState targetState) {
-    switch (targetState) {
-      case RUNNING -> {
-        switch (attackState) {
-          case RUNNING -> {
-            // NO-OP
-          }
-          case PAUSED -> this.attackState = AttackState.RUNNING;
-          case STOPPED -> start();
-        }
-      }
-      case PAUSED -> {
-        switch (attackState) {
-          case RUNNING -> this.attackState = AttackState.PAUSED;
-          case PAUSED -> {
-            // NO-OP
-          }
-          case STOPPED -> {
-            start();
-            this.attackState = AttackState.PAUSED;
-          }
-        }
-      }
-      case STOPPED -> {
-        switch (attackState) {
-          case RUNNING, PAUSED -> stopAttackPermanently();
-          case STOPPED -> {
-            // NO-OP
-          }
-        }
-      }
-    }
+  public void switchToState(AttackLifecycle targetState) {
+    Runnable r = switch (targetState) {
+      case STARTING, RUNNING -> switch (attackLifecycle) {
+        case STARTING, RUNNING, STOPPING -> () -> {
+          // NO-OP
+        };
+        case PAUSED -> () -> this.attackLifecycle = AttackLifecycle.RUNNING;
+        case STOPPED -> this::start;
+      };
+      case PAUSED -> switch (attackLifecycle) {
+        case STARTING, RUNNING ->  () -> this.attackLifecycle = AttackLifecycle.PAUSED;
+        case STOPPING, PAUSED -> () -> {
+          // NO-OP
+        };
+        case STOPPED -> () -> {
+          start();
+          this.attackLifecycle = AttackLifecycle.PAUSED;
+        };
+      };
+      case STOPPING, STOPPED -> switch (attackLifecycle) {
+        case STARTING, RUNNING, PAUSED -> this::stopAttackPermanently;
+        case STOPPING, STOPPED -> () -> {
+          // NO-OP
+        };
+      };
+    };
+
+    r.run();
   }
 
-  public CompletableFuture<?> start() {
-    if (!attackState.isStopped()) {
-      throw new IllegalStateException("Attack is already running");
+  private void start() {
+    if (!attackLifecycle.isFullyStopped()) {
+      throw new IllegalStateException("Another attack is still running");
     }
 
     SoulFireServer.setupLoggingAndVia(settingsSource);
 
-    this.attackState = AttackState.RUNNING;
+    this.attackLifecycle = AttackLifecycle.STARTING;
 
     var address = settingsSource.get(BotSettings.ADDRESS);
     logger.info("Preparing bot attack at {}", address);
@@ -254,10 +258,10 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         usedProxies);
     }
 
-    eventBus.call(new AttackStartEvent(this));
+    postEvent(new AttackStartEvent(this));
 
     var connectSemaphore = new Semaphore(settingsSource.get(BotSettings.CONCURRENT_CONNECTS));
-    return CompletableFuture.runAsync(
+    scheduler.schedule(
       () -> {
         while (!factories.isEmpty()) {
           var factory = factories.poll();
@@ -275,11 +279,11 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             () -> {
-              if (attackState.isStopped()) {
+              if (attackLifecycle.isStoppedOrStopping()) {
                 return;
               }
 
-              TimeUtil.waitCondition(attackState::isPaused);
+              TimeUtil.waitCondition(attackLifecycle::isPaused);
 
               logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
@@ -300,18 +304,24 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
               settingsSource.get(BotSettings.JOIN_DELAY.max())),
             TimeUnit.MILLISECONDS);
         }
+
+        this.attackLifecycle = AttackLifecycle.RUNNING;
       });
   }
 
   public CompletableFuture<?> stopAttackPermanently() {
-    if (attackState.isStopped()) {
+    if (attackLifecycle.isStoppedOrStopping()) {
       return CompletableFuture.completedFuture(null);
     }
 
     logger.info("Stopping bot attack");
-    this.attackState = AttackState.STOPPED;
+    this.attackLifecycle = AttackLifecycle.STOPPING;
 
-    return this.stopAttackSession();
+    return this.stopAttackSession()
+      .thenRun(() -> {
+        this.attackLifecycle = AttackLifecycle.STOPPED;
+        logger.info("Attack stopped");
+      });
   }
 
   public CompletableFuture<?> stopAttackSession() {
@@ -350,10 +360,9 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
       // Notify plugins of state change
-      eventBus.call(new AttackEndedEvent(this));
+      postEvent(new AttackEndedEvent(this));
 
       scheduler.blockNewTasks(false);
-      logger.info("Attack stopped");
     });
   }
 
@@ -361,7 +370,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     return InstanceListResponse.Instance.newBuilder()
       .setId(id.toString())
       .setFriendlyName(friendlyName)
-      .setState(attackState.toProto())
+      .setState(attackLifecycle.toProto())
       .build();
   }
 
@@ -370,7 +379,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
     json.addProperty("id", id.toString());
     json.addProperty("friendlyName", friendlyName);
-    json.addProperty("state", attackState.name());
+    json.addProperty("state", attackLifecycle.name());
     json.add("settings", settingsSource.source().serializeToTree());
 
     return json;

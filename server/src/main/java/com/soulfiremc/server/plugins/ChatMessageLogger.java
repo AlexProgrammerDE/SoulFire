@@ -107,7 +107,6 @@ public class ChatMessageLogger implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Log chat to terminal",
-        new String[] {"--log-chat"},
         "Log all received chat messages to the terminal",
         true);
   }

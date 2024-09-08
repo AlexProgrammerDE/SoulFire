@@ -33,7 +33,6 @@ public class ProxySettings implements SettingsObject {
     BUILDER.ofInt(
       "bots-per-proxy",
       "Bots per proxy",
-      new String[] {"--bots-per-proxy"},
       "Amount of bots that can be on a single proxy",
       -1,
       -1,
@@ -43,7 +42,6 @@ public class ProxySettings implements SettingsObject {
     BUILDER.ofBoolean(
       "shuffle-proxies",
       "Shuffle proxies",
-      new String[] {"--shuffle-proxies"},
       "Should the proxy order be random when connecting bots?",
       false);
 }

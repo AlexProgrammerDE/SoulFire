@@ -105,6 +105,7 @@ public class CLIManager {
 
             var propertyKey = new PropertyKey(page.getNamespace(), singleEntry.getKey());
 
+            var args = new String[]{page.getNamespace() + "-" + singleEntry.getKey()};
             var settingType = singleEntry.getType();
             targetCommandSpec.addOption(
               switch (settingType.getValueCase()) {
@@ -112,8 +113,7 @@ public class CLIManager {
                   var stringEntry = settingType.getString();
                   var reference = new AtomicReference<String>();
                   var optionSpec =
-                    CommandLine.Model.OptionSpec.builder(
-                        singleEntry.getCliFlagsList().toArray(new String[0]))
+                    CommandLine.Model.OptionSpec.builder(args)
                       .description(description)
                       .type(String.class)
                       .initialValue(stringEntry.getDef())
@@ -140,7 +140,7 @@ public class CLIManager {
                     propertyKey,
                     clientSettingsManager,
                     description,
-                    singleEntry.getCliFlagsList().toArray(new String[0]),
+                    args,
                     intEntry);
                 }
                 case DOUBLE -> {
@@ -149,15 +149,14 @@ public class CLIManager {
                     propertyKey,
                     clientSettingsManager,
                     description,
-                    singleEntry.getCliFlagsList().toArray(new String[0]),
+                    args,
                     doubleEntry);
                 }
                 case BOOL -> {
                   var boolEntry = settingType.getBool();
                   var reference = new AtomicReference<Boolean>();
                   var optionSpec =
-                    CommandLine.Model.OptionSpec.builder(
-                        singleEntry.getCliFlagsList().toArray(new String[0]))
+                    CommandLine.Model.OptionSpec.builder(args)
                       .description(description)
                       .type(boolean.class)
                       .initialValue(boolEntry.getDef())
@@ -183,8 +182,7 @@ public class CLIManager {
                   var reference = new AtomicReference<String>();
 
                   var optionSpec =
-                    CommandLine.Model.OptionSpec.builder(
-                        singleEntry.getCliFlagsList().toArray(new String[0]))
+                    CommandLine.Model.OptionSpec.builder(args)
                       .description(description)
                       .type(String.class)
                       .initialValue(
@@ -213,8 +211,7 @@ public class CLIManager {
                   var stringListEntry = settingType.getStringList();
                   var reference = new AtomicReference<String[]>();
                   var optionSpec =
-                    CommandLine.Model.OptionSpec.builder(
-                        singleEntry.getCliFlagsList().toArray(new String[0]))
+                    CommandLine.Model.OptionSpec.builder(args)
                       .description(description)
                       .type(String[].class)
                       .initialValue(stringListEntry.getDefList().toArray(new String[0]))

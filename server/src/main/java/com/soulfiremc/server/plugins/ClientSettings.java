@@ -118,21 +118,18 @@ public class ClientSettings implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Send client settings",
-        new String[] {"--send-client-settings"},
         "Send client settings to the server when joining",
         true);
     public static final StringProperty CLIENT_LOCALE =
       BUILDER.ofString(
         "client-locale",
         "Client locale",
-        new String[] {"--client-locale"},
         "The locale the client uses for translations",
         "en_gb");
     public static final IntProperty RENDER_DISTANCE =
       BUILDER.ofInt(
         "render-distance",
         "Render distance",
-        new String[] {"--render-distance"},
         "How far the client renders chunks. (Use this to load more or less chunks from the server)",
         8,
         2,
@@ -142,7 +139,6 @@ public class ClientSettings implements InternalPlugin {
       BUILDER.ofEnumMapped(
         "chat-visibility",
         "Chat visibility",
-        new String[] {"--chat-visibility"},
         "What type of chat messages the client will receive",
         ChatVisibility.values(),
         ChatVisibility.FULL,
@@ -151,63 +147,54 @@ public class ClientSettings implements InternalPlugin {
       BUILDER.ofBoolean(
         "use-chat-colors",
         "Use chat colors",
-        new String[] {"--use-chat-colors"},
         "Whether the client will use chat colors",
         true);
     public static final BooleanProperty CAPE_ENABLED =
       BUILDER.ofBoolean(
         "cape-enabled",
         "Cape enabled",
-        new String[] {"--cape-enabled"},
         "Whether to display the bots cape if it has one",
         true);
     public static final BooleanProperty JACKET_ENABLED =
       BUILDER.ofBoolean(
         "jacket-enabled",
         "Jacket enabled",
-        new String[] {"--jacket-enabled"},
         "Whether to render the jacket overlay skin layer",
         true);
     public static final BooleanProperty LEFT_SLEEVE_ENABLED =
       BUILDER.ofBoolean(
         "left-sleeve-enabled",
         "Left sleeve enabled",
-        new String[] {"--left-sleeve-enabled"},
         "Whether to render the left overlay skin layer",
         true);
     public static final BooleanProperty RIGHT_SLEEVE_ENABLED =
       BUILDER.ofBoolean(
         "right-sleeve-enabled",
         "Right sleeve enabled",
-        new String[] {"--right-sleeve-enabled"},
         "Whether to render the right overlay skin layer",
         true);
     public static final BooleanProperty LEFT_PANTS_LEG_ENABLED =
       BUILDER.ofBoolean(
         "left-pants-leg-enabled",
         "Left pants leg enabled",
-        new String[] {"--left-pants-leg-enabled"},
         "Whether to render the left pants leg overlay skin layer",
         true);
     public static final BooleanProperty RIGHT_PANTS_LEG_ENABLED =
       BUILDER.ofBoolean(
         "right-pants-leg-enabled",
         "Right pants leg enabled",
-        new String[] {"--right-pants-leg-enabled"},
         "Whether to render the right pants leg overlay skin layer",
         true);
     public static final BooleanProperty HAT_ENABLED =
       BUILDER.ofBoolean(
         "hat-enabled",
         "Hat enabled",
-        new String[] {"--hat-enabled"},
         "Whether to render the hat overlay skin layer",
         true);
     public static final ComboProperty HAND_PREFERENCE =
       BUILDER.ofEnumMapped(
         "hand-preference",
         "Hand preference",
-        new String[] {"--hand-preference"},
         "What hand the client prefers to use for items",
         HandPreference.values(),
         HandPreference.RIGHT_HAND,
@@ -216,14 +203,12 @@ public class ClientSettings implements InternalPlugin {
       BUILDER.ofBoolean(
         "text-filtering-enabled",
         "Text filtering enabled",
-        new String[] {"--text-filtering-enabled"},
         "Whether to filter chat messages from the server",
         true);
     public static final BooleanProperty ALLOWS_LISTING =
       BUILDER.ofBoolean(
         "allows-listing",
         "Allows listing",
-        new String[] {"--allows-listing"},
         "Whether the client wants their username to be shown in the server list",
         true);
   }

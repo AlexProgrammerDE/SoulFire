@@ -23,7 +23,6 @@ public record IntProperty(
   String namespace,
   String key,
   String uiName,
-  String[] cliFlags,
   String description,
   int defaultValue,
   int minValue,

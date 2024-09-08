@@ -90,7 +90,6 @@ public class ServerListBypass implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Server List Bypass",
-        new String[] {"--server-list-bypass"},
         "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",
         false);
     public static final MinMaxPropertyLink DELAY =
@@ -98,7 +97,6 @@ public class ServerListBypass implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--server-list-bypass-min-delay"},
           "Minimum delay between joining the server",
           1,
           0,
@@ -107,7 +105,6 @@ public class ServerListBypass implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--server-list-bypass-max-delay"},
           "Maximum delay between joining the server",
           3,
           0,

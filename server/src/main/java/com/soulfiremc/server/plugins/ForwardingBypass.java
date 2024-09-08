@@ -290,7 +290,6 @@ public class ForwardingBypass implements InternalPlugin {
       BUILDER.ofEnum(
         "forwarding-mode",
         "Forwarding mode",
-        new String[] {"--forwarding-mode"},
         "What type of forwarding to use",
         ForwardingMode.values(),
         ForwardingMode.NONE);
@@ -298,7 +297,6 @@ public class ForwardingBypass implements InternalPlugin {
       BUILDER.ofStringSecret(
         "secret",
         "Secret",
-        new String[] {"--secret"},
         "Secret key used for forwarding. (Not needed for legacy mode)",
         "forwarding secret");
 

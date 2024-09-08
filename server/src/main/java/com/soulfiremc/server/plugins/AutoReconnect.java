@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -32,6 +34,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class AutoReconnect implements InternalPlugin {
@@ -56,43 +59,50 @@ public class AutoReconnect implements InternalPlugin {
   @Override
   public void onServer(SoulFireServer soulFireServer) {
     soulFireServer.registerListeners(AutoReconnect.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, BotDisconnectedEvent.class, this::onDisconnect);
+    PluginHelper.registerAttackEventConsumer(soulFireServer, AttackTickEvent.class, this::onAttackTick);
   }
 
-  public void onDisconnect(BotDisconnectedEvent event) {
-    var connection = event.connection();
-    var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoReconnectSettings.ENABLED)
-      || connection.instanceManager().attackState().isInactive()) {
-      return;
+  public void onAttackTick(AttackTickEvent event) {
+    var instanceManager = event.instanceManager();
+    for (var entries : List.copyOf(instanceManager.botConnections().entrySet())) {
+      var bot = entries.getValue();
+      if (!bot.session().isDisconnected()) {
+        continue;
+      }
+
+      var settingsSource = bot.settingsSource();
+      if (!settingsSource.get(AutoReconnectSettings.ENABLED)) {
+        continue;
+      }
+
+      // Ensure this bot is not reconnected twice
+      instanceManager.botConnections().remove(entries.getKey());
+
+      instanceManager
+        .scheduler()
+        .schedule(
+          () -> {
+            var eventLoopGroup = bot.session().eventLoopGroup();
+            if (eventLoopGroup.isShuttingDown()
+              || eventLoopGroup.isShutdown()
+              || eventLoopGroup.isTerminated()) {
+              return;
+            }
+
+            bot.gracefulDisconnect();
+            var newConnection = bot.factory().prepareConnection();
+
+            instanceManager
+              .botConnections()
+              .put(bot.connectionId(), newConnection);
+
+            newConnection.connect();
+          },
+          RandomUtil.getRandomInt(
+            settingsSource.get(AutoReconnectSettings.DELAY.min()),
+            settingsSource.get(AutoReconnectSettings.DELAY.max())),
+          TimeUnit.SECONDS);
     }
-
-    connection
-      .instanceManager()
-      .scheduler()
-      .schedule(
-        () -> {
-          var eventLoopGroup = connection.session().eventLoopGroup();
-          if (eventLoopGroup.isShuttingDown()
-            || eventLoopGroup.isShutdown()
-            || eventLoopGroup.isTerminated()) {
-            return;
-          }
-
-          connection.gracefulDisconnect();
-          var newConnection = connection.factory().prepareConnection();
-
-          connection
-            .instanceManager()
-            .botConnections()
-            .put(connection.connectionId(), newConnection);
-
-          newConnection.connect();
-        },
-        RandomUtil.getRandomInt(
-          settingsSource.get(AutoReconnectSettings.DELAY.min()),
-          settingsSource.get(AutoReconnectSettings.DELAY.max())),
-        TimeUnit.SECONDS);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -102,7 +112,6 @@ public class AutoReconnect implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Reconnect",
-        new String[] {"--auto-reconnect"},
         "Reconnect a bot when it times out/is kicked",
         true);
     public static final MinMaxPropertyLink DELAY =
@@ -110,7 +119,6 @@ public class AutoReconnect implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--reconnect-min-delay"},
           "Minimum delay between reconnects",
           1,
           0,
@@ -119,7 +127,6 @@ public class AutoReconnect implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--reconnect-max-delay"},
           "Maximum delay between reconnects",
           5,
           0,

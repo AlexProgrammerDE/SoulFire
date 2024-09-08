@@ -30,7 +30,6 @@ import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -140,7 +139,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   public CompletableFuture<?> connect() {
     return CompletableFuture.runAsync(
       () -> {
-        instanceManager.eventBus().call(new PreBotConnectEvent(this));
+        instanceManager.postEvent(new PreBotConnectEvent(this));
         session.connect(true);
       });
   }
@@ -183,13 +182,13 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
         var tickHookState = TickHookContext.INSTANCE.get();
         tickHookState.clear();
 
-        eventBus.call(new BotPreTickEvent(this));
+        postEvent(new BotPreTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
 
         dataManager.tick();
         botControl.tick();
 
-        eventBus.call(new BotPostTickEvent(this));
+        postEvent(new BotPostTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
       }
     } catch (Throwable t) {

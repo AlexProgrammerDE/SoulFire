@@ -141,7 +141,7 @@ public class SFContextClassLoader extends ClassLoader {
       return (Class<?>)
         getMethodsClass()
           .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
-          .invoke(null, classLoader, findLoadedClassMethod, new Object[] {name, resolve});
+          .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
     } catch (ReflectiveOperationException e) {
       if (e.getCause() != null
         && e.getCause().getCause() != null

@@ -89,14 +89,12 @@ public class ClientBrand implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Send client brand",
-        new String[] {"--send-client-brand"},
         "Send client brand to the server",
         true);
     public static final StringProperty CLIENT_BRAND =
       BUILDER.ofString(
         "client-brand",
         "Client brand",
-        new String[] {"--client-brand"},
         "The client brand to send to the server",
         "vanilla");
   }

@@ -43,7 +43,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetReceived(Session session, Packet packet) {
     var event = new SFPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-    botConnection.eventBus().call(event);
+    botConnection.postEvent(event);
     if (event.isCancelled()) {
       return;
     }
@@ -60,7 +60,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetSending(PacketSendingEvent event) {
     var event1 = new SFPacketSendingEvent(botConnection, event.getPacket());
-    botConnection.eventBus().call(event1);
+    botConnection.postEvent(event1);
     event.setPacket(event1.packet());
     event.setCancelled(event1.isCancelled());
 
@@ -76,7 +76,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetSent(Session session, Packet packet) {
     var event = new SFPacketSentEvent(botConnection, (MinecraftPacket) packet);
-    botConnection.eventBus().call(event);
+    botConnection.postEvent(event);
 
     botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
   }
@@ -89,6 +89,6 @@ public class SFSessionListener extends SessionAdapter {
       botConnection.logger().error("Error while handling disconnect event!", t);
     }
 
-    botConnection.eventBus().call(new BotDisconnectedEvent(botConnection));
+    botConnection.postEvent(new BotDisconnectedEvent(botConnection));
   }
 }

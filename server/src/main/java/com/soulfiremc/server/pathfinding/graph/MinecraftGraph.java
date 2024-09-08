@@ -95,12 +95,12 @@ public record MinecraftGraph(TagsState tagsState,
     });
   }
 
-  public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return !inventory.creativeModeBreak();
-  }
-
   public static boolean isBlockFree(BlockState blockState) {
     return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
+  }
+
+  public boolean doUsableBlocksDecreaseWhenPlaced() {
+    return !inventory.creativeModeBreak();
   }
 
   public boolean disallowedToPlaceBlock(SFVec3i position) {

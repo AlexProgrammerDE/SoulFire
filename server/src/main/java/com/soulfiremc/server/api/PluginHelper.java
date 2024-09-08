@@ -40,9 +40,9 @@ public class PluginHelper {
    * global or attack events, this is the easiest way to do it.
    *
    * @param soulFireServer The instance of the SoulFire server.
-   * @param clazz    The class of the bot event.
-   * @param consumer The consumer that is called when the event is posted.
-   * @param <T>      The type of the bot event.
+   * @param clazz          The class of the bot event.
+   * @param consumer       The consumer that is called when the event is posted.
+   * @param <T>            The type of the bot event.
    * @see #registerAttackEventConsumer(SoulFireServer, Class, Consumer)
    */
   public static <T extends SoulFireBotEvent> void registerBotEventConsumer(
@@ -58,9 +58,9 @@ public class PluginHelper {
    * Registers a consumer that is called when a specific attack event is posted.
    *
    * @param soulFireServer The instance of the SoulFire server.
-   * @param clazz    The class of the attack event.
-   * @param consumer The consumer that is called when the event is posted.
-   * @param <T>      The type of the attack event.
+   * @param clazz          The class of the attack event.
+   * @param consumer       The consumer that is called when the event is posted.
+   * @param <T>            The type of the attack event.
    */
   public static <T extends SoulFireAttackEvent> void registerAttackEventConsumer(
     SoulFireServer soulFireServer,

@@ -481,7 +481,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           help(
             "Get spark help",
             c -> {
-              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[] {});
+              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[]{});
               return Command.SINGLE_SUCCESS;
             })));
 
@@ -708,7 +708,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 }),
               false)));
 
-    soulFireServer.eventBus().call(new CommandManagerInitEvent(this));
+    soulFireServer.postEvent(new CommandManagerInitEvent(this));
   }
 
   private int exportMap(

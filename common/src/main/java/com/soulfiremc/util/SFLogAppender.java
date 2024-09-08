@@ -42,7 +42,7 @@ public class SFLogAppender extends AbstractAppender {
 
   private static final LoggerNamePatternSelector selector = LoggerNamePatternSelector.createSelector(
     "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
-    new PatternMatch[] {
+    new PatternMatch[]{
       new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
     },
     true,

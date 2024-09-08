@@ -33,14 +33,12 @@ public class AccountSettings implements SettingsObject {
     BUILDER.ofString(
       "name-format",
       "Name format",
-      new String[] {"--name-format"},
       "The format of the bot names. %d will be replaced with the bot number.",
       "Bot_%d");
   public static final BooleanProperty SHUFFLE_ACCOUNTS =
     BUILDER.ofBoolean(
       "shuffle-accounts",
       "Shuffle accounts",
-      new String[] {"--shuffle-accounts"},
       "Should the accounts order be random when connecting bots?",
       false);
 }

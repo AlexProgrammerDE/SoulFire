@@ -152,7 +152,6 @@ public class AutoArmor implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Armor",
-        new String[] {"--auto-armor"},
         "Put on best armor automatically",
         true);
     public static final MinMaxPropertyLink DELAY =
@@ -160,7 +159,6 @@ public class AutoArmor implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--armor-min-delay"},
           "Minimum delay between putting on armor",
           1,
           0,
@@ -169,7 +167,6 @@ public class AutoArmor implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--armor-max-delay"},
           "Maximum delay between putting on armor",
           2,
           0,

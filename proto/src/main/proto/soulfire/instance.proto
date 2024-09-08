@@ -30,9 +30,11 @@ message InstanceDeleteResponse {
 }
 
 enum InstanceState {
-  STOPPED = 0;
+  STARTING = 0;
   RUNNING = 1;
   PAUSED = 2;
+  STOPPING = 3;
+  STOPPED = 4;
 }
 
 message InstanceListRequest {

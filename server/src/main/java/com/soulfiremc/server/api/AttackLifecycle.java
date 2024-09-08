@@ -19,41 +19,47 @@ package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.InstanceState;
 
-public enum AttackState {
+public enum AttackLifecycle {
+  STARTING,
   RUNNING,
   PAUSED,
+  STOPPING,
   STOPPED;
 
-  public boolean isRunning() {
-    return this == RUNNING;
+  public static AttackLifecycle fromProto(InstanceState state) {
+    return switch (state) {
+      case STARTING -> STARTING;
+      case RUNNING -> RUNNING;
+      case PAUSED -> PAUSED;
+      case STOPPING -> STOPPING;
+      case STOPPED -> STOPPED;
+      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized state");
+    };
+  }
+
+  public boolean isTicking() {
+    return this == STARTING || this == RUNNING;
   }
 
   public boolean isPaused() {
     return this == PAUSED;
   }
 
-  public boolean isStopped() {
+  public boolean isFullyStopped() {
     return this == STOPPED;
   }
 
-  public boolean isInactive() {
-    return isPaused() || isStopped();
+  public boolean isStoppedOrStopping() {
+    return this == STOPPED || this == STOPPING;
   }
 
   public InstanceState toProto() {
     return switch (this) {
+      case STARTING -> InstanceState.STARTING;
       case RUNNING -> InstanceState.RUNNING;
       case PAUSED -> InstanceState.PAUSED;
+      case STOPPING -> InstanceState.STOPPING;
       case STOPPED -> InstanceState.STOPPED;
-    };
-  }
-
-  public static AttackState fromProto(InstanceState state) {
-    return switch (state) {
-      case RUNNING -> RUNNING;
-      case PAUSED -> PAUSED;
-      case STOPPED -> STOPPED;
-      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized state");
     };
   }
 }

@@ -23,7 +23,6 @@ public record StringListProperty(
   String namespace,
   String key,
   String uiName,
-  String[] cliFlags,
   String description,
   List<String> defaultValue)
   implements SingleProperty {}

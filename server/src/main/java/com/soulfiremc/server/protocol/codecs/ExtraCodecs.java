@@ -80,7 +80,7 @@ public class ExtraCodecs {
   }
 
   private static int[] leastMostToIntArray(long most, long least) {
-    return new int[] {(int) (most >> 32), (int) most, (int) (least >> 32), (int) least};
+    return new int[]{(int) (most >> 32), (int) most, (int) (least >> 32), (int) least};
   }
 
   public static DataResult<int[]> fixedSize(IntStream stream, int size) {

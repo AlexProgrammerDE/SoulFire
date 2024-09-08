@@ -23,7 +23,6 @@ public record DoubleProperty(
   String namespace,
   String key,
   String uiName,
-  String[] cliFlags,
   String description,
   double defaultValue,
   double minValue,

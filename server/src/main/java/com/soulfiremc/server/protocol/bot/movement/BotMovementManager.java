@@ -722,7 +722,7 @@ public class BotMovementManager {
     var curlevel = getRenderedDepth(meta);
     var flow = new MutableVector3d(0, 0, 0);
     for (var combination :
-      new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
+      new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
       var dx = combination[0];
       var dz = combination[1];
       var adjBlockVec = block.add(dx, 0, dz);
@@ -747,7 +747,7 @@ public class BotMovementManager {
 
     if (meta.properties().getInt("level") >= 8) {
       for (var combination :
-        new int[][] {new int[] {0, 1}, new int[] {-1, 0}, new int[] {0, -1}, new int[] {1, 0}}) {
+        new int[][]{new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0}}) {
         var dx = combination[0];
         var dz = combination[1];
         var adjBlock = world.getBlockState(block.add(dx, 0, dz));

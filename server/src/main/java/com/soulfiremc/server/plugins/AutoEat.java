@@ -123,7 +123,6 @@ public class AutoEat implements InternalPlugin {
       BUILDER.ofBoolean(
         "enabled",
         "Enable Auto Eat",
-        new String[] {"--auto-eat"},
         "Eat available food automatically when hungry",
         true);
     public static final MinMaxPropertyLink DELAY =
@@ -131,7 +130,6 @@ public class AutoEat implements InternalPlugin {
         BUILDER.ofInt(
           "min-delay",
           "Min delay (seconds)",
-          new String[] {"--eat-min-delay"},
           "Minimum delay between eating",
           1,
           0,
@@ -140,7 +138,6 @@ public class AutoEat implements InternalPlugin {
         BUILDER.ofInt(
           "max-delay",
           "Max delay (seconds)",
-          new String[] {"--eat-max-delay"},
           "Maximum delay between eating",
           2,
           0,
