@@ -78,23 +78,14 @@ public class SFBaseListener extends SessionAdapter {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
         var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
-        var authSupport = botConnection.minecraftAccount().isPremiumJava();
-        if (!authSupport) {
-          botConnection
-            .logger()
-            .info(
-              "Server sent a encryption request, but we're offline mode. Not authenticating with mojang.");
-        }
-
-        var auth = authSupport;
+        var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
+        var needsAuth = helloPacket.isShouldAuthenticate();
         var isLegacy = SFVersionConstants.isLegacy(botConnection.protocolVersion());
-        if (auth && isLegacy) {
-          auth =
+        if (needsAuth && isLegacy) {
+          needsAuth =
             Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class))
               .authenticate;
         }
-
-        botConnection.logger().debug("Performing mojang request: {}", auth);
 
         SecretKey key;
         try {
@@ -105,11 +96,20 @@ public class SFBaseListener extends SessionAdapter {
           throw new IllegalStateException("Failed to generate shared key.", e);
         }
 
-        if (auth) {
-          var serverId =
-            SFSessionService.getServerId(
-              helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-          botConnection.joinServerId(serverId, viaSession);
+        botConnection.logger().debug("Needs auth: {}", needsAuth);
+        if (needsAuth) {
+          botConnection.logger().debug("Can do auth: {}", canDoAuth);
+          if (canDoAuth) {
+            var serverId =
+              SFSessionService.getServerId(
+                helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+            botConnection.joinServerId(serverId, viaSession);
+          } else {
+            botConnection
+              .logger()
+              .info(
+                "Server sent a encryption request, but account is offline mode. Not authenticating with mojang.");
+          }
         }
 
         var keyPacket = new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge());
