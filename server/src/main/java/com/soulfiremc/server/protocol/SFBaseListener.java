@@ -78,7 +78,6 @@ public class SFBaseListener extends SessionAdapter {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
         var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
-        var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
         var needsAuth = helloPacket.isShouldAuthenticate();
         var isLegacy = SFVersionConstants.isLegacy(botConnection.protocolVersion());
         if (needsAuth && isLegacy) {
@@ -98,6 +97,7 @@ public class SFBaseListener extends SessionAdapter {
 
         botConnection.logger().debug("Needs auth: {}", needsAuth);
         if (needsAuth) {
+          var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
           botConnection.logger().debug("Can do auth: {}", canDoAuth);
           if (canDoAuth) {
             var serverId =
