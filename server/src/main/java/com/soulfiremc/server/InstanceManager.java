@@ -89,7 +89,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     this.soulFireServer = soulFireServer;
     this.settingsSource = new SettingsDelegate(settingsSource);
 
-    this.scheduler.schedule(this::tick, 500, TimeUnit.MILLISECONDS);
+    this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
   }
 
   private void tick() {
@@ -137,7 +137,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         case STOPPED -> this::start;
       };
       case PAUSED -> switch (attackLifecycle) {
-        case STARTING, RUNNING ->  () -> this.attackLifecycle = AttackLifecycle.PAUSED;
+        case STARTING, RUNNING -> () -> this.attackLifecycle = AttackLifecycle.PAUSED;
         case STOPPING, PAUSED -> () -> {
           // NO-OP
         };
