@@ -162,12 +162,12 @@ public class SFBaseListener extends SessionAdapter {
 
   @Override
   public void connected(ConnectedEvent event) {
-    var originalAddress = botConnection.resolvedAddress().originalAddress();
+    var resolvedAddress = botConnection.resolvedAddress().resolvedAddress();
     var session = event.getSession();
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
     var intention = new ClientIntentionPacket(protocol.getCodec().getProtocolVersion(),
-      originalAddress.host(),
-      originalAddress.port(),
+      resolvedAddress.getHostName(),
+      resolvedAddress.getPort(),
       switch (targetState) {
         case LOGIN -> HandshakeIntent.LOGIN;
         case STATUS -> HandshakeIntent.STATUS;

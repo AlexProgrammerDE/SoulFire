@@ -26,7 +26,6 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Optional;
@@ -96,7 +95,7 @@ public class ResolveUtil {
     return Optional.empty();
   }
 
-  private static Optional<SocketAddress> resolveByHost(ServerAddress serverAddress) {
+  private static Optional<InetSocketAddress> resolveByHost(ServerAddress serverAddress) {
     try {
       var host = serverAddress.host();
       var resolved = InetAddress.getByName(host);
@@ -116,5 +115,5 @@ public class ResolveUtil {
     }
   }
 
-  public record ResolvedAddress(ServerAddress originalAddress, SocketAddress resolvedAddress) {}
+  public record ResolvedAddress(ServerAddress originalAddress, InetSocketAddress resolvedAddress) {}
 }
