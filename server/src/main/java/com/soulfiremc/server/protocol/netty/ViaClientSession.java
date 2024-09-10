@@ -309,11 +309,6 @@ public class ViaClientSession extends TcpSession {
 
   @Override
   public void callPacketReceived(Packet packet) {
-    if (packet.isTerminal()) {
-      super.callPacketReceived(packet);
-      return;
-    }
-
     if (packet instanceof ClientboundDelimiterPacket) {
       // Block or unlock packets for processing
       delimiterBlockProcessing = !delimiterBlockProcessing;
