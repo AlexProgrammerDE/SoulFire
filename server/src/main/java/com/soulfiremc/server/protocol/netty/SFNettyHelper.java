@@ -77,13 +77,13 @@ public class SFNettyHelper {
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addFirst("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
+          pipeline.addLast("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
         } else {
-          pipeline.addFirst("proxy", new HttpProxyHandler(address));
+          pipeline.addLast("proxy", new HttpProxyHandler(address));
         }
       }
-      case SOCKS4 -> pipeline.addFirst("proxy", new Socks4ProxyHandler(address, proxy.username()));
-      case SOCKS5 -> pipeline.addFirst("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
+      case SOCKS4 -> pipeline.addLast("proxy", new Socks4ProxyHandler(address, proxy.username()));
+      case SOCKS5 -> pipeline.addLast("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
     }
   }
 

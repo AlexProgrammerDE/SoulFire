@@ -30,6 +30,8 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -44,6 +46,7 @@ import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.network.codec.PacketCodecHelper;
+import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
 import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -58,6 +61,7 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -109,125 +113,122 @@ public class ViaClientSession extends TcpSession {
       throw new IllegalStateException("Session has already been disconnected.");
     }
 
-    try {
-      var version = botConnection.protocolVersion();
-      var isBedrock = SFVersionConstants.isBedrock(version);
-      var bootstrap = new Bootstrap();
+    var version = botConnection.protocolVersion();
+    var isBedrock = SFVersionConstants.isBedrock(version);
+    var bootstrap = new Bootstrap();
 
-      bootstrap.group(eventLoopGroup);
-      if (isBedrock) {
-        if (proxy != null && !proxy.type().udpSupport()) {
-          throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
-        }
-
-        bootstrap.channelFactory(
-          RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
-      } else {
-        bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
+    bootstrap.group(eventLoopGroup);
+    if (isBedrock) {
+      if (proxy != null && !proxy.type().udpSupport()) {
+        throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
       }
 
+      bootstrap.channelFactory(
+        RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
+    } else {
+      bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
+    }
+
+    bootstrap
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getFlag(BuiltinFlags.CLIENT_CONNECT_TIMEOUT, 30) * 1000)
+      .option(ChannelOption.IP_TOS, 0x18);
+
+    if (isBedrock) {
       bootstrap
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout() * 1000)
-        .option(ChannelOption.IP_TOS, 0x18);
+        .option(
+          RakChannelOption.RAK_PROTOCOL_VERSION,
+          ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
+        .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
+        .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
+        .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
+    } else {
+      bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
-      if (isBedrock) {
-        bootstrap
-          .option(
-            RakChannelOption.RAK_PROTOCOL_VERSION,
-            ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
-          .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
-          .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
-          .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
-      } else {
-        bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
+      if (SFNettyHelper.TRANSPORT_METHOD.tcpFastOpenClientSideAvailable()) {
+        bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+      }
+    }
 
-        if (SFNettyHelper.TRANSPORT_METHOD.tcpFastOpenClientSideAvailable()) {
-          bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
+    bootstrap.handler(
+      new ChannelInitializer<>() {
+        @Override
+        public void initChannel(@NotNull Channel channel) {
+          var protocol = getPacketProtocol();
+          protocol.newClientSession(ViaClientSession.this, false);
+
+          var pipeline = channel.pipeline();
+
+          if (proxy != null) {
+            SFNettyHelper.addProxy(pipeline, proxy);
+          }
+
+          initializeHAProxySupport(channel);
+
+          // This monitors the traffic
+          var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
+          pipeline.addLast("traffic", trafficHandler);
+          setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
+
+          pipeline.addLast("read-timeout", new ReadTimeoutHandler(getFlag(BuiltinFlags.READ_TIMEOUT, 30)));
+          pipeline.addLast("write-timeout", new WriteTimeoutHandler(getFlag(BuiltinFlags.WRITE_TIMEOUT, 0)));
+
+          // This does the extra magic
+          var userConnection = new UserConnectionImpl(channel, true);
+          new ProtocolPipelineImpl(userConnection);
+
+          userConnection.put(new StorableSession(ViaClientSession.this));
+
+          if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
+            var bedrockData = (BedrockData) botConnection.minecraftAccount().accountData();
+            userConnection.put(
+              new AuthChainData(
+                bedrockData.mojangJwt(),
+                bedrockData.identityJwt(),
+                bedrockData.publicKey(),
+                bedrockData.privateKey(),
+                bedrockData.deviceId(),
+                bedrockData.playFabId()));
+          }
+
+          setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
+
+          if (SFVersionConstants.isLegacy(version)) {
+            pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
+          } else if (isBedrock) {
+            pipeline.addLast("vb-disconnect", new DisconnectHandler());
+            pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
+          }
+
+          if (isBedrock) {
+            pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
+            pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
+          } else {
+            pipeline.addLast(SIZER_NAME, new FrameCodec());
+          }
+
+          // Inject Via codec
+          pipeline.addLast("via-codec", new ViaCodec(userConnection));
+
+          pipeline.addLast("flow-control", new TcpFlowControlHandler());
+          pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
+          pipeline.addLast("manager", ViaClientSession.this);
         }
+      });
+
+    bootstrap.remoteAddress(targetAddress);
+    bootstrap.localAddress(bindAddress, bindPort);
+
+    var handleFuture = new CompletableFuture<Void>();
+    bootstrap.connect().addListener((futureListener) -> {
+      if (!futureListener.isSuccess()) {
+        exceptionCaught(null, futureListener.cause());
       }
 
-      bootstrap.handler(
-        new ChannelInitializer<>() {
-          @Override
-          public void initChannel(@NotNull Channel channel) {
-            var protocol = getPacketProtocol();
-            protocol.newClientSession(ViaClientSession.this, false);
+      handleFuture.complete(null);
+    });
 
-            var pipeline = channel.pipeline();
-
-            refreshReadTimeoutHandler(channel);
-            refreshWriteTimeoutHandler(channel);
-
-            if (proxy != null) {
-              SFNettyHelper.addProxy(pipeline, proxy);
-            }
-
-            // This monitors the traffic
-            var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
-            pipeline.addLast("traffic", trafficHandler);
-            setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
-
-            // This does the extra magic
-            var userConnection = new UserConnectionImpl(channel, true);
-            new ProtocolPipelineImpl(userConnection);
-
-            userConnection.put(new StorableSession(ViaClientSession.this));
-
-            if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
-              var bedrockData = (BedrockData) botConnection.minecraftAccount().accountData();
-              userConnection.put(
-                new AuthChainData(
-                  bedrockData.mojangJwt(),
-                  bedrockData.identityJwt(),
-                  bedrockData.publicKey(),
-                  bedrockData.privateKey(),
-                  bedrockData.deviceId(),
-                  bedrockData.playFabId()));
-            }
-
-            setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
-
-            if (SFVersionConstants.isLegacy(version)) {
-              pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
-            } else if (isBedrock) {
-              pipeline.addLast("vb-disconnect", new DisconnectHandler());
-              pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
-            }
-
-            if (isBedrock) {
-              pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
-              pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
-            } else {
-              pipeline.addLast(SIZER_NAME, new FrameCodec());
-            }
-
-            // Inject Via codec
-            pipeline.addLast("via-codec", new ViaCodec(userConnection));
-
-            pipeline.addLast("flow-control", new TcpFlowControlHandler());
-            pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
-            pipeline.addLast("manager", ViaClientSession.this);
-
-            addHAProxySupport(pipeline);
-          }
-        });
-
-      bootstrap.remoteAddress(targetAddress);
-      bootstrap.localAddress(bindAddress, bindPort);
-
-      var future = bootstrap.connect();
-      if (wait) {
-        future.sync();
-      }
-
-      future.addListener(
-        (futureListener) -> {
-          if (!futureListener.isSuccess()) {
-            exceptionCaught(null, futureListener.cause());
-          }
-        });
-    } catch (Throwable t) {
-      exceptionCaught(null, t);
+    if (wait) {
+      handleFuture.join();
     }
   }
 
@@ -251,7 +252,7 @@ public class ViaClientSession extends TcpSession {
       if (handler == null) {
         channel
           .pipeline()
-          .addBefore("via-codec", COMPRESSION_NAME, new TcpPacketCompression(this, validateDecompression));
+          .addBefore("via-codec", COMPRESSION_NAME, new TcpPacketCompression(this, new ZlibCompression(), validateDecompression));
       }
     } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
       channel.pipeline().remove(COMPRESSION_NAME);
@@ -277,36 +278,22 @@ public class ViaClientSession extends TcpSession {
     return (MinecraftCodecHelper) this.codecHelper;
   }
 
-  private void addHAProxySupport(ChannelPipeline pipeline) {
+  private void initializeHAProxySupport(Channel channel) {
     var clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
-    if (getFlag(BuiltinFlags.ENABLE_CLIENT_PROXY_PROTOCOL, false) && clientAddress != null) {
-      pipeline.addFirst(
-        "proxy-protocol-packet-sender",
-        new ChannelInboundHandlerAdapter() {
-          @Override
-          public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
-            var proxiedProtocol =
-              clientAddress.getAddress() instanceof Inet4Address
-                ? HAProxyProxiedProtocol.TCP4
-                : HAProxyProxiedProtocol.TCP6;
-            var remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-            ctx.channel()
-              .writeAndFlush(
-                new HAProxyMessage(
-                  HAProxyProtocolVersion.V2,
-                  HAProxyCommand.PROXY,
-                  proxiedProtocol,
-                  clientAddress.getAddress().getHostAddress(),
-                  remoteAddress.getAddress().getHostAddress(),
-                  clientAddress.getPort(),
-                  remoteAddress.getPort()));
-            ctx.pipeline().remove(this);
-            ctx.pipeline().remove("proxy-protocol-encoder");
-            super.channelActive(ctx);
-          }
-        });
-      pipeline.addFirst("proxy-protocol-encoder", HAProxyMessageEncoder.INSTANCE);
+    if (clientAddress == null) {
+      return;
     }
+
+    channel.pipeline().addLast("proxy-protocol-encoder", HAProxyMessageEncoder.INSTANCE);
+    var proxiedProtocol = clientAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
+    var remoteAddress = (InetSocketAddress) channel.remoteAddress();
+    channel.writeAndFlush(new HAProxyMessage(
+      HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, proxiedProtocol,
+      clientAddress.getAddress().getHostAddress(), remoteAddress.getAddress().getHostAddress(),
+      clientAddress.getPort(), remoteAddress.getPort()
+    )).addListener(future -> {
+      channel.pipeline().remove("proxy-protocol-encoder");
+    });
   }
 
   @Override

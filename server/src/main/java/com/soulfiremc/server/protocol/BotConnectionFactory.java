@@ -26,6 +26,7 @@ import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
+import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.slf4j.Logger;
@@ -64,9 +65,9 @@ public record BotConnectionFactory(
         eventLoopGroup);
 
     var session = botConnection.session();
-    session.setConnectTimeout(settingsSource.get(BotSettings.CONNECT_TIMEOUT));
-    session.setReadTimeout(settingsSource.get(BotSettings.READ_TIMEOUT));
-    session.setWriteTimeout(settingsSource.get(BotSettings.WRITE_TIMEOUT));
+    session.setFlag(BuiltinFlags.CLIENT_CONNECT_TIMEOUT, settingsSource.get(BotSettings.CONNECT_TIMEOUT));
+    session.setFlag(BuiltinFlags.READ_TIMEOUT, settingsSource.get(BotSettings.READ_TIMEOUT));
+    session.setFlag(BuiltinFlags.WRITE_TIMEOUT, settingsSource.get(BotSettings.WRITE_TIMEOUT));
 
     session.addListener(new SFBaseListener(botConnection, targetState));
     session.addListener(new SFSessionListener(botConnection));
