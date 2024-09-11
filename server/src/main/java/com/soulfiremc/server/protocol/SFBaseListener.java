@@ -174,20 +174,12 @@ public class SFBaseListener extends SessionAdapter {
         default -> throw new IllegalStateException("Unexpected value: " + targetState);
       });
 
+    session.switchInboundState(() -> protocol.setInboundState(this.targetState));
+    session.send(intention);
+    session.switchOutboundState(() -> protocol.setOutboundState(this.targetState));
     switch (this.targetState) {
-      case LOGIN -> {
-        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.LOGIN));
-        session.send(intention);
-        session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.LOGIN));
-        session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
-      }
-      case STATUS -> {
-        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.STATUS));
-        session.send(intention);
-        session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.STATUS));
-        session.send(new ServerboundStatusRequestPacket());
-      }
-      default -> throw new IllegalStateException("Unexpected value: " + targetState);
+      case LOGIN -> session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
+      case STATUS -> session.send(new ServerboundStatusRequestPacket());
     }
   }
 }
