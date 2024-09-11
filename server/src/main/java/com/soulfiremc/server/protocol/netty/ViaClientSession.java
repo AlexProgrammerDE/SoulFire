@@ -34,7 +34,6 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
@@ -291,9 +290,7 @@ public class ViaClientSession extends TcpSession {
       HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, proxiedProtocol,
       clientAddress.getAddress().getHostAddress(), remoteAddress.getAddress().getHostAddress(),
       clientAddress.getPort(), remoteAddress.getPort()
-    )).addListener(future -> {
-      channel.pipeline().remove("proxy-protocol-encoder");
-    });
+    )).addListener(future -> channel.pipeline().remove("proxy-protocol-encoder"));
   }
 
   @Override
