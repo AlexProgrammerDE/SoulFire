@@ -298,6 +298,7 @@ public class ViaClientSession extends TcpSession {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     if (cause instanceof CancelCodecException) {
+      logger.debug("Packet was cancelled.", cause);
       return;
     }
 
@@ -369,6 +370,7 @@ public class ViaClientSession extends TcpSession {
 
   public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
     if (cause instanceof CancelCodecException) {
+      logger.debug("Packet was cancelled.", cause);
       callPacketSent(packet);
       return;
     }
