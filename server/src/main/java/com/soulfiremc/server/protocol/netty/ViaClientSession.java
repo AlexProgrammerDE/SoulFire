@@ -330,9 +330,15 @@ public class ViaClientSession extends TcpSession {
   }
 
   @Override
-  public void send(Packet packet, Runnable onSent) {
+  public void send(@NotNull Packet packet, Runnable onSent) {
     var channel = getChannel();
     if (channel == null || !channel.isActive() || eventLoopGroup.isShutdown()) {
+      logger.debug("Channel is not active, dropping packet {}", packet.getClass().getSimpleName());
+      return;
+    }
+
+    if (!channel.eventLoop().inEventLoop()) {
+      channel.eventLoop().execute(() -> this.send(packet, onSent));
       return;
     }
 
@@ -360,11 +366,6 @@ public class ViaClientSession extends TcpSession {
               packetExceptionCaught(null, future.cause(), packet);
             }
           });
-  }
-
-  @Override
-  public void disconnect(@NotNull Component reason, Throwable cause) {
-    super.disconnect(reason, cause);
   }
 
   public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
