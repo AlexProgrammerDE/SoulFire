@@ -205,10 +205,12 @@ public class ViaClientSession extends TcpSession {
             pipeline.addLast(SIZER_NAME, new FrameCodec());
           }
 
+          pipeline.addLast("flow-control", new TcpFlowControlHandler());
+
           // Inject Via codec
           pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
-          pipeline.addLast("flow-control", new TcpFlowControlHandler());
+          pipeline.addLast("via-flow-control", new TcpFlowControlHandler());
           pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
           pipeline.addLast("manager", ViaClientSession.this);
         }
