@@ -49,6 +49,7 @@ import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
 import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.network.packet.PacketCancelException;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.tcp.*;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
@@ -297,7 +298,7 @@ public class ViaClientSession extends TcpSession {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    if (cause instanceof CancelCodecException) {
+    if (cause instanceof PacketCancelException || cause instanceof CancelCodecException) {
       logger.debug("Packet was cancelled.", cause);
       return;
     }
@@ -369,7 +370,7 @@ public class ViaClientSession extends TcpSession {
   }
 
   public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
-    if (cause instanceof CancelCodecException) {
+    if (cause instanceof PacketCancelException || cause instanceof CancelCodecException) {
       logger.debug("Packet was cancelled.", cause);
       callPacketSent(packet);
       return;
