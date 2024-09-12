@@ -78,11 +78,7 @@ public class ClientSettingsManager {
         return;
       }
 
-      settingsSource = new SettingsImpl(
-        settingsSource.settings(),
-        settingsSource.accounts(),
-        newProxies
-      );
+      settingsSource = settingsSource.withProxies(newProxies);
 
       log.info("Loaded {} proxies!", newProxies.size());
     } catch (Exception e) {
@@ -105,11 +101,7 @@ public class ClientSettingsManager {
         return;
       }
 
-      settingsSource = new SettingsImpl(
-        settingsSource.settings(),
-        newAccounts,
-        settingsSource.proxies()
-      );
+      settingsSource = settingsSource.withAccounts(newAccounts);
 
       log.info("Loaded {} accounts!", newAccounts.size());
     } catch (Exception e) {

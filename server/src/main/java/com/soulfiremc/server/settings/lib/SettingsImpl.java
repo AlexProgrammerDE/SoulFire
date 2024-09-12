@@ -31,6 +31,7 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.SocketAddressHelper;
 import lombok.SneakyThrows;
+import lombok.With;
 
 import java.lang.reflect.Type;
 import java.net.SocketAddress;
@@ -43,6 +44,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
+@With
 public record SettingsImpl(
   Map<String, Map<String, JsonElement>> settings,
   List<MinecraftAccount> accounts,

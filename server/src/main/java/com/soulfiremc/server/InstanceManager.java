@@ -91,6 +91,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     this.settingsSource = new SettingsDelegate(settingsSource);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
+    this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
   }
 
   private void tick() {
@@ -101,12 +102,26 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
   private void refreshExpiredAccounts() {
     var accounts = new ArrayList<>(settingsSource.accounts());
+    if (accounts.isEmpty()) {
+      return;
+    }
+
+    logger.info("Refreshing expired accounts");
+    var refreshed = 0;
     for (var i = 0; i < accounts.size(); i++) {
       var account = accounts.get(i);
       var authService = MCAuthService.convertService(account.authType());
       if (authService.isExpired(account)) {
         accounts.set(i, authService.refresh(account, null).join());
+        refreshed++;
       }
+    }
+
+    if (refreshed > 0) {
+      logger.info("Refreshed {} accounts", refreshed);
+      settingsSource.source(settingsSource.source().withAccounts(accounts));
+    } else {
+      logger.info("No accounts needed to be refreshed");
     }
   }
 
