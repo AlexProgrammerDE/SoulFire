@@ -106,15 +106,19 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       return;
     }
 
-    logger.info("Refreshing expired accounts");
-
     var accounts = new ArrayList<MinecraftAccount>();
     var refreshed = 0;
     for (var account : settingsSource.accounts()) {
       var authService = MCAuthService.convertService(account.authType());
       if (authService.isExpired(account)) {
+        if (refreshed == 0) {
+          logger.info("Refreshing expired accounts");
+        }
+
         accounts.add(authService.refresh(account, null).join());
         refreshed++;
+      } else {
+        accounts.add(account);
       }
     }
 
