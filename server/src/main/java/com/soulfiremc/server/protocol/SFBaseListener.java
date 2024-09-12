@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.kyori.adventure.text.Component;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
+import org.geysermc.mcprotocollib.auth.SessionService;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.crypt.AESEncryption;
 import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
@@ -101,7 +102,7 @@ public class SFBaseListener extends SessionAdapter {
           botConnection.logger().debug("Can do auth: {}", canDoAuth);
           if (canDoAuth) {
             var serverId =
-              SFSessionService.getServerId(
+              SessionService.getServerId(
                 helloPacket.getServerId(), helloPacket.getPublicKey(), key);
             botConnection.joinServerId(serverId, viaSession);
           } else {

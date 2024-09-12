@@ -60,18 +60,6 @@ public class SFSessionService {
     this.proxyData = proxyData;
   }
 
-  public static String getServerId(String base, PublicKey publicKey, SecretKey secretKey) {
-    try {
-      var digest = MessageDigest.getInstance("SHA-1");
-      digest.update(base.getBytes(StandardCharsets.ISO_8859_1));
-      digest.update(secretKey.getEncoded());
-      digest.update(publicKey.getEncoded());
-      return new BigInteger(digest.digest()).toString(16);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("Server ID hash algorithm unavailable.", e);
-    }
-  }
-
   public void joinServer(UUID profileId, String authenticationToken, String serverId) {
     ReactorHttpHelper.createReactorClient(proxyData, true)
       .post()
