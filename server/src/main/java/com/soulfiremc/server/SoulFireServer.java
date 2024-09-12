@@ -128,17 +128,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     injector.register(ShutdownManager.class, shutdownManager);
 
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
-
-    rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
-    var rpcServerStart =
-      CompletableFuture.runAsync(
-        () -> {
-          try {
-            rpcServer.start();
-          } catch (IOException e) {
-            throw new CompletionException(e);
-          }
-        });
+    this.rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
 
     log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
@@ -174,7 +164,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
           return SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null);
         });
 
-    CompletableFuture.allOf(rpcServerStart, viaStart, sparkStart, updateCheck).join();
+    CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
 
     var newVersion = updateCheck.join();
     if (newVersion != null) {
@@ -209,6 +199,18 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
 
     log.info("Starting scheduled tasks...");
     scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 3, TimeUnit.SECONDS);
+
+    var rpcServerStart =
+      CompletableFuture.runAsync(
+        () -> {
+          try {
+            rpcServer.start();
+          } catch (IOException e) {
+            throw new CompletionException(e);
+          }
+        });
+
+    rpcServerStart.join();
 
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
