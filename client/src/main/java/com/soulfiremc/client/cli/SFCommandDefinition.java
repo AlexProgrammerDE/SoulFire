@@ -98,13 +98,19 @@ public class SFCommandDefinition implements Callable<Integer> {
             var name =
               Arrays.stream(option.names())
                 .map("`%s`"::formatted)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(", "))
+                .replace("|", "\\|");
             var defaultValue =
               option.defaultValueString() == null
                 ? ""
-                : "`%s`".formatted(option.defaultValueString());
+                : "`%s`"
+                .formatted(option.defaultValueString())
+                .replace("|", "\\|");
             var description =
-              option.description() == null ? "" : String.join(", ", option.description());
+              option.description() == null
+                ? ""
+                : String.join(", ", option.description())
+                .replace("|", "\\|");
             System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
           });
       cliManager.shutdown();

@@ -40,6 +40,32 @@ task("runSFCLI", JavaExec::class) {
   outputs.upToDateWhen { false }
 }
 
+task("printSFCliFlags", JavaExec::class) {
+  group = "application"
+  description = "Runs the SoulFire client"
+
+  mainClass = projectMainClass
+  classpath = sourceSets["main"].runtimeClasspath
+  args = listOf(
+    "--generate-flags"
+  )
+
+  jvmArgs = listOf(
+    "-Xmx2G",
+    "-XX:+EnableDynamicAgentLoading",
+    "-XX:+UnlockExperimentalVMOptions",
+    "-XX:+UseG1GC",
+    "-XX:G1NewSizePercent=20",
+    "-XX:G1ReservePercent=20",
+    "-XX:MaxGCPauseMillis=50",
+    "-XX:G1HeapRegionSize=32M"
+  )
+
+  standardInput = System.`in`
+
+  outputs.upToDateWhen { false }
+}
+
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 

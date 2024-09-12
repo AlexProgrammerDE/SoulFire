@@ -105,7 +105,7 @@ public class CLIManager {
 
             var propertyKey = new PropertyKey(page.getNamespace(), singleEntry.getKey());
 
-            var args = new String[]{page.getNamespace() + "-" + singleEntry.getKey()};
+            var args = new String[]{"--%s-%s".formatted(page.getNamespace(), singleEntry.getKey())};
             var settingType = singleEntry.getType();
             targetCommandSpec.addOption(
               switch (settingType.getValueCase()) {
@@ -258,7 +258,7 @@ public class CLIManager {
                 minPropertyKey,
                 clientSettingsManager,
                 minDescription,
-                min.getCliFlagsList().toArray(new String[0]),
+                new String[]{"--%s-%s".formatted(page.getNamespace(), min.getKey())},
                 min.getIntSetting()));
 
             var max = minMaxEntry.getMax();
@@ -269,7 +269,7 @@ public class CLIManager {
                 maxPropertyKey,
                 clientSettingsManager,
                 maxDescription,
-                max.getCliFlagsList().toArray(new String[0]),
+                new String[]{"--%s-%s".formatted(page.getNamespace(), max.getKey())},
                 max.getIntSetting()));
           }
           case VALUE_NOT_SET -> throw new IllegalStateException("Unexpected value: " + entry.getValueCase());
