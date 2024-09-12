@@ -531,7 +531,7 @@ public class POVServer implements InternalPlugin {
 
               @Override
               public void disconnected(DisconnectedEvent event) {
-                log.info("Disconnected: {}", SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()), event.getCause());
+                log.info("Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
               }
 
               private void awaitReceived(Class<?> clazz) {

@@ -1045,7 +1045,7 @@ public final class SessionDataManager {
     } else if (reason.contains("Connection refused")) {
       log.error("Server is not reachable!", cause);
     } else {
-      log.error("Disconnected: {}", reason, cause);
+      log.error("Disconnected: %s".formatted(reason), cause);
     }
   }
 
