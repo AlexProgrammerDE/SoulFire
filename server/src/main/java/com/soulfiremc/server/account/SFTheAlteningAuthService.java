@@ -35,12 +35,15 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SFTheAlteningAuthService
   implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
+  public static final SFTheAlteningAuthService INSTANCE = new SFTheAlteningAuthService();
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
   private static final URI AUTHENTICATE_ENDPOINT =
     URI.create("http://authserver.thealtening.com/authenticate");
 
   private static final String PASSWORD =
     "SoulFireIsCool"; // Password doesn't matter for The Altening
+
+  private SFTheAlteningAuthService() {}
 
   @Override
   public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, SFProxy proxyData) {
@@ -77,6 +80,16 @@ public final class SFTheAlteningAuthService
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
     // TODO: Figure out The Altening refreshing
     return CompletableFuture.completedFuture(account);
+  }
+
+  @Override
+  public boolean isExpired(MinecraftAccount account) {
+    return false;
+  }
+
+  @Override
+  public boolean isExpiredOrOutdated(MinecraftAccount account) {
+    return false;
   }
 
   public record TheAlteningAuthData(String altToken) {}

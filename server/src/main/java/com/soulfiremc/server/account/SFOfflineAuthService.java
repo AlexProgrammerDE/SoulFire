@@ -26,6 +26,10 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SFOfflineAuthService
   implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
+  public static final SFOfflineAuthService INSTANCE = new SFOfflineAuthService();
+
+  private SFOfflineAuthService() {}
+
   public static MinecraftAccount createAccount(String username) {
     return new MinecraftAccount(
       AuthType.OFFLINE,
@@ -47,6 +51,16 @@ public final class SFOfflineAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
     return CompletableFuture.completedFuture(account);
+  }
+
+  @Override
+  public boolean isExpired(MinecraftAccount account) {
+    return false;
+  }
+
+  @Override
+  public boolean isExpiredOrOutdated(MinecraftAccount account) {
+    return false;
   }
 
   public record OfflineAuthData(String username) {}

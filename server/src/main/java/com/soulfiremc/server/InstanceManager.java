@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
+import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.SFOfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.EventBusOwner;
@@ -95,6 +96,17 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   private void tick() {
     if (attackLifecycle.isTicking()) {
       this.postEvent(new AttackTickEvent(this));
+    }
+  }
+
+  private void refreshExpiredAccounts() {
+    var accounts = new ArrayList<>(settingsSource.accounts());
+    for (var i = 0; i < accounts.size(); i++) {
+      var account = accounts.get(i);
+      var authService = MCAuthService.convertService(account.authType());
+      if (authService.isExpired(account)) {
+        accounts.set(i, authService.refresh(account, null).join());
+      }
     }
   }
 

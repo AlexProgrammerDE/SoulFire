@@ -35,8 +35,11 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public final class SFEasyMCAuthService
   implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
+  public static final SFEasyMCAuthService INSTANCE = new SFEasyMCAuthService();
   private static final URI AUTHENTICATE_ENDPOINT =
     URI.create("https://api.easymc.io/v1/token/redeem");
+
+  private SFEasyMCAuthService() {}
 
   @Override
   public CompletableFuture<MinecraftAccount> login(EasyMCAuthData data, SFProxy proxyData) {
@@ -89,6 +92,16 @@ public final class SFEasyMCAuthService
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
     // TODO: Figure out EasyMC refreshing
     return CompletableFuture.completedFuture(account);
+  }
+
+  @Override
+  public boolean isExpired(MinecraftAccount account) {
+    return false;
+  }
+
+  @Override
+  public boolean isExpiredOrOutdated(MinecraftAccount account) {
+    return false;
   }
 
   public record EasyMCAuthData(String altToken) {}

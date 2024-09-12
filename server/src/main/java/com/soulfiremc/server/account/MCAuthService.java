@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.account;
 
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 
@@ -28,6 +30,27 @@ public sealed interface MCAuthService<T>
   SFJavaMicrosoftAuthService,
   SFOfflineAuthService,
   SFTheAlteningAuthService {
+  static MCAuthService<?> convertService(MinecraftAccountProto.AccountTypeProto service) {
+    return switch (service) {
+      case MICROSOFT_JAVA -> SFJavaMicrosoftAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK -> SFBedrockMicrosoftAuthService.INSTANCE;
+      case THE_ALTENING -> SFTheAlteningAuthService.INSTANCE;
+      case EASY_MC -> SFEasyMCAuthService.INSTANCE;
+      case OFFLINE -> SFOfflineAuthService.INSTANCE;
+      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
+    };
+  }
+
+  static MCAuthService<?> convertService(AuthType service) {
+    return switch (service) {
+      case MICROSOFT_JAVA -> SFJavaMicrosoftAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK -> SFBedrockMicrosoftAuthService.INSTANCE;
+      case THE_ALTENING -> SFTheAlteningAuthService.INSTANCE;
+      case EASY_MC -> SFEasyMCAuthService.INSTANCE;
+      case OFFLINE -> SFOfflineAuthService.INSTANCE;
+    };
+  }
+
   CompletableFuture<MinecraftAccount> login(T data, SFProxy proxyData);
 
   T createData(String data);
@@ -37,4 +60,8 @@ public sealed interface MCAuthService<T>
   }
 
   CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData);
+
+  boolean isExpired(MinecraftAccount account);
+
+  boolean isExpiredOrOutdated(MinecraftAccount account);
 }

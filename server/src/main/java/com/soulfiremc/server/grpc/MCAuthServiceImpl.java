@@ -40,23 +40,12 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     return hasProxy.getAsBoolean() ? SFProxy.fromProto(proxy.get()) : null;
   }
 
-  private static MCAuthService<?> convertService(MinecraftAccountProto.AccountTypeProto service) {
-    return switch (service) {
-      case MICROSOFT_JAVA -> new SFJavaMicrosoftAuthService();
-      case MICROSOFT_BEDROCK -> new SFBedrockMicrosoftAuthService();
-      case THE_ALTENING -> new SFTheAlteningAuthService();
-      case EASY_MC -> new SFEasyMCAuthService();
-      case OFFLINE -> new SFOfflineAuthService();
-      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
-    };
-  }
-
   @Override
   public void login(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
     try {
-      var account = convertService(request.getService()).createDataAndLogin(request.getPayload(),
+      var account = MCAuthService.convertService(request.getService()).createDataAndLogin(request.getPayload(),
         convertProxy(request::hasProxy, request::getProxy));
 
       responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.join().toProto()).build());
@@ -73,7 +62,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
 
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
-      var account = convertService(request.getAccount().getType()).refresh(receivedAccount,
+      var account = MCAuthService.convertService(request.getAccount().getType()).refresh(receivedAccount,
         convertProxy(request::hasProxy, request::getProxy)).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());

@@ -32,6 +32,10 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SFJavaMicrosoftAuthService
   implements MCAuthService<SFJavaMicrosoftAuthService.JavaMicrosoftAuthData> {
+  public static final SFJavaMicrosoftAuthService INSTANCE = new SFJavaMicrosoftAuthService();
+
+  private SFJavaMicrosoftAuthService() {}
+
   private static MinecraftAccount fromFullJavaSession(AbstractStep<?, StepFullJavaSession.FullJavaSession> flow, StepFullJavaSession.FullJavaSession fullJavaSession) {
     var mcProfile = fullJavaSession.getMcProfile();
     var mcToken = mcProfile.getMcToken();
@@ -89,6 +93,18 @@ public final class SFJavaMicrosoftAuthService
         throw new RuntimeException(e);
       }
     });
+  }
+
+  @Override
+  public boolean isExpired(MinecraftAccount account) {
+    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
+    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpired();
+  }
+
+  @Override
+  public boolean isExpiredOrOutdated(MinecraftAccount account) {
+    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
+    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpiredOrOutdated();
   }
 
   public record JavaMicrosoftAuthData(String email, String password) {}

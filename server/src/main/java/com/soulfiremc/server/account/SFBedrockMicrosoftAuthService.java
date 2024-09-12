@@ -32,6 +32,10 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SFBedrockMicrosoftAuthService
   implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
+  public static final SFBedrockMicrosoftAuthService INSTANCE = new SFBedrockMicrosoftAuthService();
+
+  private SFBedrockMicrosoftAuthService() {}
+
   private static MinecraftAccount fromFullBedrockSession(AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
     var mcChain = fullBedrockSession.getMcChain();
     var xblXsts = mcChain.getXblXsts();
@@ -95,6 +99,18 @@ public final class SFBedrockMicrosoftAuthService
         throw new RuntimeException(e);
       }
     });
+  }
+
+  @Override
+  public boolean isExpired(MinecraftAccount account) {
+    var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
+    return flow.fromJson(((BedrockData) account.accountData()).authChain()).isExpired();
+  }
+
+  @Override
+  public boolean isExpiredOrOutdated(MinecraftAccount account) {
+    var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
+    return flow.fromJson(((BedrockData) account.accountData()).authChain()).isExpiredOrOutdated();
   }
 
   public record BedrockMicrosoftAuthData(String email, String password) {}
