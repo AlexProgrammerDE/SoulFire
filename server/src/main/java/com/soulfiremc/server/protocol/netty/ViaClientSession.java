@@ -27,6 +27,7 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
@@ -49,7 +50,6 @@ import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
 import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.network.packet.PacketCancelException;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.tcp.*;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
@@ -206,13 +206,14 @@ public class ViaClientSession extends TcpSession {
             pipeline.addLast(SIZER_NAME, new FrameCodec());
           }
 
-          pipeline.addLast("flow-control", new TcpFlowControlHandler());
 
           // Inject Via codec
           pipeline.addLast("via-codec", new ViaCodec(userConnection));
 
           pipeline.addLast("via-flow-control", new TcpFlowControlHandler());
+
           pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
+          pipeline.addLast("packet-filter", new DropPacketFilter());
           pipeline.addLast("manager", ViaClientSession.this);
         }
       });
@@ -298,7 +299,7 @@ public class ViaClientSession extends TcpSession {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    if (cause instanceof PacketCancelException || cause instanceof CancelCodecException) {
+    if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
       logger.debug("Packet was cancelled.", cause);
       return;
     }
@@ -370,7 +371,7 @@ public class ViaClientSession extends TcpSession {
   }
 
   public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
-    if (cause instanceof PacketCancelException || cause instanceof CancelCodecException) {
+    if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
       logger.debug("Packet was cancelled.", cause);
       callPacketSent(packet);
       return;
