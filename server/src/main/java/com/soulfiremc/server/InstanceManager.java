@@ -126,6 +126,21 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     }
   }
 
+  private MinecraftAccount refreshAccount(MinecraftAccount account) {
+    var authService = MCAuthService.convertService(account.authType());
+    if (!authService.isExpiredOrOutdated(account)) {
+      return account;
+    }
+
+    logger.info("Account {} is expired or outdated, refreshing before connecting", account.lastKnownName());
+    var refreshedAccount = authService.refresh(account, null).join();
+    var accounts = new ArrayList<>(settingsSource.accounts());
+    accounts.set(accounts.indexOf(account), refreshedAccount);
+    settingsSource.source(settingsSource.source().withAccounts(accounts));
+
+    return refreshedAccount;
+  }
+
   public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
     var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
     var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
@@ -261,7 +276,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
-      var minecraftAccount = accountQueue.poll();
+      var minecraftAccount = refreshAccount(accountQueue.poll());
       var proxyData = getProxy(proxies).orElse(null);
       factories.add(
         new BotConnectionFactory(
