@@ -125,8 +125,6 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     if (refreshed > 0) {
       logger.info("Refreshed {} accounts", refreshed);
       settingsSource.source(settingsSource.source().withAccounts(accounts));
-    } else {
-      logger.info("No accounts needed to be refreshed");
     }
   }
 
