@@ -19,6 +19,8 @@ package com.soulfiremc.server;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.SettingsPage;
 import com.soulfiremc.server.api.EventBusOwner;
@@ -39,9 +41,11 @@ import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
+import com.soulfiremc.server.util.FileUtils;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
 import com.soulfiremc.server.viaversion.SFViaPlatform;
+import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.KeyHelper;
 import com.soulfiremc.util.SFPathConstants;
 import com.soulfiremc.util.ShutdownManager;
@@ -62,12 +66,14 @@ import org.pf4j.PluginManager;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Getter
@@ -192,8 +198,51 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
             .addClass(AccountSettings.class, "Account Settings")
             .addClass(ProxySettings.class, "Proxy Settings")));
 
+    log.info("Loading instances...");
+    loadInstances();
+
+    log.info("Starting scheduled tasks...");
+    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 3, TimeUnit.SECONDS);
+
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
+  }
+
+  private void loadInstances() {
+    var instancesFile = SFPathConstants.getStateDirectory(baseDirectory).resolve("instances.json");
+    if (!Files.exists(instancesFile)) {
+      return;
+    }
+
+    try {
+      var instancesJson = Files.readString(instancesFile);
+      var instancesArray = GsonInstance.GSON.fromJson(instancesJson, JsonObject[].class);
+      for (var instanceData : instancesArray) {
+        try {
+          var instance = InstanceManager.fromJson(this, instanceData);
+
+          instances.put(instance.id(), instance);
+
+          log.info("Restored instance with id {}", instance.id());
+        } catch (Exception e) {
+          log.error("Failed to load existing instance", e);
+        }
+      }
+    } catch (Exception e) {
+      log.error("Failed to load existing instances", e);
+    }
+  }
+
+  private void saveInstances() {
+    var instancesFile = SFPathConstants.getStateDirectory(baseDirectory).resolve("instances.json");
+    try {
+      var instancesJson =
+        GsonInstance.GSON.toJson(
+          instances.values().stream().map(InstanceManager::toJson).toArray(JsonElement[]::new));
+      FileUtils.writeIfNeeded(instancesFile, instancesJson);
+    } catch (Exception e) {
+      log.error("Failed to save instances", e);
+    }
   }
 
   public static void setupLoggingAndVia(SettingsSource settingsSource) {
