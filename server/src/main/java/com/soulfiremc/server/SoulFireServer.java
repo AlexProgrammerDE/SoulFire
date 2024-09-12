@@ -42,7 +42,9 @@ import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.FileUtils;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFUpdateChecker;
+import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
 import com.soulfiremc.server.viaversion.SFViaPlatform;
 import com.soulfiremc.util.GsonInstance;
@@ -143,17 +145,21 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
       CompletableFuture.runAsync(
-        () -> ViaLoader.init(
-          new SFViaPlatform(configDirectory.resolve("ViaVersion")),
-          new SFVLLoaderImpl(),
-          null,
-          null,
-          ViaBackwardsPlatformImpl::new,
-          ViaRewindPlatformImpl::new,
-          ViaLegacyPlatformImpl::new,
-          ViaAprilFoolsPlatformImpl::new,
-          ViaBedrockPlatformImpl::new
-        ));
+        () -> {
+          ViaLoader.init(
+            new SFViaPlatform(configDirectory.resolve("ViaVersion")),
+            new SFVLLoaderImpl(),
+            null,
+            null,
+            ViaBackwardsPlatformImpl::new,
+            ViaRewindPlatformImpl::new,
+            ViaLegacyPlatformImpl::new,
+            ViaAprilFoolsPlatformImpl::new,
+            ViaBedrockPlatformImpl::new
+          );
+
+          TimeUtil.waitCondition(SFHelpers.not(Via.getManager().getProtocolManager()::hasLoadedMappings));
+        });
     var sparkStart =
       CompletableFuture.runAsync(
         () -> {

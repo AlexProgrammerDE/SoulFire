@@ -40,7 +40,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.server.util.PrimitiveHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
@@ -161,7 +161,7 @@ public final class SessionDataManager {
   }
 
   private static List<String> readChannels(ClientboundCustomPayloadPacket packet) {
-    var split = PrimitiveHelper.split(packet.getData(), (byte) 0x00);
+    var split = SFHelpers.split(packet.getData(), (byte) 0x00);
     var list = new ArrayList<String>();
     for (var channel : split) {
       if (channel.length == 0) {

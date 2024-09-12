@@ -49,7 +49,7 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.ServerCommandSource;
-import com.soulfiremc.server.util.PrimitiveHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.util.SFPathConstants;
@@ -270,7 +270,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                       }
 
                       if (entityId == -1) {
-                        var parsedEntityId = PrimitiveHelper.parseInt(entityName);
+                        var parsedEntityId = SFHelpers.parseInt(entityName);
                         if (parsedEntityId.isEmpty()) {
                           c.getSource().sendWarn("Invalid entity specified!");
                           return Command.SINGLE_SUCCESS;

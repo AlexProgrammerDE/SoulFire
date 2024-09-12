@@ -19,9 +19,10 @@ package com.soulfiremc.server.util;
 
 import java.util.Arrays;
 import java.util.OptionalInt;
+import java.util.function.BooleanSupplier;
 
-public class PrimitiveHelper {
-  private PrimitiveHelper() {}
+public class SFHelpers {
+  private SFHelpers() {}
 
   public static byte[][] split(byte[] data, byte separator) {
     var count = 0;
@@ -55,5 +56,9 @@ public class PrimitiveHelper {
     } catch (NumberFormatException e) {
       return OptionalInt.empty();
     }
+  }
+
+  public static BooleanSupplier not(BooleanSupplier supplier) {
+    return () -> !supplier.getAsBoolean();
   }
 }
