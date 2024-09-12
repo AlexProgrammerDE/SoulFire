@@ -228,6 +228,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       for (var instanceData : instancesArray) {
         try {
           var instance = InstanceManager.fromJson(this, instanceData);
+          postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
 
