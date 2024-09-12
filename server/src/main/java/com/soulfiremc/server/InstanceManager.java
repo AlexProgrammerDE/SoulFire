@@ -174,34 +174,26 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     return Optional.of(selectedProxy.proxy());
   }
 
-  public void switchToState(AttackLifecycle targetState) {
-    Runnable r = switch (targetState) {
+  public CompletableFuture<?> switchToState(AttackLifecycle targetState) {
+    return switch (targetState) {
       case STARTING, RUNNING -> switch (attackLifecycle) {
-        case STARTING, RUNNING, STOPPING -> () -> {
-          // NO-OP
-        };
-        case PAUSED -> () -> this.attackLifecycle = AttackLifecycle.RUNNING;
-        case STOPPED -> this::start;
+        case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
+        case PAUSED -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING);
+        case STOPPED -> CompletableFuture.runAsync(this::start);
       };
       case PAUSED -> switch (attackLifecycle) {
-        case STARTING, RUNNING -> () -> this.attackLifecycle = AttackLifecycle.PAUSED;
-        case STOPPING, PAUSED -> () -> {
-          // NO-OP
-        };
-        case STOPPED -> () -> {
+        case STARTING, RUNNING -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED);
+        case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
+        case STOPPED -> CompletableFuture.runAsync(() -> {
           start();
           this.attackLifecycle = AttackLifecycle.PAUSED;
-        };
+        });
       };
       case STOPPING, STOPPED -> switch (attackLifecycle) {
-        case STARTING, RUNNING, PAUSED -> this::stopAttackPermanently;
-        case STOPPING, STOPPED -> () -> {
-          // NO-OP
-        };
+        case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
+        case STOPPING, STOPPED -> CompletableFuture.completedFuture(null);
       };
     };
-
-    r.run();
   }
 
   private void start() {

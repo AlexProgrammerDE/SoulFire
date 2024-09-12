@@ -163,7 +163,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.switchToState(AttackLifecycle.fromProto(request.getState()));
+      instance.switchToState(AttackLifecycle.fromProto(request.getState())).join();
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
