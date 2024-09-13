@@ -18,7 +18,7 @@ dependencies {
 }
 
 unimined.minecraft {
-  version("1.21")
+  version("1.21.1")
 
   mappings {
     intermediary()
@@ -33,7 +33,7 @@ unimined.minecraft {
   }
 
   fabric {
-    loader("0.15.10")
+    loader("0.16.5")
   }
 
   defaultRemapJar = true
