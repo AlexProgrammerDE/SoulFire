@@ -262,8 +262,7 @@ public class Costs {
   }
 
   private static boolean isInHolderSet(TagsState tagsState, HolderSet holderSet, BlockType blockType) {
-    return Arrays.stream(holderSet.resolve(t -> tagsState.getValuesOfTag(blockType,
-        TagKey.key(t, RegistryKeys.BLOCK))))
+    return Arrays.stream(holderSet.resolve(t -> tagsState.<BlockType>getValuesOfTag(TagKey.key(t, RegistryKeys.BLOCK))))
       .anyMatch(i -> i == blockType.id());
   }
 

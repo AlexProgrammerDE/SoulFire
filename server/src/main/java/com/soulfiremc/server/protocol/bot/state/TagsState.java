@@ -36,10 +36,10 @@ public class TagsState {
   }
 
   public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
-    return Arrays.stream(getValuesOfTag(value, tagKey)).anyMatch(t -> t == value.id());
+    return Arrays.stream(getValuesOfTag(tagKey)).anyMatch(t -> t == value.id());
   }
 
-  public <T extends RegistryValue<T>> int[] getValuesOfTag(T value, TagKey<T> tagKey) {
+  public <T extends RegistryValue<T>> int[] getValuesOfTag(TagKey<T> tagKey) {
     return tags.getOrDefault(tagKey.registry().key(), Map.of())
       .getOrDefault(tagKey.key(), EMPTY_INT_ARRAY);
   }
