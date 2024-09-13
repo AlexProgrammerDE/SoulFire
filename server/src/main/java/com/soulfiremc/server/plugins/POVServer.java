@@ -568,13 +568,13 @@ public class POVServer implements InternalPlugin {
                   session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
                 }
 
-                for (var entry : dataManager.rawRegistryData().entrySet()) {
-                  session.send(new ClientboundRegistryDataPacket(entry.getKey().key(), entry.getValue()));
-                }
-
                 var tagsPacket = new ClientboundUpdateTagsPacket();
                 tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
                 session.send(tagsPacket);
+
+                for (var entry : dataManager.rawRegistryData().entrySet()) {
+                  session.send(new ClientboundRegistryDataPacket(entry.getKey().key(), entry.getValue()));
+                }
 
                 session.send(new ClientboundFinishConfigurationPacket());
                 awaitReceived(ServerboundFinishConfigurationPacket.class);
