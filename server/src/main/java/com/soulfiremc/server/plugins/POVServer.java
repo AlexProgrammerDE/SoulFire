@@ -111,6 +111,7 @@ import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.Clie
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundUpdateEnabledFeaturesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
+import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.*;
@@ -568,13 +569,14 @@ public class POVServer implements InternalPlugin {
                   session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
                 }
 
-                var tagsPacket = new ClientboundUpdateTagsPacket();
-                tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
-                session.send(tagsPacket);
-
+                awaitReceived(ServerboundSelectKnownPacks.class);
                 for (var entry : dataManager.rawRegistryData().entrySet()) {
                   session.send(new ClientboundRegistryDataPacket(entry.getKey().key(), entry.getValue()));
                 }
+
+                var tagsPacket = new ClientboundUpdateTagsPacket();
+                tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
+                session.send(tagsPacket);
 
                 session.send(new ClientboundFinishConfigurationPacket());
                 awaitReceived(ServerboundFinishConfigurationPacket.class);

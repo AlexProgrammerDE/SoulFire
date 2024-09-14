@@ -110,7 +110,7 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
-  private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new HashMap<>();
+  private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
