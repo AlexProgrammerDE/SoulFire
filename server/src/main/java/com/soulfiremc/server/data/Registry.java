@@ -72,6 +72,8 @@ public class Registry<T extends RegistryValue<T>> {
   }
 
   public interface RegistryDataWriter {
+    RegistryDataWriter NO_OP = (key, id, data) -> {};
+
     void register(Key key, int id, NbtMap data);
   }
 

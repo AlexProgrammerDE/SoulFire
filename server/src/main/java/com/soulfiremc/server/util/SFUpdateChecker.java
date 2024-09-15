@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpStatusClass;
@@ -40,7 +41,7 @@ public class SFUpdateChecker {
     this.updateVersion = checkForUpdates();
   }
 
-  public static CompletableFuture<SFUpdateChecker> getInstance() {
+  public static CompletableFuture<SFUpdateChecker> getInstance(SoulFireServer server) {
     return CompletableFuture.supplyAsync(
       () -> {
         if (instance == null) {
@@ -48,7 +49,7 @@ public class SFUpdateChecker {
         }
 
         return instance;
-      });
+      }, server.scheduler());
   }
 
   private static String checkForUpdates() {

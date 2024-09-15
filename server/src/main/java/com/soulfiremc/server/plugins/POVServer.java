@@ -28,6 +28,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
@@ -80,6 +81,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
+import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -535,20 +537,20 @@ public class POVServer implements InternalPlugin {
                 log.info("Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
               }
 
-              private void awaitReceived(Class<?> clazz) {
-                var future = new CompletableFuture<Void>();
+              private <T> T awaitReceived(Class<T> clazz) {
+                var future = new CompletableFuture<T>();
 
                 session.addListener(
                   new SessionAdapter() {
                     @Override
                     public void packetReceived(Session session, Packet packet) {
                       if (clazz.isInstance(packet)) {
-                        future.complete(null);
+                        future.complete(clazz.cast(packet));
                       }
                     }
                   });
 
-                future.orTimeout(30, TimeUnit.SECONDS).join();
+                return future.orTimeout(30, TimeUnit.SECONDS).join();
               }
 
               private void syncBotAndUser() {
@@ -569,9 +571,27 @@ public class POVServer implements InternalPlugin {
                   session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
                 }
 
-                awaitReceived(ServerboundSelectKnownPacks.class);
-                for (var entry : dataManager.rawRegistryData().entrySet()) {
-                  session.send(new ClientboundRegistryDataPacket(entry.getKey().key(), entry.getValue()));
+                var clientPacks = awaitReceived(ServerboundSelectKnownPacks.class);
+                for (var entry : dataManager.resolvedRegistryData().entrySet()) {
+                  var registryKey = entry.getKey();
+
+                  var sentEntries = new ArrayList<RegistryEntry>();
+                  for (var value : entry.getValue()) {
+                    var holderKey = value.getId();
+                    var serverHolderData = value.getData();
+                    var packData = BuiltInKnownPackRegistry.INSTANCE.findDataOptionally(registryKey, holderKey, clientPacks.getKnownPacks());
+
+                    RegistryEntry entryToSend;
+                    if (packData.isPresent() && packData.get().equals(serverHolderData)) {
+                      entryToSend = new RegistryEntry(holderKey, null);
+                    } else {
+                      entryToSend = new RegistryEntry(holderKey, serverHolderData);
+                    }
+
+                    sentEntries.add(entryToSend);
+                  }
+
+                  session.send(new ClientboundRegistryDataPacket(registryKey.key(), sentEntries));
                 }
 
                 var tagsPacket = new ClientboundUpdateTagsPacket();

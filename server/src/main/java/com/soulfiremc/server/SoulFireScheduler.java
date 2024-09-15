@@ -22,16 +22,14 @@ import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public class SoulFireScheduler {
+public class SoulFireScheduler implements Executor {
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
     .factory());
@@ -136,6 +134,11 @@ public class SoulFireScheduler {
     } catch (Throwable t) {
       logger.error("Error in executor", t);
     }
+  }
+
+  @Override
+  public void execute(@NotNull Runnable command) {
+    schedule(command);
   }
 
   private record TimedRunnable(Runnable runnable, long time) implements Comparable<TimedRunnable> {

@@ -28,10 +28,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.KnownPack;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -80,20 +77,25 @@ public class BuiltInKnownPackRegistry {
   }
 
   public NbtMap mustFindData(ResourceKey<?> registryKey, Key holderKey, List<KnownPack> allowedPacks) {
+    return findDataOptionally(registryKey, holderKey, allowedPacks)
+      .orElseThrow(() -> new IllegalArgumentException("No data found for " + registryKey + " " + holderKey));
+  }
+
+  public Optional<NbtMap> findDataOptionally(ResourceKey<?> registryKey, Key holderKey, List<KnownPack> allowedPacks) {
     var holders = builtInRegistry.get(registryKey.key());
     if (holders == null) {
-      throw new RuntimeException("Unknown registry value: " + registryKey);
+      return Optional.empty();
     }
 
     var holder = holders.get(holderKey);
     if (holder == null) {
-      throw new RuntimeException("Unknown holder value: " + holderKey);
+      return Optional.empty();
     }
 
     if (!allowedPacks.contains(holder.left())) {
-      throw new RuntimeException("Unknown pack: " + holder.left());
+      return Optional.empty();
     }
 
-    return holder.right();
+    return Optional.ofNullable(holder.right());
   }
 }

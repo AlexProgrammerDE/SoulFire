@@ -110,7 +110,7 @@ public final class SessionDataManager {
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
-  private final Map<ResourceKey<?>, List<RegistryEntry>> rawRegistryData = new LinkedHashMap<>();
+  private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
@@ -204,7 +204,6 @@ public final class SessionDataManager {
   public void onRegistry(ClientboundRegistryDataPacket packet) {
     var registry = packet.getRegistry();
     var registryKey = ResourceKey.key(registry);
-    rawRegistryData.put(registryKey, packet.getEntries());
 
     Registry.RegistryDataWriter registryWriter;
     if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
@@ -215,9 +214,10 @@ public final class SessionDataManager {
       registryWriter = chatTypeRegistry.writer(SFChatType::new);
     } else {
       log.debug("Received registry data for unknown registry {}", registryKey);
-      return;
+      registryWriter = Registry.RegistryDataWriter.NO_OP;
     }
 
+    var resolvedEntries = new ArrayList<RegistryEntry>();
     var entries = packet.getEntries();
     for (var i = 0; i < entries.size(); i++) {
       var entry = entries.get(i);
@@ -231,7 +231,10 @@ public final class SessionDataManager {
       }
 
       registryWriter.register(holderKey, i, usedData);
+      resolvedEntries.add(new RegistryEntry(holderKey, usedData));
     }
+
+    resolvedRegistryData.put(registryKey, resolvedEntries);
   }
 
   @EventHandler

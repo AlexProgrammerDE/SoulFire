@@ -149,20 +149,20 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
           );
 
           TimeUtil.waitCondition(SFHelpers.not(Via.getManager().getProtocolManager()::hasLoadedMappings));
-        });
+        }, scheduler);
     var sparkStart =
       CompletableFuture.runAsync(
         () -> {
           var sparkPlugin = new SFSparkPlugin(configDirectory.resolve("spark"), this);
           sparkPlugin.init();
-        });
+        }, scheduler);
 
     var updateCheck =
       CompletableFuture.supplyAsync(
         () -> {
           log.info("Checking for updates...");
-          return SFUpdateChecker.getInstance().join().getUpdateVersion().orElse(null);
-        });
+          return SFUpdateChecker.getInstance(this).join().getUpdateVersion().orElse(null);
+        }, scheduler);
 
     CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
 

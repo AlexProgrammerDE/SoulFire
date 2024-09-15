@@ -176,16 +176,16 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     return switch (targetState) {
       case STARTING, RUNNING -> switch (attackLifecycle) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
-        case PAUSED -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING);
-        case STOPPED -> CompletableFuture.runAsync(this::start);
+        case PAUSED -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING, scheduler);
+        case STOPPED -> CompletableFuture.runAsync(this::start, scheduler);
       };
       case PAUSED -> switch (attackLifecycle) {
-        case STARTING, RUNNING -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED);
+        case STARTING, RUNNING -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED, scheduler);
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> CompletableFuture.runAsync(() -> {
           start();
           this.attackLifecycle = AttackLifecycle.PAUSED;
-        });
+        }, scheduler);
       };
       case STOPPING, STOPPED -> switch (attackLifecycle) {
         case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
@@ -372,7 +372,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         for (var entry : Map.copyOf(botConnections).entrySet()) {
-          disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect));
+          disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect, scheduler));
           eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
           botConnections.remove(entry.getKey());
         }
@@ -400,7 +400,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       postEvent(new AttackEndedEvent(this));
 
       scheduler.blockNewTasks(false);
-    });
+    }, scheduler);
   }
 
   public InstanceListResponse.Instance toProto() {

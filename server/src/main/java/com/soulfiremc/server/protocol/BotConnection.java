@@ -141,7 +141,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
       () -> {
         instanceManager.postEvent(new PreBotConnectEvent(this));
         session.connect(true);
-      });
+      }, scheduler);
   }
 
   public boolean isOnline() {
