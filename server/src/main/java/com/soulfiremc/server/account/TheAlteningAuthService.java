@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class TheAlteningAuthService
-  implements MCAuthService<String,TheAlteningAuthService.TheAlteningAuthData> {
+  implements MCAuthService<String, TheAlteningAuthService.TheAlteningAuthData> {
   public static final TheAlteningAuthService INSTANCE = new TheAlteningAuthService();
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
   private static final URI AUTHENTICATE_ENDPOINT =

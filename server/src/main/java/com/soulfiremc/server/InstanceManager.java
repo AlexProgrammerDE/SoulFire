@@ -94,6 +94,35 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
   }
 
+  public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
+    var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
+    var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
+    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
+    var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
+
+    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
+    instanceManager.switchToState(state);
+
+    return instanceManager;
+  }
+
+  private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
+    if (proxies.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var selectedProxy =
+      proxies.stream()
+        .filter(ProxyData::isAvailable)
+        .min(Comparator.comparingInt(ProxyData::usedBots))
+        .orElseThrow(
+          () -> new IllegalStateException("No proxies available!"));
+
+    selectedProxy.useCount().incrementAndGet();
+
+    return Optional.of(selectedProxy.proxy());
+  }
+
   private void tick() {
     if (attackLifecycle.isTicking()) {
       this.postEvent(new AttackTickEvent(this));
@@ -141,35 +170,6 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     settingsSource.source(settingsSource.source().withAccounts(accounts));
 
     return refreshedAccount;
-  }
-
-  public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
-    var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
-    var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
-    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
-    var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
-
-    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
-    instanceManager.switchToState(state);
-
-    return instanceManager;
-  }
-
-  private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
-    if (proxies.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var selectedProxy =
-      proxies.stream()
-        .filter(ProxyData::isAvailable)
-        .min(Comparator.comparingInt(ProxyData::usedBots))
-        .orElseThrow(
-          () -> new IllegalStateException("No proxies available!"));
-
-    selectedProxy.useCount().incrementAndGet();
-
-    return Optional.of(selectedProxy.proxy());
   }
 
   public CompletableFuture<?> switchToState(AttackLifecycle targetState) {

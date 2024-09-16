@@ -25,7 +25,7 @@ import com.soulfiremc.settings.proxy.SFProxy;
 import java.util.concurrent.CompletableFuture;
 
 public final class OfflineAuthService
-  implements MCAuthService<String,OfflineAuthService.OfflineAuthData> {
+  implements MCAuthService<String, OfflineAuthService.OfflineAuthData> {
   public static final OfflineAuthService INSTANCE = new OfflineAuthService();
 
   private OfflineAuthService() {}

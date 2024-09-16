@@ -40,6 +40,8 @@ message MinecraftAccountProto {
     EASY_MC = 2;
     THE_ALTENING = 3;
     OFFLINE = 4;
+    MICROSOFT_JAVA_DEVICE_CODE = 5;
+    MICROSOFT_BEDROCK_DEVICE_CODE = 6;
   }
 
   message OnlineSimpleJavaData {

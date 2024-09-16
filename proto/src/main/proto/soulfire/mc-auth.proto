@@ -17,6 +17,25 @@ message CredentialsAuthResponse {
   MinecraftAccountProto account = 1;
 }
 
+message DeviceCodeAuthRequest {
+  AccountTypeDeviceCode service = 1;
+  optional ProxyProto proxy = 2;
+}
+
+message DeviceCode {
+  string deviceCode = 1;
+  string userCode = 2;
+  string verificationUri = 3;
+  string directVerificationUri = 4;
+}
+
+message DeviceCodeAuthResponse {
+  oneof data {
+    MinecraftAccountProto account = 1;
+    DeviceCode deviceCode = 2;
+  }
+}
+
 message RefreshRequest {
   MinecraftAccountProto account = 1;
   optional ProxyProto proxy = 2;
@@ -28,5 +47,6 @@ message RefreshResponse {
 
 service MCAuthService {
   rpc loginCredentials(CredentialsAuthRequest) returns (CredentialsAuthResponse);
+  rpc loginDeviceCode(DeviceCodeAuthRequest) returns (stream DeviceCodeAuthResponse);
   rpc refresh(RefreshRequest) returns (RefreshResponse);
 }

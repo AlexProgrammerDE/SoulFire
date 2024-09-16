@@ -18,19 +18,18 @@
 package com.soulfiremc.server.account;
 
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
+import com.soulfiremc.grpc.generated.AccountTypeDeviceCode;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
+import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public sealed interface MCAuthService<I, T>
-  permits MSBedrockCredentialsAuthService,
-  EasyMCAuthService,
-  MSJavaCredentialsAuthService,
-  OfflineAuthService,
-  TheAlteningAuthService {
+  permits EasyMCAuthService, MSBedrockCredentialsAuthService, MSBedrockDeviceCodeAuthService, MSJavaCredentialsAuthService, MSJavaDeviceCodeAuthService, OfflineAuthService, TheAlteningAuthService {
   static MCAuthService<String, ?> convertService(AccountTypeCredentials service) {
     return switch (service) {
       case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
@@ -42,6 +41,14 @@ public sealed interface MCAuthService<I, T>
     };
   }
 
+  static MCAuthService<Consumer<StepMsaDeviceCode.MsaDeviceCode>, ?> convertService(AccountTypeDeviceCode service) {
+    return switch (service) {
+      case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
+      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
+    };
+  }
+
   static MCAuthService<?, ?> convertService(MinecraftAccountProto.AccountTypeProto service) {
     return switch (service) {
       case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
@@ -49,6 +56,8 @@ public sealed interface MCAuthService<I, T>
       case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
       case EASY_MC -> EasyMCAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;
+      case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
@@ -57,6 +66,8 @@ public sealed interface MCAuthService<I, T>
     return switch (service) {
       case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
+      case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
       case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
       case EASY_MC -> EasyMCAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;

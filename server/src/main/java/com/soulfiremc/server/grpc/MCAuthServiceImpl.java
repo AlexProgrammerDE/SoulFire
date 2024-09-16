@@ -18,7 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.account.*;
+import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -49,6 +49,32 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
         convertProxy(request::hasProxy, request::getProxy));
 
       responseObserver.onNext(CredentialsAuthResponse.newBuilder().setAccount(account.join().toProto()).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error authenticating account", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
+
+    try {
+      var account = MCAuthService.convertService(request.getService()).createDataAndLogin(deviceCode ->
+          responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
+            .setDeviceCode(
+              DeviceCode.newBuilder()
+                .setDeviceCode(deviceCode.getDeviceCode())
+                .setUserCode(deviceCode.getUserCode())
+                .setVerificationUri(deviceCode.getVerificationUri())
+                .setDirectVerificationUri(deviceCode.getDirectVerificationUri())
+                .build()
+            ).build()
+          ),
+        convertProxy(request::hasProxy, request::getProxy));
+
+      responseObserver.onNext(DeviceCodeAuthResponse.newBuilder().setAccount(account.join().toProto()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error authenticating account", t);

@@ -46,10 +46,10 @@ public class SFSessionService {
   public SFSessionService(AuthType authType, SFProxy proxyData) {
     this.joinEndpoint =
       switch (authType) {
-        case MICROSOFT_JAVA_CREDENTIALS -> MOJANG_JOIN_URI;
+        case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE -> MOJANG_JOIN_URI;
         case THE_ALTENING -> THE_ALTENING_JOIN_URI;
         case EASY_MC -> EASYMC_JOIN_URI;
-        default -> throw new IllegalStateException("Unexpected value: " + authType);
+        case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Invalid auth type");
       };
     this.proxyData = proxyData;
   }
@@ -62,7 +62,7 @@ public class SFSessionService {
         ByteBufFlux.fromString(
           Flux.just(
             GsonInstance.GSON.toJson(
-              new SFSessionService.JoinServerRequest(
+              new JoinServerRequest(
                 authenticationToken,
                 UUIDHelper.convertToNoDashes(profileId),
                 serverId)))))

@@ -95,7 +95,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     this.allowBlockActions =
       !diagonal && switch (modifier) {
         case JUMP_UP_BLOCK, NORMAL, FALL_1 -> true;
-        default -> false;
+        case FALL_2, FALL_3 -> false;
       };
 
     this.requiredFreeBlocks = listRequiredFreeBlocks();

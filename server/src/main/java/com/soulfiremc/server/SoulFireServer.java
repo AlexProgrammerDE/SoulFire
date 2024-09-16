@@ -216,6 +216,18 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
+  public static void setupLoggingAndVia(SettingsSource settingsSource) {
+    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+    setupLogging(settingsSource);
+  }
+
+  public static void setupLogging(SettingsSource settingsSource) {
+    Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("org.geysermc.mcprotocollib", settingsSource.get(DevSettings.MCPROTOCOLLIB_DEBUG) ? Level.DEBUG : Level.INFO);
+  }
+
   private void loadInstances() {
     var instancesFile = SFPathConstants.getStateDirectory(baseDirectory).resolve("instances.json");
     if (!Files.exists(instancesFile)) {
@@ -252,18 +264,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     } catch (Exception e) {
       log.error("Failed to save instances", e);
     }
-  }
-
-  public static void setupLoggingAndVia(SettingsSource settingsSource) {
-    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
-    setupLogging(settingsSource);
-  }
-
-  public static void setupLogging(SettingsSource settingsSource) {
-    Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("org.geysermc.mcprotocollib", settingsSource.get(DevSettings.MCPROTOCOLLIB_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
   public String generateRemoteUserJWT() {

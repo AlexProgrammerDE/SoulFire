@@ -24,7 +24,6 @@ import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
-import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.AuthType;
