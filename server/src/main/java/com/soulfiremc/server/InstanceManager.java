@@ -346,6 +346,10 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       });
   }
 
+  public CompletableFuture<?> destroyInstance() {
+    return stopAttackPermanently().thenRun(scheduler::shutdown);
+  }
+
   public CompletableFuture<?> stopAttackPermanently() {
     if (attackLifecycle.isStoppedOrStopping()) {
       return CompletableFuture.completedFuture(null);

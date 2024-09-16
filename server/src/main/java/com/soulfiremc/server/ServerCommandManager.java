@@ -148,7 +148,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               argument("radius", IntegerArgumentType.integer())
                 .executes(
                   help(
-                    "Makes all connected bots walk to a random xz position within the radius",
+                    "Makes selected bots walk to a random xz position within the radius",
                     c -> {
                       var radius = IntegerArgumentType.getInteger(c, "radius");
 
@@ -171,7 +171,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           argument("y", IntegerArgumentType.integer())
             .executes(
               help(
-                "Makes all connected bots walk to the y coordinates",
+                "Makes selected bots walk to the y coordinates",
                 c -> {
                   var y = IntegerArgumentType.getInteger(c, "y");
                   return executePathfinding(c, bot -> new YGoal(y));
@@ -182,7 +182,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               argument("z", IntegerArgumentType.integer())
                 .executes(
                   help(
-                    "Makes all connected bots walk to the xz coordinates",
+                    "Makes selected bots walk to the xz coordinates",
                     c -> {
                       var x = IntegerArgumentType.getInteger(c, "x");
                       var z = IntegerArgumentType.getInteger(c, "z");
@@ -197,7 +197,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   argument("z", IntegerArgumentType.integer())
                     .executes(
                       help(
-                        "Makes all connected bots walk to the xyz coordinates",
+                        "Makes selected bots walk to the xyz coordinates",
                         c -> {
                           var x = IntegerArgumentType.getInteger(c, "x");
                           var y = IntegerArgumentType.getInteger(c, "y");
@@ -217,7 +217,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             .then(argument("searchRadius", IntegerArgumentType.integer(1))
               .executes(
                 help(
-                  "Makes all connected bots collect a block by name or tag",
+                  "Makes selected bots collect a block by name or tag",
                   c -> {
                     var resolvable = c.getArgument("block", BlockTagResolvable.class);
                     var amount = IntegerArgumentType.getInteger(c, "amount");
@@ -241,7 +241,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           .then(argument("maxRadius", IntegerArgumentType.integer(1))
             .executes(
               help(
-                "Makes all connected bots follow an entity by id",
+                "Makes selected bots follow an entity by id",
                 c -> {
                   var entityName = StringArgumentType.getString(c, "entity");
                   var maxRadius = IntegerArgumentType.getInteger(c, "maxRadius");
@@ -290,7 +290,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       literal("stop-path")
         .executes(
           help(
-            "Makes all connected bots stop pathfinding",
+            "Makes selected bots stop pathfinding",
             c ->
               forEveryBot(
                 c,
@@ -332,7 +332,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   argument("z", DoubleArgumentType.doubleArg())
                     .executes(
                       help(
-                        "Makes all connected bots look at the block at the xyz coordinates",
+                        "Makes selected bots look at the block at the xyz coordinates",
                         c -> {
                           var x = DoubleArgumentType.getDouble(c, "x");
                           var y = DoubleArgumentType.getDouble(c, "y");
@@ -355,7 +355,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           literal("forward")
             .executes(
               help(
-                "Toggle walking forward for all connected bots",
+                "Toggle walking forward for selected bots",
                 c ->
                   forEveryBot(
                     c,
@@ -370,7 +370,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           literal("backward")
             .executes(
               help(
-                "Toggle walking backward for all connected bots",
+                "Toggle walking backward for selected bots",
                 c ->
                   forEveryBot(
                     c,
@@ -385,7 +385,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           literal("left")
             .executes(
               help(
-                "Toggle walking left for all connected bots",
+                "Toggle walking left for selected bots",
                 c ->
                   forEveryBot(
                     c,
@@ -400,7 +400,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           literal("right")
             .executes(
               help(
-                "Toggle walking right for all connected bots",
+                "Toggle walking right for selected bots",
                 c ->
                   forEveryBot(
                     c,
@@ -415,7 +415,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       literal("jump")
         .executes(
           help(
-            "Toggle jumping for all connected bots",
+            "Toggle jumping for selected bots",
             c ->
               forEveryBot(
                 c,
@@ -429,7 +429,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       literal("sneak")
         .executes(
           help(
-            "Toggle sneaking for all connected bots",
+            "Toggle sneaking for selected bots",
             c ->
               forEveryBot(
                 c,
@@ -441,7 +441,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       literal("reset")
         .executes(
           help(
-            "Resets the movement of all connected bots",
+            "Resets the movement of selected bots",
             c ->
               forEveryBot(
                 c,
@@ -460,7 +460,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryAttack(
                 c,
                 attackManager -> {
-                  soulFireServer.stopAttack(attackManager.id()).orElseThrow().join();
+                  attackManager.stopAttackPermanently().join();
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -513,7 +513,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           argument("message", StringArgumentType.greedyString())
             .executes(
               help(
-                "Makes all connected bots send a message in chat or execute a command",
+                "Makes selected bots send a message in chat or execute a command",
                 c -> {
                   var message = StringArgumentType.getString(c, "message");
 
@@ -675,7 +675,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             .forward(
               dispatcher.getRoot(),
               helpRedirect(
-                "Instead of running a command for all bots, run it for a specific list of bots. Use a comma to separate the names",
+                "Instead of running a command for selected bots, run it for a specific list of bots. Use a comma to separate the names",
                 c -> {
                   COMMAND_CONTEXT.get().put("bot_names", StringArgumentType.getString(c, "bot_names"));
                   return Collections.singleton(c.getSource());
@@ -701,7 +701,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             .forward(
               dispatcher.getRoot(),
               helpRedirect(
-                "Instead of running a command for all attacks, run it for a specific list of attacks. Use a comma to separate the ids",
+                "Instead of running a command for selected attacks, run it for a specific list of attacks. Use a comma to separate the ids",
                 c -> {
                   COMMAND_CONTEXT.get().put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
                   return Collections.singleton(c.getSource());
