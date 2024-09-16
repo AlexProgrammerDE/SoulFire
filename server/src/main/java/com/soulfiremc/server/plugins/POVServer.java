@@ -484,7 +484,7 @@ public class POVServer implements InternalPlugin {
                               .getSingleton(ServerCommandManager.class)
                               .execute(command, source);
 
-                            log.info("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+                            log.info("Command \"{}\" executed! (Code: {})", command, code);
                             return;
                           }
                         }
@@ -916,47 +916,51 @@ public class POVServer implements InternalPlugin {
                         effect.getValue().blend()));
                   }
 
-                  session.send(
-                    new ClientboundSetEntityDataPacket(
-                      entity.entityId(),
-                      entity
-                        .metadataState()
-                        .metadataStore()
-                        .values()
-                        .toArray(new EntityMetadata<?, ?>[0])));
+                  if (!entity.metadataState().metadataStore().isEmpty()) {
+                    session.send(
+                      new ClientboundSetEntityDataPacket(
+                        entity.entityId(),
+                        entity
+                          .metadataState()
+                          .metadataStore()
+                          .values()
+                          .toArray(new EntityMetadata<?, ?>[0])));
+                  }
 
-                  session.send(
-                    new ClientboundUpdateAttributesPacket(
-                      entity.entityId(),
-                      entity.attributeState().attributeStore().values().stream()
-                        .map(
-                          attributeState ->
-                            new Attribute(
-                              new AttributeType() {
-                                @Override
-                                public Key getIdentifier() {
-                                  return attributeState.type().key();
-                                }
+                  if (!entity.attributeState().attributeStore().isEmpty()) {
+                    session.send(
+                      new ClientboundUpdateAttributesPacket(
+                        entity.entityId(),
+                        entity.attributeState().attributeStore().values().stream()
+                          .map(
+                            attributeState ->
+                              new Attribute(
+                                new AttributeType() {
+                                  @Override
+                                  public Key getIdentifier() {
+                                    return attributeState.type().key();
+                                  }
 
-                                @Override
-                                public int getId() {
-                                  return attributeState.type().id();
-                                }
-                              },
-                              attributeState.baseValue(),
-                              attributeState.modifiers().values().stream()
-                                .map(
-                                  modifier ->
-                                    new AttributeModifier(
-                                      modifier.id(),
-                                      modifier.amount(),
-                                      switch (modifier.operation()) {
-                                        case ADD_VALUE -> ModifierOperation.ADD;
-                                        case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
-                                        case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
-                                      }))
-                                .toList()))
-                        .toList()));
+                                  @Override
+                                  public int getId() {
+                                    return attributeState.type().id();
+                                  }
+                                },
+                                attributeState.baseValue(),
+                                attributeState.modifiers().values().stream()
+                                  .map(
+                                    modifier ->
+                                      new AttributeModifier(
+                                        modifier.id(),
+                                        modifier.amount(),
+                                        switch (modifier.operation()) {
+                                          case ADD_VALUE -> ModifierOperation.ADD;
+                                          case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
+                                          case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
+                                        }))
+                                  .toList()))
+                          .toList()));
+                  }
                 }
 
                 // Give the client a few moments to process the packets
