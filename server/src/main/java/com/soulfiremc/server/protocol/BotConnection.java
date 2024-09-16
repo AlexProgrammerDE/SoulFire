@@ -90,6 +90,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   private final SessionDataManager dataManager;
   private final BotControlAPI botControl;
   private final Object shutdownLock = new Object();
+  private boolean explicitlyShutdown = false;
   private boolean running = true;
 
   public BotConnection(
@@ -133,7 +134,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
     this.botControl = new BotControlAPI(this, dataManager);
 
     // Start the tick loop
-    scheduler.schedule(this::tickLoop);
+    scheduler.scheduleWithFixedDelay(this::tickLoop, 0, 1, TimeUnit.MILLISECONDS);
   }
 
   public CompletableFuture<?> connect() {
@@ -149,28 +150,29 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   }
 
   private void tickLoop() {
+    if (!running) {
+      return;
+    }
+
     MDC.put("connectionId", connectionId.toString());
     MDC.put("botName", accountName);
     MDC.put("botUuid", accountProfileId.toString());
 
-    while (this.running) {
-      var tickTimer = dataManager.tickTimer();
-      var ticks = tickTimer.advanceTime(System.currentTimeMillis());
-
-      if (session.isDisconnected()) {
-        wasDisconnected();
-        break;
-      }
-
-      try {
-        tick(ticks);
-      } catch (Throwable t) {
-        logger.error("Exception ticking bot", t);
-      }
+    if (session.isDisconnected()) {
+      wasDisconnected();
+      return;
     }
+
+    var tickTimer = dataManager.tickTimer();
+    var ticks = tickTimer.advanceTime(System.currentTimeMillis());
+    tick(ticks);
   }
 
   public void tick(int ticks) {
+    if (ticks <= 0) {
+      return;
+    }
+
     try {
       session.tick(); // Ensure all packets are handled before ticking
 
@@ -207,6 +209,8 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
       }
 
       running = false;
+
+      explicitlyShutdown = true;
 
       // Run all shutdown hooks
       shutdownHooks.forEach(Runnable::run);

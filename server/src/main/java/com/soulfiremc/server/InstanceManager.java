@@ -363,10 +363,6 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
   public CompletableFuture<?> stopAttackSession() {
     return CompletableFuture.runAsync(() -> {
-      logger.info("Draining attack executor");
-      scheduler.blockNewTasks(true);
-      scheduler.drainQueue();
-
       logger.info("Disconnecting bots");
       do {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
@@ -398,8 +394,6 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
       // Notify plugins of state change
       postEvent(new AttackEndedEvent(this));
-
-      scheduler.blockNewTasks(false);
     }, scheduler);
   }
 

@@ -64,7 +64,7 @@ public class AutoReconnect implements InternalPlugin {
     var instanceManager = event.instanceManager();
     for (var entries : List.copyOf(instanceManager.botConnections().entrySet())) {
       var bot = entries.getValue();
-      if (!bot.session().isDisconnected()) {
+      if (!bot.session().isDisconnected() || bot.explicitlyShutdown()) {
         continue;
       }
 
