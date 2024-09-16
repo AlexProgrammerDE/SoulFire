@@ -20,7 +20,6 @@ package com.soulfiremc.server;
 import com.soulfiremc.server.util.RandomUtil;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -28,26 +27,22 @@ import org.slf4j.Logger;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-@RequiredArgsConstructor
 public class SoulFireScheduler implements Executor {
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
-  private final ForkJoinPool mainThreadExecutor;
   private final Logger logger;
   private final Function<Runnable, Runnable> runnableWrapper;
   @Setter
   private boolean blockNewTasks = false;
+  private boolean isShutdown = false;
 
   public SoulFireScheduler(Logger logger) {
     this(logger, r -> r);
   }
 
   public SoulFireScheduler(Logger logger, Function<Runnable, Runnable> runnableWrapper) {
-    this.mainThreadExecutor = new ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
-      ForkJoinPool.defaultForkJoinWorkerThreadFactory,
-      null, true);
     this.logger = logger;
     this.runnableWrapper = runnableWrapper;
 
@@ -55,7 +50,7 @@ public class SoulFireScheduler implements Executor {
   }
 
   public void managementTask() {
-    if (mainThreadExecutor.isShutdown()) {
+    if (isShutdown) {
       return;
     }
 
@@ -74,7 +69,7 @@ public class SoulFireScheduler implements Executor {
       return;
     }
 
-    mainThreadExecutor.execute(() -> runCommand(command));
+    ForkJoinPool.commonPool().execute(() -> runCommand(command));
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
@@ -120,7 +115,7 @@ public class SoulFireScheduler implements Executor {
 
   public void shutdown() {
     blockNewTasks = true;
-    mainThreadExecutor.shutdown();
+    isShutdown = true;
     drainQueue();
   }
 
