@@ -7,13 +7,13 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
-message AuthRequest {
-  MinecraftAccountProto.AccountTypeProto service = 1;
+message CredentialsAuthRequest {
+  AccountTypeCredentials service = 1;
   optional ProxyProto proxy = 2;
   string payload = 3;
 }
 
-message AuthResponse {
+message CredentialsAuthResponse {
   MinecraftAccountProto account = 1;
 }
 
@@ -27,6 +27,6 @@ message RefreshResponse {
 }
 
 service MCAuthService {
-  rpc login(AuthRequest) returns (AuthResponse);
+  rpc loginCredentials(CredentialsAuthRequest) returns (CredentialsAuthResponse);
   rpc refresh(RefreshRequest) returns (RefreshResponse);
 }

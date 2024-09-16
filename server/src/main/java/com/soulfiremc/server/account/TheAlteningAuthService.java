@@ -33,9 +33,9 @@ import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public final class SFTheAlteningAuthService
-  implements MCAuthService<SFTheAlteningAuthService.TheAlteningAuthData> {
-  public static final SFTheAlteningAuthService INSTANCE = new SFTheAlteningAuthService();
+public final class TheAlteningAuthService
+  implements MCAuthService<String,TheAlteningAuthService.TheAlteningAuthData> {
+  public static final TheAlteningAuthService INSTANCE = new TheAlteningAuthService();
   @SuppressWarnings("HttpUrlsUsage") // The Altening doesn't support encrypted HTTPS
   private static final URI AUTHENTICATE_ENDPOINT =
     URI.create("http://authserver.thealtening.com/authenticate");
@@ -43,7 +43,7 @@ public final class SFTheAlteningAuthService
   private static final String PASSWORD =
     "SoulFireIsCool"; // Password doesn't matter for The Altening
 
-  private SFTheAlteningAuthService() {}
+  private TheAlteningAuthService() {}
 
   @Override
   public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, SFProxy proxyData) {

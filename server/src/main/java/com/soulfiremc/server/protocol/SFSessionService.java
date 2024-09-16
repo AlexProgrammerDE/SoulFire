@@ -27,13 +27,7 @@ import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
-import javax.crypto.SecretKey;
-import java.math.BigInteger;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.UUID;
 
 public class SFSessionService {
@@ -52,7 +46,7 @@ public class SFSessionService {
   public SFSessionService(AuthType authType, SFProxy proxyData) {
     this.joinEndpoint =
       switch (authType) {
-        case MICROSOFT_JAVA -> MOJANG_JOIN_URI;
+        case MICROSOFT_JAVA_CREDENTIALS -> MOJANG_JOIN_URI;
         case THE_ALTENING -> THE_ALTENING_JOIN_URI;
         case EASY_MC -> EASYMC_JOIN_URI;
         default -> throw new IllegalStateException("Unexpected value: " + authType);

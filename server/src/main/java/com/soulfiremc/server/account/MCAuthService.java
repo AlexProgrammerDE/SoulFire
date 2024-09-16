@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.account;
 
+import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -24,38 +25,49 @@ import com.soulfiremc.settings.proxy.SFProxy;
 
 import java.util.concurrent.CompletableFuture;
 
-public sealed interface MCAuthService<T>
-  permits SFBedrockMicrosoftAuthService,
-  SFEasyMCAuthService,
-  SFJavaMicrosoftAuthService,
-  SFOfflineAuthService,
-  SFTheAlteningAuthService {
-  static MCAuthService<?> convertService(MinecraftAccountProto.AccountTypeProto service) {
+public sealed interface MCAuthService<I, T>
+  permits MSBedrockCredentialsAuthService,
+  EasyMCAuthService,
+  MSJavaCredentialsAuthService,
+  OfflineAuthService,
+  TheAlteningAuthService {
+  static MCAuthService<String, ?> convertService(AccountTypeCredentials service) {
     return switch (service) {
-      case MICROSOFT_JAVA -> SFJavaMicrosoftAuthService.INSTANCE;
-      case MICROSOFT_BEDROCK -> SFBedrockMicrosoftAuthService.INSTANCE;
-      case THE_ALTENING -> SFTheAlteningAuthService.INSTANCE;
-      case EASY_MC -> SFEasyMCAuthService.INSTANCE;
-      case OFFLINE -> SFOfflineAuthService.INSTANCE;
+      case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
+      case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
+      case EASY_MC -> EasyMCAuthService.INSTANCE;
+      case OFFLINE -> OfflineAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
 
-  static MCAuthService<?> convertService(AuthType service) {
+  static MCAuthService<?, ?> convertService(MinecraftAccountProto.AccountTypeProto service) {
     return switch (service) {
-      case MICROSOFT_JAVA -> SFJavaMicrosoftAuthService.INSTANCE;
-      case MICROSOFT_BEDROCK -> SFBedrockMicrosoftAuthService.INSTANCE;
-      case THE_ALTENING -> SFTheAlteningAuthService.INSTANCE;
-      case EASY_MC -> SFEasyMCAuthService.INSTANCE;
-      case OFFLINE -> SFOfflineAuthService.INSTANCE;
+      case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
+      case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
+      case EASY_MC -> EasyMCAuthService.INSTANCE;
+      case OFFLINE -> OfflineAuthService.INSTANCE;
+      case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
+    };
+  }
+
+  static MCAuthService<?, ?> convertService(AuthType service) {
+    return switch (service) {
+      case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
+      case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
+      case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
+      case EASY_MC -> EasyMCAuthService.INSTANCE;
+      case OFFLINE -> OfflineAuthService.INSTANCE;
     };
   }
 
   CompletableFuture<MinecraftAccount> login(T data, SFProxy proxyData);
 
-  T createData(String data);
+  T createData(I data);
 
-  default CompletableFuture<MinecraftAccount> createDataAndLogin(String data, SFProxy proxyData) {
+  default CompletableFuture<MinecraftAccount> createDataAndLogin(I data, SFProxy proxyData) {
     return login(createData(data), proxyData);
   }
 

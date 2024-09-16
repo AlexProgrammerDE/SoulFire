@@ -20,10 +20,23 @@ message ProxyProto {
   optional string password = 4;
 }
 
+enum AccountTypeCredentials {
+  MICROSOFT_JAVA_CREDENTIALS = 0;
+  MICROSOFT_BEDROCK_CREDENTIALS = 1;
+  EASY_MC = 2;
+  THE_ALTENING = 3;
+  OFFLINE = 4;
+}
+
+enum AccountTypeDeviceCode {
+  MICROSOFT_JAVA_DEVICE_CODE = 0;
+  MICROSOFT_BEDROCK_DEVICE_CODE = 1;
+}
+
 message MinecraftAccountProto {
   enum AccountTypeProto {
-    MICROSOFT_JAVA = 0;
-    MICROSOFT_BEDROCK = 1;
+    MICROSOFT_JAVA_CREDENTIALS = 0;
+    MICROSOFT_BEDROCK_CREDENTIALS = 1;
     EASY_MC = 2;
     THE_ALTENING = 3;
     OFFLINE = 4;

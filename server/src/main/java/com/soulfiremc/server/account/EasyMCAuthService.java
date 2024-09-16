@@ -33,13 +33,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-public final class SFEasyMCAuthService
-  implements MCAuthService<SFEasyMCAuthService.EasyMCAuthData> {
-  public static final SFEasyMCAuthService INSTANCE = new SFEasyMCAuthService();
+public final class EasyMCAuthService
+  implements MCAuthService<String, EasyMCAuthService.EasyMCAuthData> {
+  public static final EasyMCAuthService INSTANCE = new EasyMCAuthService();
   private static final URI AUTHENTICATE_ENDPOINT =
     URI.create("https://api.easymc.io/v1/token/redeem");
 
-  private SFEasyMCAuthService() {}
+  private EasyMCAuthService() {}
 
   @Override
   public CompletableFuture<MinecraftAccount> login(EasyMCAuthData data, SFProxy proxyData) {

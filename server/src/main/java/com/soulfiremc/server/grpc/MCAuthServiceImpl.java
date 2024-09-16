@@ -41,14 +41,14 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   }
 
   @Override
-  public void login(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
+  public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
     try {
       var account = MCAuthService.convertService(request.getService()).createDataAndLogin(request.getPayload(),
         convertProxy(request::hasProxy, request::getProxy));
 
-      responseObserver.onNext(AuthResponse.newBuilder().setAccount(account.join().toProto()).build());
+      responseObserver.onNext(CredentialsAuthResponse.newBuilder().setAccount(account.join().toProto()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error authenticating account", t);

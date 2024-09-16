@@ -24,8 +24,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AuthType {
-  MICROSOFT_JAVA("Microsoft Java", OnlineChainJavaData.class),
-  MICROSOFT_BEDROCK("Microsoft Bedrock", BedrockData.class),
+  MICROSOFT_JAVA_CREDENTIALS("Microsoft Java Credentials", OnlineChainJavaData.class),
+  MICROSOFT_BEDROCK_CREDENTIALS("Microsoft Bedrock Credentials", BedrockData.class),
   THE_ALTENING("The Altening", OnlineSimpleJavaData.class),
   EASY_MC("EasyMC", OnlineSimpleJavaData.class),
   OFFLINE("Offline", OfflineJavaData.class);

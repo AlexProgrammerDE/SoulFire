@@ -25,7 +25,7 @@ task("runSFDedicated", JavaExec::class) {
   classpath = sourceSets["main"].runtimeClasspath
 
   jvmArgs = listOf(
-    "-Xmx2G",
+    "-Xmx18G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseG1GC",

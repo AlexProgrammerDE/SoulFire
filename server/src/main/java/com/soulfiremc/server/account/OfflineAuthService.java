@@ -24,11 +24,11 @@ import com.soulfiremc.settings.proxy.SFProxy;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class SFOfflineAuthService
-  implements MCAuthService<SFOfflineAuthService.OfflineAuthData> {
-  public static final SFOfflineAuthService INSTANCE = new SFOfflineAuthService();
+public final class OfflineAuthService
+  implements MCAuthService<String,OfflineAuthService.OfflineAuthData> {
+  public static final OfflineAuthService INSTANCE = new OfflineAuthService();
 
-  private SFOfflineAuthService() {}
+  private OfflineAuthService() {}
 
   public static MinecraftAccount createAccount(String username) {
     return new MinecraftAccount(

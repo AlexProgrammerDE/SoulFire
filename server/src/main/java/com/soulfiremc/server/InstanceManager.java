@@ -22,7 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.MCAuthService;
-import com.soulfiremc.server.account.SFOfflineAuthService;
+import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.EventBusOwner;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
@@ -248,7 +248,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       } else {
         logger.info("No custom accounts provided, generating offline accounts based on name format");
         for (var i = 0; i < botAmount; i++) {
-          accounts.add(SFOfflineAuthService.createAccount(String.format(settingsSource.get(AccountSettings.NAME_FORMAT), i + 1)));
+          accounts.add(OfflineAuthService.createAccount(String.format(settingsSource.get(AccountSettings.NAME_FORMAT), i + 1)));
         }
       }
 

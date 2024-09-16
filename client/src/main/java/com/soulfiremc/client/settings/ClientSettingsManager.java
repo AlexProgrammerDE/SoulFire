@@ -21,7 +21,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.grpc.generated.AuthRequest;
+import com.soulfiremc.grpc.generated.AccountTypeCredentials;
+import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
@@ -112,8 +113,8 @@ public class ClientSettingsManager {
   private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
     try {
       var request =
-        AuthRequest.newBuilder()
-          .setService(MinecraftAccountProto.AccountTypeProto.valueOf(authType.name()))
+        CredentialsAuthRequest.newBuilder()
+          .setService(AccountTypeCredentials.valueOf(authType.name()))
           .setPayload(data);
 
       if (proxy != null) {
@@ -121,7 +122,7 @@ public class ClientSettingsManager {
       }
 
       return MinecraftAccount.fromProto(
-        rpcClient.mcAuthServiceBlocking().login(request.build()).getAccount());
+        rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()).getAccount());
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);

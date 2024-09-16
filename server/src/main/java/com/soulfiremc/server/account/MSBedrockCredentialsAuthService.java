@@ -18,49 +18,27 @@
 package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.util.LenniHttpHelper;
-import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class SFBedrockMicrosoftAuthService
-  implements MCAuthService<SFBedrockMicrosoftAuthService.BedrockMicrosoftAuthData> {
-  public static final SFBedrockMicrosoftAuthService INSTANCE = new SFBedrockMicrosoftAuthService();
+public final class MSBedrockCredentialsAuthService
+  implements MCAuthService<String,MSBedrockCredentialsAuthService.MSBedrockCredentialsAuthData> {
+  public static final MSBedrockCredentialsAuthService INSTANCE = new MSBedrockCredentialsAuthService();
 
-  private SFBedrockMicrosoftAuthService() {}
-
-  private static MinecraftAccount fromFullBedrockSession(AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
-    var mcChain = fullBedrockSession.getMcChain();
-    var xblXsts = mcChain.getXblXsts();
-    var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
-    var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
-    return new MinecraftAccount(
-      AuthType.MICROSOFT_BEDROCK,
-      mcChain.getId(),
-      mcChain.getDisplayName(),
-      new BedrockData(
-        mcChain.getMojangJwt(),
-        mcChain.getIdentityJwt(),
-        mcChain.getPublicKey(),
-        mcChain.getPrivateKey(),
-        deviceId,
-        playFabId,
-        flow.toJson(fullBedrockSession)));
-  }
+  private MSBedrockCredentialsAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(BedrockMicrosoftAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, SFProxy proxyData) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       try {
-        return fromFullBedrockSession(flow, flow.getFromInput(
+        return AuthHelpers.fromFullBedrockSession(flow, flow.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepCredentialsMsaCode.MsaCredentials(data.email, data.password)));
       } catch (Exception e) {
@@ -70,7 +48,7 @@ public final class SFBedrockMicrosoftAuthService
   }
 
   @Override
-  public BedrockMicrosoftAuthData createData(String data) {
+  public MSBedrockCredentialsAuthData createData(String data) {
     var split = data.split(":");
 
     if (split.length != 2) {
@@ -83,7 +61,7 @@ public final class SFBedrockMicrosoftAuthService
       throw new IllegalArgumentException("Invalid email!");
     }
 
-    return new BedrockMicrosoftAuthData(email, password);
+    return new MSBedrockCredentialsAuthData(email, password);
   }
 
   @Override
@@ -92,7 +70,7 @@ public final class SFBedrockMicrosoftAuthService
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());
       try {
-        return fromFullBedrockSession(flow, flow.refresh(
+        return AuthHelpers.fromFullBedrockSession(flow, flow.refresh(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullBedrockSession));
       } catch (Exception e) {
@@ -113,5 +91,5 @@ public final class SFBedrockMicrosoftAuthService
     return flow.fromJson(((BedrockData) account.accountData()).authChain()).isExpiredOrOutdated();
   }
 
-  public record BedrockMicrosoftAuthData(String email, String password) {}
+  public record MSBedrockCredentialsAuthData(String email, String password) {}
 }
