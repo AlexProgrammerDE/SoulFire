@@ -28,6 +28,9 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 
 public class SoulFireScheduler implements Executor {
+  private static final ForkJoinPool SF_FORK_JOIN_POOL = new ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
+      ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+      null, true);
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
     .factory());
@@ -69,7 +72,7 @@ public class SoulFireScheduler implements Executor {
       return;
     }
 
-    ForkJoinPool.commonPool().execute(() -> runCommand(command));
+    SF_FORK_JOIN_POOL.execute(() -> runCommand(command));
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
