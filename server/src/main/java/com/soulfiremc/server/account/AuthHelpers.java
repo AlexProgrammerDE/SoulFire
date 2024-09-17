@@ -26,13 +26,13 @@ import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 
 public class AuthHelpers {
-  public static MinecraftAccount fromFullBedrockSession(AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
+  public static MinecraftAccount fromFullBedrockSession(AuthType authType, AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
     var mcChain = fullBedrockSession.getMcChain();
     var xblXsts = mcChain.getXblXsts();
     var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
     var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
     return new MinecraftAccount(
-      AuthType.MICROSOFT_BEDROCK_CREDENTIALS,
+      authType,
       mcChain.getId(),
       mcChain.getDisplayName(),
       new BedrockData(
@@ -45,11 +45,11 @@ public class AuthHelpers {
         flow.toJson(fullBedrockSession)));
   }
 
-  public static MinecraftAccount fromFullJavaSession(AbstractStep<?, StepFullJavaSession.FullJavaSession> flow, StepFullJavaSession.FullJavaSession fullJavaSession) {
+  public static MinecraftAccount fromFullJavaSession(AuthType authType, AbstractStep<?, StepFullJavaSession.FullJavaSession> flow, StepFullJavaSession.FullJavaSession fullJavaSession) {
     var mcProfile = fullJavaSession.getMcProfile();
     var mcToken = mcProfile.getMcToken();
     return new MinecraftAccount(
-      AuthType.MICROSOFT_JAVA_CREDENTIALS,
+      authType,
       mcProfile.getId(),
       mcProfile.getName(),
       new OnlineChainJavaData(

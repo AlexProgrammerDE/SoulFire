@@ -18,6 +18,7 @@
 package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.util.LenniHttpHelper;
+import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.OnlineChainJavaData;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -38,7 +39,7 @@ public final class MSJavaDeviceCodeAuthService
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
       try {
-        return AuthHelpers.fromFullJavaSession(flow, flow.getFromInput(
+        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_DEVICE_CODE, flow, flow.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepMsaDeviceCode.MsaDeviceCodeCallback(data.callback)));
       } catch (Exception e) {
@@ -58,7 +59,7 @@ public final class MSJavaDeviceCodeAuthService
       var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullJavaSession(flow, flow.refresh(
+        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_DEVICE_CODE, flow, flow.refresh(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullJavaSession));
       } catch (Exception e) {

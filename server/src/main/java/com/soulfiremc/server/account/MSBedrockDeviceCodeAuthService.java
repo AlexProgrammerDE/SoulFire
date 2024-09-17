@@ -18,6 +18,7 @@
 package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.util.LenniHttpHelper;
+import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.account.service.BedrockData;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -38,7 +39,7 @@ public final class MSBedrockDeviceCodeAuthService
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
       try {
-        return AuthHelpers.fromFullBedrockSession(flow, flow.getFromInput(
+        return AuthHelpers.fromFullBedrockSession(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, flow, flow.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepMsaDeviceCode.MsaDeviceCodeCallback(data.callback)));
       } catch (Exception e) {
@@ -58,7 +59,7 @@ public final class MSBedrockDeviceCodeAuthService
       var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
       var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullBedrockSession(flow, flow.refresh(
+        return AuthHelpers.fromFullBedrockSession(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, flow, flow.refresh(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullBedrockSession));
       } catch (Exception e) {
