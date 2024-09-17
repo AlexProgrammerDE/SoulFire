@@ -261,7 +261,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
-      SFNettyHelper.createEventLoopGroup(0, "Attack-%s".formatted(id));
+      SFNettyHelper.createEventLoopGroup("Attack-%s".formatted(id));
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);

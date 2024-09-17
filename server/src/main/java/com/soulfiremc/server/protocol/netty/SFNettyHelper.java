@@ -18,52 +18,21 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.settings.proxy.SFProxy;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDatagramChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.DatagramChannel;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
-import io.netty.incubator.channel.uring.IOUring;
-import io.netty.incubator.channel.uring.IOUringDatagramChannel;
-import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
-import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.function.BiFunction;
-
 public class SFNettyHelper {
-  public static final TransportMethod TRANSPORT_METHOD =
-    switch (TransportHelper.determineTransportMethod().method()) {
-      case IO_URING -> new TransportMethod(
-        IOUring.isTcpFastOpenClientSideAvailable(),
-        IOUringSocketChannel.class,
-        IOUringDatagramChannel.class,
-        IOUringEventLoopGroup::new);
-      case EPOLL -> new TransportMethod(
-        Epoll.isTcpFastOpenClientSideAvailable(),
-        EpollSocketChannel.class,
-        EpollDatagramChannel.class,
-        EpollEventLoopGroup::new);
-      case NIO, KQUEUE -> new TransportMethod(
-        false, NioSocketChannel.class, NioDatagramChannel.class, NioEventLoopGroup::new);
-    };
+  public static final TransportHelper.TransportType TRANSPORT_TYPE = TransportHelper.determineTransportMethod();
 
   private SFNettyHelper() {}
 
-  public static EventLoopGroup createEventLoopGroup(int threads, String name) {
+  public static EventLoopGroup createEventLoopGroup(String name) {
     var group =
-      TRANSPORT_METHOD.eventLoopFactory.apply(
-        threads,
+      TRANSPORT_TYPE.eventLoopGroupFactory().apply(
         r ->
           Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r));
 
@@ -86,10 +55,4 @@ public class SFNettyHelper {
       case SOCKS5 -> pipeline.addLast("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
     }
   }
-
-  public record TransportMethod(
-    boolean tcpFastOpenClientSideAvailable,
-    Class<? extends Channel> channelClass,
-    Class<? extends DatagramChannel> datagramChannelClass,
-    BiFunction<Integer, ThreadFactory, EventLoopGroup> eventLoopFactory) {}
 }

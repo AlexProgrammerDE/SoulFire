@@ -124,9 +124,9 @@ public class ViaClientSession extends TcpSession {
       }
 
       bootstrap.channelFactory(
-        RakChannelFactory.client(SFNettyHelper.TRANSPORT_METHOD.datagramChannelClass()));
+        RakChannelFactory.client(SFNettyHelper.TRANSPORT_TYPE.datagramChannelClass()));
     } else {
-      bootstrap.channel(SFNettyHelper.TRANSPORT_METHOD.channelClass());
+      bootstrap.channel(SFNettyHelper.TRANSPORT_TYPE.socketChannelClass());
     }
 
     bootstrap
@@ -144,7 +144,7 @@ public class ViaClientSession extends TcpSession {
     } else {
       bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
-      if (SFNettyHelper.TRANSPORT_METHOD.tcpFastOpenClientSideAvailable()) {
+      if (SFNettyHelper.TRANSPORT_TYPE.supportsTcpFastOpenClient()) {
         bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
       }
     }
