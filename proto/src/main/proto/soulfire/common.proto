@@ -23,7 +23,6 @@ message ProxyProto {
 enum AccountTypeCredentials {
   MICROSOFT_JAVA_CREDENTIALS = 0;
   MICROSOFT_BEDROCK_CREDENTIALS = 1;
-  EASY_MC = 2;
   THE_ALTENING = 3;
   OFFLINE = 4;
 }
@@ -37,7 +36,6 @@ message MinecraftAccountProto {
   enum AccountTypeProto {
     MICROSOFT_JAVA_CREDENTIALS = 0;
     MICROSOFT_BEDROCK_CREDENTIALS = 1;
-    EASY_MC = 2;
     THE_ALTENING = 3;
     OFFLINE = 4;
     MICROSOFT_JAVA_DEVICE_CODE = 5;
