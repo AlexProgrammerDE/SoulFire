@@ -23,7 +23,6 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -137,6 +136,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class POVServer implements InternalPlugin {
@@ -997,16 +997,19 @@ public class POVServer implements InternalPlugin {
 
         var freePort =
           PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-        var serverInstance = startPOVServer(settingsSource, freePort, attackManager);
+        var serverInstance = new AtomicReference<>(startPOVServer(settingsSource, freePort, attackManager));
         log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
 
-        EventUtil.runAndAssertChanged(attackManager.eventBus(), () -> PluginHelper.registerSafeEventConsumer(
-          attackManager.eventBus(),
-          AttackEndedEvent.class,
-          e -> {
-            log.info("Stopping POV server for attack {}", attackManager.id());
-            serverInstance.close();
-          }));
+        attackManager.registerListener(AttackEndedEvent.class, e -> {
+          var currentInstance = serverInstance.get();
+          if (currentInstance == null) {
+            return;
+          }
+
+          log.info("Stopping POV server for attack {}", attackManager.id());
+          currentInstance.close();
+          serverInstance.set(null);
+        });
       });
   }
 

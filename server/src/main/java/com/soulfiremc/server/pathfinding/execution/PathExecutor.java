@@ -239,9 +239,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     registered = true;
     connection.dataManager().clientEntity().controlState().incrementActivelyControlling();
-    EventUtil.runAndAssertChanged(
-      connection.eventBus(),
-      () -> connection.eventBus().registerConsumer(this, BotPreTickEvent.class));
+    connection.registerListener(BotPreTickEvent.class, this);
   }
 
   public synchronized void unregister() {
@@ -251,9 +249,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     registered = false;
     connection.dataManager().clientEntity().controlState().decrementActivelyControlling();
-    EventUtil.runAndAssertChanged(
-      connection.eventBus(),
-      () -> connection.eventBus().unregisterConsumer(this, BotPreTickEvent.class));
+    connection.registerListener(BotPreTickEvent.class, this);
   }
 
   public void cancel() {
