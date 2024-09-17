@@ -60,8 +60,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
-    try {
-      var account = MCAuthService.convertService(request.getService()).createDataAndLogin(deviceCode ->
+    MCAuthService.convertService(request.getService()).createDataAndLogin(deviceCode ->
           responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
             .setDeviceCode(
               DeviceCode.newBuilder()
@@ -72,14 +71,16 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
                 .build()
             ).build()
           ),
-        convertProxy(request::hasProxy, request::getProxy));
-
-      responseObserver.onNext(DeviceCodeAuthResponse.newBuilder().setAccount(account.join().toProto()).build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error authenticating account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
+        convertProxy(request::hasProxy, request::getProxy))
+      .whenComplete((account, t) -> {
+        if (t != null) {
+          log.error("Error authenticating account", t);
+          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
+        } else {
+          responseObserver.onNext(DeviceCodeAuthResponse.newBuilder().setAccount(account.toProto()).build());
+          responseObserver.onCompleted();
+        }
+      });
   }
 
   @Override
