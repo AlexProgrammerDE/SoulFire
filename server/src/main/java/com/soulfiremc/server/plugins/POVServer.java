@@ -175,7 +175,7 @@ public class POVServer implements InternalPlugin {
     var faviconBytes = ResourceHelper.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
-    server.setGlobalFlag(MinecraftConstants.VERIFY_USERS_KEY, false);
+    server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
       Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
         .color(NamedTextColor.GREEN)

@@ -19,7 +19,7 @@ package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
-import com.soulfiremc.server.viaversion.FrameCodec;
+import com.soulfiremc.server.viaversion.SFVLPipeline;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.soulfiremc.settings.account.service.BedrockData;
@@ -31,23 +31,18 @@ import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.*;
+import io.netty.handler.flow.FlowControlHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
-import net.raphimc.viabedrock.netty.BatchLengthCodec;
-import net.raphimc.viabedrock.netty.PacketEncapsulationCodec;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
-import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
-import net.raphimc.vialoader.netty.viabedrock.DisconnectHandler;
-import net.raphimc.vialoader.netty.viabedrock.RakMessageEncapsulationCodec;
+import net.raphimc.vialoader.netty.VLPipeline;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.network.codec.PacketCodecHelper;
-import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
-import org.geysermc.mcprotocollib.network.crypt.PacketEncryption;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
@@ -69,6 +64,7 @@ public class ViaClientSession extends TcpSession {
   public static final String SIZER_NAME = "sizer";
   public static final String COMPRESSION_NAME = "compression";
   public static final String ENCRYPTION_NAME = "encryption";
+  public static final String CODEC_NAME = "codec";
 
   @Getter
   private final Logger logger;
@@ -83,7 +79,6 @@ public class ViaClientSession extends TcpSession {
   private final BotConnection botConnection;
   private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
   private boolean delimiterBlockProcessing = false;
-  private int threshold;
 
   public ViaClientSession(
     SocketAddress targetAddress,
@@ -192,30 +187,21 @@ public class ViaClientSession extends TcpSession {
 
           setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
 
-          if (SFVersionConstants.isLegacy(version)) {
-            pipeline.addLast("vl-prenetty", new PreNettyLengthCodec(userConnection));
-          } else if (isBedrock) {
-            pipeline.addLast("vb-disconnect", new DisconnectHandler());
-            pipeline.addLast("vb-frame-encapsulation", new RakMessageEncapsulationCodec());
-          }
-
-          if (isBedrock) {
-            pipeline.addLast(SIZER_NAME, new BatchLengthCodec());
-            pipeline.addLast("vb-packet-encapsulation", new PacketEncapsulationCodec());
-          } else {
-            pipeline.addLast(SIZER_NAME, new FrameCodec());
-          }
-
-          pipeline.addLast("flow-control", new TcpFlowControlHandler());
-
-          // Inject Via codec
-          pipeline.addLast("via-codec", new ViaCodec(userConnection));
-
-          pipeline.addLast("via-flow-control", new TcpFlowControlHandler());
-
-          pipeline.addLast("codec", new TcpPacketCodec(ViaClientSession.this, true));
+          pipeline.addLast(ENCRYPTION_NAME, new TcpPacketEncryptor());
+          pipeline.addLast(SIZER_NAME, new TcpPacketSizer(protocol.getPacketHeader(), getCodecHelper()));
+          pipeline.addLast(COMPRESSION_NAME, new TcpPacketCompression(getCodecHelper()));
+          pipeline.addLast(CODEC_NAME, new TcpPacketCodec(ViaClientSession.this, true));
           pipeline.addLast("flush-handler", new FlushHandler());
           pipeline.addLast("manager", ViaClientSession.this);
+
+          pipeline.addLast(new SFVLPipeline(userConnection));
+          if (isBedrock) {
+            pipeline.remove(COMPRESSION_NAME);
+            pipeline.remove(ENCRYPTION_NAME);
+          }
+
+          pipeline.addBefore(CODEC_NAME, "flow-control", new FlowControlHandler());
+          pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-flow-control", new FlowControlHandler());
         }
       });
 
@@ -233,47 +219,6 @@ public class ViaClientSession extends TcpSession {
 
     if (wait) {
       handleFuture.join();
-    }
-  }
-
-  @Override
-  public int getCompressionThreshold() {
-    return threshold;
-  }
-
-  @Override
-  public void setCompressionThreshold(int threshold, boolean validateDecompression) {
-    logger.debug("Enabling compression with threshold {}", threshold);
-    this.threshold = threshold;
-
-    var channel = getChannel();
-    if (channel == null) {
-      throw new IllegalStateException("Channel is not initialized.");
-    }
-
-    if (threshold >= 0) {
-      var handler = channel.pipeline().get(COMPRESSION_NAME);
-      if (handler == null) {
-        channel
-          .pipeline()
-          .addBefore("via-codec", COMPRESSION_NAME, new TcpPacketCompression(this, new ZlibCompression(), validateDecompression));
-      }
-    } else if (channel.pipeline().get(COMPRESSION_NAME) != null) {
-      channel.pipeline().remove(COMPRESSION_NAME);
-    }
-  }
-
-  @Override
-  public void enableEncryption(PacketEncryption encryption) {
-    var pipeline = getChannel().pipeline();
-    var encryptor = new TcpPacketEncryptor(encryption);
-
-    if (pipeline.get("vl-prenetty") != null) {
-      logger.debug("Enabling legacy decryption");
-      pipeline.addBefore("vl-prenetty", ENCRYPTION_NAME, encryptor);
-    } else {
-      logger.debug("Enabling decryption");
-      pipeline.addBefore(SIZER_NAME, ENCRYPTION_NAME, encryptor);
     }
   }
 

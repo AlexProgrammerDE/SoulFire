@@ -26,7 +26,10 @@ import net.kyori.adventure.text.Component;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import org.geysermc.mcprotocollib.auth.SessionService;
 import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.compression.CompressionConfig;
+import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
 import org.geysermc.mcprotocollib.network.crypt.AESEncryption;
+import org.geysermc.mcprotocollib.network.crypt.EncryptionConfig;
 import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -117,7 +120,7 @@ public class SFBaseListener extends SessionAdapter {
 
         if (!isLegacy) {
           var encryption = new AESEncryption(key);
-          session.send(keyPacket, () -> session.enableEncryption(encryption));
+          session.send(keyPacket, () -> session.setEncryption(new EncryptionConfig(encryption)));
         } else {
           botConnection.logger().debug("Storing legacy secret key.");
           session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
@@ -129,7 +132,9 @@ public class SFBaseListener extends SessionAdapter {
       } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
         session.disconnect(loginDisconnectPacket.getReason());
       } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
-        viaSession.setCompressionThreshold(loginCompressionPacket.getThreshold(), true);
+        if (loginCompressionPacket.getThreshold() >= 0) {
+          viaSession.setCompression(new CompressionConfig(loginCompressionPacket.getThreshold(), new ZlibCompression(), true));
+        }
       }
     } else if (protocol.getInboundState() == ProtocolState.STATUS) {
       if (packet instanceof ClientboundStatusResponsePacket) {

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;

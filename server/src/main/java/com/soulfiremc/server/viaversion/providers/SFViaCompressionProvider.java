@@ -20,6 +20,8 @@ package com.soulfiremc.server.viaversion.providers;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
+import org.geysermc.mcprotocollib.network.compression.CompressionConfig;
+import org.geysermc.mcprotocollib.network.compression.ZlibCompression;
 
 import java.util.Objects;
 
@@ -28,6 +30,6 @@ public class SFViaCompressionProvider extends CompressionProvider {
   public void handlePlayCompression(UserConnection user, int threshold) {
     Objects.requireNonNull(user.get(StorableSession.class))
       .session()
-      .setCompressionThreshold(threshold, true);
+      .setCompression(new CompressionConfig(threshold, new ZlibCompression(), true));
   }
 }

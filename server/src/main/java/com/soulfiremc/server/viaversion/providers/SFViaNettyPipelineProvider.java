@@ -24,6 +24,7 @@ import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
+import net.raphimc.vialoader.netty.VLPipeline;
 
 import javax.crypto.SecretKey;
 import java.util.Objects;
@@ -63,7 +64,7 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
       channel
         .pipeline()
         .addAfter(
-          "vb-frame-encapsulation",
+          VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME,
           ViaClientSession.ENCRYPTION_NAME,
           new AesEncryptionCodec(key));
     } catch (Throwable e) {

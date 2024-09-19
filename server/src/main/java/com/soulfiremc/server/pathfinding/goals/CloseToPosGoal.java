@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Goal to get close to a specific position.
  *
- * @param goal the goal position to get close to
+ * @param goal      the goal position to get close to
  * @param maxRadius the maximum radius to be close to the goal
  */
 public record CloseToPosGoal(SFVec3i goal, int maxRadius) implements GoalScorer {
