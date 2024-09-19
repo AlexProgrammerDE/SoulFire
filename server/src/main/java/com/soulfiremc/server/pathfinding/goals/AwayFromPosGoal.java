@@ -25,23 +25,24 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import java.util.List;
 
 /**
- * Goal to get close to a specific position.
+ * Goal to get minRadius away from the origin.
+ * Usually used for anti-afk where a player should move x blocks away from where they are.
  *
- * @param goal the goal position to get close to
- * @param maxRadius the maximum radius to be close to the goal
+ * @param origin    the origin to move away from
+ * @param minRadius the minimum radius to move away from the origin
  */
-public record CloseToPosGoal(SFVec3i goal, int maxRadius) implements GoalScorer {
-  public CloseToPosGoal(int x, int y, int z, int maxRadius) {
-    this(SFVec3i.from(x, y, z), maxRadius);
+public record AwayFromPosGoal(SFVec3i origin, int minRadius) implements GoalScorer {
+  public AwayFromPosGoal(int x, int y, int z, int minRadius) {
+    this(SFVec3i.from(x, y, z), minRadius);
   }
 
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return blockPosition.distance(goal);
+    return Math.max(0, minRadius - blockPosition.distance(origin));
   }
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return current.node().blockPosition().distance(goal) <= maxRadius;
+    return current.node().blockPosition().distance(origin) >= minRadius;
   }
 }
