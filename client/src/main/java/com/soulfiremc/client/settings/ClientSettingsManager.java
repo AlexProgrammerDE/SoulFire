@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -89,12 +90,11 @@ public class ClientSettingsManager {
   public void loadFromString(String data, AuthType authType, SFProxy proxy) {
     try {
       var newAccounts =
-        data.lines()
+        fromStringList(data.lines()
           .map(String::strip)
           .filter(Predicate.not(String::isBlank))
           .distinct()
-          .map(account -> fromStringSingle(account, authType, proxy))
-          .toList();
+          .toList(), authType, proxy);
 
       if (newAccounts.isEmpty()) {
         log.warn("No accounts found in the provided data!");
@@ -109,19 +109,21 @@ public class ClientSettingsManager {
     }
   }
 
-  private MinecraftAccount fromStringSingle(String data, AuthType authType, SFProxy proxy) {
+  private List<MinecraftAccount> fromStringList(List<String> accounts, AuthType authType, SFProxy proxy) {
     try {
       var request =
         CredentialsAuthRequest.newBuilder()
           .setService(AccountTypeCredentials.valueOf(authType.name()))
-          .setPayload(data);
+          .addAllPayload(accounts);
 
       if (proxy != null) {
         request.setProxy(proxy.toProto());
       }
 
-      return MinecraftAccount.fromProto(
-        rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()).getAccount());
+      return rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()).getAccountList()
+        .stream()
+        .map(MinecraftAccount::fromProto)
+        .toList();
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);

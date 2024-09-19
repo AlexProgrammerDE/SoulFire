@@ -10,11 +10,12 @@ import "soulfire/common.proto";
 message CredentialsAuthRequest {
   AccountTypeCredentials service = 1;
   optional ProxyProto proxy = 2;
-  string payload = 3;
+  int32 maxConcurrency = 3;
+  repeated string payload = 4;
 }
 
 message CredentialsAuthResponse {
-  MinecraftAccountProto account = 1;
+  repeated MinecraftAccountProto account = 1;
 }
 
 message DeviceCodeAuthRequest {

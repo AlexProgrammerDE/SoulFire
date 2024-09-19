@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
+import java.util.concurrent.Semaphore;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -45,10 +46,24 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
     try {
-      var account = MCAuthService.convertService(request.getService()).createDataAndLogin(request.getPayload(),
-        convertProxy(request::hasProxy, request::getProxy));
+      var service = MCAuthService.convertService(request.getService());
+      var proxy = convertProxy(request::hasProxy, request::getProxy);
+      var semaphore = new Semaphore(request.getMaxConcurrency());
+      var results = request.getPayloadList()
+        .parallelStream()
+        .map(payload -> {
+          try {
+            semaphore.acquire();
+            return service.createDataAndLogin(payload, proxy).join().toProto();
+          } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+          } finally {
+            semaphore.release();
+          }
+        })
+        .toList();
 
-      responseObserver.onNext(CredentialsAuthResponse.newBuilder().setAccount(account.join().toProto()).build());
+      responseObserver.onNext(CredentialsAuthResponse.newBuilder().addAllAccount(results).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error authenticating account", t);
