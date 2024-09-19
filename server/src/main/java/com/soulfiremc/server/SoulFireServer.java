@@ -198,7 +198,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     loadInstances();
 
     log.info("Starting scheduled tasks...");
-    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 3, TimeUnit.SECONDS);
+    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 500, TimeUnit.MILLISECONDS);
 
     var rpcServerStart =
       CompletableFuture.runAsync(
