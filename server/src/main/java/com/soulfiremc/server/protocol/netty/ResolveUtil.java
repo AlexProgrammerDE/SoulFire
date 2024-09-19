@@ -32,7 +32,8 @@ import java.util.Optional;
 
 @Slf4j
 public class ResolveUtil {
-  public static final int MC_DEFAULT_PORT = 25565;
+  public static final int MC_JAVA_DEFAULT_PORT = 25565;
+  public static final int MC_BEDROCK_DEFAULT_PORT = 19132;
   private static final DirContext DIR_CONTEXT;
 
   static {
@@ -53,12 +54,13 @@ public class ResolveUtil {
 
   public static Optional<ResolvedAddress> resolveAddress(
     boolean isBedrock, SettingsSource settingsSource) {
+    var defaultPort = isBedrock ? MC_BEDROCK_DEFAULT_PORT : MC_JAVA_DEFAULT_PORT;
     var serverAddress =
       ServerAddress.fromStringDefaultPort(
-        settingsSource.get(BotSettings.ADDRESS), MC_DEFAULT_PORT);
+        settingsSource.get(BotSettings.ADDRESS), defaultPort);
 
     if (settingsSource.get(BotSettings.RESOLVE_SRV)
-      && serverAddress.port() == MC_DEFAULT_PORT
+      && serverAddress.port() == defaultPort
       && !isBedrock) {
       // SRVs can override address on Java, but not Bedrock.
       var resolved = resolveSrv(serverAddress);
@@ -83,7 +85,7 @@ public class ResolveUtil {
         log.debug("SRV lookup resolved \"{}\" to \"{}\".", name, srvAttribute.get().toString());
 
         return resolveByHost(
-          ServerAddress.fromStringAndPort(attributeSplit[3], parsePort(attributeSplit[2])))
+          ServerAddress.fromStringAndPort(attributeSplit[3], parseJavaPort(attributeSplit[2])))
           .map(e -> new ResolvedAddress(serverAddress, e));
       } else {
         log.debug("SRV lookup for \"{}\" returned no records.", name);
@@ -107,11 +109,11 @@ public class ResolveUtil {
     }
   }
 
-  private static int parsePort(String port) {
+  private static int parseJavaPort(String port) {
     try {
       return Integer.parseInt(port);
     } catch (NumberFormatException e) {
-      return MC_DEFAULT_PORT;
+      return MC_JAVA_DEFAULT_PORT;
     }
   }
 
