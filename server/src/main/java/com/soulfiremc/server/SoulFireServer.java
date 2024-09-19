@@ -41,7 +41,6 @@ import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.util.FileUtils;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.util.TimeUtil;
@@ -260,7 +259,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       var instancesJson =
         GsonInstance.GSON.toJson(
           instances.values().stream().map(InstanceManager::toJson).toArray(JsonElement[]::new));
-      FileUtils.writeIfNeeded(instancesFile, instancesJson);
+      SFHelpers.writeIfNeeded(instancesFile, instancesJson);
     } catch (Exception e) {
       log.error("Failed to save instances", e);
     }

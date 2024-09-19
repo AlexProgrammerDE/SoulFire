@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
@@ -60,5 +63,17 @@ public class SFHelpers {
 
   public static BooleanSupplier not(BooleanSupplier supplier) {
     return () -> !supplier.getAsBoolean();
+  }
+
+  public static void writeIfNeeded(Path path, String content) throws IOException {
+    if (Files.exists(path)) {
+      var existingContent = Files.readString(path);
+      if (!existingContent.equals(content)) {
+        Files.writeString(path, content);
+      }
+    } else {
+      Files.createDirectories(path.getParent());
+      Files.writeString(path, content);
+    }
   }
 }
