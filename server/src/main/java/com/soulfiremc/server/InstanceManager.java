@@ -101,7 +101,9 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
     var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
 
     var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
-    instanceManager.switchToState(state);
+    if (settings.get(BotSettings.RESTORE_ON_REBOOT)) {
+      instanceManager.switchToState(state);
+    }
 
     return instanceManager;
   }
