@@ -32,9 +32,7 @@ import java.util.Objects;
 public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override
   public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
-    var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-    var channel = clientSession.getChannel();
-
+    var channel = Objects.requireNonNull(user.getChannel());
     if (channel.pipeline().names().contains(ViaClientSession.COMPRESSION_NAME)) {
       throw new IllegalStateException("Compression already enabled");
     }
@@ -53,9 +51,7 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
 
   @Override
   public void enableEncryption(UserConnection user, SecretKey key) {
-    var clientSession = Objects.requireNonNull(user.get(StorableSession.class)).session();
-    final var channel = clientSession.getChannel();
-
+    var channel = Objects.requireNonNull(user.getChannel());
     if (channel.pipeline().names().contains(ViaClientSession.ENCRYPTION_NAME)) {
       throw new IllegalStateException("Encryption already enabled");
     }
