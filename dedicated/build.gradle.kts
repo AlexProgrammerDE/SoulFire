@@ -28,11 +28,13 @@ task("runSFDedicated", JavaExec::class) {
     "-Xmx18G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
-    "-XX:+UseG1GC",
-    "-XX:G1NewSizePercent=20",
-    "-XX:G1ReservePercent=20",
-    "-XX:MaxGCPauseMillis=50",
-    "-XX:G1HeapRegionSize=32M",
+    "-XX:+UseZGC",
+    "-XX:+ZGenerational",
+    "-XX:+AlwaysActAsServerClassMachine",
+    "-XX:+UseNUMA",
+    "-XX:+UseFastUnorderedTimeStamps",
+    "-XX:+UseVectorCmov",
+    "-XX:+UseCriticalJavaThreadPriority",
     "-Dsf.flags.v1=true"
   )
 

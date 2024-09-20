@@ -17,16 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.util.ReferenceCache;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.function.Function;
-
 public class ChunkData {
-  private static final Map<ChunkSection, ChunkSection> SECTION_CACHE = new WeakHashMap<>();
+  private static final ReferenceCache<ChunkSection> SECTION_CACHE = new ReferenceCache<>();
   private final LevelHeightAccessor levelHeightAccessor;
   private final ChunkSection[] sections;
 
@@ -66,9 +63,7 @@ public class ChunkData {
   }
 
   public void setSection(int sectionIndex, ChunkSection section) {
-    synchronized (SECTION_CACHE) {
-      sections[sectionIndex] = SECTION_CACHE.computeIfAbsent(section, Function.identity());
-    }
+    sections[sectionIndex] = SECTION_CACHE.poolReference(section);
   }
 
   public void setBlock(Vector3i block, int state) {
