@@ -67,7 +67,6 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -84,8 +83,6 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
   @Getter
   private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
-  private final List<Map.Entry<Instant, String>> commandHistory =
-    Collections.synchronizedList(new ArrayList<>());
 
   private static String getCurrentUsername() {
     var currentUser = ServerRPCConstants.USER_CONTEXT_KEY.get();
@@ -860,10 +857,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     command = command.strip();
 
     try {
-      var result = dispatcher.execute(command, source);
-      commandHistory.add(Map.entry(Instant.now(), command));
-
-      return result;
+      return dispatcher.execute(command, source);
     } catch (CommandSyntaxException e) {
       source.sendWarn(e.getMessage());
       return Command.SINGLE_SUCCESS;
