@@ -1,6 +1,6 @@
 [versions]
 log4j = "2.24.0"
-grpc = "1.66.0"
+grpc = "1.68.0"
 protobuf = "3.25.5"
 via-version = "5.0.4-SNAPSHOT"
 via-backwards = "5.0.4-SNAPSHOT"
@@ -33,7 +33,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-jline = "org.jline:jline-terminal-jansi:3.26.3"
+jline = "org.jline:jline-terminal-jansi:3.27.0"
 jansi = "org.fusesource.jansi:jansi:2.4.1"
 ansi4j-core-api = "com.github.PavelKastornyy.ansi4j:ansi4j-core-api:ansi4j-1.1.0"
 ansi4j-core-impl = "com.github.PavelKastornyy.ansi4j:ansi4j-core-impl:ansi4j-1.1.0"
@@ -45,7 +45,7 @@ datafixerupper = "com.mojang:datafixerupper:7.0.14"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
 mcprotocollib = { module = "com.github.AlexProgrammerDE:MCProtocolLib", version.ref = "mcprotocollib" }
-mcstructs = "net.lenni0451.mcstructs:all:2.5.2"
+mcstructs = "net.lenni0451.mcstructs:all:2.5.3"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
