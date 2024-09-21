@@ -74,6 +74,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -90,7 +91,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
   private final Map<String, String> serviceServerConfig = new HashMap<>();
-  private final Map<UUID, InstanceManager> instances = Collections.synchronizedMap(new HashMap<>());
+  private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final RPCServer rpcServer;
   private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerSettingsRegistry instanceSettingsRegistry;
@@ -282,18 +283,18 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   }
 
   private void shutdownHook() {
-    // Shutdown the attacks if there is any
-    stopAllAttacksSessions().join();
-
-    // Shutdown scheduled tasks
-    scheduler.shutdown();
-
     // Shut down RPC
     try {
       rpcServer.shutdown();
     } catch (InterruptedException e) {
       log.error("Failed to stop RPC server", e);
     }
+
+    // Shutdown the attacks if there is any
+    shutdownInstances().join();
+
+    // Shutdown scheduled tasks
+    scheduler.shutdown();
   }
 
   public UUID createInstance(String friendlyName) {
@@ -307,15 +308,14 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
     return attackManager.id();
   }
 
-  public CompletableFuture<?> stopAllAttacksSessions() {
-    return CompletableFuture.allOf(
-      Set.copyOf(instances.values()).stream()
-        .map(InstanceManager::stopAttackSession)
+  public CompletableFuture<?> shutdownInstances() {
+    return CompletableFuture.allOf(instances.values().stream()
+        .map(InstanceManager::shutdownHook)
         .toArray(CompletableFuture[]::new));
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
-    return Optional.ofNullable(instances.remove(id)).map(InstanceManager::destroyInstance);
+    return Optional.ofNullable(instances.remove(id)).map(InstanceManager::deleteInstance);
   }
 
   public Optional<InstanceManager> getInstance(UUID id) {
