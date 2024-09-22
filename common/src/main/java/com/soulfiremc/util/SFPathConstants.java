@@ -17,20 +17,14 @@
  */
 package com.soulfiremc.util;
 
-import net.harawata.appdirs.AppDirsFactory;
-
 import java.nio.file.Path;
 
 public class SFPathConstants {
   public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
-  public static final Path CLIENT_DATA_DIRECTORY = getApplicationDataDirectory();
+  public static final Path CLIENT_DATA_DIRECTORY = Path.of(System.getProperty("user.home")).resolve(".soulfire");
   public static final Path INTEGRATED_SERVER_DIRECTORY = CLIENT_DATA_DIRECTORY.resolve("integrated-server");
 
   private SFPathConstants() {}
-
-  private static Path getApplicationDataDirectory() {
-    return Path.of(AppDirsFactory.getInstance().getUserDataDir("SoulFire", null, null));
-  }
 
   public static Path getPluginsDirectory(Path baseFolder) {
     return baseFolder.resolve("plugins");

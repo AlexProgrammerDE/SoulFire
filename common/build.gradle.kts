@@ -41,9 +41,6 @@ dependencies {
   api(libs.reflect)
   api(libs.lambdaevents)
 
-  // For detecting the dir to put data in
-  api(libs.appdirs)
-
   // For class injection
   api(libs.injector)
 }
