@@ -45,4 +45,8 @@ public class SFPathConstants {
   public static Path getStateDirectory(Path baseFolder) {
     return baseFolder.resolve("state");
   }
+
+  public static Path getLibrariesDirectory(Path baseFolder) {
+    return baseFolder.resolve("libraries");
+  }
 }

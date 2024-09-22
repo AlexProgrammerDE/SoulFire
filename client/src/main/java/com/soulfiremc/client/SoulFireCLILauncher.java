@@ -33,7 +33,7 @@ public class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   }
 
   @Override
-  protected Path getBaseDirectory() {
-    return SFPathConstants.INTEGRATED_SERVER_DIRECTORY;
+  protected Path getLibrariesDirectory() {
+    return SFPathConstants.getLibrariesDirectory(SFPathConstants.INTEGRATED_SERVER_DIRECTORY);
   }
 }

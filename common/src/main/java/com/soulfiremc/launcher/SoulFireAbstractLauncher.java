@@ -24,7 +24,7 @@ import java.util.List;
 
 public abstract class SoulFireAbstractLauncher {
   public void run(String[] args) {
-    var contextClassLoader = new SFContextClassLoader(getBaseDirectory());
+    var contextClassLoader = new SFContextClassLoader(getLibrariesDirectory());
     Thread.currentThread().setContextClassLoader(contextClassLoader);
 
     try {
@@ -39,5 +39,5 @@ public abstract class SoulFireAbstractLauncher {
 
   protected abstract String getBootstrapClassName();
 
-  protected abstract Path getBaseDirectory();
+  protected abstract Path getLibrariesDirectory();
 }
