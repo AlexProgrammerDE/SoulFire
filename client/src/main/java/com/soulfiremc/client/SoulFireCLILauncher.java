@@ -18,6 +18,9 @@
 package com.soulfiremc.client;
 
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
+import com.soulfiremc.util.SFPathConstants;
+
+import java.nio.file.Path;
 
 public class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   public static void main(String[] args) {
@@ -27,5 +30,10 @@ public class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   @Override
   protected String getBootstrapClassName() {
     return "com.soulfiremc.client.SoulFireCLIBootstrap";
+  }
+
+  @Override
+  protected Path getBaseDirectory() {
+    return SFPathConstants.INTEGRATED_SERVER_DIRECTORY;
   }
 }
