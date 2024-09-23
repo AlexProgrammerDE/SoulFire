@@ -50,6 +50,7 @@ public class SFContextClassLoader extends ClassLoader {
   private static URLClassLoader createLibClassLoader(Path libDir) {
     var urls = new ArrayList<URL>();
     try {
+      Files.createDirectories(libDir);
       for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
         var fileName = entry.getKey().getFileName().toString();
 
