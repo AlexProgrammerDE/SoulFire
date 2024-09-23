@@ -216,8 +216,8 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       .stream()
       .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
       .toList());
-    var availableProxies = proxies.size();
     {
+      var availableProxies = proxies.size();
       if (availableProxies == 0) {
         logger.info("No proxies provided, attack will be performed without proxies");
       } else {
@@ -258,7 +258,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         Collections.shuffle(accounts);
       }
 
-      accountQueue.addAll(accounts);
+      accountQueue.addAll(accounts.subList(0, botAmount));
     }
 
     // Prepare an event loop group for the attack
