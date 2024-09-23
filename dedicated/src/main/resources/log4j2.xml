@@ -34,7 +34,7 @@
                              filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz"
                              immediateFlush="false">
       <PatternLayout
-        pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %n%xEx"/>
+        pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n%xEx"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <OnStartupTriggeringPolicy/>
