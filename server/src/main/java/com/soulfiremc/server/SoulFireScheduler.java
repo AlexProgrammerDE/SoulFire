@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 
 public class SoulFireScheduler implements Executor {
   private static final ForkJoinPool SF_FORK_JOIN_POOL = new ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
@@ -103,11 +104,11 @@ public class SoulFireScheduler implements Executor {
     }, delay, unit);
   }
 
-  public void scheduleWithRandomDelay(Runnable command, long minDelay, long maxDelay, TimeUnit unit) {
+  public void scheduleWithRandomDelay(Runnable command, LongSupplier minDelay, LongSupplier maxDelay, TimeUnit unit) {
     schedule(() -> {
       runCommand(command);
       scheduleWithRandomDelay(command, minDelay, maxDelay, unit);
-    }, RandomUtil.getRandomLong(minDelay, maxDelay), unit);
+    }, RandomUtil.getRandomLong(minDelay.getAsLong(), maxDelay.getAsLong()), unit);
   }
 
   public void drainQueue() {

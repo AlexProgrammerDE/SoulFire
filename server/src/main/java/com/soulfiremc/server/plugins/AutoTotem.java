@@ -88,8 +88,8 @@ public class AutoTotem implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      settingsSource.get(AutoTotemSettings.DELAY.min()),
-      settingsSource.get(AutoTotemSettings.DELAY.max()),
+      () -> settingsSource.get(AutoTotemSettings.DELAY.min()),
+      () -> settingsSource.get(AutoTotemSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

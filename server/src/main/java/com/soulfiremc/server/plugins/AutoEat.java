@@ -95,8 +95,8 @@ public class AutoEat implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      settingsSource.get(AutoEatSettings.DELAY.min()),
-      settingsSource.get(AutoEatSettings.DELAY.max()),
+      () -> settingsSource.get(AutoEatSettings.DELAY.min()),
+      () -> settingsSource.get(AutoEatSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

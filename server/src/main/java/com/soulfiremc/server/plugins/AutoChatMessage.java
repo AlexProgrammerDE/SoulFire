@@ -57,8 +57,8 @@ public class AutoChatMessage implements InternalPlugin {
         var botControl = connection.botControl();
         botControl.sendMessage(RandomUtil.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },
-      settingsSource.get(AutoChatMessageSettings.DELAY.min()),
-      settingsSource.get(AutoChatMessageSettings.DELAY.max()),
+      () -> settingsSource.get(AutoChatMessageSettings.DELAY.min()),
+      () -> settingsSource.get(AutoChatMessageSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

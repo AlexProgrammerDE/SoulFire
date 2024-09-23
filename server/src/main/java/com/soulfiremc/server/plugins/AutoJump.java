@@ -60,8 +60,8 @@ public class AutoJump implements InternalPlugin {
           clientEntity.jump();
         }
       },
-      settingsSource.get(AutoJumpSettings.DELAY.min()),
-      settingsSource.get(AutoJumpSettings.DELAY.max()),
+      () -> settingsSource.get(AutoJumpSettings.DELAY.min()),
+      () -> settingsSource.get(AutoJumpSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 

@@ -124,8 +124,8 @@ public class AutoArmor implements InternalPlugin {
           putOn(connection.dataManager().inventoryManager(), type);
         }
       },
-      settingsSource.get(AutoArmorSettings.DELAY.min()),
-      settingsSource.get(AutoArmorSettings.DELAY.max()),
+      () -> settingsSource.get(AutoArmorSettings.DELAY.min()),
+      () -> settingsSource.get(AutoArmorSettings.DELAY.max()),
       TimeUnit.SECONDS);
   }
 
