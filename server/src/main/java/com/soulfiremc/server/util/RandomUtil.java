@@ -18,7 +18,6 @@
 package com.soulfiremc.server.util;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
@@ -36,20 +35,7 @@ public class RandomUtil {
     return ThreadLocalRandom.current().nextInt(min, max);
   }
 
-  public static long getRandomLong(long min, long max) {
-    if (min > max) {
-      throw new IllegalArgumentException("max must be greater than min");
-    }
-
-    if (min == max) {
-      return min;
-    }
-
-    return ThreadLocalRandom.current().nextLong(min, max);
-  }
-
   public static <E> E getRandomEntry(List<E> list) {
-    Random random = ThreadLocalRandom.current();
-    return list.get(random.nextInt(list.size()));
+    return list.get(ThreadLocalRandom.current().nextInt(list.size()));
   }
 }
