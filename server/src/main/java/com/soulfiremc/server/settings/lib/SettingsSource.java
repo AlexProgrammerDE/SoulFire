@@ -19,6 +19,7 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -27,6 +28,8 @@ import com.soulfiremc.util.GsonInstance;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 public interface SettingsSource {
   List<MinecraftAccount> accounts();
@@ -61,9 +64,23 @@ public interface SettingsSource {
     return List.of(getAsType(property.propertyKey(), property.defaultValue().toArray(new String[0]), String[].class));
   }
 
+  default CustomIntSupplier getRandom(MinMaxPropertyLink property) {
+    return () -> RandomUtil.getRandomInt(get(property.min()), get(property.max()));
+  }
+
   default <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
     return get(key).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
   }
 
   Optional<JsonElement> get(PropertyKey key);
+
+  interface CustomIntSupplier extends IntSupplier {
+    default LongSupplier asLongSupplier() {
+      return this::getAsLong;
+    }
+
+    default long getAsLong() {
+      return this.getAsInt();
+    }
+  }
 }

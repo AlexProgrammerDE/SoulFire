@@ -40,7 +40,6 @@ import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.SettingsDelegate;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.util.MathHelper;
-import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.settings.account.MinecraftAccount;
@@ -338,9 +337,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
             });
 
           TimeUtil.waitTime(
-            RandomUtil.getRandomInt(
-              settingsSource.get(BotSettings.JOIN_DELAY.min()),
-              settingsSource.get(BotSettings.JOIN_DELAY.max())),
+            settingsSource.getRandom(BotSettings.JOIN_DELAY).getAsLong(),
             TimeUnit.MILLISECONDS);
         }
 

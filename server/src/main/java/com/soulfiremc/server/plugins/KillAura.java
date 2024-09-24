@@ -33,8 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 @Slf4j
 public class KillAura implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(
@@ -131,14 +129,7 @@ public class KillAura implements InternalPlugin {
 
               if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
                 || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-                var randomTickDelay =
-                  ThreadLocalRandom.current()
-                    .nextDouble(
-                      bot.settingsSource()
-                        .get(KillAuraSettings.ATTACK_DELAY_TICKS.min()),
-                      bot.settingsSource()
-                        .get(KillAuraSettings.ATTACK_DELAY_TICKS.max()));
-                control.attackCooldownTicks((int) randomTickDelay);
+                control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
               }
             });
       });

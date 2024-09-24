@@ -27,7 +27,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.RandomUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -96,9 +95,7 @@ public class AutoReconnect implements InternalPlugin {
 
             newConnection.connect();
           },
-          RandomUtil.getRandomInt(
-            settingsSource.get(AutoReconnectSettings.DELAY.min()),
-            settingsSource.get(AutoReconnectSettings.DELAY.max())),
+          settingsSource.getRandom(AutoReconnectSettings.DELAY).getAsLong(),
           TimeUnit.SECONDS);
     }
   }

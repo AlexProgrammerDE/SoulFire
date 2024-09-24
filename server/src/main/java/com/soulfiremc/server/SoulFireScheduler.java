@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import com.soulfiremc.server.util.RandomUtil;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.Setter;
@@ -104,11 +103,11 @@ public class SoulFireScheduler implements Executor {
     }, delay, unit);
   }
 
-  public void scheduleWithRandomDelay(Runnable command, LongSupplier minDelay, LongSupplier maxDelay, TimeUnit unit) {
+  public void scheduleWithDynamicDelay(Runnable command, LongSupplier delay, TimeUnit unit) {
     schedule(() -> {
       runCommand(command);
-      scheduleWithRandomDelay(command, minDelay, maxDelay, unit);
-    }, RandomUtil.getRandomLong(minDelay.getAsLong(), maxDelay.getAsLong()), unit);
+      scheduleWithDynamicDelay(command, delay, unit);
+    }, delay.getAsLong(), unit);
   }
 
   public void drainQueue() {

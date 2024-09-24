@@ -51,7 +51,7 @@ public class AutoTotem implements InternalPlugin {
       return;
     }
 
-    connection.scheduler().scheduleWithRandomDelay(
+    connection.scheduler().scheduleWithDynamicDelay(
       () -> {
         var dataManager = connection.dataManager();
         var inventoryManager = dataManager.inventoryManager();
@@ -88,8 +88,7 @@ public class AutoTotem implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      () -> settingsSource.get(AutoTotemSettings.DELAY.min()),
-      () -> settingsSource.get(AutoTotemSettings.DELAY.max()),
+      settingsSource.getRandom(AutoTotemSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }
 

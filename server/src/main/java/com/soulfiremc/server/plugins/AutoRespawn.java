@@ -27,7 +27,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.RandomUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -73,9 +72,7 @@ public class AutoRespawn implements InternalPlugin {
             connection
               .session()
               .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
-          RandomUtil.getRandomInt(
-            settingsSource.get(AutoRespawnSettings.DELAY.min()),
-            settingsSource.get(AutoRespawnSettings.DELAY.max())),
+          settingsSource.getRandom(AutoRespawnSettings.DELAY).getAsLong(),
           TimeUnit.SECONDS);
     }
   }

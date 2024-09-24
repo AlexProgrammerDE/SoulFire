@@ -27,7 +27,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.RandomUtil;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -59,9 +58,7 @@ public class ServerListBypass implements InternalPlugin {
 
     factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
     TimeUtil.waitTime(
-      RandomUtil.getRandomInt(
-        settingsSource.get(ServerListBypassSettings.DELAY.min()),
-        settingsSource.get(ServerListBypassSettings.DELAY.max())),
+      settingsSource.getRandom(ServerListBypassSettings.DELAY).getAsLong(),
       TimeUnit.SECONDS);
   }
 

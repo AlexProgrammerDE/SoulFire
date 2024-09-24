@@ -52,7 +52,7 @@ public class AutoEat implements InternalPlugin {
       return;
     }
 
-    connection.scheduler().scheduleWithRandomDelay(
+    connection.scheduler().scheduleWithDynamicDelay(
       () -> {
         var dataManager = connection.dataManager();
 
@@ -95,8 +95,7 @@ public class AutoEat implements InternalPlugin {
           inventoryManager.unlockInventoryControl();
         }
       },
-      () -> settingsSource.get(AutoEatSettings.DELAY.min()),
-      () -> settingsSource.get(AutoEatSettings.DELAY.max()),
+      settingsSource.getRandom(AutoEatSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }
 

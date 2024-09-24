@@ -52,13 +52,12 @@ public class AutoChatMessage implements InternalPlugin {
       return;
     }
 
-    connection.scheduler().scheduleWithRandomDelay(
+    connection.scheduler().scheduleWithDynamicDelay(
       () -> {
         var botControl = connection.botControl();
         botControl.sendMessage(RandomUtil.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },
-      () -> settingsSource.get(AutoChatMessageSettings.DELAY.min()),
-      () -> settingsSource.get(AutoChatMessageSettings.DELAY.max()),
+      settingsSource.getRandom(AutoChatMessageSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }
 

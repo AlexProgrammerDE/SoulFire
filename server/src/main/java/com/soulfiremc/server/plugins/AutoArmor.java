@@ -118,14 +118,13 @@ public class AutoArmor implements InternalPlugin {
       return;
     }
 
-    connection.scheduler().scheduleWithRandomDelay(
+    connection.scheduler().scheduleWithDynamicDelay(
       () -> {
         for (var type : ArmorType.VALUES) {
           putOn(connection.dataManager().inventoryManager(), type);
         }
       },
-      () -> settingsSource.get(AutoArmorSettings.DELAY.min()),
-      () -> settingsSource.get(AutoArmorSettings.DELAY.max()),
+      settingsSource.getRandom(AutoArmorSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }
 

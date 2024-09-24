@@ -28,7 +28,6 @@ import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import lombok.AccessLevel;
@@ -57,7 +56,7 @@ public class AntiAFK implements InternalPlugin {
 
     connection
       .scheduler()
-      .scheduleWithRandomDelay(
+      .scheduleWithDynamicDelay(
         () -> {
           log.info("Moving bot to prevent AFK");
           PathExecutor.executePathfinding(
@@ -67,11 +66,10 @@ public class AntiAFK implements InternalPlugin {
                 .dataManager()
                 .clientEntity()
                 .pos()),
-              settingsSource.get(AntiAFKSettings.DISTANCE)),
+              settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
             new CompletableFuture<>());
         },
-        () -> settingsSource.get(AntiAFKSettings.DELAY.min()),
-        () -> settingsSource.get(AntiAFKSettings.DELAY.max()),
+        settingsSource.getRandom(AntiAFKSettings.DELAY).asLongSupplier(),
         TimeUnit.SECONDS);
   }
 
@@ -100,14 +98,23 @@ public class AntiAFK implements InternalPlugin {
         "Enable Anti AFK",
         "Enable the Anti AFK feature",
         false);
-    public static final IntProperty DISTANCE = BUILDER.ofInt(
-      "distance",
-      "Distance to walk",
-      "Distance the bot should walk during pathfinding",
-      10,
-      1,
-      Integer.MAX_VALUE,
-      1);
+    public static final MinMaxPropertyLink DISTANCE = new MinMaxPropertyLink(
+      BUILDER.ofInt(
+        "min-distance",
+        "Min distance (blocks)",
+        "Minimum distance to walk",
+        10,
+        1,
+        Integer.MAX_VALUE,
+        1),
+      BUILDER.ofInt(
+        "max-distance",
+        "Max distance (blocks)",
+        "Maximum distance to walk",
+        30,
+        1,
+        Integer.MAX_VALUE,
+        1));
     public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
       BUILDER.ofInt(
         "min-delay",

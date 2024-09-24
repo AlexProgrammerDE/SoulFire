@@ -49,7 +49,7 @@ public class AutoJump implements InternalPlugin {
       return;
     }
 
-    connection.scheduler().scheduleWithRandomDelay(
+    connection.scheduler().scheduleWithDynamicDelay(
       () -> {
         var dataManager = connection.dataManager();
         var clientEntity = dataManager.clientEntity();
@@ -60,8 +60,7 @@ public class AutoJump implements InternalPlugin {
           clientEntity.jump();
         }
       },
-      () -> settingsSource.get(AutoJumpSettings.DELAY.min()),
-      () -> settingsSource.get(AutoJumpSettings.DELAY.max()),
+      settingsSource.getRandom(AutoJumpSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }
 
