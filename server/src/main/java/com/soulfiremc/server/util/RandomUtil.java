@@ -25,7 +25,7 @@ public class RandomUtil {
 
   public static int getRandomInt(int min, int max) {
     if (min > max) {
-      throw new IllegalArgumentException("max must be greater than min");
+      throw new IllegalArgumentException("min must not be greater than max");
     }
 
     if (min == max) {
