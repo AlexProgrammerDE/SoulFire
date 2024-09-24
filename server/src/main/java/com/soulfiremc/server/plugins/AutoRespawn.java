@@ -79,7 +79,7 @@ public class AutoRespawn implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", PLUGIN_INFO, "repeat");
   }
 
   @Override

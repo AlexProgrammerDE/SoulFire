@@ -64,12 +64,12 @@ public class ServerSettingsRegistry {
     return builder.build();
   }
 
-  public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName) {
-    return addClass(clazz, pageName, null);
+  public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
+    return addClass(clazz, pageName, null, iconId);
   }
 
   public ServerSettingsRegistry addClass(
-    Class<? extends SettingsObject> clazz, String pageName, @Nullable PluginInfo owningPlugin) {
+    Class<? extends SettingsObject> clazz, String pageName, @Nullable PluginInfo owningPlugin, String iconId) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
         && Modifier.isFinal(field.getModifiers())
@@ -85,7 +85,7 @@ public class ServerSettingsRegistry {
 
           var registry = namespaceMap.get(property.namespace());
           if (registry == null) {
-            registry = new NamespaceRegistry(owningPlugin, pageName, new ArrayList<>());
+            registry = new NamespaceRegistry(owningPlugin, pageName, new ArrayList<>(), iconId);
             namespaceMap.put(property.namespace(), registry);
           }
 
@@ -216,7 +216,8 @@ public class ServerSettingsRegistry {
         .setType(type)
         .setPageName(namespaceRegistry.pageName)
         .setNamespace(namespaceEntry.getKey())
-        .addAllEntries(entries);
+        .addAllEntries(entries)
+        .setIconId(namespaceRegistry.iconId);
 
       if (namespaceRegistry.owningPlugin != null) {
         settingsPageBuilder.setOwningPlugin(namespaceRegistry.owningPlugin.id());
@@ -243,5 +244,5 @@ public class ServerSettingsRegistry {
       .setDescription(property.description());
   }
 
-  private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties) {}
+  private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties, String iconId) {}
 }

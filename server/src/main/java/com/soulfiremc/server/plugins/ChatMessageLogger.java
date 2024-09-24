@@ -84,7 +84,7 @@ public class ChatMessageLogger implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger", PLUGIN_INFO, "logs");
   }
 
   @Override

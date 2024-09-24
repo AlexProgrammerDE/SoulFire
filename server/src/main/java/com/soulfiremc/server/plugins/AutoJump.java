@@ -66,7 +66,7 @@ public class AutoJump implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump", PLUGIN_INFO, "footprints");
   }
 
   @Override

@@ -45,7 +45,7 @@ public class AutoReconnect implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect", PLUGIN_INFO, "refresh-ccw");
   }
 
   @Override

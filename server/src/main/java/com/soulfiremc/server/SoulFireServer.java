@@ -184,15 +184,15 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       new ServerSettingsRegistryInitEvent(
         serverSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.SERVER)
-            .addClass(DevSettings.class, "Dev Settings")));
+            .addClass(DevSettings.class, "Dev Settings", "bug")));
     postEvent(
       new InstanceSettingsRegistryInitEvent(
         instanceSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.INSTANCE)
             // Needs Via loaded to have all protocol versions
-            .addClass(BotSettings.class, "Bot Settings")
-            .addClass(AccountSettings.class, "Account Settings")
-            .addClass(ProxySettings.class, "Proxy Settings")));
+            .addClass(BotSettings.class, "Bot Settings", "bot")
+            .addClass(AccountSettings.class, "Account Settings", "users")
+            .addClass(ProxySettings.class, "Proxy Settings", "waypoints")));
 
     log.info("Loading instances...");
     loadInstances();

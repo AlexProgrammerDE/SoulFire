@@ -64,7 +64,7 @@ public class ServerListBypass implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass", PLUGIN_INFO, "network");
   }
 
   @Override

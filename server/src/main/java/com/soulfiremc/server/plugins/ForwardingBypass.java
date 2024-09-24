@@ -160,7 +160,7 @@ public class ForwardingBypass implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass", PLUGIN_INFO, "milestone");
   }
 
   @Override

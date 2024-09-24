@@ -45,7 +45,7 @@ public class KillAura implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", PLUGIN_INFO);
+    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", PLUGIN_INFO, "skull");
   }
 
   @Override

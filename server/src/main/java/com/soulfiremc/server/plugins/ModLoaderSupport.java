@@ -63,7 +63,7 @@ public class ModLoaderSupport implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", PLUGIN_INFO, "package");
   }
 
   private static String createFMLAddress(String initialHostname) {

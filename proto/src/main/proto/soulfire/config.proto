@@ -110,6 +110,8 @@ message SettingsPage {
   // What namespace the settings of this page represent
   string namespace = 4;
   repeated SettingEntry entries = 5;
+  // https://lucide.dev icon id for this page (Usually rendered left of the page name)
+  string iconId = 6;
 }
 
 message PermissionMessage {

@@ -130,7 +130,7 @@ public class AutoArmor implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor", PLUGIN_INFO, "shield");
   }
 
   @Override

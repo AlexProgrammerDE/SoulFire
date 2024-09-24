@@ -101,7 +101,7 @@ public class AutoEat implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat", PLUGIN_INFO, "drumstick");
   }
 
   @Override

@@ -97,7 +97,7 @@ public class ClientSettings implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", PLUGIN_INFO, "settings-2");
   }
 
   @Override

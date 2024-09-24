@@ -68,7 +68,7 @@ public class ClientBrand implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand", PLUGIN_INFO, "fingerprint");
   }
 
   @Override

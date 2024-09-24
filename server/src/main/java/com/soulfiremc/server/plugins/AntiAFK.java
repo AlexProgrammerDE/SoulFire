@@ -75,7 +75,7 @@ public class AntiAFK implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AntiAFKSettings.class, "Anti AFK", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AntiAFKSettings.class, "Anti AFK", PLUGIN_INFO, "activity");
   }
 
   @Override

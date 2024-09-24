@@ -94,7 +94,7 @@ public class AutoTotem implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoTotemSettings.class, "Auto Totem", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoTotemSettings.class, "Auto Totem", PLUGIN_INFO, "cross");
   }
 
   @Override

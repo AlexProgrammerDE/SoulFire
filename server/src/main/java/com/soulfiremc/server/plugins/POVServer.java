@@ -164,7 +164,7 @@ public class POVServer implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", PLUGIN_INFO);
+    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", PLUGIN_INFO, "view");
   }
 
   private static GameProfile getFakePlayerListEntry(Component text) {

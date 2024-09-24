@@ -70,7 +70,7 @@ public class ChatControl implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control", PLUGIN_INFO);
+    event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control", PLUGIN_INFO, "joystick");
   }
 
   @Override

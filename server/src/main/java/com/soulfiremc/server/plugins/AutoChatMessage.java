@@ -63,7 +63,7 @@ public class AutoChatMessage implements InternalPlugin {
 
   @EventHandler
   public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoChatMessageSettings.class, "Auto Chat Message", PLUGIN_INFO);
+    event.settingsRegistry().addClass(AutoChatMessageSettings.class, "Auto Chat Message", PLUGIN_INFO, "message-circle-code");
   }
 
   @Override
