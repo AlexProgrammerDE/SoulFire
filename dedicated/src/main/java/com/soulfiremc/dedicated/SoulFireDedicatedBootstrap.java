@@ -51,8 +51,6 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var host = getRPCHost("0.0.0.0");
     var port = getRPCPort(PortHelper.SF_DEFAULT_PORT);
 
-    log.info("Starting dedicated server on {}:{}", host, port);
-
     GenericTerminalConsole.setupStreams();
     var soulFire =
       new SoulFireServer(host, port, pluginManager, START_TIME, new DefaultAuthSystem(), getBaseDirectory());
