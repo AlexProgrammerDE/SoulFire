@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -59,10 +60,10 @@ public class DualMap<L, R> {
   }
 
   public R getRight(L key) {
-    return map.get(key);
+    return Objects.requireNonNull(map.get(key), () -> "Could not find mapping " + key);
   }
 
   public L getLeft(R value) {
-    return reverseMap.get(value);
+    return Objects.requireNonNull(reverseMap.get(value), () -> "Could not find mapping " + value);
   }
 }
