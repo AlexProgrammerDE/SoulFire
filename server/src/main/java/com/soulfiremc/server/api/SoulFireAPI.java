@@ -41,6 +41,7 @@ public class SoulFireAPI {
         new AutoChatMessage(),
         new AutoArmor(),
         new AutoEat(),
+        new AntiAFK(),
         new ChatMessageLogger(),
         new ServerListBypass(),
         new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
