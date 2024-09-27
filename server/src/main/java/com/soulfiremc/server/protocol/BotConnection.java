@@ -248,11 +248,11 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
     throw new UnsupportedOperationException("Not implemented yet!");
   }
 
-  public void joinServerId(String serverId, ViaClientSession session) {
+  public void joinServerId(String serverId) {
     try {
       var javaData = (OnlineJavaDataLike) minecraftAccount.accountData();
       sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
-      session.logger().debug("Successfully sent mojang join request!");
+      logger.debug("Successfully sent mojang join request!");
     } catch (Exception e) {
       session.disconnect(Component.translatable("disconnect.loginFailedInfo", e.getMessage()), e);
     }

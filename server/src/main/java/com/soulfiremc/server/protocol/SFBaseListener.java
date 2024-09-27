@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -73,10 +72,6 @@ public class SFBaseListener extends SessionAdapter {
   @SneakyThrows
   @Override
   public void packetReceived(Session session, Packet packet) {
-    if (!(session instanceof ViaClientSession viaSession)) {
-      throw new IllegalStateException("Session is not a ViaSession!");
-    }
-
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
     if (protocol.getInboundState() == ProtocolState.LOGIN) {
       if (packet instanceof ClientboundHelloPacket helloPacket) {
@@ -107,7 +102,7 @@ public class SFBaseListener extends SessionAdapter {
             var serverId =
               SessionService.getServerId(
                 helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-            botConnection.joinServerId(serverId, viaSession);
+            botConnection.joinServerId(serverId);
           } else {
             botConnection
               .logger()
@@ -133,7 +128,7 @@ public class SFBaseListener extends SessionAdapter {
         session.disconnect(loginDisconnectPacket.getReason());
       } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
         if (loginCompressionPacket.getThreshold() >= 0) {
-          viaSession.setCompression(new CompressionConfig(loginCompressionPacket.getThreshold(), new ZlibCompression(), true));
+          session.setCompression(new CompressionConfig(loginCompressionPacket.getThreshold(), new ZlibCompression(), true));
         }
       }
     } else if (protocol.getInboundState() == ProtocolState.STATUS) {
