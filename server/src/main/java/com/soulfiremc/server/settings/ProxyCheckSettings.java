@@ -1,0 +1,71 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.settings;
+
+import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
+import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.StringProperty;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class ProxyCheckSettings implements SettingsObject {
+  private static final Property.Builder BUILDER =
+    Property.builder("proxy-check");
+  public static final MinMaxPropertyLink CHECK_DELAY =
+    new MinMaxPropertyLink(
+      BUILDER.ofInt(
+        "check-min-delay",
+        "Min Check Delay (ms)",
+        "Minimum delay between checks in milliseconds",
+        500,
+        0,
+        Integer.MAX_VALUE,
+        1),
+      BUILDER.ofInt(
+        "check-max-delay",
+        "Max Check Delay (ms)",
+        "Maximum delay between checks in milliseconds",
+        2000,
+        0,
+        Integer.MAX_VALUE,
+        1));
+  public static final IntProperty CONCURRENT_CHECKS =
+    BUILDER.ofInt(
+      "concurrent-checks",
+      "Concurrent Checks",
+      "Max amount of proxies to check at the same time",
+      3,
+      1,
+      Integer.MAX_VALUE,
+      1);
+  public static final StringProperty ADDRESS =
+    BUILDER.ofString(
+      "address",
+      "Address",
+      "Address to use for checking",
+      "hypixel.net");
+  public static final StringProperty DESCRIPTION_MATCH =
+    BUILDER.ofString(
+      "description-match",
+      "Description Match",
+      "String to match in the description of the server. Some proxies ping the wrong server.",
+      "Hypixel Network");
+}

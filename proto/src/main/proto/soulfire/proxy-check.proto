@@ -8,20 +8,14 @@ package soulfire.v1;
 import "soulfire/common.proto";
 
 message ProxyCheckRequest {
-  enum Target {
-    IPIFY = 0;
-    AWS = 1;
-  }
-
+  string instanceId = 3;
   repeated ProxyProto proxy = 1;
-  Target target = 2;
 }
 
 message ProxyCheckResponseSingle {
   ProxyProto proxy = 1;
   bool valid = 2;
-  int32 latency = 3;
-  string realIp = 4;
+  optional int32 latency = 3;
 }
 
 message ProxyCheckResponse {
