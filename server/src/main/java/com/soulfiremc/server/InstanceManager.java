@@ -311,12 +311,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
             break;
           }
 
-          try {
-            connectSemaphore.acquire();
-          } catch (InterruptedException e) {
-            logger.error("Error while waiting for connection slot", e);
-            break;
-          }
+          TimeUtil.acquireYielding(connectSemaphore);
 
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(

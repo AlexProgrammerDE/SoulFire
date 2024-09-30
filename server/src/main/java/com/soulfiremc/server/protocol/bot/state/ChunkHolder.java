@@ -24,6 +24,7 @@ import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
 import com.soulfiremc.server.util.NoopLock;
+import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -64,7 +65,7 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   private ChunkData getChunkFromSection(long sectionIndex) {
-    readLock.lock();
+    TimeUtil.lockYielding(readLock);
     try {
       return chunks.get(sectionIndex);
     } finally {
@@ -73,7 +74,7 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public boolean isChunkLoaded(int x, int z) {
-    readLock.lock();
+    TimeUtil.lockYielding(readLock);
     try {
       return chunks.containsKey(ChunkKey.calculateKey(x, z));
     } finally {
@@ -87,7 +88,7 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public void removeChunk(int x, int z) {
-    writeLock.lock();
+    TimeUtil.lockYielding(writeLock);
     try {
       chunks.remove(ChunkKey.calculateKey(x, z));
     } finally {
@@ -96,7 +97,7 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public ChunkData getOrCreateChunk(int x, int z) {
-    writeLock.lock();
+    TimeUtil.lockYielding(writeLock);
     try {
       return chunks.computeIfAbsent(
         ChunkKey.calculateKey(x, z), (key) -> new ChunkData(levelHeightAccessor, false));
