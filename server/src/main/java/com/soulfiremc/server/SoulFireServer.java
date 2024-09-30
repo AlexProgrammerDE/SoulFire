@@ -71,7 +71,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,7 +100,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
-  private final Map<String, String> serviceServerConfig = new HashMap<>();
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final RPCServer rpcServer;
   private final ServerSettingsRegistry serverSettingsRegistry;
