@@ -341,7 +341,9 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
             TimeUnit.MILLISECONDS);
         }
 
-        this.attackLifecycle = AttackLifecycle.RUNNING;
+        if (this.attackLifecycle == AttackLifecycle.STARTING) {
+          this.attackLifecycle = AttackLifecycle.RUNNING;
+        }
       });
   }
 
