@@ -50,14 +50,14 @@ public class AntiAFK implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AntiAFKSettings.ENABLED)) {
-      return;
-    }
-
     connection
       .scheduler()
       .scheduleWithDynamicDelay(
         () -> {
+          if (!settingsSource.get(AntiAFKSettings.ENABLED)) {
+            return;
+          }
+
           log.info("Moving bot to prevent AFK");
           PathExecutor.executePathfinding(
             connection,

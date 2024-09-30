@@ -45,12 +45,12 @@ public class AutoJump implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoJumpSettings.ENABLED)) {
-      return;
-    }
-
     connection.scheduler().scheduleWithDynamicDelay(
       () -> {
+        if (!settingsSource.get(AutoJumpSettings.ENABLED)) {
+          return;
+        }
+
         var dataManager = connection.dataManager();
         var clientEntity = dataManager.clientEntity();
         if (clientEntity != null

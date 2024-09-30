@@ -114,12 +114,12 @@ public class AutoArmor implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoArmorSettings.ENABLED)) {
-      return;
-    }
-
     connection.scheduler().scheduleWithDynamicDelay(
       () -> {
+        if (!settingsSource.get(AutoArmorSettings.ENABLED)) {
+          return;
+        }
+
         for (var type : ArmorType.VALUES) {
           putOn(connection.dataManager().inventoryManager(), type);
         }

@@ -47,12 +47,12 @@ public class AutoTotem implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoTotemSettings.ENABLED)) {
-      return;
-    }
-
     connection.scheduler().scheduleWithDynamicDelay(
       () -> {
+        if (!settingsSource.get(AutoTotemSettings.ENABLED)) {
+          return;
+        }
+
         var dataManager = connection.dataManager();
         var inventoryManager = dataManager.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();

@@ -48,12 +48,12 @@ public class AutoChatMessage implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoChatMessageSettings.ENABLED)) {
-      return;
-    }
-
     connection.scheduler().scheduleWithDynamicDelay(
       () -> {
+        if (!settingsSource.get(AutoChatMessageSettings.ENABLED)) {
+          return;
+        }
+
         var botControl = connection.botControl();
         botControl.sendMessage(RandomUtil.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },

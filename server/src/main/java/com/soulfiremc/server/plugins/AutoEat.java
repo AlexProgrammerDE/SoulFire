@@ -48,12 +48,12 @@ public class AutoEat implements InternalPlugin {
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
-    if (!settingsSource.get(AutoEatSettings.ENABLED)) {
-      return;
-    }
-
     connection.scheduler().scheduleWithDynamicDelay(
       () -> {
+        if (!settingsSource.get(AutoEatSettings.ENABLED)) {
+          return;
+        }
+
         var dataManager = connection.dataManager();
 
         var healthData = dataManager.healthData();
