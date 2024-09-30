@@ -76,6 +76,9 @@ import java.util.function.ToIntFunction;
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
 
+/**
+ * Holds and configures all server-side text commands of SoulFire itself.
+ */
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =

@@ -56,6 +56,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Represents a single instance.
+ * An instance persists settings over restarts and managed attack session and attack state.
+ */
 @Getter
 public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
   private static final Gson GSON = new Gson();

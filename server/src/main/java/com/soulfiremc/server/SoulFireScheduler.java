@@ -27,6 +27,10 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 
+/**
+ * Lightweight scheduler for async tasks.
+ * Used for most of the async tasks in the server, bots and plugins.
+ */
 public class SoulFireScheduler implements Executor {
   private static final ForkJoinPool SF_FORK_JOIN_POOL = new ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
     ForkJoinPool.defaultForkJoinWorkerThreadFactory,

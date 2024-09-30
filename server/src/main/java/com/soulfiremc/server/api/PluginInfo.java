@@ -24,6 +24,16 @@ import org.pf4j.PluginDescriptor;
 
 import java.lang.reflect.Field;
 
+/**
+ * Represents information about a plugin.
+ * All data can be shown to the user.
+ *
+ * @param id          The plugin ID
+ * @param version     The plugin version
+ * @param description The plugin description
+ * @param author      The plugin author
+ * @param license     The plugin license
+ */
 public record PluginInfo(String id, String version, String description, String author, String license) {
   private static final Field PLUGIN_DESCRIPTOR_FIELD;
 
@@ -36,6 +46,13 @@ public record PluginInfo(String id, String version, String description, String a
     }
   }
 
+  /**
+   * Creates a new PluginInfo instance from the given plugin class.
+   *
+   * @param clazz The plugin class
+   *              (must be loaded by a {@link PluginClassLoader})
+   * @return The PluginInfo instance
+   */
   @SneakyThrows
   public static PluginInfo fromClassLoader(Class<?> clazz) {
     var plugin = (PluginClassLoader) clazz.getClassLoader();

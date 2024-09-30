@@ -48,6 +48,11 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+/**
+ * The RPC server for the SoulFire server.
+ * This server is used to communicate with the SoulFire client.
+ * The CLI may also use this RPC server to communicate with the SoulFire server.
+ */
 @Slf4j
 public class RPCServer {
   @Getter

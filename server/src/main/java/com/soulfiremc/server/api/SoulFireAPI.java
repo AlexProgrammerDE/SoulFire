@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Holds all instances of plugins running in this JVM.
+ * The SoulFire server accesses this class on startup and advertises itself to all plugins.
+ */
 public class SoulFireAPI {
   private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
 

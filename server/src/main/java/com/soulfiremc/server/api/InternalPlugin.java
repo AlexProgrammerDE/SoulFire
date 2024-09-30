@@ -17,5 +17,8 @@
  */
 package com.soulfiremc.server.api;
 
+/**
+ * This interface is for internal server plugins.
+ */
 public non-sealed interface InternalPlugin extends Plugin {
 }
