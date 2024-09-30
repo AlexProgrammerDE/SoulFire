@@ -42,8 +42,12 @@ public class TimeUtil {
         }
 
         public boolean block() throws InterruptedException {
-          Thread.sleep(1);
-          return System.nanoTime() >= endTime;
+          var remainingTime = endTime - System.nanoTime();
+          if (remainingTime > 0) {
+            Thread.sleep(remainingTime / NANOSECONDS_PER_MILLISECOND, (int) (remainingTime % NANOSECONDS_PER_MILLISECOND));
+          }
+
+          return true;
         }
       });
     } catch (InterruptedException e) {
