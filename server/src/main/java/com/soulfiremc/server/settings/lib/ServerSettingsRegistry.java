@@ -21,6 +21,8 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.settings.property.*;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.common.returnsreceiver.qual.This;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
@@ -64,10 +66,34 @@ public class ServerSettingsRegistry {
     return builder.build();
   }
 
+  /**
+   * Registers an internal class with the settings registry.
+   * This is for classes associated to internal settings.
+   *
+   * @param clazz    The class to register
+   * @param pageName The name of the page
+   * @param iconId   The icon id
+   *                 Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
+   * @return The registry
+   */
+  @This
+  @ApiStatus.Internal
   public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
     return addClass(clazz, pageName, null, iconId);
   }
 
+  /**
+   * Registers an internal class with the settings registry.
+   * This is normally used for plugins, provide your plugin info to register the settings to your plugin.
+   *
+   * @param clazz        The class to register
+   * @param pageName     The name of the page
+   * @param owningPlugin The owning plugin
+   * @param iconId       The icon id
+   *                     Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
+   * @return The registry
+   */
+  @This
   public ServerSettingsRegistry addClass(
     Class<? extends SettingsObject> clazz, String pageName, @Nullable PluginInfo owningPlugin, String iconId) {
     for (var field : clazz.getDeclaredFields()) {
