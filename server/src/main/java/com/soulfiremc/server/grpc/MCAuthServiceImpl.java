@@ -20,7 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.user.Permissions;
-import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
 import io.grpc.Status;
@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
-import java.util.concurrent.Semaphore;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -49,18 +48,8 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var service = MCAuthService.convertService(request.getService());
       var proxy = convertProxy(request::hasProxy, request::getProxy);
-      var semaphore = new Semaphore(request.getMaxConcurrency());
-      var results = request.getPayloadList()
-        .parallelStream()
-        .map(payload -> {
-          try {
-            TimeUtil.acquireYielding(semaphore);
-            return service.createDataAndLogin(payload, proxy).join().toProto();
-          } finally {
-            semaphore.release();
-          }
-        })
-        .toList();
+      var results = SFHelpers.maxFutures(request.getMaxConcurrency(), request.getPayloadList(), payload ->
+        service.createDataAndLogin(payload, proxy).thenApply(MinecraftAccount::toProto));
 
       responseObserver.onNext(CredentialsAuthResponse.newBuilder().addAllAccount(results).build());
       responseObserver.onCompleted();

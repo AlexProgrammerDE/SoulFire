@@ -20,9 +20,10 @@ package com.soulfiremc.server.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.OptionalInt;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 public class SFHelpers {
   private SFHelpers() {}
@@ -75,5 +76,22 @@ public class SFHelpers {
       Files.createDirectories(path.getParent());
       Files.writeString(path, content);
     }
+  }
+
+  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture) {
+    final var sourceIter = source.iterator();
+    final var futures = new ArrayList<CompletableFuture<T>>(maxFutures);
+    final var result = new ArrayList<T>(source.size());
+    while (sourceIter.hasNext()) {
+      while (futures.size() < maxFutures && sourceIter.hasNext()) {
+        futures.add(toFuture.apply(sourceIter.next()));
+      }
+
+      CompletableFuture.anyOf(futures.toArray(CompletableFuture[]::new)).join();
+      futures.removeIf(CompletableFuture::isDone);
+    }
+
+    CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
+    return result;
   }
 }
