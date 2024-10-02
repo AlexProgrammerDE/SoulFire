@@ -84,7 +84,13 @@ public class SFHelpers {
     final var result = new ArrayList<T>(source.size());
     while (sourceIter.hasNext()) {
       while (futures.size() < maxFutures && sourceIter.hasNext()) {
-        futures.add(toFuture.apply(sourceIter.next()));
+        futures.add(toFuture.apply(sourceIter.next()).thenApply(r -> {
+          synchronized (result) {
+            result.add(r);
+          }
+
+          return r;
+        }));
       }
 
       CompletableFuture.anyOf(futures.toArray(CompletableFuture[]::new)).join();
