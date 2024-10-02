@@ -26,13 +26,13 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class BuildSchematicController {
-  private final Map<Vector3i, BlockType> blocks;
+  private final Map<Vector3i, BlockType> absoluteBlocks;
 
   public BuildSchematicController(Map<Vector3i, BlockType> relativeBlocks, Vector3i base) {
     this(new Object2ObjectOpenHashMap<>());
 
     for (var entry : relativeBlocks.entrySet()) {
-      this.blocks.put(entry.getKey().add(base), entry.getValue());
+      this.absoluteBlocks.put(entry.getKey().add(base), entry.getValue());
     }
   }
 }

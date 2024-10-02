@@ -21,7 +21,8 @@ import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
-import com.soulfiremc.server.pathfinding.goals.BreakAnyBlockPosGoal;
+import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
+import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
 import com.soulfiremc.server.protocol.BotConnection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -80,7 +82,7 @@ public class CollectBlockController {
       log.info("Found {} possible blocks to collect", blockPos.size());
 
       var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new BreakAnyBlockPosGoal(blockPos), pathFuture);
+      PathExecutor.executePathfinding(bot, new CompositeGoal(blockPos.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet())), pathFuture);
 
       try {
         pathFuture.get();

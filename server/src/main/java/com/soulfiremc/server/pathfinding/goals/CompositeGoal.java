@@ -19,24 +19,30 @@ package com.soulfiremc.server.pathfinding.goals;
 
 import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
 import java.util.List;
 import java.util.Set;
 
-public record BreakAnyBlockPosGoal(Set<SFVec3i> goals) implements GoalScorer {
+/**
+ * Goal that is a composite of multiple goals.
+ * This goal is completed if any of the goals are completed.
+ * The closest goal is always chosen as the current goal.
+ *
+ * @param goals the goals to composite
+ */
+public record CompositeGoal(Set<GoalScorer> goals) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return goals.stream().mapToDouble(blockPosition::distance)
+    return goals.stream().mapToDouble(goal -> goal.computeScore(graph, blockPosition, actions))
       .min().orElseThrow(() -> new IllegalStateException("No goals provided"));
   }
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    for (var action : current.actions()) {
-      if (action instanceof BlockBreakAction breakBlockAction && goals.contains(breakBlockAction.blockPosition())) {
+    for (var goal : goals) {
+      if (goal.isFinished(current)) {
         return true;
       }
     }
