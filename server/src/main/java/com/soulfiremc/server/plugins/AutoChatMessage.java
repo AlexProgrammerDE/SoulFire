@@ -40,7 +40,7 @@ public class AutoChatMessage implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(
     "auto-chat-message",
     "1.0.0",
-    "Automatically jumps randomly",
+    "Automatically sends messages in a configured delay",
     "AlexProgrammerDE",
     "GPL-3.0"
   );
