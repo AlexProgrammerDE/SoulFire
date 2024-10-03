@@ -48,7 +48,7 @@ This repository only contains the CLI and server implementation. The official GU
 ## 🖥 Installation
 
 > [!TIP]
-> Want to check out how SoulFire looks before installing it? Check out the official [demo page](https://demo.soulfiremc.com).
+> Want to check out how SoulFire looks before installing it? Take a look at the official [demo page](https://demo.soulfiremc.com).
 
 For installing SoulFire, please refer to the [installation guide](https://soulfiremc.com/docs/installation).
 
