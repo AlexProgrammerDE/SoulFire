@@ -357,7 +357,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
 
     if (state == null || state != clientEntity) {
-      log.warn("Received death for unknown or invalid entity {}", packet.getPlayerId());
+      log.debug("Received death for unknown or invalid entity {}", packet.getPlayerId());
       return;
     }
 
@@ -541,7 +541,7 @@ public final class SessionDataManager {
     var container = inventoryManager.getContainer(packet.getContainerId());
 
     if (container == null) {
-      log.warn(
+      log.debug(
         "Received container content update for unknown container {}", packet.getContainerId());
       return;
     }
@@ -562,7 +562,7 @@ public final class SessionDataManager {
     var container = inventoryManager.getContainer(packet.getContainerId());
 
     if (container == null) {
-      log.warn("Received container slot update for unknown container {}", packet.getContainerId());
+      log.debug("Received container slot update for unknown container {}", packet.getContainerId());
       return;
     }
 
@@ -574,7 +574,7 @@ public final class SessionDataManager {
     var container = inventoryManager.getContainer(packet.getContainerId());
 
     if (container == null) {
-      log.warn("Received container data update for unknown container {}", packet.getContainerId());
+      log.debug("Received container data update for unknown container {}", packet.getContainerId());
       return;
     }
 
@@ -819,7 +819,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity metadata packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity metadata packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -833,7 +833,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity attributes packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity attributes packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -841,7 +841,7 @@ public final class SessionDataManager {
       var key = entry.getType().getIdentifier();
       var attributeType = AttributeType.REGISTRY.getByKey(key);
       if (attributeType == null) {
-        log.warn("Received unknown attribute type {}", key);
+        log.debug("Received unknown attribute type {}", key);
         continue;
       }
 
@@ -872,7 +872,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity event packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity event packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -884,7 +884,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received update effect packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received update effect packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -905,7 +905,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received remove effect packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received remove effect packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -917,7 +917,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity motion packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity motion packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -929,7 +929,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity position packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity position packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -942,7 +942,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity rotation packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity rotation packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -955,7 +955,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity head rotation packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity head rotation packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
@@ -967,7 +967,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn(
+      log.debug(
         "Received entity position rotation packet for unknown entity {}", packet.getEntityId());
       return;
     }
@@ -982,7 +982,7 @@ public final class SessionDataManager {
     var state = entityTrackerState.getEntity(packet.getEntityId());
 
     if (state == null) {
-      log.warn("Received entity teleport packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity teleport packet for unknown entity {}", packet.getEntityId());
       return;
     }
 
