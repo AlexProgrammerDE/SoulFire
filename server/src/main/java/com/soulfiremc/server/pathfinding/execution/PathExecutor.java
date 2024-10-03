@@ -25,7 +25,6 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
@@ -74,11 +73,9 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
-        var level = new ProjectedLevel(
-          dataManager.currentLevel(),
-          dataManager.currentLevel()
-            .chunks()
-            .immutableCopy());
+        var level = dataManager.currentLevel()
+          .chunks()
+          .immutableCopy();
         var inventory =
           new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(), pathConstraint);
         var start =

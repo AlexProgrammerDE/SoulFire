@@ -23,6 +23,7 @@ import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
+import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
@@ -37,7 +38,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,
-                             ProjectedLevel level, ProjectedInventory inventory,
+                             BlockAccessor blockAccessor, ProjectedInventory inventory,
                              PathConstraint pathConstraint) {
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends List<WrappedActionSubscription>>
@@ -141,7 +142,7 @@ public record MinecraftGraph(TagsState tagsState,
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
         absolutePositionBlock = node.blockPosition().add(key);
-        blockState = level.getBlockState(absolutePositionBlock);
+        blockState = blockAccessor.getBlockState(absolutePositionBlock);
 
         if (blockState.blockType() == BlockType.VOID_AIR) {
           throw new OutOfLevelException();

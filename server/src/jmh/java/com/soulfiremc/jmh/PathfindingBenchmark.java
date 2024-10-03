@@ -25,10 +25,8 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
-import com.soulfiremc.test.utils.TestLevelHeightAccessor;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
@@ -100,7 +98,7 @@ public class PathfindingBenchmark {
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-        new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
+        accessor,
         inventory,
         TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
 
