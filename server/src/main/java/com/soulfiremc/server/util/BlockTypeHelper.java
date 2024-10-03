@@ -66,7 +66,7 @@ public class BlockTypeHelper {
   }
 
   public static boolean isEmptyBlock(BlockType type) {
-    // Void air stands for unloaded blocks, so we do not know what is there
+    // Void air stands for not loaded blocks, so we do not know what is there
     return type.air() && type != BlockType.VOID_AIR;
   }
 }

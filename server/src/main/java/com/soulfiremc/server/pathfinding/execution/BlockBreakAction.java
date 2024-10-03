@@ -92,7 +92,7 @@ public final class BlockBreakAction implements WorldAction {
     if (remainingTicks == -1) {
       var optionalBlockType = level.getBlockState(blockPosition).blockType();
       if (optionalBlockType == BlockType.VOID_AIR) {
-        log.warn("Block at {} is not in view range!", blockPosition);
+        log.warn("Block at {} is not loaded!", blockPosition);
         return;
       }
 

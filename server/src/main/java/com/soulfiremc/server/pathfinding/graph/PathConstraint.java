@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
+import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
@@ -42,6 +43,10 @@ public class PathConstraint {
 
   public boolean isTool(SFItemStack item) {
     return ItemTypeHelper.isTool(item);
+  }
+
+  public boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
+    return blockState.blockType() == BlockType.VOID_AIR && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
   public boolean canBreakBlockPos(SFVec3i pos) {

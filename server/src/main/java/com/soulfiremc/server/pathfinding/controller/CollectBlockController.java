@@ -55,12 +55,7 @@ public class CollectBlockController {
       for (var x = -radius; x <= radius; x++) {
         for (var z = -radius; z <= radius; z++) {
           var blockPos = rootPosition.add(x, y, z);
-          var blockState = level.getBlockState(blockPos);
-          if (blockState.blockType() == BlockType.VOID_AIR) {
-            continue;
-          }
-
-          if (checker.test(blockState)) {
+          if (checker.test(level.getBlockState(blockPos))) {
             list.add(blockPos);
           }
         }

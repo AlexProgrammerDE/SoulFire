@@ -38,7 +38,8 @@ import java.util.function.Consumer;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,
-                             BlockAccessor blockAccessor, ProjectedInventory inventory,
+                             BlockAccessor blockAccessor,
+                             ProjectedInventory inventory,
                              PathConstraint pathConstraint) {
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends List<WrappedActionSubscription>>
@@ -144,7 +145,7 @@ public record MinecraftGraph(TagsState tagsState,
         absolutePositionBlock = node.blockPosition().add(key);
         blockState = blockAccessor.getBlockState(absolutePositionBlock);
 
-        if (blockState.blockType() == BlockType.VOID_AIR) {
+        if (pathConstraint.isOutOfLevel(blockState, absolutePositionBlock)) {
           throw new OutOfLevelException();
         }
       }

@@ -34,7 +34,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkHolder implements BlockAccessor {
-  private static final BlockState AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.AIR);
   private static final BlockState VOID_AIR_BLOCK_STATE = BlockState.forDefaultBlockType(BlockType.VOID_AIR);
   private final Long2ObjectOpenHashMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
   private final Lock readLock;
@@ -109,7 +108,7 @@ public class ChunkHolder implements BlockAccessor {
   @Override
   public BlockState getBlockState(int x, int y, int z) {
     if (levelHeightAccessor.isOutsideBuildHeight(y)) {
-      return AIR_BLOCK_STATE;
+      return VOID_AIR_BLOCK_STATE;
     }
 
     var chunkData = getChunk(SectionUtils.blockToSection(x), SectionUtils.blockToSection(z));
