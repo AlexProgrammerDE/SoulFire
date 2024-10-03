@@ -37,7 +37,12 @@ public class ArgumentTypeHelper {
   public static DoubleAxisData readAxis(StringReader reader) throws CommandSyntaxException {
     if (reader.canRead() && reader.peek() == '~') {
       reader.skip();
-      return new DoubleAxisData(true, reader.readDouble());
+      double value = 0;
+      if (reader.canRead() && reader.peek() != ' ') {
+        value = reader.readDouble();
+      }
+
+      return new DoubleAxisData(true, value);
     }
 
     return new DoubleAxisData(false, reader.readDouble());
