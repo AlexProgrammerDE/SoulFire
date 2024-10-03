@@ -47,6 +47,9 @@ This repository only contains the CLI and server implementation. The official GU
 
 ## 🖥 Installation
 
+> [!TIP]
+> Want to check out how SoulFire looks before installing it? Take a look at the official [demo page](https://demo.soulfiremc.com).
+
 For installing SoulFire, please refer to the [installation guide](https://soulfiremc.com/docs/installation).
 
 ## 🍿 Version support
@@ -74,8 +77,9 @@ If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](htt
 
 ## 🧵 Demo
 
-SoulFire has a built-in GUI for easy usage.
-![GUI](./assets/demo.png)
+SoulFire has a built-in GUI for easy usage. Try a SoulFire demo yourself at the [demo page](https://demo.soulfiremc.com).
+
+https://github.com/user-attachments/assets/81fbf91b-1aae-49ca-a101-bc3467e048e6
 
 ## ✨ Nightly builds
 
