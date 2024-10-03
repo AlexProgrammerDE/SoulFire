@@ -24,7 +24,6 @@ import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
@@ -35,20 +34,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
 public record MinecraftGraph(TagsState tagsState,
                              ProjectedLevel level, ProjectedInventory inventory,
-                             Predicate<SFVec3i> canBreakBlockPredicate,
-                             Predicate<SFVec3i> canPlaceBlockPredicate) {
+                             PathConstraint pathConstraint) {
   private static final Object2ObjectFunction<
     ? super SFVec3i, ? extends List<WrappedActionSubscription>>
     CREATE_MISSING_FUNCTION = k -> new ArrayList<>();
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
-  private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
 
   static {
     var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, List<WrappedActionSubscription>>();
@@ -83,40 +79,24 @@ public record MinecraftGraph(TagsState tagsState,
     }
   }
 
-  public MinecraftGraph(TagsState tagsState,
-                        ProjectedLevel level, ProjectedInventory inventory,
-                        boolean canBreakBlocks, boolean canPlaceBlocks) {
-    this(tagsState, level, inventory, v -> canBreakBlocks, v -> {
-      if (!canPlaceBlocks) {
-        return false;
-      }
-
-      return level.isPlaceable(v);
-    });
-  }
-
   public static boolean isBlockFree(BlockState blockState) {
     return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
   }
 
   public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return !inventory.creativeModeBreak();
+    return pathConstraint.doUsableBlocksDecreaseWhenPlaced();
   }
 
   public boolean disallowedToPlaceBlock(SFVec3i position) {
-    return !canPlaceBlockPredicate.test(position);
+    return !pathConstraint.canPlaceBlockPos(position);
   }
 
   public boolean disallowedToBreakBlock(SFVec3i position) {
-    return !canBreakBlockPredicate.test(position);
+    return !pathConstraint.canBreakBlockPos(position);
   }
 
-  public boolean disallowedToBreakType(BlockType blockType) {
-    if (!ALLOW_BREAKING_UNDIGGABLE) {
-      return !BlockTypeHelper.isDiggable(blockType);
-    }
-
-    return false;
+  public boolean disallowedToBreakBlockType(BlockType blockType) {
+    return !pathConstraint.canBreakBlockType(blockType);
   }
 
   public void insertActions(NodeState node, Consumer<GraphInstructions> callback) {

@@ -25,17 +25,16 @@ import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
-import com.soulfiremc.server.util.ItemTypeHelper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 /**
  * An immutable representation of a player inventory. This takes an inventory and projects changes
@@ -54,22 +53,16 @@ public class ProjectedInventory {
   private final ClientEntity entity;
   private final PlayerInventoryContainer playerInventory;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity,
-                            Predicate<SFItemStack> isPlaceable, Predicate<SFItemStack> isTool) {
+  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity, PathConstraint pathConstraint) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
         .filter(item -> item != null && item.getAmount() > 0)
         .toList(), entity, playerInventory,
-      isPlaceable, isTool);
+      pathConstraint);
   }
 
-  public ProjectedInventory(List<SFItemStack> items) {
-    this(items, null, null, ItemTypeHelper::isSafeFullBlockItem, ItemTypeHelper::isTool);
-  }
-
-  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory,
-                            Predicate<SFItemStack> isPlaceable, Predicate<SFItemStack> isTool) {
+  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory, PathConstraint pathConstraint) {
     this.entity = entity;
     this.playerInventory = playerInventory;
 
@@ -80,9 +73,9 @@ public class ProjectedInventory {
     usableToolsAndNull.add(null);
 
     for (var item : items) {
-      if (isPlaceable.test(item)) {
+      if (pathConstraint.isPlaceable(item)) {
         blockItems += item.getAmount();
-      } else if (isTool.test(item)) {
+      } else if (pathConstraint.isTool(item)) {
         usableToolsAndNull.add(item);
       }
     }
@@ -92,8 +85,9 @@ public class ProjectedInventory {
     this.sharedMiningCosts = new ConcurrentHashMap<>();
   }
 
-  public boolean creativeModeBreak() {
-    return entity != null && entity.abilities().creativeModeBreak();
+  @VisibleForTesting
+  public static ProjectedInventory forUnitTest(List<SFItemStack> items, PathConstraint pathConstraint) {
+    return new ProjectedInventory(items, null, null, pathConstraint);
   }
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {

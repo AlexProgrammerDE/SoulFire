@@ -31,10 +31,6 @@ import java.util.List;
  * @param maxRadius the maximum radius to be close to the goal
  */
 public record CloseToPosGoal(SFVec3i goal, int maxRadius) implements GoalScorer {
-  public CloseToPosGoal(int x, int y, int z, int maxRadius) {
-    this(SFVec3i.from(x, y, z), maxRadius);
-  }
-
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
     return blockPosition.distance(goal);

@@ -23,6 +23,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
@@ -53,6 +54,7 @@ public class SFItemStack extends ItemStack {
     return new SFItemStack(itemStack);
   }
 
+  @VisibleForTesting
   public static SFItemStack forTypeSingle(ItemType itemType) {
     return new SFItemStack(itemType, 1);
   }

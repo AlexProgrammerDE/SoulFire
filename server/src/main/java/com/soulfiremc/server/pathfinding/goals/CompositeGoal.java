@@ -41,12 +41,12 @@ public record CompositeGoal(Set<GoalScorer> goals) implements GoalScorer {
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    for (var goal : goals) {
-      if (goal.isFinished(current)) {
-        return true;
-      }
-    }
+    return goals.stream().anyMatch(goal -> goal.isFinished(current));
+  }
 
-    return false;
+  public GoalScorer getFinishedGoal(MinecraftRouteNode current) {
+    return goals.stream().filter(goal -> goal.isFinished(current))
+      .findFirst()
+      .orElseThrow(() -> new IllegalStateException("No goals finished"));
   }
 }

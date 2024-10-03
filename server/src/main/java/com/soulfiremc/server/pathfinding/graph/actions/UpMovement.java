@@ -249,7 +249,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
-            || graph.disallowedToBreakType(blockState.blockType())
+            || graph.disallowedToBreakBlockType(blockState.blockType())
             || upMovement.unsafeToBreak()[blockArrayIndex]) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;

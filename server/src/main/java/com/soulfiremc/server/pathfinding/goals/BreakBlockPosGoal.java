@@ -34,7 +34,7 @@ public record BreakBlockPosGoal(SFVec3i goal) implements GoalScorer {
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
     for (var action : current.actions()) {
-      if (action instanceof BlockBreakAction breakBlockAction && goal.equals(breakBlockAction.blockPosition())) {
+      if (action instanceof BlockBreakAction breakBlockAction && breakBlockAction.blockPosition().equals(goal)) {
         return true;
       }
     }

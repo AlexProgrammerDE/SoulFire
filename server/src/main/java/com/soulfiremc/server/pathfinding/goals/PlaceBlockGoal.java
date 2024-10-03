@@ -25,12 +25,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
 import java.util.List;
 
-// TODO: Extract into having more fine behaviour control
 public record PlaceBlockGoal(SFVec3i goal) implements GoalScorer {
-  public PlaceBlockGoal(int x, int y, int z) {
-    this(new SFVec3i(x, y, z));
-  }
-
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
     return blockPosition.distance(goal);

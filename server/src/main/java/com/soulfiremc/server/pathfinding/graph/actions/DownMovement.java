@@ -228,7 +228,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (graph.disallowedToBreakBlock(absoluteKey)
-            || graph.disallowedToBreakType(blockState.blockType())) {
+            || graph.disallowedToBreakBlockType(blockState.blockType())) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }

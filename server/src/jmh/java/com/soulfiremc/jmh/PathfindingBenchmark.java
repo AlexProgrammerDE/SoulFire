@@ -29,6 +29,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.test.utils.TestLevelHeightAccessor;
+import com.soulfiremc.test.utils.TestPathConstraint;
 import com.soulfiremc.util.GsonInstance;
 import com.soulfiremc.util.ResourceHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -94,14 +95,14 @@ public class PathfindingBenchmark {
         }
       }
 
-      var inventory = new ProjectedInventory(List.of());
+      var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
         new ProjectedLevel(TestLevelHeightAccessor.INSTANCE, accessor),
         inventory,
-        true, true), new PosGoal(100, 80, 100));
+        TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {

@@ -486,7 +486,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
             || !simpleMovement.allowBlockActions()
-            || graph.disallowedToBreakType(blockState.blockType())
+            || graph.disallowedToBreakBlockType(blockState.blockType())
             // Check if we previously found out this block is unsafe to break
             || simpleMovement.unsafeToBreak()[blockArrayIndex]) {
             // No way to break this block

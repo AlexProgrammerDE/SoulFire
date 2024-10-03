@@ -23,10 +23,10 @@ import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.ProjectedLevel;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.ItemTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +59,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     this.pathCompletionFuture = pathCompletionFuture;
   }
 
-  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer,
-                                        CompletableFuture<Void> pathCompletionFuture) {
+  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer, CompletableFuture<Void> pathCompletionFuture) {
     // Cancel the path if the bot is disconnected
     bot.shutdownHooks().add(() -> {
       if (!pathCompletionFuture.isDone()) {
@@ -71,6 +70,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     var logger = bot.logger();
     var dataManager = bot.dataManager();
     var clientEntity = dataManager.clientEntity();
+    var pathConstraint = new PathConstraint(clientEntity, dataManager.currentLevel());
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
@@ -80,12 +80,11 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
             .chunks()
             .immutableCopy());
         var inventory =
-          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(),
-            ItemTypeHelper::isSafeFullBlockItem, ItemTypeHelper::isTool);
+          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(), pathConstraint);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =
-          new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, true, true), goalScorer);
+          new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, pathConstraint), goalScorer);
 
         logger.info("Starting calculations at: {}", start.formatXYZ());
         var actions = routeFinder.findRoute(NodeState.forInfo(start, inventory), requiresRepositioning, pathCompletionFuture);

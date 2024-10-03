@@ -32,10 +32,6 @@ import java.util.List;
  * @param minRadius the minimum radius to move away from the origin
  */
 public record AwayFromPosGoal(SFVec3i origin, int minRadius) implements GoalScorer {
-  public AwayFromPosGoal(int x, int y, int z, int minRadius) {
-    this(SFVec3i.from(x, y, z), minRadius);
-  }
-
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
     return Math.max(0, minRadius - blockPosition.distance(origin));

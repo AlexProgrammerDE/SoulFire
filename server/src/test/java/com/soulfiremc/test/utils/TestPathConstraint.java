@@ -15,26 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding.controller;
+package com.soulfiremc.test.utils;
 
-import com.soulfiremc.server.data.BlockType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.math.vector.Vector3i;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 
-import java.util.Map;
-
-@Slf4j
-@RequiredArgsConstructor
-public class BuildSchematicController {
-  private final Map<Vector3i, BlockType> absoluteBlocks;
-
-  public BuildSchematicController(Map<Vector3i, BlockType> relativeBlocks, Vector3i base) {
-    this(new Object2ObjectOpenHashMap<>());
-
-    for (var entry : relativeBlocks.entrySet()) {
-      this.absoluteBlocks.put(entry.getKey().add(base), entry.getValue());
-    }
-  }
+public class TestPathConstraint {
+  public static final PathConstraint INSTANCE = new PathConstraint(null, TestLevelHeightAccessor.INSTANCE);
 }
