@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base", "group:allNonMajor"],
   "ignoreDeps": [
     "com.github.GeyserMC:MCProtocolLib",
     "com.github.GeyserMC:mcauthlib",
