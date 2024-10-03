@@ -19,7 +19,6 @@ package com.soulfiremc.server;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -32,13 +31,14 @@ import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
-import com.soulfiremc.server.brigadier.BlockTagResolvable;
-import com.soulfiremc.server.brigadier.TagBasedArgumentType;
+import com.soulfiremc.server.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.grpc.ServerRPCConstants;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
+import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
 import com.soulfiremc.server.pathfinding.controller.FollowEntityController;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
@@ -59,7 +59,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.raphimc.vialoader.util.ProtocolVersionList;
 import org.apache.commons.io.FileUtils;
-import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.vector.Vector2d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 import javax.annotation.PostConstruct;
@@ -168,43 +169,39 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                       });
                     }))))
         .then(
-          argument("y", IntegerArgumentType.integer())
+          argument("y", new DynamicYArgumentType())
             .executes(
               help(
                 "Makes selected bots walk to the y coordinates",
                 c -> {
-                  var y = IntegerArgumentType.getInteger(c, "y");
-                  return executePathfinding(c, bot -> new YGoal(y));
+                  var y = c.getArgument("y", DynamicYArgumentType.YLocationMapper.class);
+                  return executePathfinding(c, bot -> new YGoal(GenericMath.floor(
+                    y.getAbsoluteLocation(bot.dataManager().clientEntity().y())
+                  )));
                 })))
         .then(
-          argument("x", IntegerArgumentType.integer())
-            .then(
-              argument("z", IntegerArgumentType.integer())
-                .executes(
-                  help(
-                    "Makes selected bots walk to the xz coordinates",
-                    c -> {
-                      var x = IntegerArgumentType.getInteger(c, "x");
-                      var z = IntegerArgumentType.getInteger(c, "z");
-
-                      return executePathfinding(c, bot -> new XZGoal(x, z));
-                    }))))
+          argument("xz", new DynamicXZArgumentType())
+            .executes(
+              help(
+                "Makes selected bots walk to the xz coordinates",
+                c -> {
+                  var xz = c.getArgument("xz", DynamicXZArgumentType.XZLocationMapper.class);
+                  return executePathfinding(c, bot -> new XZGoal(xz.getAbsoluteLocation(Vector2d.from(
+                    bot.dataManager().clientEntity().x(),
+                    bot.dataManager().clientEntity().z()
+                  )).toInt()));
+                })))
         .then(
-          argument("x", IntegerArgumentType.integer())
-            .then(
-              argument("y", IntegerArgumentType.integer())
-                .then(
-                  argument("z", IntegerArgumentType.integer())
-                    .executes(
-                      help(
-                        "Makes selected bots walk to the xyz coordinates",
-                        c -> {
-                          var x = IntegerArgumentType.getInteger(c, "x");
-                          var y = IntegerArgumentType.getInteger(c, "y");
-                          var z = IntegerArgumentType.getInteger(c, "z");
-
-                          return executePathfinding(c, bot -> new PosGoal(x, y, z));
-                        }))))));
+          argument("xyz", new DynamicXYZArgumentType())
+            .executes(
+              help(
+                "Makes selected bots walk to the xyz coordinates",
+                c -> {
+                  var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
+                  return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
+                    xyz.getAbsoluteLocation(bot.dataManager().clientEntity().pos())
+                  )));
+                }))));
     dispatcher.register(
       literal("collect")
         .then(argument("block", new TagBasedArgumentType<BlockType, BlockTagResolvable>(
@@ -287,6 +284,54 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                     });
                 })))));
     dispatcher.register(
+      literal("excavate")
+        .then(literal("rectangle")
+          .then(argument("from", new DynamicXYZArgumentType())
+            .then(argument("to", new DynamicXYZArgumentType())
+              .executes(
+                help(
+                  "Makes selected bots dig a rectangle from the from to the to coordinates",
+                  c -> {
+                    var from = c.getArgument("from", DynamicXYZArgumentType.XYZLocationMapper.class);
+                    var to = c.getArgument("to", DynamicXYZArgumentType.XYZLocationMapper.class);
+
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        var dataManager = bot.dataManager();
+                        bot.scheduler().schedule(() -> new ExcavateAreaController(
+                          ExcavateAreaController.getRectangleFromTo(
+                            SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.clientEntity().pos())),
+                            SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.clientEntity().pos()))
+                          )
+                        ).start(bot));
+
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  })))))
+        .then(literal("sphere")
+          .then(argument("position", new DynamicXYZArgumentType())
+            .then(argument("radius", IntegerArgumentType.integer(1))
+              .executes(
+                help(
+                  "Makes selected bots dig a sphere with the given radius",
+                  c -> {
+                    var position = c.getArgument("position", DynamicXYZArgumentType.XYZLocationMapper.class);
+                    var radius = IntegerArgumentType.getInteger(c, "radius");
+
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        var dataManager = bot.dataManager();
+
+                        bot.scheduler().schedule(() -> new ExcavateAreaController(
+                          ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.clientEntity().pos())), radius)
+                        ).start(bot));
+
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  }))))));
+    dispatcher.register(
       literal("stop-path")
         .executes(
           help(
@@ -324,31 +369,24 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     // Movement controls
     dispatcher.register(
       literal("lookat")
-        .then(
-          argument("x", DoubleArgumentType.doubleArg())
-            .then(
-              argument("y", DoubleArgumentType.doubleArg())
-                .then(
-                  argument("z", DoubleArgumentType.doubleArg())
-                    .executes(
-                      help(
-                        "Makes selected bots look at the block at the xyz coordinates",
-                        c -> {
-                          var x = DoubleArgumentType.getDouble(c, "x");
-                          var y = DoubleArgumentType.getDouble(c, "y");
-                          var z = DoubleArgumentType.getDouble(c, "z");
+        .then(argument("xyz", new DynamicXYZArgumentType())
+          .executes(
+            help(
+              "Makes selected bots look at the block at the xyz coordinates",
+              c -> {
+                var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
 
-                          return forEveryBot(
-                            c,
-                            bot -> {
-                              bot.dataManager()
-                                .clientEntity()
-                                .lookAt(
-                                  RotationOrigin.EYES,
-                                  Vector3d.from(x, y, z));
-                              return Command.SINGLE_SUCCESS;
-                            });
-                        }))))));
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    bot.dataManager()
+                      .clientEntity()
+                      .lookAt(
+                        RotationOrigin.EYES,
+                        xyz.getAbsoluteLocation(bot.dataManager().clientEntity().pos()));
+                    return Command.SINGLE_SUCCESS;
+                  });
+              }))));
     dispatcher.register(
       literal("move")
         .then(

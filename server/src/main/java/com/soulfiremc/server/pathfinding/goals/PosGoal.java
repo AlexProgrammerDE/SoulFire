@@ -21,10 +21,12 @@ import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 
 public record PosGoal(SFVec3i goal) implements GoalScorer {
+  @VisibleForTesting
   public PosGoal(int x, int y, int z) {
     this(SFVec3i.from(x, y, z));
   }

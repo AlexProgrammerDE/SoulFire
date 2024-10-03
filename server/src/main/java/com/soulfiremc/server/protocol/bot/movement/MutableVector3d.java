@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.movement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -44,7 +45,7 @@ public class MutableVector3d {
   }
 
   public MutableVector3d floored() {
-    return new MutableVector3d(Math.floor(x), Math.floor(y), Math.floor(z));
+    return new MutableVector3d(GenericMath.floor(x), GenericMath.floor(y), GenericMath.floor(z));
   }
 
   public void add(Vector3i vector3i) {
