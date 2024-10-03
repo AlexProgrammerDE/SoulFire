@@ -57,8 +57,8 @@ public class MathHelper {
     return x * x;
   }
 
-  public static long getSeed(int i, int j, int k) {
-    var l = (i * 3129871L) ^ (long) k * 116129781L ^ (long) j;
+  public static long getSeed(int x, int y, int z) {
+    var l = (x * 3129871L) ^ (long) z * 116129781L ^ (long) y;
     l = l * l * 42317861L + l * 11L;
     return l >> 16;
   }
