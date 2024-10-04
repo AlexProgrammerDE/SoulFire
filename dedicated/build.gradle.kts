@@ -52,7 +52,6 @@ dependencies {
 
   implementation(projects.buildData)
   api(projects.proto)
-  api(projects.common)
   api(projects.server)
 
   // The java 8 launcher takes care of notifying the user if they are using an unsupported java version

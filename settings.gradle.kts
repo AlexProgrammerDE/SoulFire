@@ -37,7 +37,6 @@ include(
   "build-data",
   "j8-launcher",
   "proto",
-  "common",
   "server",
   "dedicated",
   "client"
