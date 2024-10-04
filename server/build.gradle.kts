@@ -50,10 +50,6 @@ dependencies {
   // For profiling
   api(libs.spark)
 
-
-  implementation(projects.buildData)
-  api(projects.proto)
-
   // Log/Console libraries
   api(libs.bundles.log4j)
   api(libs.jline)
