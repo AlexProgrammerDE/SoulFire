@@ -131,6 +131,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.Serve
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import org.slf4j.event.Level;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -1062,7 +1063,7 @@ public class POVServer implements InternalPlugin {
     }
 
     @Override
-    public void sendMessage(Component message) {
+    public void sendMessage(Level ignored, Component message) {
       session.send(new ClientboundSystemChatPacket(message, false));
     }
   }

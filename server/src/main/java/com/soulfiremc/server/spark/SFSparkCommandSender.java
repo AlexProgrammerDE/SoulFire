@@ -18,10 +18,10 @@
 package com.soulfiremc.server.spark;
 
 import com.soulfiremc.brigadier.CommandSource;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.ServerCommandSource;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
+import org.slf4j.event.Level;
 
 import java.util.UUID;
 
@@ -46,7 +46,7 @@ public class SFSparkCommandSender extends AbstractCommandSender<CommandSource> {
 
   @Override
   public void sendMessage(final Component message) {
-    this.delegate.sendMessage(ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
+    this.delegate.sendMessage(Level.INFO, message);
   }
 
   @Override

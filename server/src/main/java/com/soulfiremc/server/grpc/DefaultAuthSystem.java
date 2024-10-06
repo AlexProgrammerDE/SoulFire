@@ -23,6 +23,7 @@ import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
+import org.slf4j.event.Level;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -39,11 +40,6 @@ public class DefaultAuthSystem implements AuthSystem {
 
   private record GrpcUser(String subject, UUID uuid) implements ServerCommandSource {
     @Override
-    public void sendMessage(Component message) {
-      LogServiceImpl.sendMessage(uuid, ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
-    }
-
-    @Override
     public UUID getUniqueId() {
       return uuid;
     }
@@ -56,6 +52,11 @@ public class DefaultAuthSystem implements AuthSystem {
     @Override
     public TriState getPermission(Permission permission) {
       return TriState.TRUE;
+    }
+
+    @Override
+    public void sendMessage(Level level, Component message) {
+      LogServiceImpl.sendMessage(uuid, ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
     }
   }
 }

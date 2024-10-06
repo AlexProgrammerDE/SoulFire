@@ -18,10 +18,8 @@
 package com.soulfiremc.server.brigadier;
 
 import com.soulfiremc.brigadier.ClientConsoleCommandSource;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 
 import java.util.UUID;
@@ -30,11 +28,6 @@ public class ServerConsoleCommandSource extends ClientConsoleCommandSource imple
   public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();
   private static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   private static final String CONSOLE_NAME = "CONSOLE";
-
-  @Override
-  public void sendMessage(Component message) {
-    sendMessage(ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
-  }
 
   @Override
   public UUID getUniqueId() {

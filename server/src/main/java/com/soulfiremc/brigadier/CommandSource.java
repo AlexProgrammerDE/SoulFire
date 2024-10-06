@@ -17,25 +17,36 @@
  */
 package com.soulfiremc.brigadier;
 
-import org.fusesource.jansi.Ansi;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.slf4j.event.Level;
 import org.slf4j.helpers.MessageFormatter;
 
 public interface CommandSource {
-  static String format(String format, Object[] params, Throwable t) {
+  private static String format(String format, Object[] params, Throwable t) {
     return MessageFormatter.arrayFormat(format, params, t).getMessage();
   }
 
   default void sendInfo(String message, Object... args) {
-    sendMessage(format(message, args, null));
+    sendMessage(Level.INFO, format(message, args, null));
   }
 
   default void sendWarn(String message, Object... args) {
-    sendMessage(Ansi.ansi().fgYellow() + format(message, args, null));
+    sendMessage(Level.WARN, format(message, args, null));
   }
 
   default void sendError(String message, Throwable t) {
-    sendMessage(Ansi.ansi().fgRed() + format(message, new Object[0], t));
+    sendMessage(Level.ERROR, format(message, new Object[0], t));
   }
 
-  void sendMessage(String message);
+  default void sendMessage(Level level, String message) {
+    var component = Component.text(message);
+    sendMessage(level, switch (level) {
+      case WARN -> component.color(NamedTextColor.YELLOW);
+      case ERROR -> component.color(NamedTextColor.RED);
+      default -> component;
+    });
+  }
+
+  void sendMessage(Level level, Component message);
 }

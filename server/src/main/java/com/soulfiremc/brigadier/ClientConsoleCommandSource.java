@@ -17,30 +17,18 @@
  */
 package com.soulfiremc.brigadier;
 
+import com.soulfiremc.server.plugins.ChatMessageLogger;
+import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 public class ClientConsoleCommandSource implements CommandSource {
   public static final ClientConsoleCommandSource INSTANCE = new ClientConsoleCommandSource();
   private static final Logger log = LoggerFactory.getLogger("Console");
 
   @Override
-  public void sendInfo(String message, Object... args) {
-    log.info(message, args);
-  }
-
-  @Override
-  public void sendWarn(String message, Object... args) {
-    log.warn(message, args);
-  }
-
-  @Override
-  public void sendError(String message, Throwable t) {
-    log.error(message, t);
-  }
-
-  @Override
-  public void sendMessage(String message) {
-    log.info(message);
+  public void sendMessage(Level level, Component message) {
+    log.atLevel(level).log(() -> ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
   }
 }
