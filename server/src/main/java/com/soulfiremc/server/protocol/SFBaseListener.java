@@ -113,12 +113,12 @@ public class SFBaseListener extends SessionAdapter {
 
         var keyPacket = new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge());
 
+        var encryptionConfig = new EncryptionConfig(new AESEncryption(key));
         if (!isLegacy) {
-          var encryption = new AESEncryption(key);
-          session.send(keyPacket, () -> session.setEncryption(new EncryptionConfig(encryption)));
+          session.send(keyPacket, () -> session.setEncryption(encryptionConfig));
         } else {
           botConnection.logger().debug("Storing legacy secret key.");
-          session.setFlag(SFProtocolConstants.ENCRYPTION_SECRET_KEY, key);
+          session.setFlag(SFProtocolConstants.VL_ENCRYPTION_CONFIG, encryptionConfig);
         }
       } else if (packet instanceof ClientboundGameProfilePacket) {
         session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
