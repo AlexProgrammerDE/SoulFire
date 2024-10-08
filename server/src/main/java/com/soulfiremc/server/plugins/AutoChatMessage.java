@@ -28,7 +28,7 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.StringListProperty;
-import com.soulfiremc.server.util.RandomUtil;
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -55,7 +55,7 @@ public class AutoChatMessage implements InternalPlugin {
         }
 
         var botControl = connection.botControl();
-        botControl.sendMessage(RandomUtil.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
+        botControl.sendMessage(SFHelpers.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },
       settingsSource.getRandom(AutoChatMessageSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);

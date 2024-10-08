@@ -17,14 +17,18 @@
  */
 package com.soulfiremc.server.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
+@Slf4j
 public class SFHelpers {
   private SFHelpers() {}
 
@@ -97,5 +101,52 @@ public class SFHelpers {
 
     CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
     return result;
+  }
+
+  public static int getRandomInt(int min, int max) {
+    if (min > max) {
+      throw new IllegalArgumentException("min must not be greater than max");
+    }
+
+    if (min == max) {
+      return min;
+    }
+
+    return ThreadLocalRandom.current().nextInt(min, max);
+  }
+
+  public static <E> E getRandomEntry(List<E> list) {
+    return list.get(ThreadLocalRandom.current().nextInt(list.size()));
+  }
+
+  public static boolean isNewer(String currentVersion, String checkVersion) {
+    currentVersion = currentVersion.replace("-SNAPSHOT", "");
+    checkVersion = checkVersion.replace("-SNAPSHOT", "");
+
+    try {
+      var currentVersionData =
+        Arrays.stream(currentVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
+      var checkVersionData =
+        Arrays.stream(checkVersion.split("\\.")).mapToInt(Integer::parseInt).toArray();
+
+      var i = 0;
+      for (var version : checkVersionData) {
+        if (i == currentVersionData.length) {
+          return true;
+        }
+
+        if (version > currentVersionData[i]) {
+          return true;
+        } else if (version < currentVersionData[i]) {
+          return false;
+        }
+
+        i++;
+      }
+    } catch (NumberFormatException e) {
+      log.error("Error while parsing version!", e);
+    }
+
+    return false;
   }
 }

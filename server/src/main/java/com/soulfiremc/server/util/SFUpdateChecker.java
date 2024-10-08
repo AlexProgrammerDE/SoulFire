@@ -76,7 +76,7 @@ public class SFUpdateChecker {
                   var responseObject = GsonInstance.GSON.fromJson(s, JsonObject.class);
 
                   var latestVersion = responseObject.get("tag_name").getAsString();
-                  if (VersionComparator.isNewer(BuildData.VERSION, latestVersion)) {
+                  if (SFHelpers.isNewer(BuildData.VERSION, latestVersion)) {
                     return latestVersion;
                   } else {
                     return null;

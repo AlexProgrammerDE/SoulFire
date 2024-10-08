@@ -19,7 +19,7 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.util.RandomUtil;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.settings.PropertyKey;
 import com.soulfiremc.settings.account.MinecraftAccount;
 import com.soulfiremc.settings.proxy.SFProxy;
@@ -65,7 +65,7 @@ public interface SettingsSource {
   }
 
   default CustomIntSupplier getRandom(MinMaxPropertyLink property) {
-    return () -> RandomUtil.getRandomInt(get(property.min()), get(property.max()));
+    return () -> SFHelpers.getRandomInt(get(property.min()), get(property.max()));
   }
 
   default <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
