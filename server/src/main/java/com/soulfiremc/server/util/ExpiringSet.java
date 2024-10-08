@@ -17,32 +17,22 @@
  */
 package com.soulfiremc.server.util;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class ExpiringSet<E> {
-  private final Cache<E, Long> cache;
-  private final long lifetime;
+public final class ExpiringSet {
+  private ExpiringSet() {}
 
-  public ExpiringSet(long duration, TimeUnit unit) {
-    this.cache = Caffeine.newBuilder().expireAfterWrite(duration, unit).build();
-    this.lifetime = unit.toMillis(duration);
-  }
-
-  public boolean add(E item) {
-    var present = contains(item);
-    this.cache.put(item, System.currentTimeMillis() + this.lifetime);
-    return !present;
-  }
-
-  public boolean contains(E item) {
-    var timeout = this.cache.getIfPresent(item);
-    return timeout != null && timeout > System.currentTimeMillis();
-  }
-
-  public void remove(E item) {
-    this.cache.invalidate(item);
+  /**
+   * An expiring set using Caffeine caches
+   *
+   * @param <E> the element type
+   * @return a new expiring set
+   */
+  public static <E> Set<E> newExpiringSet(long duration, TimeUnit unit) {
+    return Collections.newSetFromMap(Caffeine.newBuilder().expireAfterWrite(duration, unit).<E, Boolean>build().asMap());
   }
 }

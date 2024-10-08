@@ -35,6 +35,7 @@ import net.kyori.ansi.ColorLevel;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.fusesource.jansi.AnsiConsole;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class ChatMessageLogger implements InternalPlugin {
           case TrueColor -> ColorLevel.TRUE_COLOR;
         })
       .build();
-  private static final ExpiringSet<String> CHAT_MESSAGES = new ExpiringSet<>(5, TimeUnit.SECONDS);
+  private static final Set<String> CHAT_MESSAGES = ExpiringSet.newExpiringSet(5, TimeUnit.SECONDS);
 
   public static void onMessage(ChatMessageReceiveEvent event) {
     if (!event.connection().settingsSource().get(ChatMessageSettings.ENABLED)) {
