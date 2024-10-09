@@ -20,8 +20,8 @@ package com.soulfiremc.generator.generators;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import com.soulfiremc.generator.Main;
 import com.soulfiremc.generator.util.GsonInstance;
+import com.soulfiremc.generator.util.MCHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -53,7 +53,7 @@ public class WorldExporterGenerator implements IDataGenerator {
     try (var gzipOutputStream = new GZIPOutputStream(byteOutputStream);
          var outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
          var jsonWriter = new JsonWriter(outputStreamWriter)) {
-      var level = Objects.requireNonNull(Main.SERVER.getLevel(Level.OVERWORLD));
+      var level = Objects.requireNonNull(MCHelper.getServer().getLevel(Level.OVERWORLD));
       var jsonObject = new JsonObject();
       var minBuildHeight = level.getMinBuildHeight();
       var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
