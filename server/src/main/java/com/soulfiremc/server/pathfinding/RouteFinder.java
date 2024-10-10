@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +91,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions that we need to look at
     var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
-    var shortestPathFound = new HashSet<NodeState>();
 
     {
       var startScore = scorer.computeScore(graph, from.blockPosition(), List.of());
@@ -123,17 +121,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         bestNode.totalRouteScore() - bestNode.sourceCost()
       );
     }, 1, TimeUnit.SECONDS);
-    var cleaner = new CallLimiter(() -> {
-      if (!log.isInfoEnabled()) {
-        return;
-      }
-
-      var bestNode = findBestNode(routeIndex.values());
-      openSet.clear();
-      openSet.enqueue(bestNode);
-      shortestPathFound.clear();
-      routeIndex.clear();
-    }, 5, TimeUnit.SECONDS);
     while (!openSet.isEmpty()) {
       if (pathCompletionFuture.isDone()) {
         stopwatch.stop();
@@ -146,10 +133,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       progressInfo.run();
-      cleaner.run();
 
       var current = openSet.dequeue();
-      shortestPathFound.add(current.node());
       routeIndex.remove(current.node());
 
       log.debug("Looking at node: {}", current.node());
@@ -167,9 +152,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           var actionCost = instructions.actionCost();
           var worldActions = instructions.actions();
           var instructionNode = instructions.node();
-          if (shortestPathFound.contains(instructionNode)) {
-            return;
-          }
 
           routeIndex.compute(
             instructionNode,
