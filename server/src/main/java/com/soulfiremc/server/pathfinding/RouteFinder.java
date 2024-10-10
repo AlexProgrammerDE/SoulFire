@@ -152,15 +152,15 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           var worldActions = instructions.actions();
           var instructionNode = instructions.node();
 
+          // Calculate new distance from start to this connection,
+          // Get distance from the current element
+          // and add the distance from the current element to the next element
+          var newSourceCost = current.sourceCost() + actionCost;
+          var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+
           routeIndex.compute(
             instructionNode,
             (k, v) -> {
-              // Calculate new distance from start to this connection,
-              // Get distance from the current element
-              // and add the distance from the current element to the next element
-              var newSourceCost = current.sourceCost() + actionCost;
-              var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
-
               // The first time we see this node
               if (v == null) {
                 var node =
