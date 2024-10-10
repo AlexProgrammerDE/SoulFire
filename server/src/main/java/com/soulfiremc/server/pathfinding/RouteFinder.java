@@ -129,7 +129,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       } else if (System.currentTimeMillis() > expireTime) {
         stopwatch.stop();
         log.info("Expired pathfinding after {}ms", stopwatch.elapsed().toMillis());
-        return List.of();
+        throw new IllegalStateException("Pathfinding took too long");
       }
 
       progressInfo.run();

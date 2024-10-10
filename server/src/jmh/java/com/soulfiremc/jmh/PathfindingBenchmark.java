@@ -26,6 +26,7 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.test.utils.TestPathConstraint;
@@ -52,7 +53,7 @@ public class PathfindingBenchmark {
   @Setup
   public void setup() {
     var byteArrayInputStream =
-      new ByteArrayInputStream(ResourceHelper.getResourceAsBytes("world_data.json.zip"));
+      new ByteArrayInputStream(SFHelpers.getResourceAsBytes("world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
          var reader = new InputStreamReader(gzipInputStream)) {
       log.info("Reading world data...");
