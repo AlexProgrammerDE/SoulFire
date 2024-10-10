@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.account;
 
+import com.soulfiremc.server.settings.account.AuthType;
+import com.soulfiremc.server.settings.account.MinecraftAccount;
+import com.soulfiremc.server.settings.account.service.OnlineSimpleJavaData;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.settings.account.AuthType;
-import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.OnlineSimpleJavaData;
-import com.soulfiremc.settings.proxy.SFProxy;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;

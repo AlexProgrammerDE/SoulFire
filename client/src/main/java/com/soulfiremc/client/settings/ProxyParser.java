@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.client.settings;
 
-import com.soulfiremc.settings.proxy.ProxyType;
-import com.soulfiremc.settings.proxy.SFProxy;
+import com.soulfiremc.server.settings.proxy.ProxyType;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;

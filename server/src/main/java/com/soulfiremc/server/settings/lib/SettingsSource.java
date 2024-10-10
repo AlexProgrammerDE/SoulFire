@@ -18,12 +18,12 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
+import com.soulfiremc.server.settings.PropertyKey;
+import com.soulfiremc.server.settings.account.MinecraftAccount;
 import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.settings.PropertyKey;
-import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.proxy.SFProxy;
 
 import java.util.List;
 import java.util.Optional;

@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.settings.proxy;
+package com.soulfiremc.server.settings.account.service;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 
-@Getter
-@RequiredArgsConstructor
-public enum ProxyType {
-  HTTP(false),
-  SOCKS4(false),
-  SOCKS5(true);
+public record OnlineSimpleJavaData(String authToken, long tokenExpireAt) implements AccountData, OnlineJavaDataLike {
+  public static OnlineSimpleJavaData fromProto(MinecraftAccountProto.OnlineSimpleJavaData data) {
+    return new OnlineSimpleJavaData(data.getAuthToken(), data.getTokenExpireAt());
+  }
 
-  private final boolean udpSupport;
+  public MinecraftAccountProto.OnlineSimpleJavaData toProto() {
+    return MinecraftAccountProto.OnlineSimpleJavaData.newBuilder()
+      .setAuthToken(authToken)
+      .setTokenExpireAt(tokenExpireAt)
+      .build();
+  }
 }

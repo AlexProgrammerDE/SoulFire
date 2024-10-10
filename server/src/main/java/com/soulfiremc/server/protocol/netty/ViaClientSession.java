@@ -19,11 +19,11 @@ package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
+import com.soulfiremc.server.settings.account.service.BedrockData;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import com.soulfiremc.server.viaversion.SFVLPipeline;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
-import com.soulfiremc.settings.account.service.BedrockData;
-import com.soulfiremc.settings.proxy.SFProxy;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;

@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.settings.account.AuthType;
-import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.BedrockData;
-import com.soulfiremc.settings.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.settings.account.AuthType;
+import com.soulfiremc.server.settings.account.MinecraftAccount;
+import com.soulfiremc.server.settings.account.service.BedrockData;
+import com.soulfiremc.server.settings.account.service.OnlineChainJavaData;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;

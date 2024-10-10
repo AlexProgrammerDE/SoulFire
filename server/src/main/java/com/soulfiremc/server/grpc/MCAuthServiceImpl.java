@@ -19,10 +19,10 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.account.MCAuthService;
+import com.soulfiremc.server.settings.account.MinecraftAccount;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.proxy.SFProxy;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;

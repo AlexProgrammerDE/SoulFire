@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.account;
 
+import com.soulfiremc.server.settings.account.AuthType;
+import com.soulfiremc.server.settings.account.MinecraftAccount;
+import com.soulfiremc.server.settings.account.service.BedrockData;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
-import com.soulfiremc.settings.account.AuthType;
-import com.soulfiremc.settings.account.MinecraftAccount;
-import com.soulfiremc.settings.account.service.BedrockData;
-import com.soulfiremc.settings.proxy.SFProxy;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 

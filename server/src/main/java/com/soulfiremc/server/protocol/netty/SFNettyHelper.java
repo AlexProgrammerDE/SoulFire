@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
-import com.soulfiremc.settings.proxy.SFProxy;
+import com.soulfiremc.server.settings.proxy.SFProxy;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.proxy.HttpProxyHandler;

@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.settings;
+package com.soulfiremc.server.settings.account.service;
 
-public record PropertyKey(String namespace, String key) {}
+public interface OnlineJavaDataLike {
+  String authToken();
+}
