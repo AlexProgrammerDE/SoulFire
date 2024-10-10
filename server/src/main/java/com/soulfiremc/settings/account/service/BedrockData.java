@@ -21,8 +21,8 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.Struct;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.util.KeyHelper;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.SneakyThrows;
 
 import java.security.interfaces.ECPrivateKey;

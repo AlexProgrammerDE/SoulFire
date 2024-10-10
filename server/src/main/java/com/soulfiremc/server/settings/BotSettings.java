@@ -19,8 +19,8 @@ package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.server.util.BuiltinSettingsConstants;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
 import lombok.AccessLevel;

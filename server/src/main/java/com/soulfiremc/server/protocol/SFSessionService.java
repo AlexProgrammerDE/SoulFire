@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.UUIDHelper;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.settings.account.AuthType;
 import com.soulfiremc.settings.proxy.SFProxy;
-import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
