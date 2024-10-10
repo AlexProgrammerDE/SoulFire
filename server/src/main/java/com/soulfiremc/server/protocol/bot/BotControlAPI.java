@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
-import com.soulfiremc.server.util.Segment;
+import com.soulfiremc.server.util.structs.Segment;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;

@@ -19,7 +19,7 @@ package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.util.ServerAddress;
+import com.soulfiremc.server.util.structs.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.naming.directory.DirContext;

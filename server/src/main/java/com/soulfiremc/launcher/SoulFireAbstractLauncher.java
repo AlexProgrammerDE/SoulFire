@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.util.SFContextClassLoader;
+import com.soulfiremc.server.util.structs.SFContextClassLoader;
 
 import java.nio.file.Path;
 import java.util.List;

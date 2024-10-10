@@ -15,10 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util.structs;
 
-import com.google.gson.Gson;
+import java.util.concurrent.TimeUnit;
 
-public class GsonInstance {
-  public static final Gson GSON = new Gson();
+/**
+ * A class that only allows a call to be made once in a given interval.
+ */
+public class CallLimiter implements Runnable {
+  private final Runnable c;
+  private final long interval;
+  private volatile long lastCalled;
+
+  public CallLimiter(Runnable c, long interval, TimeUnit unit) {
+    this.c = c;
+    this.interval = unit.toMillis(interval);
+  }
+
+  @Override
+  public void run() {
+    if (lastCalled + interval < System.currentTimeMillis()) {
+      lastCalled = System.currentTimeMillis();
+      c.run();
+    }
+  }
 }

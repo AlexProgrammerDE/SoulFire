@@ -33,7 +33,7 @@ import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.VelocityConstants;
-import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

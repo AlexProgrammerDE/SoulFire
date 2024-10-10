@@ -19,10 +19,10 @@ package com.soulfiremc.launcher;
 
 import com.soulfiremc.api.MixinExtension;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.util.CustomClassProvider;
-import com.soulfiremc.util.PortHelper;
-import com.soulfiremc.util.SFLogAppender;
-import com.soulfiremc.util.SFPathConstants;
+import com.soulfiremc.server.util.structs.CustomClassProvider;
+import com.soulfiremc.server.util.PortHelper;
+import com.soulfiremc.server.util.structs.SFLogAppender;
+import com.soulfiremc.server.util.SFPathConstants;
 import io.netty.util.ResourceLeakDetector;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

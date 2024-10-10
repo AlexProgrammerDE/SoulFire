@@ -22,7 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
-import com.soulfiremc.server.util.TickRateManager;
+import com.soulfiremc.server.util.structs.TickRateManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;

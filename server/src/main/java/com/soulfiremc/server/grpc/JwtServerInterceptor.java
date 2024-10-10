@@ -18,7 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.util.RPCConstants;
+import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 import io.jsonwebtoken.*;
 

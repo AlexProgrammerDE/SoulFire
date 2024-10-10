@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.Struct;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.SneakyThrows;
 
 public record OnlineChainJavaData(String authToken, long tokenExpireAt, JsonObject authChain) implements AccountData, OnlineJavaDataLike {

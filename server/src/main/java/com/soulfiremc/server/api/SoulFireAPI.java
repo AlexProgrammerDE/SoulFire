@@ -18,7 +18,7 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.server.plugins.*;
-import com.soulfiremc.util.SFFeatureFlags;
+import com.soulfiremc.server.util.SFFeatureFlags;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -17,26 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
-import java.util.concurrent.TimeUnit;
+public class SFFeatureFlags {
+  public static final boolean MOD_SUPPORT = Boolean.getBoolean("sf.mod_support");
 
-/**
- * A class that only allows a call to be made once in a given interval.
- */
-public class CallLimiter implements Runnable {
-  private final Runnable c;
-  private final long interval;
-  private volatile long lastCalled;
-
-  public CallLimiter(Runnable c, long interval, TimeUnit unit) {
-    this.c = c;
-    this.interval = unit.toMillis(interval);
-  }
-
-  @Override
-  public void run() {
-    if (lastCalled + interval < System.currentTimeMillis()) {
-      lastCalled = System.currentTimeMillis();
-      c.run();
-    }
-  }
+  private SFFeatureFlags() {}
 }

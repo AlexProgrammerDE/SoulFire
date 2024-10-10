@@ -23,7 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class GsonDataHelper {
           var data = new JsonArray();
           try {
             data =
-              gson.fromJson(ResourceHelper.getResourceAsString(file), JsonArray.class);
+              gson.fromJson(SFHelpers.getResourceAsString(file), JsonArray.class);
           } catch (Exception e) {
             throw new RuntimeException("Failed to load data file " + file, e);
           }

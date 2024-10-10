@@ -46,9 +46,9 @@ import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.util.PortHelper;
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.PortHelper;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -173,7 +173,7 @@ public class POVServer implements InternalPlugin {
   }
 
   private static TcpServer startPOVServer(SettingsSource settingsSource, int port, InstanceManager instanceManager) {
-    var faviconBytes = ResourceHelper.getResourceAsBytes("assets/pov_favicon.png");
+    var faviconBytes = SFHelpers.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);

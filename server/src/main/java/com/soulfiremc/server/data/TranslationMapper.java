@@ -19,8 +19,8 @@ package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.util.GsonInstance;
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
 
   static {
     var translations = GsonInstance.GSON.fromJson(
-      ResourceHelper.getResourceAsString("minecraft/en_us.json"), JsonObject.class);
+      SFHelpers.getResourceAsString("minecraft/en_us.json"), JsonObject.class);
     var mojangTranslations = new Object2ObjectOpenHashMap<String, String>();
     for (var translationEntry : translations.entrySet()) {
       mojangTranslations.put(translationEntry.getKey(), translationEntry.getValue().getAsString());

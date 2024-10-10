@@ -18,7 +18,7 @@
 package com.soulfiremc.client;
 
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
-import com.soulfiremc.util.SFPathConstants;
+import com.soulfiremc.server.util.SFPathConstants;
 
 import java.nio.file.Path;
 

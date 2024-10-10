@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.util.structs;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
-public final class ExpiringSet {
-  private ExpiringSet() {}
+@RequiredArgsConstructor
+public class LazyBoolean {
+  private final BooleanSupplier supplier;
+  private boolean value;
+  private boolean initialized;
 
-  /**
-   * An expiring set using Caffeine caches
-   *
-   * @param <E> the element type
-   * @return a new expiring set
-   */
-  public static <E> Set<E> newExpiringSet(long duration, TimeUnit unit) {
-    return Collections.newSetFromMap(Caffeine.newBuilder().expireAfterWrite(duration, unit).<E, Boolean>build().asMap());
+  public boolean get() {
+    if (!initialized) {
+      value = supplier.getAsBoolean();
+      initialized = true;
+    }
+
+    return value;
   }
 }

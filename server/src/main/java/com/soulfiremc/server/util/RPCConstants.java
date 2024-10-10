@@ -15,30 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util;
 
-import com.google.common.net.HostAndPort;
+import io.grpc.Metadata;
 
-import java.net.IDN;
+import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
-public record ServerAddress(HostAndPort hostAndPort) {
-  public static ServerAddress fromStringDefaultPort(String address, int defaultPort) {
-    return new ServerAddress(HostAndPort.fromString(address).withDefaultPort(defaultPort));
-  }
+public class RPCConstants {
+  public static final String BEARER_TYPE = "Bearer";
 
-  public static ServerAddress fromStringAndPort(String host, int port) {
-    return new ServerAddress(HostAndPort.fromParts(host, port));
-  }
+  public static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY =
+    Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
 
-  public String host() {
-    try {
-      return IDN.toASCII(hostAndPort.getHost());
-    } catch (IllegalArgumentException e) {
-      return "";
-    }
-  }
-
-  public int port() {
-    return hostAndPort.getPort();
-  }
+  private RPCConstants() {}
 }

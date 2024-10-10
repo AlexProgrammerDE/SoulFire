@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.data;
 
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import org.intellij.lang.annotations.Subst;
@@ -31,7 +31,7 @@ public class BlockShapeLoader {
     new Object2ObjectOpenHashMap<>();
 
   static {
-    ResourceHelper.getResourceAsString("minecraft/blockstates.txt")
+    SFHelpers.getResourceAsString("minecraft/blockstates.txt")
       .lines()
       .forEach(
         line -> {

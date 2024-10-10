@@ -18,8 +18,8 @@
 package com.soulfiremc.brigadier;
 
 import com.mojang.brigadier.Command;
-import com.soulfiremc.util.CommandHistoryManager;
-import com.soulfiremc.util.ShutdownManager;
+import com.soulfiremc.server.util.structs.CommandHistoryManager;
+import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import org.apache.logging.log4j.Level;

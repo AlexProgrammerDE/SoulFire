@@ -18,7 +18,6 @@
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.settings.proxy.SFProxy;
-import com.soulfiremc.util.ReactorHttpHelper;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.extern.slf4j.Slf4j;

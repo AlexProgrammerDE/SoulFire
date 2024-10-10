@@ -24,7 +24,7 @@ import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.settings.proxy.SFProxy;
-import com.soulfiremc.util.ReactorHttpHelper;
+import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;

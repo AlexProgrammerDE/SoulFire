@@ -15,13 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util.structs;
 
-public class BuiltinSettingsConstants {
-  public static final String BOT_SETTINGS_ID = "bot";
-  public static final String ACCOUNT_SETTINGS_ID = "account";
-  public static final String PROXY_SETTINGS_ID = "proxy";
-  public static final String DEV_SETTINGS_ID = "dev";
+import com.google.gson.Gson;
 
-  private BuiltinSettingsConstants() {}
+public class GsonInstance {
+  public static final Gson GSON = new Gson();
 }

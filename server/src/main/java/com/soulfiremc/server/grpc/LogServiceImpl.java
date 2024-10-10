@@ -19,7 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.user.Permissions;
-import com.soulfiremc.util.SFLogAppender;
+import com.soulfiremc.server.util.structs.SFLogAppender;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;

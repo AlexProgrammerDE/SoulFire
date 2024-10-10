@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -148,5 +149,17 @@ public class SFHelpers {
     }
 
     return false;
+  }
+
+  public static String getResourceAsString(String path) {
+    return new String(getResourceAsBytes(path), StandardCharsets.UTF_8);
+  }
+
+  public static byte[] getResourceAsBytes(String path) {
+    try {
+      return Objects.requireNonNull(SFHelpers.class.getClassLoader().getResourceAsStream(path), path).readAllBytes();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to get file", e);
+    }
   }
 }

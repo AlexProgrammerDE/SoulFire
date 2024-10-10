@@ -22,7 +22,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.JsonOps;
-import com.soulfiremc.util.GsonInstance;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;

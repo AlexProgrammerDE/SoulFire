@@ -21,7 +21,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.util.BuiltinSettingsConstants;
+import com.soulfiremc.server.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

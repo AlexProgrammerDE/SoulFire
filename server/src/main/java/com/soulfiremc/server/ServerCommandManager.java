@@ -52,7 +52,7 @@ import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
-import com.soulfiremc.util.SFPathConstants;
+import com.soulfiremc.server.util.SFPathConstants;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;

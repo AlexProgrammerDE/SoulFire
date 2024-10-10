@@ -17,6 +17,6 @@
  */
 package com.soulfiremc.client;
 
-import com.soulfiremc.util.ServerAddress;
+import com.soulfiremc.server.util.structs.ServerAddress;
 
 public record RemoteServerData(ServerAddress serverAddress, String token) {}

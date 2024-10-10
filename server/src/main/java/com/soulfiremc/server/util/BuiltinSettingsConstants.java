@@ -17,22 +17,11 @@
  */
 package com.soulfiremc.server.util;
 
-import lombok.RequiredArgsConstructor;
+public class BuiltinSettingsConstants {
+  public static final String BOT_SETTINGS_ID = "bot";
+  public static final String ACCOUNT_SETTINGS_ID = "account";
+  public static final String PROXY_SETTINGS_ID = "proxy";
+  public static final String DEV_SETTINGS_ID = "dev";
 
-import java.util.function.BooleanSupplier;
-
-@RequiredArgsConstructor
-public class LazyBoolean {
-  private final BooleanSupplier supplier;
-  private boolean value;
-  private boolean initialized;
-
-  public boolean get() {
-    if (!initialized) {
-      value = supplier.getAsBoolean();
-      initialized = true;
-    }
-
-    return value;
-  }
+  private BuiltinSettingsConstants() {}
 }

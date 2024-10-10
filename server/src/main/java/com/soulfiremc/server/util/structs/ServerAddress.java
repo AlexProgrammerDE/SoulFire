@@ -15,10 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util.structs;
 
-public class SFFeatureFlags {
-  public static final boolean MOD_SUPPORT = Boolean.getBoolean("sf.mod_support");
+import com.google.common.net.HostAndPort;
 
-  private SFFeatureFlags() {}
+import java.net.IDN;
+
+public record ServerAddress(HostAndPort hostAndPort) {
+  public static ServerAddress fromStringDefaultPort(String address, int defaultPort) {
+    return new ServerAddress(HostAndPort.fromString(address).withDefaultPort(defaultPort));
+  }
+
+  public static ServerAddress fromStringAndPort(String host, int port) {
+    return new ServerAddress(HostAndPort.fromParts(host, port));
+  }
+
+  public String host() {
+    try {
+      return IDN.toASCII(hostAndPort.getHost());
+    } catch (IllegalArgumentException e) {
+      return "";
+    }
+  }
+
+  public int port() {
+    return hostAndPort.getPort();
+  }
 }

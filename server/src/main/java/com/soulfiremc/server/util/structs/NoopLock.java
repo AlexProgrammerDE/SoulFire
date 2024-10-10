@@ -15,24 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.util.structs;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Make an object use shared memory.
- * Will try to free memory when the object is not used/already in memory.
- *
- * @param <T> The type of object to pool.
- */
-public class ReferenceCache<T> {
-  private final Map<T, T> cache = new WeakHashMap<>();
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
-  public T poolReference(T obj) {
-    synchronized (cache) {
-      return cache.computeIfAbsent(obj, Function.identity());
-    }
+public class NoopLock implements Lock {
+  @Override
+  public void lock() {}
+
+  @Override
+  public void lockInterruptibly() {}
+
+  @Override
+  public boolean tryLock() {
+    return true;
+  }
+
+  @Override
+  public boolean tryLock(long time, @NotNull TimeUnit unit) {
+    return true;
+  }
+
+  @Override
+  public void unlock() {}
+
+  @NotNull
+  @Override
+  public Condition newCondition() {
+    throw new UnsupportedOperationException();
   }
 }

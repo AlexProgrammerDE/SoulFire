@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.protocol.bot.movement.AABB;
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -32,7 +32,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
   public static final BlockShapeGroup EMPTY;
 
   static {
-    ResourceHelper.getResourceAsString("minecraft/blockshapes.txt")
+    SFHelpers.getResourceAsString("minecraft/blockshapes.txt")
       .lines()
       .forEach(
         line -> {

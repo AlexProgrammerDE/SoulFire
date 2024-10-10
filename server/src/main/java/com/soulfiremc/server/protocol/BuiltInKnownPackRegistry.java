@@ -18,7 +18,7 @@
 package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.data.ResourceKey;
-import com.soulfiremc.util.ResourceHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class BuiltInKnownPackRegistry {
 
   public BuiltInKnownPackRegistry() {
     var byteArrayInputStream =
-      new ByteArrayInputStream(ResourceHelper.getResourceAsBytes("minecraft/builtin_packs.bin.zip"));
+      new ByteArrayInputStream(SFHelpers.getResourceAsBytes("minecraft/builtin_packs.bin.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
       var bytes = gzipInputStream.readAllBytes();
       var in = Unpooled.wrappedBuffer(bytes);

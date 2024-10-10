@@ -18,7 +18,6 @@
 package com.soulfiremc.server.util;
 
 import com.google.common.base.Preconditions;
-import com.soulfiremc.util.ResourceHelper;
 import it.unimi.dsi.fastutil.Pair;
 
 import javax.crypto.Cipher;
@@ -54,7 +53,7 @@ public class EncryptionUtils {
     }
 
     try {
-      YGGDRASIL_SESSION_KEY = parseRsaPublicKey(ResourceHelper.getResourceAsBytes("yggdrasil_session_pubkey.der"));
+      YGGDRASIL_SESSION_KEY = parseRsaPublicKey(SFHelpers.getResourceAsBytes("yggdrasil_session_pubkey.der"));
     } catch (NullPointerException err) {
       throw new RuntimeException(err);
     }

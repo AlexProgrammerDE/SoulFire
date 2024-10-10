@@ -15,17 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util.structs;
 
-import io.grpc.Metadata;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
-import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-public class RPCConstants {
-  public static final String BEARER_TYPE = "Bearer";
+public final class ExpiringSet {
+  private ExpiringSet() {}
 
-  public static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY =
-    Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
-
-  private RPCConstants() {}
+  /**
+   * An expiring set using Caffeine caches
+   *
+   * @param <E> the element type
+   * @return a new expiring set
+   */
+  public static <E> Set<E> newExpiringSet(long duration, TimeUnit unit) {
+    return Collections.newSetFromMap(Caffeine.newBuilder().expireAfterWrite(duration, unit).<E, Boolean>build().asMap());
+  }
 }

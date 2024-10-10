@@ -21,7 +21,7 @@ import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
-import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import com.soulfiremc.server.util.structs.Vec2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
   private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();

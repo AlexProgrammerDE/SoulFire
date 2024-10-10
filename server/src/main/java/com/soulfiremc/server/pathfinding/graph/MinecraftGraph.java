@@ -25,8 +25,8 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.util.LazyBoolean;
-import com.soulfiremc.server.util.Vec2ObjectOpenHashMap;
+import com.soulfiremc.server.util.structs.LazyBoolean;
+import com.soulfiremc.server.util.structs.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import lombok.extern.slf4j.Slf4j;
 

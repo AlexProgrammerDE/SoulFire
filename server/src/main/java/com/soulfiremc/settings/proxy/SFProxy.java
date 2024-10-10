@@ -18,7 +18,7 @@
 package com.soulfiremc.settings.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
-import com.soulfiremc.util.SocketAddressHelper;
+import com.soulfiremc.server.util.SocketAddressHelper;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 

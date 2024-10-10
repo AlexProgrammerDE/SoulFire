@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.util.ReferenceCache;
+import com.soulfiremc.server.util.structs.ReferenceCache;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;

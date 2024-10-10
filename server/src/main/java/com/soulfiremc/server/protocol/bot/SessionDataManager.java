@@ -41,7 +41,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.TickTimer;
+import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.*;

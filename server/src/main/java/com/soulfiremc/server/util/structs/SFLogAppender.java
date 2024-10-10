@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.util;
+package com.soulfiremc.server.util.structs;
 
 import lombok.Getter;
 import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
