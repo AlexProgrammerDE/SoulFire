@@ -146,57 +146,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return reconstructPath(current);
       }
 
-      Consumer<GraphInstructions> callback =
-        instructions -> {
-          var actionCost = instructions.actionCost();
-          var worldActions = instructions.actions();
-          var instructionNode = instructions.node();
-
-          // Calculate new distance from start to this connection,
-          // Get distance from the current element
-          // and add the distance from the current element to the next element
-          var newSourceCost = current.sourceCost() + actionCost;
-          var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
-
-          routeIndex.compute(
-            instructionNode,
-            (k, v) -> {
-              // The first time we see this node
-              if (v == null) {
-                var node =
-                  new MinecraftRouteNode(
-                    instructionNode,
-                    current,
-                    worldActions,
-                    newSourceCost,
-                    newTotalRouteScore);
-
-                log.debug("Found a new node: {}", instructionNode);
-
-                openSet.enqueue(node);
-
-                return node;
-              }
-
-              // If we found a better route to this node, update it
-              if (newSourceCost < v.sourceCost()) {
-                v.setBetterParent(
-                  current,
-                  worldActions,
-                  newSourceCost,
-                  newTotalRouteScore);
-
-                log.debug("Found a better route to node: {}", instructionNode);
-
-                openSet.enqueue(v);
-              }
-
-              return v;
-            });
-        };
-
       try {
-        graph.insertActions(current.node(), callback);
+        graph.insertActions(current.node(), instructions ->
+          handleInstructions(openSet, routeIndex, current, instructions));
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
@@ -229,5 +181,56 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     stopwatch.stop();
     log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
     throw new NoRouteFoundException();
+  }
+
+  private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
+                                  Map<NodeState, MinecraftRouteNode> routeIndex,
+                                  MinecraftRouteNode current,
+                                  GraphInstructions instructions) {
+    var actionCost = instructions.actionCost();
+    var worldActions = instructions.actions();
+    var instructionNode = instructions.node();
+
+    // Calculate new distance from start to this connection,
+    // Get distance from the current element
+    // and add the distance from the current element to the next element
+    var newSourceCost = current.sourceCost() + actionCost;
+    var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+
+    routeIndex.compute(
+      instructionNode,
+      (k, v) -> {
+        // The first time we see this node
+        if (v == null) {
+          var node =
+            new MinecraftRouteNode(
+              instructionNode,
+              current,
+              worldActions,
+              newSourceCost,
+              newTotalRouteScore);
+
+          log.debug("Found a new node: {}", instructionNode);
+
+          openSet.enqueue(node);
+
+          return node;
+        }
+
+        // If we found a better route to this node, update it
+        if (newSourceCost < v.sourceCost()) {
+          v.setBetterParent(
+            current,
+            worldActions,
+            newSourceCost,
+            newTotalRouteScore);
+
+          log.debug("Found a better route to node: {}", instructionNode);
+
+          openSet.enqueue(v);
+        }
+
+        return v;
+      });
   }
 }
