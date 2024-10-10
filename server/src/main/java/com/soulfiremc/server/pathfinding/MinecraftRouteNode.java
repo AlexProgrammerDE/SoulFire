@@ -20,14 +20,11 @@ package com.soulfiremc.server.pathfinding;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @ToString
 @AllArgsConstructor
 public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
@@ -56,18 +53,6 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
    */
   private double totalRouteScore;
 
-  private List<MinecraftRouteNode> children;
-
-  public MinecraftRouteNode(NodeState node, MinecraftRouteNode parent, List<WorldAction> actions,
-                            double sourceCost, double totalRouteScore) {
-    this.node = node;
-    this.parent = parent;
-    this.actions = actions;
-    this.sourceCost = sourceCost;
-    this.totalRouteScore = totalRouteScore;
-    this.children = new ArrayList<>();
-  }
-
   public MinecraftRouteNode(NodeState node, List<WorldAction> actions,
                             double sourceCost, double totalRouteScore) {
     this.node = node;
@@ -75,11 +60,17 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
     this.actions = actions;
     this.sourceCost = sourceCost;
     this.totalRouteScore = totalRouteScore;
-    this.children = new ArrayList<>();
   }
 
   @Override
   public int compareTo(MinecraftRouteNode other) {
     return Double.compare(this.totalRouteScore, other.totalRouteScore);
+  }
+
+  public void setBetterParent(MinecraftRouteNode parent, List<WorldAction> actions, double sourceCost, double totalRouteScore) {
+    this.parent = parent;
+    this.actions = actions;
+    this.sourceCost = sourceCost;
+    this.totalRouteScore = totalRouteScore;
   }
 }

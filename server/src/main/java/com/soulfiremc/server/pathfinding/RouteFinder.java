@@ -181,10 +181,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
               // If we found a better route to this node, update it
               if (newSourceCost < v.sourceCost()) {
-                v.parent(current);
-                v.actions(worldActions);
-                v.sourceCost(newSourceCost);
-                v.totalRouteScore(newTotalRouteScore);
+                v.setBetterParent(
+                  current,
+                  worldActions,
+                  newSourceCost,
+                  newTotalRouteScore);
 
                 log.debug("Found a better route to node: {}", instructionNode);
 
