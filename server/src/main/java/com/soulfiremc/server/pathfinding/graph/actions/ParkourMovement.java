@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public final class ParkourMovement extends GraphAction {
+public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final ParkourDirection direction;
   private final SFVec3i targetFeetBlock;
@@ -128,7 +128,16 @@ public final class ParkourMovement extends GraphAction {
 
   @Override
   public ParkourMovement copy() {
-    return this;
+    return this.clone();
+  }
+
+  @Override
+  public ParkourMovement clone() {
+    try {
+      return (ParkourMovement) super.clone();
+    } catch (CloneNotSupportedException cantHappen) {
+      throw new InternalError();
+    }
   }
 
   record ParkourMovementBlockSubscription(
