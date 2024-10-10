@@ -135,7 +135,6 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       progressInfo.run();
 
       var current = openSet.dequeue();
-      routeIndex.remove(current.node());
 
       log.debug("Looking at node: {}", current.node());
 
