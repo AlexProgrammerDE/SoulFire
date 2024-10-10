@@ -31,8 +31,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,14 +41,11 @@ import java.util.function.Consumer;
 public final class DownMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetToMineBlock;
-  @Getter
-  @Setter
+  // Mutable
   private MovementMiningCost breakCost;
-  @Getter
-  @Setter
+  // Mutable
   private int closestBlockToFallOn = Integer.MIN_VALUE;
-  @Getter
-  @Setter
+  // Mutable
   private int closestObstructingBlock = Integer.MIN_VALUE;
 
   public DownMovement() {
@@ -235,25 +230,24 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
           var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
           // We can mine this block, lets add costs and continue
-          downMovement.breakCost(
-            new MovementMiningCost(
-              absoluteKey,
-              cacheableMiningCost.miningCost(),
-              cacheableMiningCost.willDropUsableBlockItem(),
-              blockBreakSideHint));
+          downMovement.breakCost = new MovementMiningCost(
+            absoluteKey,
+            cacheableMiningCost.miningCost(),
+            cacheableMiningCost.willDropUsableBlockItem(),
+            blockBreakSideHint);
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case DOWN_SAFETY_CHECK -> {
           var yLevel = key.y;
 
-          if (yLevel < downMovement.closestBlockToFallOn()) {
+          if (yLevel < downMovement.closestBlockToFallOn) {
             // We already found a block to fall on, above this one
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
           if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
             // We found a block to fall on
-            downMovement.closestBlockToFallOn(yLevel);
+            downMovement.closestBlockToFallOn = yLevel;
           }
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
@@ -273,12 +267,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
         case MOVEMENT_OBSTRUCTING_FALL_CHECK -> {
           var yLevel = key.y;
 
-          if (yLevel < downMovement.closestObstructingBlock()) {
+          if (yLevel < downMovement.closestObstructingBlock) {
             // We already found a higher obstructing block
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
-          if (yLevel < downMovement.closestBlockToFallOn()) {
+          if (yLevel < downMovement.closestBlockToFallOn) {
             // We only search blocks above the closest block to fall on
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
@@ -288,7 +282,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
           }
 
           // We found a block that obstructs our fall
-          downMovement.closestObstructingBlock(yLevel);
+          downMovement.closestObstructingBlock = yLevel;
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
       };

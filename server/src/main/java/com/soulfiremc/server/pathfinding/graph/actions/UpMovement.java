@@ -33,7 +33,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -46,13 +45,12 @@ import java.util.function.Consumer;
 public final class UpMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetFeetBlock;
-  @Getter
   private final List<Pair<SFVec3i, BlockFace>> requiredFreeBlocks;
-  @Getter
+  // Mutable
   private MovementMiningCost[] blockBreakCosts;
-  @Getter
+  // Mutable
   private boolean[] unsafeToBreak;
-  @Getter
+  // Mutable
   private boolean[] noNeedToBreak;
 
   public UpMovement() {
@@ -75,7 +73,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     UpMovement movement) {
     {
       var blockId = 0;
-      for (var freeBlock : movement.requiredFreeBlocks()) {
+      for (var freeBlock : movement.requiredFreeBlocks) {
         blockSubscribers
           .accept(freeBlock.key(), new UpMovementBlockSubscription(UpMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
@@ -243,21 +241,21 @@ public final class UpMovement extends GraphAction implements Cloneable {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (isFree.get()) {
-            upMovement.noNeedToBreak()[blockArrayIndex] = true;
+            upMovement.noNeedToBreak[blockArrayIndex] = true;
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
             || graph.disallowedToBreakBlockType(blockState.blockType())
-            || upMovement.unsafeToBreak()[blockArrayIndex]) {
+            || upMovement.unsafeToBreak[blockArrayIndex]) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
 
           var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
           // We can mine this block, lets add costs and continue
-          upMovement.blockBreakCosts()[blockArrayIndex] =
+          upMovement.blockBreakCosts[blockArrayIndex] =
             new MovementMiningCost(
               absoluteKey,
               cacheableMiningCost.miningCost(),
@@ -275,12 +273,12 @@ public final class UpMovement extends GraphAction implements Cloneable {
         }
         case MOVEMENT_BREAK_SAFETY_CHECK -> {
           // There is no need to break this block, so there is no need for safety checks
-          if (upMovement.noNeedToBreak()[blockArrayIndex]) {
+          if (upMovement.noNeedToBreak[blockArrayIndex]) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
           // The block was already marked as unsafe
-          if (upMovement.unsafeToBreak()[blockArrayIndex]) {
+          if (upMovement.unsafeToBreak[blockArrayIndex]) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
@@ -291,7 +289,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
-          var currentValue = upMovement.blockBreakCosts()[blockArrayIndex];
+          var currentValue = upMovement.blockBreakCosts[blockArrayIndex];
 
           if (currentValue != null) {
             // We learned that this block needs to be broken, so we need to set it as impossible
@@ -301,7 +299,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
           // Store for a later time that this is unsafe,
           // so if we check this block,
           // we know it's unsafe
-          upMovement.unsafeToBreak()[blockArrayIndex] = true;
+          upMovement.unsafeToBreak[blockArrayIndex] = true;
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }

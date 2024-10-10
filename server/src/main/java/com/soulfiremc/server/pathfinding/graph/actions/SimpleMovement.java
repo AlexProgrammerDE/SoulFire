@@ -33,8 +33,6 @@ import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -49,28 +47,22 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private final MovementDirection direction;
   private final MovementModifier modifier;
   private final SFVec3i targetFeetBlock;
-  @Getter
   private final boolean diagonal;
-  @Getter
   private final boolean allowBlockActions;
-  @Getter
   private final List<Pair<SFVec3i, BlockFace>> requiredFreeBlocks;
-  @Getter
+  // Mutable
   private MovementMiningCost[] blockBreakCosts;
-  @Getter
+  // Mutable
   private boolean[] unsafeToBreak;
-  @Getter
+  // Mutable
   private boolean[] noNeedToBreak;
-  @Setter
-  @Getter
+  // Mutable
   private MovementSide blockedSide;
-  @Setter
-  @Getter
+  // Mutable
   private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
-  @Getter
-  @Setter
+  // Mutable
   private double cost;
-  @Setter
+  // Mutable
   private boolean requiresAgainstBlock = false;
 
   public SimpleMovement(MovementDirection direction, MovementModifier modifier) {
@@ -128,7 +120,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     SimpleMovement movement) {
     {
       var blockId = 0;
-      for (var freeBlock : movement.requiredFreeBlocks()) {
+      for (var freeBlock : movement.requiredFreeBlocks) {
         blockSubscribers
           .accept(freeBlock.key(), new SimpleMovementBlockSubscription(SimpleMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
       }
@@ -476,8 +468,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return switch (type) {
         case MOVEMENT_FREE -> {
           if (isFree.get()) {
-            if (simpleMovement.allowBlockActions()) {
-              simpleMovement.noNeedToBreak()[blockArrayIndex] = true;
+            if (simpleMovement.allowBlockActions) {
+              simpleMovement.noNeedToBreak[blockArrayIndex] = true;
             }
 
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
@@ -485,17 +477,17 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
           // Search for a way to break this block
           if (graph.disallowedToBreakBlock(absoluteKey)
-            || !simpleMovement.allowBlockActions()
+            || !simpleMovement.allowBlockActions
             || graph.disallowedToBreakBlockType(blockState.blockType())
             // Check if we previously found out this block is unsafe to break
-            || simpleMovement.unsafeToBreak()[blockArrayIndex]) {
+            || simpleMovement.unsafeToBreak[blockArrayIndex]) {
             // No way to break this block
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
 
           var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
           // We can mine this block, lets add costs and continue
-          simpleMovement.blockBreakCosts()[blockArrayIndex] =
+          simpleMovement.blockBreakCosts[blockArrayIndex] =
             new MovementMiningCost(
               absoluteKey,
               cacheableMiningCost.miningCost(),
@@ -505,12 +497,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
         case MOVEMENT_BREAK_SAFETY_CHECK -> {
           // There is no need to break this block, so there is no need for safety checks
-          if (simpleMovement.noNeedToBreak()[blockArrayIndex]) {
+          if (simpleMovement.noNeedToBreak[blockArrayIndex]) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
           // The block was already marked as unsafe
-          if (simpleMovement.unsafeToBreak()[blockArrayIndex]) {
+          if (simpleMovement.unsafeToBreak[blockArrayIndex]) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
@@ -521,7 +513,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
-          var currentValue = simpleMovement.blockBreakCosts()[blockArrayIndex];
+          var currentValue = simpleMovement.blockBreakCosts[blockArrayIndex];
 
           if (currentValue != null) {
             // We learned that this block needs to be broken, so we need to set it as impossible
@@ -531,7 +523,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           // Store for a later time that this is unsafe,
           // so if we check this block,
           // we know it's unsafe
-          simpleMovement.unsafeToBreak()[blockArrayIndex] = true;
+          simpleMovement.unsafeToBreak[blockArrayIndex] = true;
 
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
@@ -542,18 +534,18 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           }
 
           if (graph.disallowedToPlaceBlock(absoluteKey)
-            || !simpleMovement.allowBlockActions()
+            || !simpleMovement.allowBlockActions
             || !blockState.blockType().replaceable()) {
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
 
           // We can place a block here, but we need to find a block to place against
-          simpleMovement.requiresAgainstBlock(true);
+          simpleMovement.requiresAgainstBlock = true;
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case MOVEMENT_AGAINST_PLACE_SOLID -> {
           // We already found one, no need to check for more
-          if (simpleMovement.blockPlaceAgainstData() != null) {
+          if (simpleMovement.blockPlaceAgainstData != null) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
@@ -563,9 +555,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           }
 
           // Fixup the position to be the block we are placing against instead of relative
-          simpleMovement.blockPlaceAgainstData(
-            new BotActionManager.BlockPlaceAgainstData(
-              absoluteKey, blockToPlaceAgainst.blockFace()));
+          simpleMovement.blockPlaceAgainstData = new BotActionManager.BlockPlaceAgainstData(
+            absoluteKey, blockToPlaceAgainst.blockFace());
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case MOVEMENT_DIAGONAL_COLLISION -> {
@@ -573,10 +564,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           } else if (blockState.blockShapeGroup().isFullBlock()) {
-            var blockedSide = simpleMovement.blockedSide();
+            var blockedSide = simpleMovement.blockedSide;
             if (blockedSide == null) {
-              simpleMovement.blockedSide(side);
-              simpleMovement.cost(simpleMovement.cost() + Costs.CORNER_SLIDE);
+              simpleMovement.blockedSide = side;
+              simpleMovement.cost = simpleMovement.cost + Costs.CORNER_SLIDE;
               yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
             } else if (blockedSide == side) {
               yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
