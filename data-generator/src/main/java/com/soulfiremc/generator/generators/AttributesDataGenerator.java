@@ -40,6 +40,10 @@ public class AttributesDataGenerator implements IDataGenerator {
 
     attributeDesc.addProperty("defaultValue", rangedAttribute.getDefaultValue());
 
+    if (rangedAttribute.isClientSyncable()) {
+      attributeDesc.addProperty("clientSyncable", true);
+    }
+
     return attributeDesc;
   }
 

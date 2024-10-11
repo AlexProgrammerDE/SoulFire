@@ -23,10 +23,11 @@ import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record AttributeType(int id, Key key, double min, double max, double defaultValue) implements RegistryValue<AttributeType> {
-  public static final Registry<AttributeType> REGISTRY = new Registry<>(RegistryKeys.ATTRIBUTE);
+public record AttributeType(int id, Key key, double min, double max, double defaultValue,
+                            boolean clientSyncable) implements RegistryValue<AttributeType> {
+    public static final Registry<AttributeType> REGISTRY = new Registry<>(RegistryKeys.ATTRIBUTE);
 
-  //@formatter:off
+    //@formatter:off
   public static final AttributeType ARMOR = register("minecraft:generic.armor");
   public static final AttributeType ARMOR_TOUGHNESS = register("minecraft:generic.armor_toughness");
   public static final AttributeType ATTACK_DAMAGE = register("minecraft:generic.attack_damage");
@@ -60,26 +61,26 @@ public record AttributeType(int id, Key key, double min, double max, double defa
   public static final AttributeType WATER_MOVEMENT_EFFICIENCY = register("minecraft:generic.water_movement_efficiency");
   //@formatter:on
 
-  public static AttributeType register(String key) {
-    var instance =
-      GsonDataHelper.fromJson("minecraft/attributes.json", key, AttributeType.class);
+    public static AttributeType register(String key) {
+        var instance =
+                GsonDataHelper.fromJson("minecraft/attributes.json", key, AttributeType.class);
 
-    return REGISTRY.register(instance);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        return REGISTRY.register(instance);
     }
-    if (!(o instanceof AttributeType other)) {
-      return false;
-    }
-    return id == other.id;
-  }
 
-  @Override
-  public int hashCode() {
-    return id;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AttributeType other)) {
+            return false;
+        }
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

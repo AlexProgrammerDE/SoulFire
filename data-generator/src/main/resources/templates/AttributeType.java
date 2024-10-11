@@ -23,7 +23,8 @@ import net.kyori.adventure.key.Key;
 
 @SuppressWarnings("unused")
 @With(value = AccessLevel.PRIVATE)
-public record AttributeType(int id, Key key, double min, double max, double defaultValue) implements RegistryValue<AttributeType> {
+public record AttributeType(int id, Key key, double min, double max, double defaultValue,
+                            boolean clientSyncable) implements RegistryValue<AttributeType> {
   public static final Registry<AttributeType> REGISTRY = new Registry<>(RegistryKeys.ATTRIBUTE);
 
   //@formatter:off
