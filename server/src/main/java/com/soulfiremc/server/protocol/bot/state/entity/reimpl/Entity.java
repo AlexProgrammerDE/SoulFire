@@ -1,10 +1,14 @@
 package com.soulfiremc.server.protocol.bot.state.entity.reimpl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
-import com.google.common.collect.ImmutableList.Builder;
+import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.EntityTypeTags;
+import com.soulfiremc.server.data.FluidType;
+import com.soulfiremc.server.data.TagKey;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
 import it.unimi.dsi.fastutil.floats.FloatArraySet;
@@ -12,25 +16,15 @@ import it.unimi.dsi.fastutil.floats.FloatArrays;
 import it.unimi.dsi.fastutil.floats.FloatSet;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess, CommandSource, ScoreHolder {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Entity.class);
+public abstract class Entity {
   public static final String ID_TAG = "id";
   public static final String PASSENGERS_TAG = "Passengers";
   private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
@@ -49,7 +43,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   private static final double LAVA_FAST_FLOW_SCALE = 0.007;
   private static final double LAVA_SLOW_FLOW_SCALE = 0.0023333333333333335;
   public static final String UUID_TAG = "UUID";
-  private static double viewScale = 1.0;
+  private static final double viewScale = 1.0;
   private final EntityType<?> type;
   private int id = ENTITY_COUNTER.incrementAndGet();
   public boolean blocksBuilding;
@@ -57,7 +51,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   protected int boardingCooldown;
   @Nullable
   private Entity vehicle;
-  private Level level;
+  private final Level level;
   public double xo;
   public double yo;
   public double zo;
@@ -118,13 +112,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   private static final EntityDataAccessor<Boolean> DATA_NO_GRAVITY = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
   protected static final EntityDataAccessor<Pose> DATA_POSE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.POSE);
   private static final EntityDataAccessor<Integer> DATA_TICKS_FROZEN = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);
-  private EntityInLevelCallback levelCallback = EntityInLevelCallback.NULL;
+  private final EntityInLevelCallback levelCallback = EntityInLevelCallback.NULL;
   private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
   public boolean noCulling;
   public boolean hasImpulse;
-  @Nullable
-  public PortalProcessor portalProcess;
-  private int portalCooldown;
   private boolean invulnerable;
   protected UUID uuid = Mth.createInsecureUUID(this.random);
   protected String stringUUID = this.uuid.toString();
@@ -200,7 +191,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return this.packetPositionCodec;
   }
 
-  public EntityType<?> getType() {
+  public EntityType getType() {
     return this.type;
   }
 
@@ -218,7 +209,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   }
 
   public boolean addTag(String tag) {
-    return this.tags.size() >= 1024 ? false : this.tags.add(tag);
+    return this.tags.size() < 1024 && this.tags.add(tag);
   }
 
   public boolean removeTag(String tag) {
@@ -227,14 +218,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public void kill() {
     this.remove(Entity.RemovalReason.KILLED);
-    this.gameEvent(GameEvent.ENTITY_DIE);
   }
 
   public final void discard() {
     this.remove(Entity.RemovalReason.DISCARDED);
   }
-
-  protected abstract void defineSynchedData(SynchedEntityData.Builder builder);
 
   public SynchedEntityData getEntityData() {
     return this.entityData;
@@ -242,7 +230,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   @Override
   public boolean equals(Object object) {
-    return object instanceof Entity ? ((Entity)object).id == this.id : false;
+    return object instanceof Entity && ((Entity) object).id == this.id;
   }
 
   @Override
@@ -377,7 +365,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
     this.firstTick = false;
     if (!this.level().isClientSide && this instanceof Leashable) {
-      Leashable.tickLeash((Entity)((Leashable)this));
+      Leashable.tickLeash((Entity) this);
     }
 
     this.level().getProfiler().pop();
@@ -391,18 +379,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     if (this.getY() < (double)(this.level().getMinBuildHeight() - 64)) {
       this.onBelowWorld();
     }
-  }
-
-  public void setPortalCooldown() {
-    this.portalCooldown = this.getDimensionChangingDelay();
-  }
-
-  public void setPortalCooldown(int portalCooldown) {
-    this.portalCooldown = portalCooldown;
-  }
-
-  public int getPortalCooldown() {
-    return this.portalCooldown;
   }
 
   public boolean isOnPortalCooldown() {
@@ -593,17 +569,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
               if (lv7.emitsSounds()) {
                 this.waterSwimSound();
               }
-
-              if (lv7.emitsEvents()) {
-                this.gameEvent(GameEvent.SWIM);
-              }
             }
           } else if (lv9.isAir()) {
             this.processFlappingMovement();
           }
         }
 
-        this.tryCheckInsideBlocks();
+        this.checkInsideBlocks();
         float h = this.getBlockSpeedFactor();
         this.setDeltaMovement(this.getDeltaMovement().multiply((double)h, 1.0, (double)h));
         if (this.level()
@@ -637,10 +609,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
           this.walkingStepSound(pos, state);
         }
 
-        if (broadcastGameEvent) {
-          this.level().gameEvent(GameEvent.STEP, this.position(), GameEvent.Context.of(this, state));
-        }
-
         return true;
       } else {
         return false;
@@ -652,17 +620,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return false;
   }
 
-  protected void tryCheckInsideBlocks() {
-    try {
-      this.checkInsideBlocks();
-    } catch (Throwable var4) {
-      CrashReport lv = CrashReport.forThrowable(var4, "Checking entity block collision");
-      CrashReportCategory lv2 = lv.addCategory("Entity being checked for collision");
-      this.fillCrashReportCategory(lv2);
-      throw new ReportedException(lv);
-    }
-  }
-
   public void extinguishFire() {
     this.clearFire();
   }
@@ -670,9 +627,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   protected void processFlappingMovement() {
     if (this.isFlapping()) {
       this.onFlap();
-      if (this.getMovementEmission().emitsEvents()) {
-        this.gameEvent(GameEvent.FLAP);
-      }
     }
   }
 
@@ -800,7 +754,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
       DoubleListIterator var8 = doubleList.iterator();
 
       while (var8.hasNext()) {
-        double d = (Double)var8.next();
+        double d = var8.next();
         float h = (float)(d - box.minY);
         if (!(h < 0.0F) && h != maxUpStep) {
           if (h > deltaY) {
@@ -980,12 +934,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     if (onGround) {
       if (this.fallDistance > 0.0F) {
         state.getBlock().fallOn(this.level(), state, pos, this, this.fallDistance);
-        this.level()
-          .gameEvent(
-            GameEvent.HIT_GROUND,
-            this.position,
-            GameEvent.Context.of(this, this.mainSupportingBlockPos.<BlockState>map(arg -> this.level().getBlockState(arg)).orElse(state))
-          );
       }
 
       this.resetFallDistance();
@@ -1105,8 +1053,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     float g = Math.min(1.0F, (float)Math.sqrt(lv2.x * lv2.x * 0.2F + lv2.y * lv2.y + lv2.z * lv2.z * 0.2F) * f);
 
     float h = (float)Mth.floor(this.getY());
-
-    this.gameEvent(GameEvent.SPLASH);
   }
 
   @Deprecated
@@ -1142,7 +1088,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     }
   }
 
-  public boolean isEyeInFluid(TagKey<Fluid> fluidTag) {
+  public boolean isEyeInFluid(TagKey<FluidType> fluidTag) {
     return this.fluidOnEyes.contains(fluidTag);
   }
 
@@ -1358,10 +1304,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return new Vec3(d, e, g);
   }
 
-  public Vec3 getLightProbePosition(float partialTicks) {
-    return this.getEyePosition(partialTicks);
-  }
-
   public final Vec3 getPosition(float partialTicks) {
     double d = Mth.lerp((double)partialTicks, this.xo, this.getX());
     double e = Mth.lerp((double)partialTicks, this.yo, this.getY());
@@ -1386,108 +1328,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public boolean isPushable() {
     return false;
-  }
-
-  public boolean shouldRender(double x, double y, double z) {
-    double g = this.getX() - x;
-    double h = this.getY() - y;
-    double i = this.getZ() - z;
-    double j = g * g + h * h + i * i;
-    return this.shouldRenderAtSqrDistance(j);
-  }
-
-  public boolean shouldRenderAtSqrDistance(double distance) {
-    double e = this.getBoundingBox().getSize();
-    if (Double.isNaN(e)) {
-      e = 1.0;
-    }
-
-    e *= 64.0 * viewScale;
-    return distance < e * e;
-  }
-
-  public void load(CompoundTag compound) {
-    try {
-      ListTag lv = compound.getList("Pos", 6);
-      ListTag lv2 = compound.getList("Motion", 6);
-      ListTag lv3 = compound.getList("Rotation", 5);
-      double d = lv2.getDouble(0);
-      double e = lv2.getDouble(1);
-      double f = lv2.getDouble(2);
-      this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-      double g = 3.0000512E7;
-      this.setPosRaw(
-        Mth.clamp(lv.getDouble(0), -3.0000512E7, 3.0000512E7),
-        Mth.clamp(lv.getDouble(1), -2.0E7, 2.0E7),
-        Mth.clamp(lv.getDouble(2), -3.0000512E7, 3.0000512E7)
-      );
-      this.setYRot(lv3.getFloat(0));
-      this.setXRot(lv3.getFloat(1));
-      this.setOldPosAndRot();
-      this.setYHeadRot(this.getYRot());
-      this.setYBodyRot(this.getYRot());
-      this.fallDistance = compound.getFloat("FallDistance");
-      this.remainingFireTicks = compound.getShort("Fire");
-      if (compound.contains("Air")) {
-        this.setAirSupply(compound.getShort("Air"));
-      }
-
-      this.onGround = compound.getBoolean("OnGround");
-      this.invulnerable = compound.getBoolean("Invulnerable");
-      this.portalCooldown = compound.getInt("PortalCooldown");
-      if (compound.hasUUID("UUID")) {
-        this.uuid = compound.getUUID("UUID");
-        this.stringUUID = this.uuid.toString();
-      }
-
-      if (!Double.isFinite(this.getX()) || !Double.isFinite(this.getY()) || !Double.isFinite(this.getZ())) {
-        throw new IllegalStateException("Entity has invalid position");
-      } else if (Double.isFinite((double)this.getYRot()) && Double.isFinite((double)this.getXRot())) {
-        this.reapplyPosition();
-        this.setRot(this.getYRot(), this.getXRot());
-        if (compound.contains("CustomName", 8)) {
-          String string = compound.getString("CustomName");
-
-          try {
-            this.setCustomName(Component.Serializer.fromJson(string, this.registryAccess()));
-          } catch (Exception var16) {
-            LOGGER.warn("Failed to parse entity custom name {}", string, var16);
-          }
-        }
-
-        this.setCustomNameVisible(compound.getBoolean("CustomNameVisible"));
-        this.setSilent(compound.getBoolean("Silent"));
-        this.setNoGravity(compound.getBoolean("NoGravity"));
-        this.setGlowingTag(compound.getBoolean("Glowing"));
-        this.setTicksFrozen(compound.getInt("TicksFrozen"));
-        this.hasVisualFire = compound.getBoolean("HasVisualFire");
-        if (compound.contains("Tags", 9)) {
-          this.tags.clear();
-          ListTag lv4 = compound.getList("Tags", 8);
-          int i = Math.min(lv4.size(), 1024);
-
-          for (int j = 0; j < i; j++) {
-            this.tags.add(lv4.getString(j));
-          }
-        }
-
-        this.readAdditionalSaveData(compound);
-        if (this.repositionEntityAfterLoad()) {
-          this.reapplyPosition();
-        }
-      } else {
-        throw new IllegalStateException("Entity has invalid rotation");
-      }
-    } catch (Throwable var17) {
-      CrashReport lv5 = CrashReport.forThrowable(var17, "Loading entity NBT");
-      CrashReportCategory lv6 = lv5.addCategory("Entity being loaded");
-      this.fillCrashReportCategory(lv6);
-      throw new ReportedException(lv5);
-    }
-  }
-
-  protected boolean repositionEntityAfterLoad() {
-    return true;
   }
 
   public boolean isAlive() {
@@ -1519,16 +1359,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   public InteractionResult interact(Player player, InteractionHand hand) {
     if (this.isAlive() && this instanceof Leashable lv) {
       if (lv.getLeashHolder() == player) {
-        if (!this.level().isClientSide()) {
-          lv.dropLeash(true, !player.hasInfiniteMaterials());
-          this.gameEvent(GameEvent.ENTITY_INTERACT, player);
-        }
-
         return InteractionResult.sidedSuccess(this.level().isClientSide);
       }
 
       ItemStack lv2 = player.getItemInHand(hand);
-      if (lv2.is(Items.LEAD) && lv.canHaveALeashAttachedToIt()) {
+      if (lv2.is(ItemType.LEAD) && lv.canHaveALeashAttachedToIt()) {
         if (!this.level().isClientSide()) {
           lv.setLeashedTo(player, true);
         }
@@ -1630,7 +1465,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public void ejectPassengers() {
     for (int i = this.passengers.size() - 1; i >= 0; i--) {
-      ((Entity)this.passengers.get(i)).stopRiding();
+      this.passengers.get(i).stopRiding();
     }
   }
 
@@ -1654,16 +1489,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
         this.passengers = ImmutableList.of(passenger);
       } else {
         List<Entity> list = Lists.newArrayList(this.passengers);
-        if (!this.level().isClientSide && passenger instanceof Player && !(this.getFirstPassenger() instanceof Player)) {
-          list.add(0, passenger);
-        } else {
-          list.add(passenger);
-        }
+        list.add(passenger);
 
         this.passengers = ImmutableList.copyOf(list);
       }
-
-      this.gameEvent(GameEvent.ENTITY_MOUNT, passenger);
     }
   }
 
@@ -1678,7 +1507,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
       }
 
       passenger.boardingCooldown = 60;
-      this.gameEvent(GameEvent.ENTITY_DISMOUNT, passenger);
     }
   }
 
@@ -1725,16 +1553,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public Vec3 getLookAngle() {
     return this.calculateViewVector(this.getXRot(), this.getYRot());
-  }
-
-  public Vec3 getHandHoldingItemAngle(Item item) {
-    if (!(this instanceof Player lv)) {
-      return Vec3.ZERO;
-    } else {
-      boolean bl = lv.getOffhandItem().is(item) && !lv.getMainHandItem().is(item);
-      HumanoidArm lv2 = bl ? lv.getMainArm().getOpposite() : lv.getMainArm();
-      return this.calculateViewVector(0.0F, this.getYRot() + (float)(lv2 == HumanoidArm.RIGHT ? 80 : -80)).scale(0.5);
-    }
   }
 
   public Vec2 getRotationVector() {
@@ -1846,7 +1664,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
       return false;
     } else {
       Team lv = this.getTeam();
-      return lv != null && player != null && player.getTeam() == lv && lv.canSeeFriendlyInvisibles() ? false : this.isInvisible();
+      return (lv == null || player == null || player.getTeam() != lv || !lv.canSeeFriendlyInvisibles()) && this.isInvisible();
     }
   }
 
@@ -2027,85 +1845,18 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     this.stringUUID = this.uuid.toString();
   }
 
-  @Override
   public UUID getUUID() {
     return this.uuid;
-  }
-
-  public String getStringUUID() {
-    return this.stringUUID;
-  }
-
-  @Override
-  public String getScoreboardName() {
-    return this.stringUUID;
   }
 
   public boolean isPushedByFluid() {
     return true;
   }
 
-  public static double getViewScale() {
-    return viewScale;
-  }
-
-  public static void setViewScale(double renderDistWeight) {
-    viewScale = renderDistWeight;
-  }
-
-  @Override
-  public Component getDisplayName() {
-    return PlayerTeam.formatNameForTeam(this.getTeam(), this.getName())
-      .withStyle(arg -> arg.withHoverEvent(this.createHoverEvent()).withInsertion(this.getStringUUID()));
-  }
-
-  public void setCustomName(@Nullable Component name) {
-    this.entityData.set(DATA_CUSTOM_NAME, Optional.ofNullable(name));
-  }
-
-  @Nullable
-  @Override
-  public Component getCustomName() {
-    return this.entityData.get(DATA_CUSTOM_NAME).orElse(null);
-  }
-
-  @Override
-  public boolean hasCustomName() {
-    return this.entityData.get(DATA_CUSTOM_NAME).isPresent();
-  }
-
-  public void setCustomNameVisible(boolean alwaysRenderNameTag) {
-    this.entityData.set(DATA_CUSTOM_NAME_VISIBLE, alwaysRenderNameTag);
-  }
-
   public boolean isCustomNameVisible() {
     return this.entityData.get(DATA_CUSTOM_NAME_VISIBLE);
   }
 
-  private void teleportPassengers() {
-    this.getSelfAndPassengers().forEach(entity -> {
-      UnmodifiableIterator var1 = entity.passengers.iterator();
-
-      while (var1.hasNext()) {
-        Entity lv = (Entity)var1.next();
-        entity.positionRider(lv, Entity::moveTo);
-      }
-    });
-  }
-
-  public void teleportRelative(double dx, double dy, double dz) {
-    this.teleportTo(this.getX() + dx, this.getY() + dy, this.getZ() + dz);
-  }
-
-  public boolean shouldShowName() {
-    return this.isCustomNameVisible();
-  }
-
-  @Override
-  public void onSyncedDataUpdated(List<SynchedEntityData.DataValue<?>> newData) {
-  }
-
-  @Override
   public void onSyncedDataUpdated(EntityDataAccessor<?> dataAccessor) {
     if (DATA_POSE.equals(dataAccessor)) {
       this.refreshDimensions();
@@ -2127,51 +1878,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     this.dimensions = lv3;
     this.eyeHeight = lv3.eyeHeight();
     this.reapplyPosition();
-    boolean bl = (double)lv3.width() <= 4.0 && (double)lv3.height() <= 4.0;
-    if (!this.level.isClientSide
-      && !this.firstTick
-      && !this.noPhysics
-      && bl
-      && (lv3.width() > lv.width() || lv3.height() > lv.height())
-      && !(this instanceof Player)) {
-      this.fudgePositionAfterSizeChange(lv);
-    }
-  }
-
-  public boolean fudgePositionAfterSizeChange(EntityDimensions dimensions) {
-    EntityDimensions lv = this.getDimensions(this.getPose());
-    Vec3 lv2 = this.position().add(0.0, (double)dimensions.height() / 2.0, 0.0);
-    double d = (double)Math.max(0.0F, lv.width() - dimensions.width()) + 1.0E-6;
-    double e = (double)Math.max(0.0F, lv.height() - dimensions.height()) + 1.0E-6;
-    VoxelShape lv3 = Shapes.create(AABB.ofSize(lv2, d, e, d));
-    Optional<Vec3> optional = this.level.findFreePosition(this, lv3, lv2, (double)lv.width(), (double)lv.height(), (double)lv.width());
-    if (optional.isPresent()) {
-      this.setPos(optional.get().add(0.0, (double)(-lv.height()) / 2.0, 0.0));
-      return true;
-    } else {
-      if (lv.width() > dimensions.width() && lv.height() > dimensions.height()) {
-        VoxelShape lv4 = Shapes.create(AABB.ofSize(lv2, d, 1.0E-6, d));
-        Optional<Vec3> optional2 = this.level.findFreePosition(this, lv4, lv2, (double)lv.width(), (double)dimensions.height(), (double)lv.width());
-        if (optional2.isPresent()) {
-          this.setPos(optional2.get().add(0.0, (double)(-dimensions.height()) / 2.0 + 1.0E-6, 0.0));
-          return true;
-        }
-      }
-
-      return false;
-    }
-  }
-
-  public Direction getDirection() {
-    return Direction.fromYRot((double)this.getYRot());
-  }
-
-  public Direction getMotionDirection() {
-    return this.getDirection();
-  }
-
-  protected HoverEvent createHoverEvent() {
-    return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityTooltipInfo(this.getType(), this.getUUID(), this.getName()));
   }
 
   @Override
@@ -2195,71 +1901,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return this.eyeHeight;
   }
 
-  public Vec3 getLeashOffset(float partialTick) {
-    return this.getLeashOffset();
-  }
-
-  protected Vec3 getLeashOffset() {
-    return new Vec3(0.0, (double)this.getEyeHeight(), (double)(this.getBbWidth() * 0.4F));
-  }
-
   public SlotAccess getSlot(int slot) {
     return SlotAccess.NULL;
-  }
-
-  @Override
-  public void sendSystemMessage(Component component) {
-  }
-
-  public Level getCommandSenderWorld() {
-    return this.level();
   }
 
   @Nullable
   public MinecraftServer getServer() {
     return this.level().getServer();
-  }
-
-  public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
-    return InteractionResult.PASS;
-  }
-
-  public boolean ignoreExplosion(Explosion explosion) {
-    return false;
-  }
-
-  public float rotate(Rotation transformRotation) {
-    float f = Mth.wrapDegrees(this.getYRot());
-    switch (transformRotation) {
-      case CLOCKWISE_180:
-        return f + 180.0F;
-      case COUNTERCLOCKWISE_90:
-        return f + 270.0F;
-      case CLOCKWISE_90:
-        return f + 90.0F;
-      default:
-        return f;
-    }
-  }
-
-  public float mirror(Mirror transformMirror) {
-    float f = Mth.wrapDegrees(this.getYRot());
-    switch (transformMirror) {
-      case FRONT_BACK:
-        return -f;
-      case LEFT_RIGHT:
-        return 180.0F - f;
-      default:
-        return f;
-    }
-  }
-
-  public boolean onlyOpCanSetNbt() {
-    return false;
-  }
-
-  public ProjectileDeflection deflection(Projectile projectile) {
-    return this.getType().is(EntityTypeTags.DEFLECTS_PROJECTILES) ? ProjectileDeflection.REVERSE : ProjectileDeflection.NONE;
   }
 
   @Nullable
@@ -2277,7 +1925,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   @Nullable
   public Entity getFirstPassenger() {
-    return this.passengers.isEmpty() ? null : (Entity)this.passengers.get(0);
+    return this.passengers.isEmpty() ? null : this.passengers.get(0);
   }
 
   public boolean hasPassenger(Entity entity) {
@@ -2342,7 +1990,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
       return false;
     } else {
       Entity lv = entity.getVehicle();
-      return lv == this ? true : this.hasIndirectPassenger(lv);
+      return lv == this || this.hasIndirectPassenger(lv);
     }
   }
 
@@ -2351,7 +1999,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   }
 
   public boolean isEffectiveAi() {
-    return !this.level().isClientSide;
+    return false;
   }
 
   protected static Vec3 getCollisionHorizontalEscapeVector(double vehicleWidth, double passengerWidth, float yRot) {
@@ -2374,14 +2022,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
   @Nullable
   public Entity getControlledVehicle() {
     return this.vehicle != null && this.vehicle.getControllingPassenger() == this ? this.vehicle : null;
-  }
-
-  public PushReaction getPistonPushReaction() {
-    return PushReaction.NORMAL;
-  }
-
-  public SoundSource getSoundSource() {
-    return SoundSource.NEUTRAL;
   }
 
   protected int getFireImmuneTicks() {
@@ -2566,10 +2206,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return this.position.x + (double)this.getBbWidth() * scale;
   }
 
-  public double getRandomX(double scale) {
-    return this.getX((2.0 * this.random.nextDouble() - 1.0) * scale);
-  }
-
   public final int getBlockY() {
     return this.blockPosition.getY();
   }
@@ -2580,10 +2216,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public double getY(double scale) {
     return this.position.y + (double)this.getBbHeight() * scale;
-  }
-
-  public double getRandomY() {
-    return this.getY(this.random.nextDouble());
   }
 
   public double getEyeY() {
@@ -2600,10 +2232,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
   public double getZ(double scale) {
     return this.position.z + (double)this.getBbWidth() * scale;
-  }
-
-  public double getRandomZ(double scale) {
-    return this.getZ((2.0 * this.random.nextDouble() - 1.0) * scale);
   }
 
   public final void setPosRaw(double x, double y, double z) {
@@ -2624,15 +2252,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     }
   }
 
-  public void checkDespawn() {
-  }
-
-  public Vec3 getRopeHoldPosition(float partialTicks) {
-    return this.getPosition(partialTicks).add(0.0, (double)this.eyeHeight * 0.7, 0.0);
-  }
-
   public void recreateFromPacket(ClientboundAddEntityPacket packet) {
-    int i = packet.getId();
+    int i = packet.getEntityId();
     double d = packet.getX();
     double e = packet.getY();
     double f = packet.getZ();
@@ -2641,32 +2262,15 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     this.setXRot(packet.getXRot());
     this.setYRot(packet.getYRot());
     this.setId(i);
-    this.setUUID(packet.getUUID());
-  }
-
-  @Nullable
-  public ItemStack getPickResult() {
-    return null;
-  }
-
-  public void setIsInPowderSnow(boolean isInPowderSnow) {
-    this.isInPowderSnow = isInPowderSnow;
+    this.setUUID(packet.getUuid());
   }
 
   public boolean canFreeze() {
     return !this.getType().is(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES);
   }
 
-  public boolean isFreezing() {
-    return (this.isInPowderSnow || this.wasInPowderSnow) && this.canFreeze();
-  }
-
   public float getYRot() {
     return this.yRot;
-  }
-
-  public float getVisualRotationYInDegrees() {
-    return this.getYRot();
   }
 
   public void setYRot(float yRot) {
@@ -2697,16 +2301,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     return 0.0F;
   }
 
-  public void onExplosionHit(@Nullable Entity entity) {
-  }
-
   public final boolean isRemoved() {
     return this.removalReason != null;
-  }
-
-  @Nullable
-  public Entity.RemovalReason getRemovalReason() {
-    return this.removalReason;
   }
 
   @Override
@@ -2721,41 +2317,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
     this.getPassengers().forEach(Entity::stopRiding);
     this.levelCallback.onRemove(removalReason);
-  }
-
-  protected void unsetRemoved() {
-    this.removalReason = null;
-  }
-
-  @Override
-  public void setLevelCallback(EntityInLevelCallback levelCallback) {
-    this.levelCallback = levelCallback;
-  }
-
-  @Override
-  public boolean shouldBeSaved() {
-    if (this.removalReason != null && !this.removalReason.shouldSave()) {
-      return false;
-    } else {
-      return this.isPassenger() ? false : !this.isVehicle() || !this.hasExactlyOnePlayerPassenger();
-    }
-  }
-
-  @Override
-  public boolean isAlwaysTicking() {
-    return false;
-  }
-
-  public boolean mayInteract(Level level, BlockPos pos) {
-    return true;
-  }
-
-  public Level level() {
-    return this.level;
-  }
-
-  protected void setLevel(Level level) {
-    this.level = level;
   }
 
   public DamageSources damageSources() {
@@ -2799,7 +2360,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     void accept(Entity arg, double d, double e, double f);
   }
 
-  public static enum MovementEmission {
+  public enum MovementEmission {
     NONE(false, false),
     SOUNDS(true, false),
     EVENTS(false, true),
@@ -2808,7 +2369,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     final boolean sounds;
     final boolean events;
 
-    private MovementEmission(final boolean bl, final boolean bl2) {
+    MovementEmission(final boolean bl, final boolean bl2) {
       this.sounds = bl;
       this.events = bl2;
     }
@@ -2826,27 +2387,21 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
     }
   }
 
-  public static enum RemovalReason {
-    KILLED(true, false),
-    DISCARDED(true, false),
-    UNLOADED_TO_CHUNK(false, true),
-    UNLOADED_WITH_PLAYER(false, false),
-    CHANGED_DIMENSION(false, false);
+  public enum RemovalReason {
+    KILLED(true),
+    DISCARDED(true),
+    UNLOADED_TO_CHUNK(false),
+    UNLOADED_WITH_PLAYER(false),
+    CHANGED_DIMENSION(false);
 
     private final boolean destroy;
-    private final boolean save;
 
-    private RemovalReason(final boolean bl, final boolean bl2) {
+    RemovalReason(final boolean bl) {
       this.destroy = bl;
-      this.save = bl2;
     }
 
     public boolean shouldDestroy() {
       return this.destroy;
-    }
-
-    public boolean shouldSave() {
-      return this.save;
     }
   }
 }

@@ -1,36 +1,28 @@
 package com.soulfiremc.server.protocol.bot.state.entity.reimpl;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
-import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.EntityTypeTags;
+import com.soulfiremc.server.data.ResourceKey;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-public abstract class LivingEntity extends Entity implements Attackable {
-  private static final Logger LOGGER = LogUtils.getLogger();
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+
+public abstract class LivingEntity extends Entity {
   private static final String TAG_ACTIVE_EFFECTS = "active_effects";
-  private static final ResourceLocation SPEED_MODIFIER_POWDER_SNOW_ID = ResourceLocation.withDefaultNamespace("powder_snow");
-  private static final ResourceLocation SPRINTING_MODIFIER_ID = ResourceLocation.withDefaultNamespace("sprinting");
+  private static final ResourceKey SPEED_MODIFIER_POWDER_SNOW_ID = ResourceKey.key("powder_snow");
+  private static final ResourceKey SPRINTING_MODIFIER_ID = ResourceKey.key("sprinting");
   private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
     SPRINTING_MODIFIER_ID, 0.3F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
   );
@@ -68,7 +60,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
   private static final float ITEM_USE_EFFECT_START_FRACTION = 0.21875F;
   public static final String ATTRIBUTES_FIELD = "attributes";
   private final AttributeMap attributes;
-  private final CombatTracker combatTracker = new CombatTracker(this);
   private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.newHashMap();
   private final NonNullList<ItemStack> lastHandItemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
   private final NonNullList<ItemStack> lastArmorItemStacks = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -141,14 +132,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
   protected ItemStack autoSpinAttackItemStack;
   private float swimAmount;
   private float swimAmountO;
-  protected Brain<?> brain;
   private boolean skipDropExperience;
   private final Reference2ObjectMap<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments = new Reference2ObjectArrayMap();
   protected float appliedScale = 1.0F;
 
   protected LivingEntity(EntityType<? extends LivingEntity> arg, Level arg2) {
     super(arg, arg2);
-    this.attributes = new AttributeMap(DefaultAttributes.getSupplier(arg));
+    this.AttributeType = new AttributeMap(DefaultAttributeType.getSupplier(arg));
     this.setHealth(this.getMaxHealth());
     this.blocksBuilding = true;
     this.rotA = (float)((Math.random() + 1.0) * 0.01F);
@@ -156,20 +146,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.timeOffs = (float)Math.random() * 12398.0F;
     this.setYRot((float)(Math.random() * (float) (Math.PI * 2)));
     this.yHeadRot = this.getYRot();
-    NbtOps lv = NbtOps.INSTANCE;
-    this.brain = this.makeBrain(new Dynamic(lv, (Tag)lv.createMap(ImmutableMap.of(lv.createString("memories"), (Tag)lv.emptyMap()))));
-  }
-
-  public Brain<?> getBrain() {
-    return this.brain;
-  }
-
-  protected Brain.Provider<?> brainProvider() {
-    return Brain.provider(ImmutableList.of(), ImmutableList.of());
-  }
-
-  protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-    return this.brainProvider().makeBrain(dynamic);
   }
 
   @Override
@@ -177,41 +153,26 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
   }
 
-  public boolean canAttackType(EntityType<?> entityType) {
-    return true;
-  }
-
-  @Override
-  protected void defineSynchedData(SynchedEntityData.Builder builder) {
-    builder.define(DATA_LIVING_ENTITY_FLAGS, (byte)0);
-    builder.define(DATA_EFFECT_PARTICLES, List.of());
-    builder.define(DATA_EFFECT_AMBIENCE_ID, false);
-    builder.define(DATA_ARROW_COUNT_ID, 0);
-    builder.define(DATA_STINGER_COUNT_ID, 0);
-    builder.define(DATA_HEALTH_ID, 1.0F);
-    builder.define(SLEEPING_POS_ID, Optional.empty());
-  }
-
-  public static AttributeSupplier.Builder createLivingAttributes() {
-    return AttributeSupplier.builder()
-      .add(Attributes.MAX_HEALTH)
-      .add(Attributes.KNOCKBACK_RESISTANCE)
-      .add(Attributes.MOVEMENT_SPEED)
-      .add(Attributes.ARMOR)
-      .add(Attributes.ARMOR_TOUGHNESS)
-      .add(Attributes.MAX_ABSORPTION)
-      .add(Attributes.STEP_HEIGHT)
-      .add(Attributes.SCALE)
-      .add(Attributes.GRAVITY)
-      .add(Attributes.SAFE_FALL_DISTANCE)
-      .add(Attributes.FALL_DAMAGE_MULTIPLIER)
-      .add(Attributes.JUMP_STRENGTH)
-      .add(Attributes.OXYGEN_BONUS)
-      .add(Attributes.BURNING_TIME)
-      .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE)
-      .add(Attributes.WATER_MOVEMENT_EFFICIENCY)
-      .add(Attributes.MOVEMENT_EFFICIENCY)
-      .add(Attributes.ATTACK_KNOCKBACK);
+  public static AttributeTypeupplier.Builder createLivingAttributeType() {
+    return AttributeTypeupplier.builder()
+            .add(AttributeType.MAX_HEALTH)
+            .add(AttributeType.KNOCKBACK_RESISTANCE)
+            .add(AttributeType.MOVEMENT_SPEED)
+            .add(AttributeType.ARMOR)
+            .add(AttributeType.ARMOR_TOUGHNESS)
+            .add(AttributeType.MAX_ABSORPTION)
+            .add(AttributeType.STEP_HEIGHT)
+            .add(AttributeType.SCALE)
+            .add(AttributeType.GRAVITY)
+            .add(AttributeType.SAFE_FALL_DISTANCE)
+            .add(AttributeType.FALL_DAMAGE_MULTIPLIER)
+            .add(AttributeType.JUMP_STRENGTH)
+            .add(AttributeType.OXYGEN_BONUS)
+            .add(AttributeType.BURNING_TIME)
+            .add(AttributeType.EXPLOSION_KNOCKBACK_RESISTANCE)
+            .add(AttributeType.WATER_MOVEMENT_EFFICIENCY)
+            .add(AttributeType.MOVEMENT_EFFICIENCY)
+            .add(AttributeType.ATTACK_KNOCKBACK);
   }
 
   @Override
@@ -320,31 +281,35 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.level().getProfiler().pop();
   }
 
-  @Override
-  protected float getBlockSpeedFactor() {
-    return Mth.lerp((float)this.getAttributeValue(Attributes.MOVEMENT_EFFICIENCY), super.getBlockSpeedFactor(), 1.0F);
-  }
-
-  protected void removeFrost() {
-    AttributeInstance lv = this.getAttribute(Attributes.MOVEMENT_SPEED);
-    if (lv != null) {
-      if (lv.getModifier(SPEED_MODIFIER_POWDER_SNOW_ID) != null) {
-        lv.removeModifier(SPEED_MODIFIER_POWDER_SNOW_ID);
-      }
+  @Nullable
+  private static EquipmentSlot getEquipmentSlot(int index) {
+    if (index == 100 + EquipmentSlot.HEAD.getIndex()) {
+      return EquipmentSlot.HEAD;
+    } else if (index == 100 + EquipmentSlot.BODY.getIndex()) {
+      return EquipmentSlot.BODY;
+    } else if (index == 100 + EquipmentSlot.LEGS.getIndex()) {
+      return EquipmentSlot.LEGS;
+    } else if (index == 100 + EquipmentSlot.FEET.getIndex()) {
+      return EquipmentSlot.FEET;
+    } else if (index == 98) {
+      return EquipmentSlot.MAINHAND;
+    } else if (index == 99) {
+      return EquipmentSlot.OFFHAND;
+    } else {
+      return index == 105 ? EquipmentSlot.BODY : null;
     }
   }
 
-  protected void tryAddFrost() {
-    if (!this.getBlockStateOnLegacy().isAir()) {
-      int i = this.getTicksFrozen();
-      if (i > 0) {
-        AttributeInstance lv = this.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (lv == null) {
-          return;
-        }
+  @Override
+  protected float getBlockSpeedFactor() {
+    return Mth.lerp((float) this.getAttributeValue(AttributeType.MOVEMENT_EFFICIENCY), super.getBlockSpeedFactor(), 1.0F);
+  }
 
-        float f = -0.05F * this.getPercentFrozen();
-        lv.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_ID, (double)f, AttributeModifier.Operation.ADD_VALUE));
+  protected void removeFrost() {
+    AttributeInstance lv = this.getAttribute(AttributeType.MOVEMENT_SPEED);
+    if (lv != null) {
+      if (lv.getModifier(SPEED_MODIFIER_POWDER_SNOW_ID) != null) {
+        lv.removeModifier(SPEED_MODIFIER_POWDER_SNOW_ID);
       }
     }
   }
@@ -357,9 +322,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return this.isBaby() ? 0.5F : 1.0F;
   }
 
-  public float getScale() {
-    AttributeMap lv = this.getAttributes();
-    return lv == null ? 1.0F : this.sanitizeScale((float)lv.getValue(Attributes.SCALE));
+  protected void tryAddFrost() {
+    if (!this.getBlockStateOnLegacy().isAir()) {
+      int i = this.getTicksFrozen();
+      if (i > 0) {
+        AttributeInstance lv = this.getAttribute(AttributeType.MOVEMENT_SPEED);
+        if (lv == null) {
+          return;
+        }
+
+        float f = -0.05F * this.getPercentFrozen();
+        lv.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_ID, (double)f, AttributeModifier.Operation.ADD_VALUE));
+      }
+    }
   }
 
   protected float sanitizeScale(float scale) {
@@ -382,16 +357,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return !this.isBaby();
   }
 
-  protected int decreaseAirSupply(int currentAir) {
-    AttributeInstance lv = this.getAttribute(Attributes.OXYGEN_BONUS);
-    double d;
-    if (lv != null) {
-      d = lv.getValue();
-    } else {
-      d = 0.0;
-    }
-
-    return d > 0.0 && this.random.nextDouble() >= 1.0 / (d + 1.0) ? currentAir : currentAir - 1;
+  public float getScale() {
+    AttributeMap lv = this.getAttributeType();
+    return lv == null ? 1.0F : this.sanitizeScale((float) lv.getValue(AttributeType.SCALE));
   }
 
   protected int increaseAirSupply(int currentAir) {
@@ -472,22 +440,25 @@ public abstract class LivingEntity extends Entity implements Attackable {
   public void onEquipItem(EquipmentSlot slot, ItemStack oldItem, ItemStack newItem) {
   }
 
+  protected int decreaseAirSupply(int currentAir) {
+    AttributeInstance lv = this.getAttribute(AttributeType.OXYGEN_BONUS);
+    double d;
+    if (lv != null) {
+      d = lv.getValue();
+    } else {
+      d = 0.0;
+    }
+
+    return d > 0.0 && this.random.nextDouble() >= 1.0 / (d + 1.0) ? currentAir : currentAir - 1;
+  }
+
   @Override
   public void remove(Entity.RemovalReason reason) {
     if (reason == Entity.RemovalReason.KILLED || reason == Entity.RemovalReason.DISCARDED) {
-      this.triggerOnDeathMobEffects(reason);
+      this.triggerOnDeathEffectType(reason);
     }
 
     super.remove(reason);
-    this.brain.clearMemories();
-  }
-
-  protected void triggerOnDeathMobEffects(Entity.RemovalReason removalReason) {
-    for (MobEffectInstance lv : this.getActiveEffects()) {
-      lv.onMobRemoved(this, removalReason);
-    }
-
-    this.activeEffects.clear();
   }
 
   protected void tickEffects() {
@@ -542,8 +513,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return this.activeEffects;
   }
 
-  public boolean hasEffect(Holder<MobEffect> effect) {
-    return this.activeEffects.containsKey(effect);
+  protected void triggerOnDeathEffectType(Entity.RemovalReason removalReason) {
+    for (MobEffectInstance lv : this.getActiveEffects()) {
+      lv.onMobRemoved(this, removalReason);
+    }
+
+    this.activeEffects.clear();
   }
 
   @Nullable
@@ -576,16 +551,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
   }
 
-  public boolean canBeAffected(MobEffectInstance effectInstance) {
-    if (this.getType().is(EntityTypeTags.IMMUNE_TO_INFESTED)) {
-      return !effectInstance.is(MobEffects.INFESTED);
-    } else if (this.getType().is(EntityTypeTags.IMMUNE_TO_OOZING)) {
-      return !effectInstance.is(MobEffects.OOZING);
-    } else {
-      return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN)
-        ? true
-        : !effectInstance.is(MobEffects.REGENERATION) && !effectInstance.is(MobEffects.POISON);
-    }
+  public boolean hasEffect(EffectType effect) {
+    return this.activeEffects.containsKey(effect);
   }
 
   public void forceAddEffect(MobEffectInstance instance, @Nullable Entity entity) {
@@ -631,28 +598,24 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.effectsDirty = true;
   }
 
-  private void refreshDirtyAttributes() {
-    Set<AttributeInstance> set = this.getAttributes().getAttributesToUpdate();
+  public boolean canBeAffected(MobEffectInstance effectInstance) {
+    if (this.getType().is(EntityTypeTags.IMMUNE_TO_INFESTED)) {
+      return !effectInstance.is(EffectType.INFESTED);
+    } else if (this.getType().is(EntityTypeTags.IMMUNE_TO_OOZING)) {
+      return !effectInstance.is(EffectType.OOZING);
+    } else {
+      return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN) || !effectInstance.is(EffectType.REGENERATION) && !effectInstance.is(EffectType.POISON);
+    }
+  }
+
+  private void refreshDirtyAttributeType() {
+    Set<AttributeInstance> set = this.getAttributeType().getAttributeTypeToUpdate();
 
     for (AttributeInstance lv : set) {
       this.onAttributeUpdated(lv.getAttribute());
     }
 
     set.clear();
-  }
-
-  private void onAttributeUpdated(Holder<Attribute> attribute) {
-    if (attribute.is(Attributes.MAX_HEALTH)) {
-      float f = this.getMaxHealth();
-      if (this.getHealth() > f) {
-        this.setHealth(f);
-      }
-    } else if (attribute.is(Attributes.MAX_ABSORPTION)) {
-      float f = this.getMaxAbsorption();
-      if (this.getAbsorptionAmount() > f) {
-        this.setAbsorptionAmount(f);
-      }
-    }
   }
 
   public void heal(float healAmount) {
@@ -708,12 +671,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
   public boolean isDamageSourceBlocked(DamageSource damageSource) {
     Entity lv = damageSource.getDirectEntity();
-    boolean bl = false;
-    if (lv instanceof AbstractArrow lv2 && lv2.getPierceLevel() > 0) {
-      bl = true;
-    }
+    boolean bl = lv instanceof AbstractArrow lv2 && lv2.getPierceLevel() > 0;
 
-    if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !bl) {
+      if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !bl) {
       Vec3 lv3 = damageSource.getSourcePosition();
       if (lv3 != null) {
         Vec3 lv4 = this.calculateViewVector(0.0F, this.getYHeadRot());
@@ -764,24 +724,22 @@ public abstract class LivingEntity extends Entity implements Attackable {
   protected void dropEquipment() {
   }
 
-  protected float getKnockback(Entity attacker, DamageSource damageSource) {
-    return (float) this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+  private void onAttributeUpdated(AttributeType attribute) {
+    if (attribute.is(AttributeType.MAX_HEALTH)) {
+      float f = this.getMaxHealth();
+      if (this.getHealth() > f) {
+        this.setHealth(f);
+      }
+    } else if (attribute.is(AttributeType.MAX_ABSORPTION)) {
+      float f = this.getMaxAbsorption();
+      if (this.getAbsorptionAmount() > f) {
+        this.setAbsorptionAmount(f);
+      }
+    }
   }
 
-  public void knockback(double strength, double x, double z) {
-    strength *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-    if (!(strength <= 0.0)) {
-      this.hasImpulse = true;
-      Vec3 lv = this.getDeltaMovement();
-
-      while (x * x + z * z < 1.0E-5F) {
-        x = (Math.random() - Math.random()) * 0.01;
-        z = (Math.random() - Math.random()) * 0.01;
-      }
-
-      Vec3 lv2 = new Vec3(x, 0.0, z).normalize().scale(strength);
-      this.setDeltaMovement(lv.x / 2.0 - lv2.x, this.onGround() ? Math.min(0.4, lv.y / 2.0 + strength) : lv.y, lv.z / 2.0 - lv2.z);
-    }
+  protected float getKnockback(Entity attacker, DamageSource damageSource) {
+    return (float) this.getAttributeValue(AttributeType.ATTACK_KNOCKBACK);
   }
 
   public void indicateDamage(double xDistance, double zDistance) {
@@ -885,13 +843,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
   }
 
-  protected int calculateFallDamage(float fallDistance, float damageMultiplier) {
-    if (this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
-      return 0;
-    } else {
-      float h = (float)this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
-      float i = fallDistance - h;
-      return Mth.ceil((double)(i * damageMultiplier) * this.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER));
+  public void knockback(double strength, double x, double z) {
+    strength *= 1.0 - this.getAttributeValue(AttributeType.KNOCKBACK_RESISTANCE);
+    if (!(strength <= 0.0)) {
+      this.hasImpulse = true;
+      Vec3 lv = this.getDeltaMovement();
+
+      while (x * x + z * z < 1.0E-5F) {
+        x = (Math.random() - Math.random()) * 0.01;
+        z = (Math.random() - Math.random()) * 0.01;
+      }
+
+      Vec3 lv2 = new Vec3(x, 0.0, z).normalize().scale(strength);
+      this.setDeltaMovement(lv.x / 2.0 - lv2.x, this.onGround() ? Math.min(0.4, lv.y / 2.0 + strength) : lv.y, lv.z / 2.0 - lv2.z);
     }
   }
 
@@ -913,8 +877,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.hurtTime = this.hurtDuration;
   }
 
-  public int getArmorValue() {
-    return Mth.floor(this.getAttributeValue(Attributes.ARMOR));
+  protected int calculateFallDamage(float fallDistance, float damageMultiplier) {
+    if (this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
+      return 0;
+    } else {
+      float h = (float) this.getAttributeValue(AttributeType.SAFE_FALL_DISTANCE);
+      float i = fallDistance - h;
+      return Mth.ceil((double) (i * damageMultiplier) * this.getAttributeValue(AttributeType.FALL_DAMAGE_MULTIPLIER));
+    }
   }
 
   protected void hurtArmor(DamageSource damageSource, float damageAmount) {
@@ -926,78 +896,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
   protected void hurtCurrentlyUsedShield(float damageAmount) {
   }
 
-  protected void doHurtEquipment(DamageSource damageSource, float damageAmount, EquipmentSlot... slots) {
-    if (!(damageAmount <= 0.0F)) {
-      int i = (int)Math.max(1.0F, damageAmount / 4.0F);
-
-      for (EquipmentSlot lv : slots) {
-        ItemStack lv2 = this.getItemBySlot(lv);
-        if (lv2.getItem() instanceof ArmorItem && lv2.canBeHurtBy(damageSource)) {
-          lv2.hurtAndBreak(i, this, lv);
-        }
-      }
-    }
-  }
-
-  protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float damageAmount) {
-    if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
-      this.hurtArmor(damageSource, damageAmount);
-      damageAmount = CombatRules.getDamageAfterAbsorb(
-        this, damageAmount, damageSource, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS)
-      );
-    }
-
-    return damageAmount;
-  }
-
-  protected float getDamageAfterMagicAbsorb(DamageSource damageSource, float damageAmount) {
-    if (damageSource.is(DamageTypeTags.BYPASSES_EFFECTS)) {
-      return damageAmount;
-    } else {
-      if (this.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !damageSource.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
-        int i = (this.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
-        int j = 25 - i;
-        float g = damageAmount * (float)j;
-        float h = damageAmount;
-        damageAmount = Math.max(g / 25.0F, 0.0F);
-      }
-
-      if (damageAmount <= 0.0F) {
-        return 0.0F;
-      } else if (damageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
-        return damageAmount;
-      } else {
-        float l = 0.0F;
-
-        if (l > 0.0F) {
-          damageAmount = CombatRules.getDamageAfterMagicAbsorb(damageAmount, l);
-        }
-
-        return damageAmount;
-      }
-    }
-  }
-
-  protected void actuallyHurt(DamageSource damageSource, float damageAmount) {
-    if (!this.isInvulnerableTo(damageSource)) {
-      damageAmount = this.getDamageAfterArmorAbsorb(damageSource, damageAmount);
-      damageAmount = this.getDamageAfterMagicAbsorb(damageSource, damageAmount);
-      float var9 = Math.max(damageAmount - this.getAbsorptionAmount(), 0.0F);
-      this.setAbsorptionAmount(this.getAbsorptionAmount() - (damageAmount - var9));
-
-      if (var9 != 0.0F) {
-        this.getCombatTracker().recordDamage(damageSource, var9);
-        this.setHealth(this.getHealth() - var9);
-        this.setAbsorptionAmount(this.getAbsorptionAmount() - var9);
-        this.gameEvent(GameEvent.ENTITY_DAMAGE);
-      }
-    }
-  }
-
-  public CombatTracker getCombatTracker() {
-    return this.combatTracker;
-  }
-
   @Nullable
   public LivingEntity getKillCredit() {
     if (this.lastHurtByPlayer != null) {
@@ -1007,12 +905,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
   }
 
-  public final float getMaxHealth() {
-    return (float)this.getAttributeValue(Attributes.MAX_HEALTH);
+  public int getArmorValue() {
+    return Mth.floor(this.getAttributeValue(AttributeType.ARMOR));
   }
 
-  public final float getMaxAbsorption() {
-    return (float)this.getAttributeValue(Attributes.MAX_ABSORPTION);
+  public final float getMaxHealth() {
+    return (float) this.getAttributeValue(AttributeType.MAX_HEALTH);
   }
 
   public final int getArrowCount() {
@@ -1031,12 +929,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.entityData.set(DATA_STINGER_COUNT_ID, stingerCount);
   }
 
-  private int getCurrentSwingDuration() {
-    if (MobEffectUtil.hasDigSpeed(this)) {
-      return 6 - (1 + MobEffectUtil.getDigSpeedAmplification(this));
-    } else {
-      return this.hasEffect(MobEffects.DIG_SLOWDOWN) ? 6 + (1 + this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) * 2 : 6;
-    }
+  public final float getMaxAbsorption() {
+    return (float) this.getAttributeValue(AttributeType.MAX_ABSORPTION);
   }
 
   public void swing(InteractionHand hand) {
@@ -1063,52 +957,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.lastDamageStamp = this.level().getGameTime();
   }
 
-  @Override
-  public void handleEntityEvent(byte id) {
-    switch (id) {
-      case 3:
-        if (!(this instanceof Player)) {
-          this.setHealth(0.0F);
-          this.die(this.damageSources().generic());
-        }
-        break;
-      case 29:
-        break;
-      case 30:
-        break;
-      case 46:
-        break;
-      case 47:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.MAINHAND));
-        break;
-      case 48:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.OFFHAND));
-        break;
-      case 49:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.HEAD));
-        break;
-      case 50:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.CHEST));
-        break;
-      case 51:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.LEGS));
-        break;
-      case 52:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.FEET));
-        break;
-      case 54:
-        HoneyBlock.showJumpParticles(this);
-        break;
-      case 55:
-        this.swapHandItems();
-        break;
-      case 60:
-        break;
-      case 65:
-        this.breakItem(this.getItemBySlot(EquipmentSlot.BODY));
-        break;
-      default:
-        super.handleEntityEvent(id);
+  private int getCurrentSwingDuration() {
+    if (MobEffectUtil.hasDigSpeed(this)) {
+      return 6 - (1 + MobEffectUtil.getDigSpeedAmplification(this));
+    } else {
+      return this.hasEffect(EffectType.DIG_SLOWDOWN) ? 6 + (1 + this.getEffect(EffectType.DIG_SLOWDOWN).getAmplifier()) * 2 : 6;
     }
   }
 
@@ -1138,21 +991,65 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.attackAnim = (float)this.swingTime / (float)i;
   }
 
+  @Override
+  public void handleEntityEvent(byte id) {
+    switch (id) {
+      case 3:
+        if (!(this instanceof Player)) {
+          this.setHealth(0.0F);
+          this.die(this.damageSources().generic());
+        }
+        break;
+      case 29:
+        break;
+      case 30:
+        break;
+      case 46:
+        break;
+      case 47:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.MAINHAND));
+        break;
+      case 48:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.OFFHAND));
+        break;
+      case 49:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.HEAD));
+        break;
+      case 50:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.BODY));
+        break;
+      case 51:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.LEGS));
+        break;
+      case 52:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.FEET));
+        break;
+      case 54:
+        break;
+      case 55:
+        this.swapHandItems();
+        break;
+      case 60:
+        break;
+      case 65:
+        this.breakItem(this.getItemBySlot(EquipmentSlot.BODY));
+        break;
+      default:
+        super.handleEntityEvent(id);
+    }
+  }
+
   @Nullable
-  public AttributeInstance getAttribute(Holder<Attribute> attribute) {
-    return this.getAttributes().getInstance(attribute);
+  public AttributeInstance getAttribute(AttributeType attribute) {
+    return this.getAttributeType().getInstance(attribute);
   }
 
-  public double getAttributeValue(Holder<Attribute> attribute) {
-    return this.getAttributes().getValue(attribute);
+  public double getAttributeValue(AttributeType attribute) {
+    return this.getAttributeType().getValue(attribute);
   }
 
-  public double getAttributeBaseValue(Holder<Attribute> attribute) {
-    return this.getAttributes().getBaseValue(attribute);
-  }
-
-  public AttributeMap getAttributes() {
-    return this.attributes;
+  public double getAttributeBaseValue(AttributeType attribute) {
+    return this.getAttributeType().getBaseValue(attribute);
   }
 
   public ItemStack getMainHandItem() {
@@ -1245,14 +1142,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return i > 0 ? (float)j / (float)i : 0.0F;
   }
 
-  @Override
-  public void setSprinting(boolean sprinting) {
-    super.setSprinting(sprinting);
-    AttributeInstance lv = this.getAttribute(Attributes.MOVEMENT_SPEED);
-    lv.removeModifier(SPEED_MODIFIER_SPRINTING.id());
-    if (sprinting) {
-      lv.addTransientModifier(SPEED_MODIFIER_SPRINTING);
-    }
+  public AttributeMap getAttributeType() {
+    return this.AttributeType;
   }
 
   protected float getSoundVolume() {
@@ -1299,12 +1190,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return this.getJumpPower(1.0F);
   }
 
-  protected float getJumpPower(float multiplier) {
-    return (float)this.getAttributeValue(Attributes.JUMP_STRENGTH) * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
+  @Override
+  public void setSprinting(boolean sprinting) {
+    super.setSprinting(sprinting);
+    AttributeInstance lv = this.getAttribute(AttributeType.MOVEMENT_SPEED);
+    lv.removeModifier(SPEED_MODIFIER_SPRINTING.id());
+    if (sprinting) {
+      lv.addTransientModifier(SPEED_MODIFIER_SPRINTING);
+    }
   }
 
-  public float getJumpBoostPower() {
-    return this.hasEffect(MobEffects.JUMP) ? 0.1F * ((float)this.getEffect(MobEffects.JUMP).getAmplifier() + 1.0F) : 0.0F;
+  protected float getJumpPower(float multiplier) {
+    return (float) this.getAttributeValue(AttributeType.JUMP_STRENGTH) * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
   }
 
   @VisibleForTesting
@@ -1338,16 +1235,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return false;
   }
 
+  public float getJumpBoostPower() {
+    return this.hasEffect(EffectType.JUMP) ? 0.1F * ((float) this.getEffect(EffectType.JUMP).getAmplifier() + 1.0F) : 0.0F;
+  }
+
   @Override
   protected double getDefaultGravity() {
-    return this.getAttributeValue(Attributes.GRAVITY);
+    return this.getAttributeValue(AttributeType.GRAVITY);
   }
 
   public void travel(Vec3 travelVector) {
     if (this.isControlledByLocalInstance()) {
       double d = this.getGravity();
       boolean bl = this.getDeltaMovement().y <= 0.0;
-      if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
+      if (bl && this.hasEffect(EffectType.SLOW_FALLING)) {
         d = Math.min(d, 0.01);
       }
 
@@ -1356,7 +1257,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         double e = this.getY();
         float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
         float g = 0.02F;
-        float h = (float)this.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY);
+        float h = (float) this.getAttributeValue(AttributeType.WATER_MOVEMENT_EFFICIENCY);
         if (!this.onGround()) {
           h *= 0.5F;
         }
@@ -1366,7 +1267,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
           g += (this.getSpeed() - g) * h;
         }
 
-        if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
+        if (this.hasEffect(EffectType.DOLPHINS_GRACE)) {
           f = 0.96F;
         }
 
@@ -1411,7 +1312,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         double i = Math.sqrt(lv6.x * lv6.x + lv6.z * lv6.z);
         double j = lv5.horizontalDistance();
         double k = lv6.length();
-        double l = Math.cos((double)fx);
+        double l = Math.cos(fx);
         l = l * l * Math.min(1.0, k / 0.4);
         lv5 = this.getDeltaMovement().add(0.0, d * (-1.0 + l * 0.75), 0.0);
         if (lv5.y < 0.0 && i > 0.0) {
@@ -1420,7 +1321,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
         }
 
         if (fx < 0.0F && i > 0.0) {
-          double m = j * (double)(-Mth.sin(fx)) * 0.04;
+          double m = j * -Mth.sin(fx) * 0.04;
           lv5 = lv5.add(-lv6.x * m / i, m * 3.2, -lv6.z * m / i);
         }
 
@@ -1436,8 +1337,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
         float fxx = this.onGround() ? p * 0.91F : 0.91F;
         Vec3 lv8 = this.handleRelativeFrictionAndCalculateMovement(travelVector, p);
         double q = lv8.y;
-        if (this.hasEffect(MobEffects.LEVITATION)) {
-          q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - lv8.y) * 0.2;
+        if (this.hasEffect(EffectType.LEVITATION)) {
+          q += (0.05 * (double) (this.getEffect(EffectType.LEVITATION).getAmplifier() + 1) - lv8.y) * 0.2;
         } else if (this.level().hasChunkAt(lv7)) {
           q -= d;
         } else if (this.getY() > (double)this.level().getMinBuildHeight()) {
@@ -1455,19 +1356,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     this.calculateEntityAnimation(this instanceof FlyingAnimal);
-  }
-
-  private void travelRidden(Player player, Vec3 travelVector) {
-    Vec3 lv = this.getRiddenInput(player, travelVector);
-    this.tickRidden(player, lv);
-    if (this.isControlledByLocalInstance()) {
-      this.setSpeed(this.getRiddenSpeed(player));
-      this.travel(lv);
-    } else {
-      this.calculateEntityAnimation(false);
-      this.setDeltaMovement(Vec3.ZERO);
-      this.tryCheckInsideBlocks();
-    }
   }
 
   protected void tickRidden(Player player, Vec3 travelVector) {
@@ -1557,6 +1445,29 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return false;
   }
 
+  private void travelRidden(Player player, Vec3 travelVector) {
+    Vec3 lv = this.getRiddenInput(player, travelVector);
+    this.tickRidden(player, lv);
+    if (this.isControlledByLocalInstance()) {
+      this.setSpeed(this.getRiddenSpeed(player));
+      this.travel(lv);
+    } else {
+      this.calculateEntityAnimation(false);
+      this.setDeltaMovement(Vec3.ZERO);
+      this.checkInsideBlocks();
+    }
+  }
+
+  private void detectEquipmentUpdates() {
+    Map<EquipmentSlot, ItemStack> map = this.collectEquipmentChanges();
+    if (map != null) {
+      this.handleHandSwap(map);
+      if (!map.isEmpty()) {
+        this.handleEquipmentChanges(map);
+      }
+    }
+  }
+
   @Override
   public void tick() {
     super.tick();
@@ -1576,7 +1487,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
     float k = 0.0F;
     if (f > 0.0025000002F) {
       k = 1.0F;
-      h = (float)Math.sqrt((double)f) * 3.0F;
+      h = (float)Math.sqrt(f) * 3.0F;
       float l = (float)Mth.atan2(e, d) * (180.0F / (float)Math.PI) - 90.0F;
       float m = Mth.abs(Mth.wrapDegrees(this.getYRot()) - l);
       if (95.0F < m && m < 265.0F) {
@@ -1644,72 +1555,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
       this.setXRot(0.0F);
     }
 
-    this.refreshDirtyAttributes();
+    this.refreshDirtyAttributeType();
     float l = this.getScale();
     if (l != this.appliedScale) {
       this.appliedScale = l;
       this.refreshDimensions();
     }
-  }
-
-  private void detectEquipmentUpdates() {
-    Map<EquipmentSlot, ItemStack> map = this.collectEquipmentChanges();
-    if (map != null) {
-      this.handleHandSwap(map);
-      if (!map.isEmpty()) {
-        this.handleEquipmentChanges(map);
-      }
-    }
-  }
-
-  @Nullable
-  private Map<EquipmentSlot, ItemStack> collectEquipmentChanges() {
-    Map<EquipmentSlot, ItemStack> map = null;
-
-    for (EquipmentSlot lv : EquipmentSlot.values()) {
-      ItemStack lv2 = switch (lv.getType()) {
-        case HAND -> this.getLastHandItem(lv);
-        case HUMANOID_ARMOR -> this.getLastArmorItem(lv);
-        case ANIMAL_ARMOR -> this.lastBodyItemStack;
-      };
-      ItemStack lv3 = this.getItemBySlot(lv);
-      if (this.equipmentHasChanged(lv2, lv3)) {
-        if (map == null) {
-          map = Maps.newEnumMap(EquipmentSlot.class);
-        }
-
-        map.put(lv, lv3);
-        AttributeMap lv4 = this.getAttributes();
-        if (!lv2.isEmpty()) {
-          lv2.forEachModifier(lv, (arg4, arg5) -> {
-            AttributeInstance lvx = lv4.getInstance(arg4);
-            if (lvx != null) {
-              lvx.removeModifier(arg5);
-            }
-
-            EnchantmentHelper.stopLocationBasedEffects(lv2, this, lv);
-          });
-        }
-      }
-    }
-
-    if (map != null) {
-      for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
-        EquipmentSlot lv5 = entry.getKey();
-        ItemStack lv6 = entry.getValue();
-        if (!lv6.isEmpty()) {
-          lv6.forEachModifier(lv5, (arg3, arg4) -> {
-            AttributeInstance lv = this.attributes.getInstance(arg3);
-            if (lv != null) {
-              lv.removeModifier(arg4.id());
-              lv.addTransientModifier(arg4);
-            }
-          });
-        }
-      }
-    }
-
-    return map;
   }
 
   public boolean equipmentHasChanged(ItemStack oldItem, ItemStack newItem) {
@@ -1723,7 +1574,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
       && lv2 != null
       && ItemStack.matches(lv, this.getLastHandItem(EquipmentSlot.OFFHAND))
       && ItemStack.matches(lv2, this.getLastHandItem(EquipmentSlot.MAINHAND))) {
-      ((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundEntityEventPacket(this, (byte)55));
       hands.remove(EquipmentSlot.MAINHAND);
       hands.remove(EquipmentSlot.OFFHAND);
       this.setLastHandItem(EquipmentSlot.MAINHAND, lv.copy());
@@ -1747,7 +1597,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
           this.lastBodyItemStack = lv;
       }
     });
-    ((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEquipmentPacket(this.getId(), list));
   }
 
   private ItemStack getLastArmorItem(EquipmentSlot slot) {
@@ -1785,6 +1634,60 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
   protected float getMaxHeadRotationRelativeToBody() {
     return 50.0F;
+  }
+
+  @Nullable
+  private Map<EquipmentSlot, ItemStack> collectEquipmentChanges() {
+    Map<EquipmentSlot, ItemStack> map = null;
+
+    for (EquipmentSlot lv : EquipmentSlot.values()) {
+      ItemStack lv2 = switch (lv.getType()) {
+        case HAND -> this.getLastHandItem(lv);
+        case HUMANOID_ARMOR -> this.getLastArmorItem(lv);
+        case ANIMAL_ARMOR -> this.lastBodyItemStack;
+      };
+      ItemStack lv3 = this.getItemBySlot(lv);
+      if (this.equipmentHasChanged(lv2, lv3)) {
+        if (map == null) {
+          map = Maps.newEnumMap(EquipmentSlot.class);
+        }
+
+        map.put(lv, lv3);
+        AttributeMap lv4 = this.getAttributeType();
+        if (!lv2.isEmpty()) {
+          lv2.forEachModifier(lv, (arg4, arg5) -> {
+            AttributeInstance lvx = lv4.getInstance(arg4);
+            if (lvx != null) {
+              lvx.removeModifier(arg5);
+            }
+
+            EnchantmentHelper.stopLocationBasedEffects(lv2, this, lv);
+          });
+        }
+      }
+    }
+
+    if (map != null) {
+      for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
+        EquipmentSlot lv5 = entry.getKey();
+        ItemStack lv6 = entry.getValue();
+        if (!lv6.isEmpty()) {
+          lv6.forEachModifier(lv5, (arg3, arg4) -> {
+            AttributeInstance lv = this.AttributeType.getInstance(arg3);
+            if (lv != null) {
+              lv.removeModifier(arg4.id());
+              lv.addTransientModifier(arg4);
+            }
+          });
+        }
+      }
+    }
+
+    return map;
+  }
+
+  public boolean isSensitiveToWater() {
+    return false;
   }
 
   public void aiStep() {
@@ -1872,7 +1775,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.updateFallFlying();
     AABB lv2 = this.getBoundingBox();
     Vec3 lv3 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
-    if (this.hasEffect(MobEffects.SLOW_FALLING) || this.hasEffect(MobEffects.LEVITATION)) {
+    if (this.hasEffect(EffectType.SLOW_FALLING) || this.hasEffect(EffectType.LEVITATION)) {
       this.resetFallDistance();
     }
 
@@ -1894,25 +1797,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
     }
 
     this.pushEntities();
-  }
-
-  public boolean isSensitiveToWater() {
-    return false;
-  }
-
-  private void updateFallFlying() {
-    boolean bl = this.getSharedFlag(7);
-    if (bl && !this.onGround() && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
-      ItemStack lv = this.getItemBySlot(EquipmentSlot.CHEST);
-      if (lv.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(lv)) {
-        bl = true;
-        int i = this.fallFlyTicks + 1;
-      } else {
-        bl = false;
-      }
-    } else {
-      bl = false;
-    }
   }
 
   protected void serverAiStep() {
@@ -1993,8 +1877,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
     this.lerpX = x;
     this.lerpY = y;
     this.lerpZ = z;
-    this.lerpYRot = (double)yRot;
-    this.lerpXRot = (double)xRot;
+    this.lerpYRot = yRot;
+    this.lerpXRot = xRot;
     this.lerpSteps = steps;
   }
 
@@ -2025,7 +1909,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
   @Override
   public void lerpHeadTo(float yaw, int pitch) {
-    this.lerpYHeadRot = (double)yaw;
+    this.lerpYHeadRot = yaw;
     this.lerpHeadSteps = pitch;
   }
 
@@ -2246,7 +2130,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
   public boolean isBlocking() {
     if (this.isUsingItem() && !this.useItem.isEmpty()) {
       Item lv = this.useItem.getItem();
-      return lv.getUseAnimation(this.useItem) != UseAnim.BLOCK ? false : lv.getUseDuration(this.useItem, this) - this.useItemRemaining >= 5;
+      return lv.getUseAnimation(this.useItem) == UseAnim.BLOCK && lv.getUseDuration(this.useItem, this) - this.useItemRemaining >= 5;
     } else {
       return false;
     }
@@ -2435,21 +2319,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return !this.isSleeping() && super.isInWall();
   }
 
-  public ItemStack getProjectile(ItemStack weaponStack) {
-    return ItemStack.EMPTY;
-  }
-
-  public final ItemStack eat(Level level, ItemStack food) {
-    FoodProperties lv = food.get(DataComponents.FOOD);
-    return lv != null ? this.eat(level, food, lv) : food;
-  }
-
-  public ItemStack eat(Level level, ItemStack food, FoodProperties foodProperties) {
-    food.consume(1, this);
-    this.gameEvent(GameEvent.EAT);
-    return food;
-  }
-
   private static byte entityEventForEquipmentBreak(EquipmentSlot slot) {
     return switch (slot) {
       case MAINHAND -> 47;
@@ -2470,13 +2339,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
     return hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
   }
 
-  @Override
-  public AABB getBoundingBoxForCulling() {
-    if (this.getItemBySlot(EquipmentSlot.HEAD).is(Items.DRAGON_HEAD)) {
-      float f = 0.5F;
-      return this.getBoundingBox().inflate(0.5, 0.5, 0.5);
+  private void updateFallFlying() {
+    boolean bl = this.getSharedFlag(7);
+    if (bl && !this.onGround() && !this.isPassenger() && !this.hasEffect(EffectType.LEVITATION)) {
+      ItemStack lv = this.getItemBySlot(EquipmentSlot.BODY);
+      if (lv.is(ItemType.ELYTRA) && ElytraItem.isFlyEnabled(lv)) {
+        bl = true;
+        int i = this.fallFlyTicks + 1;
+      } else {
+        bl = false;
+      }
     } else {
-      return super.getBoundingBoxForCulling();
+      bl = false;
     }
   }
 
@@ -2498,22 +2372,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
       : SlotAccess.forEquipmentSlot(entity, slot);
   }
 
-  @Nullable
-  private static EquipmentSlot getEquipmentSlot(int index) {
-    if (index == 100 + EquipmentSlot.HEAD.getIndex()) {
-      return EquipmentSlot.HEAD;
-    } else if (index == 100 + EquipmentSlot.CHEST.getIndex()) {
-      return EquipmentSlot.CHEST;
-    } else if (index == 100 + EquipmentSlot.LEGS.getIndex()) {
-      return EquipmentSlot.LEGS;
-    } else if (index == 100 + EquipmentSlot.FEET.getIndex()) {
-      return EquipmentSlot.FEET;
-    } else if (index == 98) {
-      return EquipmentSlot.MAINHAND;
-    } else if (index == 99) {
-      return EquipmentSlot.OFFHAND;
+  @Override
+  public AABB getBoundingBoxForCulling() {
+    if (this.getItemBySlot(EquipmentSlot.HEAD).is(ItemType.DRAGON_HEAD)) {
+      float f = 0.5F;
+      return this.getBoundingBox().inflate(0.5, 0.5, 0.5);
     } else {
-      return index == 105 ? EquipmentSlot.BODY : null;
+      return super.getBoundingBoxForCulling();
     }
   }
 
@@ -2529,7 +2394,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
       return false;
     } else {
       boolean bl = !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
-        && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
+              && !this.getItemBySlot(EquipmentSlot.BODY).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
         && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
         && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
         && !this.getItemBySlot(EquipmentSlot.BODY).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
@@ -2566,7 +2431,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
   @Override
   public float maxUpStep() {
-    float f = (float)this.getAttributeValue(Attributes.STEP_HEIGHT);
+    float f = (float) this.getAttributeValue(AttributeType.STEP_HEIGHT);
     return this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f;
   }
 
@@ -2581,7 +2446,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
   @Override
   public void igniteForTicks(int ticks) {
-    super.igniteForTicks(Mth.ceil((double)ticks * this.getAttributeValue(Attributes.BURNING_TIME)));
+    super.igniteForTicks(Mth.ceil((double) ticks * this.getAttributeValue(AttributeType.BURNING_TIME)));
   }
 
   public boolean hasInfiniteMaterials() {

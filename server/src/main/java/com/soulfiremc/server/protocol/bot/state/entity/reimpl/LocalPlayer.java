@@ -1,24 +1,20 @@
 package com.soulfiremc.server.protocol.bot.state.entity.reimpl;
 
-import com.google.common.collect.Lists;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.StreamSupport;
+import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.FluidTags;
+import com.soulfiremc.server.data.ItemType;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
+
+import java.util.Objects;
 
 public class LocalPlayer extends AbstractClientPlayer {
-  public static final Logger LOGGER = LogUtils.getLogger();
   private static final int POSITION_REMINDER_INTERVAL = 20;
   private static final int WATER_VISION_MAX_TIME = 600;
   private static final int WATER_VISION_QUICK_TIME = 100;
   private static final float WATER_VISION_QUICK_PERCENT = 0.6F;
   private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
   private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962634F;
-  public final ClientPacketListener connection;
-  private final StatsCounter stats;
-  private final ClientRecipeBook recipeBook;
   private int permissionLevel = 0;
   private double xLast;
   private double yLast1;
@@ -50,7 +46,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   private int autoJumpTime;
   private boolean wasFallFlying;
   private int waterVisionTime;
-  private boolean showDeathScreen = true;
+  private final boolean showDeathScreen = true;
   private boolean doLimitedCrafting = false;
 
   public LocalPlayer(Minecraft arg, ClientLevel arg2, ClientPacketListener arg3, StatsCounter arg4, ClientRecipeBook arg5, boolean bl, boolean bl2) {
@@ -125,8 +121,8 @@ public class LocalPlayer extends AbstractClientPlayer {
       double d = this.getX() - this.xLast;
       double e = this.getY() - this.yLast1;
       double f = this.getZ() - this.zLast;
-      double g = (double)(this.getYRot() - this.yRotLast);
-      double h = (double)(this.getXRot() - this.xRotLast);
+      double g = this.getYRot() - this.yRotLast;
+      double h = this.getXRot() - this.xRotLast;
       this.positionReminder++;
       boolean bl2 = Mth.lengthSquared(d, e, f) > Mth.square(2.0E-4) || this.positionReminder >= 20;
       boolean bl3 = g != 0.0 || h != 0.0;
@@ -262,14 +258,6 @@ public class LocalPlayer extends AbstractClientPlayer {
     this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.OPEN_INVENTORY));
   }
 
-  public StatsCounter getStats() {
-    return this.stats;
-  }
-
-  public ClientRecipeBook getRecipeBook() {
-    return this.recipeBook;
-  }
-
   public void removeRecipeHighlight(RecipeHolder<?> recipe) {
     if (this.recipeBook.willHighlight(recipe)) {
       this.recipeBook.removeHighlight(recipe);
@@ -333,11 +321,6 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   @Override
-  public void sendSystemMessage(Component component) {
-    this.minecraft.gui.getChat().addMessage(component);
-  }
-
-  @Override
   public void handleEntityEvent(byte id) {
     if (id >= 24 && id <= 28) {
       this.setPermissionLevel(id - 24);
@@ -346,30 +329,12 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
   }
 
-  public void setShowDeathScreen(boolean show) {
-    this.showDeathScreen = show;
-  }
-
-  public boolean shouldShowDeathScreen() {
-    return this.showDeathScreen;
-  }
-
   public void setDoLimitedCrafting(boolean doLimitedCrafting) {
     this.doLimitedCrafting = doLimitedCrafting;
   }
 
   public boolean getDoLimitedCrafting() {
     return this.doLimitedCrafting;
-  }
-
-  @Override
-  public void playSound(SoundEvent sound, float volume, float pitch) {
-    this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), sound, this.getSoundSource(), volume, pitch, false);
-  }
-
-  @Override
-  public void playNotifySound(SoundEvent sound, SoundSource source, float volume, float pitch) {
-    this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), sound, source, volume, pitch, false);
   }
 
   @Override
@@ -470,7 +435,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   @Override
   public void openItemGui(ItemStack stack, InteractionHand hand) {
-    if (stack.is(Items.WRITABLE_BOOK)) {
+    if (stack.is(ItemType.WRITABLE_BOOK)) {
       this.minecraft.setScreen(new BookEditScreen(this, stack, hand));
     }
   }
@@ -533,7 +498,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 
     if (!(this.minecraft.screen instanceof ReceivingLevelScreen)) {
       this.handleConfusionTransitionEffect(this.getActivePortalLocalTransition() == Portal.Transition.CONFUSION);
-      this.processPortalCooldown();
     }
 
     boolean bl = this.input.jumping;
@@ -545,7 +509,7 @@ public class LocalPlayer extends AbstractClientPlayer {
       && !this.isPassenger()
       && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
       && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
-    float f = (float)this.getAttributeValue(Attributes.SNEAKING_SPEED);
+    float f = (float) this.getAttributeValue(AttributeType.SNEAKING_SPEED);
     this.input.tick(this.isMovingSlowly(), f);
     this.minecraft.getTutorial().onInput(this.input);
     if (this.isUsingItem() && !this.isPassenger()) {
@@ -625,7 +589,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
     if (this.input.jumping && !bl8 && !bl && !lv.flying && !this.isPassenger() && !this.onClimbable()) {
       ItemStack lv2 = this.getItemBySlot(EquipmentSlot.CHEST);
-      if (lv2.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(lv2) && this.tryToStartFallFlying()) {
+      if (lv2.is(ItemType.ELYTRA) && ElytraItem.isFlyEnabled(lv2) && this.tryToStartFallFlying()) {
         this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
       }
     }
@@ -728,7 +692,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
       f = 0.0125F;
       this.portalProcess.setAsInsidePortalThisTick(false);
-    } else if (this.hasEffect(MobEffects.CONFUSION) && !this.getEffect(MobEffects.CONFUSION).endsWithin(60)) {
+    } else if (this.hasEffect(EffectType.CONFUSION) && !this.getEffect(EffectType.CONFUSION).endsWithin(60)) {
       f = 0.006666667F;
     } else if (this.spinningEffectIntensity > 0.0F) {
       f = -0.05F;
@@ -754,7 +718,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Nullable
   @Override
   public MobEffectInstance removeEffectNoUpdate(Holder<MobEffect> effect) {
-    if (effect.is(MobEffects.CONFUSION)) {
+    if (effect.is(EffectType.CONFUSION)) {
       this.oSpinningEffectIntensity = 0.0F;
       this.spinningEffectIntensity = 0.0F;
     }
@@ -767,108 +731,6 @@ public class LocalPlayer extends AbstractClientPlayer {
     double d = this.getX();
     double e = this.getZ();
     super.move(type, pos);
-    this.updateAutoJump((float)(this.getX() - d), (float)(this.getZ() - e));
-  }
-
-  public boolean isAutoJumpEnabled() {
-    return this.autoJumpEnabled;
-  }
-
-  protected void updateAutoJump(float movementX, float movementZ) {
-    if (this.canAutoJump()) {
-      Vec3 lv = this.position();
-      Vec3 lv2 = lv.add((double)movementX, 0.0, (double)movementZ);
-      Vec3 lv3 = new Vec3((double)movementX, 0.0, (double)movementZ);
-      float h = this.getSpeed();
-      float i = (float)lv3.lengthSqr();
-      if (i <= 0.001F) {
-        Vec2 lv4 = this.input.getMoveVector();
-        float j = h * lv4.x;
-        float k = h * lv4.y;
-        float l = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
-        float m = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-        lv3 = new Vec3((double)(j * m - k * l), lv3.y, (double)(k * m + j * l));
-        i = (float)lv3.lengthSqr();
-        if (i <= 0.001F) {
-          return;
-        }
-      }
-
-      float n = Mth.invSqrt(i);
-      Vec3 lv5 = lv3.scale((double)n);
-      Vec3 lv6 = this.getForward();
-      float l = (float)(lv6.x * lv5.x + lv6.z * lv5.z);
-      if (!(l < -0.15F)) {
-        CollisionContext lv7 = CollisionContext.of(this);
-        BlockPos lv8 = BlockPos.containing(this.getX(), this.getBoundingBox().maxY, this.getZ());
-        BlockState lv9 = this.level().getBlockState(lv8);
-        if (lv9.getCollisionShape(this.level(), lv8, lv7).isEmpty()) {
-          lv8 = lv8.above();
-          BlockState lv10 = this.level().getBlockState(lv8);
-          if (lv10.getCollisionShape(this.level(), lv8, lv7).isEmpty()) {
-            float o = 7.0F;
-            float p = 1.2F;
-            if (this.hasEffect(MobEffects.JUMP)) {
-              p += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75F;
-            }
-
-            float q = Math.max(h * 7.0F, 1.0F / n);
-            Vec3 lv12 = lv2.add(lv5.scale((double)q));
-            float r = this.getBbWidth();
-            float s = this.getBbHeight();
-            AABB lv13 = new AABB(lv, lv12.add(0.0, (double)s, 0.0)).inflate((double)r, 0.0, (double)r);
-            Vec3 lv11 = lv.add(0.0, 0.51F, 0.0);
-            lv12 = lv12.add(0.0, 0.51F, 0.0);
-            Vec3 lv14 = lv5.cross(new Vec3(0.0, 1.0, 0.0));
-            Vec3 lv15 = lv14.scale((double)(r * 0.5F));
-            Vec3 lv16 = lv11.subtract(lv15);
-            Vec3 lv17 = lv12.subtract(lv15);
-            Vec3 lv18 = lv11.add(lv15);
-            Vec3 lv19 = lv12.add(lv15);
-            Iterable<VoxelShape> iterable = this.level().getCollisions(this, lv13);
-            Iterator<AABB> iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
-            float t = Float.MIN_VALUE;
-
-            while (iterator.hasNext()) {
-              AABB lv20 = iterator.next();
-              if (lv20.intersects(lv16, lv17) || lv20.intersects(lv18, lv19)) {
-                t = (float)lv20.maxY;
-                Vec3 lv21 = lv20.getCenter();
-                BlockPos lv22 = BlockPos.containing(lv21);
-
-                for (int u = 1; (float)u < p; u++) {
-                  BlockPos lv23 = lv22.above(u);
-                  BlockState lv24 = this.level().getBlockState(lv23);
-                  VoxelShape lv25;
-                  if (!(lv25 = lv24.getCollisionShape(this.level(), lv23, lv7)).isEmpty()) {
-                    t = (float)lv25.max(Direction.Axis.Y) + (float)lv23.getY();
-                    if ((double)t - this.getY() > (double)p) {
-                      return;
-                    }
-                  }
-
-                  if (u > 1) {
-                    lv8 = lv8.above();
-                    BlockState lv26 = this.level().getBlockState(lv8);
-                    if (!lv26.getCollisionShape(this.level(), lv8, lv7).isEmpty()) {
-                      return;
-                    }
-                  }
-                }
-                break;
-              }
-            }
-
-            if (t != Float.MIN_VALUE) {
-              float v = (float)((double)t - this.getY());
-              if (!(v <= 0.5F) && !(v > p)) {
-                this.autoJumpTime = 1;
-              }
-            }
-          }
-        }
-      }
-    }
   }
 
   @Override
@@ -889,27 +751,12 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
   }
 
-  private boolean canAutoJump() {
-    return this.isAutoJumpEnabled()
-      && this.autoJumpTime <= 0
-      && this.onGround()
-      && !this.isStayingOnGroundSurface()
-      && !this.isPassenger()
-      && this.isMoving()
-      && (double)this.getBlockJumpFactor() >= 1.0;
-  }
-
-  private boolean isMoving() {
-    Vec2 lv = this.input.getMoveVector();
-    return lv.x != 0.0F || lv.y != 0.0F;
-  }
-
   private boolean canStartSprinting() {
     return !this.isSprinting()
       && this.hasEnoughImpulseToStartSprinting()
       && this.hasEnoughFoodToStartSprinting()
       && !this.isUsingItem()
-      && !this.hasEffect(MobEffects.BLINDNESS)
+            && !this.hasEffect(EffectType.BLINDNESS)
       && (!this.isPassenger() || this.vehicleCanSprint(this.getVehicle()))
       && !this.isFallFlying();
   }
@@ -952,44 +799,6 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Override
   public boolean isUnderWater() {
     return this.wasUnderwater;
-  }
-
-  @Override
-  protected boolean updateIsUnderwater() {
-    boolean bl = this.wasUnderwater;
-    boolean bl2 = super.updateIsUnderwater();
-    if (this.isSpectator()) {
-      return this.wasUnderwater;
-    } else {
-      if (!bl && bl2) {
-        this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.AMBIENT, 1.0F, 1.0F, false);
-        this.minecraft.getSoundManager().play(new UnderwaterAmbientSoundInstances.UnderwaterAmbientSoundInstance(this));
-      }
-
-      if (bl && !bl2) {
-        this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.AMBIENT, 1.0F, 1.0F, false);
-      }
-
-      return this.wasUnderwater;
-    }
-  }
-
-  @Override
-  public Vec3 getRopeHoldPosition(float partialTicks) {
-    if (this.minecraft.options.getCameraType().isFirstPerson()) {
-      float g = Mth.lerp(partialTicks * 0.5F, this.getYRot(), this.yRotO) * (float) (Math.PI / 180.0);
-      float h = Mth.lerp(partialTicks * 0.5F, this.getXRot(), this.xRotO) * (float) (Math.PI / 180.0);
-      double d = this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0;
-      Vec3 lv = new Vec3(0.39 * d, -0.6, 0.3);
-      return lv.xRot(-h).yRot(-g).add(this.getEyePosition(partialTicks));
-    } else {
-      return super.getRopeHoldPosition(partialTicks);
-    }
-  }
-
-  @Override
-  public void updateTutorialInventoryAction(ItemStack carried, ItemStack clicked, ClickAction action) {
-    this.minecraft.getTutorial().onInventoryAction(carried, clicked, action);
   }
 
   @Override
