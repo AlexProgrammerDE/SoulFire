@@ -45,6 +45,7 @@ import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.key.Key;
@@ -132,6 +133,7 @@ public final class SessionDataManager {
   private LoginPacketData loginData;
   private boolean enableRespawnScreen;
   private boolean doLimitedCrafting;
+  @Getter(value = AccessLevel.PRIVATE)
   private Level level;
   private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private int serverViewDistance = -1;

@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
@@ -27,11 +28,16 @@ import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.ItemTypeHelper;
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
 public class PathConstraint {
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
   private final ClientEntity entity;
   private final LevelHeightAccessor levelHeightAccessor;
+
+  public PathConstraint(BotConnection botConnection) {
+    this(botConnection.dataManager().clientEntity(), botConnection.dataManager().currentLevel());
+  }
 
   public boolean doUsableBlocksDecreaseWhenPlaced() {
     return entity == null || !entity.abilities().creativeModeBreak();

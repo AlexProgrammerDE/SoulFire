@@ -58,11 +58,10 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     this.pathCompletionFuture = pathCompletionFuture;
   }
 
-  public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer) {
+  public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer, PathConstraint pathConstraint) {
     var logger = bot.logger();
     var dataManager = bot.dataManager();
     var clientEntity = dataManager.clientEntity();
-    var pathConstraint = new PathConstraint(clientEntity, dataManager.currentLevel());
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {

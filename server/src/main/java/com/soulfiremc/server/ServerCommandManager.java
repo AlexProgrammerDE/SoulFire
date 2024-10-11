@@ -45,6 +45,7 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
@@ -887,7 +888,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     return forEveryBot(
       context,
       bot -> {
-        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot));
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraint(bot));
         return Command.SINGLE_SUCCESS;
       });
   }

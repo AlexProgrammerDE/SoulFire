@@ -23,6 +23,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,7 @@ public class CollectBlockController {
       log.info("Found {} possible blocks to collect", blockPos.size());
 
       try {
-        PathExecutor.executePathfinding(bot, new CompositeGoal(blockPos.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet()))).get();
+        PathExecutor.executePathfinding(bot, new CompositeGoal(blockPos.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet())), new PathConstraint(bot)).get();
         collectedAmount++;
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);

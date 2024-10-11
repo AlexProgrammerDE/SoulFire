@@ -21,6 +21,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import lombok.RequiredArgsConstructor;
@@ -65,7 +66,7 @@ public class ExcavateAreaController {
 
   private boolean someBlocksCanBeMined(BotConnection bot) {
     return blocksToMine.stream().anyMatch(blockPos -> {
-      var blockState = bot.dataManager().level().getBlockState(blockPos);
+      var blockState = bot.dataManager().currentLevel().getBlockState(blockPos);
       return BlockTypeHelper.isFullBlock(blockState) && BlockTypeHelper.isDiggable(blockState.blockType());
     });
   }
@@ -75,7 +76,14 @@ public class ExcavateAreaController {
       log.info("Searching for next block to excavate");
 
       try {
-        PathExecutor.executePathfinding(bot, new CompositeGoal(blocksToMine.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet()))).get();
+        PathExecutor.executePathfinding(bot, new CompositeGoal(blocksToMine.stream()
+          .map(BreakBlockPosGoal::new)
+          .collect(Collectors.toUnmodifiableSet())), new PathConstraint(bot) {
+          @Override
+          public boolean canPlaceBlockPos(SFVec3i pos) {
+            return super.canPlaceBlockPos(pos) && !blocksToMine.contains(pos);
+          }
+        }).get();
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);
         return;

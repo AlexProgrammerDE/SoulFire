@@ -26,6 +26,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
@@ -65,7 +66,8 @@ public class AntiAFK implements InternalPlugin {
                 .dataManager()
                 .clientEntity()
                 .pos()),
-              settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()));
+              settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
+            new PathConstraint(connection));
         },
         settingsSource.getRandom(AntiAFKSettings.DELAY).asLongSupplier(),
         TimeUnit.SECONDS);
