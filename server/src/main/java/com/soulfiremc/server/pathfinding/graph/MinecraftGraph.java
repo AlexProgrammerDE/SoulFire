@@ -26,8 +26,8 @@ import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.structs.LazyBoolean;
-import com.soulfiremc.server.util.structs.Vec2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public record MinecraftGraph(TagsState tagsState,
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
 
   static {
-    var blockSubscribers = new Vec2ObjectOpenHashMap<SFVec3i, List<WrappedActionSubscription>>();
+    var blockSubscribers = new Object2ObjectOpenHashMap<SFVec3i, List<WrappedActionSubscription>>();
     var actions = new ArrayList<GraphAction>();
     var currentSubscriptions = new AtomicInteger(0);
     BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) -> {

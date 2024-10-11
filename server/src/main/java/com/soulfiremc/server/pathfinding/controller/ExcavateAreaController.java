@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,11 +74,8 @@ public class ExcavateAreaController {
     while (someBlocksCanBeMined(bot)) {
       log.info("Searching for next block to excavate");
 
-      var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new CompositeGoal(blocksToMine.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet())), pathFuture);
-
       try {
-        pathFuture.get();
+        PathExecutor.executePathfinding(bot, new CompositeGoal(blocksToMine.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet()))).get();
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);
         return;

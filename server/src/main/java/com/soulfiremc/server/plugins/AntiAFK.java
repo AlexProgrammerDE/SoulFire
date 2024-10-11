@@ -35,7 +35,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -66,8 +65,7 @@ public class AntiAFK implements InternalPlugin {
                 .dataManager()
                 .clientEntity()
                 .pos()),
-              settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
-            new CompletableFuture<>());
+              settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()));
         },
         settingsSource.getRandom(AntiAFKSettings.DELAY).asLongSupplier(),
         TimeUnit.SECONDS);

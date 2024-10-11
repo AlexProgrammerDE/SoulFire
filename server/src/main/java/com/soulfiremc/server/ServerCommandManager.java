@@ -69,7 +69,6 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -888,7 +887,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     return forEveryBot(
       context,
       bot -> {
-        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new CompletableFuture<>());
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot));
         return Command.SINGLE_SUCCESS;
       });
   }

@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -76,11 +75,8 @@ public class CollectBlockController {
 
       log.info("Found {} possible blocks to collect", blockPos.size());
 
-      var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new CompositeGoal(blockPos.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet())), pathFuture);
-
       try {
-        pathFuture.get();
+        PathExecutor.executePathfinding(bot, new CompositeGoal(blockPos.stream().map(BreakBlockPosGoal::new).collect(Collectors.toUnmodifiableSet()))).get();
         collectedAmount++;
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);

@@ -41,7 +41,6 @@ import org.openjdk.jmh.annotations.State;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -110,6 +109,6 @@ public class PathfindingBenchmark {
 
   @Benchmark
   public void calculatePath() {
-    routeFinder.findRoute(initialState, true, new CompletableFuture<>());
+    routeFinder.findRouteSync(initialState, true);
   }
 }

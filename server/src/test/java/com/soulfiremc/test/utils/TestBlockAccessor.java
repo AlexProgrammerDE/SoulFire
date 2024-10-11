@@ -21,10 +21,12 @@ import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
-import com.soulfiremc.server.util.structs.Vec2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
+import java.util.Map;
 
 public class TestBlockAccessor implements BlockAccessor {
-  private final Vec2ObjectOpenHashMap<SFVec3i, BlockState> blocks = new Vec2ObjectOpenHashMap<>();
+  private final Map<SFVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
   private final BlockState defaultBlock;
 
   public TestBlockAccessor() {

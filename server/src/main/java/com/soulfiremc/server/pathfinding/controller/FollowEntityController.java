@@ -25,7 +25,6 @@ import com.soulfiremc.server.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -47,12 +46,8 @@ public class FollowEntityController {
         continue;
       }
 
-      var pathFuture = new CompletableFuture<Void>();
-      PathExecutor.executePathfinding(bot, new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius),
-        pathFuture);
-
       try {
-        pathFuture.get();
+        PathExecutor.executePathfinding(bot, new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius)).get();
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);
         return;

@@ -29,6 +29,7 @@ import com.soulfiremc.server.util.structs.CallLimiter;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,16 +76,14 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return bestNode;
   }
 
-  public List<WorldAction> findRoute(NodeState from, boolean requiresRepositioning,
-                                     CompletableFuture<Void> pathCompletionFuture) {
-    return findRoute(from, requiresRepositioning, pathCompletionFuture, Integer.getInteger("sf.pathfinding-expire", 180), TimeUnit.SECONDS);
+  public CompletableFuture<List<WorldAction>> findRouteFuture(NodeState from, boolean requiresRepositioning) {
+    return CompletableFuture.supplyAsync(() -> findRouteSync(from, requiresRepositioning));
   }
 
-  public List<WorldAction> findRoute(NodeState from, boolean requiresRepositioning,
-                                     CompletableFuture<Void> pathCompletionFuture,
-                                     long expireDelay, TimeUnit expireTimeUnit) {
+  @VisibleForTesting
+  public List<WorldAction> findRouteSync(NodeState from, boolean requiresRepositioning) {
     var stopwatch = Stopwatch.createStarted();
-    var expireTime = System.currentTimeMillis() + expireTimeUnit.toMillis(expireDelay);
+    var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Integer.getInteger("sf.pathfinding-expire", 180));
 
     // Store block positions and the best route to them
     var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
@@ -122,7 +121,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       );
     }, 1, TimeUnit.SECONDS);
     while (!openSet.isEmpty()) {
-      if (pathCompletionFuture.isDone()) {
+      if (Thread.currentThread().isInterrupted()) {
         stopwatch.stop();
         log.info("Cancelled pathfinding after {}ms", stopwatch.elapsed().toMillis());
         return List.of();

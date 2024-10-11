@@ -58,14 +58,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     this.pathCompletionFuture = pathCompletionFuture;
   }
 
-  public static void executePathfinding(BotConnection bot, GoalScorer goalScorer, CompletableFuture<Void> pathCompletionFuture) {
-    // Cancel the path if the bot is disconnected
-    bot.shutdownHooks().add(() -> {
-      if (!pathCompletionFuture.isDone()) {
-        pathCompletionFuture.cancel(true);
-      }
-    });
-
+  public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer) {
     var logger = bot.logger();
     var dataManager = bot.dataManager();
     var clientEntity = dataManager.clientEntity();
@@ -84,14 +77,23 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
           new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, pathConstraint), goalScorer);
 
         logger.info("Starting calculations at: {}", start.formatXYZ());
-        var actions = routeFinder.findRoute(NodeState.forInfo(start, inventory), requiresRepositioning, pathCompletionFuture);
+        var actionsFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory), requiresRepositioning);
+        bot.shutdownHooks().add(() -> actionsFuture.cancel(true));
+        var actions = actionsFuture.join();
         logger.info("Calculated path with {} actions: {}", actions.size(), actions);
 
         return actions;
       };
 
+    var pathCompletionFuture = new CompletableFuture<Void>();
+
+    // Cancel the path if the bot is disconnected
+    bot.shutdownHooks().add(() -> pathCompletionFuture.cancel(true));
+
     var pathExecutor = new PathExecutor(bot, findPath, pathCompletionFuture);
     pathExecutor.submitForPathCalculation(true);
+
+    return pathCompletionFuture;
   }
 
   public boolean isDone() {
