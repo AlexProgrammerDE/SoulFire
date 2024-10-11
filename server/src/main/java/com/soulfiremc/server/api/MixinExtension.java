@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.api;
+package com.soulfiremc.server.api;
 
 import org.pf4j.ExtensionPoint;
 

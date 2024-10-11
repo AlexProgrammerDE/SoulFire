@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.api.MixinExtension;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.api.MixinExtension;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CustomClassProvider;
