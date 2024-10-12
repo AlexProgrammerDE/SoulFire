@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.proxy;
+package com.soulfiremc.server.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.server.util.SocketAddressHelper;

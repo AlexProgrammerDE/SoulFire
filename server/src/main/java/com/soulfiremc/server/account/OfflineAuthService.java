@@ -17,10 +17,8 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.server.settings.account.AuthType;
-import com.soulfiremc.server.settings.account.MinecraftAccount;
-import com.soulfiremc.server.settings.account.service.OfflineJavaData;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.proxy.SFProxy;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -25,10 +25,10 @@ import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.server.settings.PropertyKey;
-import com.soulfiremc.server.settings.account.AuthType;
-import com.soulfiremc.server.settings.account.MinecraftAccount;
+import com.soulfiremc.server.account.AuthType;
+import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.proxy.SFProxy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

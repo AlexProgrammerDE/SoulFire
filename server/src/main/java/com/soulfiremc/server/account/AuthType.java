@@ -15,17 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.proxy;
+package com.soulfiremc.server.account;
 
+import com.soulfiremc.server.account.service.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ProxyType {
-  HTTP(false),
-  SOCKS4(false),
-  SOCKS5(true);
+public enum AuthType {
+  MICROSOFT_JAVA_CREDENTIALS("Microsoft Java Credentials", OnlineChainJavaData.class),
+  MICROSOFT_BEDROCK_CREDENTIALS("Microsoft Bedrock Credentials", BedrockData.class),
+  MICROSOFT_JAVA_DEVICE_CODE("Microsoft Java Device Code", OnlineChainJavaData.class),
+  MICROSOFT_BEDROCK_DEVICE_CODE("Microsoft Bedrock Device Code", BedrockData.class),
+  THE_ALTENING("The Altening", OnlineSimpleJavaData.class),
+  OFFLINE("Offline", OfflineJavaData.class);
 
-  private final boolean udpSupport;
+  private final String displayName;
+  private final Class<? extends AccountData> accountDataClass;
+
+  @Override
+  public String toString() {
+    return displayName;
+  }
 }

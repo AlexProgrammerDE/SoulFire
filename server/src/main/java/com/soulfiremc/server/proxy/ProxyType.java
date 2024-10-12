@@ -15,8 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.account.service;
+package com.soulfiremc.server.proxy;
 
-public interface OnlineJavaDataLike {
-  String authToken();
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum ProxyType {
+  HTTP(false),
+  SOCKS4(false),
+  SOCKS5(true);
+
+  private final boolean udpSupport;
 }

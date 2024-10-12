@@ -20,9 +20,7 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.AccountTypeDeviceCode;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.server.settings.account.AuthType;
-import com.soulfiremc.server.settings.account.MinecraftAccount;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.proxy.SFProxy;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;

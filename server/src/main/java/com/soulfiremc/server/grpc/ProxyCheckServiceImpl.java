@@ -22,7 +22,7 @@ import com.soulfiremc.grpc.generated.ProxyCheckRequest;
 import com.soulfiremc.grpc.generated.ProxyCheckResponse;
 import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;

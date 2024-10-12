@@ -18,7 +18,7 @@
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.proxy.SFProxy;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;

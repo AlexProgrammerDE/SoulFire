@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.settings.account.AuthType;
-import com.soulfiremc.server.settings.proxy.SFProxy;
+import com.soulfiremc.server.account.AuthType;
+import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;

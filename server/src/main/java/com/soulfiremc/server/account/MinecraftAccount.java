@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.settings.account;
+package com.soulfiremc.server.account;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.server.settings.account.service.*;
+import com.soulfiremc.server.account.service.*;
 import lombok.NonNull;
 
 import java.util.UUID;
