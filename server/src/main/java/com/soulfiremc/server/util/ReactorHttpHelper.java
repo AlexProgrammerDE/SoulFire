@@ -46,7 +46,7 @@ public class ReactorHttpHelper {
         .responseTimeout(Duration.ofSeconds(5))
         .headers(
           h -> {
-            h.set(HttpHeaderNames.ACCEPT, "application/json");
+            h.set(HttpHeaderNames.ACCEPT, "application/json;q=1.0, text/plain;q=0.9, */*;q=0.5");
             if (withBody) {
               h.set(HttpHeaderNames.CONTENT_TYPE, "application/json");
             }
