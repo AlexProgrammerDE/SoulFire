@@ -5,7 +5,7 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
-import "common.proto";
+import "soulfire/common.proto";
 
 message DownloadRequest {
   string url = 1;
