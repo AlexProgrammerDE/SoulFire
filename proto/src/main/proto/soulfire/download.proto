@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "common.proto";
+
+message DownloadRequest {
+  string url = 1;
+  map<string, string> headers = 2;
+  optional ProxyProto proxy = 3;
+}
+
+message DownloadResponse {
+  bytes data = 1;
+  map<string, string> headers = 2;
+  int32 status_code = 3;
+}
+
+service DownloadService {
+  rpc download(DownloadRequest) returns (DownloadResponse);
+}
