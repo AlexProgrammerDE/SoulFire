@@ -52,7 +52,7 @@ public class AutoJump implements InternalPlugin {
         }
 
         var dataManager = connection.dataManager();
-        var clientEntity = dataManager.clientEntity();
+        var clientEntity = dataManager.localPlayer();
         if (clientEntity != null
           && clientEntity.level().isChunkLoaded(clientEntity.blockPos())
           && clientEntity.onGround()) {

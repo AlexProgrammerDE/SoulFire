@@ -258,7 +258,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
     }
   }
 
-  public void sendPacket(Packet packet) {
+  public void send(Packet packet) {
     session.send(packet);
   }
 }

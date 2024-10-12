@@ -155,7 +155,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
 
                       return executePathfinding(c, bot -> {
                         var random = ThreadLocalRandom.current();
-                        var pos = bot.dataManager().clientEntity().pos();
+                        var pos = bot.dataManager().localPlayer().pos();
                         var x =
                           random.nextInt(
                             pos.getFloorX() - radius,
@@ -176,7 +176,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 c -> {
                   var y = c.getArgument("y", DynamicYArgumentType.YLocationMapper.class);
                   return executePathfinding(c, bot -> new YGoal(GenericMath.floor(
-                    y.getAbsoluteLocation(bot.dataManager().clientEntity().y())
+                    y.getAbsoluteLocation(bot.dataManager().localPlayer().y())
                   )));
                 })))
         .then(
@@ -187,8 +187,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 c -> {
                   var xz = c.getArgument("xz", DynamicXZArgumentType.XZLocationMapper.class);
                   return executePathfinding(c, bot -> new XZGoal(xz.getAbsoluteLocation(Vector2d.from(
-                    bot.dataManager().clientEntity().x(),
-                    bot.dataManager().clientEntity().z()
+                    bot.dataManager().localPlayer().x(),
+                    bot.dataManager().localPlayer().z()
                   )).toInt()));
                 })))
         .then(
@@ -199,7 +199,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 c -> {
                   var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
                   return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
-                    xyz.getAbsoluteLocation(bot.dataManager().clientEntity().pos())
+                    xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos())
                   )));
                 }))));
     dispatcher.register(
@@ -301,8 +301,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                         var dataManager = bot.dataManager();
                         bot.scheduler().schedule(() -> new ExcavateAreaController(
                           ExcavateAreaController.getRectangleFromTo(
-                            SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.clientEntity().pos())),
-                            SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.clientEntity().pos()))
+                            SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.localPlayer().pos())),
+                            SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.localPlayer().pos()))
                           )
                         ).start(bot));
 
@@ -325,7 +325,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                         var dataManager = bot.dataManager();
 
                         bot.scheduler().schedule(() -> new ExcavateAreaController(
-                          ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.clientEntity().pos())), radius)
+                          ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.localPlayer().pos())), radius)
                         ).start(bot));
 
                         return Command.SINGLE_SUCCESS;
@@ -380,10 +380,10 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   c,
                   bot -> {
                     bot.dataManager()
-                      .clientEntity()
+                      .localPlayer()
                       .lookAt(
                         RotationOrigin.EYES,
-                        xyz.getAbsoluteLocation(bot.dataManager().clientEntity().pos()));
+                        xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos()));
                     return Command.SINGLE_SUCCESS;
                   });
               }))));

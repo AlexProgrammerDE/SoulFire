@@ -42,7 +42,7 @@ public class FollowEntityController {
         return;
       }
 
-      if (entity.blockPos().distance(bot.dataManager().clientEntity().blockPos()) <= maxRadius) {
+      if (entity.blockPos().distance(bot.dataManager().localPlayer().blockPos()) <= maxRadius) {
         TimeUtil.waitTime(1, TimeUnit.SECONDS);
         continue;
       }

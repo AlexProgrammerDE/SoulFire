@@ -53,7 +53,7 @@ public class AutoRespawn implements InternalPlugin {
         return;
       }
 
-      if (combatKillPacket.getPlayerId() != connection.dataManager().clientEntity().entityId()) {
+      if (combatKillPacket.getPlayerId() != connection.dataManager().localPlayer().entityId()) {
         return;
       }
 

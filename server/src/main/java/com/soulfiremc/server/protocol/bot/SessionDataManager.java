@@ -33,7 +33,7 @@ import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.*;
 import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.state.*;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
@@ -123,7 +123,7 @@ public final class SessionDataManager {
   private final TagsState tagsState = new TagsState();
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
-  private ClientEntity clientEntity;
+  private LocalPlayer localPlayer;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
   private HealthData healthData;
@@ -253,10 +253,10 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // Init client entity
-    clientEntity =
-      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
-    clientEntity.showReducedDebug(packet.isReducedDebugInfo());
-    entityTrackerState.addEntity(clientEntity);
+    localPlayer =
+      new LocalPlayer(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
+    localPlayer.showReducedDebug(packet.isReducedDebugInfo());
+    entityTrackerState.addEntity(localPlayer);
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
@@ -296,22 +296,22 @@ public final class SessionDataManager {
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
     var relative = packet.getRelative();
-    var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getX() : packet.getX();
-    var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
-    var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
+    var x = relative.contains(PositionElement.X) ? localPlayer.x() + packet.getX() : packet.getX();
+    var y = relative.contains(PositionElement.Y) ? localPlayer.y() + packet.getY() : packet.getY();
+    var z = relative.contains(PositionElement.Z) ? localPlayer.z() + packet.getZ() : packet.getZ();
     var yaw =
       relative.contains(PositionElement.YAW)
-        ? clientEntity.yaw() + packet.getYaw()
+        ? localPlayer.yaw() + packet.getYaw()
         : packet.getYaw();
     var pitch =
       relative.contains(PositionElement.PITCH)
-        ? clientEntity.pitch() + packet.getPitch()
+        ? localPlayer.pitch() + packet.getPitch()
         : packet.getPitch();
 
-    clientEntity.setPosition(x, y, z);
-    clientEntity.setRotation(yaw, pitch);
+    localPlayer.setPosition(x, y, z);
+    localPlayer.setRotation(yaw, pitch);
 
-    var position = clientEntity.blockPos();
+    var position = localPlayer.blockPos();
     if (!joinedWorld) {
       joinedWorld = true;
 
@@ -327,8 +327,8 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
-    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
-    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
+    connection.send(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
+    connection.send(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
   }
 
   @EventHandler
@@ -341,7 +341,7 @@ public final class SessionDataManager {
       }
     }
 
-    clientEntity.lookAt(packet.getOrigin(), targetPosition);
+    localPlayer.lookAt(packet.getOrigin(), targetPosition);
   }
 
   @EventHandler
@@ -349,7 +349,7 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // We are now possibly in a new dimension
-    clientEntity.level(currentLevel());
+    localPlayer.level(currentLevel());
 
     log.info("Respawned");
   }
@@ -358,7 +358,7 @@ public final class SessionDataManager {
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
 
-    if (state == null || state != clientEntity) {
+    if (state == null || state != localPlayer) {
       log.debug("Received death for unknown or invalid entity {}", packet.getPlayerId());
       return;
     }
@@ -368,7 +368,7 @@ public final class SessionDataManager {
       isDead = true;
     } else {
       log.info("Died, respawning due to game rule");
-      connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+      connection.send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
     }
   }
 
@@ -491,7 +491,7 @@ public final class SessionDataManager {
         packet.getFlySpeed(),
         packet.getWalkSpeed());
 
-    var attributeState = clientEntity.attributeState();
+    var attributeState = localPlayer.attributeState();
     attributeState
       .getOrCreateAttribute(AttributeType.MOVEMENT_SPEED)
       .baseValue(abilitiesData.walkSpeed());
@@ -633,7 +633,7 @@ public final class SessionDataManager {
       }
       case ENTER_CREDITS -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
-        connection.sendPacket(
+        connection.send(
           new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
       }
       case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
@@ -996,19 +996,19 @@ public final class SessionDataManager {
   @EventHandler
   public void onResourcePack(ClientboundResourcePackPushPacket packet) {
     if (!isValidResourcePackUrl(packet.getUrl())) {
-      connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.INVALID_URL));
+      connection.send(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.INVALID_URL));
       return;
     }
 
     var version = connection.protocolVersion();
     if (SFVersionConstants.isBedrock(version)) {
-      connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DECLINED));
+      connection.send(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DECLINED));
       return;
     }
 
-    connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.ACCEPTED));
-    connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DOWNLOADED));
-    connection.sendPacket(
+    connection.send(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.ACCEPTED));
+    connection.send(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.DOWNLOADED));
+    connection.send(
       new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.SUCCESSFULLY_LOADED));
   }
 

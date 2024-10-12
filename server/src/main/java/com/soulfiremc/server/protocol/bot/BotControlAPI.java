@@ -81,7 +81,7 @@ public class BotControlAPI {
     dataManager.controlState().flying(newFly);
 
     // Let the server know we are flying
-    connection.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
+    connection.send(new ServerboundPlayerAbilitiesPacket(newFly));
 
     return newFly;
   }
@@ -91,9 +91,9 @@ public class BotControlAPI {
     dataManager.controlState().sprinting(newSprint);
 
     // Let the server know we are sprinting
-    connection.sendPacket(
+    connection.send(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.localPlayer().entityId(),
         newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
 
     return newSprint;
@@ -104,9 +104,9 @@ public class BotControlAPI {
     dataManager.controlState().sneaking(newSneak);
 
     // Let the server know we are sneaking
-    connection.sendPacket(
+    connection.send(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.localPlayer().entityId(),
         newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
 
     return newSneak;
@@ -119,11 +119,11 @@ public class BotControlAPI {
       // We only sign chat at the moment because commands require the entire command tree to be
       // handled
       // Command signing is signing every string parameter in the command because of reporting /msg
-      connection.sendPacket(
+      connection.send(
         new ServerboundChatCommandPacket(command));
     } else {
       var salt = secureRandom.nextLong();
-      connection.sendPacket(
+      connection.send(
         new ServerboundChatPacket(message, now.toEpochMilli(), salt, null, 0, new BitSet()));
     }
   }
@@ -150,7 +150,7 @@ public class BotControlAPI {
   }
 
   public void sendPluginMessage(Key channel, byte[] data) {
-    connection.sendPacket(new ServerboundCustomPayloadPacket(channel, data));
+    connection.send(new ServerboundCustomPayloadPacket(channel, data));
   }
 
   public Vector3d getEntityVisiblePoint(Entity entity) {
@@ -173,7 +173,7 @@ public class BotControlAPI {
       }
     }
 
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.localPlayer().eyePosition();
 
     // sort by distance to the bot
     points.sort(Comparator.comparingDouble(eye::distance));
@@ -201,7 +201,7 @@ public class BotControlAPI {
     var packet =
       new ServerboundInteractPacket(
         entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
-    connection.sendPacket(packet);
+    connection.send(packet);
     if (swingArm) {
       swingArm();
     }
@@ -215,19 +215,19 @@ public class BotControlAPI {
     boolean ignoreBots,
     boolean onlyInteractable,
     boolean mustBeSeen) {
-    if (dataManager.clientEntity() == null) {
+    if (dataManager.localPlayer() == null) {
       return null;
     }
 
-    var x = dataManager.clientEntity().x();
-    var y = dataManager.clientEntity().y();
-    var z = dataManager.clientEntity().z();
+    var x = dataManager.localPlayer().x();
+    var y = dataManager.localPlayer().y();
+    var z = dataManager.localPlayer().z();
 
     Entity closest = null;
     var closestDistance = Double.MAX_VALUE;
 
     for (var entity : dataManager.entityTrackerState().getEntities()) {
-      if (entity.entityId() == dataManager.clientEntity().entityId()) {
+      if (entity.entityId() == dataManager.localPlayer().entityId()) {
         continue;
       }
 
@@ -260,11 +260,11 @@ public class BotControlAPI {
         && dataManager.connection().instanceManager().botConnections().values().stream()
         .anyMatch(
           b -> {
-            if (b.dataManager().clientEntity() == null) {
+            if (b.dataManager().localPlayer() == null) {
               return false;
             }
 
-            return b.dataManager().clientEntity().uuid().equals(entity.uuid());
+            return b.dataManager().localPlayer().uuid().equals(entity.uuid());
           })) {
         continue;
       }
@@ -289,7 +289,7 @@ public class BotControlAPI {
   public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
     var level = dataManager.currentLevel();
 
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.localPlayer().eyePosition();
     var distance = eye.distance(vec);
     if (distance >= 256) {
       return false;
@@ -306,7 +306,7 @@ public class BotControlAPI {
 
   public void swingArm() {
     var swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
-    connection.sendPacket(swingPacket);
+    connection.send(swingPacket);
   }
 
   public float getHitItemCooldownTicks() {
@@ -314,7 +314,7 @@ public class BotControlAPI {
 
     return (float)
       (1.0
-        / dataManager.clientEntity().attributeValue(AttributeType.ATTACK_SPEED)
+        / dataManager.localPlayer().attributeValue(AttributeType.ATTACK_SPEED)
         * 20.0);
   }
 }

@@ -26,16 +26,13 @@ import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
 import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
 import java.util.UUID;
 
@@ -45,13 +42,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class ClientEntity extends Entity {
-  private final PhysicsData physics = new PhysicsData();
+public class LocalPlayer extends Entity {
   private final BotConnection connection;
   private final SessionDataManager dataManager;
-  private final ControlState controlState;
-  private final PlayerMovementState movementState;
-  private final BotMovementManager botMovementManager;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -62,59 +55,77 @@ public class ClientEntity extends Entity {
   private boolean lastOnGround = false;
   private int positionReminder = 0;
 
-  public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, ControlState controlState,
+  public LocalPlayer(
+    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager,
     Level level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
     this.dataManager = dataManager;
-    this.controlState = controlState;
-    this.movementState =
-      new PlayerMovementState(this, dataManager.inventoryManager().playerInventory());
-    this.botMovementManager = new BotMovementManager(dataManager, movementState, this);
   }
 
   @Override
   public void tick() {
-    super.tick();
+    if (level.isChunkLoaded(this.blockX(), this.blockZ())) {
+      super.tick();
 
-    // Collect data for calculations
-    movementState.updateData();
-
-    // Tick physics movement
-    if (level.isChunkLoaded(this.blockPos())) {
-      botMovementManager.tick();
+      // Send position changes
+      sendPosition();
     }
-
-    // Apply calculated state
-    movementState.applyData();
-
-    // Send position changes
-    sendPositionChanges();
   }
 
-  public void sendPositionChanges() {
-    // Detect whether anything changed
-    var xDiff = x - lastX;
-    var yDiff = y - lastY;
-    var zDiff = z - lastZ;
-    var yawDiff = (double) (yaw - lastYaw);
-    var pitchDiff = (double) (pitch - lastPitch);
-    var sendPos =
-      MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
-        || ++positionReminder >= 20;
-    var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
-    var sendOnGround = onGround != lastOnGround;
+  private void sendPosition() {
+    this.sendIsSprintingIfNeeded();
+    boolean bl = this.isShiftKeyDown();
+    if (bl != this.wasShiftKeyDown) {
+      this.connection.send(new ServerboundPlayerCommandPacket(entityId(), bl
+        ? PlayerState.START_SNEAKING
+        : PlayerState.STOP_SNEAKING));
+      this.wasShiftKeyDown = bl;
+    }
 
-    // Send position packets if changed
-    if (sendPos && sendRot) {
-      sendPosRot();
-    } else if (sendPos) {
-      sendPos();
-    } else if (sendRot) {
-      sendRot();
-    } else if (sendOnGround) {
-      sendOnGround();
+    if (this.isControlledCamera()) {
+      double d = this.x() - this.xLast;
+      double e = this.y() - this.yLast1;
+      double f = this.z() - this.zLast;
+      double g = (double)(this.getYRot() - this.yRotLast);
+      double h = (double)(this.getXRot() - this.xRotLast);
+      this.positionReminder++;
+      boolean bl2 = Mth.lengthSquared(d, e, f) > Mth.square(2.0E-4) || this.positionReminder >= 20;
+      boolean bl3 = g != 0.0 || h != 0.0;
+      if (bl2 && bl3) {
+        this.connection
+          .send(new ServerboundMovePlayerPosRotPacket(this.x(), this.y(), this.z(), this.getYRot(), this.getXRot(), this.onGround()));
+      } else if (bl2) {
+        this.connection.send(new ServerboundMovePlayerPosPacket(this.x(), this.y(), this.z(), this.onGround()));
+      } else if (bl3) {
+        this.connection.send(new ServerboundMovePlayerRotPacket(this.getYRot(), this.getXRot(), this.onGround()));
+      } else if (this.lastOnGround != this.onGround()) {
+        this.connection.send(new ServerboundMovePlayerStatusOnlyPacket(this.onGround()));
+      }
+
+      if (bl2) {
+        this.xLast = this.x();
+        this.yLast1 = this.y();
+        this.zLast = this.z();
+        this.positionReminder = 0;
+      }
+
+      if (bl3) {
+        this.yRotLast = this.getYRot();
+        this.xRotLast = this.getXRot();
+      }
+
+      this.lastOnGround = this.onGround();
+    }
+  }
+
+  private void sendIsSprintingIfNeeded() {
+    boolean bl = this.isSprinting();
+    if (bl != this.wasSprinting) {
+      this.connection.send(new ServerboundPlayerCommandPacket(entityId(), bl
+        ? PlayerState.START_SPRINTING
+        : PlayerState.STOP_SPRINTING));
+      this.wasSprinting = bl;
     }
   }
 
@@ -142,55 +153,6 @@ public class ClientEntity extends Entity {
     } else {
       return 1.62F;
     }
-  }
-
-  public void sendPosRot() {
-    var onGround = movementState.onGround;
-
-    lastOnGround = onGround;
-
-    lastX = x;
-    lastY = y;
-    lastZ = z;
-    positionReminder = 0;
-
-    lastYaw = yaw;
-    lastPitch = pitch;
-
-    connection.sendPacket(
-      new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
-  }
-
-  public void sendPos() {
-    var onGround = movementState.onGround;
-
-    lastOnGround = onGround;
-
-    lastX = x;
-    lastY = y;
-    lastZ = z;
-    positionReminder = 0;
-
-    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
-  }
-
-  public void sendRot() {
-    var onGround = movementState.onGround;
-
-    lastOnGround = onGround;
-
-    lastYaw = yaw;
-    lastPitch = pitch;
-
-    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
-  }
-
-  public void sendOnGround() {
-    var onGround = movementState.onGround;
-
-    lastOnGround = onGround;
-
-    connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
   }
 
   public AbilitiesData abilities() {

@@ -93,9 +93,9 @@ public class ItemPlaceHelper {
       var cost =
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
-            dataManager.clientEntity(),
+            dataManager.localPlayer(),
             dataManager.inventoryManager().playerInventory(),
-            dataManager.clientEntity().onGround(),
+            dataManager.localPlayer().onGround(),
             slotItem,
             optionalBlockType)
           .ticks();

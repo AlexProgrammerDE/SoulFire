@@ -21,7 +21,6 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.data.TagKey;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
@@ -30,6 +29,7 @@ import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -170,6 +170,18 @@ public abstract class Entity {
 
   public Vector3i blockPos() {
     return Vector3i.from(x, y, z);
+  }
+
+  public int blockX() {
+    return GenericMath.floor(x);
+  }
+
+  public int blockY() {
+    return GenericMath.floor(y);
+  }
+
+  public int blockZ() {
+    return GenericMath.floor(z);
   }
 
   public Vector3d pos() {

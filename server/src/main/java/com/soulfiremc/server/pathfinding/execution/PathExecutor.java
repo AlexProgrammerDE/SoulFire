@@ -61,7 +61,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer, PathConstraint pathConstraint) {
     var logger = bot.logger();
     var dataManager = bot.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.localPlayer();
 
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
@@ -69,7 +69,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
           .chunks()
           .immutableCopy();
         var inventory =
-          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(), pathConstraint);
+          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.localPlayer(), pathConstraint);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =
@@ -183,7 +183,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
       return;
     }
 
-    if (SFVec3i.fromDouble(connection.dataManager().clientEntity().pos())
+    if (SFVec3i.fromDouble(connection.dataManager().localPlayer().pos())
       .distance(worldAction.targetPosition(connection)) > MAX_ERROR_DISTANCE) {
       connection.logger().warn("More than {} blocks away from target, this must be a mistake!", MAX_ERROR_DISTANCE);
       connection.logger().warn("Recalculating path...");
@@ -234,7 +234,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = true;
-    connection.dataManager().clientEntity().controlState().incrementActivelyControlling();
+    connection.dataManager().localPlayer().controlState().incrementActivelyControlling();
     connection.registerListener(BotPreTickEvent.class, this);
   }
 
@@ -244,7 +244,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = false;
-    connection.dataManager().clientEntity().controlState().decrementActivelyControlling();
+    connection.dataManager().localPlayer().controlState().decrementActivelyControlling();
     connection.registerListener(BotPreTickEvent.class, this);
   }
 

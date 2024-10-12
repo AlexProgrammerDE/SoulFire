@@ -72,18 +72,13 @@ public class ChunkHolder implements BlockAccessor {
     }
   }
 
-  public boolean isChunkLoaded(int x, int z) {
+  public boolean isChunkLoaded(int blockX, int blockZ) {
     TimeUtil.lockYielding(readLock);
     try {
-      return chunks.containsKey(ChunkKey.calculateKey(x, z));
+      return chunks.containsKey(ChunkKey.calculateKey(SectionUtils.blockToSection(blockX), SectionUtils.blockToSection(blockZ)));
     } finally {
       readLock.unlock();
     }
-  }
-
-  public boolean isChunkLoaded(Vector3i block) {
-    return isChunkLoaded(
-      SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
   }
 
   public void removeChunk(int x, int z) {

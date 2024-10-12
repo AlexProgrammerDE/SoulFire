@@ -80,15 +80,15 @@ public class InventoryManager {
   }
 
   public void sendHeldItemChange() {
-    connection.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
+    connection.send(new ServerboundSetCarriedItemPacket(heldItemSlot));
   }
 
   public void closeInventory() {
     if (openContainer != null) {
-      connection.sendPacket(new ServerboundContainerClosePacket(openContainer.id()));
+      connection.send(new ServerboundContainerClosePacket(openContainer.id()));
       openContainer = null;
     } else {
-      connection.sendPacket(new ServerboundContainerClosePacket(0));
+      connection.send(new ServerboundContainerClosePacket(0));
     }
   }
 
@@ -138,7 +138,7 @@ public class InventoryManager {
     Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
     changes.put(slot, slotItem);
 
-    connection.sendPacket(
+    connection.send(
       new ServerboundContainerClickPacket(
         openContainer.id(),
         lastStateId,
@@ -168,7 +168,7 @@ public class InventoryManager {
         hasChanged = true;
 
         // Remove the old item's modifiers
-        dataManager.clientEntity().attributeState().removeItemModifiers(previousItem, equipmentSlot);
+        dataManager.localPlayer().attributeState().removeItemModifiers(previousItem, equipmentSlot);
       } else {
         // Item before, and we have the same one now
         hasChanged = false;
@@ -179,7 +179,7 @@ public class InventoryManager {
     }
 
     if (hasChanged && item != null) {
-      dataManager.clientEntity().attributeState().putItemModifiers(item, equipmentSlot);
+      dataManager.localPlayer().attributeState().putItemModifiers(item, equipmentSlot);
     }
 
     lastInEquipment.put(equipmentSlot, item);

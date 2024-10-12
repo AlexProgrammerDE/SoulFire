@@ -91,7 +91,7 @@ public class BotActionManager {
 
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
-    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yaw(), dataManager.clientEntity().pitch()));
+    connection.send(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.localPlayer().yaw(), dataManager.localPlayer().pitch()));
   }
 
   public void placeBlock(Hand hand, BlockPlaceAgainstData blockPlaceAgainstData) {
@@ -100,7 +100,7 @@ public class BotActionManager {
 
   public void placeBlock(Hand hand, Vector3i againstBlock, BlockFace againstFace) {
     incrementSequenceNumber();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.localPlayer();
     var level = dataManager.currentLevel();
 
     var eyePosition = clientEntity.eyePosition();
@@ -127,7 +127,7 @@ public class BotActionManager {
     var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
     var insideBlock = !level.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
-    connection.sendPacket(
+    connection.send(
       new ServerboundUseItemOnPacket(
         againstBlock,
         againstFace.toDirection(),
@@ -141,20 +141,20 @@ public class BotActionManager {
 
   public void sendStartBreakBlock(Vector3i blockPos, Direction direction) {
     incrementSequenceNumber();
-    connection.sendPacket(
+    connection.send(
       new ServerboundPlayerActionPacket(
         PlayerAction.START_DIGGING, blockPos, direction, sequenceNumber));
   }
 
   public void sendEndBreakBlock(Vector3i blockPos, Direction direction) {
     incrementSequenceNumber();
-    connection.sendPacket(
+    connection.send(
       new ServerboundPlayerActionPacket(
         PlayerAction.FINISH_DIGGING, blockPos, direction, sequenceNumber));
   }
 
   public void sendBreakBlockAnimation() {
-    connection.sendPacket(new ServerboundSwingPacket(Hand.MAIN_HAND));
+    connection.send(new ServerboundSwingPacket(Hand.MAIN_HAND));
   }
 
   public record BlockPlaceAgainstData(SFVec3i againstPos, BlockFace blockFace) {}
