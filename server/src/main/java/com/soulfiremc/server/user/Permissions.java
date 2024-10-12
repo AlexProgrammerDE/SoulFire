@@ -38,6 +38,8 @@ public class Permissions {
     new Permission("soulfire.subscribe_logs", "Allows the client to subscribe to logs");
   public static final Permission SERVER_CONFIG =
     new Permission("soulfire.server_config", "Allows the client to view server configuration");
+  public static final Permission DOWNLOAD_URL =
+    new Permission("soulfire.download_url", "Allows the client to download data through the server from arbitrary URLs");
 
   private Permissions() {
   }

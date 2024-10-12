@@ -107,6 +107,7 @@ public class RPCServer {
         .addService(injector.getSingleton(InstanceServiceImpl.class))
         .addService(injector.getSingleton(MCAuthServiceImpl.class))
         .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
+        .addService(injector.getSingleton(DownloadServiceImpl.class))
         // Allow collecting info about callable methods.
         .addService(ProtoReflectionService.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)

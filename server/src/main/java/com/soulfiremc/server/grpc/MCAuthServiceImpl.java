@@ -20,7 +20,6 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
@@ -28,26 +27,19 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
-  private static @Nullable SFProxy convertProxy(BooleanSupplier hasProxy, Supplier<ProxyProto> proxy) {
-    return hasProxy.getAsBoolean() ? SFProxy.fromProto(proxy.get()) : null;
-  }
-
   @Override
   public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
     try {
       var service = MCAuthService.convertService(request.getService());
-      var proxy = convertProxy(request::hasProxy, request::getProxy);
+      var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);
       var results = SFHelpers.maxFutures(request.getMaxConcurrency(), request.getPayloadList(), payload ->
         service.createDataAndLogin(payload, proxy).thenApply(MinecraftAccount::toProto));
 
@@ -74,7 +66,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
                 .build()
             ).build()
           ),
-        convertProxy(request::hasProxy, request::getProxy))
+        RPCUtils.convertProxy(request::hasProxy, request::getProxy))
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -93,7 +85,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
       var account = MCAuthService.convertService(request.getAccount().getType()).refresh(receivedAccount,
-        convertProxy(request::hasProxy, request::getProxy)).join();
+        RPCUtils.convertProxy(request::hasProxy, request::getProxy)).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

@@ -7,15 +7,20 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
+message HeaderPair {
+  string key = 1;
+  string value = 2;
+}
+
 message DownloadRequest {
-  string url = 1;
-  map<string, string> headers = 2;
+  string uri = 1;
+  repeated HeaderPair headers = 2;
   optional ProxyProto proxy = 3;
 }
 
 message DownloadResponse {
   bytes data = 1;
-  map<string, string> headers = 2;
+  repeated HeaderPair headers = 2;
   int32 status_code = 3;
 }
 
