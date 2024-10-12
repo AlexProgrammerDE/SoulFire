@@ -44,7 +44,7 @@ public class SFSessionService {
   public SFSessionService(AuthType authType, SFProxy proxyData) {
     this.joinEndpoint =
       switch (authType) {
-        case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE -> MOJANG_JOIN_URI;
+        case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
         case THE_ALTENING -> THE_ALTENING_JOIN_URI;
         case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Invalid auth type");
       };

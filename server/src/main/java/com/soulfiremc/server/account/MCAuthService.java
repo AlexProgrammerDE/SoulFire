@@ -27,13 +27,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public sealed interface MCAuthService<I, T>
-  permits MSBedrockCredentialsAuthService, MSBedrockDeviceCodeAuthService, MSJavaCredentialsAuthService, MSJavaDeviceCodeAuthService, OfflineAuthService, TheAlteningAuthService {
+  permits MSBedrockCredentialsAuthService, MSBedrockDeviceCodeAuthService, MSJavaCredentialsAuthService, MSJavaDeviceCodeAuthService, MSJavaRefreshTokenAuthService, OfflineAuthService, TheAlteningAuthService {
   static MCAuthService<String, ?> convertService(AccountTypeCredentials service) {
     return switch (service) {
       case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
       case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;
+      case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
@@ -54,6 +55,7 @@ public sealed interface MCAuthService<I, T>
       case OFFLINE -> OfflineAuthService.INSTANCE;
       case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
+      case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
@@ -66,6 +68,7 @@ public sealed interface MCAuthService<I, T>
       case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
       case THE_ALTENING -> TheAlteningAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;
+      case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
     };
   }
 

@@ -54,8 +54,8 @@ public final class MSBedrockCredentialsAuthService
       throw new IllegalArgumentException("Invalid data!");
     }
 
-    var email = split[0].trim();
-    var password = split[1].trim();
+    var email = split[0].strip();
+    var password = split[1].strip();
     if (!EmailValidator.getInstance().isValid(email)) {
       throw new IllegalArgumentException("Invalid email!");
     }

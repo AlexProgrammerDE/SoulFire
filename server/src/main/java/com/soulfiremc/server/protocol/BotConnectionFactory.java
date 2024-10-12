@@ -18,12 +18,12 @@
 package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
-import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.BotSettings;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;

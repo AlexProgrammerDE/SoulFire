@@ -48,7 +48,7 @@ public class JwtServerInterceptor implements ServerInterceptor {
     } else {
       Jws<Claims> claims = null;
       // remove authorization type prefix
-      var token = value.substring(RPCConstants.BEARER_TYPE.length()).trim();
+      var token = value.substring(RPCConstants.BEARER_TYPE.length()).strip();
       try {
         // verify token signature and parse claims
         claims = parser.parseSignedClaims(token);

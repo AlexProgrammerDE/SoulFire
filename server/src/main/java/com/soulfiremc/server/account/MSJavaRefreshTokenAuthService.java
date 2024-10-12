@@ -21,25 +21,24 @@ import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
-import org.apache.commons.validator.routines.EmailValidator;
+import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class MSJavaCredentialsAuthService
-  implements MCAuthService<String, MSJavaCredentialsAuthService.MSJavaCredentialsAuthData> {
-  public static final MSJavaCredentialsAuthService INSTANCE = new MSJavaCredentialsAuthService();
+public final class MSJavaRefreshTokenAuthService
+  implements MCAuthService<String, MSJavaRefreshTokenAuthService.MSJavaRefreshTokenAuthData> {
+  public static final MSJavaRefreshTokenAuthService INSTANCE = new MSJavaRefreshTokenAuthService();
 
-  private MSJavaCredentialsAuthService() {}
+  private MSJavaRefreshTokenAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaCredentialsAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, SFProxy proxyData) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_CREDENTIALS, flow, flow.getFromInput(
+        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, flow, flow.getFromInput(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password)));
+          new StepMsaToken.RefreshToken(data.refreshToken)));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -47,20 +46,8 @@ public final class MSJavaCredentialsAuthService
   }
 
   @Override
-  public MSJavaCredentialsAuthData createData(String data) {
-    var split = data.split(":");
-
-    if (split.length != 2) {
-      throw new IllegalArgumentException("Invalid data!");
-    }
-
-    var email = split[0].strip();
-    var password = split[1].strip();
-    if (!EmailValidator.getInstance().isValid(email)) {
-      throw new IllegalArgumentException("Invalid email!");
-    }
-
-    return new MSJavaCredentialsAuthData(email, password);
+  public MSJavaRefreshTokenAuthData createData(String data) {
+    return new MSJavaRefreshTokenAuthData(data.strip());
   }
 
   @Override
@@ -69,7 +56,7 @@ public final class MSJavaCredentialsAuthService
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_CREDENTIALS, flow, flow.refresh(
+        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, flow, flow.refresh(
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullJavaSession));
       } catch (Exception e) {
@@ -90,5 +77,5 @@ public final class MSJavaCredentialsAuthService
     return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpiredOrOutdated();
   }
 
-  public record MSJavaCredentialsAuthData(String email, String password) {}
+  public record MSJavaRefreshTokenAuthData(String refreshToken) {}
 }

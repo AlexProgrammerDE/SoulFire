@@ -25,6 +25,7 @@ enum AccountTypeCredentials {
   MICROSOFT_BEDROCK_CREDENTIALS = 1;
   THE_ALTENING = 3;
   OFFLINE = 4;
+  MICROSOFT_JAVA_REFRESH_TOKEN = 5;
 }
 
 enum AccountTypeDeviceCode {
@@ -40,6 +41,7 @@ message MinecraftAccountProto {
     OFFLINE = 4;
     MICROSOFT_JAVA_DEVICE_CODE = 5;
     MICROSOFT_BEDROCK_DEVICE_CODE = 6;
+    MICROSOFT_JAVA_REFRESH_TOKEN = 7;
   }
 
   message OnlineSimpleJavaData {

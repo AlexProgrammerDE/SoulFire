@@ -18,9 +18,9 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.PropertyKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
