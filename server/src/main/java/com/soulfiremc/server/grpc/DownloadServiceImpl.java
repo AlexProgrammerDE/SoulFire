@@ -41,7 +41,7 @@ public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImpl
 
     try {
       var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);
-      responseObserver.onNext(ReactorHttpHelper.createReactorClient(proxy, false)
+      ReactorHttpHelper.createReactorClient(proxy, false)
         .headers(h -> request.getHeadersList().forEach(header -> h.set(header.getKey(), header.getValue())))
         .get()
         .uri(URI.create(request.getUri()))
@@ -59,12 +59,16 @@ public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImpl
                       .build()).toList())
                     .setStatusCode(res.status().code())
                     .build()))
-        .toFuture()
-        .join()
-      );
+        .subscribe(response -> {
+          responseObserver.onNext(response);
+          responseObserver.onCompleted();
+        }, t -> {
+          log.error("Error downloading data", t);
+          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
+        });
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error authenticating account", t);
+      log.error("Error downloading data", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
