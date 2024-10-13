@@ -63,8 +63,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     var dataManager = bot.dataManager();
     var clientEntity = dataManager.clientEntity();
 
-    var pathCompletionFuture = new CompletableFuture<Void>();
-
     Boolean2ObjectFunction<List<WorldAction>> findPath =
       requiresRepositioning -> {
         var level = dataManager.currentLevel()
@@ -80,20 +78,13 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         logger.info("Starting calculations at: {}", start.formatXYZ());
         var actionsFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory), requiresRepositioning);
         bot.shutdownHooks().add(() -> actionsFuture.cancel(true));
-        while (!actionsFuture.isDone()) {
-          if (pathCompletionFuture.isDone()) {
-            actionsFuture.cancel(true);
-            return List.of();
-          }
-
-          TimeUtil.waitTime(1, TimeUnit.MILLISECONDS);
-        }
-
         var actions = actionsFuture.join();
         logger.info("Calculated path with {} actions: {}", actions.size(), actions);
 
         return actions;
       };
+
+    var pathCompletionFuture = new CompletableFuture<Void>();
 
     // Cancel the path if the bot is disconnected
     bot.shutdownHooks().add(() -> pathCompletionFuture.cancel(true));
