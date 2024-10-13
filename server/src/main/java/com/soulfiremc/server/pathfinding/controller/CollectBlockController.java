@@ -51,12 +51,14 @@ public class CollectBlockController {
     var list = new HashSet<SFVec3i>();
     for (var x = -radius; x <= radius; x++) {
       for (var z = -radius; z <= radius; z++) {
-        if (!level.isChunkPositionLoaded(x, z)) {
+        var blockX = rootPosition.x + x;
+        var blockZ = rootPosition.z + z;
+        if (!level.isChunkPositionLoaded(blockX, blockZ)) {
           continue;
         }
 
         for (var y = minY; y <= maxY; y++) {
-          var blockPos = rootPosition.add(x, y, z);
+          var blockPos = new SFVec3i(blockX, y, blockZ);
           var blockState = level.getBlockState(blockPos);
           if (!blockState.blockType().air() && checker.test(blockState)) {
             list.add(blockPos);
