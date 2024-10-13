@@ -72,34 +72,33 @@ public class ChunkHolder implements BlockAccessor {
     }
   }
 
-  public boolean isChunkLoaded(int x, int z) {
+  public boolean isChunkSectionLoaded(int sectionX, int sectionZ) {
     TimeUtil.lockYielding(readLock);
     try {
-      return chunks.containsKey(ChunkKey.calculateKey(x, z));
+      return chunks.containsKey(ChunkKey.calculateKey(sectionX, sectionZ));
     } finally {
       readLock.unlock();
     }
   }
 
-  public boolean isChunkLoaded(Vector3i block) {
-    return isChunkLoaded(
-      SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
+  public boolean isChunkPositionLoaded(int blockX, int blockZ) {
+    return isChunkSectionLoaded(SectionUtils.blockToSection(blockX), SectionUtils.blockToSection(blockZ));
   }
 
-  public void removeChunk(int x, int z) {
+  public void removeChunkSection(int sectionX, int sectionZ) {
     TimeUtil.lockYielding(writeLock);
     try {
-      chunks.remove(ChunkKey.calculateKey(x, z));
+      chunks.remove(ChunkKey.calculateKey(sectionX, sectionZ));
     } finally {
       writeLock.unlock();
     }
   }
 
-  public ChunkData getOrCreateChunk(int x, int z) {
+  public ChunkData getOrCreateChunkSection(int sectionX, int sectionZ) {
     TimeUtil.lockYielding(writeLock);
     try {
       return chunks.computeIfAbsent(
-        ChunkKey.calculateKey(x, z), (key) -> new ChunkData(levelHeightAccessor, false));
+        ChunkKey.calculateKey(sectionX, sectionZ), (key) -> new ChunkData(levelHeightAccessor, false));
     } finally {
       writeLock.unlock();
     }

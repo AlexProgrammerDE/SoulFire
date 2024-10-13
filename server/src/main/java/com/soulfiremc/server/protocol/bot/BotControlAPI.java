@@ -33,7 +33,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.InteractAction;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
@@ -295,7 +294,8 @@ public class BotControlAPI {
       return false;
     }
 
-    if (!level.isChunkLoaded(Vector3i.from(vec.getX(), vec.getY(), vec.getZ()))) {
+    var blockVec = vec.toInt();
+    if (!level.isChunkPositionLoaded(blockVec.getX(), blockVec.getZ())) {
       return false;
     }
 

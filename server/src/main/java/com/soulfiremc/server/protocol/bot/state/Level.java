@@ -89,8 +89,8 @@ public class Level implements LevelHeightAccessor {
     chunkData.setBlock(block, stateId);
   }
 
-  public boolean isChunkLoaded(Vector3i block) {
-    return chunks.isChunkLoaded(block);
+  public boolean isChunkPositionLoaded(int blockX, int blockZ) {
+    return chunks.isChunkPositionLoaded(blockX, blockZ);
   }
 
   public BlockState getBlockState(Vector3i block) {

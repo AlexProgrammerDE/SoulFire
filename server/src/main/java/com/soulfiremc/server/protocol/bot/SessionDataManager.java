@@ -659,7 +659,7 @@ public final class SessionDataManager {
     var data = packet.getChunkData();
     var buf = Unpooled.wrappedBuffer(data);
 
-    var chunkData = level.chunks().getOrCreateChunk(packet.getX(), packet.getZ());
+    var chunkData = level.chunks().getOrCreateChunkSection(packet.getX(), packet.getZ());
 
     try {
       for (var i = 0; i < chunkData.getSectionCount(); i++) {
@@ -695,7 +695,7 @@ public final class SessionDataManager {
   @EventHandler
   public void onChunkForget(ClientboundForgetLevelChunkPacket packet) {
     var level = currentLevel();
-    level.chunks().removeChunk(packet.getX(), packet.getZ());
+    level.chunks().removeChunkSection(packet.getX(), packet.getZ());
   }
 
   @EventHandler

@@ -169,7 +169,19 @@ public abstract class Entity {
   }
 
   public Vector3i blockPos() {
-    return Vector3i.from(x, y, z);
+    return Vector3i.from(blockX(), blockY(), blockZ());
+  }
+
+  public int blockX() {
+    return MathHelper.floorDouble(x);
+  }
+
+  public int blockY() {
+    return MathHelper.floorDouble(y);
+  }
+
+  public int blockZ() {
+    return MathHelper.floorDouble(z);
   }
 
   public Vector3d pos() {

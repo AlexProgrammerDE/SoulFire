@@ -82,7 +82,7 @@ public class ClientEntity extends Entity {
     movementState.updateData();
 
     // Tick physics movement
-    if (level.isChunkLoaded(this.blockPos())) {
+    if (level.isChunkPositionLoaded(this.blockX(), this.blockZ())) {
       botMovementManager.tick();
     }
 

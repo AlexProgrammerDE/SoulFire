@@ -41,21 +41,24 @@ public class CollectBlockController {
   private final int maxRadius;
   private int collectedAmount;
 
-  public static Set<SFVec3i> searchWithinRadiusLayered(BotConnection botConnection, Predicate<BlockState> checker, int radius) {
+  public static Set<SFVec3i> searchWithinRadius(BotConnection botConnection, Predicate<BlockState> checker, int radius) {
     var clientEntity = botConnection.dataManager().clientEntity();
     var level = clientEntity.level();
     var rootPosition = SFVec3i.fromInt(clientEntity.pos().toInt());
 
+    var minY = Math.max(level.getMinBuildHeight(), rootPosition.y - radius);
+    var maxY = Math.min(level.getMaxBuildHeight() - 1, rootPosition.y + radius);
     var list = new HashSet<SFVec3i>();
-    for (var y = -radius; y <= radius; y++) {
-      if (level.isOutsideBuildHeight(rootPosition.y + y)) {
-        continue;
-      }
+    for (var x = -radius; x <= radius; x++) {
+      for (var z = -radius; z <= radius; z++) {
+        if (!level.isChunkPositionLoaded(x, z)) {
+          continue;
+        }
 
-      for (var x = -radius; x <= radius; x++) {
-        for (var z = -radius; z <= radius; z++) {
+        for (var y = minY; y <= maxY; y++) {
           var blockPos = rootPosition.add(x, y, z);
-          if (checker.test(level.getBlockState(blockPos))) {
+          var blockState = level.getBlockState(blockPos);
+          if (!blockState.blockType().air() && checker.test(blockState)) {
             list.add(blockPos);
           }
         }
@@ -67,8 +70,10 @@ public class CollectBlockController {
 
   public void start(BotConnection bot) {
     while (collectedAmount < requestedAmount) {
-      log.info("Searching for blocks to collect");
-      var blockPos = searchWithinRadiusLayered(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius);
+      log.info("Collecting block {}/{}", collectedAmount, requestedAmount);
+
+      log.info("Searching for block within radius {}", maxRadius);
+      var blockPos = searchWithinRadius(bot, blockState -> blockTypeChecker.test(blockState.blockType()), maxRadius);
 
       if (blockPos.isEmpty()) {
         throw new IllegalStateException("Could not find matching block within radius " + maxRadius);
