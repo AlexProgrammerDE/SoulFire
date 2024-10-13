@@ -66,7 +66,6 @@ public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImpl
           log.error("Error downloading data", t);
           responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
         });
-      responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error downloading data", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
