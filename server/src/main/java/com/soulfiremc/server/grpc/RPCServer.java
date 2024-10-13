@@ -25,6 +25,7 @@ import com.linecorp.armeria.common.SessionProtocol;
 import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
+import com.linecorp.armeria.common.logging.LogFormatter;
 import com.linecorp.armeria.common.logging.LogLevel;
 import com.linecorp.armeria.common.logging.LogWriter;
 import com.linecorp.armeria.common.prometheus.PrometheusMeterRegistries;
@@ -130,6 +131,9 @@ public class RPCServer {
 
               return null;
             })
+            .logFormatter(LogFormatter.builderForText()
+              .contentSanitizer((requestContext, o) -> "****")
+              .build())
             .build())
           .newDecorator())
         .service(grpcService,
