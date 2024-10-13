@@ -114,7 +114,7 @@ public class Costs {
     SFItemStack bestItem = null;
     var willDropUsableBlockItem = false;
     for (var slot : inventory.usableToolsAndNull()) {
-      var miningTicks = getRequiredMiningTicks(tagsState, entity, playerInventory, true, slot, blockType);
+      var miningTicks = getRequiredMiningTicks(tagsState, entity, true, slot, blockType);
       if (miningTicks.ticks() < lowestMiningTicks) {
         lowestMiningTicks = miningTicks.ticks();
         bestItem = slot;
@@ -135,14 +135,13 @@ public class Costs {
   public static TickResult getRequiredMiningTicks(
     TagsState tagsState,
     @Nullable ClientEntity entity,
-    @Nullable PlayerInventoryContainer inventoryContainer,
     boolean onGround,
     @Nullable SFItemStack itemStack,
     BlockType blockType) {
     var correctToolUsed = isCorrectToolUsed(tagsState, itemStack, blockType);
 
     // If this value adds up over all ticks to 1, the block is fully mined
-    var damage = getBlockDamagePerTick(tagsState, entity, inventoryContainer, onGround, itemStack, blockType);
+    var damage = getBlockDamagePerTick(tagsState, entity, onGround, itemStack, blockType);
 
     var creativeMode = entity != null && entity.abilities().creativeModeBreak();
     var willDropUsableBlockItem = correctToolUsed && !creativeMode && BlockTypeHelper.isUsableBlockItem(blockType);
@@ -157,7 +156,6 @@ public class Costs {
 
   private static float getBlockDamagePerTick(TagsState tagsState,
                                              @Nullable ClientEntity entity,
-                                             @Nullable PlayerInventoryContainer inventoryContainer,
                                              boolean onGround,
                                              @Nullable SFItemStack itemStack,
                                              BlockType blockType) {
@@ -171,14 +169,13 @@ public class Costs {
       return 0.0F;
     } else {
       var currentToolDivision = isCorrectToolUsed(tagsState, itemStack, blockType) ? 30 : 100;
-      return getPlayerBlockDamagePerTick(tagsState, entity, inventoryContainer, onGround, itemStack, blockType)
+      return getPlayerBlockDamagePerTick(tagsState, entity, onGround, itemStack, blockType)
         / blockDestroyTime / (float) currentToolDivision;
     }
   }
 
   private static float getPlayerBlockDamagePerTick(TagsState tagsState,
                                                    @Nullable ClientEntity entity,
-                                                   @Nullable PlayerInventoryContainer inventoryContainer,
                                                    boolean onGround,
                                                    @Nullable SFItemStack itemStack,
                                                    BlockType blockType) {

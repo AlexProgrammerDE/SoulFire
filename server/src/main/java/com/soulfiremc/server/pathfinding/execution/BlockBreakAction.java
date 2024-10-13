@@ -100,7 +100,6 @@ public final class BlockBreakAction implements WorldAction {
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
             dataManager.clientEntity(),
-            dataManager.inventoryManager().playerInventory(),
             clientEntity.onGround(),
             dataManager.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
