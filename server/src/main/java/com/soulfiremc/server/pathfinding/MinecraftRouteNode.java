@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding;
 
+import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,28 +50,45 @@ public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   private double sourceCost;
 
   /**
-   * The estimated cost of the route from this node to the target.
+   * The cost of the route from this node to the target.
+   */
+  private double targetCost;
+
+  /**
+   * The estimated cost of the route from this node to the target + the source cost.
    */
   private double totalRouteScore;
 
   public MinecraftRouteNode(NodeState node, List<WorldAction> actions,
-                            double sourceCost, double totalRouteScore) {
-    this.node = node;
-    this.parent = null;
-    this.actions = actions;
-    this.sourceCost = sourceCost;
-    this.totalRouteScore = totalRouteScore;
+                            double sourceCost, double targetCost,
+                            double totalRouteScore) {
+    this(
+      node,
+      null,
+      actions,
+      sourceCost,
+      targetCost,
+      totalRouteScore
+    );
   }
 
   @Override
   public int compareTo(MinecraftRouteNode other) {
-    return Double.compare(this.totalRouteScore, other.totalRouteScore);
+    var totalRouteComparison = DoubleMath.fuzzyCompare(this.totalRouteScore, other.totalRouteScore, 0.0001);
+    if (totalRouteComparison != 0) {
+      return totalRouteComparison;
+    }
+
+    return DoubleMath.fuzzyCompare(this.targetCost, other.targetCost, 0.0001);
   }
 
-  public void setBetterParent(MinecraftRouteNode parent, List<WorldAction> actions, double sourceCost, double totalRouteScore) {
+  public void setBetterParent(MinecraftRouteNode parent, List<WorldAction> actions,
+                              double sourceCost, double targetCost,
+                              double totalRouteScore) {
     this.parent = parent;
     this.actions = actions;
     this.sourceCost = sourceCost;
+    this.targetCost = targetCost;
     this.totalRouteScore = totalRouteScore;
   }
 }

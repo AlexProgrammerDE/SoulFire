@@ -102,6 +102,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             ? List.of(new MovementAction(from.blockPosition(), false))
             : List.of(),
           0,
+          startScore,
           startScore);
       routeIndex.put(from, start);
       openSet.enqueue(start);
@@ -167,6 +168,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               bestNode,
               List.of(new RecalculatePathAction()),
               bestNode.sourceCost(),
+              bestNode.targetCost(),
               bestNode.totalRouteScore()));
 
         if (recalculateTrace.size() == (requiresRepositioning ? 2 : 1)) {
@@ -194,7 +196,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     // Get distance from the current element
     // and add the distance from the current element to the next element
     var newSourceCost = current.sourceCost() + actionCost;
-    var newTotalRouteScore = newSourceCost + scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+    var newTargetCost = scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+    var newTotalRouteScore = newSourceCost + newTargetCost;
 
     routeIndex.compute(
       instructionNode,
@@ -207,6 +210,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               current,
               worldActions,
               newSourceCost,
+              newTargetCost,
               newTotalRouteScore);
 
           log.debug("Found a new node: {}", instructionNode);
@@ -222,6 +226,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             current,
             worldActions,
             newSourceCost,
+            newTargetCost,
             newTotalRouteScore);
 
           log.debug("Found a better route to node: {}", instructionNode);
