@@ -18,8 +18,11 @@
 package com.soulfiremc.generator;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.player.LocalPlayer;
 
 public class Main implements ModInitializer {
   @Override
-  public void onInitialize() {}
+  public void onInitialize() {
+    LocalPlayer
+  }
 }
