@@ -28,6 +28,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
+import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
@@ -681,6 +683,24 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               var builder = new StringBuilder("\n");
               for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
                 builder.append("| `%s` | %s |\n".formatted(command.command(), command.help()));
+              }
+              c.getSource().sendInfo(builder.toString());
+
+              return Command.SINGLE_SUCCESS;
+            })));
+    dispatcher.register(
+      literal("print-plugins")
+        .executes(
+          privateCommand(
+            c -> {
+              var builder = new StringBuilder("\n");
+              for (var plugin : SoulFireAPI.getServerExtensions()) {
+                if (!(plugin instanceof InternalPlugin)) {
+                  continue;
+                }
+
+                var pluginInfo = plugin.pluginInfo();
+                builder.append("| `%s` | `%s` | `%s` | `%s` | `%s` |\n".formatted(pluginInfo.id(), pluginInfo.version(), pluginInfo.author(), pluginInfo.license(), pluginInfo.description()));
               }
               c.getSource().sendInfo(builder.toString());
 
