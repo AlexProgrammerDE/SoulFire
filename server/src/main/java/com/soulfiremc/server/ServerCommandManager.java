@@ -649,30 +649,25 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
         .executes(
           privateCommand(
             c -> {
-              var yesEmoji = "✅";
-              var noEmoji = "❌";
-
               var builder = new StringBuilder("\n");
               ProtocolVersionList.getProtocolsNewToOld()
                 .forEach(
                   version -> {
                     var versionId = "%s\\|%d".formatted(version.getVersionType().name(), version.getOriginalVersion());
-                    var nativeVersion =
-                      SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
-                        ? yesEmoji
-                        : noEmoji;
-                    var bedrockVersion =
-                      SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                    var javaVersion =
-                      !SFVersionConstants.isBedrock(version) ? yesEmoji : noEmoji;
-                    var snapshotVersion =
-                      SFVersionConstants.isAprilFools(version) ? yesEmoji : noEmoji;
-                    var legacyVersion =
-                      SFVersionConstants.isLegacy(version) ? yesEmoji : noEmoji;
+                    String type;
+                    if (SFVersionConstants.isBedrock(version)) {
+                      type = "BEDROCK";
+                    } else if (SFVersionConstants.isLegacy(version)) {
+                      type = "LEGACY";
+                    } else if (SFVersionConstants.isAprilFools(version)) {
+                      type = "SNAPSHOT";
+                    } else {
+                      type = "JAVA";
+                    }
 
                     builder.append(
-                      "| `%s` | `%s` | %s | %s | %s | %s | %s |\n".formatted(version.getName(), versionId, nativeVersion, javaVersion,
-                        snapshotVersion, legacyVersion, bedrockVersion));
+                      "| `%s`%s | `%s` | `%s` |\n".formatted(version.getName(), SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
+                        ? " (native)" : "", versionId, type));
                   });
               c.getSource().sendInfo(builder.toString());
 
