@@ -645,7 +645,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   return exportMap(c, bot -> IntSet.of(mapId));
                 }))));
     dispatcher.register(
-      literal("generate-versions")
+      literal("print-versions")
         .executes(
           privateCommand(
             c -> {
@@ -674,7 +674,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               return Command.SINGLE_SUCCESS;
             })));
     dispatcher.register(
-      literal("generate-commands")
+      literal("print-commands")
         .executes(
           privateCommand(
             c -> {
