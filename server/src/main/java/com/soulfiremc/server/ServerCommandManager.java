@@ -700,7 +700,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 }
 
                 var pluginInfo = plugin.pluginInfo();
-                builder.append("| `%s` | `%s` | `%s` | `%s` | `%s` |\n".formatted(pluginInfo.id(), pluginInfo.version(), pluginInfo.author(), pluginInfo.license(), pluginInfo.description()));
+                builder.append("| `%s` | %s | %s | %s |\n".formatted(pluginInfo.id(), pluginInfo.description(), pluginInfo.author(), pluginInfo.license()));
               }
               c.getSource().sendInfo(builder.toString());
 
