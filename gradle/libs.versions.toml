@@ -2,7 +2,7 @@
 log4j = "2.24.1"
 grpc = "1.68.0"
 protobuf = "3.25.5"
-via-version = "5.0.4"
+via-version = "5.0.5"
 via-backwards = "5.0.4"
 via-rewind = "4.0.3"
 via-legacy = "3.0.3"
