@@ -19,6 +19,7 @@ package com.soulfiremc.launcher;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.MixinExtension;
+import com.soulfiremc.server.injection.SFDefaultMixinExtension;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CustomClassProvider;
@@ -43,6 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.stream.Stream;
 
 /**
  * This class prepares the earliest work possible, such as loading mixins and setting up logging.
@@ -148,8 +150,10 @@ public abstract class SoulFireAbstractBootstrap {
 
   private void injectMixinsAndRun(String[] args) {
     var mixinPaths = new HashSet<String>();
-    pluginManager
-      .getExtensions(MixinExtension.class)
+    Stream.concat(pluginManager
+          .getExtensions(MixinExtension.class)
+          .stream(),
+        Stream.of(new SFDefaultMixinExtension()))
       .forEach(
         mixinExtension -> {
           for (var mixinPath : mixinExtension.getMixinPaths()) {
