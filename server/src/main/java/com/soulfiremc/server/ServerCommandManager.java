@@ -682,7 +682,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             c -> {
               var builder = new StringBuilder("\n");
               for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
-                builder.append("| `%s` | %s |\n".formatted(command.command(), command.help()));
+                builder.append("| `%s{:bash}` | %s |\n".formatted(command.command(), command.help()));
               }
               c.getSource().sendInfo(builder.toString());
 
