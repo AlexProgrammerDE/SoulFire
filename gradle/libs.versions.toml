@@ -90,7 +90,7 @@ reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", ve
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
-junit = "org.junit.jupiter:junit-jupiter:5.11.2"
+junit = "org.junit.jupiter:junit-jupiter:5.11.3"
 
 [bundles]
 bom = ["netty-bom", "armeria-bom", "protobuf-bom"]
