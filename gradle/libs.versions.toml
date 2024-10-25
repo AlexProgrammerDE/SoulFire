@@ -45,7 +45,7 @@ datafixerupper = "com.mojang:datafixerupper:7.0.14"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
 mcprotocollib = { module = "com.github.AlexProgrammerDE:MCProtocolLib", version.ref = "mcprotocollib" }
-mcstructs = "net.lenni0451.mcstructs:all:2.5.3"
+mcstructs = "net.lenni0451.mcstructs:all:2.5.4"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
@@ -64,7 +64,7 @@ oshi = "com.github.oshi:oshi-core:6.6.5"
 guava = "com.google.guava:guava:33.3.1-jre"
 gson = "com.google.code.gson:gson:2.11.0"
 pf4j = "org.pf4j:pf4j:3.12.1"
-fastutil = "it.unimi.dsi:fastutil:8.5.14"
+fastutil = "it.unimi.dsi:fastutil:8.5.15"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.8"
 jetbrains-annotations = "org.jetbrains:annotations:26.0.1"
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
@@ -90,7 +90,7 @@ reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", ve
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
-junit = "org.junit.jupiter:junit-jupiter:5.11.2"
+junit = "org.junit.jupiter:junit-jupiter:5.11.3"
 
 [bundles]
 bom = ["netty-bom", "armeria-bom", "protobuf-bom"]
