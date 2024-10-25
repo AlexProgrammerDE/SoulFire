@@ -17,18 +17,18 @@
  */
 package com.soulfiremc.server.util.structs;
 
-import com.soulfiremc.server.util.FileSystemUtil;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SFContextClassLoader extends ClassLoader {
   @Getter
@@ -48,20 +48,29 @@ public class SFContextClassLoader extends ClassLoader {
     }
   }
 
-  private static URLClassLoader createLibClassLoader(Path libDir) {
+  private static ClassLoader createLibClassLoader(Path libDir) {
     var urls = new ArrayList<URL>();
-    try {
-      Files.createDirectories(libDir);
-      for (var entry : FileSystemUtil.getFilesInDirectory("/META-INF/lib").entrySet()) {
-        var fileName = entry.getKey().getFileName().toString();
-
-        var libFile = libDir.resolve(fileName);
-        Files.write(libFile, entry.getValue());
-        urls.add(libFile.toUri().toURL());
+    var dependencyListInput = ClassLoader.getSystemClassLoader().getResourceAsStream("META-INF/dependency-list.txt");
+    if (dependencyListInput != null) {
+      try {
+        Files.createDirectories(libDir);
+        for (var fileName : new String(dependencyListInput.readAllBytes(), StandardCharsets.UTF_8).split("\n")) {
+          var libFile = libDir.resolve(fileName);
+          try (var libInput = Objects.requireNonNull(
+            ClassLoader.getSystemClassLoader().getResourceAsStream(
+              "META-INF/lib/" + fileName
+            ),
+            "File not found: " + fileName
+          )) {
+            Files.write(libFile, libInput.readAllBytes());
+            urls.add(libFile.toUri().toURL());
+          }
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
-    } catch (IOException | URISyntaxException e) {
-      throw new RuntimeException(e);
     }
+
     return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
   }
 

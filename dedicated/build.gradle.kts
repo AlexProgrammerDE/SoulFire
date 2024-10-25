@@ -71,6 +71,18 @@ fun Manifest.applySFAttributes() {
 }
 
 tasks {
+  val generateDependencyList = register("generateDependencyList") {
+    val outputFile = layout.buildDirectory.file("dependency-list.txt")
+    outputs.file(outputFile)
+
+    doLast {
+      val dependencies = configurations.runtimeClasspath.get().files
+        .filter { it.name.endsWith("jar") }
+        .filter { !it.toString().contains("build/libs") }
+        .joinToString("\n") { it.name }
+      outputFile.get().asFile.writeText(dependencies)
+    }
+  }
   jar {
     archiveClassifier = "unshaded"
 
@@ -99,6 +111,9 @@ tasks {
         .filter { !it.toString().contains("build/libs") }
     }) {
       into("META-INF/lib")
+    }
+    from(generateDependencyList.get().outputs.files) {
+      into("META-INF")
     }
   }
   build {
