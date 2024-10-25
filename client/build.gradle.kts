@@ -101,6 +101,9 @@ fun Manifest.applySFAttributes() {
 
 tasks {
   val generateDependencyList = register("generateDependencyList") {
+    dependsOn(configurations.runtimeClasspath)
+    inputs.files(configurations.runtimeClasspath)
+
     val outputFile = layout.buildDirectory.file("dependency-list.txt")
     outputs.file(outputFile)
 
