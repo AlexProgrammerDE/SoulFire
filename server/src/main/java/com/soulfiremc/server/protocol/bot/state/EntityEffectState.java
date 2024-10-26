@@ -67,18 +67,8 @@ public class EntityEffectState {
         state.blend()));
   }
 
-  public boolean hasEffect(Effect effect) {
-    return effects.containsKey(effect);
-  }
-
   public int getEffectAmplifier(Effect effect) {
-    var state = effects.get(effect);
-
-    if (state == null) {
-      return 0;
-    }
-
-    return state.amplifier();
+    return getEffect(effect).map(EffectData::amplifier).orElse(0);
   }
 
   public void tick() {
