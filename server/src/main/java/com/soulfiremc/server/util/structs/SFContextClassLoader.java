@@ -20,7 +20,6 @@ package com.soulfiremc.server.util.structs;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -31,21 +30,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class SFContextClassLoader extends ClassLoader {
+  // Prevent infinite loop when plugins are looking for classes inside this class loader
+  private static final ThreadLocal<Boolean> PREVENT_LOOP = ThreadLocal.withInitial(() -> false);
   @Getter
   private final List<ClassLoader> childClassLoaders = new ArrayList<>();
-  private final Method findLoadedClassMethod;
   private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
-  // Prevent infinite loop when plugins are looking for classes inside this class loader
-  private boolean lookingThroughPlugins = false;
 
   public SFContextClassLoader(Path libDir) {
     super(createLibClassLoader(libDir));
-    try {
-      findLoadedClassMethod =
-        ClassLoader.class.getDeclaredMethod("loadClass", String.class, boolean.class);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private static ClassLoader createLibClassLoader(Path libDir) {
@@ -81,39 +73,44 @@ public class SFContextClassLoader extends ClassLoader {
       var c = findLoadedClass(name);
       if (c == null) {
         try {
-          return loadClassFromClassLoader(platformClassLoader, name, resolve);
+          c = platformClassLoader.loadClass(name);
         } catch (ClassNotFoundException ignored) {
           // Ignore
         }
 
-        // In the next step, we pretend we own the classes of either the parent or the child class
-        // loaders
-        var parentClassData = getClassBytes(this.getParent(), name);
-        if (parentClassData == null) {
-          if (lookingThroughPlugins) {
-            throw new ClassNotFoundException(name);
-          }
+        // In the next step, we pretend we own the classes
+        // of either the parent or the child classloaders
+        if (c == null) {
+          var parentClassData = getClassBytes(this.getParent(), name);
+          if (parentClassData == null) {
+            if (PREVENT_LOOP.get()) {
+              // This classloader -> plugin classloader -> delegates back to this classloader -> tries to get it from the plugin classloader again
+              // We don't want to loop infinitely
+              throw new ClassNotFoundException(name);
+            }
 
-          lookingThroughPlugins = true;
-
-          // Check if child class loaders can load the class
-          for (var childClassLoader : childClassLoaders) {
+            PREVENT_LOOP.set(true);
             try {
-              var pluginClass = loadClassFromClassLoader(childClassLoader, name, resolve);
-              if (pluginClass != null) {
-                lookingThroughPlugins = false;
-                return pluginClass;
+              // Check if child class loaders can load the class
+              for (var childClassLoader : childClassLoaders) {
+                try {
+                  var pluginClass = childClassLoader.loadClass(name);
+                  if (pluginClass != null) {
+                    return pluginClass;
+                  }
+                } catch (ClassNotFoundException ignored) {
+                  // Ignore
+                }
               }
-            } catch (ClassNotFoundException ignored) {
-              // Ignore
+
+              throw new ClassNotFoundException(name);
+            } finally {
+              PREVENT_LOOP.set(false);
             }
           }
 
-          lookingThroughPlugins = false;
-          throw new ClassNotFoundException(name);
+          c = defineClass(name, parentClassData, 0, parentClassData.length);
         }
-
-        c = defineClass(name, parentClassData, 0, parentClassData.length);
       }
 
       // Resolve the class if requested
@@ -122,32 +119,6 @@ public class SFContextClassLoader extends ClassLoader {
       }
 
       return c;
-    }
-  }
-
-  private Class<?> loadClassFromClassLoader(ClassLoader classLoader, String name, boolean resolve)
-    throws ClassNotFoundException {
-    try {
-      return (Class<?>)
-        getMethodsClass()
-          .getDeclaredMethod("invoke", Object.class, Method.class, Object[].class)
-          .invoke(null, classLoader, findLoadedClassMethod, new Object[]{name, resolve});
-    } catch (ReflectiveOperationException e) {
-      if (e.getCause() != null
-        && e.getCause().getCause() != null
-        && e.getCause().getCause() instanceof ClassNotFoundException cnfe) {
-        throw cnfe;
-      } else {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  private Class<?> getMethodsClass() throws ClassNotFoundException {
-    try {
-      return getParent().loadClass("net.lenni0451.reflect.Methods");
-    } catch (ClassNotFoundException e) {
-      return getClass().getClassLoader().loadClass("net.lenni0451.reflect.Methods");
     }
   }
 
