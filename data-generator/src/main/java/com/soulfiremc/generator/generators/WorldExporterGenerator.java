@@ -55,7 +55,7 @@ public class WorldExporterGenerator implements IDataGenerator {
          var jsonWriter = new JsonWriter(outputStreamWriter)) {
       var level = Objects.requireNonNull(MCHelper.getServer().getLevel(Level.OVERWORLD));
       var jsonObject = new JsonObject();
-      var minBuildHeight = level.getMinBuildHeight();
+      var minBuildHeight = level.getMinY();
       var definitionArray = new String[BuiltInRegistries.BLOCK.size()];
       for (var blockState : BuiltInRegistries.BLOCK) {
         definitionArray[BuiltInRegistries.BLOCK.getId(blockState)] =

@@ -56,8 +56,8 @@ public class DefaultPacksDataGenerator implements IDataGenerator {
     RegistryDataLoader.RegistryData<T> registryData,
     RegistryAccess registryAccess
   ) {
-    var registry = registryAccess.registry(registryData.key()).orElseThrow();
-    friendlyByteBuf.writeCollection(registry.holders().toList(), (buf, holder) -> {
+    var registry = registryAccess.lookupOrThrow(registryData.key());
+    friendlyByteBuf.writeCollection(registry.listElements().toList(), (buf, holder) -> {
       var holderPack = registry.registrationInfo(holder.key()).flatMap(RegistrationInfo::knownPackInfo).orElseThrow();
       var holderData = registryData.elementCodec()
         .encodeStart(ops, holder.value())

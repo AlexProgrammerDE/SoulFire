@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.soulfiremc.generator.util.MCHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 
@@ -63,7 +64,7 @@ public class EntitiesDataGenerator implements IDataGenerator {
       return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE));
     }
 
-    return entityType.create(MCHelper.getLevel());
+    return entityType.create(MCHelper.getLevel(), EntitySpawnReason.COMMAND);
   }
 
   @Override

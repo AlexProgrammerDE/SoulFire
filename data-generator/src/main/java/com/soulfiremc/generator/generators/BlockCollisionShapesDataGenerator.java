@@ -104,7 +104,7 @@ public class BlockCollisionShapesDataGenerator {
               blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 
             // Revert block offset
-            var blockShapeCenter = blockState.getOffset(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+            var blockShapeCenter = blockState.getOffset(BlockPos.ZERO);
             var inverseBlockShapeCenter = blockShapeCenter.reverse();
             blockShape =
               blockShape.move(

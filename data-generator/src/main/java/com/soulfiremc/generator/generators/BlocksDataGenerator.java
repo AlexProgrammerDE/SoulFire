@@ -28,7 +28,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -62,11 +61,11 @@ public class BlocksDataGenerator implements IDataGenerator {
       BuiltInRegistries.FLUID.getKey(defaultState.getFluidState().getType()).toString());
 
     JsonArray poolsArray;
-    var lootTableKey = block.getLootTable();
-    if (lootTableKey == BuiltInLootTables.EMPTY) {
+    var lootTable = block.getLootTable();
+    if (lootTable.isEmpty()) {
       poolsArray = new JsonArray();
     } else {
-      var lootTableFilePath = "/data/minecraft/loot_table/%s.json".formatted(block.getLootTable().location().getPath());
+      var lootTableFilePath = "/data/minecraft/loot_table/%s.json".formatted(lootTable.get().location().getPath());
       try (var in = Objects.requireNonNull(BlocksDataGenerator.class.getResourceAsStream(lootTableFilePath))) {
         var data = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         var dataJsonObject = GsonInstance.GSON.fromJson(data, JsonObject.class);
