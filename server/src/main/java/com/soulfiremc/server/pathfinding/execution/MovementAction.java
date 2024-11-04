@@ -33,7 +33,7 @@ public final class MovementAction implements WorldAction {
   // Corner jumps normally require you to stand closer to the block to jump
   private final boolean walkFewTicksNoJump;
   private boolean didLook = false;
-  private boolean lockYaw = false;
+  private boolean lockYRot = false;
   private int noJumpTicks = 0;
 
   @Override
@@ -71,20 +71,20 @@ public final class MovementAction implements WorldAction {
     var blockMeta = level.getBlockState(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
 
-    var previousYaw = clientEntity.yaw();
+    var previousYRot = clientEntity.yRot();
     clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
-    clientEntity.pitch(0);
-    var newYaw = clientEntity.yaw();
+    clientEntity.xRot(0);
+    var newYRot = clientEntity.yRot();
 
-    var yawDifference = Math.abs(MathHelper.wrapDegrees(newYaw - previousYaw));
+    var yRotDifference = Math.abs(MathHelper.wrapDegrees(newYRot - previousYRot));
 
-    // We should only set the yaw once to the server to prevent the bot looking weird due to
+    // We should only set the yRot once to the server to prevent the bot looking weird due to
     // inaccuracy
     if (!didLook) {
       didLook = true;
-    } else if (yawDifference > 5 || lockYaw) {
-      lockYaw = true;
-      clientEntity.lastYaw(newYaw);
+    } else if (yRotDifference > 5 || lockYRot) {
+      lockYRot = true;
+      clientEntity.lastYRot(newYRot);
     }
 
     clientEntity.controlState().forward(true);

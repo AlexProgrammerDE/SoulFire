@@ -35,9 +35,9 @@ public class RawEntity extends Entity {
   public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data,
                    Level level,
                    double x, double y, double z,
-                   float yaw, float pitch, float headYaw,
+                   float yRot, float xRot, float headYRot,
                    double motionX, double motionY, double motionZ) {
-    super(entityId, uuid, type, level, x, y, z, yaw, pitch, headYaw, motionX, motionY, motionZ);
+    super(entityId, uuid, type, level, x, y, z, yRot, xRot, headYRot, motionX, motionY, motionZ);
     this.data = data;
   }
 }

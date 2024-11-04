@@ -52,9 +52,9 @@ public abstract class Entity {
   protected double x;
   protected double y;
   protected double z;
-  protected float yaw;
-  protected float pitch;
-  protected float headYaw;
+  protected float yRot;
+  protected float xRot;
+  protected float headYRot;
   protected double motionX;
   protected double motionY;
   protected double motionZ;
@@ -63,7 +63,7 @@ public abstract class Entity {
   public Entity(int entityId, UUID uuid, EntityType entityType,
                 Level level,
                 double x, double y, double z,
-                float yaw, float pitch, float headYaw,
+                float yRot, float xRot, float headYRot,
                 double motionX, double motionY, double motionZ) {
     this.entityId = entityId;
     this.uuid = uuid;
@@ -72,12 +72,16 @@ public abstract class Entity {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.yaw = yaw;
-    this.pitch = pitch;
-    this.headYaw = headYaw;
+    this.yRot = yRot;
+    this.xRot = xRot;
+    this.headYRot = headYRot;
     this.motionX = motionX;
     this.motionY = motionY;
     this.motionZ = motionZ;
+  }
+
+  public void setPosition(Vector3d pos) {
+    setPosition(pos.getX(), pos.getY(), pos.getZ());
   }
 
   public void setPosition(double x, double y, double z) {
@@ -92,13 +96,13 @@ public abstract class Entity {
     this.z += deltaZ;
   }
 
-  public void setRotation(float yaw, float pitch) {
-    this.yaw = yaw;
-    this.pitch = pitch;
+  public void setRotation(float yRot, float xRot) {
+    this.yRot = yRot;
+    this.xRot = xRot;
   }
 
-  public void setHeadRotation(float headYaw) {
-    this.headYaw = headYaw;
+  public void setHeadRotation(float headYRot) {
+    this.headYRot = headYRot;
   }
 
   public void setMotion(double motionX, double motionY, double motionZ) {
@@ -145,9 +149,9 @@ public abstract class Entity {
 
     var sqr = Math.sqrt(dx * dx + dz * dz);
 
-    this.pitch =
+    this.xRot =
       MathHelper.wrapDegrees((float) (-(Math.atan2(dy, sqr) * 180.0F / (float) Math.PI)));
-    this.yaw =
+    this.yRot =
       MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
   }
 
@@ -160,11 +164,11 @@ public abstract class Entity {
   }
 
   public Vector3d rotationVector() {
-    var yawRadians = (float) Math.toRadians(yaw);
-    var pitchRadians = (float) Math.toRadians(pitch);
-    var x = -Math.sin(yawRadians) * Math.cos(pitchRadians);
-    var y = -Math.sin(pitchRadians);
-    var z = Math.cos(yawRadians) * Math.cos(pitchRadians);
+    var yRotRadians = (float) Math.toRadians(yRot);
+    var xRotRadians = (float) Math.toRadians(xRot);
+    var x = -Math.sin(yRotRadians) * Math.cos(xRotRadians);
+    var y = -Math.sin(xRotRadians);
+    var z = Math.cos(yRotRadians) * Math.cos(xRotRadians);
     return Vector3d.from(x, y, z);
   }
 

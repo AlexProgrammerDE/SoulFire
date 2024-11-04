@@ -91,7 +91,7 @@ public class BotActionManager {
 
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
-    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yaw(), dataManager.clientEntity().pitch()));
+    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yRot(), dataManager.clientEntity().xRot()));
   }
 
   public void placeBlock(Hand hand, BlockPlaceAgainstData blockPlaceAgainstData) {
@@ -107,10 +107,10 @@ public class BotActionManager {
 
     var againstPlacePosition = againstFace.getMiddleOfFace(SFVec3i.fromInt(againstBlock));
 
-    var previousYaw = clientEntity.yaw();
-    var previousPitch = clientEntity.pitch();
+    var previousYRot = clientEntity.yRot();
+    var previousXRot = clientEntity.xRot();
     clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
-    if (previousPitch != clientEntity.pitch() || previousYaw != clientEntity.yaw()) {
+    if (previousXRot != clientEntity.xRot() || previousYRot != clientEntity.yRot()) {
       clientEntity.sendRot();
     }
 

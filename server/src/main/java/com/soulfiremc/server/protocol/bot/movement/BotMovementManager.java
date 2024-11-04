@@ -151,50 +151,50 @@ public class BotMovementManager {
   }
 
   private static LookingVectorData getLookingVector(Entity clientEntity) {
-    // given a yaw pitch, we need the looking vector
+    // given a yRot xRot, we need the looking vector
 
-    // yaw is right handed rotation about y (up) starting from -z (north)
-    // pitch is -90 looking down, 90 looking up, 0 looking at horizon
+    // yRot is right handed rotation about y (up) starting from -z (north)
+    // xRot is -90 looking down, 90 looking up, 0 looking at horizon
     // lets get its coordinate system.
     // var x' = -z (north)
     // var y' = -x (west)
     // var z' = y (up)
 
     // the non normalized looking vector in x', y', z' space is
-    // x' is cos(yaw)
-    // y' is sin(yaw)
-    // z' is tan(pitch)
+    // x' is cos(yRot)
+    // y' is sin(yRot)
+    // z' is tan(xRot)
 
     // substituting back in x, y, z, we get the looking vector in the normal x, y, z space
-    // -z = cos(yaw) => z = -cos(yaw)
-    // -x = sin(yaw) => x = -sin(yaw)
-    // y = tan(pitch)
+    // -z = cos(yRot) => z = -cos(yRot)
+    // -x = sin(yRot) => x = -sin(yRot)
+    // y = tan(xRot)
 
     // normalizing the vectors, we divide each by |sqrt(x*x + y*y + z*z)|
     // x*x + z*z = sin^2 + cos^2 = 1
-    // so |sqrt(xx+yy+zz)| = |sqrt(1+tan^2(pitch))|
-    //     = |sqrt(1+sin^2(pitch)/cos^2(pitch))|
-    //     = |sqrt((cos^2+sin^2)/cos^2(pitch))|
-    //     = |sqrt(1/cos^2(pitch))|
-    //     = |+/- 1/cos(pitch)|
-    //     = 1/cos(pitch) since pitch in [-90, 90]
+    // so |sqrt(xx+yy+zz)| = |sqrt(1+tan^2(xRot))|
+    //     = |sqrt(1+sin^2(xRot)/cos^2(xRot))|
+    //     = |sqrt((cos^2+sin^2)/cos^2(xRot))|
+    //     = |sqrt(1/cos^2(xRot))|
+    //     = |+/- 1/cos(xRot)|
+    //     = 1/cos(xRot) since xRot in [-90, 90]
 
     // the looking vector is therefore
-    // x = -sin(yaw) * cos(pitch)
-    // y = tan(pitch) * cos(pitch) = sin(pitch)
-    // z = -cos(yaw) * cos(pitch)
+    // x = -sin(yRot) * cos(xRot)
+    // y = tan(xRot) * cos(xRot) = sin(xRot)
+    // z = -cos(yRot) * cos(xRot)
 
-    var yaw = clientEntity.yaw();
-    var pitch = clientEntity.pitch();
-    var sinYaw = Math.sin(yaw);
-    var cosYaw = Math.cos(yaw);
-    var sinPitch = Math.sin(pitch);
-    var cosPitch = Math.cos(pitch);
-    var lookX = -sinYaw * cosPitch;
-    var lookZ = -cosYaw * cosPitch;
-    var lookDir = new MutableVector3d(lookX, sinPitch, lookZ);
+    var yRot = clientEntity.yRot();
+    var xRot = clientEntity.xRot();
+    var sinYRot = Math.sin(yRot);
+    var cosYRot = Math.cos(yRot);
+    var sinXRot = Math.sin(xRot);
+    var cosXRot = Math.cos(xRot);
+    var lookX = -sinYRot * cosXRot;
+    var lookZ = -cosYRot * cosXRot;
+    var lookDir = new MutableVector3d(lookX, sinXRot, lookZ);
     return new LookingVectorData(
-      yaw, pitch, sinYaw, cosYaw, sinPitch, cosPitch, lookX, sinPitch, lookZ, lookDir);
+      yRot, xRot, sinYRot, cosYRot, sinXRot, cosXRot, lookX, sinXRot, lookZ, lookDir);
   }
 
   public static boolean isMaterialInBB(Level world, AABB queryBB, List<BlockType> types) {
@@ -277,9 +277,9 @@ public class BotMovementManager {
         }
 
         if (controlState.sprinting()) {
-          var yaw = Math.PI - clientEntity.yaw();
-          vel.x -= Math.sin(yaw) * 0.2;
-          vel.z += Math.cos(yaw) * 0.2;
+          var yRot = Math.PI - clientEntity.yRot();
+          vel.x -= Math.sin(yRot) * 0.2;
+          vel.z += Math.cos(yRot) * 0.2;
         }
 
         movementState.jumpTicks = physics.autojumpCooldown;
@@ -384,33 +384,33 @@ public class BotMovementManager {
       }
     } else if (movementState.elytraFlying) {
       var lookingData = getLookingVector(clientEntity);
-      var pitch = lookingData.pitch;
-      var sinPitch = lookingData.sinPitch;
-      var cosPitch = lookingData.cosPitch;
+      var xRot = lookingData.xRot;
+      var sinXRot = lookingData.sinXRot;
+      var cosXRot = lookingData.cosXRot;
       var lookDir = lookingData.lookDir;
 
       var horizontalSpeed = Math.sqrt(vel.x * vel.x + vel.z * vel.z);
-      var cosPitchSquared = cosPitch * cosPitch;
-      vel.y += physics.gravity * gravityMultiplier * (-1.0 + cosPitchSquared * 0.75);
-      // cosPitch is in [0, 1], so cosPitch > 0.0 is just to protect against
+      var cosXRotSquared = cosXRot * cosXRot;
+      vel.y += physics.gravity * gravityMultiplier * (-1.0 + cosXRotSquared * 0.75);
+      // cosXRot is in [0, 1], so cosXRot > 0.0 is just to protect against
       // divide by zero errors
-      if (vel.y < 0.0 && cosPitch > 0.0) {
-        var movingDownSpeedModifier = vel.y * (-0.1) * cosPitchSquared;
-        vel.x += lookDir.x * movingDownSpeedModifier / cosPitch;
+      if (vel.y < 0.0 && cosXRot > 0.0) {
+        var movingDownSpeedModifier = vel.y * (-0.1) * cosXRotSquared;
+        vel.x += lookDir.x * movingDownSpeedModifier / cosXRot;
         vel.y += movingDownSpeedModifier;
-        vel.z += lookDir.z * movingDownSpeedModifier / cosPitch;
+        vel.z += lookDir.z * movingDownSpeedModifier / cosXRot;
       }
 
-      if (pitch < 0.0 && cosPitch > 0.0) {
-        var lookDownSpeedModifier = horizontalSpeed * (-sinPitch) * 0.04;
-        vel.x += -lookDir.x * lookDownSpeedModifier / cosPitch;
+      if (xRot < 0.0 && cosXRot > 0.0) {
+        var lookDownSpeedModifier = horizontalSpeed * (-sinXRot) * 0.04;
+        vel.x += -lookDir.x * lookDownSpeedModifier / cosXRot;
         vel.y += lookDownSpeedModifier * 3.2;
-        vel.z += -lookDir.z * lookDownSpeedModifier / cosPitch;
+        vel.z += -lookDir.z * lookDownSpeedModifier / cosXRot;
       }
 
-      if (cosPitch > 0.0) {
-        vel.x += (lookDir.x / cosPitch * horizontalSpeed - vel.x) * 0.1;
-        vel.z += (lookDir.z / cosPitch * horizontalSpeed - vel.z) * 0.1;
+      if (cosXRot > 0.0) {
+        vel.x += (lookDir.x / cosXRot * horizontalSpeed - vel.x) * 0.1;
+        vel.z += (lookDir.z / cosXRot * horizontalSpeed - vel.z) * 0.1;
       }
 
       vel.x *= 0.99;
@@ -679,9 +679,9 @@ public class BotMovementManager {
     strafe *= speed;
     forward *= speed;
 
-    var yawRadians = Math.toRadians(clientEntity.yaw());
-    var sin = Math.sin(yawRadians);
-    var cos = Math.cos(yawRadians);
+    var yRotRadians = Math.toRadians(clientEntity.yRot());
+    var sin = Math.sin(yRotRadians);
+    var cos = Math.cos(yRotRadians);
 
     var vel = movementState.vel;
     vel.x += strafe * cos - forward * sin;
@@ -813,12 +813,12 @@ public class BotMovementManager {
   }
 
   record LookingVectorData(
-    float yaw,
-    float pitch,
-    double sinYaw,
-    double cosYaw,
-    double sinPitch,
-    double cosPitch,
+    float yRot,
+    float xRot,
+    double sinYRot,
+    double cosYRot,
+    double sinXRot,
+    double cosXRot,
     double lookX,
     double lookY,
     double lookZ,

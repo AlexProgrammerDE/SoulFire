@@ -57,8 +57,8 @@ public class ClientEntity extends Entity {
   private double lastX = 0;
   private double lastY = 0;
   private double lastZ = 0;
-  private float lastYaw = 0;
-  private float lastPitch = 0;
+  private float lastYRot = 0;
+  private float lastXRot = 0;
   private boolean lastOnGround = false;
   private boolean lastHorizontalCollision = false;
   private int positionReminder = 0;
@@ -99,12 +99,12 @@ public class ClientEntity extends Entity {
     var xDiff = x - lastX;
     var yDiff = y - lastY;
     var zDiff = z - lastZ;
-    var yawDiff = (double) (yaw - lastYaw);
-    var pitchDiff = (double) (pitch - lastPitch);
+    var yRotDiff = (double) (yRot - lastYRot);
+    var xRotDiff = (double) (xRot - lastXRot);
     var sendPos =
       MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
         || ++positionReminder >= 20;
-    var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
+    var sendRot = xRotDiff != 0.0 || yRotDiff != 0.0;
     var sendStatus = onGround != lastOnGround || movementState.isCollidedHorizontally != lastHorizontalCollision;
 
     // Send position packets if changed
@@ -157,11 +157,11 @@ public class ClientEntity extends Entity {
     lastZ = z;
     positionReminder = 0;
 
-    lastYaw = yaw;
-    lastPitch = pitch;
+    lastYRot = yRot;
+    lastXRot = xRot;
 
     connection.sendPacket(
-      new ServerboundMovePlayerPosRotPacket(onGround, horizontalCollision, x, y, z, yaw, pitch));
+      new ServerboundMovePlayerPosRotPacket(onGround, horizontalCollision, x, y, z, yRot, xRot));
   }
 
   public void sendPos() {
@@ -186,10 +186,10 @@ public class ClientEntity extends Entity {
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
-    lastYaw = yaw;
-    lastPitch = pitch;
+    lastYRot = yRot;
+    lastXRot = xRot;
 
-    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, horizontalCollision, yaw, pitch));
+    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, horizontalCollision, yRot, xRot));
   }
 
   public void sendStatus() {

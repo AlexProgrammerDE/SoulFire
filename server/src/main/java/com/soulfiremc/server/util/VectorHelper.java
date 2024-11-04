@@ -31,4 +31,31 @@ public class VectorHelper {
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
     return vector.floor().add(0.5, blockShapeGroup.highestY(), 0.5);
   }
+
+  public static Vector3d xRot(Vector3d base, float pitch) {
+    var g = MathHelper.cos(pitch);
+    var h = MathHelper.sin(pitch);
+    var d = base.getX();
+    var e = base.getY() * (double) g + base.getZ() * (double) h;
+    var i = base.getZ() * (double) g - base.getY() * (double) h;
+    return Vector3d.from(d, e, i);
+  }
+
+  public static Vector3d yRot(Vector3d base, float yaw) {
+    var g = MathHelper.cos(yaw);
+    var h = MathHelper.sin(yaw);
+    var d = base.getX() * (double) g + base.getZ() * (double) h;
+    var e = base.getY();
+    var i = base.getZ() * (double) g - base.getX() * (double) h;
+    return Vector3d.from(d, e, i);
+  }
+
+  public static Vector3d zRot(Vector3d base, float roll) {
+    var g = MathHelper.cos(roll);
+    var h = MathHelper.sin(roll);
+    var d = base.getX() * (double) g + base.getY() * (double) h;
+    var e = base.getY() * (double) g - base.getX() * (double) h;
+    var i = base.getZ();
+    return Vector3d.from(d, e, i);
+  }
 }

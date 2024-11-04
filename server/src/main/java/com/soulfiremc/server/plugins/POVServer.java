@@ -127,6 +127,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.Clien
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundConfigurationAcknowledgedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
@@ -157,7 +158,8 @@ public class POVServer implements InternalPlugin {
       ServerboundPongPacket.class,
       ClientboundCustomPayloadPacket.class,
       ServerboundFinishConfigurationPacket.class,
-      ServerboundConfigurationAcknowledgedPacket.class);
+      ServerboundConfigurationAcknowledgedPacket.class,
+      ServerboundClientTickEndPacket.class);
   private static final byte[] FULL_LIGHT = new byte[2048];
 
   static {
@@ -389,8 +391,8 @@ public class POVServer implements InternalPlugin {
                                     (posRot.getX() * 32 - lastX * 32) * 128,
                                     (posRot.getY() * 32 - lastY * 32) * 128,
                                     (posRot.getZ() * 32 - lastZ * 32) * 128,
-                                    posRot.getYaw(),
-                                    posRot.getPitch(),
+                                    posRot.getYRot(),
+                                    posRot.getXRot(),
                                     clientEntity.onGround()));
                                 lastX = posRot.getX();
                                 lastY = posRot.getY();
@@ -411,8 +413,8 @@ public class POVServer implements InternalPlugin {
                               case ServerboundMovePlayerRotPacket rot -> povSession.send(
                                 new ClientboundMoveEntityRotPacket(
                                   clientEntity.entityId(),
-                                  rot.getYaw(),
-                                  rot.getPitch(),
+                                  rot.getYRot(),
+                                  rot.getXRot(),
                                   clientEntity.onGround()));
                               default -> {
                               }
@@ -452,8 +454,8 @@ public class POVServer implements InternalPlugin {
                         clientEntity.x(posRot.getX());
                         clientEntity.y(posRot.getY());
                         clientEntity.z(posRot.getZ());
-                        clientEntity.yaw(posRot.getYaw());
-                        clientEntity.pitch(posRot.getPitch());
+                        clientEntity.yRot(posRot.getYRot());
+                        clientEntity.xRot(posRot.getXRot());
                       }
                       case ServerboundMovePlayerPosPacket pos -> {
                         lastX = pos.getX();
@@ -465,8 +467,8 @@ public class POVServer implements InternalPlugin {
                         clientEntity.z(pos.getZ());
                       }
                       case ServerboundMovePlayerRotPacket rot -> {
-                        clientEntity.yaw(rot.getYaw());
-                        clientEntity.pitch(rot.getPitch());
+                        clientEntity.yRot(rot.getYRot());
+                        clientEntity.xRot(rot.getXRot());
                       }
                       case ServerboundAcceptTeleportationPacket teleportationPacket -> {
                         // This was a forced teleport, the server should not know about it
@@ -713,8 +715,10 @@ public class POVServer implements InternalPlugin {
                   new ClientboundPlayerPositionPacket(
                     Integer.MIN_VALUE,
                     dataManager.clientEntity().pos(),
-                    dataManager.clientEntity().yaw(),
-                    dataManager.clientEntity().pitch()));
+                    Vector3d.ZERO,
+                    dataManager.clientEntity().yRot(),
+                    dataManager.clientEntity().xRot(),
+                    List.of()));
 
                 if (dataManager.playerListState().header() != null
                   && dataManager.playerListState().footer() != null) {
@@ -890,9 +894,9 @@ public class POVServer implements InternalPlugin {
                         entity.x(),
                         entity.y(),
                         entity.z(),
-                        entity.yaw(),
-                        entity.headYaw(),
-                        entity.pitch(),
+                        entity.yRot(),
+                        entity.headYRot(),
+                        entity.xRot(),
                         entity.motionX(),
                         entity.motionY(),
                         entity.motionZ()));

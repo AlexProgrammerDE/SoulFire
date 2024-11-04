@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Slf4j
@@ -161,5 +162,10 @@ public class SFHelpers {
     } catch (Exception e) {
       throw new RuntimeException("Failed to get file", e);
     }
+  }
+
+  public static <T> T make(T object, Consumer<? super T> consumer) {
+    consumer.accept(object);
+    return object;
   }
 }

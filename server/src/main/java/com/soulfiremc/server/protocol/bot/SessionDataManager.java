@@ -41,10 +41,12 @@ import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -300,20 +302,31 @@ public final class SessionDataManager {
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
     var relative = packet.getRelatives();
-    var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getX() : packet.getX();
-    var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
-    var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
-    var yaw =
-      relative.contains(PositionElement.YAW)
-        ? clientEntity.yaw() + packet.getYRot()
+    var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getPosition().getX() : packet.getPosition().getX();
+    var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getPosition().getY() : packet.getPosition().getY();
+    var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getPosition().getZ() : packet.getPosition().getZ();
+    var yRot =
+      relative.contains(PositionElement.Y_ROT)
+        ? clientEntity.yRot() + packet.getYRot()
         : packet.getYRot();
-    var pitch =
-      relative.contains(PositionElement.PITCH)
-        ? clientEntity.pitch() + packet.getXRot()
+    var xRot =
+      relative.contains(PositionElement.X_ROT)
+        ? clientEntity.xRot() + packet.getXRot()
         : packet.getXRot();
+    var deltaMovement = packet.getDeltaMovement();
+    if (relative.contains(PositionElement.ROTATE_DELTA)) {
+      var k = clientEntity.yRot() - yRot;
+      var l = clientEntity.xRot() - xRot;
+      deltaMovement = VectorHelper.xRot(deltaMovement, (float) Math.toRadians(l));
+      deltaMovement = VectorHelper.yRot(deltaMovement, (float) Math.toRadians(k));
+    }
 
     clientEntity.setPosition(x, y, z);
-    clientEntity.setRotation(yaw, pitch);
+    clientEntity.setRotation(yRot, xRot);
+    clientEntity.setMotion(
+      relative.contains(PositionElement.DELTA_X) ? clientEntity.motionX() + deltaMovement.getX() : deltaMovement.getX(),
+      relative.contains(PositionElement.DELTA_Y) ? clientEntity.motionY() + deltaMovement.getY() : deltaMovement.getY(),
+      relative.contains(PositionElement.DELTA_Z) ? clientEntity.motionZ() + deltaMovement.getZ() : deltaMovement.getZ());
 
     var position = clientEntity.blockPos();
     if (!joinedWorld) {
@@ -331,7 +344,7 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
-    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, false, x, y, z, yaw, pitch));
+    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, false, x, y, z, yRot, xRot));
     connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
   }
 
@@ -993,8 +1006,8 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setPosition(packet.getX(), packet.getY(), packet.getZ());
-    state.setRotation(packet.getYaw(), packet.getPitch());
+    state.setPosition(packet.getPosition());
+    state.setRotation(packet.getYRot(), packet.getXRot());
     state.onGround(packet.isOnGround());
   }
 
@@ -1102,7 +1115,7 @@ public final class SessionDataManager {
     }
 
     synchronized (itemCoolDowns) {
-      var iterator = itemCoolDowns.int2IntEntrySet().iterator();
+      var iterator = itemCoolDowns.object2IntEntrySet().iterator();
       while (iterator.hasNext()) {
         var entry = iterator.next();
         var ticks = entry.getIntValue() - 1;
