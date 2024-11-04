@@ -41,11 +41,14 @@ public class Level implements LevelHeightAccessor {
   private final long hashedSeed;
   private final boolean debug;
   private final boolean flat;
+  private final int seaLevel;
 
   @Setter
-  private long worldAge;
+  private long gameTime;
   @Setter
-  private long time;
+  private long dayTime;
+  @Setter
+  private boolean tickDayTime;
 
   public Level(
     TagsState tagsState,
@@ -53,13 +56,15 @@ public class Level implements LevelHeightAccessor {
     Key worldKey,
     long hashedSeed,
     boolean debug,
-    boolean flat) {
+    boolean flat,
+    int seaLevel) {
     this.tagsState = tagsState;
     this.dimensionType = dimensionType;
     this.worldKey = worldKey;
     this.hashedSeed = hashedSeed;
     this.debug = debug;
     this.flat = flat;
+    this.seaLevel = seaLevel;
 
     this.chunks = new ChunkHolder(this);
   }

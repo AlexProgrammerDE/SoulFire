@@ -136,6 +136,7 @@ public class BotActionManager {
         rayCastPosition.getY(),
         rayCastPosition.getZ(),
         insideBlock,
+        false, // TODO: Implement check for hitting world border
         sequenceNumber));
   }
 

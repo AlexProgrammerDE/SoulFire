@@ -60,6 +60,7 @@ public class ClientEntity extends Entity {
   private float lastYaw = 0;
   private float lastPitch = 0;
   private boolean lastOnGround = false;
+  private boolean lastHorizontalCollision = false;
   private int positionReminder = 0;
 
   public ClientEntity(
@@ -104,7 +105,7 @@ public class ClientEntity extends Entity {
       MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
         || ++positionReminder >= 20;
     var sendRot = pitchDiff != 0.0 || yawDiff != 0.0;
-    var sendOnGround = onGround != lastOnGround;
+    var sendStatus = onGround != lastOnGround || movementState.isCollidedHorizontally != lastHorizontalCollision;
 
     // Send position packets if changed
     if (sendPos && sendRot) {
@@ -113,8 +114,8 @@ public class ClientEntity extends Entity {
       sendPos();
     } else if (sendRot) {
       sendRot();
-    } else if (sendOnGround) {
-      sendOnGround();
+    } else if (sendStatus) {
+      sendStatus();
     }
   }
 
@@ -146,8 +147,10 @@ public class ClientEntity extends Entity {
 
   public void sendPosRot() {
     var onGround = movementState.onGround;
+    var horizontalCollision = movementState.isCollidedHorizontally;
 
     lastOnGround = onGround;
+    lastHorizontalCollision = horizontalCollision;
 
     lastX = x;
     lastY = y;
@@ -158,39 +161,45 @@ public class ClientEntity extends Entity {
     lastPitch = pitch;
 
     connection.sendPacket(
-      new ServerboundMovePlayerPosRotPacket(onGround, x, y, z, yaw, pitch));
+      new ServerboundMovePlayerPosRotPacket(onGround, horizontalCollision, x, y, z, yaw, pitch));
   }
 
   public void sendPos() {
     var onGround = movementState.onGround;
+    var horizontalCollision = movementState.isCollidedHorizontally;
 
     lastOnGround = onGround;
+    lastHorizontalCollision = horizontalCollision;
 
     lastX = x;
     lastY = y;
     lastZ = z;
     positionReminder = 0;
 
-    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, x, y, z));
+    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, horizontalCollision, x, y, z));
   }
 
   public void sendRot() {
     var onGround = movementState.onGround;
+    var horizontalCollision = movementState.isCollidedHorizontally;
 
     lastOnGround = onGround;
+    lastHorizontalCollision = horizontalCollision;
 
     lastYaw = yaw;
     lastPitch = pitch;
 
-    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, yaw, pitch));
+    connection.sendPacket(new ServerboundMovePlayerRotPacket(onGround, horizontalCollision, yaw, pitch));
   }
 
-  public void sendOnGround() {
+  public void sendStatus() {
     var onGround = movementState.onGround;
+    var horizontalCollision = movementState.isCollidedHorizontally;
 
     lastOnGround = onGround;
+    lastHorizontalCollision = horizontalCollision;
 
-    connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround));
+    connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround, horizontalCollision));
   }
 
   public AbilitiesData abilities() {

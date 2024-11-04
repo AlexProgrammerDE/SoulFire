@@ -31,9 +31,10 @@ import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.ChatVisibility;
+import org.geysermc.mcprotocollib.protocol.data.game.setting.ParticleStatus;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.SkinPart;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class ClientSettings implements InternalPlugin {
   );
 
   public static void onPacket(SFPacketReceiveEvent event) {
-    if (event.packet() instanceof ClientboundGameProfilePacket) {
+    if (event.packet() instanceof ClientboundLoginFinishedPacket) {
       var connection = event.connection();
       var settingsSource = connection.settingsSource();
       if (!settingsSource.get(ClientSettingsSettings.ENABLED)) {
@@ -91,7 +92,8 @@ public class ClientSettings implements InternalPlugin {
             skinParts,
             settingsSource.get(ClientSettingsSettings.HAND_PREFERENCE, HandPreference.class),
             settingsSource.get(ClientSettingsSettings.TEXT_FILTERING_ENABLED),
-            settingsSource.get(ClientSettingsSettings.ALLOWS_LISTING)));
+            settingsSource.get(ClientSettingsSettings.ALLOWS_LISTING),
+            settingsSource.get(ClientSettingsSettings.PARTICLE_STATUS, ParticleStatus.class)));
     }
   }
 
@@ -211,5 +213,13 @@ public class ClientSettings implements InternalPlugin {
         "Allows listing",
         "Whether the client wants their username to be shown in the server list",
         true);
+    public static final ComboProperty PARTICLE_STATUS =
+      BUILDER.ofEnumMapped(
+        "particle-status",
+        "Particle Status",
+        "How many particles the client will render",
+        ParticleStatus.values(),
+        ParticleStatus.ALL,
+        ComboProperty::capitalizeEnum);
   }
 }

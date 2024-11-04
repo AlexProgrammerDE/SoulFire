@@ -96,12 +96,15 @@ public class RegistryKeys {
   public static final ResourceKey<?> VILLAGER_TYPE = ResourceKey.key("minecraft:villager_type");
   public static final ResourceKey<?> DECORATED_POT_PATTERN = ResourceKey.key("minecraft:decorated_pot_pattern");
   public static final ResourceKey<?> NUMBER_FORMAT_TYPE = ResourceKey.key("minecraft:number_format_type");
-  public static final ResourceKey<?> ARMOR_MATERIAL = ResourceKey.key("minecraft:armor_material");
   public static final ResourceKey<?> DATA_COMPONENT_TYPE = ResourceKey.key("minecraft:data_component_type");
   public static final ResourceKey<?> ENTITY_SUB_PREDICATE_TYPE = ResourceKey.key("minecraft:entity_sub_predicate_type");
   public static final ResourceKey<?> ITEM_SUB_PREDICATE_TYPE = ResourceKey.key("minecraft:item_sub_predicate_type");
   public static final ResourceKey<?> MAP_DECORATION_TYPE = ResourceKey.key("minecraft:map_decoration_type");
   public static final ResourceKey<?> ENCHANTMENT_EFFECT_COMPONENT_TYPE = ResourceKey.key("minecraft:enchantment_effect_component_type");
+  public static final ResourceKey<?> CONSUME_EFFECT_TYPE = ResourceKey.key("minecraft:consume_effect_type");
+  public static final ResourceKey<?> RECIPE_DISPLAY = ResourceKey.key("minecraft:recipe_display");
+  public static final ResourceKey<?> SLOT_DISPLAY = ResourceKey.key("minecraft:slot_display");
+  public static final ResourceKey<?> RECIPE_BOOK_CATEGORY = ResourceKey.key("minecraft:recipe_book_category");
   public static final ResourceKey<?> BIOME = ResourceKey.key("minecraft:worldgen/biome");
   public static final ResourceKey<?> CHAT_TYPE = ResourceKey.key("minecraft:chat_type");
   public static final ResourceKey<?> CONFIGURED_CARVER = ResourceKey.key("minecraft:worldgen/configured_carver");
@@ -123,6 +126,7 @@ public class RegistryKeys {
   public static final ResourceKey<?> TRIM_PATTERN = ResourceKey.key("minecraft:trim_pattern");
   public static final ResourceKey<?> WORLD_PRESET = ResourceKey.key("minecraft:worldgen/world_preset");
   public static final ResourceKey<?> MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST = ResourceKey.key("minecraft:worldgen/multi_noise_biome_source_parameter_list");
+  public static final ResourceKey<?> TRIAL_SPAWNER_CONFIG = ResourceKey.key("minecraft:trial_spawner");
   public static final ResourceKey<?> DIMENSION = ResourceKey.key("minecraft:dimension");
   public static final ResourceKey<?> LEVEL_STEM = ResourceKey.key("minecraft:dimension");
   public static final ResourceKey<?> LOOT_TABLE = ResourceKey.key("minecraft:loot_table");

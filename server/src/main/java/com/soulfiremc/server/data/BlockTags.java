@@ -49,6 +49,7 @@ public class BlockTags {
   public static final TagKey<BlockType> OVERWORLD_NATURAL_LOGS = register("minecraft:overworld_natural_logs");
   public static final TagKey<BlockType> LOGS = register("minecraft:logs");
   public static final TagKey<BlockType> DARK_OAK_LOGS = register("minecraft:dark_oak_logs");
+  public static final TagKey<BlockType> PALE_OAK_LOGS = register("minecraft:pale_oak_logs");
   public static final TagKey<BlockType> OAK_LOGS = register("minecraft:oak_logs");
   public static final TagKey<BlockType> BIRCH_LOGS = register("minecraft:birch_logs");
   public static final TagKey<BlockType> ACACIA_LOGS = register("minecraft:acacia_logs");
@@ -90,6 +91,7 @@ public class BlockTags {
   public static final TagKey<BlockType> BADLANDS_TERRACOTTA = register("minecraft:badlands_terracotta");
   public static final TagKey<BlockType> CONCRETE_POWDER = register("minecraft:concrete_powder");
   public static final TagKey<BlockType> COMPLETES_FIND_TREE_TUTORIAL = register("minecraft:completes_find_tree_tutorial");
+  public static final TagKey<BlockType> SHULKER_BOXES = register("minecraft:shulker_boxes");
   public static final TagKey<BlockType> FLOWER_POTS = register("minecraft:flower_pots");
   public static final TagKey<BlockType> ENDERMAN_HOLDABLE = register("minecraft:enderman_holdable");
   public static final TagKey<BlockType> ICE = register("minecraft:ice");
@@ -123,7 +125,6 @@ public class BlockTags {
   public static final TagKey<BlockType> WALL_POST_OVERRIDE = register("minecraft:wall_post_override");
   public static final TagKey<BlockType> CLIMBABLE = register("minecraft:climbable");
   public static final TagKey<BlockType> FALL_DAMAGE_RESETTING = register("minecraft:fall_damage_resetting");
-  public static final TagKey<BlockType> SHULKER_BOXES = register("minecraft:shulker_boxes");
   public static final TagKey<BlockType> HOGLIN_REPELLENTS = register("minecraft:hoglin_repellents");
   public static final TagKey<BlockType> SOUL_FIRE_BASE_BLOCKS = register("minecraft:soul_fire_base_blocks");
   public static final TagKey<BlockType> STRIDER_WARM_BLOCKS = register("minecraft:strider_warm_blocks");
@@ -191,6 +192,7 @@ public class BlockTags {
   public static final TagKey<BlockType> FOXES_SPAWNABLE_ON = register("minecraft:foxes_spawnable_on");
   public static final TagKey<BlockType> WOLVES_SPAWNABLE_ON = register("minecraft:wolves_spawnable_on");
   public static final TagKey<BlockType> FROGS_SPAWNABLE_ON = register("minecraft:frogs_spawnable_on");
+  public static final TagKey<BlockType> BATS_SPAWNABLE_ON = register("minecraft:bats_spawnable_on");
   public static final TagKey<BlockType> AZALEA_GROWS_ON = register("minecraft:azalea_grows_on");
   public static final TagKey<BlockType> CONVERTABLE_TO_MUD = register("minecraft:convertable_to_mud");
   public static final TagKey<BlockType> MANGROVE_LOGS_CAN_GROW_THROUGH = register("minecraft:mangrove_logs_can_grow_through");

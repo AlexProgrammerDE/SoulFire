@@ -76,6 +76,8 @@ public record BlockType(
   public static final BlockType ACACIA_PLANKS = register("minecraft:acacia_planks");
   public static final BlockType CHERRY_PLANKS = register("minecraft:cherry_planks");
   public static final BlockType DARK_OAK_PLANKS = register("minecraft:dark_oak_planks");
+  public static final BlockType PALE_OAK_WOOD = register("minecraft:pale_oak_wood");
+  public static final BlockType PALE_OAK_PLANKS = register("minecraft:pale_oak_planks");
   public static final BlockType MANGROVE_PLANKS = register("minecraft:mangrove_planks");
   public static final BlockType BAMBOO_PLANKS = register("minecraft:bamboo_planks");
   public static final BlockType BAMBOO_MOSAIC = register("minecraft:bamboo_mosaic");
@@ -86,6 +88,7 @@ public record BlockType(
   public static final BlockType ACACIA_SAPLING = register("minecraft:acacia_sapling");
   public static final BlockType CHERRY_SAPLING = register("minecraft:cherry_sapling");
   public static final BlockType DARK_OAK_SAPLING = register("minecraft:dark_oak_sapling");
+  public static final BlockType PALE_OAK_SAPLING = register("minecraft:pale_oak_sapling");
   public static final BlockType MANGROVE_PROPAGULE = register("minecraft:mangrove_propagule");
   public static final BlockType BEDROCK = register("minecraft:bedrock");
   public static final BlockType WATER = register("minecraft:water");
@@ -109,6 +112,7 @@ public record BlockType(
   public static final BlockType ACACIA_LOG = register("minecraft:acacia_log");
   public static final BlockType CHERRY_LOG = register("minecraft:cherry_log");
   public static final BlockType DARK_OAK_LOG = register("minecraft:dark_oak_log");
+  public static final BlockType PALE_OAK_LOG = register("minecraft:pale_oak_log");
   public static final BlockType MANGROVE_LOG = register("minecraft:mangrove_log");
   public static final BlockType MANGROVE_ROOTS = register("minecraft:mangrove_roots");
   public static final BlockType MUDDY_MANGROVE_ROOTS = register("minecraft:muddy_mangrove_roots");
@@ -119,6 +123,7 @@ public record BlockType(
   public static final BlockType STRIPPED_ACACIA_LOG = register("minecraft:stripped_acacia_log");
   public static final BlockType STRIPPED_CHERRY_LOG = register("minecraft:stripped_cherry_log");
   public static final BlockType STRIPPED_DARK_OAK_LOG = register("minecraft:stripped_dark_oak_log");
+  public static final BlockType STRIPPED_PALE_OAK_LOG = register("minecraft:stripped_pale_oak_log");
   public static final BlockType STRIPPED_OAK_LOG = register("minecraft:stripped_oak_log");
   public static final BlockType STRIPPED_MANGROVE_LOG = register("minecraft:stripped_mangrove_log");
   public static final BlockType STRIPPED_BAMBOO_BLOCK = register("minecraft:stripped_bamboo_block");
@@ -137,6 +142,7 @@ public record BlockType(
   public static final BlockType STRIPPED_ACACIA_WOOD = register("minecraft:stripped_acacia_wood");
   public static final BlockType STRIPPED_CHERRY_WOOD = register("minecraft:stripped_cherry_wood");
   public static final BlockType STRIPPED_DARK_OAK_WOOD = register("minecraft:stripped_dark_oak_wood");
+  public static final BlockType STRIPPED_PALE_OAK_WOOD = register("minecraft:stripped_pale_oak_wood");
   public static final BlockType STRIPPED_MANGROVE_WOOD = register("minecraft:stripped_mangrove_wood");
   public static final BlockType OAK_LEAVES = register("minecraft:oak_leaves");
   public static final BlockType SPRUCE_LEAVES = register("minecraft:spruce_leaves");
@@ -145,6 +151,7 @@ public record BlockType(
   public static final BlockType ACACIA_LEAVES = register("minecraft:acacia_leaves");
   public static final BlockType CHERRY_LEAVES = register("minecraft:cherry_leaves");
   public static final BlockType DARK_OAK_LEAVES = register("minecraft:dark_oak_leaves");
+  public static final BlockType PALE_OAK_LEAVES = register("minecraft:pale_oak_leaves");
   public static final BlockType MANGROVE_LEAVES = register("minecraft:mangrove_leaves");
   public static final BlockType AZALEA_LEAVES = register("minecraft:azalea_leaves");
   public static final BlockType FLOWERING_AZALEA_LEAVES = register("minecraft:flowering_azalea_leaves");
@@ -232,6 +239,7 @@ public record BlockType(
   public static final BlockType FIRE = register("minecraft:fire");
   public static final BlockType SOUL_FIRE = register("minecraft:soul_fire");
   public static final BlockType SPAWNER = register("minecraft:spawner");
+  public static final BlockType CREAKING_HEART = register("minecraft:creaking_heart");
   public static final BlockType OAK_STAIRS = register("minecraft:oak_stairs");
   public static final BlockType CHEST = register("minecraft:chest");
   public static final BlockType REDSTONE_WIRE = register("minecraft:redstone_wire");
@@ -249,6 +257,7 @@ public record BlockType(
   public static final BlockType CHERRY_SIGN = register("minecraft:cherry_sign");
   public static final BlockType JUNGLE_SIGN = register("minecraft:jungle_sign");
   public static final BlockType DARK_OAK_SIGN = register("minecraft:dark_oak_sign");
+  public static final BlockType PALE_OAK_SIGN = register("minecraft:pale_oak_sign");
   public static final BlockType MANGROVE_SIGN = register("minecraft:mangrove_sign");
   public static final BlockType BAMBOO_SIGN = register("minecraft:bamboo_sign");
   public static final BlockType OAK_DOOR = register("minecraft:oak_door");
@@ -262,6 +271,7 @@ public record BlockType(
   public static final BlockType CHERRY_WALL_SIGN = register("minecraft:cherry_wall_sign");
   public static final BlockType JUNGLE_WALL_SIGN = register("minecraft:jungle_wall_sign");
   public static final BlockType DARK_OAK_WALL_SIGN = register("minecraft:dark_oak_wall_sign");
+  public static final BlockType PALE_OAK_WALL_SIGN = register("minecraft:pale_oak_wall_sign");
   public static final BlockType MANGROVE_WALL_SIGN = register("minecraft:mangrove_wall_sign");
   public static final BlockType BAMBOO_WALL_SIGN = register("minecraft:bamboo_wall_sign");
   public static final BlockType OAK_HANGING_SIGN = register("minecraft:oak_hanging_sign");
@@ -271,6 +281,7 @@ public record BlockType(
   public static final BlockType CHERRY_HANGING_SIGN = register("minecraft:cherry_hanging_sign");
   public static final BlockType JUNGLE_HANGING_SIGN = register("minecraft:jungle_hanging_sign");
   public static final BlockType DARK_OAK_HANGING_SIGN = register("minecraft:dark_oak_hanging_sign");
+  public static final BlockType PALE_OAK_HANGING_SIGN = register("minecraft:pale_oak_hanging_sign");
   public static final BlockType CRIMSON_HANGING_SIGN = register("minecraft:crimson_hanging_sign");
   public static final BlockType WARPED_HANGING_SIGN = register("minecraft:warped_hanging_sign");
   public static final BlockType MANGROVE_HANGING_SIGN = register("minecraft:mangrove_hanging_sign");
@@ -282,6 +293,7 @@ public record BlockType(
   public static final BlockType CHERRY_WALL_HANGING_SIGN = register("minecraft:cherry_wall_hanging_sign");
   public static final BlockType JUNGLE_WALL_HANGING_SIGN = register("minecraft:jungle_wall_hanging_sign");
   public static final BlockType DARK_OAK_WALL_HANGING_SIGN = register("minecraft:dark_oak_wall_hanging_sign");
+  public static final BlockType PALE_OAK_WALL_HANGING_SIGN = register("minecraft:pale_oak_wall_hanging_sign");
   public static final BlockType MANGROVE_WALL_HANGING_SIGN = register("minecraft:mangrove_wall_hanging_sign");
   public static final BlockType CRIMSON_WALL_HANGING_SIGN = register("minecraft:crimson_wall_hanging_sign");
   public static final BlockType WARPED_WALL_HANGING_SIGN = register("minecraft:warped_wall_hanging_sign");
@@ -296,6 +308,7 @@ public record BlockType(
   public static final BlockType ACACIA_PRESSURE_PLATE = register("minecraft:acacia_pressure_plate");
   public static final BlockType CHERRY_PRESSURE_PLATE = register("minecraft:cherry_pressure_plate");
   public static final BlockType DARK_OAK_PRESSURE_PLATE = register("minecraft:dark_oak_pressure_plate");
+  public static final BlockType PALE_OAK_PRESSURE_PLATE = register("minecraft:pale_oak_pressure_plate");
   public static final BlockType MANGROVE_PRESSURE_PLATE = register("minecraft:mangrove_pressure_plate");
   public static final BlockType BAMBOO_PRESSURE_PLATE = register("minecraft:bamboo_pressure_plate");
   public static final BlockType REDSTONE_ORE = register("minecraft:redstone_ore");
@@ -347,6 +360,7 @@ public record BlockType(
   public static final BlockType ACACIA_TRAPDOOR = register("minecraft:acacia_trapdoor");
   public static final BlockType CHERRY_TRAPDOOR = register("minecraft:cherry_trapdoor");
   public static final BlockType DARK_OAK_TRAPDOOR = register("minecraft:dark_oak_trapdoor");
+  public static final BlockType PALE_OAK_TRAPDOOR = register("minecraft:pale_oak_trapdoor");
   public static final BlockType MANGROVE_TRAPDOOR = register("minecraft:mangrove_trapdoor");
   public static final BlockType BAMBOO_TRAPDOOR = register("minecraft:bamboo_trapdoor");
   public static final BlockType STONE_BRICKS = register("minecraft:stone_bricks");
@@ -420,6 +434,7 @@ public record BlockType(
   public static final BlockType POTTED_ACACIA_SAPLING = register("minecraft:potted_acacia_sapling");
   public static final BlockType POTTED_CHERRY_SAPLING = register("minecraft:potted_cherry_sapling");
   public static final BlockType POTTED_DARK_OAK_SAPLING = register("minecraft:potted_dark_oak_sapling");
+  public static final BlockType POTTED_PALE_OAK_SAPLING = register("minecraft:potted_pale_oak_sapling");
   public static final BlockType POTTED_MANGROVE_PROPAGULE = register("minecraft:potted_mangrove_propagule");
   public static final BlockType POTTED_FERN = register("minecraft:potted_fern");
   public static final BlockType POTTED_DANDELION = register("minecraft:potted_dandelion");
@@ -448,6 +463,7 @@ public record BlockType(
   public static final BlockType ACACIA_BUTTON = register("minecraft:acacia_button");
   public static final BlockType CHERRY_BUTTON = register("minecraft:cherry_button");
   public static final BlockType DARK_OAK_BUTTON = register("minecraft:dark_oak_button");
+  public static final BlockType PALE_OAK_BUTTON = register("minecraft:pale_oak_button");
   public static final BlockType MANGROVE_BUTTON = register("minecraft:mangrove_button");
   public static final BlockType BAMBOO_BUTTON = register("minecraft:bamboo_button");
   public static final BlockType SKELETON_SKULL = register("minecraft:skeleton_skull");
@@ -516,6 +532,7 @@ public record BlockType(
   public static final BlockType ACACIA_STAIRS = register("minecraft:acacia_stairs");
   public static final BlockType CHERRY_STAIRS = register("minecraft:cherry_stairs");
   public static final BlockType DARK_OAK_STAIRS = register("minecraft:dark_oak_stairs");
+  public static final BlockType PALE_OAK_STAIRS = register("minecraft:pale_oak_stairs");
   public static final BlockType MANGROVE_STAIRS = register("minecraft:mangrove_stairs");
   public static final BlockType BAMBOO_STAIRS = register("minecraft:bamboo_stairs");
   public static final BlockType BAMBOO_MOSAIC_STAIRS = register("minecraft:bamboo_mosaic_stairs");
@@ -602,6 +619,7 @@ public record BlockType(
   public static final BlockType ACACIA_SLAB = register("minecraft:acacia_slab");
   public static final BlockType CHERRY_SLAB = register("minecraft:cherry_slab");
   public static final BlockType DARK_OAK_SLAB = register("minecraft:dark_oak_slab");
+  public static final BlockType PALE_OAK_SLAB = register("minecraft:pale_oak_slab");
   public static final BlockType MANGROVE_SLAB = register("minecraft:mangrove_slab");
   public static final BlockType BAMBOO_SLAB = register("minecraft:bamboo_slab");
   public static final BlockType BAMBOO_MOSAIC_SLAB = register("minecraft:bamboo_mosaic_slab");
@@ -629,6 +647,7 @@ public record BlockType(
   public static final BlockType ACACIA_FENCE_GATE = register("minecraft:acacia_fence_gate");
   public static final BlockType CHERRY_FENCE_GATE = register("minecraft:cherry_fence_gate");
   public static final BlockType DARK_OAK_FENCE_GATE = register("minecraft:dark_oak_fence_gate");
+  public static final BlockType PALE_OAK_FENCE_GATE = register("minecraft:pale_oak_fence_gate");
   public static final BlockType MANGROVE_FENCE_GATE = register("minecraft:mangrove_fence_gate");
   public static final BlockType BAMBOO_FENCE_GATE = register("minecraft:bamboo_fence_gate");
   public static final BlockType SPRUCE_FENCE = register("minecraft:spruce_fence");
@@ -637,6 +656,7 @@ public record BlockType(
   public static final BlockType ACACIA_FENCE = register("minecraft:acacia_fence");
   public static final BlockType CHERRY_FENCE = register("minecraft:cherry_fence");
   public static final BlockType DARK_OAK_FENCE = register("minecraft:dark_oak_fence");
+  public static final BlockType PALE_OAK_FENCE = register("minecraft:pale_oak_fence");
   public static final BlockType MANGROVE_FENCE = register("minecraft:mangrove_fence");
   public static final BlockType BAMBOO_FENCE = register("minecraft:bamboo_fence");
   public static final BlockType SPRUCE_DOOR = register("minecraft:spruce_door");
@@ -645,6 +665,7 @@ public record BlockType(
   public static final BlockType ACACIA_DOOR = register("minecraft:acacia_door");
   public static final BlockType CHERRY_DOOR = register("minecraft:cherry_door");
   public static final BlockType DARK_OAK_DOOR = register("minecraft:dark_oak_door");
+  public static final BlockType PALE_OAK_DOOR = register("minecraft:pale_oak_door");
   public static final BlockType MANGROVE_DOOR = register("minecraft:mangrove_door");
   public static final BlockType BAMBOO_DOOR = register("minecraft:bamboo_door");
   public static final BlockType END_ROD = register("minecraft:end_rod");
@@ -1116,6 +1137,9 @@ public record BlockType(
   public static final BlockType TRIAL_SPAWNER = register("minecraft:trial_spawner");
   public static final BlockType VAULT = register("minecraft:vault");
   public static final BlockType HEAVY_CORE = register("minecraft:heavy_core");
+  public static final BlockType PALE_MOSS_BLOCK = register("minecraft:pale_moss_block");
+  public static final BlockType PALE_MOSS_CARPET = register("minecraft:pale_moss_carpet");
+  public static final BlockType PALE_HANGING_MOSS = register("minecraft:pale_hanging_moss");
   //@formatter:on
 
   public BlockType {

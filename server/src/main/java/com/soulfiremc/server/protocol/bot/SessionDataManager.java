@@ -45,6 +45,9 @@ import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
@@ -88,8 +91,8 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.borde
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -110,7 +113,7 @@ public final class SessionDataManager {
   private final BotConnection connection;
   private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
-  private final Int2IntMap itemCoolDowns = Int2IntMaps.synchronize(new Int2IntOpenHashMap());
+  private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
@@ -188,7 +191,7 @@ public final class SessionDataManager {
   }
 
   @EventHandler
-  public void onLoginSuccess(ClientboundGameProfilePacket packet) {
+  public void onLoginSuccess(ClientboundLoginFinishedPacket packet) {
     botProfile = packet.getProfile();
   }
 
@@ -267,7 +270,8 @@ public final class SessionDataManager {
         spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
-        spawnInfo.isFlat());
+        spawnInfo.isFlat(),
+        spawnInfo.getSeaLevel());
     gameMode = spawnInfo.getGameMode();
     previousGameMode = spawnInfo.getPreviousGamemode();
     lastDeathPos = spawnInfo.getLastDeathPos();
@@ -295,18 +299,18 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
-    var relative = packet.getRelative();
+    var relative = packet.getRelatives();
     var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getX() : packet.getX();
     var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getY() : packet.getY();
     var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getZ() : packet.getZ();
     var yaw =
       relative.contains(PositionElement.YAW)
-        ? clientEntity.yaw() + packet.getYaw()
-        : packet.getYaw();
+        ? clientEntity.yaw() + packet.getYRot()
+        : packet.getYRot();
     var pitch =
       relative.contains(PositionElement.PITCH)
-        ? clientEntity.pitch() + packet.getPitch()
-        : packet.getPitch();
+        ? clientEntity.pitch() + packet.getXRot()
+        : packet.getXRot();
 
     clientEntity.setPosition(x, y, z);
     clientEntity.setRotation(yaw, pitch);
@@ -327,8 +331,8 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
-    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getTeleportId()));
-    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, x, y, z, yaw, pitch));
+    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, false, x, y, z, yaw, pitch));
+    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
   }
 
   @EventHandler
@@ -533,8 +537,9 @@ public final class SessionDataManager {
   public void onLevelTime(ClientboundSetTimePacket packet) {
     var level = currentLevel();
 
-    level.worldAge(packet.getWorldAge());
-    level.time(packet.getTime());
+    level.gameTime(packet.getGameTime());
+    level.dayTime(packet.getDayTime());
+    level.tickDayTime(packet.isTickDayTime());
   }
 
   @EventHandler
@@ -584,7 +589,7 @@ public final class SessionDataManager {
   }
 
   @EventHandler
-  public void onSetSlot(ClientboundSetCarriedItemPacket packet) {
+  public void onSetSlot(ClientboundSetHeldSlotPacket packet) {
     inventoryManager.heldItemSlot(packet.getSlot());
   }
 
@@ -615,9 +620,9 @@ public final class SessionDataManager {
   @EventHandler
   public void onCooldown(ClientboundCooldownPacket packet) {
     if (packet.getCooldownTicks() == 0) {
-      itemCoolDowns.remove(packet.getItemId());
+      itemCoolDowns.removeInt(packet.getCooldownGroup());
     } else {
-      itemCoolDowns.put(packet.getItemId(), packet.getCooldownTicks());
+      itemCoolDowns.put(packet.getCooldownGroup(), packet.getCooldownTicks());
     }
   }
 

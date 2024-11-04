@@ -28,42 +28,43 @@ public record AttributeType(int id, Key key, double min, double max, double defa
   public static final Registry<AttributeType> REGISTRY = new Registry<>(RegistryKeys.ATTRIBUTE);
 
   //@formatter:off
-  public static final AttributeType ARMOR = register("minecraft:generic.armor");
-  public static final AttributeType ARMOR_TOUGHNESS = register("minecraft:generic.armor_toughness");
-  public static final AttributeType ATTACK_DAMAGE = register("minecraft:generic.attack_damage");
-  public static final AttributeType ATTACK_KNOCKBACK = register("minecraft:generic.attack_knockback");
-  public static final AttributeType ATTACK_SPEED = register("minecraft:generic.attack_speed");
-  public static final AttributeType BLOCK_BREAK_SPEED = register("minecraft:player.block_break_speed");
-  public static final AttributeType BLOCK_INTERACTION_RANGE = register("minecraft:player.block_interaction_range");
-  public static final AttributeType BURNING_TIME = register("minecraft:generic.burning_time");
-  public static final AttributeType EXPLOSION_KNOCKBACK_RESISTANCE = register("minecraft:generic.explosion_knockback_resistance");
-  public static final AttributeType ENTITY_INTERACTION_RANGE = register("minecraft:player.entity_interaction_range");
-  public static final AttributeType FALL_DAMAGE_MULTIPLIER = register("minecraft:generic.fall_damage_multiplier");
-  public static final AttributeType FLYING_SPEED = register("minecraft:generic.flying_speed");
-  public static final AttributeType FOLLOW_RANGE = register("minecraft:generic.follow_range");
-  public static final AttributeType GRAVITY = register("minecraft:generic.gravity");
-  public static final AttributeType JUMP_STRENGTH = register("minecraft:generic.jump_strength");
-  public static final AttributeType KNOCKBACK_RESISTANCE = register("minecraft:generic.knockback_resistance");
-  public static final AttributeType LUCK = register("minecraft:generic.luck");
-  public static final AttributeType MAX_ABSORPTION = register("minecraft:generic.max_absorption");
-  public static final AttributeType MAX_HEALTH = register("minecraft:generic.max_health");
-  public static final AttributeType MINING_EFFICIENCY = register("minecraft:player.mining_efficiency");
-  public static final AttributeType MOVEMENT_EFFICIENCY = register("minecraft:generic.movement_efficiency");
-  public static final AttributeType MOVEMENT_SPEED = register("minecraft:generic.movement_speed");
-  public static final AttributeType OXYGEN_BONUS = register("minecraft:generic.oxygen_bonus");
-  public static final AttributeType SAFE_FALL_DISTANCE = register("minecraft:generic.safe_fall_distance");
-  public static final AttributeType SCALE = register("minecraft:generic.scale");
-  public static final AttributeType SNEAKING_SPEED = register("minecraft:player.sneaking_speed");
-  public static final AttributeType SPAWN_REINFORCEMENTS_CHANCE = register("minecraft:zombie.spawn_reinforcements");
-  public static final AttributeType STEP_HEIGHT = register("minecraft:generic.step_height");
-  public static final AttributeType SUBMERGED_MINING_SPEED = register("minecraft:player.submerged_mining_speed");
-  public static final AttributeType SWEEPING_DAMAGE_RATIO = register("minecraft:player.sweeping_damage_ratio");
-  public static final AttributeType WATER_MOVEMENT_EFFICIENCY = register("minecraft:generic.water_movement_efficiency");
+  public static final AttributeType ARMOR = register("minecraft:armor");
+  public static final AttributeType ARMOR_TOUGHNESS = register("minecraft:armor_toughness");
+  public static final AttributeType ATTACK_DAMAGE = register("minecraft:attack_damage");
+  public static final AttributeType ATTACK_KNOCKBACK = register("minecraft:attack_knockback");
+  public static final AttributeType ATTACK_SPEED = register("minecraft:attack_speed");
+  public static final AttributeType BLOCK_BREAK_SPEED = register("minecraft:block_break_speed");
+  public static final AttributeType BLOCK_INTERACTION_RANGE = register("minecraft:block_interaction_range");
+  public static final AttributeType BURNING_TIME = register("minecraft:burning_time");
+  public static final AttributeType EXPLOSION_KNOCKBACK_RESISTANCE = register("minecraft:explosion_knockback_resistance");
+  public static final AttributeType ENTITY_INTERACTION_RANGE = register("minecraft:entity_interaction_range");
+  public static final AttributeType FALL_DAMAGE_MULTIPLIER = register("minecraft:fall_damage_multiplier");
+  public static final AttributeType FLYING_SPEED = register("minecraft:flying_speed");
+  public static final AttributeType FOLLOW_RANGE = register("minecraft:follow_range");
+  public static final AttributeType GRAVITY = register("minecraft:gravity");
+  public static final AttributeType JUMP_STRENGTH = register("minecraft:jump_strength");
+  public static final AttributeType KNOCKBACK_RESISTANCE = register("minecraft:knockback_resistance");
+  public static final AttributeType LUCK = register("minecraft:luck");
+  public static final AttributeType MAX_ABSORPTION = register("minecraft:max_absorption");
+  public static final AttributeType MAX_HEALTH = register("minecraft:max_health");
+  public static final AttributeType MINING_EFFICIENCY = register("minecraft:mining_efficiency");
+  public static final AttributeType MOVEMENT_EFFICIENCY = register("minecraft:movement_efficiency");
+  public static final AttributeType MOVEMENT_SPEED = register("minecraft:movement_speed");
+  public static final AttributeType OXYGEN_BONUS = register("minecraft:oxygen_bonus");
+  public static final AttributeType SAFE_FALL_DISTANCE = register("minecraft:safe_fall_distance");
+  public static final AttributeType SCALE = register("minecraft:scale");
+  public static final AttributeType SNEAKING_SPEED = register("minecraft:sneaking_speed");
+  public static final AttributeType SPAWN_REINFORCEMENTS_CHANCE = register("minecraft:spawn_reinforcements");
+  public static final AttributeType STEP_HEIGHT = register("minecraft:step_height");
+  public static final AttributeType SUBMERGED_MINING_SPEED = register("minecraft:submerged_mining_speed");
+  public static final AttributeType SWEEPING_DAMAGE_RATIO = register("minecraft:sweeping_damage_ratio");
+  public static final AttributeType TEMPT_RANGE = register("minecraft:tempt_range");
+  public static final AttributeType WATER_MOVEMENT_EFFICIENCY = register("minecraft:water_movement_efficiency");
   //@formatter:on
 
   public static AttributeType register(String key) {
     var instance =
-            GsonDataHelper.fromJson("minecraft/attributes.json", key, AttributeType.class);
+      GsonDataHelper.fromJson("minecraft/attributes.json", key, AttributeType.class);
 
     return REGISTRY.register(instance);
   }

@@ -34,7 +34,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
-import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundGameProfilePacket;
+import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 
 public class ClientBrand implements InternalPlugin {
   public static final PluginInfo PLUGIN_INFO = new PluginInfo(
@@ -46,7 +46,7 @@ public class ClientBrand implements InternalPlugin {
   );
 
   public static void onPacket(SFPacketReceiveEvent event) {
-    if (event.packet() instanceof ClientboundGameProfilePacket) {
+    if (event.packet() instanceof ClientboundLoginFinishedPacket) {
       var connection = event.connection();
       var settingsSource = connection.settingsSource();
 

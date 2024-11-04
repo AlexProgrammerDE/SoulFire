@@ -18,6 +18,8 @@ minecraft:jungle_planks|1
 minecraft:acacia_planks|1
 minecraft:cherry_planks|1
 minecraft:dark_oak_planks|1
+minecraft:pale_oak_wood|1
+minecraft:pale_oak_planks|1
 minecraft:mangrove_planks|1
 minecraft:bamboo_planks|1
 minecraft:bamboo_mosaic|1
@@ -28,6 +30,7 @@ minecraft:jungle_sapling|0
 minecraft:acacia_sapling|0
 minecraft:cherry_sapling|0
 minecraft:dark_oak_sapling|0
+minecraft:pale_oak_sapling|0
 minecraft:mangrove_propagule|0
 minecraft:bedrock|1
 minecraft:water|0
@@ -51,6 +54,7 @@ minecraft:jungle_log|1
 minecraft:acacia_log|1
 minecraft:cherry_log|1
 minecraft:dark_oak_log|1
+minecraft:pale_oak_log|1
 minecraft:mangrove_log|1
 minecraft:mangrove_roots|1
 minecraft:muddy_mangrove_roots|1
@@ -61,6 +65,7 @@ minecraft:stripped_jungle_log|1
 minecraft:stripped_acacia_log|1
 minecraft:stripped_cherry_log|1
 minecraft:stripped_dark_oak_log|1
+minecraft:stripped_pale_oak_log|1
 minecraft:stripped_oak_log|1
 minecraft:stripped_mangrove_log|1
 minecraft:stripped_bamboo_block|1
@@ -79,6 +84,7 @@ minecraft:stripped_jungle_wood|1
 minecraft:stripped_acacia_wood|1
 minecraft:stripped_cherry_wood|1
 minecraft:stripped_dark_oak_wood|1
+minecraft:stripped_pale_oak_wood|1
 minecraft:stripped_mangrove_wood|1
 minecraft:oak_leaves|1
 minecraft:spruce_leaves|1
@@ -87,6 +93,7 @@ minecraft:jungle_leaves|1
 minecraft:acacia_leaves|1
 minecraft:cherry_leaves|1
 minecraft:dark_oak_leaves|1
+minecraft:pale_oak_leaves|1
 minecraft:mangrove_leaves|1
 minecraft:azalea_leaves|1
 minecraft:flowering_azalea_leaves|1
@@ -174,6 +181,7 @@ minecraft:wall_torch|0
 minecraft:fire|0
 minecraft:soul_fire|0
 minecraft:spawner|1
+minecraft:creaking_heart|1
 minecraft:oak_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:chest|48,48,49,49,50,50,48,48,50,50,49,49,48,48,51,51,52,52,48,48,52,52,51,51
 minecraft:redstone_wire|0
@@ -191,6 +199,7 @@ minecraft:acacia_sign|0
 minecraft:cherry_sign|0
 minecraft:jungle_sign|0
 minecraft:dark_oak_sign|0
+minecraft:pale_oak_sign|0
 minecraft:mangrove_sign|0
 minecraft:bamboo_sign|0
 minecraft:oak_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
@@ -204,6 +213,7 @@ minecraft:acacia_wall_sign|0
 minecraft:cherry_wall_sign|0
 minecraft:jungle_wall_sign|0
 minecraft:dark_oak_wall_sign|0
+minecraft:pale_oak_wall_sign|0
 minecraft:mangrove_wall_sign|0
 minecraft:bamboo_wall_sign|0
 minecraft:oak_hanging_sign|0
@@ -213,6 +223,7 @@ minecraft:acacia_hanging_sign|0
 minecraft:cherry_hanging_sign|0
 minecraft:jungle_hanging_sign|0
 minecraft:dark_oak_hanging_sign|0
+minecraft:pale_oak_hanging_sign|0
 minecraft:crimson_hanging_sign|0
 minecraft:warped_hanging_sign|0
 minecraft:mangrove_hanging_sign|0
@@ -224,6 +235,7 @@ minecraft:acacia_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:cherry_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:jungle_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:dark_oak_wall_hanging_sign|58,58,58,58,59,59,59,59
+minecraft:pale_oak_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:mangrove_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:crimson_wall_hanging_sign|58,58,58,58,59,59,59,59
 minecraft:warped_wall_hanging_sign|58,58,58,58,59,59,59,59
@@ -238,6 +250,7 @@ minecraft:jungle_pressure_plate|0
 minecraft:acacia_pressure_plate|0
 minecraft:cherry_pressure_plate|0
 minecraft:dark_oak_pressure_plate|0
+minecraft:pale_oak_pressure_plate|0
 minecraft:mangrove_pressure_plate|0
 minecraft:bamboo_pressure_plate|0
 minecraft:redstone_ore|1
@@ -289,6 +302,7 @@ minecraft:jungle_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,
 minecraft:acacia_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
 minecraft:cherry_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
 minecraft:dark_oak_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
+minecraft:pale_oak_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
 minecraft:mangrove_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
 minecraft:bamboo_trapdoor|55,55,55,55,90,90,90,90,55,55,55,55,91,91,91,91,57,57,57,57,90,90,90,90,57,57,57,57,91,91,91,91,56,56,56,56,90,90,90,90,56,56,56,56,91,91,91,91,54,54,54,54,90,90,90,90,54,54,54,54,91,91,91,91
 minecraft:stone_bricks|1
@@ -362,6 +376,7 @@ minecraft:potted_jungle_sapling|160
 minecraft:potted_acacia_sapling|160
 minecraft:potted_cherry_sapling|160
 minecraft:potted_dark_oak_sapling|160
+minecraft:potted_pale_oak_sapling|160
 minecraft:potted_mangrove_propagule|160
 minecraft:potted_fern|160
 minecraft:potted_dandelion|160
@@ -390,6 +405,7 @@ minecraft:jungle_button|0
 minecraft:acacia_button|0
 minecraft:cherry_button|0
 minecraft:dark_oak_button|0
+minecraft:pale_oak_button|0
 minecraft:mangrove_button|0
 minecraft:bamboo_button|0
 minecraft:skeleton_skull|161
@@ -458,6 +474,7 @@ minecraft:black_stained_glass_pane|92,93,92,93,94,95,94,95,96,97,96,97,98,99,98,
 minecraft:acacia_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:cherry_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:dark_oak_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
+minecraft:pale_oak_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:mangrove_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:bamboo_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:bamboo_mosaic_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
@@ -544,6 +561,7 @@ minecraft:jungle_slab|178,178,63,63,1,1
 minecraft:acacia_slab|178,178,63,63,1,1
 minecraft:cherry_slab|178,178,63,63,1,1
 minecraft:dark_oak_slab|178,178,63,63,1,1
+minecraft:pale_oak_slab|178,178,63,63,1,1
 minecraft:mangrove_slab|178,178,63,63,1,1
 minecraft:bamboo_slab|178,178,63,63,1,1
 minecraft:bamboo_mosaic_slab|178,178,63,63,1,1
@@ -571,6 +589,7 @@ minecraft:jungle_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,
 minecraft:acacia_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
 minecraft:cherry_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
 minecraft:dark_oak_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
+minecraft:pale_oak_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
 minecraft:mangrove_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
 minecraft:bamboo_fence_gate|0,0,73,73,0,0,73,73,0,0,73,73,0,0,73,73,0,0,76,76,0,0,76,76,0,0,76,76,0,0,76,76
 minecraft:spruce_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
@@ -579,6 +598,7 @@ minecraft:jungle_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,
 minecraft:acacia_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
 minecraft:cherry_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
 minecraft:dark_oak_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
+minecraft:pale_oak_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
 minecraft:mangrove_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
 minecraft:bamboo_fence|67,68,67,68,69,70,69,70,71,72,71,72,73,74,73,74,75,76,75,76,77,78,77,78,79,80,79,80,81,82,81,82
 minecraft:spruce_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
@@ -587,6 +607,7 @@ minecraft:jungle_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,5
 minecraft:acacia_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
 minecraft:cherry_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
 minecraft:dark_oak_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
+minecraft:pale_oak_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
 minecraft:mangrove_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
 minecraft:bamboo_door|54,54,55,55,56,56,55,55,54,54,55,55,56,56,55,55,56,56,57,57,54,54,57,57,56,56,57,57,54,54,57,57,55,55,56,56,57,57,56,56,55,55,56,56,57,57,56,56,57,57,54,54,55,55,54,54,57,57,54,54,55,55,54,54
 minecraft:end_rod|180,181,180,181,182,182
@@ -1058,3 +1079,6 @@ minecraft:crafter|1
 minecraft:trial_spawner|1
 minecraft:vault|1
 minecraft:heavy_core|161
+minecraft:pale_moss_block|1
+minecraft:pale_moss_carpet|179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+minecraft:pale_hanging_moss|0

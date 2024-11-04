@@ -46,6 +46,7 @@ public class ItemTags {
   public static final TagKey<ItemType> LOGS_THAT_BURN = register("minecraft:logs_that_burn");
   public static final TagKey<ItemType> LOGS = register("minecraft:logs");
   public static final TagKey<ItemType> DARK_OAK_LOGS = register("minecraft:dark_oak_logs");
+  public static final TagKey<ItemType> PALE_OAK_LOGS = register("minecraft:pale_oak_logs");
   public static final TagKey<ItemType> OAK_LOGS = register("minecraft:oak_logs");
   public static final TagKey<ItemType> BIRCH_LOGS = register("minecraft:birch_logs");
   public static final TagKey<ItemType> ACACIA_LOGS = register("minecraft:acacia_logs");
@@ -75,6 +76,10 @@ public class ItemTags {
   public static final TagKey<ItemType> PIGLIN_REPELLENTS = register("minecraft:piglin_repellents");
   public static final TagKey<ItemType> PIGLIN_LOVED = register("minecraft:piglin_loved");
   public static final TagKey<ItemType> IGNORED_BY_PIGLIN_BABIES = register("minecraft:ignored_by_piglin_babies");
+  public static final TagKey<ItemType> PIGLIN_SAFE_ARMOR = register("minecraft:piglin_safe_armor");
+  public static final TagKey<ItemType> DUPLICATES_ALLAYS = register("minecraft:duplicates_allays");
+  public static final TagKey<ItemType> BREWING_FUEL = register("minecraft:brewing_fuel");
+  public static final TagKey<ItemType> SHULKER_BOXES = register("minecraft:shulker_boxes");
   public static final TagKey<ItemType> MEAT = register("minecraft:meat");
   public static final TagKey<ItemType> SNIFFER_FOOD = register("minecraft:sniffer_food");
   public static final TagKey<ItemType> PIGLIN_FOOD = register("minecraft:piglin_food");
@@ -96,6 +101,7 @@ public class ItemTags {
   public static final TagKey<ItemType> LLAMA_TEMPT_ITEMS = register("minecraft:llama_tempt_items");
   public static final TagKey<ItemType> OCELOT_FOOD = register("minecraft:ocelot_food");
   public static final TagKey<ItemType> PANDA_FOOD = register("minecraft:panda_food");
+  public static final TagKey<ItemType> PANDA_EATS_FROM_GROUND = register("minecraft:panda_eats_from_ground");
   public static final TagKey<ItemType> PIG_FOOD = register("minecraft:pig_food");
   public static final TagKey<ItemType> RABBIT_FOOD = register("minecraft:rabbit_food");
   public static final TagKey<ItemType> STRIDER_FOOD = register("minecraft:strider_food");
@@ -128,7 +134,20 @@ public class ItemTags {
   public static final TagKey<ItemType> LECTERN_BOOKS = register("minecraft:lectern_books");
   public static final TagKey<ItemType> BOOKSHELF_BOOKS = register("minecraft:bookshelf_books");
   public static final TagKey<ItemType> BEACON_PAYMENT_ITEMS = register("minecraft:beacon_payment_items");
+  public static final TagKey<ItemType> WOODEN_TOOL_MATERIALS = register("minecraft:wooden_tool_materials");
   public static final TagKey<ItemType> STONE_TOOL_MATERIALS = register("minecraft:stone_tool_materials");
+  public static final TagKey<ItemType> IRON_TOOL_MATERIALS = register("minecraft:iron_tool_materials");
+  public static final TagKey<ItemType> GOLD_TOOL_MATERIALS = register("minecraft:gold_tool_materials");
+  public static final TagKey<ItemType> DIAMOND_TOOL_MATERIALS = register("minecraft:diamond_tool_materials");
+  public static final TagKey<ItemType> NETHERITE_TOOL_MATERIALS = register("minecraft:netherite_tool_materials");
+  public static final TagKey<ItemType> REPAIRS_LEATHER_ARMOR = register("minecraft:repairs_leather_armor");
+  public static final TagKey<ItemType> REPAIRS_CHAIN_ARMOR = register("minecraft:repairs_chain_armor");
+  public static final TagKey<ItemType> REPAIRS_IRON_ARMOR = register("minecraft:repairs_iron_armor");
+  public static final TagKey<ItemType> REPAIRS_GOLD_ARMOR = register("minecraft:repairs_gold_armor");
+  public static final TagKey<ItemType> REPAIRS_DIAMOND_ARMOR = register("minecraft:repairs_diamond_armor");
+  public static final TagKey<ItemType> REPAIRS_NETHERITE_ARMOR = register("minecraft:repairs_netherite_armor");
+  public static final TagKey<ItemType> REPAIRS_TURTLE_HELMET = register("minecraft:repairs_turtle_helmet");
+  public static final TagKey<ItemType> REPAIRS_WOLF_ARMOR = register("minecraft:repairs_wolf_armor");
   public static final TagKey<ItemType> STONE_CRAFTING_MATERIALS = register("minecraft:stone_crafting_materials");
   public static final TagKey<ItemType> FREEZE_IMMUNE_WEARABLES = register("minecraft:freeze_immune_wearables");
   public static final TagKey<ItemType> DAMPENS_VIBRATIONS = register("minecraft:dampens_vibrations");
@@ -154,7 +173,10 @@ public class ItemTags {
   public static final TagKey<ItemType> SHOVELS = register("minecraft:shovels");
   public static final TagKey<ItemType> BREAKS_DECORATED_POTS = register("minecraft:breaks_decorated_pots");
   public static final TagKey<ItemType> VILLAGER_PLANTABLE_SEEDS = register("minecraft:villager_plantable_seeds");
+  public static final TagKey<ItemType> VILLAGER_PICKS_UP = register("minecraft:villager_picks_up");
   public static final TagKey<ItemType> DYEABLE = register("minecraft:dyeable");
+  public static final TagKey<ItemType> FURNACE_MINECART_FUEL = register("minecraft:furnace_minecart_fuel");
+  public static final TagKey<ItemType> BUNDLES = register("minecraft:bundles");
   public static final TagKey<ItemType> FOOT_ARMOR_ENCHANTABLE = register("minecraft:enchantable/foot_armor");
   public static final TagKey<ItemType> LEG_ARMOR_ENCHANTABLE = register("minecraft:enchantable/leg_armor");
   public static final TagKey<ItemType> CHEST_ARMOR_ENCHANTABLE = register("minecraft:enchantable/chest_armor");
@@ -174,6 +196,8 @@ public class ItemTags {
   public static final TagKey<ItemType> CROSSBOW_ENCHANTABLE = register("minecraft:enchantable/crossbow");
   public static final TagKey<ItemType> VANISHING_ENCHANTABLE = register("minecraft:enchantable/vanishing");
   public static final TagKey<ItemType> MACE_ENCHANTABLE = register("minecraft:enchantable/mace");
+  public static final TagKey<ItemType> MAP_INVISIBILITY_EQUIPMENT = register("minecraft:map_invisibility_equipment");
+  public static final TagKey<ItemType> GAZE_DISGUISE_EQUIPMENT = register("minecraft:gaze_disguise_equipment");
   //@formatter:on
 
   private ItemTags() {}

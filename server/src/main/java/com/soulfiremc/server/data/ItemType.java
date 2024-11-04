@@ -70,6 +70,7 @@ public record ItemType(
   public static final ItemType ACACIA_PLANKS = register("minecraft:acacia_planks");
   public static final ItemType CHERRY_PLANKS = register("minecraft:cherry_planks");
   public static final ItemType DARK_OAK_PLANKS = register("minecraft:dark_oak_planks");
+  public static final ItemType PALE_OAK_PLANKS = register("minecraft:pale_oak_planks");
   public static final ItemType MANGROVE_PLANKS = register("minecraft:mangrove_planks");
   public static final ItemType BAMBOO_PLANKS = register("minecraft:bamboo_planks");
   public static final ItemType CRIMSON_PLANKS = register("minecraft:crimson_planks");
@@ -82,6 +83,7 @@ public record ItemType(
   public static final ItemType ACACIA_SAPLING = register("minecraft:acacia_sapling");
   public static final ItemType CHERRY_SAPLING = register("minecraft:cherry_sapling");
   public static final ItemType DARK_OAK_SAPLING = register("minecraft:dark_oak_sapling");
+  public static final ItemType PALE_OAK_SAPLING = register("minecraft:pale_oak_sapling");
   public static final ItemType MANGROVE_PROPAGULE = register("minecraft:mangrove_propagule");
   public static final ItemType BEDROCK = register("minecraft:bedrock");
   public static final ItemType SAND = register("minecraft:sand");
@@ -165,6 +167,7 @@ public record ItemType(
   public static final ItemType JUNGLE_LOG = register("minecraft:jungle_log");
   public static final ItemType ACACIA_LOG = register("minecraft:acacia_log");
   public static final ItemType CHERRY_LOG = register("minecraft:cherry_log");
+  public static final ItemType PALE_OAK_LOG = register("minecraft:pale_oak_log");
   public static final ItemType DARK_OAK_LOG = register("minecraft:dark_oak_log");
   public static final ItemType MANGROVE_LOG = register("minecraft:mangrove_log");
   public static final ItemType MANGROVE_ROOTS = register("minecraft:mangrove_roots");
@@ -179,6 +182,7 @@ public record ItemType(
   public static final ItemType STRIPPED_ACACIA_LOG = register("minecraft:stripped_acacia_log");
   public static final ItemType STRIPPED_CHERRY_LOG = register("minecraft:stripped_cherry_log");
   public static final ItemType STRIPPED_DARK_OAK_LOG = register("minecraft:stripped_dark_oak_log");
+  public static final ItemType STRIPPED_PALE_OAK_LOG = register("minecraft:stripped_pale_oak_log");
   public static final ItemType STRIPPED_MANGROVE_LOG = register("minecraft:stripped_mangrove_log");
   public static final ItemType STRIPPED_CRIMSON_STEM = register("minecraft:stripped_crimson_stem");
   public static final ItemType STRIPPED_WARPED_STEM = register("minecraft:stripped_warped_stem");
@@ -189,6 +193,7 @@ public record ItemType(
   public static final ItemType STRIPPED_ACACIA_WOOD = register("minecraft:stripped_acacia_wood");
   public static final ItemType STRIPPED_CHERRY_WOOD = register("minecraft:stripped_cherry_wood");
   public static final ItemType STRIPPED_DARK_OAK_WOOD = register("minecraft:stripped_dark_oak_wood");
+  public static final ItemType STRIPPED_PALE_OAK_WOOD = register("minecraft:stripped_pale_oak_wood");
   public static final ItemType STRIPPED_MANGROVE_WOOD = register("minecraft:stripped_mangrove_wood");
   public static final ItemType STRIPPED_CRIMSON_HYPHAE = register("minecraft:stripped_crimson_hyphae");
   public static final ItemType STRIPPED_WARPED_HYPHAE = register("minecraft:stripped_warped_hyphae");
@@ -199,6 +204,7 @@ public record ItemType(
   public static final ItemType JUNGLE_WOOD = register("minecraft:jungle_wood");
   public static final ItemType ACACIA_WOOD = register("minecraft:acacia_wood");
   public static final ItemType CHERRY_WOOD = register("minecraft:cherry_wood");
+  public static final ItemType PALE_OAK_WOOD = register("minecraft:pale_oak_wood");
   public static final ItemType DARK_OAK_WOOD = register("minecraft:dark_oak_wood");
   public static final ItemType MANGROVE_WOOD = register("minecraft:mangrove_wood");
   public static final ItemType CRIMSON_HYPHAE = register("minecraft:crimson_hyphae");
@@ -210,6 +216,7 @@ public record ItemType(
   public static final ItemType ACACIA_LEAVES = register("minecraft:acacia_leaves");
   public static final ItemType CHERRY_LEAVES = register("minecraft:cherry_leaves");
   public static final ItemType DARK_OAK_LEAVES = register("minecraft:dark_oak_leaves");
+  public static final ItemType PALE_OAK_LEAVES = register("minecraft:pale_oak_leaves");
   public static final ItemType MANGROVE_LEAVES = register("minecraft:mangrove_leaves");
   public static final ItemType AZALEA_LEAVES = register("minecraft:azalea_leaves");
   public static final ItemType FLOWERING_AZALEA_LEAVES = register("minecraft:flowering_azalea_leaves");
@@ -272,9 +279,12 @@ public record ItemType(
   public static final ItemType TWISTING_VINES = register("minecraft:twisting_vines");
   public static final ItemType SUGAR_CANE = register("minecraft:sugar_cane");
   public static final ItemType KELP = register("minecraft:kelp");
-  public static final ItemType MOSS_CARPET = register("minecraft:moss_carpet");
   public static final ItemType PINK_PETALS = register("minecraft:pink_petals");
+  public static final ItemType MOSS_CARPET = register("minecraft:moss_carpet");
   public static final ItemType MOSS_BLOCK = register("minecraft:moss_block");
+  public static final ItemType PALE_MOSS_CARPET = register("minecraft:pale_moss_carpet");
+  public static final ItemType PALE_HANGING_MOSS = register("minecraft:pale_hanging_moss");
+  public static final ItemType PALE_MOSS_BLOCK = register("minecraft:pale_moss_block");
   public static final ItemType HANGING_ROOTS = register("minecraft:hanging_roots");
   public static final ItemType BIG_DRIPLEAF = register("minecraft:big_dripleaf");
   public static final ItemType SMALL_DRIPLEAF = register("minecraft:small_dripleaf");
@@ -286,6 +296,7 @@ public record ItemType(
   public static final ItemType ACACIA_SLAB = register("minecraft:acacia_slab");
   public static final ItemType CHERRY_SLAB = register("minecraft:cherry_slab");
   public static final ItemType DARK_OAK_SLAB = register("minecraft:dark_oak_slab");
+  public static final ItemType PALE_OAK_SLAB = register("minecraft:pale_oak_slab");
   public static final ItemType MANGROVE_SLAB = register("minecraft:mangrove_slab");
   public static final ItemType BAMBOO_SLAB = register("minecraft:bamboo_slab");
   public static final ItemType BAMBOO_MOSAIC_SLAB = register("minecraft:bamboo_mosaic_slab");
@@ -326,6 +337,7 @@ public record ItemType(
   public static final ItemType PURPUR_PILLAR = register("minecraft:purpur_pillar");
   public static final ItemType PURPUR_STAIRS = register("minecraft:purpur_stairs");
   public static final ItemType SPAWNER = register("minecraft:spawner");
+  public static final ItemType CREAKING_HEART = register("minecraft:creaking_heart");
   public static final ItemType CHEST = register("minecraft:chest");
   public static final ItemType CRAFTING_TABLE = register("minecraft:crafting_table");
   public static final ItemType FARMLAND = register("minecraft:farmland");
@@ -345,6 +357,7 @@ public record ItemType(
   public static final ItemType ACACIA_FENCE = register("minecraft:acacia_fence");
   public static final ItemType CHERRY_FENCE = register("minecraft:cherry_fence");
   public static final ItemType DARK_OAK_FENCE = register("minecraft:dark_oak_fence");
+  public static final ItemType PALE_OAK_FENCE = register("minecraft:pale_oak_fence");
   public static final ItemType MANGROVE_FENCE = register("minecraft:mangrove_fence");
   public static final ItemType BAMBOO_FENCE = register("minecraft:bamboo_fence");
   public static final ItemType CRIMSON_FENCE = register("minecraft:crimson_fence");
@@ -417,6 +430,7 @@ public record ItemType(
   public static final ItemType ACACIA_STAIRS = register("minecraft:acacia_stairs");
   public static final ItemType CHERRY_STAIRS = register("minecraft:cherry_stairs");
   public static final ItemType DARK_OAK_STAIRS = register("minecraft:dark_oak_stairs");
+  public static final ItemType PALE_OAK_STAIRS = register("minecraft:pale_oak_stairs");
   public static final ItemType MANGROVE_STAIRS = register("minecraft:mangrove_stairs");
   public static final ItemType BAMBOO_STAIRS = register("minecraft:bamboo_stairs");
   public static final ItemType BAMBOO_MOSAIC_STAIRS = register("minecraft:bamboo_mosaic_stairs");
@@ -718,6 +732,7 @@ public record ItemType(
   public static final ItemType ACACIA_BUTTON = register("minecraft:acacia_button");
   public static final ItemType CHERRY_BUTTON = register("minecraft:cherry_button");
   public static final ItemType DARK_OAK_BUTTON = register("minecraft:dark_oak_button");
+  public static final ItemType PALE_OAK_BUTTON = register("minecraft:pale_oak_button");
   public static final ItemType MANGROVE_BUTTON = register("minecraft:mangrove_button");
   public static final ItemType BAMBOO_BUTTON = register("minecraft:bamboo_button");
   public static final ItemType CRIMSON_BUTTON = register("minecraft:crimson_button");
@@ -733,6 +748,7 @@ public record ItemType(
   public static final ItemType ACACIA_PRESSURE_PLATE = register("minecraft:acacia_pressure_plate");
   public static final ItemType CHERRY_PRESSURE_PLATE = register("minecraft:cherry_pressure_plate");
   public static final ItemType DARK_OAK_PRESSURE_PLATE = register("minecraft:dark_oak_pressure_plate");
+  public static final ItemType PALE_OAK_PRESSURE_PLATE = register("minecraft:pale_oak_pressure_plate");
   public static final ItemType MANGROVE_PRESSURE_PLATE = register("minecraft:mangrove_pressure_plate");
   public static final ItemType BAMBOO_PRESSURE_PLATE = register("minecraft:bamboo_pressure_plate");
   public static final ItemType CRIMSON_PRESSURE_PLATE = register("minecraft:crimson_pressure_plate");
@@ -745,6 +761,7 @@ public record ItemType(
   public static final ItemType ACACIA_DOOR = register("minecraft:acacia_door");
   public static final ItemType CHERRY_DOOR = register("minecraft:cherry_door");
   public static final ItemType DARK_OAK_DOOR = register("minecraft:dark_oak_door");
+  public static final ItemType PALE_OAK_DOOR = register("minecraft:pale_oak_door");
   public static final ItemType MANGROVE_DOOR = register("minecraft:mangrove_door");
   public static final ItemType BAMBOO_DOOR = register("minecraft:bamboo_door");
   public static final ItemType CRIMSON_DOOR = register("minecraft:crimson_door");
@@ -765,6 +782,7 @@ public record ItemType(
   public static final ItemType ACACIA_TRAPDOOR = register("minecraft:acacia_trapdoor");
   public static final ItemType CHERRY_TRAPDOOR = register("minecraft:cherry_trapdoor");
   public static final ItemType DARK_OAK_TRAPDOOR = register("minecraft:dark_oak_trapdoor");
+  public static final ItemType PALE_OAK_TRAPDOOR = register("minecraft:pale_oak_trapdoor");
   public static final ItemType MANGROVE_TRAPDOOR = register("minecraft:mangrove_trapdoor");
   public static final ItemType BAMBOO_TRAPDOOR = register("minecraft:bamboo_trapdoor");
   public static final ItemType CRIMSON_TRAPDOOR = register("minecraft:crimson_trapdoor");
@@ -784,6 +802,7 @@ public record ItemType(
   public static final ItemType ACACIA_FENCE_GATE = register("minecraft:acacia_fence_gate");
   public static final ItemType CHERRY_FENCE_GATE = register("minecraft:cherry_fence_gate");
   public static final ItemType DARK_OAK_FENCE_GATE = register("minecraft:dark_oak_fence_gate");
+  public static final ItemType PALE_OAK_FENCE_GATE = register("minecraft:pale_oak_fence_gate");
   public static final ItemType MANGROVE_FENCE_GATE = register("minecraft:mangrove_fence_gate");
   public static final ItemType BAMBOO_FENCE_GATE = register("minecraft:bamboo_fence_gate");
   public static final ItemType CRIMSON_FENCE_GATE = register("minecraft:crimson_fence_gate");
@@ -800,6 +819,7 @@ public record ItemType(
   public static final ItemType HOPPER_MINECART = register("minecraft:hopper_minecart");
   public static final ItemType CARROT_ON_A_STICK = register("minecraft:carrot_on_a_stick");
   public static final ItemType WARPED_FUNGUS_ON_A_STICK = register("minecraft:warped_fungus_on_a_stick");
+  public static final ItemType PHANTOM_MEMBRANE = register("minecraft:phantom_membrane");
   public static final ItemType ELYTRA = register("minecraft:elytra");
   public static final ItemType OAK_BOAT = register("minecraft:oak_boat");
   public static final ItemType OAK_CHEST_BOAT = register("minecraft:oak_chest_boat");
@@ -815,6 +835,8 @@ public record ItemType(
   public static final ItemType CHERRY_CHEST_BOAT = register("minecraft:cherry_chest_boat");
   public static final ItemType DARK_OAK_BOAT = register("minecraft:dark_oak_boat");
   public static final ItemType DARK_OAK_CHEST_BOAT = register("minecraft:dark_oak_chest_boat");
+  public static final ItemType PALE_OAK_BOAT = register("minecraft:pale_oak_boat");
+  public static final ItemType PALE_OAK_CHEST_BOAT = register("minecraft:pale_oak_chest_boat");
   public static final ItemType MANGROVE_BOAT = register("minecraft:mangrove_boat");
   public static final ItemType MANGROVE_CHEST_BOAT = register("minecraft:mangrove_chest_boat");
   public static final ItemType BAMBOO_RAFT = register("minecraft:bamboo_raft");
@@ -920,6 +942,7 @@ public record ItemType(
   public static final ItemType ACACIA_SIGN = register("minecraft:acacia_sign");
   public static final ItemType CHERRY_SIGN = register("minecraft:cherry_sign");
   public static final ItemType DARK_OAK_SIGN = register("minecraft:dark_oak_sign");
+  public static final ItemType PALE_OAK_SIGN = register("minecraft:pale_oak_sign");
   public static final ItemType MANGROVE_SIGN = register("minecraft:mangrove_sign");
   public static final ItemType BAMBOO_SIGN = register("minecraft:bamboo_sign");
   public static final ItemType CRIMSON_SIGN = register("minecraft:crimson_sign");
@@ -931,6 +954,7 @@ public record ItemType(
   public static final ItemType ACACIA_HANGING_SIGN = register("minecraft:acacia_hanging_sign");
   public static final ItemType CHERRY_HANGING_SIGN = register("minecraft:cherry_hanging_sign");
   public static final ItemType DARK_OAK_HANGING_SIGN = register("minecraft:dark_oak_hanging_sign");
+  public static final ItemType PALE_OAK_HANGING_SIGN = register("minecraft:pale_oak_hanging_sign");
   public static final ItemType MANGROVE_HANGING_SIGN = register("minecraft:mangrove_hanging_sign");
   public static final ItemType BAMBOO_HANGING_SIGN = register("minecraft:bamboo_hanging_sign");
   public static final ItemType CRIMSON_HANGING_SIGN = register("minecraft:crimson_hanging_sign");
@@ -958,6 +982,22 @@ public record ItemType(
   public static final ItemType COMPASS = register("minecraft:compass");
   public static final ItemType RECOVERY_COMPASS = register("minecraft:recovery_compass");
   public static final ItemType BUNDLE = register("minecraft:bundle");
+  public static final ItemType WHITE_BUNDLE = register("minecraft:white_bundle");
+  public static final ItemType ORANGE_BUNDLE = register("minecraft:orange_bundle");
+  public static final ItemType MAGENTA_BUNDLE = register("minecraft:magenta_bundle");
+  public static final ItemType LIGHT_BLUE_BUNDLE = register("minecraft:light_blue_bundle");
+  public static final ItemType YELLOW_BUNDLE = register("minecraft:yellow_bundle");
+  public static final ItemType LIME_BUNDLE = register("minecraft:lime_bundle");
+  public static final ItemType PINK_BUNDLE = register("minecraft:pink_bundle");
+  public static final ItemType GRAY_BUNDLE = register("minecraft:gray_bundle");
+  public static final ItemType LIGHT_GRAY_BUNDLE = register("minecraft:light_gray_bundle");
+  public static final ItemType CYAN_BUNDLE = register("minecraft:cyan_bundle");
+  public static final ItemType PURPLE_BUNDLE = register("minecraft:purple_bundle");
+  public static final ItemType BLUE_BUNDLE = register("minecraft:blue_bundle");
+  public static final ItemType BROWN_BUNDLE = register("minecraft:brown_bundle");
+  public static final ItemType GREEN_BUNDLE = register("minecraft:green_bundle");
+  public static final ItemType RED_BUNDLE = register("minecraft:red_bundle");
+  public static final ItemType BLACK_BUNDLE = register("minecraft:black_bundle");
   public static final ItemType FISHING_ROD = register("minecraft:fishing_rod");
   public static final ItemType CLOCK = register("minecraft:clock");
   public static final ItemType SPYGLASS = register("minecraft:spyglass");
@@ -1025,8 +1065,8 @@ public record ItemType(
   public static final ItemType GHAST_TEAR = register("minecraft:ghast_tear");
   public static final ItemType GOLD_NUGGET = register("minecraft:gold_nugget");
   public static final ItemType NETHER_WART = register("minecraft:nether_wart");
-  public static final ItemType POTION = register("minecraft:potion");
   public static final ItemType GLASS_BOTTLE = register("minecraft:glass_bottle");
+  public static final ItemType POTION = register("minecraft:potion");
   public static final ItemType SPIDER_EYE = register("minecraft:spider_eye");
   public static final ItemType FERMENTED_SPIDER_EYE = register("minecraft:fermented_spider_eye");
   public static final ItemType BLAZE_POWDER = register("minecraft:blaze_powder");
@@ -1111,6 +1151,7 @@ public record ItemType(
   public static final ItemType WITHER_SKELETON_SPAWN_EGG = register("minecraft:wither_skeleton_spawn_egg");
   public static final ItemType WOLF_SPAWN_EGG = register("minecraft:wolf_spawn_egg");
   public static final ItemType ZOGLIN_SPAWN_EGG = register("minecraft:zoglin_spawn_egg");
+  public static final ItemType CREAKING_SPAWN_EGG = register("minecraft:creaking_spawn_egg");
   public static final ItemType ZOMBIE_SPAWN_EGG = register("minecraft:zombie_spawn_egg");
   public static final ItemType ZOMBIE_HORSE_SPAWN_EGG = register("minecraft:zombie_horse_spawn_egg");
   public static final ItemType ZOMBIE_VILLAGER_SPAWN_EGG = register("minecraft:zombie_villager_spawn_egg");
@@ -1120,6 +1161,7 @@ public record ItemType(
   public static final ItemType WIND_CHARGE = register("minecraft:wind_charge");
   public static final ItemType WRITABLE_BOOK = register("minecraft:writable_book");
   public static final ItemType WRITTEN_BOOK = register("minecraft:written_book");
+  public static final ItemType BREEZE_ROD = register("minecraft:breeze_rod");
   public static final ItemType MACE = register("minecraft:mace");
   public static final ItemType ITEM_FRAME = register("minecraft:item_frame");
   public static final ItemType GLOW_ITEM_FRAME = register("minecraft:glow_item_frame");
@@ -1216,7 +1258,6 @@ public record ItemType(
   public static final ItemType MUSIC_DISC_PRECIPICE = register("minecraft:music_disc_precipice");
   public static final ItemType DISC_FRAGMENT_5 = register("minecraft:disc_fragment_5");
   public static final ItemType TRIDENT = register("minecraft:trident");
-  public static final ItemType PHANTOM_MEMBRANE = register("minecraft:phantom_membrane");
   public static final ItemType NAUTILUS_SHELL = register("minecraft:nautilus_shell");
   public static final ItemType HEART_OF_THE_SEA = register("minecraft:heart_of_the_sea");
   public static final ItemType CROSSBOW = register("minecraft:crossbow");
@@ -1230,6 +1271,8 @@ public record ItemType(
   public static final ItemType PIGLIN_BANNER_PATTERN = register("minecraft:piglin_banner_pattern");
   public static final ItemType FLOW_BANNER_PATTERN = register("minecraft:flow_banner_pattern");
   public static final ItemType GUSTER_BANNER_PATTERN = register("minecraft:guster_banner_pattern");
+  public static final ItemType FIELD_MASONED_BANNER_PATTERN = register("minecraft:field_masoned_banner_pattern");
+  public static final ItemType BORDURE_INDENTED_BANNER_PATTERN = register("minecraft:bordure_indented_banner_pattern");
   public static final ItemType GOAT_HORN = register("minecraft:goat_horn");
   public static final ItemType COMPOSTER = register("minecraft:composter");
   public static final ItemType BARREL = register("minecraft:barrel");
@@ -1359,7 +1402,6 @@ public record ItemType(
   public static final ItemType OMINOUS_TRIAL_KEY = register("minecraft:ominous_trial_key");
   public static final ItemType VAULT = register("minecraft:vault");
   public static final ItemType OMINOUS_BOTTLE = register("minecraft:ominous_bottle");
-  public static final ItemType BREEZE_ROD = register("minecraft:breeze_rod");
   //@formatter:on
 
   public static ItemType register(String key) {

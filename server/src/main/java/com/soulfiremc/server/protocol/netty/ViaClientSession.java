@@ -77,7 +77,7 @@ public class ViaClientSession extends TcpSession {
   private final EventLoopGroup eventLoopGroup;
   @Getter
   private final BotConnection botConnection;
-  private final Queue<Packet> packetTickQueue = new ConcurrentLinkedQueue<>();
+  private final Queue<Runnable> packetTickQueue;
   private boolean delimiterBlockProcessing = false;
 
   public ViaClientSession(
@@ -87,7 +87,18 @@ public class ViaClientSession extends TcpSession {
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
     BotConnection botConnection) {
-    super(null, -1, protocol);
+    this(targetAddress, logger, protocol, proxy, eventLoopGroup, botConnection, new ConcurrentLinkedQueue<>());
+  }
+
+  private ViaClientSession(
+    SocketAddress targetAddress,
+    Logger logger,
+    PacketProtocol protocol,
+    SFProxy proxy,
+    EventLoopGroup eventLoopGroup,
+    BotConnection botConnection,
+    Queue<Runnable> packetTickQueue) {
+    super(null, -1, protocol, packetTickQueue::add);
     this.logger = logger;
     this.targetAddress = targetAddress;
     this.bindAddress = "0.0.0.0";
@@ -96,6 +107,7 @@ public class ViaClientSession extends TcpSession {
     this.codecHelper = protocol.createHelper();
     this.eventLoopGroup = eventLoopGroup;
     this.botConnection = botConnection;
+    this.packetTickQueue = packetTickQueue;
   }
 
   public boolean isDisconnected() {
@@ -260,9 +272,9 @@ public class ViaClientSession extends TcpSession {
     if (packet instanceof ClientboundDelimiterPacket) {
       // Block or unlock packets for processing
       delimiterBlockProcessing = !delimiterBlockProcessing;
-    } else {
-      super.callPacketReceived(packet);
     }
+
+    super.callPacketReceived(packet);
   }
 
   public void tick() {
@@ -271,9 +283,9 @@ public class ViaClientSession extends TcpSession {
       return;
     }
 
-    Packet packet;
-    while ((packet = packetTickQueue.poll()) != null) {
-      super.callPacketReceived(packet);
+    Runnable packetHandler;
+    while ((packetHandler = packetTickQueue.poll()) != null) {
+      packetHandler.run();
     }
   }
 

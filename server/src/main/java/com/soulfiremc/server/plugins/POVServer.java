@@ -60,6 +60,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
@@ -215,6 +216,7 @@ public class POVServer implements InternalPlugin {
               false,
               false,
               null,
+              0,
               0),
             false));
 
@@ -228,7 +230,7 @@ public class POVServer implements InternalPlugin {
         // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
         // request packet spam,
         // so send it after calling ConnectedEvent which adds the PacketHandler as listener
-        session.send(new ClientboundPlayerPositionPacket(0, 0, 0, 0, 0, 0));
+        session.send(new ClientboundPlayerPositionPacket(0, Vector3d.ZERO, Vector3d.ZERO, 0, 0, List.of()));
 
         // this packet is required since 1.20.3
         session.send(
@@ -612,7 +614,8 @@ public class POVServer implements InternalPlugin {
                     dataManager.currentLevel().debug(),
                     dataManager.currentLevel().flat(),
                     dataManager.lastDeathPos(),
-                    dataManager.portalCooldown());
+                    dataManager.portalCooldown(),
+                    dataManager.currentLevel().seaLevel());
                 session.send(
                   new ClientboundLoginPacket(
                     dataManager.clientEntity().entityId(),
@@ -708,12 +711,10 @@ public class POVServer implements InternalPlugin {
                 // Give initial coordinates to the client
                 session.send(
                   new ClientboundPlayerPositionPacket(
-                    dataManager.clientEntity().x(),
-                    dataManager.clientEntity().y(),
-                    dataManager.clientEntity().z(),
+                    Integer.MIN_VALUE,
+                    dataManager.clientEntity().pos(),
                     dataManager.clientEntity().yaw(),
-                    dataManager.clientEntity().pitch(),
-                    Integer.MIN_VALUE));
+                    dataManager.clientEntity().pitch()));
 
                 if (dataManager.playerListState().header() != null
                   && dataManager.playerListState().footer() != null) {
@@ -758,6 +759,7 @@ public class POVServer implements InternalPlugin {
                               entry.getLatency(),
                               entry.getGameMode(),
                               entry.getDisplayName(),
+                              entry.getListOrder(),
                               entry.getSessionId(),
                               entry.getExpiresAt(),
                               entry.getPublicKey(),
@@ -826,7 +828,7 @@ public class POVServer implements InternalPlugin {
 
                 if (dataManager.inventoryManager() != null) {
                   session.send(
-                    new ClientboundSetCarriedItemPacket(
+                    new ClientboundSetHeldSlotPacket(
                       dataManager.inventoryManager().heldItemSlot()));
                   var stateIndex = 0;
                   for (var container :

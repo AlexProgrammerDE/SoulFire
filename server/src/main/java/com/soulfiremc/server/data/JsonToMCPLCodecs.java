@@ -71,22 +71,13 @@ public class JsonToMCPLCodecs {
       )
       .apply(instance, MobEffectInstance::new)
   );
-  public static final Codec<FoodProperties.PossibleEffect> POSSIBLE_EFFECT_CODEC = RecordCodecBuilder.create(
-    instance -> instance.group(
-        MOB_EFFECT_INSTANCE_CODEC.fieldOf("effect").forGetter(FoodProperties.PossibleEffect::getEffect),
-        Codec.floatRange(0.0F, 1.0F).optionalFieldOf("probability", 1.0F).forGetter(FoodProperties.PossibleEffect::getProbability)
-      )
-      .apply(instance, FoodProperties.PossibleEffect::new)
-  );
   public static final Codec<FoodProperties> FOOD_PROPERTIES_CODEC = RecordCodecBuilder.create(
     instance -> instance.group(
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("nutrition").forGetter(FoodProperties::getNutrition),
         Codec.FLOAT.fieldOf("saturation").forGetter(FoodProperties::getSaturationModifier),
-        Codec.BOOL.optionalFieldOf("can_always_eat", false).forGetter(FoodProperties::isCanAlwaysEat),
-        ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("eat_seconds", 1.6F).forGetter(FoodProperties::getEatSeconds),
-        POSSIBLE_EFFECT_CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(FoodProperties::getEffects)
+        Codec.BOOL.optionalFieldOf("can_always_eat", false).forGetter(FoodProperties::isCanAlwaysEat)
       )
-      .apply(instance, (a, b, c, d, e) -> new FoodProperties(a, b, c, d, null, e))
+      .apply(instance, FoodProperties::new)
   );
   private static final Codec<ItemAttributeModifiers.EquipmentSlotGroup> MCPL_EQUIPMENT_SLOT_GROUP_CODEC = DualMap.keyCodec(
     DualMap.forEnumSwitch(ItemAttributeModifiers.EquipmentSlotGroup.class, g -> switch (g) {
