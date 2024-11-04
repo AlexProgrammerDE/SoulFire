@@ -45,6 +45,7 @@ import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -189,6 +190,8 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
 
         dataManager.tick();
         botControl.tick();
+
+        sendPacket(ServerboundClientTickEndPacket.INSTANCE);
 
         postEvent(new BotPostTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
