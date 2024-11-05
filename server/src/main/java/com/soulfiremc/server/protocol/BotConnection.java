@@ -191,7 +191,9 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
         dataManager.tick();
         botControl.tick();
 
-        sendPacket(ServerboundClientTickEndPacket.INSTANCE);
+        if (protocol.getOutboundState() == ProtocolState.GAME) {
+          sendPacket(ServerboundClientTickEndPacket.INSTANCE);
+        }
 
         postEvent(new BotPostTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
