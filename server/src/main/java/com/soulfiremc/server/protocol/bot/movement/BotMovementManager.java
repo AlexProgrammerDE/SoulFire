@@ -27,6 +27,7 @@ import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3d;
@@ -110,42 +111,7 @@ public class BotMovementManager {
     var dy = direction.getY();
     var dz = direction.getZ();
 
-    if (dy != 0) {
-      for (var blockBB : collisionBoxes) {
-        dy = blockBB.computeOffsetY(boundingBox, dy);
-      }
-
-      if (dy != 0) {
-        boundingBox = boundingBox.move(0, dy, 0);
-      }
-    }
-
-    var xLessThanZ = Math.abs(dx) < Math.abs(dz);
-    if (xLessThanZ && dz != 0) {
-      for (var blockBB : collisionBoxes) {
-        dz = blockBB.computeOffsetZ(boundingBox, dz);
-      }
-
-      if (dz != 0) {
-        boundingBox = boundingBox.move(0, 0, dz);
-      }
-    }
-
-    if (dx != 0) {
-      for (var blockBB : collisionBoxes) {
-        dx = blockBB.computeOffsetX(boundingBox, dx);
-      }
-
-      if (!xLessThanZ && dx != 0) {
-        boundingBox = boundingBox.move(dx, 0, 0);
-      }
-    }
-
-    if (!xLessThanZ && dz != 0.0) {
-      for (var blockBB : collisionBoxes) {
-        dz = blockBB.computeOffsetZ(boundingBox, dz);
-      }
-    }
+    // TODO: Fix movement
 
     return Vector3d.from(dx, dy, dz);
   }

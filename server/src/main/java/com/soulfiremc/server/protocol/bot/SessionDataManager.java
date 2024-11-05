@@ -42,7 +42,6 @@ import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
@@ -70,7 +69,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.LimitedCraftingValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RespawnScreenValue;
@@ -340,7 +338,7 @@ public final class SessionDataManager {
   }
 
   @EventHandler
-  public void onROtation(ClientboundPlayerRotationPacket packet) {
+  public void onRotation(ClientboundPlayerRotationPacket packet) {
     clientEntity.setRotation(
       packet.getYRot(),
       packet.getXRot()

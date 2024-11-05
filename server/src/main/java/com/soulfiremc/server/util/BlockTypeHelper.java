@@ -54,7 +54,7 @@ public class BlockTypeHelper {
     }
 
     var shape = type.blockShapes().getFirst();
-    return shape.isBlockXZCollision() && shape.minY() == 0 && shape.maxY() >= SAFE_BLOCK_MIN_HEIGHT;
+    return shape.isBlockXZCollision() && shape.minY == 0 && shape.maxY >= SAFE_BLOCK_MIN_HEIGHT;
   }
 
   public static boolean isDiggable(BlockType type) {

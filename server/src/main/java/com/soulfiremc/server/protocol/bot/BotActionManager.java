@@ -17,16 +17,15 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
-import com.soulfiremc.server.data.BlockState;
+import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3f;
+import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
@@ -37,13 +36,11 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 /**
  * Manages mostly block and interaction related stuff that requires to keep track of sequence
  * numbers.
  */
+@Slf4j
 @Data
 @RequiredArgsConstructor
 public class BotActionManager {
@@ -52,38 +49,6 @@ public class BotActionManager {
   @ToString.Exclude
   private final BotConnection connection;
   private int sequenceNumber = 0;
-
-  private static Optional<Vector3f> rayCastToBlock(
-    BlockState blockState, Vector3d eyePosition, Vector3d headRotation, Vector3i targetBlock) {
-    var intersections = new ArrayList<Vector3f>();
-
-    for (var shape : blockState.getCollisionBoxes(targetBlock)) {
-      shape
-        .getIntersection(eyePosition, headRotation)
-        .map(Vector3d::toFloat)
-        .ifPresent(intersections::add);
-    }
-
-    if (intersections.isEmpty()) {
-      return Optional.empty();
-    }
-
-    Vector3f closestIntersection = null;
-    var closestDistance = Double.MAX_VALUE;
-
-    for (var intersection : intersections) {
-      double distance =
-        intersection.distance(eyePosition.getX(), eyePosition.getY(), eyePosition.getZ());
-
-      if (distance < closestDistance) {
-        closestIntersection = intersection;
-        closestDistance = distance;
-      }
-    }
-
-    assert closestIntersection != null;
-    return Optional.of(closestIntersection);
-  }
 
   public void incrementSequenceNumber() {
     sequenceNumber++;
@@ -107,36 +72,37 @@ public class BotActionManager {
 
     var againstPlacePosition = againstFace.getMiddleOfFace(SFVec3i.fromInt(againstBlock));
 
-    var previousYRot = clientEntity.yRot();
-    var previousXRot = clientEntity.xRot();
     clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
-    if (previousXRot != clientEntity.xRot() || previousYRot != clientEntity.yRot()) {
-      clientEntity.sendRot();
-    }
+    clientEntity.sendPositionChanges();
 
-    var rayCast =
-      rayCastToBlock(
-        level.getBlockState(againstBlock),
-        eyePosition,
-        clientEntity.rotationVector(),
-        againstBlock);
-    if (rayCast.isEmpty()) {
+    var viewDirection = clientEntity.getViewVector();
+    var blockInteractionRange = clientEntity.attributeValue(AttributeType.BLOCK_INTERACTION_RANGE);
+    var endPos = eyePosition.add(
+      viewDirection.getX() * blockInteractionRange,
+      viewDirection.getY() * blockInteractionRange,
+      viewDirection.getZ() * blockInteractionRange
+    );
+    var againstState = level.getBlockState(againstBlock);
+    var hitResult = AABB.clip(againstState.getCollisionBoxes(againstBlock), eyePosition, endPos, againstBlock);
+    if (hitResult == null) {
+      log.warn("Failed to place block at {} against {}", againstBlock, againstFace);
       return;
     }
 
-    var rayCastPosition = rayCast.get().sub(againstBlock.toFloat());
     var insideBlock = !level.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
+    var blockPlacePosition = hitResult.getVector3i();
+    var blockPlaceLocation = hitResult.location();
     connection.sendPacket(
       new ServerboundUseItemOnPacket(
-        againstBlock,
+        hitResult.getVector3i(),
         againstFace.toDirection(),
         hand,
-        rayCastPosition.getX(),
-        rayCastPosition.getY(),
-        rayCastPosition.getZ(),
+        (float) (blockPlaceLocation.getX() - (double) blockPlacePosition.getX()),
+        (float) (blockPlaceLocation.getY() - (double) blockPlacePosition.getY()),
+        (float) (blockPlaceLocation.getZ() - (double) blockPlacePosition.getZ()),
         insideBlock,
-        false, // TODO: Implement check for hitting world border
+        false,
         sequenceNumber));
   }
 

@@ -218,18 +218,12 @@ public class AABB {
 
   @Override
   public int hashCode() {
-    var l = Double.doubleToLongBits(this.minX);
-    var i = (int) (l ^ l >>> 32);
-    l = Double.doubleToLongBits(this.minY);
-    i = 31 * i + (int) (l ^ l >>> 32);
-    l = Double.doubleToLongBits(this.minZ);
-    i = 31 * i + (int) (l ^ l >>> 32);
-    l = Double.doubleToLongBits(this.maxX);
-    i = 31 * i + (int) (l ^ l >>> 32);
-    l = Double.doubleToLongBits(this.maxY);
-    i = 31 * i + (int) (l ^ l >>> 32);
-    l = Double.doubleToLongBits(this.maxZ);
-    return 31 * i + (int) (l ^ l >>> 32);
+    var i = Double.hashCode(this.minX);
+    i = 31 * i + Double.hashCode(this.minY);
+    i = 31 * i + Double.hashCode(this.minZ);
+    i = 31 * i + Double.hashCode(this.maxX);
+    i = 31 * i + Double.hashCode(this.maxY);
+    return 31 * i + Double.hashCode(this.maxZ);
   }
 
   public AABB contract(double x, double y, double z) {
@@ -455,5 +449,19 @@ public class AABB {
 
   public Vector3d getMaxPosition() {
     return Vector3d.from(this.maxX, this.maxY, this.maxZ);
+  }
+
+  public boolean fullBlock() {
+    return this.minX == 0 && this.minY == 0 && this.minZ == 0 && this.maxX == 1 && this.maxY == 1 && this.maxZ == 1;
+  }
+
+  public double diagonalXZLength() {
+    var x = this.maxX - this.minX;
+    var z = this.maxZ - this.minZ;
+    return Math.sqrt(x * x + z * z);
+  }
+
+  public boolean isBlockXZCollision() {
+    return minX == 0 && minZ == 0 && maxX == 1 && maxZ == 1;
   }
 }

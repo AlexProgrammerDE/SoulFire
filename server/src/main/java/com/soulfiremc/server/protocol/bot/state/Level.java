@@ -19,9 +19,9 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.structs.TickRateManager;
 import lombok.Getter;
 import lombok.Setter;

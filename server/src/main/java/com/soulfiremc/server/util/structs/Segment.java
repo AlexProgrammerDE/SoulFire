@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.util.structs;
 
-import com.soulfiremc.server.protocol.bot.movement.AABB;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
 
 import java.util.List;

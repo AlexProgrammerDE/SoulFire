@@ -21,13 +21,13 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.data.TagKey;
-import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -231,5 +231,19 @@ public abstract class Entity {
 
   public double attributeValue(AttributeType type) {
     return attributeState.getOrCreateAttribute(type).calculateValue();
+  }
+
+  public final Vector3d getViewVector() {
+    return this.calculateViewVector(xRot, yRot);
+  }
+
+  public final Vector3d calculateViewVector(float xRot, float yRot) {
+    var h = xRot * (float) (Math.PI / 180.0);
+    var i = -yRot * (float) (Math.PI / 180.0);
+    var j = MathHelper.cos(i);
+    var k = MathHelper.sin(i);
+    var l = MathHelper.cos(h);
+    var m = MathHelper.sin(h);
+    return Vector3d.from(k * l, -m, (double) (j * l));
   }
 }

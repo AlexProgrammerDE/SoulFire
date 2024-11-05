@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.data;
 
-import com.soulfiremc.server.protocol.bot.movement.AABB;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.mcstructs.AABB;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highestY) {
+public record BlockShapeGroup(int id, List<AABB> blockShapes, double highestY) {
   public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
   public static final BlockShapeGroup EMPTY;
 
@@ -39,14 +39,14 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
           var parts = line.split("\\|");
 
           var id = Integer.parseInt(parts[0]);
-          var blockShapes = new ArrayList<BlockShape>();
+          var blockShapes = new ArrayList<AABB>();
 
           if (parts.length > 1) {
             for (var i = 1; i < parts.length; i++) {
               var part = parts[i];
               var subParts = part.split(",");
               var shape =
-                new BlockShape(
+                new AABB(
                   Double.parseDouble(subParts[0]),
                   Double.parseDouble(subParts[1]),
                   Double.parseDouble(subParts[2]),
@@ -62,7 +62,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
             new BlockShapeGroup(
               id,
               blockShapes,
-              blockShapes.stream().mapToDouble(BlockShape::maxY).max().orElse(0)));
+              blockShapes.stream().mapToDouble(a -> a.maxY).max().orElse(0)));
         });
 
     EMPTY = getById(0);
@@ -77,7 +77,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
     for (var shape : blockShapes) {
       var shapeBB =
         new AABB(
-          shape.minX(), shape.minY(), shape.minZ(), shape.maxX(), shape.maxY(), shape.maxZ());
+          shape.minX, shape.minY, shape.minZ, shape.maxX, shape.maxY, shape.maxZ);
 
       // Apply random offset if needed
       shapeBB = shapeBB.move(OffsetHelper.getOffsetForBlock(blockType, block));
@@ -96,7 +96,7 @@ public record BlockShapeGroup(int id, List<BlockShape> blockShapes, double highe
       return false;
     }
 
-    return blockShapes.getFirst().isFullBlock();
+    return blockShapes.getFirst().fullBlock();
   }
 
   public boolean hasNoCollisions() {

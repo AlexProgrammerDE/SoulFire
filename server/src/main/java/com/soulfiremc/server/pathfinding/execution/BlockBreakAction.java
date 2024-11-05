@@ -67,14 +67,10 @@ public final class BlockBreakAction implements WorldAction {
     var level = dataManager.currentLevel();
     if (!didLook) {
       didLook = true;
-      var previousYRot = clientEntity.yRot();
-      var previousXRot = clientEntity.xRot();
       clientEntity.lookAt(
         RotationOrigin.EYES,
         blockBreakSideHint.getMiddleOfFace(blockPosition));
-      if (previousXRot != clientEntity.xRot() || previousYRot != clientEntity.yRot()) {
-        clientEntity.sendRot();
-      }
+      clientEntity.sendPositionChanges();
     }
 
     if (!putInHand) {
