@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.EffectType;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.ConsumeEffect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 
 public class ItemTypeHelper {
@@ -36,11 +37,17 @@ public class ItemTypeHelper {
 
   public static boolean isGoodEdibleFood(SFItemStack itemStack) {
     var components = itemStack.components();
-    return components.getOptional(DataComponentType.FOOD).map(f -> {
-      for (var effect : f.getEffects()) {
-        if (EffectType.REGISTRY.getById(effect.getEffect().getEffect().ordinal()).category()
-          == EffectType.EffectCategory.HARMFUL) {
-          return false;
+    return components.getOptional(DataComponentType.CONSUMABLE).map(f -> {
+      for (var consumeEffects : f.onConsumeEffects()) {
+        if (!(consumeEffects instanceof ConsumeEffect.ApplyEffects applyEffects)) {
+          continue;
+        }
+
+        for (var mobEffect : applyEffects.effects()) {
+          if (EffectType.REGISTRY.getById(mobEffect.getEffect().ordinal()).category()
+            == EffectType.EffectCategory.HARMFUL) {
+            return false;
+          }
         }
       }
 
