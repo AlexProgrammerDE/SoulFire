@@ -40,6 +40,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
+import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.structs.TickTimer;
@@ -93,6 +94,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.borde
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 import org.jetbrains.annotations.NotNull;
@@ -301,32 +303,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
-    var relative = packet.getRelatives();
-    var x = relative.contains(PositionElement.X) ? clientEntity.x() + packet.getPosition().getX() : packet.getPosition().getX();
-    var y = relative.contains(PositionElement.Y) ? clientEntity.y() + packet.getPosition().getY() : packet.getPosition().getY();
-    var z = relative.contains(PositionElement.Z) ? clientEntity.z() + packet.getPosition().getZ() : packet.getPosition().getZ();
-    var yRot =
-      relative.contains(PositionElement.Y_ROT)
-        ? clientEntity.yRot() + packet.getYRot()
-        : packet.getYRot();
-    var xRot =
-      relative.contains(PositionElement.X_ROT)
-        ? clientEntity.xRot() + packet.getXRot()
-        : packet.getXRot();
-    var deltaMovement = packet.getDeltaMovement();
-    if (relative.contains(PositionElement.ROTATE_DELTA)) {
-      var k = clientEntity.yRot() - yRot;
-      var l = clientEntity.xRot() - xRot;
-      deltaMovement = VectorHelper.xRot(deltaMovement, (float) Math.toRadians(l));
-      deltaMovement = VectorHelper.yRot(deltaMovement, (float) Math.toRadians(k));
-    }
-
-    clientEntity.setPosition(x, y, z);
-    clientEntity.setRotation(yRot, xRot);
-    clientEntity.setMotion(
-      relative.contains(PositionElement.DELTA_X) ? clientEntity.motionX() + deltaMovement.getX() : deltaMovement.getX(),
-      relative.contains(PositionElement.DELTA_Y) ? clientEntity.motionY() + deltaMovement.getY() : deltaMovement.getY(),
-      relative.contains(PositionElement.DELTA_Z) ? clientEntity.motionZ() + deltaMovement.getZ() : deltaMovement.getZ());
+    var newMovement = EntityMovement.toAbsolute(clientEntity.toMovement(), new EntityMovement(
+      packet.getPosition(),
+      packet.getDeltaMovement(),
+      packet.getYRot(),
+      packet.getXRot()
+    ), packet.getRelatives());
+    clientEntity.setFrom(newMovement);
 
     var position = clientEntity.blockPos();
     if (!joinedWorld) {
@@ -344,8 +327,30 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
-    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(false, false, x, y, z, yRot, xRot));
+    connection.sendPacket(new ServerboundMovePlayerPosRotPacket(
+      false,
+      false,
+      packet.getPosition().getX(),
+      packet.getPosition().getY(),
+      packet.getPosition().getZ(),
+      packet.getYRot(),
+      packet.getXRot()
+    ));
     connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
+  }
+
+  @EventHandler
+  public void onROtation(ClientboundPlayerRotationPacket packet) {
+    clientEntity.setRotation(
+      packet.getYRot(),
+      packet.getXRot()
+    );
+    connection.sendPacket(new ServerboundMovePlayerRotPacket(
+      false,
+      false,
+      packet.getYRot(),
+      packet.getXRot()
+    ));
   }
 
   @EventHandler
@@ -599,6 +604,16 @@ public final class SessionDataManager {
     }
 
     container.setProperty(packet.getRawProperty(), packet.getValue());
+  }
+
+  @EventHandler
+  public void onSetPlayerInventory(ClientboundSetPlayerInventoryPacket packet) {
+    inventoryManager.playerInventory().setSlot(packet.getSlot(), SFItemStack.from(packet.getContents()));
+  }
+
+  @EventHandler
+  public void onSetCursor(ClientboundSetCursorItemPacket packet) {
+    inventoryManager.cursorItem(SFItemStack.from(packet.getContents()));
   }
 
   @EventHandler
@@ -999,15 +1014,37 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var state = entityTrackerState.getEntity(packet.getId());
 
     if (state == null) {
-      log.debug("Received entity teleport packet for unknown entity {}", packet.getEntityId());
+      log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
       return;
     }
 
-    state.setPosition(packet.getPosition());
-    state.setRotation(packet.getYRot(), packet.getXRot());
+    state.setFrom(EntityMovement.toAbsolute(state.toMovement(), new EntityMovement(
+      packet.getPosition(),
+      packet.getDeltaMovement(),
+      packet.getYRot(),
+      packet.getXRot()
+    ), packet.getRelatives()));
+    state.onGround(packet.isOnGround());
+  }
+
+  @EventHandler
+  public void onEntityPositionSync(ClientboundEntityPositionSyncPacket packet) {
+    var state = entityTrackerState.getEntity(packet.getId());
+
+    if (state == null) {
+      log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
+      return;
+    }
+
+    state.setFrom(new EntityMovement(
+      packet.getPosition(),
+      packet.getDeltaMovement(),
+      packet.getYRot(),
+      packet.getXRot()
+    ));
     state.onGround(packet.isOnGround());
   }
 

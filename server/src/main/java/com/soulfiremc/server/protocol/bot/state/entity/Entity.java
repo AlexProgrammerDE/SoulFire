@@ -26,6 +26,7 @@ import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -80,6 +81,16 @@ public abstract class Entity {
     this.motionZ = motionZ;
   }
 
+  public EntityMovement toMovement() {
+    return new EntityMovement(Vector3d.from(x, y, z), Vector3d.from(motionX, motionY, motionZ), yRot, xRot);
+  }
+
+  public void setFrom(EntityMovement entityMovement) {
+    setPosition(entityMovement.pos());
+    setMotion(entityMovement.deltaMovement());
+    setRotation(entityMovement.yRot(), entityMovement.xRot());
+  }
+
   public void setPosition(Vector3d pos) {
     setPosition(pos.getX(), pos.getY(), pos.getZ());
   }
@@ -103,6 +114,10 @@ public abstract class Entity {
 
   public void setHeadRotation(float headYRot) {
     this.headYRot = headYRot;
+  }
+
+  public void setMotion(Vector3d motion) {
+    setMotion(motion.getX(), motion.getY(), motion.getZ());
   }
 
   public void setMotion(double motionX, double motionY, double motionZ) {

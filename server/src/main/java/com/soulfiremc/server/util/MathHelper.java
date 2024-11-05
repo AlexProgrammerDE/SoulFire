@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.server.util;
 
+import com.soulfiremc.server.util.mcstructs.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Locale;
 import java.util.function.IntPredicate;
@@ -313,6 +315,12 @@ public class MathHelper {
 
   public static double frac(double number) {
     return number - (double) lfloor(number);
+  }
+
+  public static long getSeed(int x, int y, int z) {
+    var l = (x * 3129871L) ^ (long) z * 116129781L ^ (long) y;
+    l = l * l * 42317861L + l * 11L;
+    return l >> 16;
   }
 
   public static double inverseLerp(double delta, double start, double end) {

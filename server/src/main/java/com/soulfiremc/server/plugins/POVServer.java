@@ -391,8 +391,8 @@ public class POVServer implements InternalPlugin {
                                     (posRot.getX() * 32 - lastX * 32) * 128,
                                     (posRot.getY() * 32 - lastY * 32) * 128,
                                     (posRot.getZ() * 32 - lastZ * 32) * 128,
-                                    posRot.getYRot(),
-                                    posRot.getXRot(),
+                                    posRot.getYaw(),
+                                    posRot.getPitch(),
                                     clientEntity.onGround()));
                                 lastX = posRot.getX();
                                 lastY = posRot.getY();
@@ -413,8 +413,8 @@ public class POVServer implements InternalPlugin {
                               case ServerboundMovePlayerRotPacket rot -> povSession.send(
                                 new ClientboundMoveEntityRotPacket(
                                   clientEntity.entityId(),
-                                  rot.getYRot(),
-                                  rot.getXRot(),
+                                  rot.getYaw(),
+                                  rot.getPitch(),
                                   clientEntity.onGround()));
                               default -> {
                               }
@@ -454,8 +454,8 @@ public class POVServer implements InternalPlugin {
                         clientEntity.x(posRot.getX());
                         clientEntity.y(posRot.getY());
                         clientEntity.z(posRot.getZ());
-                        clientEntity.yRot(posRot.getYRot());
-                        clientEntity.xRot(posRot.getXRot());
+                        clientEntity.yRot(posRot.getYaw());
+                        clientEntity.xRot(posRot.getPitch());
                       }
                       case ServerboundMovePlayerPosPacket pos -> {
                         lastX = pos.getX();
@@ -467,8 +467,8 @@ public class POVServer implements InternalPlugin {
                         clientEntity.z(pos.getZ());
                       }
                       case ServerboundMovePlayerRotPacket rot -> {
-                        clientEntity.yRot(rot.getYRot());
-                        clientEntity.xRot(rot.getXRot());
+                        clientEntity.yRot(rot.getYaw());
+                        clientEntity.xRot(rot.getPitch());
                       }
                       case ServerboundAcceptTeleportationPacket teleportationPacket -> {
                         // This was a forced teleport, the server should not know about it

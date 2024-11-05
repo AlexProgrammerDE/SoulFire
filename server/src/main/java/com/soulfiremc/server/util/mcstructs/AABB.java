@@ -1,5 +1,6 @@
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.util.mcstructs;
 
+import com.soulfiremc.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -32,17 +33,6 @@ public class AABB {
 
   public AABB(Vector3d arg, Vector3d arg2) {
     this(arg.getX(), arg.getY(), arg.getZ(), arg2.getX(), arg2.getY(), arg2.getZ());
-  }
-
-  public static AABB of(BoundingBox mutableBox) {
-    return new AABB(
-      (double) mutableBox.minX(),
-      (double) mutableBox.minY(),
-      (double) mutableBox.minZ(),
-      (double) (mutableBox.maxX() + 1),
-      (double) (mutableBox.maxY() + 1),
-      (double) (mutableBox.maxZ() + 1)
-    );
   }
 
   public static AABB unitCubeFromLowerCorner(Vector3d vector) {
