@@ -330,11 +330,11 @@ public final class SessionDataManager {
     connection.sendPacket(new ServerboundMovePlayerPosRotPacket(
       false,
       false,
-      packet.getPosition().getX(),
-      packet.getPosition().getY(),
-      packet.getPosition().getZ(),
-      packet.getYRot(),
-      packet.getXRot()
+      newMovement.pos().getX(),
+      newMovement.pos().getY(),
+      newMovement.pos().getZ(),
+      newMovement.yRot(),
+      newMovement.xRot()
     ));
     connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
   }
