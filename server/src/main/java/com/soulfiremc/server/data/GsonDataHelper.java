@@ -50,7 +50,7 @@ public class GsonDataHelper {
   private static final Function<Map<Class<?>, TypeAdapter<?>>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
       .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
-      .registerTypeAdapter(JsonDataComponents.class, JsonDataComponents.SERIALIZER);
+      .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
 
     for (var entry : typeAdapters.entrySet()) {
       builder.registerTypeAdapter(entry.getKey(), entry.getValue());

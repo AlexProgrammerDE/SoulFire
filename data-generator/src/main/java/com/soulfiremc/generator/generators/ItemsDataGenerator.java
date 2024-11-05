@@ -19,13 +19,18 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
+import com.google.gson.JsonPrimitive;
 import com.soulfiremc.generator.util.MCHelper;
-import net.minecraft.core.component.DataComponentMap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.Item;
 
+import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 
 public class ItemsDataGenerator implements IDataGenerator {
   public static JsonObject generateItem(Item item) {
@@ -35,11 +40,22 @@ public class ItemsDataGenerator implements IDataGenerator {
     itemDesc.addProperty("key", BuiltInRegistries.ITEM.getKey(item).toString());
 
     var sortedComponentObj = new JsonObject();
-    DataComponentMap.CODEC.encodeStart(
-        MCHelper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE),
-        item.components()).result().orElseThrow().getAsJsonObject()
-      .entrySet().stream().sorted(Map.Entry.comparingByKey())
-      .forEach(e -> sortedComponentObj.add(e.getKey(), e.getValue()));
+    item.components().stream().map(typed -> {
+        ByteBuf buf = Unpooled.buffer();
+        RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, MCHelper.getLevel().registryAccess());
+        registryBuf.writeVarInt(BuiltInRegistries.DATA_COMPONENT_TYPE.getId(typed.type()));
+        writeComponent(registryBuf, typed);
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        buf.release();
+        String data = Base64.getEncoder().encodeToString(bytes);
+
+        return Map.entry(
+          Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(typed.type())).toString(),
+          data);
+      })
+      .sorted(Map.Entry.comparingByKey())
+      .forEach(e -> sortedComponentObj.add(e.getKey(), new JsonPrimitive(e.getValue())));
     itemDesc.add("components", sortedComponentObj);
 
     return itemDesc;
@@ -55,5 +71,9 @@ public class ItemsDataGenerator implements IDataGenerator {
     var resultArray = new JsonArray();
     BuiltInRegistries.ITEM.forEach(item -> resultArray.add(generateItem(item)));
     return resultArray;
+  }
+
+  private static <T> void writeComponent(RegistryFriendlyByteBuf buf, TypedDataComponent<T> typed) {
+    typed.type().streamCodec().encode(buf, typed.value());
   }
 }
