@@ -38,4 +38,3 @@ public abstract class HitResult {
     ENTITY;
   }
 }
-

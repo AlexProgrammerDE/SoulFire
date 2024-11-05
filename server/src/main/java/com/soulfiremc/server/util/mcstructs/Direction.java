@@ -472,4 +472,3 @@ public enum Direction {
     }
   }
 }
-
