@@ -144,13 +144,13 @@ public abstract class Entity {
   public void baseTick() {
     this.wasInPowderSnow = this.isInPowderSnow;
     this.isInPowderSnow = false;
-    this.updateInWaterStateAndDoFluidPushing();
-    this.updateFluidOnEyes();
-    this.updateSwimming();
+    // this.updateInWaterStateAndDoFluidPushing();
+    // this.updateFluidOnEyes();
+    // this.updateSwimming();
 
-    if (this.isInLava()) {
-      this.fallDistance *= 0.5F;
-    }
+    // if (this.isInLava()) {
+    //   this.fallDistance *= 0.5F;
+    // }
 
     effectState.tick();
   }
