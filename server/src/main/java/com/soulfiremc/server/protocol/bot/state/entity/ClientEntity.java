@@ -18,13 +18,11 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
-import com.soulfiremc.server.protocol.bot.movement.BotMovementManager;
-import com.soulfiremc.server.protocol.bot.movement.ControlState;
-import com.soulfiremc.server.protocol.bot.movement.PhysicsData;
-import com.soulfiremc.server.protocol.bot.movement.PlayerMovementState;
+import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -32,10 +30,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerStatusOnlyPacket;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundPlayerInputPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
 import java.util.UUID;
 
@@ -46,12 +43,10 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class ClientEntity extends Entity {
-  private final PhysicsData physics = new PhysicsData();
+  private final AbilitiesData abilitiesData = new AbilitiesData();
   private final BotConnection connection;
   private final SessionDataManager dataManager;
   private final ControlState controlState;
-  private final PlayerMovementState movementState;
-  private final BotMovementManager botMovementManager;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -61,7 +56,12 @@ public class ClientEntity extends Entity {
   private float lastXRot = 0;
   private boolean lastOnGround = false;
   private boolean lastHorizontalCollision = false;
+  private boolean wasShiftKeyDown = false;
+  private boolean wasSprinting = false;
+  private boolean noPhysics = false;
+  private boolean wasUnderwater = false;
   private int positionReminder = 0;
+  private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
   public ClientEntity(
     int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, ControlState controlState,
@@ -70,31 +70,59 @@ public class ClientEntity extends Entity {
     this.connection = connection;
     this.dataManager = dataManager;
     this.controlState = controlState;
-    this.movementState =
-      new PlayerMovementState(this, dataManager.inventoryManager().playerInventory());
-    this.botMovementManager = new BotMovementManager(dataManager, movementState, this);
   }
 
   @Override
   public void tick() {
-    super.tick();
+    playerTick();
 
-    // Collect data for calculations
-    movementState.updateData();
+    this.sendShiftKeyState();
 
-    // Tick physics movement
-    if (level.isChunkPositionLoaded(this.blockX(), this.blockZ())) {
-      botMovementManager.tick();
+    var keyPressPacket = this.controlState.toServerboundPlayerInputPacket();
+    if (!keyPressPacket.equals(this.lastSentInput)) {
+      this.connection.sendPacket(keyPressPacket);
+      this.lastSentInput = keyPressPacket;
     }
-
-    // Apply calculated state
-    movementState.applyData();
 
     // Send position changes
     sendPositionChanges();
   }
 
+  private void playerTick() {
+    this.noPhysics = this.isSpectator();
+    if (this.isSpectator()) {
+      this.onGround(false);
+    }
+
+    this.wasUnderwater = this.isEyeInFluid(FluidTags.WATER);
+    livingEntityTick();
+
+    var x = MathHelper.clamp(this.x(), -2.9999999E7, 2.9999999E7);
+    var z = MathHelper.clamp(this.z(), -2.9999999E7, 2.9999999E7);
+    if (x != this.x() || z != this.z()) {
+      this.setPosition(x, this.y(), z);
+    }
+  }
+
+  private void livingEntityTick() {
+    super.tick();
+
+    this.aiStep();
+
+    if (this.isFallFlying()) {
+      this.fallFlyTicks++;
+    } else {
+      this.fallFlyTicks = 0;
+    }
+
+    if (this.isSleeping()) {
+      this.xRot(0.0F);
+    }
+  }
+
   public void sendPositionChanges() {
+    sendIsSprintingIfNeeded();
+
     // Detect whether anything changed
     var xDiff = x - lastX;
     var yDiff = y - lastY;
@@ -105,7 +133,7 @@ public class ClientEntity extends Entity {
       MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
         || ++positionReminder >= 20;
     var sendRot = xRotDiff != 0.0 || yRotDiff != 0.0;
-    var sendStatus = onGround != lastOnGround || movementState.isCollidedHorizontally != lastHorizontalCollision;
+    var sendStatus = onGround != lastOnGround || horizontalCollision != lastHorizontalCollision;
 
     // Send position packets if changed
     if (sendPos && sendRot) {
@@ -146,9 +174,6 @@ public class ClientEntity extends Entity {
   }
 
   public void sendPosRot() {
-    var onGround = movementState.onGround;
-    var horizontalCollision = movementState.isCollidedHorizontally;
-
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
@@ -165,9 +190,6 @@ public class ClientEntity extends Entity {
   }
 
   public void sendPos() {
-    var onGround = movementState.onGround;
-    var horizontalCollision = movementState.isCollidedHorizontally;
-
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
@@ -180,9 +202,6 @@ public class ClientEntity extends Entity {
   }
 
   public void sendRot() {
-    var onGround = movementState.onGround;
-    var horizontalCollision = movementState.isCollidedHorizontally;
-
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
@@ -193,13 +212,30 @@ public class ClientEntity extends Entity {
   }
 
   public void sendStatus() {
-    var onGround = movementState.onGround;
-    var horizontalCollision = movementState.isCollidedHorizontally;
-
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
     connection.sendPacket(new ServerboundMovePlayerStatusOnlyPacket(onGround, horizontalCollision));
+  }
+
+  private void sendShiftKeyState() {
+    var sneaking = controlState.sneaking();
+    if (sneaking != this.wasShiftKeyDown) {
+      this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sneaking
+        ? PlayerState.START_SNEAKING
+        : PlayerState.STOP_SNEAKING));
+      this.wasShiftKeyDown = sneaking;
+    }
+  }
+
+  private void sendIsSprintingIfNeeded() {
+    var sprinting = controlState.sprinting();
+    if (sprinting != this.wasSprinting) {
+      this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sprinting
+        ? PlayerState.START_SPRINTING
+        : PlayerState.STOP_SPRINTING));
+      this.wasSprinting = sprinting;
+    }
   }
 
   public AbilitiesData abilities() {
@@ -207,11 +243,23 @@ public class ClientEntity extends Entity {
   }
 
   public void jump() {
-    movementState.jumpQueued = true;
+    jumpTriggerTime = 7;
   }
 
   @Override
   public float height() {
     return this.controlState.sneaking() ? 1.5F : 1.8F;
+  }
+
+  private boolean isSpectator() {
+    return false; // TODO
+  }
+
+  private boolean isSleeping() {
+    return false; // TODO
+  }
+
+  public boolean isUnderWater() {
+    return this.wasUnderwater;
   }
 }

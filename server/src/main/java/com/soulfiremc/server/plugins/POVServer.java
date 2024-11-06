@@ -633,46 +633,48 @@ public class POVServer implements InternalPlugin {
                     dataManager.loginData().enforcesSecureChat()));
                 session.send(new ClientboundRespawnPacket(spawnInfo, false, false));
 
-                if (dataManager.difficultyData() != null) {
+                var difficultyData = dataManager.difficultyData();
+                if (difficultyData != null) {
                   session.send(
                     new ClientboundChangeDifficultyPacket(
-                      dataManager.difficultyData().difficulty(),
-                      dataManager.difficultyData().locked()));
+                      difficultyData.difficulty(),
+                      difficultyData.locked()));
                 }
 
-                if (dataManager.abilitiesData() != null) {
-                  session.send(
-                    new ClientboundPlayerAbilitiesPacket(
-                      dataManager.abilitiesData().invulnerable(),
-                      dataManager.abilitiesData().flying(),
-                      dataManager.abilitiesData().allowFlying(),
-                      dataManager.abilitiesData().creativeModeBreak(),
-                      dataManager.abilitiesData().flySpeed(),
-                      dataManager.abilitiesData().walkSpeed()));
-                }
+                var abilitiesData = dataManager.clientEntity().abilitiesData();
+                session.send(
+                  new ClientboundPlayerAbilitiesPacket(
+                    abilitiesData.invulnerable(),
+                    abilitiesData.flying(),
+                    abilitiesData.mayfly(),
+                    abilitiesData.instabuild(),
+                    abilitiesData.flySpeed(),
+                    abilitiesData.walkSpeed()));
 
                 session.send(
                   new ClientboundGameEventPacket(
                     GameEvent.CHANGE_GAMEMODE, dataManager.gameMode()));
 
-                if (dataManager.borderState() != null) {
+                var borderState = dataManager.borderState();
+                if (borderState != null) {
                   session.send(
                     new ClientboundInitializeBorderPacket(
-                      dataManager.borderState().centerX(),
-                      dataManager.borderState().centerZ(),
-                      dataManager.borderState().oldSize(),
-                      dataManager.borderState().newSize(),
-                      dataManager.borderState().lerpTime(),
-                      dataManager.borderState().newAbsoluteMaxSize(),
-                      dataManager.borderState().warningBlocks(),
-                      dataManager.borderState().warningTime()));
+                      borderState.centerX(),
+                      borderState.centerZ(),
+                      borderState.oldSize(),
+                      borderState.newSize(),
+                      borderState.lerpTime(),
+                      borderState.newAbsoluteMaxSize(),
+                      borderState.warningBlocks(),
+                      borderState.warningTime()));
                 }
 
-                if (dataManager.defaultSpawnData() != null) {
+                var defaultSpawnData = dataManager.defaultSpawnData();
+                if (defaultSpawnData != null) {
                   session.send(
                     new ClientboundSetDefaultSpawnPositionPacket(
-                      dataManager.defaultSpawnData().position(),
-                      dataManager.defaultSpawnData().angle()));
+                      defaultSpawnData.position(),
+                      defaultSpawnData.angle()));
                 }
 
                 if (dataManager.weatherState() != null) {
@@ -694,20 +696,22 @@ public class POVServer implements InternalPlugin {
                         dataManager.weatherState().thunderStrength())));
                 }
 
-                if (dataManager.healthData() != null) {
+                var healthData = dataManager.healthData();
+                if (healthData != null) {
                   session.send(
                     new ClientboundSetHealthPacket(
-                      dataManager.healthData().health(),
-                      dataManager.healthData().food(),
-                      dataManager.healthData().saturation()));
+                      healthData.health(),
+                      healthData.food(),
+                      healthData.saturation()));
                 }
 
-                if (dataManager.experienceData() != null) {
+                var experienceData = dataManager.experienceData();
+                if (experienceData != null) {
                   session.send(
                     new ClientboundSetExperiencePacket(
-                      dataManager.experienceData().experience(),
-                      dataManager.experienceData().level(),
-                      dataManager.experienceData().totalExperience()));
+                      experienceData.experience(),
+                      experienceData.level(),
+                      experienceData.totalExperience()));
                 }
 
                 // Give initial coordinates to the client

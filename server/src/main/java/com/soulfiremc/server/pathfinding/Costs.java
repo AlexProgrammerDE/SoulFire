@@ -143,7 +143,7 @@ public class Costs {
     // If this value adds up over all ticks to 1, the block is fully mined
     var damage = getBlockDamagePerTick(tagsState, entity, onGround, itemStack, blockType);
 
-    var creativeMode = entity != null && entity.abilities().creativeModeBreak();
+    var creativeMode = entity != null && entity.abilities().instabuild();
     var willDropUsableBlockItem = correctToolUsed && !creativeMode && BlockTypeHelper.isUsableBlockItem(blockType);
 
     // Insta mine
@@ -159,7 +159,7 @@ public class Costs {
                                              boolean onGround,
                                              @Nullable SFItemStack itemStack,
                                              BlockType blockType) {
-    if (entity != null && entity.abilities().creativeModeBreak()) {
+    if (entity != null && entity.abilities().instabuild()) {
       // We instantly break any block in creative mode
       return 1.0F;
     }

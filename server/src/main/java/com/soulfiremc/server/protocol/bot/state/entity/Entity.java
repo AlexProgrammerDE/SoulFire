@@ -36,6 +36,8 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -46,6 +48,8 @@ public abstract class Entity {
   private final EntityMetadataState metadataState = new EntityMetadataState();
   private final EntityAttributeState attributeState = new EntityAttributeState();
   private final EntityEffectState effectState = new EntityEffectState();
+  private final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
+  public float fallDistance;
   private final int entityId;
   private final UUID uuid;
   private final EntityType entityType;
@@ -60,6 +64,13 @@ public abstract class Entity {
   protected double motionY;
   protected double motionZ;
   protected boolean onGround;
+  protected int jumpTriggerTime;
+  protected boolean horizontalCollision;
+  protected boolean verticalCollision;
+  protected boolean verticalCollisionBelow;
+  protected boolean minorHorizontalCollision;
+  protected boolean isInPowderSnow;
+  protected boolean wasInPowderSnow;
 
   public Entity(int entityId, UUID uuid, EntityType entityType,
                 Level level,
@@ -127,6 +138,20 @@ public abstract class Entity {
   }
 
   public void tick() {
+    this.baseTick();
+  }
+
+  public void baseTick() {
+    this.wasInPowderSnow = this.isInPowderSnow;
+    this.isInPowderSnow = false;
+    this.updateInWaterStateAndDoFluidPushing();
+    this.updateFluidOnEyes();
+    this.updateSwimming();
+
+    if (this.isInLava()) {
+      this.fallDistance *= 0.5F;
+    }
+
     effectState.tick();
   }
 
@@ -176,15 +201,6 @@ public abstract class Entity {
 
   public Vector3d eyePosition() {
     return Vector3d.from(x, y + eyeHeight(), z);
-  }
-
-  public Vector3d rotationVector() {
-    var yRotRadians = (float) Math.toRadians(yRot);
-    var xRotRadians = (float) Math.toRadians(xRot);
-    var x = -Math.sin(yRotRadians) * Math.cos(xRotRadians);
-    var y = -Math.sin(xRotRadians);
-    var z = Math.cos(yRotRadians) * Math.cos(xRotRadians);
-    return Vector3d.from(x, y, z);
   }
 
   public Vector3i blockPos() {

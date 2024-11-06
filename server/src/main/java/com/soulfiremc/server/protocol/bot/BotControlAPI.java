@@ -71,13 +71,13 @@ public class BotControlAPI {
   }
 
   public boolean toggleFlight() {
-    var abilitiesData = dataManager.abilitiesData();
-    if (abilitiesData != null && !abilitiesData.allowFlying()) {
+    var abilitiesData = dataManager.clientEntity().abilitiesData();
+    if (abilitiesData != null && !abilitiesData.mayfly()) {
       throw new IllegalStateException("You can't fly! (Server said so)");
     }
 
-    var newFly = !dataManager.controlState().flying();
-    dataManager.controlState().flying(newFly);
+    var newFly = !dataManager.clientEntity().abilitiesData().flying();
+    dataManager.clientEntity().abilitiesData().flying(newFly);
 
     // Let the server know we are flying
     connection.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));

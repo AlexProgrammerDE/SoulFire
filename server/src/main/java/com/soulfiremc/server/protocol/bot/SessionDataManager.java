@@ -31,7 +31,6 @@ import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.*;
-import com.soulfiremc.server.protocol.bot.movement.ControlState;
 import com.soulfiremc.server.protocol.bot.state.*;
 import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
@@ -146,7 +145,6 @@ public final class SessionDataManager {
   private @Nullable GlobalPos lastDeathPos;
   private int portalCooldown = -1;
   private @Nullable DifficultyData difficultyData;
-  private @Nullable AbilitiesData abilitiesData;
   private @Nullable DefaultSpawnData defaultSpawnData;
   private @Nullable ExperienceData experienceData;
   private @Nullable ChunkKey centerChunk;
@@ -502,24 +500,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
-    abilitiesData =
-      new AbilitiesData(
-        packet.isInvincible(),
-        packet.isFlying(),
-        packet.isCanFly(),
-        packet.isCreative(),
-        packet.getFlySpeed(),
-        packet.getWalkSpeed());
-
-    var attributeState = clientEntity.attributeState();
-    attributeState
-      .getOrCreateAttribute(AttributeType.MOVEMENT_SPEED)
-      .baseValue(abilitiesData.walkSpeed());
-    attributeState
-      .getOrCreateAttribute(AttributeType.FLYING_SPEED)
-      .baseValue(abilitiesData.flySpeed());
-
-    controlState.flying(abilitiesData.flying());
+    var abilitiesData = clientEntity.abilitiesData();
+    abilitiesData.flying = packet.isFlying();
+    abilitiesData.instabuild = packet.isCreative();
+    abilitiesData.invulnerable = packet.isInvincible();
+    abilitiesData.mayfly = packet.isCanFly();
+    abilitiesData.flySpeed(packet.getFlySpeed());
+    abilitiesData.walkSpeed(packet.getWalkSpeed());
   }
 
   @EventHandler

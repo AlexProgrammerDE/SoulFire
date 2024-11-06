@@ -17,10 +17,23 @@
  */
 package com.soulfiremc.server.protocol.bot.model;
 
-public record AbilitiesData(
-  boolean invulnerable,
-  boolean flying,
-  boolean allowFlying,
-  boolean creativeModeBreak,
-  float flySpeed,
-  float walkSpeed) {}
+import lombok.*;
+
+@Setter
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor
+public final class AbilitiesData {
+  public boolean invulnerable;
+  public boolean flying;
+  public boolean mayfly;
+  public boolean instabuild;
+  public boolean mayBuild;
+  private float flySpeed;
+  private float walkSpeed;
+
+  public AbilitiesData() {
+    this(false, false, false, false, true, 0.05F, 0.1F);
+  }
+}
