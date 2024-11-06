@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.test;
 
+import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.server.util.PortHelper;
@@ -38,6 +39,7 @@ public class LoadTest {
 
     SFLogAppender.INSTANCE.start();
 
+    SoulFireAbstractBootstrap.injectMixins(null);
     var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), new DefaultPluginManager(), Instant.now(), new DefaultAuthSystem(), tempDir);
 
     server.shutdownManager().shutdownSoftware(false);

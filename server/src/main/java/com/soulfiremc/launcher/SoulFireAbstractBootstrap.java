@@ -35,6 +35,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -148,9 +149,14 @@ public abstract class SoulFireAbstractBootstrap {
     log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
   }
 
-  private void injectMixinsAndRun(String[] args) {
+  public void injectMixinsAndRun(String[] args) {
+    injectMixins(pluginManager);
+    this.postMixinMain(args);
+  }
+
+  public static void injectMixins(@Nullable PluginManager pluginManager) {
     var mixinPaths = new HashSet<String>();
-    Stream.concat(pluginManager
+    Stream.concat(pluginManager == null ? Stream.empty() : pluginManager
           .getExtensions(MixinExtension.class)
           .stream(),
         Stream.of(new SFDefaultMixinExtension()))
@@ -167,9 +173,11 @@ public abstract class SoulFireAbstractBootstrap {
 
     var classLoaders = new ArrayList<ClassLoader>();
     classLoaders.add(SoulFireAbstractBootstrap.class.getClassLoader());
-    pluginManager
-      .getPlugins()
-      .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
+    if (pluginManager != null) {
+      pluginManager
+        .getPlugins()
+        .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
+    }
 
     var classProvider = new CustomClassProvider(classLoaders);
     var transformerManager = new TransformerManager(classProvider);
@@ -179,11 +187,9 @@ public abstract class SoulFireAbstractBootstrap {
     try {
       transformerManager.hookInstrumentation(Agents.getInstrumentation());
       log.info("Used Runtime Agent to inject mixins");
-
-      this.postMixinMain(args);
     } catch (IOException t) {
       log.error("Failed to inject mixins", t);
-      System.exit(1);
+      throw new IllegalStateException("Failed to inject mixins", t);
     }
   }
 
