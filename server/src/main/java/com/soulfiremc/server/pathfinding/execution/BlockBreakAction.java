@@ -36,7 +36,8 @@ public final class BlockBreakAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockFace blockBreakSideHint;
-  boolean finishedDigging = false;
+  private BlockType wasBlockType = null;
+  private boolean finishedDigging = false;
   private boolean didLook = false;
   private boolean putInHand = false;
   private int remainingTicks = -1;
@@ -50,7 +51,13 @@ public final class BlockBreakAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isEmptyBlock(level.getBlockState(blockPosition).blockType());
+    var currentBlockType = level.getBlockState(blockPosition).blockType();
+    if (wasBlockType == null) {
+      wasBlockType = currentBlockType;
+    }
+
+    return BlockTypeHelper.isEmptyBlock(currentBlockType)
+      || wasBlockType != currentBlockType;
   }
 
   @Override
