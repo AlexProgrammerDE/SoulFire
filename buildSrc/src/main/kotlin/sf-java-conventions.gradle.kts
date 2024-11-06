@@ -5,12 +5,12 @@ plugins {
   id("sf-formatting-conventions")
   id("io.freefair.lombok")
   id("net.kyori.indra.git")
+  id("io.freefair.javadocs")
 }
 
 tasks {
   javadoc {
     title = "SoulFire Javadocs"
-    options.encoding = Charsets.UTF_8.name()
     (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
   }
   compileJava {

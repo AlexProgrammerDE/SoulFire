@@ -1,5 +1,25 @@
 plugins {
   base
+  id("io.freefair.aggregate-javadoc")
+}
+
+dependencies {
+  rootProject.subprojects.forEach { subproject ->
+    if (subproject.name == "data-generator") {
+      return@forEach;
+    }
+
+    subproject.plugins.withId("java") {
+      javadoc(subproject)
+    }
+  }
+}
+
+tasks {
+  javadoc {
+    title = "SoulFire Javadocs"
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+  }
 }
 
 allprojects {

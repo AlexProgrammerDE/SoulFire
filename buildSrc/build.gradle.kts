@@ -23,4 +23,5 @@ dependencies {
   implementation(libs.gradle.plugin.indra.git)
   implementation(libs.gradle.plugin.unimined)
   implementation(libs.gradle.plugin.spotless)
+  implementation(libs.gradle.plugin.freefair)
 }
