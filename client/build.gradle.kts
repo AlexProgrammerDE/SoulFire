@@ -110,7 +110,7 @@ tasks {
     doLast {
       val dependencies = configurations.runtimeClasspath.get().files
         .filter { it.name.endsWith("jar") }
-        .filter { !it.toString().contains("build/libs") }
+        .filter { !it.toString().contains("build" + File.separator + "libs") }
         .joinToString("\n") { it.name }
       outputFile.get().asFile.writeText(dependencies)
     }
@@ -123,7 +123,7 @@ tasks {
     from({
       configurations.runtimeClasspath.get()
         .filter { it.name.endsWith("jar") }
-        .filter { it.toString().contains("build/libs") }
+        .filter { it.toString().contains("build" + File.separator + "libs") }
         .map { zipTree(it) }
     })
 
@@ -140,7 +140,7 @@ tasks {
     from({
       configurations.runtimeClasspath.get()
         .filter { it.name.endsWith("jar") }
-        .filter { !it.toString().contains("build/libs") }
+        .filter { !it.toString().contains("build" + File.separator + "libs") }
     }) {
       into("META-INF/lib")
     }
