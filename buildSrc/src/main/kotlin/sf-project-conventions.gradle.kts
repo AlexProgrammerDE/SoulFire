@@ -5,8 +5,7 @@ plugins {
 
 publishing {
   repositories {
-    val repoName = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
-    maven("https://repo.codemc.org/repository/${repoName}/") {
+    maven("https://repo.codemc.org/repository/alexprogrammerde/") {
       name = "codemc"
       credentials {
         username = System.getenv("CODEMC_USERNAME")
