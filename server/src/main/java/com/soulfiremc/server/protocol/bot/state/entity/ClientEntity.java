@@ -107,13 +107,13 @@ public class ClientEntity extends Entity {
   private void livingEntityTick() {
     super.tick();
 
-    this.aiStep();
+    // this.aiStep();
 
-    if (this.isFallFlying()) {
-      this.fallFlyTicks++;
-    } else {
-      this.fallFlyTicks = 0;
-    }
+    // if (this.isFallFlying()) {
+    //  this.fallFlyTicks++;
+    //  else {
+    //  this.fallFlyTicks = 0;
+    // }
 
     if (this.isSleeping()) {
       this.xRot(0.0F);
@@ -236,10 +236,6 @@ public class ClientEntity extends Entity {
         : PlayerState.STOP_SPRINTING));
       this.wasSprinting = sprinting;
     }
-  }
-
-  public AbilitiesData abilities() {
-    return dataManager.abilitiesData();
   }
 
   public void jump() {
