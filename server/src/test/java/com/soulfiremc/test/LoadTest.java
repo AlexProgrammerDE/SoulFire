@@ -34,6 +34,8 @@ public class LoadTest {
 
   @Test
   public void testLoad() {
+    System.setProperty("sf.unit.test", "true");
+
     SFLogAppender.INSTANCE.start();
 
     var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), new DefaultPluginManager(), Instant.now(), new DefaultAuthSystem(), tempDir);
