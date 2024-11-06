@@ -5,7 +5,7 @@ plugins {
 
 publishing {
   repositories {
-    maven("https://repo.codemc.org/repository/alexprogrammerde/") {
+    maven("https://repo.codemc.org/repository/AlexProgrammerDE/") {
       name = "codemc"
       credentials {
         username = System.getenv("CODEMC_USERNAME")
