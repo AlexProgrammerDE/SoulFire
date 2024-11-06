@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.brigadier;
+package com.soulfiremc.client;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.soulfiremc.brigadier.CommandHelpWrapper;
+import com.soulfiremc.brigadier.CommandSource;
+import com.soulfiremc.brigadier.RedirectHelpWrapper;
 
 public class ClientBrigadierHelper {
   private ClientBrigadierHelper() {}

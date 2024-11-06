@@ -69,7 +69,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
           .chunks()
           .immutableCopy();
         var inventory =
-          new ProjectedInventory(dataManager.inventoryManager().playerInventory(), dataManager.clientEntity(), pathConstraint);
+          new ProjectedInventory(bot.inventoryManager().playerInventory(), dataManager.clientEntity(), pathConstraint);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var routeFinder =
@@ -101,7 +101,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
   public void submitForPathCalculation(boolean isInitial) {
     unregister();
-    connection.dataManager().controlState().resetAll();
+    connection.controlState().resetAll();
 
     connection.scheduler().schedule(() -> {
       try {
@@ -205,7 +205,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
       // If there are no more goals, stop
       if (worldAction == null) {
         connection.logger().info("Finished all goals!");
-        connection.dataManager().controlState().resetAll();
+        connection.controlState().resetAll();
         pathCompletionFuture.complete(null);
         unregister();
         return;
@@ -234,7 +234,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = true;
-    connection.dataManager().clientEntity().controlState().incrementActivelyControlling();
+    connection.controlState().incrementActivelyControlling();
     connection.registerListener(BotPreTickEvent.class, this);
   }
 
@@ -244,7 +244,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     }
 
     registered = false;
-    connection.dataManager().clientEntity().controlState().decrementActivelyControlling();
+    connection.controlState().decrementActivelyControlling();
     connection.registerListener(BotPreTickEvent.class, this);
   }
 

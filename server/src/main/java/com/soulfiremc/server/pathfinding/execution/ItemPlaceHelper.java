@@ -22,6 +22,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
@@ -32,8 +33,8 @@ import com.soulfiremc.server.util.TimeUtil;
 import java.util.concurrent.TimeUnit;
 
 public class ItemPlaceHelper {
-  public static boolean placeBestBlockInHand(SessionDataManager dataManager) {
-    var inventoryManager = dataManager.inventoryManager();
+  public static boolean placeBestBlockInHand(BotConnection connection) {
+    var inventoryManager = connection.inventoryManager();
     var playerInventory = inventoryManager.playerInventory();
 
     ItemType leastHardItemType = null;
@@ -69,7 +70,7 @@ public class ItemPlaceHelper {
   }
 
   public static boolean placeBestToolInHand(SessionDataManager dataManager, SFVec3i blockPosition) {
-    var inventoryManager = dataManager.inventoryManager();
+    var inventoryManager = dataManager.connection().inventoryManager();
     var playerInventory = inventoryManager.playerInventory();
 
     SFItemStack bestItemStack = null;

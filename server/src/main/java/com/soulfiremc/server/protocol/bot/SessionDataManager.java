@@ -27,7 +27,6 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
-import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.*;
@@ -121,9 +120,6 @@ public final class SessionDataManager {
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
-  private final InventoryManager inventoryManager;
-  private final BotActionManager botActionManager;
-  private final ControlState controlState = new ControlState();
   private final TagsState tagsState = new TagsState();
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
@@ -157,8 +153,6 @@ public final class SessionDataManager {
     this.log = connection.logger();
     this.codecHelper = connection.session().getCodecHelper();
     this.connection = connection;
-    this.inventoryManager = new InventoryManager(this, connection);
-    this.botActionManager = new BotActionManager(this, connection);
   }
 
   private static String toPlainText(Component component) {
@@ -257,7 +251,7 @@ public final class SessionDataManager {
 
     // Init client entity
     clientEntity =
-      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, this, controlState, currentLevel());
+      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, currentLevel());
     clientEntity.showReducedDebug(packet.isReducedDebugInfo());
     entityTrackerState.addEntity(clientEntity);
   }
@@ -547,8 +541,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
-    inventoryManager.lastStateId(packet.getStateId());
-    var container = inventoryManager.getContainer(packet.getContainerId());
+    connection.inventoryManager().lastStateId(packet.getStateId());
+    var container = connection.inventoryManager().getContainer(packet.getContainerId());
 
     if (container == null) {
       log.debug(
@@ -563,13 +557,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
-    inventoryManager.lastStateId(packet.getStateId());
+    connection.inventoryManager().lastStateId(packet.getStateId());
     if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
-      inventoryManager.cursorItem(SFItemStack.from(packet.getItem()));
+      connection.inventoryManager().cursorItem(SFItemStack.from(packet.getItem()));
       return;
     }
 
-    var container = inventoryManager.getContainer(packet.getContainerId());
+    var container = connection.inventoryManager().getContainer(packet.getContainerId());
 
     if (container == null) {
       log.debug("Received container slot update for unknown container {}", packet.getContainerId());
@@ -581,7 +575,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
-    var container = inventoryManager.getContainer(packet.getContainerId());
+    var container = connection.inventoryManager().getContainer(packet.getContainerId());
 
     if (container == null) {
       log.debug("Received container data update for unknown container {}", packet.getContainerId());
@@ -593,25 +587,25 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetPlayerInventory(ClientboundSetPlayerInventoryPacket packet) {
-    inventoryManager.playerInventory().setSlot(packet.getSlot(), SFItemStack.from(packet.getContents()));
+    connection.inventoryManager().playerInventory().setSlot(packet.getSlot(), SFItemStack.from(packet.getContents()));
   }
 
   @EventHandler
   public void onSetCursor(ClientboundSetCursorItemPacket packet) {
-    inventoryManager.cursorItem(SFItemStack.from(packet.getContents()));
+    connection.inventoryManager().cursorItem(SFItemStack.from(packet.getContents()));
   }
 
   @EventHandler
   public void onSetSlot(ClientboundSetHeldSlotPacket packet) {
-    inventoryManager.heldItemSlot(packet.getSlot());
+    connection.inventoryManager().heldItemSlot(packet.getSlot());
   }
 
   @EventHandler
   public void onOpenScreen(ClientboundOpenScreenPacket packet) {
     var container =
       new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
-    inventoryManager.setContainer(packet.getContainerId(), container);
-    inventoryManager.openContainer(container);
+    connection.inventoryManager().setContainer(packet.getContainerId(), container);
+    connection.inventoryManager().openContainer(container);
   }
 
   @EventHandler
@@ -622,7 +616,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onCloseContainer(ClientboundContainerClosePacket packet) {
-    inventoryManager.openContainer(null);
+    connection.inventoryManager().openContainer(null);
   }
 
   @EventHandler

@@ -47,6 +47,7 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
+import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
@@ -65,6 +66,7 @@ import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -357,7 +359,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                             return false;
                           }));
 
-                  bot.dataManager().controlState().resetAll();
+                  bot.controlState().resetAll();
 
                   if (changed == 0) {
                     c.getSource().sendWarn("No pathfinding was running!");
@@ -400,7 +402,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.dataManager().controlState();
+                      var controlState = bot.controlState();
 
                       controlState.forward(!controlState.forward());
                       controlState.backward(false);
@@ -415,7 +417,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.dataManager().controlState();
+                      var controlState = bot.controlState();
 
                       controlState.backward(!controlState.backward());
                       controlState.forward(false);
@@ -430,7 +432,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.dataManager().controlState();
+                      var controlState = bot.controlState();
 
                       controlState.left(!controlState.left());
                       controlState.right(false);
@@ -445,7 +447,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.dataManager().controlState();
+                      var controlState = bot.controlState();
 
                       controlState.right(!controlState.right());
                       controlState.left(false);
@@ -460,7 +462,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryBot(
                 c,
                 bot -> {
-                  var controlState = bot.dataManager().controlState();
+                  var controlState = bot.controlState();
 
                   controlState.jumping(!controlState.jumping());
                   return Command.SINGLE_SUCCESS;
@@ -486,9 +488,30 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryBot(
                 c,
                 bot -> {
-                  bot.dataManager().controlState().resetAll();
+                  bot.controlState().resetAll();
                   return Command.SINGLE_SUCCESS;
                 }))));
+
+    // Inventory controls
+    dispatcher.register(
+      literal("placeon")
+        .then(argument("block", new DynamicXYZArgumentType())
+          .then(
+            argument("face", new EnumArgumentType<>(BlockFace.class))
+              .executes(
+                help(
+                  "Makes selected bots place a block on the specified face of a block",
+                  c -> {
+                    var block = c.getArgument("block", DynamicXYZArgumentType.XYZLocationMapper.class);
+                    var face = c.getArgument("face", BlockFace.class);
+
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        bot.botActionManager().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().clientEntity().pos()).toInt(), face);
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  })))));
 
     // Attack controls
     dispatcher.register(

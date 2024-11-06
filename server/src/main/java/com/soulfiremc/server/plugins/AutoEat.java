@@ -61,7 +61,7 @@ public class AutoEat implements InternalPlugin {
           return;
         }
 
-        var inventoryManager = dataManager.inventoryManager();
+          var inventoryManager = connection.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
@@ -87,7 +87,7 @@ public class AutoEat implements InternalPlugin {
             }
           }
 
-          dataManager.botActionManager().useItemInHand(Hand.MAIN_HAND);
+            connection.botActionManager().useItemInHand(Hand.MAIN_HAND);
 
           // Wait before eating again
           TimeUtil.waitTime(2, TimeUnit.SECONDS);

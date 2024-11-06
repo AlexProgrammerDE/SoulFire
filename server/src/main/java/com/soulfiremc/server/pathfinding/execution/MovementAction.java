@@ -64,7 +64,7 @@ public final class MovementAction implements WorldAction {
   @Override
   public void tick(BotConnection connection) {
     var clientEntity = connection.dataManager().clientEntity();
-    clientEntity.controlState().resetAll();
+    connection.controlState().resetAll();
 
     var level = connection.dataManager().currentLevel();
 
@@ -87,12 +87,12 @@ public final class MovementAction implements WorldAction {
       clientEntity.lastYRot(newYRot);
     }
 
-    clientEntity.controlState().forward(true);
+    connection.controlState().forward(true);
 
     var botPosition = clientEntity.pos();
     if (targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
       && shouldJump()) {
-      clientEntity.controlState().jumping(true);
+      connection.controlState().jumping(true);
     }
   }
 

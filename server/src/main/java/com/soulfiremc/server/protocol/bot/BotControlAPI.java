@@ -58,7 +58,6 @@ import java.util.Comparator;
 @RequiredArgsConstructor
 public class BotControlAPI {
   private final BotConnection connection;
-  private final SessionDataManager dataManager;
   private final SecureRandom secureRandom = new SecureRandom();
   @Getter
   @Setter
@@ -71,6 +70,7 @@ public class BotControlAPI {
   }
 
   public boolean toggleFlight() {
+    var dataManager = connection.dataManager();
     var abilitiesData = dataManager.clientEntity().abilitiesData();
     if (abilitiesData != null && !abilitiesData.mayfly()) {
       throw new IllegalStateException("You can't fly! (Server said so)");
@@ -86,8 +86,9 @@ public class BotControlAPI {
   }
 
   public boolean toggleSprint() {
-    var newSprint = !dataManager.controlState().sprinting();
-    dataManager.controlState().sprinting(newSprint);
+    var dataManager = connection.dataManager();
+    var newSprint = !connection.controlState().sprinting();
+    connection.controlState().sprinting(newSprint);
 
     // Let the server know we are sprinting
     connection.sendPacket(
@@ -99,8 +100,9 @@ public class BotControlAPI {
   }
 
   public boolean toggleSneak() {
-    var newSneak = !dataManager.controlState().sneaking();
-    dataManager.controlState().sneaking(newSneak);
+    var dataManager = connection.dataManager();
+    var newSneak = !connection.controlState().sneaking();
+    connection.controlState().sneaking(newSneak);
 
     // Let the server know we are sneaking
     connection.sendPacket(
@@ -172,6 +174,7 @@ public class BotControlAPI {
       }
     }
 
+    var dataManager = connection.dataManager();
     var eye = dataManager.clientEntity().eyePosition();
 
     // sort by distance to the bot
@@ -199,7 +202,7 @@ public class BotControlAPI {
 
     var packet =
       new ServerboundInteractPacket(
-        entity.entityId(), InteractAction.ATTACK, dataManager.controlState().sneaking());
+        entity.entityId(), InteractAction.ATTACK, connection.controlState().sneaking());
     connection.sendPacket(packet);
     if (swingArm) {
       swingArm();
@@ -214,6 +217,7 @@ public class BotControlAPI {
     boolean ignoreBots,
     boolean onlyInteractable,
     boolean mustBeSeen) {
+    var dataManager = connection.dataManager();
     if (dataManager.clientEntity() == null) {
       return null;
     }
@@ -286,6 +290,7 @@ public class BotControlAPI {
   }
 
   public boolean canSee(Vector3d vec) { // intensive method, don't use it too often
+    var dataManager = connection.dataManager();
     var level = dataManager.currentLevel();
 
     var eye = dataManager.clientEntity().eyePosition();
@@ -310,11 +315,11 @@ public class BotControlAPI {
   }
 
   public float getHitItemCooldownTicks() {
-    dataManager.inventoryManager().applyItemAttributes();
+    connection.inventoryManager().applyItemAttributes();
 
     return (float)
       (1.0
-        / dataManager.clientEntity().attributeValue(AttributeType.ATTACK_SPEED)
+        / connection.dataManager().clientEntity().attributeValue(AttributeType.ATTACK_SPEED)
         * 20.0);
   }
 }

@@ -62,7 +62,7 @@ public final class BlockBreakAction implements WorldAction {
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
     var clientEntity = dataManager.clientEntity();
-    dataManager.controlState().resetAll();
+    connection.controlState().resetAll();
 
     var level = dataManager.currentLevel();
     if (!didLook) {
@@ -97,10 +97,10 @@ public final class BlockBreakAction implements WorldAction {
             dataManager.tagsState(),
             dataManager.clientEntity(),
             clientEntity.onGround(),
-            dataManager.inventoryManager().playerInventory().getHeldItem().item(),
+            connection.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
           .ticks();
-      dataManager.botActionManager()
+      connection.botActionManager()
         .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
 
       // We instamine or are in creative mode
@@ -113,11 +113,11 @@ public final class BlockBreakAction implements WorldAction {
         dataManager.currentLevel().setBlock(blockPosition.toVector3i(), BlockState.forDefaultBlockType(BlockType.AIR));
       }
     } else if (--remainingTicks == 0) {
-      dataManager.botActionManager()
+      connection.botActionManager()
         .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
       finishedDigging = true;
     } else {
-      dataManager.botActionManager().sendBreakBlockAnimation();
+      connection.botActionManager().sendBreakBlockAnimation();
     }
   }
 

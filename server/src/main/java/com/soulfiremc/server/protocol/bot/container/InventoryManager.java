@@ -19,7 +19,6 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -45,8 +44,6 @@ public class InventoryManager {
     new Int2ObjectOpenHashMap<>(Map.of(0, playerInventory));
   private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
-  @ToString.Exclude
-  private final SessionDataManager dataManager;
   @ToString.Exclude
   private final BotConnection connection;
   private Container openContainer;
@@ -168,7 +165,7 @@ public class InventoryManager {
         hasChanged = true;
 
         // Remove the old item's modifiers
-        dataManager.clientEntity().attributeState().removeItemModifiers(previousItem, equipmentSlot);
+        connection.dataManager().clientEntity().attributeState().removeItemModifiers(previousItem, equipmentSlot);
       } else {
         // Item before, and we have the same one now
         hasChanged = false;
@@ -179,7 +176,7 @@ public class InventoryManager {
     }
 
     if (hasChanged && item != null) {
-      dataManager.clientEntity().attributeState().putItemModifiers(item, equipmentSlot);
+      connection.dataManager().clientEntity().attributeState().putItemModifiers(item, equipmentSlot);
     }
 
     lastInEquipment.put(equipmentSlot, item);

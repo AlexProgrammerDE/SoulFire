@@ -50,10 +50,10 @@ public final class BlockPlaceAction implements WorldAction {
   @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
-    dataManager.controlState().resetAll();
+    connection.controlState().resetAll();
 
     if (!putOnHotbar) {
-      if (ItemPlaceHelper.placeBestBlockInHand(dataManager)) {
+      if (ItemPlaceHelper.placeBestBlockInHand(connection)) {
         putOnHotbar = true;
       }
 
@@ -64,7 +64,7 @@ public final class BlockPlaceAction implements WorldAction {
       return;
     }
 
-    connection.dataManager().botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
+    connection.botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
     finishedPlacing = true;
   }
 

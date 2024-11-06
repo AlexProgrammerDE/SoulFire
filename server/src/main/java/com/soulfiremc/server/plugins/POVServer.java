@@ -500,7 +500,7 @@ public class POVServer implements InternalPlugin {
 
                     // The client spams too many packets when being force-moved,
                     // so we'll just ignore them
-                    if (clientEntity.controlState().isActivelyControlling()) {
+                    if (botConnection.controlState().isActivelyControlling()) {
                       return;
                     }
 
@@ -834,26 +834,26 @@ public class POVServer implements InternalPlugin {
                       lightUpdateData));
                 }
 
-                if (dataManager.inventoryManager() != null) {
+                if (botConnection.inventoryManager() != null) {
                   session.send(
                     new ClientboundSetHeldSlotPacket(
-                      dataManager.inventoryManager().heldItemSlot()));
+                      botConnection.inventoryManager().heldItemSlot()));
                   var stateIndex = 0;
                   for (var container :
-                    dataManager.inventoryManager().containerData().values()) {
+                    botConnection.inventoryManager().containerData().values()) {
                     session.send(
                       new ClientboundContainerSetContentPacket(
                         container.id(),
                         stateIndex++,
                         Arrays.stream(
-                            dataManager
+                            botConnection
                               .inventoryManager()
                               .playerInventory()
                               .slots())
                           .map(ContainerSlot::item)
                           .toList()
                           .toArray(new ItemStack[0]),
-                        dataManager.inventoryManager().cursorItem()));
+                        botConnection.inventoryManager().cursorItem()));
 
                     if (container.properties() != null) {
                       for (var containerProperty : container.properties().int2IntEntrySet()) {

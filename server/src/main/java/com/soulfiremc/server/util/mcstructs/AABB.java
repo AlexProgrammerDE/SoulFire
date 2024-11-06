@@ -35,13 +35,13 @@ public class AABB {
   public final double maxY;
   public final double maxZ;
 
-  public AABB(double d, double e, double f, double g, double h, double i) {
-    this.minX = Math.min(d, g);
-    this.minY = Math.min(e, h);
-    this.minZ = Math.min(f, i);
-    this.maxX = Math.max(d, g);
-    this.maxY = Math.max(e, h);
-    this.maxZ = Math.max(f, i);
+  public AABB(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+    this.minX = Math.min(minX, maxX);
+    this.minY = Math.min(minY, maxY);
+    this.minZ = Math.min(minZ, maxZ);
+    this.maxX = Math.max(minX, maxX);
+    this.maxY = Math.max(minY, maxY);
+    this.maxZ = Math.max(minZ, maxZ);
   }
 
   public AABB(Vector3i arg) {
@@ -84,20 +84,21 @@ public class AABB {
   @Nullable
   public static BlockHitResult clip(Iterable<AABB> boxes, Vector3d start, Vector3d end, Vector3i pos) {
     var ds = new double[]{1.0};
-    Direction lv = null;
-    var d = end.getX() - start.getX();
-    var e = end.getY() - start.getY();
-    var f = end.getZ() - start.getZ();
+    Direction direction = null;
+    var x = end.getX() - start.getX();
+    var y = end.getY() - start.getY();
+    var z = end.getZ() - start.getZ();
 
     for (var lv2 : boxes) {
-      lv = getDirection(lv2.move(pos), start, ds, lv, d, e, f);
+      // Modification: Our AABBs are already absolute
+      direction = getDirection(lv2, start, ds, direction, x, y, z);
     }
 
-    if (lv == null) {
+    if (direction == null) {
       return null;
     } else {
       var g = ds[0];
-      return new BlockHitResult(start.add(g * d, g * e, g * f), lv, pos, false);
+      return new BlockHitResult(start.add(g * x, g * y, g * z), direction, pos, false);
     }
   }
 

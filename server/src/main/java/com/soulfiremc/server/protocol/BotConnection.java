@@ -27,8 +27,11 @@ import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
+import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
+import com.soulfiremc.server.protocol.bot.container.InventoryManager;
+import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
@@ -74,6 +77,9 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
       });
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
+  private final ControlState controlState = new ControlState();
+  private final InventoryManager inventoryManager;
+  private final BotActionManager botActionManager;
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
@@ -132,7 +138,9 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
     this.session = new ViaClientSession(
       resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, this);
     this.dataManager = new SessionDataManager(this);
-    this.botControl = new BotControlAPI(this, dataManager);
+    this.inventoryManager = new InventoryManager(this);
+    this.botActionManager = new BotActionManager(this);
+    this.botControl = new BotControlAPI(this);
 
     // Start the tick loop
     scheduler.scheduleWithFixedDelay(this::tickLoop, 0, 1, TimeUnit.MILLISECONDS);

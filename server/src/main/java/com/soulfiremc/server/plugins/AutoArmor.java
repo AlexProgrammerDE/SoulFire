@@ -121,7 +121,7 @@ public class AutoArmor implements InternalPlugin {
         }
 
         for (var type : ArmorType.VALUES) {
-          putOn(connection.dataManager().inventoryManager(), type);
+          putOn(connection.inventoryManager(), type);
         }
       },
       settingsSource.getRandom(AutoArmorSettings.DELAY).asLongSupplier(),

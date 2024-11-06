@@ -45,8 +45,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 @RequiredArgsConstructor
 public class BotActionManager {
   @ToString.Exclude
-  private final SessionDataManager dataManager;
-  @ToString.Exclude
   private final BotConnection connection;
   private int sequenceNumber = 0;
 
@@ -56,6 +54,7 @@ public class BotActionManager {
 
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
+    var dataManager = connection.dataManager();
     connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yRot(), dataManager.clientEntity().xRot()));
   }
 
@@ -65,6 +64,7 @@ public class BotActionManager {
 
   public void placeBlock(Hand hand, Vector3i againstBlock, BlockFace againstFace) {
     incrementSequenceNumber();
+    var dataManager = connection.dataManager();
     var clientEntity = dataManager.clientEntity();
     var level = dataManager.currentLevel();
 
@@ -93,6 +93,7 @@ public class BotActionManager {
 
     var blockPlacePosition = hitResult.getVector3i();
     var blockPlaceLocation = hitResult.location();
+
     connection.sendPacket(
       new ServerboundUseItemOnPacket(
         hitResult.getVector3i(),

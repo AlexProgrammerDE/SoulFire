@@ -35,8 +35,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
 
-import static com.soulfiremc.brigadier.ClientBrigadierHelper.help;
-import static com.soulfiremc.brigadier.ClientBrigadierHelper.literal;
+import static com.soulfiremc.client.ClientBrigadierHelper.help;
+import static com.soulfiremc.client.ClientBrigadierHelper.literal;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)

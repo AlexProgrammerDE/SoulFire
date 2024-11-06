@@ -76,4 +76,13 @@ public record BlockState(
   public int hashCode() {
     return id;
   }
+
+  @Override
+  public String toString() {
+    return "BlockState{" +
+      "id=" + id +
+      ", properties=" + properties +
+      ", blockShapeGroup=" + blockShapeGroup +
+      '}';
+  }
 }

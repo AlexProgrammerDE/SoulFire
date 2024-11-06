@@ -20,9 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
-import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -45,8 +43,6 @@ import java.util.UUID;
 public class ClientEntity extends Entity {
   private final AbilitiesData abilitiesData = new AbilitiesData();
   private final BotConnection connection;
-  private final SessionDataManager dataManager;
-  private final ControlState controlState;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -64,12 +60,10 @@ public class ClientEntity extends Entity {
   private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
   public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection, SessionDataManager dataManager, ControlState controlState,
+    int entityId, UUID uuid, BotConnection connection,
     Level level) {
     super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
     this.connection = connection;
-    this.dataManager = dataManager;
-    this.controlState = controlState;
   }
 
   @Override
@@ -78,7 +72,7 @@ public class ClientEntity extends Entity {
 
     this.sendShiftKeyState();
 
-    var keyPressPacket = this.controlState.toServerboundPlayerInputPacket();
+    var keyPressPacket = connection.controlState().toServerboundPlayerInputPacket();
     if (!keyPressPacket.equals(this.lastSentInput)) {
       this.connection.sendPacket(keyPressPacket);
       this.lastSentInput = keyPressPacket;
@@ -162,7 +156,7 @@ public class ClientEntity extends Entity {
 
   @Override
   public double eyeHeight() {
-    if (this.controlState.sneaking()) {
+    if (connection.controlState().sneaking()) {
       return connection
         .protocolVersion()
         .newerThanOrEqualTo(ProtocolVersion.v1_14)
@@ -219,7 +213,7 @@ public class ClientEntity extends Entity {
   }
 
   private void sendShiftKeyState() {
-    var sneaking = controlState.sneaking();
+    var sneaking = connection.controlState().sneaking();
     if (sneaking != this.wasShiftKeyDown) {
       this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sneaking
         ? PlayerState.START_SNEAKING
@@ -229,7 +223,7 @@ public class ClientEntity extends Entity {
   }
 
   private void sendIsSprintingIfNeeded() {
-    var sprinting = controlState.sprinting();
+    var sprinting = connection.controlState().sprinting();
     if (sprinting != this.wasSprinting) {
       this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sprinting
         ? PlayerState.START_SPRINTING
@@ -244,7 +238,7 @@ public class ClientEntity extends Entity {
 
   @Override
   public float height() {
-    return this.controlState.sneaking() ? 1.5F : 1.8F;
+    return connection.controlState().sneaking() ? 1.5F : 1.8F;
   }
 
   private boolean isSpectator() {

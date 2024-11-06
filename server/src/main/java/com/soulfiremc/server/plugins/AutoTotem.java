@@ -54,7 +54,7 @@ public class AutoTotem implements InternalPlugin {
         }
 
         var dataManager = connection.dataManager();
-        var inventoryManager = dataManager.inventoryManager();
+        var inventoryManager = connection.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
         var offhandSlot = playerInventory.getOffhand();
 
