@@ -27,6 +27,8 @@ tasks {
     options.isFork = true
   }
   test {
+    reports.junitXml.required = true
+    reports.html.required = true
     useJUnitPlatform()
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
   }
