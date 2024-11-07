@@ -1,9 +1,12 @@
 plugins {
   base
+  id("io.freefair.javadocs")
   id("io.freefair.aggregate-javadoc")
 }
 
 dependencies {
+  javadocClasspath("org.projectlombok:lombok:1.18.34")
+
   rootProject.subprojects.forEach { subproject ->
     if (subproject.name == "data-generator") {
       return@forEach;
