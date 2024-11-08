@@ -109,4 +109,8 @@ public class SoulFireAPI {
   public static void postEvent(SoulFireEvent event) {
     EVENT_BUS.call(event);
   }
+
+  public static LambdaManager getEventManager() {
+    return EVENT_BUS;
+  }
 }

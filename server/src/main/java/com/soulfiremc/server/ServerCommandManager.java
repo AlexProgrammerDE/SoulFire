@@ -345,9 +345,9 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 c,
                 bot -> {
                   var changed = EventUtil.runAndCountChanged(
-                    bot.eventBus(),
+                    SoulFireAPI.getEventManager(),
                     () ->
-                      bot.eventBus()
+                      SoulFireAPI.getEventManager()
                         .unregisterAll(
                           BotPreTickEvent.class,
                           (clazz, o) -> {
