@@ -18,7 +18,6 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.EventUtil;
 import com.soulfiremc.server.api.event.SoulFireEvent;
 import com.soulfiremc.server.plugins.*;
 import com.soulfiremc.server.util.SFFeatureFlags;
@@ -95,15 +94,15 @@ public class SoulFireAPI {
   }
 
   public static <E extends SoulFireEvent> void registerListener(Class<E> clazz, Consumer<E> consumer) {
-    EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.registerConsumer(consumer, clazz));
+    EVENT_BUS.registerConsumer(consumer, clazz);
   }
 
   public static void registerListenersOfClass(Class<?> clazz) {
-    EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.register(clazz));
+    EVENT_BUS.register(clazz);
   }
 
   public static void registerListenersOfObject(Object object) {
-    EventUtil.runAndAssertChanged(EVENT_BUS, () -> EVENT_BUS.register(object));
+    EVENT_BUS.register(object);
   }
 
   public static void postEvent(SoulFireEvent event) {
