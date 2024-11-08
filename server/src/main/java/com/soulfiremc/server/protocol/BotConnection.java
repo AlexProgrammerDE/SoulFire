@@ -22,8 +22,6 @@ import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.OnlineJavaDataLike;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
@@ -43,8 +41,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -64,17 +60,6 @@ import java.util.concurrent.TimeUnit;
 public final class BotConnection {
   public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final UUID connectionId = UUID.randomUUID();
-  private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
-    .setExceptionHandler(EventExceptionHandler.INSTANCE)
-    .setEventFilter(
-      (c, h) -> {
-        if (SoulFireBotEvent.class.isAssignableFrom(c)) {
-          return true;
-        } else {
-          throw new IllegalStateException(
-            "This event handler only accepts bot events");
-        }
-      });
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final ControlState controlState = new ControlState();

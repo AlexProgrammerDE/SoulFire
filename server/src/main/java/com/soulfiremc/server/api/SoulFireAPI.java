@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 public class SoulFireAPI {
   private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
   private static final LambdaManager EVENT_BUS =
-    LambdaManager.basic(new ASMGenerator())
+    LambdaManager.threadSafe(new ASMGenerator())
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
       .setEventFilter(
         (c, h) -> {

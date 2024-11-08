@@ -26,8 +26,6 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
@@ -47,8 +45,6 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,17 +63,6 @@ public class InstanceManager {
   private final Logger logger;
   private final SoulFireScheduler scheduler;
   private final SettingsDelegate settingsSource;
-  private final LambdaManager eventBus =
-    LambdaManager.basic(new ASMGenerator())
-      .setExceptionHandler(EventExceptionHandler.INSTANCE)
-      .setEventFilter(
-        (c, h) -> {
-          if (SoulFireInstanceEvent.class.isAssignableFrom(c)) {
-            return true;
-          } else {
-            throw new IllegalStateException("This event handler only accepts attack events");
-          }
-        });
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final SoulFireServer soulFireServer;
   @Setter
