@@ -246,7 +246,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     registered = false;
     connection.controlState().decrementActivelyControlling();
-    SoulFireAPI.registerListener(BotPreTickEvent.class, this);
+    SoulFireAPI.unregisterListener(BotPreTickEvent.class, this);
   }
 
   public void cancel() {

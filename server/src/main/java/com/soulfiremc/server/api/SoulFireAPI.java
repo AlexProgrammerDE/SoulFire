@@ -97,12 +97,24 @@ public class SoulFireAPI {
     EVENT_BUS.registerConsumer(consumer, clazz);
   }
 
+  public static <E extends SoulFireEvent> void unregisterListener(Class<E> clazz, Consumer<E> consumer) {
+    EVENT_BUS.unregisterConsumer(consumer, clazz);
+  }
+
   public static void registerListenersOfClass(Class<?> clazz) {
     EVENT_BUS.register(clazz);
   }
 
+  public static void unregisterListenersOfClass(Class<?> clazz) {
+    EVENT_BUS.unregister(clazz);
+  }
+
   public static void registerListenersOfObject(Object object) {
     EVENT_BUS.register(object);
+  }
+
+  public static void unregisterListenersOfObject(Object object) {
+    EVENT_BUS.unregister(object);
   }
 
   public static void postEvent(SoulFireEvent event) {
