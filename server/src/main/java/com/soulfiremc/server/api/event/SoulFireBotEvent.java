@@ -17,11 +17,17 @@
  */
 package com.soulfiremc.server.api.event;
 
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.protocol.BotConnection;
 
 /**
  * Represents a bot event of a SoulFire bot in an attack.
  */
-public non-sealed interface SoulFireBotEvent extends SoulFireEvent {
+public non-sealed interface SoulFireBotEvent extends SoulFireEvent, SoulFireInstanceEvent {
   BotConnection connection();
+
+  @Override
+  default InstanceManager instanceManager() {
+    return connection().instanceManager();
+  }
 }

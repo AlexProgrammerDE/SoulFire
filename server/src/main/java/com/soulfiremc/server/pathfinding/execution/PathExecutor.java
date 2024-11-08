@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
@@ -235,7 +236,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     registered = true;
     connection.controlState().incrementActivelyControlling();
-    connection.registerListener(BotPreTickEvent.class, this);
+    SoulFireAPI.registerListener(BotPreTickEvent.class, this);
   }
 
   public synchronized void unregister() {
@@ -245,7 +246,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
     registered = false;
     connection.controlState().decrementActivelyControlling();
-    connection.registerListener(BotPreTickEvent.class, this);
+    SoulFireAPI.registerListener(BotPreTickEvent.class, this);
   }
 
   public void cancel() {

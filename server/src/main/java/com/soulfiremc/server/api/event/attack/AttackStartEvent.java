@@ -18,6 +18,6 @@
 package com.soulfiremc.server.api.event.attack;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.event.SoulFireAttackEvent;
+import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 
-public record AttackStartEvent(InstanceManager instanceManager) implements SoulFireAttackEvent {}
+public record AttackStartEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}

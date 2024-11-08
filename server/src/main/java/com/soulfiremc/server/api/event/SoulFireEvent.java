@@ -18,4 +18,4 @@
 package com.soulfiremc.server.api.event;
 
 public sealed interface SoulFireEvent
-  permits SoulFireGlobalEvent, SoulFireAttackEvent, SoulFireBotEvent {}
+  permits SoulFireGlobalEvent, SoulFireInstanceEvent, SoulFireBotEvent {}

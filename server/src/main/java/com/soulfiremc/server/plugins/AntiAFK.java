@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -39,14 +37,17 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class AntiAFK implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "anti-afk",
-    "1.0.0",
-    "Automatically moves x amount of blocks in a random direction to prevent being kicked for being AFK",
-    "AlexProgrammerDE",
-    "GPL-3.0");
+public class AntiAFK extends InternalPlugin {
+  public AntiAFK() {
+    super(new PluginInfo(
+      "anti-afk",
+      "1.0.0",
+      "Automatically moves x amount of blocks in a random direction to prevent being kicked for being AFK",
+      "AlexProgrammerDE",
+      "GPL-3.0"));
+  }
 
+  @EventHandler
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
@@ -74,19 +75,8 @@ public class AntiAFK implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AntiAFKSettings.class, "Anti AFK", PLUGIN_INFO, "activity");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AntiAFK.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, BotJoinedEvent.class, AntiAFK::onJoined);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AntiAFKSettings.class, "Anti AFK", this, "activity");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

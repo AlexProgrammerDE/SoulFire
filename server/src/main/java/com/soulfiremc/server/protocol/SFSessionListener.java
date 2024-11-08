@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
@@ -43,7 +44,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetReceived(Session session, Packet packet) {
     var event = new SFPacketReceiveEvent(botConnection, (MinecraftPacket) packet);
-    botConnection.postEvent(event);
+    SoulFireAPI.postEvent(event);
     if (event.isCancelled()) {
       return;
     }
@@ -60,7 +61,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetSending(PacketSendingEvent event) {
     var event1 = new SFPacketSendingEvent(botConnection, event.getPacket());
-    botConnection.postEvent(event1);
+    SoulFireAPI.postEvent(event1);
     event.setPacket(event1.packet());
     event.setCancelled(event1.isCancelled());
 
@@ -76,7 +77,7 @@ public class SFSessionListener extends SessionAdapter {
   @Override
   public void packetSent(Session session, Packet packet) {
     var event = new SFPacketSentEvent(botConnection, (MinecraftPacket) packet);
-    botConnection.postEvent(event);
+    SoulFireAPI.postEvent(event);
 
     botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
   }
@@ -89,6 +90,6 @@ public class SFSessionListener extends SessionAdapter {
       botConnection.logger().error("Error while handling disconnect event!", t);
     }
 
-    botConnection.postEvent(new BotDisconnectedEvent(botConnection));
+    SoulFireAPI.postEvent(new BotDisconnectedEvent(botConnection));
   }
 }

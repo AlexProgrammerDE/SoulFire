@@ -21,12 +21,12 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.OnlineJavaDataLike;
-import com.soulfiremc.server.api.EventBusOwner;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
+import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
@@ -61,7 +61,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
+public final class BotConnection {
   public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final UUID connectionId = UUID.randomUUID();
   private final LambdaManager eventBus = LambdaManager.basic(new ASMGenerator())
@@ -149,7 +149,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
   public CompletableFuture<?> connect() {
     return CompletableFuture.runAsync(
       () -> {
-        instanceManager.postEvent(new PreBotConnectEvent(this));
+        SoulFireAPI.postEvent(new PreBotConnectEvent(this));
         session.connect(true);
       }, scheduler);
   }
@@ -193,7 +193,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
         var tickHookState = TickHookContext.INSTANCE.get();
         tickHookState.clear();
 
-        postEvent(new BotPreTickEvent(this));
+        SoulFireAPI.postEvent(new BotPreTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
 
         dataManager.tick();
@@ -203,7 +203,7 @@ public final class BotConnection implements EventBusOwner<SoulFireBotEvent> {
           sendPacket(ServerboundClientTickEndPacket.INSTANCE);
         }
 
-        postEvent(new BotPostTickEvent(this));
+        SoulFireAPI.postEvent(new BotPostTickEvent(this));
         tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
       }
     } catch (Throwable t) {

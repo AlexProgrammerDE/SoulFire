@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -33,15 +31,18 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 
-public class FakeVirtualHost implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "fake-virtual-host",
-    "1.0.0",
-    "Fakes the virtual host",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class FakeVirtualHost extends InternalPlugin {
+  public FakeVirtualHost() {
+    super(new PluginInfo(
+      "fake-virtual-host",
+      "1.0.0",
+      "Fakes the virtual host",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onPacket(SFPacketSendingEvent event) {
     if (event.packet() instanceof ClientIntentionPacket intentionPacket) {
       var settingsSource = event.connection().settingsSource();
@@ -58,19 +59,8 @@ public class FakeVirtualHost implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(FakeVirtualHostSettings.class, "Fake Virtual Host", PLUGIN_INFO, "globe");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(FakeVirtualHost.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketSendingEvent.class, FakeVirtualHost::onPacket);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(FakeVirtualHostSettings.class, "Fake Virtual Host", this, "globe");
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

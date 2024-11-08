@@ -18,9 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.google.common.collect.ImmutableList;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
@@ -50,7 +48,6 @@ import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundC
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -59,16 +56,18 @@ import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ForwardingBypass implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "forwarding-bypass",
-    "1.0.0",
-    "Allows bypassing proxy forwarding",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class ForwardingBypass extends InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
+
+  public ForwardingBypass() {
+    super(new PluginInfo(
+      "forwarding-bypass",
+      "1.0.0",
+      "Allows bypassing proxy forwarding",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
   public static void writePlayerKey(
     ByteBuf buf, MinecraftCodecHelper codecHelper, IdentifiedKey playerKey) {
@@ -159,22 +158,11 @@ public class ForwardingBypass implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass", PLUGIN_INFO, "milestone");
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone");
   }
 
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ForwardingBypass.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketSendingEvent.class, this::onPacket);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, this::onPacketReceive);
-  }
-
+  @EventHandler
   public void onPacket(SFPacketSendingEvent event) {
     if (!(event.packet() instanceof ClientIntentionPacket handshake)) {
       return;
@@ -200,6 +188,7 @@ public class ForwardingBypass implements InternalPlugin {
     }
   }
 
+  @EventHandler
   public void onPacketReceive(SFPacketReceiveEvent event) {
     if (!(event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage)) {
       return;

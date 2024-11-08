@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -36,15 +34,18 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class AutoChatMessage implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-chat-message",
-    "1.0.0",
-    "Automatically sends messages in a configured delay",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoChatMessage extends InternalPlugin {
+  public AutoChatMessage() {
+    super(new PluginInfo(
+      "auto-chat-message",
+      "1.0.0",
+      "Automatically sends messages in a configured delay",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
@@ -62,19 +63,8 @@ public class AutoChatMessage implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoChatMessageSettings.class, "Auto Chat Message", PLUGIN_INFO, "message-circle-code");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoChatMessage.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, BotJoinedEvent.class, AutoChatMessage::onJoined);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoChatMessageSettings.class, "Auto Chat Message", this, "message-circle-code");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -34,105 +32,96 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
-public class KillAura implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "kill-aura",
-    "1.0.0",
-    "Automatically attacks entities",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class KillAura extends InternalPlugin {
+  public KillAura() {
+    super(new PluginInfo(
+      "kill-aura",
+      "1.0.0",
+      "Automatically attacks entities",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", PLUGIN_INFO, "skull");
+  public static void onPreEntityTick(BotPreEntityTickEvent event) {
+    var bot = event.connection();
+    if (!bot.settingsSource().get(KillAuraSettings.ENABLE)) {
+      return;
+    }
+
+    var control = bot.botControl();
+
+    var whitelistedUser = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USER);
+
+    var lookRange = bot.settingsSource().get(KillAuraSettings.LOOK_RANGE);
+    var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
+    var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
+
+    var max = Math.max(lookRange, Math.max(hitRange, swingRange));
+
+    var target =
+      control.getClosestEntity(
+        max,
+        whitelistedUser,
+        true,
+        true,
+        bot.settingsSource().get(KillAuraSettings.CHECK_WALLS));
+
+    if (target == null) {
+      return;
+    }
+
+    double distance;
+    var bestVisiblePoint = control.getEntityVisiblePoint(target);
+    if (bestVisiblePoint != null) {
+      distance =
+        bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition());
+    } else {
+      distance =
+        target
+          .eyePosition()
+          .distance(bot.dataManager().clientEntity().eyePosition());
+    }
+
+    if (distance > lookRange) {
+      return;
+    }
+
+    if (bestVisiblePoint != null) {
+      bot.dataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+    } else {
+      bot.dataManager()
+        .clientEntity()
+        .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
+    }
+
+    TickHookContext.INSTANCE
+      .get()
+      .addHook(
+        TickHookContext.HookType.POST_ENTITY_TICK,
+        () -> {
+          if (control.attackCooldownTicks() > 0) {
+            return;
+          }
+
+          var swing = distance <= swingRange;
+          if (distance <= hitRange) {
+            control.attack(target, swing);
+          } else if (swing) {
+            control.swingArm();
+          }
+
+          if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
+            || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+            control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
+          }
+        });
   }
 
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(KillAura.class);
-    PluginHelper.registerBotEventConsumer(
-      soulFireServer,
-      BotPreEntityTickEvent.class,
-      event -> {
-        var bot = event.connection();
-        if (!bot.settingsSource().get(KillAuraSettings.ENABLE)) {
-          return;
-        }
-
-        var control = bot.botControl();
-
-        var whitelistedUser = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USER);
-
-        var lookRange = bot.settingsSource().get(KillAuraSettings.LOOK_RANGE);
-        var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
-        var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
-
-        var max = Math.max(lookRange, Math.max(hitRange, swingRange));
-
-        var target =
-          control.getClosestEntity(
-            max,
-            whitelistedUser,
-            true,
-            true,
-            bot.settingsSource().get(KillAuraSettings.CHECK_WALLS));
-
-        if (target == null) {
-          return;
-        }
-
-        double distance;
-        var bestVisiblePoint = control.getEntityVisiblePoint(target);
-        if (bestVisiblePoint != null) {
-          distance =
-            bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition());
-        } else {
-          distance =
-            target
-              .eyePosition()
-              .distance(bot.dataManager().clientEntity().eyePosition());
-        }
-
-        if (distance > lookRange) {
-          return;
-        }
-
-        if (bestVisiblePoint != null) {
-          bot.dataManager().clientEntity().lookAt(RotationOrigin.EYES, bestVisiblePoint);
-        } else {
-          bot.dataManager()
-            .clientEntity()
-            .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
-        }
-
-        TickHookContext.INSTANCE
-          .get()
-          .addHook(
-            TickHookContext.HookType.POST_ENTITY_TICK,
-            () -> {
-              if (control.attackCooldownTicks() > 0) {
-                return;
-              }
-
-              var swing = distance <= swingRange;
-              if (distance <= hitRange) {
-                control.attack(target, swing);
-              } else if (swing) {
-                control.swingArm();
-              }
-
-              if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
-                || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-                control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
-              }
-            });
-      });
+  @EventHandler
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", this, "skull");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -23,10 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.SettingsPage;
-import com.soulfiremc.server.api.EventBusOwner;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
@@ -53,8 +50,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import net.raphimc.vialoader.ViaLoader;
 import net.raphimc.vialoader.impl.platform.*;
 import org.apache.logging.log4j.Level;
@@ -85,7 +80,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Getter
-public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
+public class SoulFireServer {
   public static final ComponentFlattener FLATTENER =
     ComponentFlattener.basic().toBuilder()
       .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
@@ -104,17 +99,6 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final Path baseDirectory;
-  private final LambdaManager eventBus =
-    LambdaManager.basic(new ASMGenerator())
-      .setExceptionHandler(EventExceptionHandler.INSTANCE)
-      .setEventFilter(
-        (c, h) -> {
-          if (SoulFireGlobalEvent.class.isAssignableFrom(c)) {
-            return true;
-          } else {
-            throw new IllegalStateException("This event handler only accepts global events");
-          }
-        });
 
   public SoulFireServer(
     String host,
@@ -181,17 +165,15 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       log.info("SoulFire is up to date!");
     }
 
-    for (var serverExtension : SoulFireAPI.getServerExtensions()) {
-      serverExtension.onServer(this);
-    }
-
-    postEvent(
+    SoulFireAPI.postEvent(
       new ServerSettingsRegistryInitEvent(
+        this,
         serverSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.SERVER)
             .addClass(DevSettings.class, "Dev Settings", "bug")));
-    postEvent(
+    SoulFireAPI.postEvent(
       new InstanceSettingsRegistryInitEvent(
+        this,
         instanceSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.INSTANCE)
             // Needs Via loaded to have all protocol versions
@@ -245,7 +227,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
       for (var instanceData : instancesArray) {
         try {
           var instance = InstanceManager.fromJson(this, instanceData);
-          postEvent(new InstanceInitEvent(instance));
+          SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
 
@@ -304,7 +286,7 @@ public class SoulFireServer implements EventBusOwner<SoulFireGlobalEvent> {
 
   public UUID createInstance(String friendlyName) {
     var attackManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
-    postEvent(new InstanceInitEvent(attackManager));
+    SoulFireAPI.postEvent(new InstanceInitEvent(attackManager));
 
     instances.put(attackManager.id(), attackManager);
 

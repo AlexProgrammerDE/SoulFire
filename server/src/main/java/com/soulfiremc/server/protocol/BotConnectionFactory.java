@@ -19,7 +19,8 @@ package com.soulfiremc.server.protocol;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.api.event.attack.BotConnectionInitEvent;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.BotSettings;
@@ -72,7 +73,7 @@ public record BotConnectionFactory(
     session.addListener(new SFBaseListener(botConnection, targetState));
     session.addListener(new SFSessionListener(botConnection));
 
-    instanceManager.postEvent(new BotConnectionInitEvent(botConnection));
+    SoulFireAPI.postEvent(new BotConnectionInitEvent(botConnection));
 
     return botConnection;
   }

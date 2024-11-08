@@ -15,24 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event.attack;
+package com.soulfiremc.server.api.event.bot;
 
-import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.event.SoulFireAttackEvent;
+import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 
 /**
- * The event is called when the bot is about to connect to the server in the attack. The
- * BotConnection instance has all fields filled, but most methods are unusable as the bot is not
- * connected. This also runs async off the main thread of the attack, so you can do blocking
- * operations for the attack here. <br>
- * This event is recommended for when you want to add a pre-connect hook like for server list ping.
+ * The event is called the moment after a bot connection object was created. The BotConnection
+ * instance has all fields filled, but most methods are unusable as the bot is not connected yet.
+ * <br>
+ * This event is recommended for when you want to add a plugin listener to the bot connection.
  *
  * @param connection The bot connection instance.
  */
-public record PreBotConnectEvent(BotConnection connection) implements SoulFireAttackEvent {
-  @Override
-  public InstanceManager instanceManager() {
-    return connection.instanceManager();
-  }
+public record BotConnectionInitEvent(BotConnection connection) implements SoulFireBotEvent {
 }

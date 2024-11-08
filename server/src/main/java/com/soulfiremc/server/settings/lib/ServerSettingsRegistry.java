@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.settings.property.*;
 import lombok.RequiredArgsConstructor;
@@ -95,7 +96,7 @@ public class ServerSettingsRegistry {
    */
   @This
   public ServerSettingsRegistry addClass(
-    Class<? extends SettingsObject> clazz, String pageName, @Nullable PluginInfo owningPlugin, String iconId) {
+    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
         && Modifier.isFinal(field.getModifiers())
@@ -111,7 +112,8 @@ public class ServerSettingsRegistry {
 
           var registry = namespaceMap.get(property.namespace());
           if (registry == null) {
-            registry = new NamespaceRegistry(owningPlugin, pageName, new ArrayList<>(), iconId);
+            var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
+            registry = new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId);
             namespaceMap.put(property.namespace(), registry);
           }
 

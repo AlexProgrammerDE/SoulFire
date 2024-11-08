@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -37,14 +35,16 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-public class AutoArmor implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-armor",
-    "1.0.0",
-    "Automatically puts on the best armor",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoArmor extends InternalPlugin {
+  public AutoArmor() {
+    super(new PluginInfo(
+      "auto-armor",
+      "1.0.0",
+      "Automatically puts on the best armor",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
   private static void putOn(
     InventoryManager inventoryManager,
@@ -111,6 +111,7 @@ public class AutoArmor implements InternalPlugin {
     }
   }
 
+  @EventHandler
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
@@ -129,19 +130,8 @@ public class AutoArmor implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor", PLUGIN_INFO, "shield");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoArmor.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, BotJoinedEvent.class, AutoArmor::onJoined);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor", this, "shield");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

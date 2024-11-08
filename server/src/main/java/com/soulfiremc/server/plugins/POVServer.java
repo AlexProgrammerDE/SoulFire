@@ -21,8 +21,8 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -142,14 +142,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-public class POVServer implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "pov-server",
-    "1.0.0",
-    "A plugin that allows users to control bots from a first-person perspective.",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class POVServer extends InternalPlugin {
   private static final List<Class<?>> NOT_SYNCED =
     List.of(
       ClientboundKeepAlivePacket.class,
@@ -166,9 +159,19 @@ public class POVServer implements InternalPlugin {
     Arrays.fill(FULL_LIGHT, (byte) 0xFF);
   }
 
+  public POVServer() {
+    super(new PluginInfo(
+      "pov-server",
+      "1.0.0",
+      "A plugin that allows users to control bots from a first-person perspective.",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
+
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", PLUGIN_INFO, "view");
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", this, "view");
   }
 
   private static GameProfile getFakePlayerListEntry(Component text) {
@@ -988,40 +991,29 @@ public class POVServer implements InternalPlugin {
     return server;
   }
 
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
+  @EventHandler
+  public void onAttackStart(AttackStartEvent event) {
+    var attackManager = event.instanceManager();
+    var settingsSource = attackManager.settingsSource();
+    if (!settingsSource.get(POVServerSettings.ENABLED)) {
+      return;
+    }
 
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(POVServer.class);
-    PluginHelper.registerAttackEventConsumer(
-      soulFireServer,
-      AttackStartEvent.class,
-      event -> {
-        var attackManager = event.instanceManager();
-        var settingsSource = attackManager.settingsSource();
-        if (!settingsSource.get(POVServerSettings.ENABLED)) {
-          return;
-        }
+    var freePort =
+      PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
+    var serverInstance = new AtomicReference<>(startPOVServer(settingsSource, freePort, attackManager));
+    log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
 
-        var freePort =
-          PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-        var serverInstance = new AtomicReference<>(startPOVServer(settingsSource, freePort, attackManager));
-        log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
+    SoulFireAPI.registerListener(AttackEndedEvent.class, e -> {
+      var currentInstance = serverInstance.get();
+      if (currentInstance == null) {
+        return;
+      }
 
-        attackManager.registerListener(AttackEndedEvent.class, e -> {
-          var currentInstance = serverInstance.get();
-          if (currentInstance == null) {
-            return;
-          }
-
-          log.info("Stopping POV server for attack {}", attackManager.id());
-          currentInstance.close();
-          serverInstance.set(null);
-        });
-      });
+      log.info("Stopping POV server for attack {}", attackManager.id());
+      currentInstance.close();
+      serverInstance.set(null);
+    });
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

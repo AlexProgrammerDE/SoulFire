@@ -15,9 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event.gui;
+package com.soulfiremc.server.api.event;
 
-import com.soulfiremc.server.api.event.AbstractCancellable;
-import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireServer;
 
-public class WindowCloseEvent extends AbstractCancellable implements SoulFireGlobalEvent {}
+/**
+ * Represents an attack event of a SoulFire instance.
+ */
+public non-sealed interface SoulFireInstanceEvent extends SoulFireEvent, SoulFireGlobalEvent {
+  InstanceManager instanceManager();
+
+  @Override
+  default SoulFireServer soulFireServer() {
+    return instanceManager().soulFireServer();
+  }
+}

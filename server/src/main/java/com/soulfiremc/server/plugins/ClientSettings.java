@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -27,7 +25,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.ChatVisibility;
@@ -36,19 +33,20 @@ import org.geysermc.mcprotocollib.protocol.data.game.setting.SkinPart;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientSettings implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "client-settings",
-    "1.0.0",
-    "Sends client settings to the server",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class ClientSettings extends InternalPlugin {
+  public ClientSettings() {
+    super(new PluginInfo(
+      "client-settings",
+      "1.0.0",
+      "Sends client settings to the server",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundLoginFinishedPacket) {
       var connection = event.connection();
@@ -98,19 +96,8 @@ public class ClientSettings implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", PLUGIN_INFO, "settings-2");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ClientSettings.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, ClientSettings::onPacket);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", this, "settings-2");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

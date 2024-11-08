@@ -784,7 +784,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 }),
               false)));
 
-    soulFireServer.postEvent(new CommandManagerInitEvent(this));
+    SoulFireAPI.postEvent(new CommandManagerInitEvent(soulFireServer, this));
   }
 
   private int exportMap(

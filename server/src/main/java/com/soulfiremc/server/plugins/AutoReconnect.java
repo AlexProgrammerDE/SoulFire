@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -34,31 +32,23 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class AutoReconnect implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-reconnect",
-    "1.0.0",
-    "Automatically reconnects bots when they time out or are kicked",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoReconnect extends InternalPlugin {
+  public AutoReconnect() {
+    super(new PluginInfo(
+      "auto-reconnect",
+      "1.0.0",
+      "Automatically reconnects bots when they time out or are kicked",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect", PLUGIN_INFO, "refresh-ccw");
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw");
   }
 
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoReconnect.class);
-    PluginHelper.registerAttackEventConsumer(soulFireServer, AttackTickEvent.class, this::onAttackTick);
-  }
-
+  @EventHandler
   public void onAttackTick(AttackTickEvent event) {
     var instanceManager = event.instanceManager();
     for (var entries : List.copyOf(instanceManager.botConnections().entrySet())) {

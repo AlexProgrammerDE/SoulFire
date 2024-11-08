@@ -19,7 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -39,15 +38,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class ChatMessageLogger implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "chat-message-logger",
-    "1.0.0",
-    "Logs all received chat messages to the terminal",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
-
+public class ChatMessageLogger extends InternalPlugin {
   public static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
     ANSIComponentSerializer.builder()
       .flattener(SoulFireServer.FLATTENER)
@@ -60,6 +51,17 @@ public class ChatMessageLogger implements InternalPlugin {
       .build();
   private static final Set<String> CHAT_MESSAGES = ExpiringSet.newExpiringSet(5, TimeUnit.SECONDS);
 
+  public ChatMessageLogger() {
+    super(new PluginInfo(
+      "chat-message-logger",
+      "1.0.0",
+      "Logs all received chat messages to the terminal",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
+
+  @EventHandler
   public static void onMessage(ChatMessageReceiveEvent event) {
     if (!event.connection().settingsSource().get(ChatMessageSettings.ENABLED)) {
       return;
@@ -84,21 +86,8 @@ public class ChatMessageLogger implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger", PLUGIN_INFO, "logs");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ChatMessageLogger.class);
-    PluginHelper.registerBotEventConsumer(
-      soulFireServer,
-      ChatMessageReceiveEvent.class, ChatMessageLogger::onMessage);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger", this, "logs");
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

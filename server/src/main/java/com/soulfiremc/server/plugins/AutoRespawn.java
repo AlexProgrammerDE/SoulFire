@@ -19,7 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -36,14 +35,16 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.Serverbound
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoRespawn implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-respawn",
-    "1.0.0",
-    "Automatically respawns after death",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoRespawn extends InternalPlugin {
+  public AutoRespawn() {
+    super(new PluginInfo(
+      "auto-respawn",
+      "1.0.0",
+      "Automatically respawns after death",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
@@ -78,19 +79,8 @@ public class AutoRespawn implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", PLUGIN_INFO, "repeat");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoRespawn.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, AutoRespawn::onPacket);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", this, "repeat");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

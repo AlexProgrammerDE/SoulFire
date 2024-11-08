@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
@@ -39,19 +37,10 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 
-import javax.inject.Inject;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ModLoaderSupport implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "mod-loader-support",
-    "1.0.0",
-    "Supports mod loaders like Forge",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class ModLoaderSupport extends InternalPlugin {
   private static final Key FML_HS_KEY = Key.key("fml:hs");
   private static final Key FML_FML_KEY = Key.key("fml:fml");
   private static final Key FML_MP_KEY = Key.key("fml:mp");
@@ -61,9 +50,19 @@ public class ModLoaderSupport implements InternalPlugin {
   private static final Key FML2_HANDSHAKE_KEY = Key.key("fml:handshake");
   private static final char HOSTNAME_SEPARATOR = '\0';
 
+  public ModLoaderSupport() {
+    super(new PluginInfo(
+      "mod-loader-support",
+      "1.0.0",
+      "Supports mod loaders like Forge",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
+
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", PLUGIN_INFO, "package");
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", this, "package");
   }
 
   private static String createFMLAddress(String initialHostname) {
@@ -74,18 +73,7 @@ public class ModLoaderSupport implements InternalPlugin {
     return initialHostname + HOSTNAME_SEPARATOR + "FML2" + HOSTNAME_SEPARATOR;
   }
 
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ModLoaderSupport.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketSendingEvent.class, this::onPacket);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, this::onPacketReceive);
-  }
-
+  @EventHandler
   public void onPacket(SFPacketSendingEvent event) {
     if (!(event.packet() instanceof ClientIntentionPacket handshake)) {
       return;

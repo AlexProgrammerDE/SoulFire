@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
@@ -311,7 +312,7 @@ public final class SessionDataManager {
         position.getY(),
         position.getZ());
 
-      connection.postEvent(new BotJoinedEvent(connection));
+      SoulFireAPI.postEvent(new BotJoinedEvent(connection));
     } else {
       log.debug(
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
@@ -439,7 +440,7 @@ public final class SessionDataManager {
   }
 
   private void onChat(long stamp, Component message) {
-    connection.postEvent(new ChatMessageReceiveEvent(connection, stamp, message));
+    SoulFireAPI.postEvent(new ChatMessageReceiveEvent(connection, stamp, message));
   }
 
   @EventHandler
@@ -1115,13 +1116,13 @@ public final class SessionDataManager {
 
     var tickHookState = TickHookContext.INSTANCE.get();
 
-    connection.postEvent(new BotPreEntityTickEvent(connection));
+    SoulFireAPI.postEvent(new BotPreEntityTickEvent(connection));
     tickHookState.callHooks(TickHookContext.HookType.PRE_ENTITY_TICK);
 
     // Tick entities
     entityTrackerState.tick();
 
-    connection.postEvent(new BotPostEntityTickEvent(connection));
+    SoulFireAPI.postEvent(new BotPostEntityTickEvent(connection));
     tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
   }
 

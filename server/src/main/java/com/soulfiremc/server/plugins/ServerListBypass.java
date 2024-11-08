@@ -17,11 +17,9 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.attack.PreBotConnectEvent;
+import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -35,15 +33,18 @@ import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 
 import java.util.concurrent.TimeUnit;
 
-public class ServerListBypass implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "server-list-bypass",
-    "1.0.0",
-    "Bypasses server list anti-bots",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class ServerListBypass extends InternalPlugin {
+  public ServerListBypass() {
+    super(new PluginInfo(
+      "server-list-bypass",
+      "1.0.0",
+      "Bypasses server list anti-bots",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onPreConnect(PreBotConnectEvent event) {
     var connection = event.connection();
     if (connection.targetState() == ProtocolState.STATUS) {
@@ -63,21 +64,8 @@ public class ServerListBypass implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass", PLUGIN_INFO, "network");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ServerListBypass.class);
-    PluginHelper.registerAttackEventConsumer(
-      soulFireServer,
-      PreBotConnectEvent.class, ServerListBypass::onPreConnect);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass", this, "network");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

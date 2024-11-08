@@ -22,9 +22,8 @@ import org.pf4j.ExtensionPoint;
 /**
  * This interface is for external server plugins.
  */
-public non-sealed interface ExternalPlugin extends Plugin, ExtensionPoint {
-  @Override
-  default PluginInfo pluginInfo() {
-    return PluginInfo.fromClassLoader(getClass());
+public non-sealed abstract class ExternalPlugin extends Plugin implements ExtensionPoint {
+  protected ExternalPlugin(Class<?> pluginClass) {
+    super(PluginInfo.fromClassLoader(pluginClass));
   }
 }

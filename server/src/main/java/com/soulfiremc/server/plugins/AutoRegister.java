@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -31,15 +29,18 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 
-public class AutoRegister implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-register",
-    "1.0.0",
-    "Automatically registers bots on servers",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoRegister extends InternalPlugin {
+  public AutoRegister() {
+    super(new PluginInfo(
+      "auto-register",
+      "1.0.0",
+      "Automatically registers bots on servers",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onChat(ChatMessageReceiveEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
@@ -70,19 +71,8 @@ public class AutoRegister implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRegisterSettings.class, "Auto Register", PLUGIN_INFO, "key-round");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoRegister.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, ChatMessageReceiveEvent.class, AutoRegister::onChat);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoRegisterSettings.class, "Auto Register", this, "key-round");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

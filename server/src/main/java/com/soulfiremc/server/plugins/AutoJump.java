@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -33,15 +31,18 @@ import net.lenni0451.lambdaevents.EventHandler;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoJump implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "auto-jump",
-    "1.0.0",
-    "Automatically jumps randomly",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class AutoJump extends InternalPlugin {
+  public AutoJump() {
+    super(new PluginInfo(
+      "auto-jump",
+      "1.0.0",
+      "Automatically jumps randomly",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onJoined(BotJoinedEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
@@ -65,19 +66,8 @@ public class AutoJump implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump", PLUGIN_INFO, "footprints");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(AutoJump.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, BotJoinedEvent.class, AutoJump::onJoined);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump", this, "footprints");
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

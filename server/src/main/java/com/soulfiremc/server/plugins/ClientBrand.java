@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
-import com.soulfiremc.server.api.PluginHelper;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -36,15 +34,18 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 
-public class ClientBrand implements InternalPlugin {
-  public static final PluginInfo PLUGIN_INFO = new PluginInfo(
-    "client-brand",
-    "1.0.0",
-    "Sends the client brand to the server",
-    "AlexProgrammerDE",
-    "GPL-3.0"
-  );
+public class ClientBrand extends InternalPlugin {
+  public ClientBrand() {
+    super(new PluginInfo(
+      "client-brand",
+      "1.0.0",
+      "Sends the client brand to the server",
+      "AlexProgrammerDE",
+      "GPL-3.0"
+    ));
+  }
 
+  @EventHandler
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundLoginFinishedPacket) {
       var connection = event.connection();
@@ -67,19 +68,8 @@ public class ClientBrand implements InternalPlugin {
   }
 
   @EventHandler
-  public static void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand", PLUGIN_INFO, "fingerprint");
-  }
-
-  @Override
-  public PluginInfo pluginInfo() {
-    return PLUGIN_INFO;
-  }
-
-  @Override
-  public void onServer(SoulFireServer soulFireServer) {
-    soulFireServer.registerListeners(ClientBrand.class);
-    PluginHelper.registerBotEventConsumer(soulFireServer, SFPacketReceiveEvent.class, ClientBrand::onPacket);
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand", this, "fingerprint");
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

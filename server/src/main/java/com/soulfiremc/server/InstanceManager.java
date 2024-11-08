@@ -25,9 +25,9 @@ import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
-import com.soulfiremc.server.api.EventBusOwner;
+import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireAttackEvent;
+import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * An instance persists settings over restarts and managed attack session and attack state.
  */
 @Getter
-public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
+public class InstanceManager {
   private static final Gson GSON = new Gson();
   private final UUID id;
   private final Logger logger;
@@ -72,7 +72,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
       .setEventFilter(
         (c, h) -> {
-          if (SoulFireAttackEvent.class.isAssignableFrom(c)) {
+          if (SoulFireInstanceEvent.class.isAssignableFrom(c)) {
             return true;
           } else {
             throw new IllegalStateException("This event handler only accepts attack events");
@@ -130,7 +130,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
 
   private void tick() {
     if (attackLifecycle.isTicking()) {
-      this.postEvent(new AttackTickEvent(this));
+      SoulFireAPI.postEvent(new AttackTickEvent(this));
     }
   }
 
@@ -300,7 +300,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
         usedProxies);
     }
 
-    postEvent(new AttackStartEvent(this));
+    SoulFireAPI.postEvent(new AttackStartEvent(this));
 
     var connectSemaphore = new Semaphore(settingsSource.get(BotSettings.CONCURRENT_CONNECTS));
     scheduler.schedule(
@@ -401,7 +401,7 @@ public class InstanceManager implements EventBusOwner<SoulFireAttackEvent> {
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
       // Notify plugins of state change
-      postEvent(new AttackEndedEvent(this));
+      SoulFireAPI.postEvent(new AttackEndedEvent(this));
     }, scheduler);
   }
 

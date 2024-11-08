@@ -17,20 +17,23 @@
  */
 package com.soulfiremc.server.api;
 
-import com.soulfiremc.server.SoulFireServer;
+import lombok.Getter;
 
 /**
  * This interface is for any plugin that hooks into the server.
  */
-public sealed interface Plugin permits ExternalPlugin, InternalPlugin {
-  PluginInfo pluginInfo();
+@Getter
+public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
+  private final PluginInfo pluginInfo;
 
-  /**
-   * When a new SoulFire server became ready for you to use.
-   * Be aware this method may be called multiple times.
-   * There is no guarantee that only one SoulFireServer may be created.
-   *
-   * @param soulFireServer The server instance.
-   */
-  void onServer(SoulFireServer soulFireServer);
+  protected Plugin(PluginInfo pluginInfo) {
+    this.pluginInfo = pluginInfo;
+
+    register();
+  }
+
+  protected void register() {
+    SoulFireAPI.registerListenersOfClass(getClass());
+    SoulFireAPI.registerListenersOfObject(this);
+  }
 }
