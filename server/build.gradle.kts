@@ -15,7 +15,6 @@ dependencies {
   }
   api(libs.mcstructs)
   api(libs.bundles.kyori)
-  api(libs.datafixerupper)
 
   // Netty raknet support for ViaBedrock
   api(libs.netty.raknet) {

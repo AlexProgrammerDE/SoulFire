@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.data;
 
-import com.mojang.serialization.Codec;
-import com.soulfiremc.server.protocol.codecs.ExtraCodecs;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
@@ -33,11 +31,7 @@ public class Registry<T extends RegistryValue<T>> {
   @Getter
   private final ResourceKey<? extends Registry<T>> registryKey;
   private final Object2ReferenceMap<Key, T> FROM_KEY = new Object2ReferenceOpenHashMap<>();
-  @Getter
-  private final Codec<T> keyCodec = ExtraCodecs.KYORI_KEY_CODEC.xmap(this::getByKey, RegistryValue::key);
   private final Int2ReferenceMap<T> FROM_ID = new Int2ReferenceOpenHashMap<>();
-  @Getter
-  private final Codec<T> idCodec = Codec.INT.xmap(this::getById, RegistryValue::id);
 
   @SuppressWarnings("unchecked")
   public Registry(ResourceKey<?> registryKey) {

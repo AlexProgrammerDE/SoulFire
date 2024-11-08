@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.util.mcstructs;
 
-
 import com.google.common.collect.Iterators;
-import com.mojang.serialization.DataResult;
 import com.soulfiremc.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -27,7 +25,9 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -53,7 +53,7 @@ public enum Direction {
     .sorted(Comparator.comparingInt(arg -> arg.data2d))
     .toArray(Direction[]::new);
 
-  private Direction(
+  Direction(
     final int j, final int k, final int l, final String string2, final Direction.AxisDirection arg, final Direction.Axis arg2, final Vector3i arg3
   ) {
     this.data3d = j;
@@ -149,9 +149,9 @@ public enum Direction {
     return switch (this) {
       case DOWN -> WEST;
       case UP -> EAST;
-      default -> throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
       case WEST -> UP;
       case EAST -> DOWN;
+      default -> throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
     };
   }
 
@@ -159,9 +159,9 @@ public enum Direction {
     return switch (this) {
       case DOWN -> EAST;
       case UP -> WEST;
-      default -> throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
       case WEST -> DOWN;
       case EAST -> UP;
+      default -> throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
     };
   }
 
@@ -274,10 +274,6 @@ public enum Direction {
     return this.name;
   }
 
-  private static DataResult<Direction> verifyVertical(Direction direction) {
-    return direction.getAxis().isVertical() ? DataResult.success(direction) : DataResult.error(() -> "Expected a vertical direction");
-  }
-
   public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {
     for (Direction lv : VALUES) {
       if (lv.getAxisDirection() == axisDirection && lv.getAxis() == axis) {
@@ -299,7 +295,7 @@ public enum Direction {
     return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0F;
   }
 
-  public static enum Axis implements Predicate<Direction> {
+  public enum Axis implements Predicate<Direction> {
     X("x") {
       @Override
       public int choose(int x, int y, int z) {
@@ -412,14 +408,14 @@ public enum Direction {
     public abstract double choose(double x, double y, double z);
   }
 
-  public static enum AxisDirection {
+  public enum AxisDirection {
     POSITIVE(1, "Towards positive"),
     NEGATIVE(-1, "Towards negative");
 
     private final int step;
     private final String name;
 
-    private AxisDirection(final int j, final String string2) {
+    AxisDirection(final int j, final String string2) {
       this.step = j;
       this.name = string2;
     }
@@ -442,14 +438,14 @@ public enum Direction {
     }
   }
 
-  public static enum Plane implements Iterable<Direction>, Predicate<Direction> {
+  public enum Plane implements Iterable<Direction>, Predicate<Direction> {
     HORIZONTAL(new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}, new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}),
     VERTICAL(new Direction[]{Direction.UP, Direction.DOWN}, new Direction.Axis[]{Direction.Axis.Y});
 
     private final Direction[] faces;
     private final Direction.Axis[] axis;
 
-    private Plane(final Direction[] args, final Direction.Axis[] args2) {
+    Plane(final Direction[] args, final Direction.Axis[] args2) {
       this.faces = args;
       this.axis = args2;
     }
