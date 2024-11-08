@@ -31,6 +31,7 @@ import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.Fields;
+import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -119,22 +120,29 @@ public abstract class SoulFireAbstractBootstrap {
 
   @SneakyThrows
   protected void internalBootstrap(String[] args, List<ClassLoader> classLoaders) {
-    var forkJoinPoolFactory = new CustomThreadFactory();
-    // Ensure the ForkJoinPool uses our custom thread factory
-    Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), forkJoinPoolFactory);
-    Fields.set(null, ForkJoinPool.class.getDeclaredField("defaultForkJoinWorkerThreadFactory"), forkJoinPoolFactory);
+    try {
+      var forkJoinPoolFactory = new CustomThreadFactory();
+      // Ensure the ForkJoinPool uses our custom thread factory
+      Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), forkJoinPoolFactory);
+      Fields.set(null, ForkJoinPool.class.getDeclaredField("defaultForkJoinWorkerThreadFactory"), forkJoinPoolFactory);
 
-    SFLogAppender.INSTANCE.start();
+      SFLogAppender.INSTANCE.start();
 
-    AnsiConsole.systemInstall();
+      AnsiConsole.systemInstall();
 
-    sendFlagsInfo();
+      sendFlagsInfo();
 
-    injectExceptionHandler();
+      injectExceptionHandler();
 
-    initPlugins(classLoaders);
+      initPlugins(classLoaders);
 
-    injectMixinsAndRun(args);
+      injectMixinsAndRun(args);
+    } catch (Throwable t) {
+      // Ensure logs are written out on fatal errors
+      log.error("Failed to start server", t);
+      LogManager.shutdown();
+      System.exit(1);
+    }
   }
 
   private void sendFlagsInfo() {
