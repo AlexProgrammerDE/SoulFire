@@ -27,6 +27,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.AccountSettings;
@@ -92,6 +93,7 @@ public class SoulFireServer {
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
+  private final MetadataHolder metadata = new MetadataHolder();
   private final RPCServer rpcServer;
   private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerSettingsRegistry instanceSettingsRegistry;

@@ -29,6 +29,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
+import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
@@ -59,11 +60,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 public class InstanceManager {
   private static final Gson GSON = new Gson();
+  private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
+  private final MetadataHolder metadata = new MetadataHolder();
   private final UUID id;
   private final Logger logger;
   private final SoulFireScheduler scheduler;
   private final SettingsDelegate settingsSource;
-  private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final SoulFireServer soulFireServer;
   @Setter
   private String friendlyName;
@@ -407,6 +409,19 @@ public class InstanceManager {
     json.add("settings", settingsSource.source().serializeToTree());
 
     return json;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) return true;
+    if (!(object instanceof InstanceManager that)) return false;
+
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
   }
 
   private record ProxyData(SFProxy proxy, int maxBots, AtomicInteger useCount) {

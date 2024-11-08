@@ -25,6 +25,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
+import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
@@ -62,6 +63,7 @@ public final class BotConnection {
   private final UUID connectionId = UUID.randomUUID();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
+  private final MetadataHolder metadata = new MetadataHolder();
   private final ControlState controlState = new ControlState();
   private final InventoryManager inventoryManager;
   private final BotActionManager botActionManager;
