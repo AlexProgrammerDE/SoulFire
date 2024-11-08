@@ -22,7 +22,7 @@ import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
-import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
+import com.soulfiremc.server.util.SectionUtils;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.NoopLock;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

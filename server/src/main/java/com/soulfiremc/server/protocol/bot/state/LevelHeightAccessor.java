@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.protocol.bot.utils.SectionUtils;
+import com.soulfiremc.server.util.SectionUtils;
 
 public interface LevelHeightAccessor {
   int getHeight();

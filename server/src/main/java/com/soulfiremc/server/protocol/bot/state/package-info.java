@@ -15,16 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.protocol.bot.utils;
-
-public class SectionUtils {
-  private SectionUtils() {}
-
-  public static int blockToSection(int block) {
-    return block >> 4;
-  }
-
-  public static int sectionToBlock(int section) {
-    return section << 4;
-  }
-}
+/**
+ * Stateful classes that represent the bot's current state. Most of these classes are mutable and their state can be changed.
+ */
+package com.soulfiremc.server.protocol.bot.state;
