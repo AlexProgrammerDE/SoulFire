@@ -16,6 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 /**
- * This package contains the pathfinding implementation for SoulFire.
+ * Pathfinding implementation for SoulFire.
  */
 package com.soulfiremc.server.pathfinding;
