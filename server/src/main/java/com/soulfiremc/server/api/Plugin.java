@@ -32,6 +32,12 @@ public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
     register();
   }
 
+  protected Plugin() {
+    this.pluginInfo = PluginInfo.fromClassLoader(getClass());
+
+    register();
+  }
+
   protected void register() {
     SoulFireAPI.registerListenersOfClass(getClass());
     SoulFireAPI.registerListenersOfObject(this);
