@@ -29,15 +29,10 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
  * This event is called when a packet is sent to the connected server. Setter is used to change the
  * packet by a plugin.
  */
+@Getter
 @AllArgsConstructor
 public class SFPacketSendingEvent extends AbstractCancellable implements SoulFireBotEvent {
   private final BotConnection connection;
-  @Getter
   @Setter
   private MinecraftPacket packet;
-
-  @Override
-  public BotConnection connection() {
-    return connection;
-  }
 }

@@ -56,7 +56,7 @@ public class DimensionType implements RegistryValue<DimensionType> {
     this.natural = dimensionTypeData.getByte("natural");
     this.minY = dimensionTypeData.getInt("min_y");
     this.bedWorks = dimensionTypeData.getByte("bed_works");
-    this.fixedTime = !dimensionTypeData.containsKey("fixed_time") ? null : dimensionTypeData.getLong("fixed_time");
+    this.fixedTime = dimensionTypeData.containsKey("fixed_time") ? dimensionTypeData.getLong("fixed_time") : null;
     this.coordinateScale = dimensionTypeData.getDouble("coordinate_scale");
     this.piglinSafe = dimensionTypeData.getByte("piglin_safe");
     this.hasCeiling = dimensionTypeData.getByte("has_ceiling");

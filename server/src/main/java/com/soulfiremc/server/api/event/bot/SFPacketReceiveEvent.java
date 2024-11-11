@@ -30,15 +30,10 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
  * before the packet is processed by the default bot listener. Setter is used to change the packet
  * by a plugin to change the behaviour of the bot.
  */
+@Getter
 @AllArgsConstructor
 public class SFPacketReceiveEvent extends AbstractCancellable implements SoulFireBotEvent {
   private final BotConnection connection;
-  @Getter
   @Setter
   private MinecraftPacket packet;
-
-  @Override
-  public BotConnection connection() {
-    return connection;
-  }
 }
