@@ -62,7 +62,7 @@ public class AutoEat extends InternalPlugin {
           return;
         }
 
-          var inventoryManager = connection.inventoryManager();
+        var inventoryManager = connection.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
@@ -72,23 +72,25 @@ public class AutoEat extends InternalPlugin {
         }
 
         var slot = edibleSlot.get();
-        if (!inventoryManager.tryInventoryControl()) {
+        if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
           return;
         }
 
         try {
           if (!playerInventory.isHeldItem(slot) && playerInventory.isHotbar(slot)) {
-            inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(slot));
-            inventoryManager.sendHeldItemChange();
+            inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
           } else if (playerInventory.isMainInventory(slot)) {
+            inventoryManager.openPlayerInventory();
             inventoryManager.leftClickSlot(slot);
             inventoryManager.leftClickSlot(playerInventory.getHeldItem());
             if (inventoryManager.cursorItem() != null) {
               inventoryManager.leftClickSlot(slot);
             }
+
+            inventoryManager.closeInventory();
           }
 
-            connection.botActionManager().useItemInHand(Hand.MAIN_HAND);
+          connection.botActionManager().useItemInHand(Hand.MAIN_HAND);
 
           // Wait before eating again
           TimeUtil.waitTime(2, TimeUnit.SECONDS);

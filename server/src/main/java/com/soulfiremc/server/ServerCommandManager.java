@@ -522,8 +522,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             c ->
               forEveryAttack(
                 c,
-                attackManager -> {
-                  attackManager.stopAttackPermanently().join();
+                instanceManager -> {
+                  instanceManager.stopAttackPermanently().join();
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -557,9 +557,9 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             c ->
               forEveryAttackEnsureHasBots(
                 c,
-                attackManager -> {
+                instanceManager -> {
                   var online = new ArrayList<String>();
-                  for (var bot : attackManager.botConnections().values()) {
+                  for (var bot : instanceManager.botConnections().values()) {
                     if (bot.isOnline()) {
                       online.add(bot.accountName());
                     }
@@ -600,13 +600,13 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
             c ->
               forEveryAttackEnsureHasBots(
                 c,
-                attackManager -> {
+                instanceManager -> {
                   c.getSource()
                     .sendInfo(
-                      "Total bots: {}", attackManager.botConnections().size());
+                      "Total bots: {}", instanceManager.botConnections().size());
                   long readTraffic = 0;
                   long writeTraffic = 0;
-                  for (var bot : attackManager.botConnections().values()) {
+                  for (var bot : instanceManager.botConnections().values()) {
                     var trafficShapingHandler = bot.trafficHandler();
 
                     if (trafficShapingHandler == null) {
@@ -630,7 +630,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
 
                   long currentReadTraffic = 0;
                   long currentWriteTraffic = 0;
-                  for (var bot : attackManager.botConnections().values()) {
+                  for (var bot : instanceManager.botConnections().values()) {
                     var trafficShapingHandler = bot.trafficHandler();
 
                     if (trafficShapingHandler == null) {
@@ -765,8 +765,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               (c, b) -> {
                 forEveryAttack(
                   c,
-                  attackManager -> {
-                    b.suggest(attackManager.id().toString());
+                  instanceManager -> {
+                    b.suggest(instanceManager.id().toString());
 
                     return Command.SINGLE_SUCCESS;
                   },
@@ -836,22 +836,22 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     }
 
     var resultCode = Command.SINGLE_SUCCESS;
-    for (var attackManager : soulFireServer.instances().values()) {
+    for (var instanceManager : soulFireServer.instances().values()) {
       if (COMMAND_CONTEXT.get().containsKey("attack_ids")
         && Arrays.stream(COMMAND_CONTEXT.get().get("attack_ids").split(","))
         .map(UUIDHelper::tryParseUniqueId)
         .filter(Optional::isPresent)
-        .noneMatch(i -> i.orElseThrow().equals(attackManager.id()))) {
+        .noneMatch(i -> i.orElseThrow().equals(instanceManager.id()))) {
         continue;
       }
 
       if (printMessages) {
         context
           .getSource()
-          .sendInfo("--- Running command for attack " + attackManager.id() + " ---");
+          .sendInfo("--- Running command for attack " + instanceManager.id() + " ---");
       }
 
-      var result = consumer.applyAsInt(attackManager);
+      var result = consumer.applyAsInt(instanceManager);
       if (result != Command.SINGLE_SUCCESS) {
         resultCode = result;
       }
@@ -871,15 +871,15 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     boolean printMessages) {
     return forEveryAttack(
       context,
-      attackManager -> {
-        if (attackManager.botConnections().isEmpty()) {
+      instanceManager -> {
+        if (instanceManager.botConnections().isEmpty()) {
           if (printMessages) {
-            context.getSource().sendWarn("No bots found in attack " + attackManager.id() + "!");
+            context.getSource().sendWarn("No bots found in attack " + instanceManager.id() + "!");
           }
           return 3;
         }
 
-        return consumer.applyAsInt(attackManager);
+        return consumer.applyAsInt(instanceManager);
       },
       printMessages);
   }
@@ -895,9 +895,9 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     boolean printMessages) {
     return forEveryAttackEnsureHasBots(
       context,
-      attackManager -> {
+      instanceManager -> {
         var resultCode = Command.SINGLE_SUCCESS;
-        for (var bot : attackManager.botConnections().values()) {
+        for (var bot : instanceManager.botConnections().values()) {
           if (COMMAND_CONTEXT.get().containsKey("bot_names")
             && Arrays.stream(COMMAND_CONTEXT.get().get("bot_names").split(","))
             .noneMatch(s -> s.equals(bot.accountName()))) {

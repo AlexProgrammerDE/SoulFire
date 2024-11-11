@@ -46,7 +46,7 @@ public class InventoryManager {
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
   @ToString.Exclude
   private final BotConnection connection;
-  private Container openContainer;
+  private Container currentContainer;
   private int heldItemSlot = 0;
   private int lastStateId = 0;
   private SFItemStack cursorItem;
@@ -76,40 +76,49 @@ public class InventoryManager {
     containerData.put(containerId, container);
   }
 
-  public void sendHeldItemChange() {
+  private void sendHeldItemChange() {
     connection.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
   }
 
   public void closeInventory() {
-    if (openContainer != null) {
-      connection.sendPacket(new ServerboundContainerClosePacket(openContainer.id()));
-      openContainer = null;
-    } else {
-      connection.sendPacket(new ServerboundContainerClosePacket(0));
+    if (currentContainer == null) {
+      return;
     }
+
+    connection.sendPacket(new ServerboundContainerClosePacket(currentContainer.id()));
+    currentContainer = null;
+  }
+
+  public boolean lookingAtForeignContainer() {
+    return currentContainer != null && currentContainer != playerInventory;
   }
 
   public void openPlayerInventory() {
-    openContainer = playerInventory();
+    currentContainer = playerInventory();
+  }
+
+  public void changeHeldItem(int slot) {
+    heldItemSlot = slot;
+    sendHeldItemChange();
   }
 
   public void leftClickSlot(ContainerSlot slot) {
     leftClickSlot(slot.slot());
   }
 
-  public void leftClickSlot(int slot) {
+  private void leftClickSlot(int slot) {
     if (!inventoryControlLock.isHeldByCurrentThread()) {
       throw new IllegalStateException(
         "You need to lock the inventoryControlLock before calling this method!");
     }
 
-    if (openContainer == null) {
-      openPlayerInventory();
+    if (currentContainer == null) {
+      throw new IllegalStateException("No container is open");
     }
 
     SFItemStack slotItem;
     {
-      var containerSlot = openContainer.getSlot(slot);
+      var containerSlot = currentContainer.getSlot(slot);
       if (containerSlot.item() == null) {
         // The target slot is empty, and we don't have an item in our cursor
         if (cursorItem == null) {
@@ -131,13 +140,13 @@ public class InventoryManager {
       }
     }
 
-    openContainer.setSlot(slot, slotItem);
+    currentContainer.setSlot(slot, slotItem);
     Int2ObjectMap<ItemStack> changes = new Int2ObjectArrayMap<>(1);
     changes.put(slot, slotItem);
 
     connection.sendPacket(
       new ServerboundContainerClickPacket(
-        openContainer.id(),
+        currentContainer.id(),
         lastStateId,
         slot,
         ContainerActionType.CLICK_ITEM,

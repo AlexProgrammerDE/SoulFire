@@ -92,11 +92,12 @@ public class AutoArmor extends InternalPlugin {
       }
     }
 
-    if (!inventoryManager.tryInventoryControl()) {
+    if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
       return;
     }
 
     try {
+      inventoryManager.openPlayerInventory();
       inventoryManager.leftClickSlot(bestItemSlot);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
       inventoryManager.leftClickSlot(equipmentSlot);
@@ -106,6 +107,8 @@ public class AutoArmor extends InternalPlugin {
         inventoryManager.leftClickSlot(bestItemSlot);
         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
       }
+
+      inventoryManager.closeInventory();
     } finally {
       inventoryManager.unlockInventoryControl();
     }

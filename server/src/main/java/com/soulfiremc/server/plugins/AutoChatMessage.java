@@ -98,7 +98,6 @@ public class AutoChatMessage extends InternalPlugin {
       BUILDER.ofStringList(
         "messages",
         "Chat Messages",
-        new String[]{"--chat-messages"},
         "List of chat messages to send",
         List.of("Hello", "Hi", "Hey", "How are you?"));
   }

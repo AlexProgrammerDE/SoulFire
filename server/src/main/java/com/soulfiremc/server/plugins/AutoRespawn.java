@@ -46,6 +46,7 @@ public class AutoRespawn extends InternalPlugin {
     ));
   }
 
+  @EventHandler
   public static void onPacket(SFPacketReceiveEvent event) {
     if (event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket) {
       var connection = event.connection();

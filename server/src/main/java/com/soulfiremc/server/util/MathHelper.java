@@ -19,7 +19,6 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.util.mcstructs.AABB;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Locale;
 import java.util.function.IntPredicate;
@@ -419,7 +418,6 @@ public class MathHelper {
     }
   }
 
-  @Deprecated
   public static double fastInvSqrt(double number) {
     var e = 0.5 * number;
     var l = Double.doubleToRawLongBits(number);

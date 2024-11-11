@@ -92,6 +92,6 @@ public class ProjectedInventory {
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
     return sharedMiningCosts.computeIfAbsent(
-      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, entity, playerInventory, this, type));
+      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, entity, this, type));
   }
 }

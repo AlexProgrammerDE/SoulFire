@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.util.mcstructs;
 
-import com.google.common.collect.Iterators;
 import com.soulfiremc.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -27,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -228,11 +226,11 @@ public enum Direction {
   }
 
   public static Direction getApproximateNearest(float f, float g, float h) {
-    Direction lv = NORTH;
-    float i = Float.MIN_VALUE;
+    var lv = NORTH;
+    var i = Float.MIN_VALUE;
 
-    for (Direction lv2 : VALUES) {
-      float j = f * (float)lv2.normal.getX() + g * (float)lv2.normal.getY() + h * (float)lv2.normal.getZ();
+    for (var lv2 : VALUES) {
+      var j = f * (float) lv2.normal.getX() + g * (float) lv2.normal.getY() + h * (float) lv2.normal.getZ();
       if (j > i) {
         i = j;
         lv = lv2;
@@ -249,9 +247,9 @@ public enum Direction {
   @Nullable
   @Contract("_,_,_,!null->!null;_,_,_,_->_")
   public static Direction getNearest(int i, int j, int k, @Nullable Direction arg) {
-    int l = Math.abs(i);
-    int m = Math.abs(j);
-    int n = Math.abs(k);
+    var l = Math.abs(i);
+    var m = Math.abs(j);
+    var n = Math.abs(k);
     if (l > n && l > m) {
       return i < 0 ? WEST : EAST;
     } else if (n > l && n > m) {
@@ -275,7 +273,7 @@ public enum Direction {
   }
 
   public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {
-    for (Direction lv : VALUES) {
+    for (var lv : VALUES) {
       if (lv.getAxisDirection() == axisDirection && lv.getAxis() == axis) {
         return lv;
       }
@@ -289,9 +287,9 @@ public enum Direction {
   }
 
   public boolean isFacingAngle(float degrees) {
-    float g = degrees * (float) (Math.PI / 180.0);
-    float h = -MathHelper.sin(g);
-    float i = MathHelper.cos(g);
+    var g = degrees * (float) (Math.PI / 180.0);
+    var h = -MathHelper.sin(g);
+    var i = MathHelper.cos(g);
     return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0F;
   }
 
@@ -396,13 +394,6 @@ public enum Direction {
       return direction != null && direction.getAxis() == this;
     }
 
-    public Direction.Plane getPlane() {
-      return switch (this) {
-        case X, Z -> Direction.Plane.HORIZONTAL;
-        case Y -> Direction.Plane.VERTICAL;
-      };
-    }
-
     public abstract int choose(int x, int y, int z);
 
     public abstract double choose(double x, double y, double z);
@@ -435,36 +426,6 @@ public enum Direction {
 
     public Direction.AxisDirection opposite() {
       return this == POSITIVE ? NEGATIVE : POSITIVE;
-    }
-  }
-
-  public enum Plane implements Iterable<Direction>, Predicate<Direction> {
-    HORIZONTAL(new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}, new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}),
-    VERTICAL(new Direction[]{Direction.UP, Direction.DOWN}, new Direction.Axis[]{Direction.Axis.Y});
-
-    private final Direction[] faces;
-    private final Direction.Axis[] axis;
-
-    Plane(final Direction[] args, final Direction.Axis[] args2) {
-      this.faces = args;
-      this.axis = args2;
-    }
-
-    public boolean test(@Nullable Direction direction) {
-      return direction != null && direction.getAxis().getPlane() == this;
-    }
-
-    @Override
-    public Iterator<Direction> iterator() {
-      return Iterators.forArray(this.faces);
-    }
-
-    public Stream<Direction> stream() {
-      return Arrays.stream(this.faces);
-    }
-
-    public int length() {
-      return this.faces.length;
     }
   }
 }

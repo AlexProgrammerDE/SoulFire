@@ -606,7 +606,7 @@ public final class SessionDataManager {
     var container =
       new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
     connection.inventoryManager().setContainer(packet.getContainerId(), container);
-    connection.inventoryManager().openContainer(container);
+    connection.inventoryManager().currentContainer(container);
   }
 
   @EventHandler
@@ -617,7 +617,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onCloseContainer(ClientboundContainerClosePacket packet) {
-    connection.inventoryManager().openContainer(null);
+    connection.inventoryManager().currentContainer(null);
   }
 
   @EventHandler

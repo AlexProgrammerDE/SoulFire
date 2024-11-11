@@ -54,7 +54,6 @@ public class AutoTotem extends InternalPlugin {
           return;
         }
 
-        var dataManager = connection.dataManager();
         var inventoryManager = connection.inventoryManager();
         var playerInventory = inventoryManager.playerInventory();
         var offhandSlot = playerInventory.getOffhand();
@@ -71,11 +70,12 @@ public class AutoTotem extends InternalPlugin {
         }
 
         var slot = totemSlot.get();
-        if (!inventoryManager.tryInventoryControl()) {
+        if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
           return;
         }
 
         try {
+          inventoryManager.openPlayerInventory();
           inventoryManager.leftClickSlot(slot);
           TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
           inventoryManager.leftClickSlot(offhandSlot);
@@ -85,6 +85,8 @@ public class AutoTotem extends InternalPlugin {
             inventoryManager.leftClickSlot(slot);
             TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
           }
+
+          inventoryManager.closeInventory();
         } finally {
           inventoryManager.unlockInventoryControl();
         }

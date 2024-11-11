@@ -287,14 +287,14 @@ public class SoulFireServer {
   }
 
   public UUID createInstance(String friendlyName) {
-    var attackManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
-    SoulFireAPI.postEvent(new InstanceInitEvent(attackManager));
+    var instanceManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
+    SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
-    instances.put(attackManager.id(), attackManager);
+    instances.put(instanceManager.id(), instanceManager);
 
-    log.debug("Created instance with id {}", attackManager.id());
+    log.debug("Created instance with id {}", instanceManager.id());
 
-    return attackManager.id();
+    return instanceManager.id();
   }
 
   public CompletableFuture<?> shutdownInstances() {

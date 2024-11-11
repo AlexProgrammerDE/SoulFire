@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
@@ -107,7 +106,6 @@ public class Costs {
   public static BlockMiningCosts calculateBlockBreakCost(
     TagsState tagsState,
     @Nullable ClientEntity entity,
-    @Nullable PlayerInventoryContainer playerInventory,
     ProjectedInventory inventory,
     BlockType blockType) {
     var lowestMiningTicks = Integer.MAX_VALUE;

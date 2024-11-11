@@ -19,16 +19,11 @@ package com.soulfiremc.server.protocol.bot.block;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import org.cloudburstmc.math.vector.Vector3i;
 
 public interface BlockAccessor {
   BlockState getBlockState(int x, int y, int z);
 
   default BlockState getBlockState(SFVec3i position) {
     return getBlockState(position.x, position.y, position.z);
-  }
-
-  default BlockState getBlockState(Vector3i pos) {
-    return getBlockState(pos.getX(), pos.getY(), pos.getZ());
   }
 }

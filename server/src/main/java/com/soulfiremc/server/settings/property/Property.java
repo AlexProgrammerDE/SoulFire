@@ -153,7 +153,7 @@ public sealed interface Property permits SingleProperty, MinMaxPropertyLink {
     }
 
     public StringListProperty ofStringList(
-      String key, String uiName, String[] cliFlags, String description, List<String> defaultValue) {
+      String key, String uiName, String description, List<String> defaultValue) {
       return new StringListProperty(namespace, key, uiName, description, defaultValue);
     }
   }

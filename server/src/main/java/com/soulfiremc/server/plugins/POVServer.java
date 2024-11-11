@@ -993,29 +993,29 @@ public class POVServer extends InternalPlugin {
 
   @EventHandler
   public void onAttackStart(AttackStartEvent event) {
-    var attackManager = event.instanceManager();
-    var settingsSource = attackManager.settingsSource();
+    var instanceManager = event.instanceManager();
+    var settingsSource = instanceManager.settingsSource();
     if (!settingsSource.get(POVServerSettings.ENABLED)) {
       return;
     }
 
     var freePort =
       PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-    var serverInstance = startPOVServer(settingsSource, freePort, attackManager);
-    log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
+    var serverInstance = startPOVServer(settingsSource, freePort, instanceManager);
+    log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, instanceManager.id());
 
-    attackManager.metadata().set(TCP_SERVER, serverInstance);
+    instanceManager.metadata().set(TCP_SERVER, serverInstance);
   }
 
   @EventHandler
   public void onAttackEnded(AttackEndedEvent event) {
-    var attackManager = event.instanceManager();
-    var currentInstance = attackManager.metadata().getAndRemove(TCP_SERVER);
+    var instanceManager = event.instanceManager();
+    var currentInstance = instanceManager.metadata().getAndRemove(TCP_SERVER);
     if (currentInstance == null) {
       return;
     }
 
-    log.info("Stopping POV server for attack {}", attackManager.id());
+    log.info("Stopping POV server for attack {}", instanceManager.id());
     currentInstance.close();
   }
 

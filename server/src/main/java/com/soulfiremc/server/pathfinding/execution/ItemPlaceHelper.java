@@ -29,9 +29,11 @@ import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.util.TimeUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class ItemPlaceHelper {
   public static boolean placeBestBlockInHand(BotConnection connection) {
     var inventoryManager = connection.inventoryManager();
@@ -124,14 +126,19 @@ public class ItemPlaceHelper {
       return false;
     }
 
+    if (inventoryManager.lookingAtForeignContainer()) {
+      log.warn("Cannot place item in hand while looking at a foreign container");
+      return false;
+    }
+
     try {
       if (playerInventory.isHeldItem(slot)) {
         return true;
       } else if (playerInventory.isHotbar(slot)) {
-        inventoryManager.heldItemSlot(playerInventory.toHotbarIndex(slot));
-        inventoryManager.sendHeldItemChange();
+        inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
         return true;
       } else if (playerInventory.isMainInventory(slot)) {
+        inventoryManager.openPlayerInventory();
         inventoryManager.leftClickSlot(slot);
         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
         inventoryManager.leftClickSlot(playerInventory.getHeldItem());
@@ -142,6 +149,7 @@ public class ItemPlaceHelper {
           TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
         }
 
+        inventoryManager.closeInventory();
         return true;
       } else {
         throw new IllegalStateException("Unexpected container slot type");

@@ -84,18 +84,6 @@ public class CommandHistoryManager {
     }
   }
 
-  public void clearCommandHistory() {
-    lock.writeLock().lock();
-    try {
-      Files.deleteIfExists(historyFile);
-      commandHistory.clear();
-    } catch (IOException e) {
-      log.error("Failed to delete command history file!", e);
-    } finally {
-      lock.writeLock().unlock();
-    }
-  }
-
   public List<Map.Entry<Instant, String>> getCommandHistory() {
     lock.readLock().lock();
     try {
