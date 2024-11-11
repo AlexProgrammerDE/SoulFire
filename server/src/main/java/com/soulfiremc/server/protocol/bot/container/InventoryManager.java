@@ -48,7 +48,7 @@ public class InventoryManager {
   private final BotConnection connection;
   private Container openContainer;
   private int heldItemSlot = 0;
-  private int lastStateId = -1;
+  private int lastStateId = 0;
   private SFItemStack cursorItem;
 
   /**
