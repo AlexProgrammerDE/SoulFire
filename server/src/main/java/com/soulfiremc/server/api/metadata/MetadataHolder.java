@@ -45,4 +45,8 @@ public class MetadataHolder {
   public <T> void remove(MetadataKey<T> key) {
     this.metadata.remove(key.key());
   }
+
+  public <T> T getAndRemove(MetadataKey<T> key) {
+    return key.cast(this.metadata.remove(key.key()));
+  }
 }

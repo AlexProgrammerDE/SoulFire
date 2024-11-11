@@ -31,7 +31,6 @@ import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.state.ControlState;
-import com.soulfiremc.server.protocol.bot.state.TickHookContext;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
@@ -177,11 +176,7 @@ public final class BotConnection {
       }
 
       for (var i = 0L; i < Math.min(ticks, 10); i++) {
-        var tickHookState = TickHookContext.INSTANCE.get();
-        tickHookState.clear();
-
         SoulFireAPI.postEvent(new BotPreTickEvent(this));
-        tickHookState.callHooks(TickHookContext.HookType.PRE_TICK);
 
         dataManager.tick();
         botControl.tick();
@@ -191,7 +186,6 @@ public final class BotConnection {
         }
 
         SoulFireAPI.postEvent(new BotPostTickEvent(this));
-        tickHookState.callHooks(TickHookContext.HookType.POST_TICK);
       }
     } catch (Throwable t) {
       logger.error("Error while ticking bot!", t);

@@ -1114,16 +1114,12 @@ public final class SessionDataManager {
     // Tick cooldowns
     tickCooldowns();
 
-    var tickHookState = TickHookContext.INSTANCE.get();
-
     SoulFireAPI.postEvent(new BotPreEntityTickEvent(connection));
-    tickHookState.callHooks(TickHookContext.HookType.PRE_ENTITY_TICK);
 
     // Tick entities
     entityTrackerState.tick();
 
     SoulFireAPI.postEvent(new BotPostEntityTickEvent(connection));
-    tickHookState.callHooks(TickHookContext.HookType.POST_ENTITY_TICK);
   }
 
   private void tickCooldowns() {

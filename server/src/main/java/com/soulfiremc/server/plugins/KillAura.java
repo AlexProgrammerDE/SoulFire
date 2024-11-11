@@ -19,9 +19,11 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.protocol.bot.state.TickHookContext;
+import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -33,6 +35,8 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
 public class KillAura extends InternalPlugin {
+  private static final MetadataKey<AttackEntity> ATTACK_ENTITY = MetadataKey.of("kill_aura", "attack_entity", AttackEntity.class);
+
   public KillAura() {
     super(new PluginInfo(
       "kill-aura",
@@ -72,17 +76,10 @@ public class KillAura extends InternalPlugin {
       return;
     }
 
-    double distance;
     var bestVisiblePoint = control.getEntityVisiblePoint(target);
-    if (bestVisiblePoint != null) {
-      distance =
-        bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition());
-    } else {
-      distance =
-        target
-          .eyePosition()
-          .distance(bot.dataManager().clientEntity().eyePosition());
-    }
+    var distance = bestVisiblePoint != null ?
+      bestVisiblePoint.distance(bot.dataManager().clientEntity().eyePosition())
+      : target.eyePosition().distance(bot.dataManager().clientEntity().eyePosition());
 
     if (distance > lookRange) {
       return;
@@ -96,27 +93,39 @@ public class KillAura extends InternalPlugin {
         .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
     }
 
-    TickHookContext.INSTANCE
-      .get()
-      .addHook(
-        TickHookContext.HookType.POST_ENTITY_TICK,
-        () -> {
-          if (control.attackCooldownTicks() > 0) {
-            return;
-          }
+    bot.metadata().set(ATTACK_ENTITY, new AttackEntity(target, distance));
+  }
 
-          var swing = distance <= swingRange;
-          if (distance <= hitRange) {
-            control.attack(target, swing);
-          } else if (swing) {
-            control.swingArm();
-          }
+  @EventHandler
+  public static void onPostEntityTick(BotPostEntityTickEvent event) {
+    var bot = event.connection();
+    if (!bot.settingsSource().get(KillAuraSettings.ENABLE)) {
+      return;
+    }
 
-          if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
-            || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-            control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
-          }
-        });
+    var control = bot.botControl();
+    if (control.attackCooldownTicks() > 0) {
+      return;
+    }
+
+    var attackEntity = bot.metadata().getAndRemove(ATTACK_ENTITY);
+    if (attackEntity == null) {
+      return;
+    }
+
+    var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
+    var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
+    var swing = attackEntity.distance() <= swingRange;
+    if (attackEntity.distance() <= hitRange) {
+      control.attack(attackEntity.attackEntity(), swing);
+    } else if (swing) {
+      control.swingArm();
+    }
+
+    if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
+      || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
+      control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
+    }
   }
 
   @EventHandler
@@ -194,4 +203,6 @@ public class KillAura extends InternalPlugin {
           20,
           1));
   }
+
+  private record AttackEntity(Entity attackEntity, double distance) {}
 }
