@@ -22,10 +22,10 @@ import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -139,10 +139,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class POVServer extends InternalPlugin {
+  private static final MetadataKey<TcpServer> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", TcpServer.class);
   private static final List<Class<?>> NOT_SYNCED =
     List.of(
       ClientboundKeepAlivePacket.class,
@@ -1001,19 +1001,22 @@ public class POVServer extends InternalPlugin {
 
     var freePort =
       PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-    var serverInstance = new AtomicReference<>(startPOVServer(settingsSource, freePort, attackManager));
+    var serverInstance = startPOVServer(settingsSource, freePort, attackManager);
     log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, attackManager.id());
 
-    SoulFireAPI.registerListener(AttackEndedEvent.class, e -> {
-      var currentInstance = serverInstance.get();
-      if (currentInstance == null) {
-        return;
-      }
+    attackManager.metadata().set(TCP_SERVER, serverInstance);
+  }
 
-      log.info("Stopping POV server for attack {}", attackManager.id());
-      currentInstance.close();
-      serverInstance.set(null);
-    });
+  @EventHandler
+  public void onAttackEnded(AttackEndedEvent event) {
+    var attackManager = event.instanceManager();
+    var currentInstance = attackManager.metadata().getAndRemove(TCP_SERVER);
+    if (currentInstance == null) {
+      return;
+    }
+
+    log.info("Stopping POV server for attack {}", attackManager.id());
+    currentInstance.close();
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -99,10 +99,6 @@ public class KillAura extends InternalPlugin {
   @EventHandler
   public static void onPostEntityTick(BotPostEntityTickEvent event) {
     var bot = event.connection();
-    if (!bot.settingsSource().get(KillAuraSettings.ENABLE)) {
-      return;
-    }
-
     var control = bot.botControl();
     if (control.attackCooldownTicks() > 0) {
       return;
