@@ -143,6 +143,33 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
 
               return Command.SINGLE_SUCCESS;
             })));
+    dispatcher.register(
+      literal("plugins")
+        .executes(
+          help(
+            "Show all installed plugins",
+            c -> {
+              var extensions = SoulFireAPI.getServerExtensions();
+              if (extensions.isEmpty()) {
+                c.getSource().sendWarn("No plugins found!");
+                return Command.SINGLE_SUCCESS;
+              }
+
+              extensions.forEach(
+                plugin -> {
+                  var pluginInfo = plugin.pluginInfo();
+                  c.getSource()
+                    .sendInfo(
+                      "Plugin: {} | Version: {} | Description: {} | Author: {} | License: {}",
+                      pluginInfo.id(),
+                      pluginInfo.version(),
+                      pluginInfo.description(),
+                      pluginInfo.author(),
+                      pluginInfo.license());
+                });
+
+              return Command.SINGLE_SUCCESS;
+            })));
 
     // Pathfinding
     dispatcher.register(
