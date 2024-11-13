@@ -31,9 +31,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
+import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class AutoEat extends InternalPlugin {
   public AutoEat() {
     super(new PluginInfo(

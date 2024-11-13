@@ -33,10 +33,12 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Extension
 public class AntiAFK extends InternalPlugin {
   public AntiAFK() {
     super(new PluginInfo(

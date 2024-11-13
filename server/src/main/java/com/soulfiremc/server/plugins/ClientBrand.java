@@ -33,7 +33,9 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
+import org.pf4j.Extension;
 
+@Extension
 public class ClientBrand extends InternalPlugin {
   public ClientBrand() {
     super(new PluginInfo(

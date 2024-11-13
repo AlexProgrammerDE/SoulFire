@@ -133,6 +133,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.Serve
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
+import org.pf4j.Extension;
 import org.slf4j.event.Level;
 
 import java.nio.charset.StandardCharsets;
@@ -141,6 +142,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Extension
 public class POVServer extends InternalPlugin {
   private static final MetadataKey<TcpServer> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", TcpServer.class);
   private static final List<Class<?>> NOT_SYNCED =

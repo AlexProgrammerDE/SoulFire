@@ -32,8 +32,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.pf4j.Extension;
 
 @Slf4j
+@Extension
 public class KillAura extends InternalPlugin {
   private static final MetadataKey<AttackEntity> ATTACK_ENTITY = MetadataKey.of("kill_aura", "attack_entity", AttackEntity.class);
 

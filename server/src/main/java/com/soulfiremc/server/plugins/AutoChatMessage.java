@@ -30,10 +30,12 @@ import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.pf4j.Extension;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class AutoChatMessage extends InternalPlugin {
   public AutoChatMessage() {
     super(new PluginInfo(

@@ -31,10 +31,12 @@ import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.pf4j.Extension;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class AutoArmor extends InternalPlugin {
   public AutoArmor() {
     super(new PluginInfo(

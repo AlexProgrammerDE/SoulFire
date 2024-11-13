@@ -32,9 +32,11 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class AutoRespawn extends InternalPlugin {
   public AutoRespawn() {
     super(new PluginInfo(

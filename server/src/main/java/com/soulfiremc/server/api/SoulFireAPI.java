@@ -19,8 +19,6 @@ package com.soulfiremc.server.api;
 
 import com.soulfiremc.server.api.event.EventExceptionHandler;
 import com.soulfiremc.server.api.event.SoulFireEvent;
-import com.soulfiremc.server.plugins.*;
-import com.soulfiremc.server.util.SFFeatureFlags;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 
@@ -47,41 +45,6 @@ public class SoulFireAPI {
             throw new IllegalStateException("This event handler only accepts global events");
           }
         });
-
-  static {
-    var plugins =
-      new InternalPlugin[]{
-        new ClientBrand(),
-        new ClientSettings(),
-        new ChatControl(),
-        new AutoReconnect(),
-        new AutoRegister(),
-        new AutoRespawn(),
-        new AutoTotem(),
-        new AutoJump(),
-        new AutoChatMessage(),
-        new AutoArmor(),
-        new AutoEat(),
-        new AntiAFK(),
-        new ChatMessageLogger(),
-        new ServerListBypass(),
-        new FakeVirtualHost(), // Needs to be before ModLoaderSupport to not break it
-        SFFeatureFlags.MOD_SUPPORT
-          ? new ModLoaderSupport()
-          : null, // Needs to be before ForwardingBypass to not break it
-        new ForwardingBypass(),
-        new KillAura(),
-        new POVServer()
-      };
-
-    for (var plugin : plugins) {
-      if (plugin == null) {
-        continue;
-      }
-
-      SERVER_EXTENSIONS.add(plugin);
-    }
-  }
 
   private SoulFireAPI() {}
 

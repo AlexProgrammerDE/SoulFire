@@ -30,9 +30,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class ServerListBypass extends InternalPlugin {
   public ServerListBypass() {
     super(new PluginInfo(

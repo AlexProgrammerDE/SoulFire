@@ -28,10 +28,12 @@ import com.soulfiremc.server.settings.property.Property;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.pf4j.Extension;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Extension
 public class AutoReconnect extends InternalPlugin {
   public AutoReconnect() {
     super(new PluginInfo(

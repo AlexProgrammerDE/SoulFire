@@ -17,10 +17,8 @@
  */
 package com.soulfiremc.server.api;
 
-import org.pf4j.ExtensionPoint;
-
 /**
  * This interface is for external server plugins.
  */
-public non-sealed abstract class ExternalPlugin extends Plugin implements ExtensionPoint {
+public non-sealed abstract class ExternalPlugin extends Plugin {
 }

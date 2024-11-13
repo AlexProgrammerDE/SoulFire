@@ -45,6 +45,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
+import org.pf4j.Extension;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -56,6 +57,7 @@ import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 @Slf4j
+@Extension(ordinal = 2)
 public class ForwardingBypass extends InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
 

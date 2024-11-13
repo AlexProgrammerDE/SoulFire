@@ -32,9 +32,11 @@ import org.geysermc.mcprotocollib.protocol.data.game.setting.ParticleStatus;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.SkinPart;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
+import org.pf4j.Extension;
 
 import java.util.ArrayList;
 
+@Extension
 public class ClientSettings extends InternalPlugin {
   public ClientSettings() {
     super(new PluginInfo(

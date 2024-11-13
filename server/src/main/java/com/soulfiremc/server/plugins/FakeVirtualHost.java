@@ -30,7 +30,9 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
+import org.pf4j.Extension;
 
+@Extension
 public class FakeVirtualHost extends InternalPlugin {
   public FakeVirtualHost() {
     super(new PluginInfo(

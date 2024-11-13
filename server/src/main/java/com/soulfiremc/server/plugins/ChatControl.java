@@ -30,7 +30,9 @@ import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.pf4j.Extension;
 
+@Extension
 public class ChatControl extends InternalPlugin {
   public ChatControl() {
     super(new PluginInfo(

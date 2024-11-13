@@ -18,12 +18,15 @@
 package com.soulfiremc.server.api;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.pf4j.ExtensionPoint;
 
 /**
  * This interface is for any plugin that hooks into the server.
  */
+@Slf4j
 @Getter
-public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
+public sealed abstract class Plugin implements ExtensionPoint permits ExternalPlugin, InternalPlugin {
   private final PluginInfo pluginInfo;
 
   protected Plugin(PluginInfo pluginInfo) {
@@ -39,7 +42,15 @@ public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
   }
 
   protected void register() {
+    if (!isAvailable()) {
+      return;
+    }
+
     SoulFireAPI.registerListenersOfClass(getClass());
     SoulFireAPI.registerListenersOfObject(this);
+  }
+
+  public boolean isAvailable() {
+    return true;
   }
 }

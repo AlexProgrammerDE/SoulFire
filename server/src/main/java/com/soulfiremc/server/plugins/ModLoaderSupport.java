@@ -36,10 +36,12 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
+import org.pf4j.Extension;
 
 import java.util.List;
 
 @Slf4j
+@Extension(ordinal = 1)
 public class ModLoaderSupport extends InternalPlugin {
   private static final Key FML_HS_KEY = Key.key("fml:hs");
   private static final Key FML_FML_KEY = Key.key("fml:fml");
@@ -58,6 +60,11 @@ public class ModLoaderSupport extends InternalPlugin {
       "AlexProgrammerDE",
       "GPL-3.0"
     ));
+  }
+
+  @Override
+  public boolean isAvailable() {
+    return Boolean.getBoolean("sf.mod_support");
   }
 
   @EventHandler
@@ -90,6 +97,7 @@ public class ModLoaderSupport extends InternalPlugin {
     }
   }
 
+  @EventHandler
   public void onPacketReceive(SFPacketReceiveEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();

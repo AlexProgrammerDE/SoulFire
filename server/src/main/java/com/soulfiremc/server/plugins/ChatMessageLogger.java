@@ -33,11 +33,13 @@ import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.ansi.ColorLevel;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.fusesource.jansi.AnsiConsole;
+import org.pf4j.Extension;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Extension
 public class ChatMessageLogger extends InternalPlugin {
   public static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
     ANSIComponentSerializer.builder()
