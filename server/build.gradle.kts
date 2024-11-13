@@ -65,6 +65,7 @@ dependencies {
   api(libs.commons.io)
 
   api(libs.oshi)
+  api(libs.ollama4j)
 
   api(libs.guava)
   api(libs.gson)
