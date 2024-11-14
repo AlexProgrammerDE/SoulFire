@@ -13,7 +13,7 @@ mcprotocollib = "7fd279b"
 kyori = "4.17.0"
 reactor = "1.2.0"
 classtransform = "1.14.0"
-armeria = "1.30.1"
+armeria = "1.31.0"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
