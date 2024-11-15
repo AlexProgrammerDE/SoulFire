@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-  javadocClasspath("org.projectlombok:lombok:1.18.34")
+  javadocClasspath("org.projectlombok:lombok:1.18.36")
 
   rootProject.subprojects.forEach { subproject ->
     if (subproject.name == "data-generator") {
