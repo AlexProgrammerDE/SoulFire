@@ -112,6 +112,8 @@ public class AIChatBot extends InternalPlugin {
           Keep responses short, but conversational.
           You must not say anything that is not safe for work.
           You will take any roleplay seriously and follow the player's lead.
+          You cannot interact with the Minecraft world except by chatting.
+          Use prefixes to express emotions, do not put names as prefixes.
           """.replace("\n", " "));
     public static final StringProperty MODEL =
       BUILDER.ofString(
