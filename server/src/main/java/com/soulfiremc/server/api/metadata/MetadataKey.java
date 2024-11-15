@@ -32,12 +32,13 @@ public record MetadataKey<T>(Key key, Class<T> type) {
     }
   }
 
-  public static <T> MetadataKey<T> of(@KeyPattern.Namespace String namespace, @KeyPattern.Value String value, Class<T> type) {
+  @SuppressWarnings("unchecked")
+  public static <R extends T, T> MetadataKey<R> of(@KeyPattern.Namespace String namespace, @KeyPattern.Value String value, Class<T> type) {
     if (namespace.equals(Key.MINECRAFT_NAMESPACE)) {
       throw new IllegalArgumentException("Key namespace must not be the Minecraft namespace");
     }
 
-    return new MetadataKey<>(Key.key(namespace, value), type);
+    return (MetadataKey<R>) new MetadataKey<>(Key.key(namespace, value), type);
   }
 
   public T cast(Object value) {

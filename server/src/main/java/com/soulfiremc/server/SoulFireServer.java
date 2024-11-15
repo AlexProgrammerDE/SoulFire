@@ -30,10 +30,7 @@ import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.grpc.RPCServer;
-import com.soulfiremc.server.settings.AccountSettings;
-import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.DevSettings;
-import com.soulfiremc.server.settings.ProxySettings;
+import com.soulfiremc.server.settings.*;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
@@ -181,7 +178,8 @@ public class SoulFireServer {
             // Needs Via loaded to have all protocol versions
             .addClass(BotSettings.class, "Bot Settings", "bot")
             .addClass(AccountSettings.class, "Account Settings", "users")
-            .addClass(ProxySettings.class, "Proxy Settings", "waypoints")));
+            .addClass(ProxySettings.class, "Proxy Settings", "waypoints")
+            .addClass(AISettings.class, "AI Settings", "sparkles")));
 
     log.info("Loading instances...");
     loadInstances();
