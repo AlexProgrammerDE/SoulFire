@@ -294,6 +294,7 @@ public class ForwardingBypass extends InternalPlugin {
         .uiName("Secret")
         .description("Secret key used for forwarding. (Not needed for legacy mode)")
         .defaultValue("forwarding secret")
+        .secret(true)
         .build();
 
     @RequiredArgsConstructor

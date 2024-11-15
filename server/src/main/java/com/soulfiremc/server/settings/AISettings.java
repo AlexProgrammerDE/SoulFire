@@ -41,7 +41,7 @@ public class AISettings implements SettingsObject {
     ImmutableStringProperty.builder()
       .namespace(NAMESPACE)
       .key("api-username")
-      .uiName("API Username")
+      .uiName("API Username (optional)")
       .description("Ollama API server username (if required)")
       .defaultValue("")
       .build();
@@ -49,9 +49,10 @@ public class AISettings implements SettingsObject {
     ImmutableStringProperty.builder()
       .namespace(NAMESPACE)
       .key("api-password")
-      .uiName("API Password")
+      .uiName("API Password (optional)")
       .description("Ollama API server password (if required)")
       .defaultValue("")
+      .secret(true)
       .build();
   public static final IntProperty REQUEST_TIMEOUT =
     ImmutableIntProperty.builder()
