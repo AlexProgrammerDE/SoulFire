@@ -74,8 +74,8 @@ public class ServerSettingsRegistry {
         .setMaxUiName(property.maxUiName())
         .setMinDescription(property.minDescription())
         .setMaxDescription(property.maxDescription())
-        .setMinDef(property.minValue())
-        .setMaxDef(property.maxValue())
+        .setMinDef(property.minDefaultValue())
+        .setMaxDef(property.maxDefaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
         .setStep(property.stepValue());
