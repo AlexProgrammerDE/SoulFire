@@ -23,8 +23,9 @@ import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -72,30 +73,27 @@ public class ServerListBypass extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ServerListBypassSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("server-list-bypass");
+    private static final String NAMESPACE = "server-list-bypass";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Server List Bypass",
-        "Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)",
-        false);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between joining the server",
-          1,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between joining the server",
-          3,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Server List Bypass")
+        .description("Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)")
+        .defaultValue(false)
+        .build();
+    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+      .namespace(NAMESPACE)
+      .key("delay")
+      .minUiName("Min delay (seconds)")
+      .maxUiName("Max delay (seconds)")
+      .minDescription("Minimum delay between joining the server")
+      .maxDescription("Maximum delay between joining the server")
+      .minDefaultValue(1)
+      .maxDefaultValue(3)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   }
 }

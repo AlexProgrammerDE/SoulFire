@@ -25,8 +25,9 @@ import com.soulfiremc.server.data.ArmorType;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -141,30 +142,28 @@ public class AutoArmor extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoArmorSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-armor");
+    private static final String NAMESPACE = "auto-armor";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Armor",
-        "Put on best armor automatically",
-        true);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between putting on armor",
-          1,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between putting on armor",
-          2,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Armor")
+        .description("Put on best armor automatically")
+        .defaultValue(true)
+        .build();
+    public static final MinMaxProperty DELAY =
+      ImmutableMinMaxProperty.builder()
+        .namespace(NAMESPACE)
+        .key("delay")
+        .minUiName("Min delay (seconds)")
+        .maxUiName("Max delay (seconds)")
+        .minDescription("Minimum delay between putting on armor")
+        .maxDescription("Maximum delay between putting on armor")
+        .minDefaultValue(1)
+        .maxDefaultValue(2)
+        .minValue(0)
+        .maxValue(Integer.MAX_VALUE)
+        .stepValue(1)
+        .build();
   }
 }

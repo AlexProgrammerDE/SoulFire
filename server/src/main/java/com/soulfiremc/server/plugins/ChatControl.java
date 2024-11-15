@@ -25,7 +25,8 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -78,18 +79,22 @@ public class ChatControl extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ChatControlSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("chat-control");
+    private static final String NAMESPACE = "chat-control";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Chat Control",
-        "Enable controlling the bot with chat messages",
-        false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Chat Control")
+        .description("Enable controlling the bot with chat messages")
+        .defaultValue(false)
+        .build();
     public static final StringProperty COMMAND_PREFIX =
-      BUILDER.ofString(
-        "command-prefix",
-        "Command Prefix",
-        "Word to put before a command to make the bot execute it",
-        "$");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("command-prefix")
+        .uiName("Command Prefix")
+        .description("Word to put before a command to make the bot execute it")
+        .defaultValue("$")
+        .build();
   }
 }

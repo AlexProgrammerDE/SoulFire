@@ -19,29 +19,32 @@ package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProxySettings implements SettingsObject {
-  private static final Property.Builder BUILDER =
-    Property.builder(BuiltinSettingsConstants.PROXY_SETTINGS_ID);
+  private static final String NAMESPACE = "proxy";
   public static final IntProperty BOTS_PER_PROXY =
-    BUILDER.ofInt(
-      "bots-per-proxy",
-      "Bots per proxy",
-      "Amount of bots that can be on a single proxy",
-      -1,
-      -1,
-      Integer.MAX_VALUE,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("bots-per-proxy")
+      .uiName("Bots per proxy")
+      .description("Amount of bots that can be on a single proxy")
+      .defaultValue(-1)
+      .minValue(-1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   public static final BooleanProperty SHUFFLE_PROXIES =
-    BUILDER.ofBoolean(
-      "shuffle-proxies",
-      "Shuffle proxies",
-      "Should the proxy order be random when connecting bots?",
-      false);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("shuffle-proxies")
+      .uiName("Shuffle proxies")
+      .description("Should the proxy order be random when connecting bots?")
+      .defaultValue(false)
+      .build();
 }

@@ -27,7 +27,8 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.IdentifiedKey;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableComboProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.VelocityConstants;
@@ -276,20 +277,24 @@ public class ForwardingBypass extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("forwarding-bypass");
+    private static final String NAMESPACE = "forwarding-bypass";
     public static final ComboProperty FORWARDING_MODE =
-      BUILDER.ofEnum(
-        "forwarding-mode",
-        "Forwarding mode",
-        "What type of forwarding to use",
-        ForwardingMode.values(),
-        ForwardingMode.NONE);
+      ImmutableComboProperty.builder()
+        .namespace(NAMESPACE)
+        .key("forwarding-mode")
+        .uiName("Forwarding mode")
+        .description("What type of forwarding to use")
+        .defaultValue(ForwardingMode.NONE.name())
+        .addOptions(ComboProperty.optionsFromEnum(ForwardingMode.values(), ForwardingMode::toString))
+        .build();
     public static final StringProperty SECRET =
-      BUILDER.ofStringSecret(
-        "secret",
-        "Secret",
-        "Secret key used for forwarding. (Not needed for legacy mode)",
-        "forwarding secret");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("secret")
+        .uiName("Secret")
+        .description("Secret key used for forwarding. (Not needed for legacy mode)")
+        .defaultValue("forwarding secret")
+        .build();
 
     @RequiredArgsConstructor
     enum ForwardingMode {

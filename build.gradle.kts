@@ -6,10 +6,11 @@ plugins {
 
 dependencies {
   javadocClasspath("org.projectlombok:lombok:1.18.36")
+  javadocClasspath(libs.immutables)
 
   rootProject.subprojects.forEach { subproject ->
     if (subproject.name == "data-generator") {
-      return@forEach;
+      return@forEach
     }
 
     subproject.plugins.withId("java") {

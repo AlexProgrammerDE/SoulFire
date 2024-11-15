@@ -24,7 +24,8 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -76,18 +77,22 @@ public class ClientBrand extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ClientBrandSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("client-brand");
+    private static final String NAMESPACE = "client-brand";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Send client brand",
-        "Send client brand to the server",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Send client brand")
+        .description("Send client brand to the server")
+        .defaultValue(true)
+        .build();
     public static final StringProperty CLIENT_BRAND =
-      BUILDER.ofString(
-        "client-brand",
-        "Client brand",
-        "The client brand to send to the server",
-        "vanilla");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("client-brand")
+        .uiName("Client brand")
+        .description("The client brand to send to the server")
+        .defaultValue("vanilla")
+        .build();
   }
 }

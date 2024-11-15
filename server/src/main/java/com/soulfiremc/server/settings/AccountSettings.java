@@ -19,26 +19,29 @@ package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
-import com.soulfiremc.server.util.BuiltinSettingsConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class AccountSettings implements SettingsObject {
-  private static final Property.Builder BUILDER =
-    Property.builder(BuiltinSettingsConstants.ACCOUNT_SETTINGS_ID);
+  private static final String NAMESPACE = "account";
   public static final StringProperty NAME_FORMAT =
-    BUILDER.ofString(
-      "name-format",
-      "Name format",
-      "The format of the bot names. %d will be replaced with the bot number.",
-      "Bot_%d");
+    ImmutableStringProperty.builder()
+      .namespace(NAMESPACE)
+      .key("name-format")
+      .uiName("Name format")
+      .description("The format of the bot names. %d will be replaced with the bot number.")
+      .defaultValue("Bot_%d")
+      .build();
   public static final BooleanProperty SHUFFLE_ACCOUNTS =
-    BUILDER.ofBoolean(
-      "shuffle-accounts",
-      "Shuffle accounts",
-      "Should the accounts order be random when connecting bots?",
-      false);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("shuffle-accounts")
+      .uiName("Shuffle accounts")
+      .description("Should the accounts order be random when connecting bots?")
+      .defaultValue(false)
+      .build();
 }

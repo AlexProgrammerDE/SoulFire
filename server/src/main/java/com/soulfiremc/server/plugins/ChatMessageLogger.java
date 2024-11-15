@@ -24,7 +24,7 @@ import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.util.structs.ExpiringSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -94,12 +94,14 @@ public class ChatMessageLogger extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ChatMessageSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("chat-message-logger");
+    private static final String NAMESPACE = "chat-message-logger";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Log chat to terminal",
-        "Log all received chat messages to the terminal",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Log chat to terminal")
+        .description("Log all received chat messages to the terminal")
+        .defaultValue(true)
+        .build();
   }
 }

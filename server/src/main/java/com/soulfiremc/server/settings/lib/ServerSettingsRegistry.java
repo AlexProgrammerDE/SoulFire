@@ -40,14 +40,14 @@ public class ServerSettingsRegistry {
   private static IntSetting createIntSetting(IntProperty property) {
     var builder =
       IntSetting.newBuilder()
+        .setUiName(property.uiName())
+        .setDescription(property.description())
         .setDef(property.defaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
         .setStep(property.stepValue());
 
-    if (property.format() != null) {
-      builder = builder.setFormat(property.format());
-    }
+    property.format().ifPresent(builder::setFormat);
 
     return builder.build();
   }
@@ -55,14 +55,32 @@ public class ServerSettingsRegistry {
   private static DoubleSetting createDoubleSetting(DoubleProperty property) {
     var builder =
       DoubleSetting.newBuilder()
+        .setUiName(property.uiName())
+        .setDescription(property.description())
         .setDef(property.defaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
         .setStep(property.stepValue());
 
-    if (property.format() != null) {
-      builder = builder.setFormat(property.format());
-    }
+    property.format().ifPresent(builder::setFormat);
+
+    return builder.build();
+  }
+
+  private static MinMaxSetting createMinMaxSetting(MinMaxProperty property) {
+    var builder =
+      MinMaxSetting.newBuilder()
+        .setMinUiName(property.minUiName())
+        .setMaxUiName(property.maxUiName())
+        .setMinDescription(property.minDescription())
+        .setMaxDescription(property.maxDescription())
+        .setMinDef(property.minValue())
+        .setMaxDef(property.maxValue())
+        .setMin(property.minValue())
+        .setMax(property.maxValue())
+        .setStep(property.stepValue());
+
+    property.format().ifPresent(builder::setFormat);
 
     return builder.build();
   }
@@ -80,7 +98,7 @@ public class ServerSettingsRegistry {
   @This
   @ApiStatus.Internal
   public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
-    return addClass(clazz, pageName, null, iconId);
+    return addClassInternal(clazz, pageName, null, iconId);
   }
 
   /**
@@ -96,6 +114,12 @@ public class ServerSettingsRegistry {
    */
   @This
   public ServerSettingsRegistry addClass(
+    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId) {
+    return addClassInternal(clazz, pageName, owningPlugin, iconId);
+  }
+
+  @This
+  private ServerSettingsRegistry addClassInternal(
     Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
@@ -110,12 +134,10 @@ public class ServerSettingsRegistry {
             throw new IllegalStateException("Property is null!");
           }
 
-          var registry = namespaceMap.get(property.namespace());
-          if (registry == null) {
+          var registry = namespaceMap.computeIfAbsent(property.namespace(), k -> {
             var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
-            registry = new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId);
-            namespaceMap.put(property.namespace(), registry);
-          }
+            return new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId);
+          });
 
           registry.properties.add(property);
         } catch (IllegalAccessException e) {
@@ -134,72 +156,42 @@ public class ServerSettingsRegistry {
       var namespaceRegistry = namespaceEntry.getValue();
       var entries = new ArrayList<SettingEntry>();
       for (var property : namespaceRegistry.properties) {
-        switch (property) {
-          case BooleanProperty booleanProperty -> entries.add(
-            SettingEntry.newBuilder()
-              .setSingle(
-                fillSingleProperties(booleanProperty)
-                  .setType(
-                    SettingType.newBuilder()
-                      .setBool(
-                        BoolSetting.newBuilder()
-                          .setDef(booleanProperty.defaultValue())
-                          .build())
-                      .build())
-                  .build())
-              .build());
-          case IntProperty intProperty -> entries.add(
-            SettingEntry.newBuilder()
-              .setSingle(
-                fillSingleProperties(intProperty)
-                  .setType(
-                    SettingType.newBuilder()
-                      .setInt(createIntSetting(intProperty))
-                      .build())
-                  .build())
-              .build());
-          case DoubleProperty doubleProperty -> entries.add(
-            SettingEntry.newBuilder()
-              .setSingle(
-                fillSingleProperties(doubleProperty)
-                  .setType(
-                    SettingType.newBuilder()
-                      .setDouble(createDoubleSetting(doubleProperty))
-                      .build())
-                  .build())
-              .build());
-          case MinMaxPropertyLink minMaxPropertyLink -> {
-            var minProperty = minMaxPropertyLink.min();
-            var maxProperty = minMaxPropertyLink.max();
-            entries.add(
-              SettingEntry.newBuilder()
-                .setMinMaxPair(
-                  SettingEntryMinMaxPair.newBuilder()
-                    .setMin(
-                      fillMultiProperties(minProperty)
-                        .setIntSetting(createIntSetting(minProperty))
-                        .build())
-                    .setMax(
-                      fillMultiProperties(maxProperty)
-                        .setIntSetting(createIntSetting(maxProperty))
-                        .build())
+        entries.add(switch (property) {
+          case BooleanProperty booleanProperty -> fillProperties(booleanProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setBool(
+                  BoolSetting.newBuilder()
+                    .setUiName(booleanProperty.uiName())
+                    .setDescription(booleanProperty.description())
+                    .setDef(booleanProperty.defaultValue())
                     .build())
-                .build());
-          }
-          case StringProperty stringProperty -> entries.add(
-            SettingEntry.newBuilder()
-              .setSingle(
-                fillSingleProperties(stringProperty)
-                  .setType(
-                    SettingType.newBuilder()
-                      .setString(
-                        StringSetting.newBuilder()
-                          .setDef(stringProperty.defaultValue())
-                          .setSecret(stringProperty.secret())
-                          .build())
-                      .build())
-                  .build())
-              .build());
+                .build())
+            .build();
+          case IntProperty intProperty -> fillProperties(intProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setInt(createIntSetting(intProperty))
+                .build())
+            .build();
+          case DoubleProperty doubleProperty -> fillProperties(doubleProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setDouble(createDoubleSetting(doubleProperty))
+                .build())
+            .build();
+          case StringProperty stringProperty -> fillProperties(stringProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setString(
+                  StringSetting.newBuilder()
+                    .setUiName(stringProperty.uiName())
+                    .setDescription(stringProperty.description())
+                    .setDef(stringProperty.defaultValue())
+                    .setSecret(stringProperty.secret())
+                    .build())
+                .build())
+            .build();
           case ComboProperty comboProperty -> {
             var options = new ArrayList<ComboOption>();
             for (var option : comboProperty.options()) {
@@ -209,35 +201,37 @@ public class ServerSettingsRegistry {
                   .setDisplayName(option.displayName())
                   .build());
             }
-            entries.add(
-              SettingEntry.newBuilder()
-                .setSingle(
-                  fillSingleProperties(comboProperty)
-                    .setType(
-                      SettingType.newBuilder()
-                        .setCombo(
-                          ComboSetting.newBuilder()
-                            .setDef(comboProperty.defaultValue())
-                            .addAllOptions(options)
-                            .build())
-                        .build())
-                    .build())
-                .build());
-          }
-          case StringListProperty stringListProperty -> entries.add(
-            SettingEntry.newBuilder()
-              .setSingle(
-                fillSingleProperties(stringListProperty)
-                  .setType(
-                    SettingType.newBuilder()
-                      .setStringList(
-                        StringListSetting.newBuilder()
-                          .addAllDef(stringListProperty.defaultValue())
-                          .build())
+            yield fillProperties(comboProperty)
+              .setType(
+                SettingType.newBuilder()
+                  .setCombo(
+                    ComboSetting.newBuilder()
+                      .setUiName(comboProperty.uiName())
+                      .setDescription(comboProperty.description())
+                      .setDef(comboProperty.defaultValue())
+                      .addAllOptions(options)
                       .build())
                   .build())
-              .build());
-        }
+              .build();
+          }
+          case StringListProperty stringListProperty -> fillProperties(stringListProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setStringList(
+                  StringListSetting.newBuilder()
+                    .setUiName(stringListProperty.uiName())
+                    .setDescription(stringListProperty.description())
+                    .addAllDef(stringListProperty.defaultValue())
+                    .build())
+                .build())
+            .build();
+          case MinMaxProperty minMaxProperty -> fillProperties(minMaxProperty)
+            .setType(
+              SettingType.newBuilder()
+                .setMinMax(createMinMaxSetting(minMaxProperty))
+                .build())
+            .build();
+        });
       }
 
       var settingsPageBuilder = SettingsPage.newBuilder()
@@ -257,19 +251,9 @@ public class ServerSettingsRegistry {
     return list;
   }
 
-  private SettingEntrySingle.Builder fillSingleProperties(SingleProperty property) {
-    return SettingEntrySingle.newBuilder()
-      .setKey(property.key())
-      .setUiName(property.uiName())
-      .setDescription(property.description());
-  }
-
-  private SettingEntryMinMaxPairSingle.Builder fillMultiProperties(
-    SingleProperty property) {
-    return SettingEntryMinMaxPairSingle.newBuilder()
-      .setKey(property.key())
-      .setUiName(property.uiName())
-      .setDescription(property.description());
+  private SettingEntry.Builder fillProperties(Property property) {
+    return SettingEntry.newBuilder()
+      .setKey(property.key());
   }
 
   private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties, String iconId) {}

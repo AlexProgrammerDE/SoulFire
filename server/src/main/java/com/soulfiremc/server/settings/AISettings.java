@@ -19,11 +19,7 @@ package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.settings.property.StringProperty;
-import com.soulfiremc.server.util.BuiltinSettingsConstants;
+import com.soulfiremc.server.settings.property.*;
 import io.github.ollama4j.OllamaAPI;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -32,47 +28,58 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AISettings implements SettingsObject {
-  public static final Property.Builder BUILDER =
-    Property.builder(BuiltinSettingsConstants.AI_SETTINGS_ID);
+  private static final String NAMESPACE = "ai";
   public static final StringProperty API_ENDPOINT =
-    BUILDER.ofString(
-      "api-endpoint",
-      "API Endpoint",
-      "Ollama API server endpoint",
-      "http://127.0.0.1:11434");
+    ImmutableStringProperty.builder()
+      .namespace(NAMESPACE)
+      .key("api-endpoint")
+      .uiName("API Endpoint")
+      .description("Ollama API server endpoint")
+      .defaultValue("http://127.0.0.1:11434")
+      .build();
   public static final StringProperty API_USERNAME =
-    BUILDER.ofString(
-      "api-username",
-      "API Username",
-      "Ollama API server username (if required)",
-      "");
+    ImmutableStringProperty.builder()
+      .namespace(NAMESPACE)
+      .key("api-username")
+      .uiName("API Username")
+      .description("Ollama API server username (if required)")
+      .defaultValue("")
+      .build();
   public static final StringProperty API_PASSWORD =
-    BUILDER.ofString(
-      "api-password",
-      "API Password",
-      "Ollama API server password (if required)",
-      "");
+    ImmutableStringProperty.builder()
+      .namespace(NAMESPACE)
+      .key("api-password")
+      .uiName("API Password")
+      .description("Ollama API server password (if required)")
+      .defaultValue("")
+      .build();
   public static final IntProperty REQUEST_TIMEOUT =
-    BUILDER.ofInt(
-      "api-request-timeout",
-      "API Request Timeout",
-      "Ollama API request timeout (seconds)",
-      5,
-      1,
-      6,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("api-request-timeout")
+      .uiName("API Request Timeout")
+      .description("Ollama API request timeout (seconds)")
+      .defaultValue(5)
+      .minValue(1)
+      .maxValue(6)
+      .stepValue(1)
+      .build();
   public static final BooleanProperty PULL_MODELS =
-    BUILDER.ofBoolean(
-      "pull-models",
-      "Pull Models",
-      "Whether to pull models if not found already installed",
-      true);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("pull-models")
+      .uiName("Pull Models")
+      .description("Whether to pull models if not found already installed")
+      .defaultValue(true)
+      .build();
   public static final BooleanProperty VERBOSE =
-    BUILDER.ofBoolean(
-      "verbose",
-      "Verbose",
-      "Enable verbose extra logging",
-      false);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("verbose")
+      .uiName("Verbose")
+      .description("Enable verbose extra logging")
+      .defaultValue(false)
+      .build();
 
   public static OllamaAPI create(SettingsSource source) {
     var api = new OllamaAPI(source.get(AISettings.API_ENDPOINT));

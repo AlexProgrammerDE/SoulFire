@@ -22,10 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.settings.property.StringListProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -71,36 +68,36 @@ public class AutoChatMessage extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoChatMessageSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-chat-message");
+    private static final String NAMESPACE = "auto-chat-message";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Chat Message",
-        "Attempt to send chat messages automatically in random intervals",
-        false);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between chat messages",
-          2,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between chat messages",
-          5,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Chat Message")
+        .description("Attempt to send chat messages automatically in random intervals")
+        .defaultValue(false)
+        .build();
+    public static final MinMaxProperty DELAY =
+      ImmutableMinMaxProperty.builder()
+        .namespace(NAMESPACE)
+        .key("delay")
+        .minUiName("Min delay (seconds)")
+        .maxUiName("Max delay (seconds)")
+        .minDescription("Minimum delay between chat messages")
+        .maxDescription("Maximum delay between chat messages")
+        .minDefaultValue(2)
+        .maxDefaultValue(5)
+        .minValue(0)
+        .maxValue(Integer.MAX_VALUE)
+        .stepValue(1)
+        .build();
     public static final StringListProperty MESSAGES =
-      BUILDER.ofStringList(
-        "messages",
-        "Chat Messages",
-        "List of chat messages to send",
-        List.of("Hello", "Hi", "Hey", "How are you?"));
+      ImmutableStringListProperty.builder()
+        .namespace(NAMESPACE)
+        .key("messages")
+        .uiName("Chat Messages")
+        .description("List of chat messages to send")
+        .addAllDefaultValue(List.of("Hello", "Hi", "Hey", "How are you?"))
+        .build();
   }
 }

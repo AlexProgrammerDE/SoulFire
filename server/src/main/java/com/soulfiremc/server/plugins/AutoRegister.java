@@ -23,7 +23,8 @@ import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -79,36 +80,46 @@ public class AutoRegister extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoRegisterSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-register");
+    private static final String NAMESPACE = "auto-register";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Register",
-        "Make bots run the /register and /login command after joining",
-        false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Register")
+        .description("Make bots run the /register and /login command after joining")
+        .defaultValue(false)
+        .build();
     public static final StringProperty REGISTER_COMMAND =
-      BUILDER.ofString(
-        "register-command",
-        "Register Command",
-        "Command to be executed to register",
-        "/register %password% %password%");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("register-command")
+        .uiName("Register Command")
+        .description("Command to be executed to register")
+        .defaultValue("/register %password% %password%")
+        .build();
     public static final StringProperty LOGIN_COMMAND =
-      BUILDER.ofString(
-        "login-command",
-        "Login Command",
-        "Command to be executed to log in",
-        "/login %password%");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("login-command")
+        .uiName("Login Command")
+        .description("Command to be executed to log in")
+        .defaultValue("/login %password%")
+        .build();
     public static final StringProperty CAPTCHA_COMMAND =
-      BUILDER.ofString(
-        "captcha-command",
-        "Captcha Command",
-        "Command to be executed to confirm a captcha",
-        "/captcha %captcha%");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("captcha-command")
+        .uiName("Captcha Command")
+        .description("Command to be executed to confirm a captcha")
+        .defaultValue("/captcha %captcha%")
+        .build();
     public static final StringProperty PASSWORD_FORMAT =
-      BUILDER.ofString(
-        "password-format",
-        "Password Format",
-        "The password for registering",
-        "SoulFire");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("password-format")
+        .uiName("Password Format")
+        .description("The password for registering")
+        .defaultValue("SoulFire")
+        .build();
   }
 }

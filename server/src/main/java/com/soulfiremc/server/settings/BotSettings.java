@@ -19,7 +19,6 @@ package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.util.BuiltinSettingsConstants;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
@@ -31,6 +30,7 @@ import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
+  private static final String NAMESPACE = "bot";
   public static final Function<String, ProtocolVersion> PROTOCOL_VERSION_PARSER =
     version -> {
       var split = version.split("\\|");
@@ -41,105 +41,119 @@ public class BotSettings implements SettingsObject {
       return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
     };
 
-  private static final Property.Builder BUILDER =
-    Property.builder(BuiltinSettingsConstants.BOT_SETTINGS_ID);
   public static final StringProperty ADDRESS =
-    BUILDER.ofString(
-      "address",
-      "Address",
-      "Address to connect to",
-      "127.0.0.1:25565");
+    ImmutableStringProperty.builder()
+      .namespace(NAMESPACE)
+      .key("address")
+      .uiName("Address")
+      .description("Address to connect to")
+      .defaultValue("127.0.0.1:25565")
+      .build();
   public static final IntProperty AMOUNT =
-    BUILDER.ofInt(
-      "amount",
-      "Amount",
-      "Amount of bots to connect",
-      1,
-      1,
-      Integer.MAX_VALUE,
-      1);
-  public static final MinMaxPropertyLink JOIN_DELAY =
-    new MinMaxPropertyLink(
-      BUILDER.ofInt(
-        "join-min-delay",
-        "Min Join Delay (ms)",
-        "Minimum delay between joins in milliseconds",
-        1000,
-        0,
-        Integer.MAX_VALUE,
-        1),
-      BUILDER.ofInt(
-        "join-max-delay",
-        "Max Join Delay (ms)",
-        "Maximum delay between joins in milliseconds",
-        3000,
-        0,
-        Integer.MAX_VALUE,
-        1));
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("amount")
+      .uiName("Amount")
+      .description("Amount of bots to connect")
+      .defaultValue(1)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
+  public static final MinMaxProperty JOIN_DELAY = ImmutableMinMaxProperty.builder()
+    .namespace(NAMESPACE)
+    .key("join-delay")
+    .minUiName("Min Join Delay (ms)")
+    .maxUiName("Max Join Delay (ms)")
+    .minDescription("Minimum delay between joins in milliseconds")
+    .maxDescription("Maximum delay between joins in milliseconds")
+    .minDefaultValue(1000)
+    .maxDefaultValue(3000)
+    .minValue(0)
+    .maxValue(Integer.MAX_VALUE)
+    .stepValue(1)
+    .build();
   public static final ComboProperty PROTOCOL_VERSION =
-    BUILDER.ofCombo(
-      "protocol-version",
-      "Protocol Version",
-      "Minecraft protocol version to use",
-      getProtocolVersionOptions(),
-      getLatestProtocolVersionIndex());
+    ImmutableComboProperty.builder()
+      .namespace(NAMESPACE)
+      .key("protocol-version")
+      .uiName("Protocol Version")
+      .description("Minecraft protocol version to use")
+      .defaultValue(getLatestProtocolVersionId())
+      .addOptions(getProtocolVersionOptions())
+      .build();
   public static final IntProperty READ_TIMEOUT =
-    BUILDER.ofInt(
-      "read-timeout",
-      "Read Timeout",
-      "Read timeout in seconds",
-      30,
-      0,
-      Integer.MAX_VALUE,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("read-timeout")
+      .uiName("Read Timeout")
+      .description("Read timeout in seconds")
+      .defaultValue(30)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   public static final IntProperty WRITE_TIMEOUT =
-    BUILDER.ofInt(
-      "write-timeout",
-      "Write Timeout",
-      "Write timeout in seconds",
-      0,
-      0,
-      Integer.MAX_VALUE,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("write-timeout")
+      .uiName("Write Timeout")
+      .description("Write timeout in seconds")
+      .defaultValue(0)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   public static final IntProperty CONNECT_TIMEOUT =
-    BUILDER.ofInt(
-      "connect-timeout",
-      "Connect Timeout",
-      "Connect timeout in seconds",
-      30,
-      0,
-      Integer.MAX_VALUE,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("connect-timeout")
+      .uiName("Connect Timeout")
+      .description("Connect timeout in seconds")
+      .defaultValue(30)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   public static final BooleanProperty RESOLVE_SRV =
-    BUILDER.ofBoolean(
-      "resolve-srv",
-      "Resolve SRV",
-      "Try to resolve SRV records from the address",
-      true);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("resolve-srv")
+      .uiName("Resolve SRV")
+      .description("Try to resolve SRV records from the address")
+      .defaultValue(true)
+      .build();
   public static final IntProperty CONCURRENT_CONNECTS =
-    BUILDER.ofInt(
-      "concurrent-connects",
-      "Concurrent Connects",
-      "Max amount of bots attempting to connect at once",
-      1,
-      1,
-      Integer.MAX_VALUE,
-      1);
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("concurrent-connects")
+      .uiName("Concurrent Connects")
+      .description("Max amount of bots attempting to connect at once")
+      .defaultValue(1)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   public static final BooleanProperty RESTORE_ON_REBOOT =
-    BUILDER.ofBoolean(
-      "restore-on-reboot",
-      "Restore on Reboot",
-      "Whether the attack should be restored after a reboot of the SoulFire machine. If turned off, the attack will not be restored after a reboot.",
-      true);
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("restore-on-reboot")
+      .uiName("Restore on Reboot")
+      .description("Whether the attack should be restored after a reboot of the SoulFire machine. If turned off, the attack will not be restored after a reboot.")
+      .defaultValue(true)
+      .build();
+
+  private static String formatVersion(ProtocolVersion version) {
+    return "%s|%d".formatted(version.getVersionType().name(), version.getOriginalVersion());
+  }
 
   private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
     return ProtocolVersionList.getProtocolsNewToOld().stream()
-      .map(version -> new ComboProperty.ComboOption("%s|%d".formatted(version.getVersionType().name(), version.getOriginalVersion()), version.getName()))
+      .map(version -> new ComboProperty.ComboOption(formatVersion(version), version.getName()))
       .toArray(ComboProperty.ComboOption[]::new);
   }
 
-  private static int getLatestProtocolVersionIndex() {
-    return ProtocolVersionList.getProtocolsNewToOld()
-      .indexOf(SFVersionConstants.CURRENT_PROTOCOL_VERSION);
+  private static String getLatestProtocolVersionId() {
+    return formatVersion(SFVersionConstants.CURRENT_PROTOCOL_VERSION);
   }
 }

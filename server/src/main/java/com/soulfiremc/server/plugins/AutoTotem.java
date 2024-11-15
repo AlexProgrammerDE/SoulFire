@@ -24,8 +24,9 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -104,30 +105,27 @@ public class AutoTotem extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoTotemSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-totem");
+    private static final String NAMESPACE = "auto-totem";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Totem",
-        "Always put available totems in the offhand slot",
-        true);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between using totems",
-          1,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between using totems",
-          2,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Totem")
+        .description("Always put available totems in the offhand slot")
+        .defaultValue(true)
+        .build();
+    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+      .namespace(NAMESPACE)
+      .key("delay")
+      .minUiName("Min delay (seconds)")
+      .maxUiName("Max delay (seconds)")
+      .minDescription("Minimum delay between using totems")
+      .maxDescription("Maximum delay between using totems")
+      .minDefaultValue(1)
+      .maxDefaultValue(2)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   }
 }

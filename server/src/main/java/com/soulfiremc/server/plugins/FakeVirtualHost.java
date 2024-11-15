@@ -22,10 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -67,28 +64,34 @@ public class FakeVirtualHost extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class FakeVirtualHostSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("fake-virtual-host");
+    private static final String NAMESPACE = "fake-virtual-host";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Fake virtual host",
-        "Whether to fake the virtual host or not",
-        false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Fake virtual host")
+        .description("Whether to fake the virtual host or not")
+        .defaultValue(false)
+        .build();
     public static final StringProperty HOSTNAME =
-      BUILDER.ofString(
-        "hostname",
-        "Hostname",
-        "The hostname to fake",
-        "localhost");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("hostname")
+        .uiName("Hostname")
+        .description("The hostname to fake")
+        .defaultValue("localhost")
+        .build();
     public static final IntProperty PORT =
-      BUILDER.ofInt(
-        "port",
-        "Port",
-        "The port to fake",
-        25565,
-        1,
-        65535,
-        1,
-        "#");
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("port")
+        .uiName("Port")
+        .description("The port to fake")
+        .defaultValue(25565)
+        .minValue(1)
+        .maxValue(65535)
+        .stepValue(1)
+        .format("#")
+        .build();
   }
 }

@@ -11,28 +11,36 @@ message ClientDataRequest {
 }
 
 message StringSetting {
-  string def = 1;
-  bool secret = 2;
+  string uiName = 1;
+  string description = 2;
+  string def = 3;
+  bool secret = 4;
 }
 
 message IntSetting {
-  int32 def = 1;
-  int32 min = 2;
-  int32 max = 3;
-  int32 step = 4;
-  optional string format = 5;
+  string uiName = 1;
+  string description = 2;
+  int32 def = 3;
+  int32 min = 4;
+  int32 max = 5;
+  int32 step = 6;
+  optional string format = 7;
 }
 
 message DoubleSetting {
-  double def = 1;
-  double min = 2;
-  double max = 3;
-  double step = 4;
-  optional string format = 5;
+  string uiName = 1;
+  string description = 2;
+  double def = 3;
+  double min = 4;
+  double max = 5;
+  double step = 6;
+  optional string format = 7;
 }
 
 message BoolSetting {
-  bool def = 1;
+  string uiName = 1;
+  string description = 2;
+  bool def = 3;
 }
 
 message ComboOption {
@@ -43,13 +51,30 @@ message ComboOption {
 }
 
 message ComboSetting {
+  string uiName = 1;
+  string description = 2;
   // List of options
-  repeated ComboOption options = 1;
-  int32 def = 2;
+  repeated ComboOption options = 3;
+  string def = 4;
 }
 
 message StringListSetting {
-  repeated string def = 1;
+  string uiName = 1;
+  string description = 2;
+  repeated string def = 3;
+}
+
+message MinMaxSetting {
+  string minUiName = 1;
+  string maxUiName = 2;
+  string minDescription = 3;
+  string maxDescription = 4;
+  int32 minDef = 5;
+  int32 maxDef = 6;
+  int32 min = 7;
+  int32 max = 8;
+  int32 step = 9;
+  optional string format = 10;
 }
 
 // A single setting type with optional default value
@@ -61,40 +86,15 @@ message SettingType {
     BoolSetting bool = 4;
     ComboSetting combo = 5;
     StringListSetting stringList = 6;
+    MinMaxSetting minMax = 7;
   }
-}
-
-// A single option in the settings page
-message SettingEntrySingle {
-  // Basically we only send a kv map to the server with every setting entry
-  string key = 1;
-  string uiName = 2;
-  string description = 3;
-  SettingType type = 4;
-}
-
-message SettingEntryMinMaxPairSingle {
-  // Basically we only send a kv map to the server with every setting entry
-  string key = 1;
-  string uiName = 2;
-  string description = 3;
-  IntSetting intSetting = 4;
-}
-
-// A paired option in the settings page
-message SettingEntryMinMaxPair {
-  // Required to be IntSetting
-  SettingEntryMinMaxPairSingle min = 1;
-  // Required to be IntSetting
-  SettingEntryMinMaxPairSingle max = 2;
 }
 
 // A entry in the settings page
 message SettingEntry {
-  oneof value {
-    SettingEntrySingle single = 1;
-    SettingEntryMinMaxPair minMaxPair = 2;
-  }
+  // Basically we only send a kv map to the server with every setting entry
+  string key = 1;
+  SettingType type = 4;
 }
 
 message SettingsPage {

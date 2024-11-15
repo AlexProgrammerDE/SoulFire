@@ -90,6 +90,7 @@ reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", ve
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
 ollama4j = "io.github.ollama4j:ollama4j:1.0.89"
+immutables = "org.immutables:value:2.10.1 "
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit = "org.junit.jupiter:junit-jupiter:5.11.3"
 

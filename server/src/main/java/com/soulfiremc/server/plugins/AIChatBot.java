@@ -25,7 +25,8 @@ import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import io.github.ollama4j.models.chat.OllamaChatMessageRole;
 import io.github.ollama4j.models.chat.OllamaChatRequestBuilder;
@@ -94,19 +95,22 @@ public class AIChatBot extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AIChatBotSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("ai-chat-bot");
+    private static final String NAMESPACE = "ai-chat-bot";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable AI Chat Bot",
-        "Enable the AI Chat Bot",
-        false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable AI Chat Bot")
+        .description("Enable the AI Chat Bot")
+        .defaultValue(false)
+        .build();
     public static final StringProperty PROMPT =
-      BUILDER.ofString(
-        "prompt",
-        "AI System prompt",
-        "What the bot is instructed to say",
-        """
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("prompt")
+        .uiName("AI System prompt")
+        .description("What the bot is instructed to say")
+        .defaultValue("""
           You are a Minecraft chat bot, you chat with players.
           You must not say more than 128 characters or more than 2 sentences per response.
           Keep responses short, but conversational.
@@ -114,18 +118,23 @@ public class AIChatBot extends InternalPlugin {
           You will take any roleplay seriously and follow the player's lead.
           You cannot interact with the Minecraft world except by chatting.
           Use prefixes to express emotions, do not put names as prefixes.
-          """.replace("\n", " "));
+          """.replace("\n", " "))
+        .build();
     public static final StringProperty MODEL =
-      BUILDER.ofString(
-        "model",
-        "AI Model",
-        "What AI model should be used for inference",
-        "nemotron-mini");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("model")
+        .uiName("AI Model")
+        .description("What AI model should be used for inference")
+        .defaultValue("nemotron-mini")
+        .build();
     public static final StringProperty KEYWORD =
-      BUILDER.ofString(
-        "keyword",
-        "Keyword",
-        "Only respond to messages containing this keyword",
-        "!ai");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("keyword")
+        .uiName("Keyword")
+        .description("Only respond to messages containing this keyword")
+        .defaultValue("!ai")
+        .build();
   }
 }

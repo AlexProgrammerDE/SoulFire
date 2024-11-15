@@ -40,10 +40,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.PortHelper;
@@ -1023,34 +1020,42 @@ public class POVServer extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class POVServerSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("pov-server");
+    private static final String NAMESPACE = "pov-server";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable POV server",
-        "Host a POV server for the bots",
-        false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable POV server")
+        .description("Host a POV server for the bots")
+        .defaultValue(false)
+        .build();
     public static final IntProperty PORT_START =
-      BUILDER.ofInt(
-        "port-start",
-        "Port Start",
-        "What port to start with to host the POV server",
-        31765,
-        1,
-        65535,
-        1);
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("port-start")
+        .uiName("Port Start")
+        .description("What port to start with to host the POV server")
+        .defaultValue(31765)
+        .minValue(1)
+        .maxValue(65535)
+        .stepValue(1)
+        .build();
     public static final BooleanProperty ENABLE_COMMANDS =
-      BUILDER.ofBoolean(
-        "enable-commands",
-        "Enable commands",
-        "Allow users connected to the POV server to execute commands in the SF server shell",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enable-commands")
+        .uiName("Enable commands")
+        .description("Allow users connected to the POV server to execute commands in the SF server shell")
+        .defaultValue(true)
+        .build();
     public static final StringProperty COMMAND_PREFIX =
-      BUILDER.ofString(
-        "command-prefix",
-        "Command Prefix",
-        "The prefix to use for commands executed in the SF server shell",
-        "#");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("command-prefix")
+        .uiName("Command Prefix")
+        .description("The prefix to use for commands executed in the SF server shell")
+        .defaultValue("#")
+        .build();
   }
 
   private record PovServerUser(Session session, String username) implements ServerCommandSource {

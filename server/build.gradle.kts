@@ -74,6 +74,8 @@ dependencies {
   api(libs.fastutil)
   api(libs.caffeine)
   api(libs.jetbrains.annotations)
+  compileOnly(libs.immutables)
+  annotationProcessor(libs.immutables)
 
   api(libs.bundles.armeria)
   api(libs.bundles.reactor.netty)

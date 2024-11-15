@@ -25,7 +25,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ComboProperty;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableComboProperty;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -241,14 +241,16 @@ public class ModLoaderSupport extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ModLoaderSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("mod-loader");
+    private static final String NAMESPACE = "mod-loader";
     public static final ComboProperty FORGE_MODE =
-      BUILDER.ofEnum(
-        "mod-loader-mode",
-        "Mod Loader mode",
-        "What mod loader to use",
-        ModLoaderMode.values(),
-        ModLoaderMode.NONE);
+      ImmutableComboProperty.builder()
+        .namespace(NAMESPACE)
+        .key("mod-loader-mode")
+        .uiName("Mod Loader mode")
+        .description("What mod loader to use")
+        .defaultValue(ModLoaderMode.NONE.name())
+        .addOptions(ComboProperty.optionsFromEnum(ModLoaderMode.values(), ModLoaderMode::toString))
+        .build();
 
     @RequiredArgsConstructor
     enum ModLoaderMode {

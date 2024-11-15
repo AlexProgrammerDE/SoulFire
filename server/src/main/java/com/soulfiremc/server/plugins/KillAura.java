@@ -133,73 +133,86 @@ public class KillAura extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class KillAuraSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("kill-aura");
+    private static final String NAMESPACE = "kill-aura";
     public static final BooleanProperty ENABLE =
-      BUILDER.ofBoolean(
-        "enable", "Enable", "Enable KillAura", false);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enable")
+        .uiName("Enable")
+        .description("Enable KillAura")
+        .defaultValue(false)
+        .build();
     public static final StringProperty WHITELISTED_USER =
-      BUILDER.ofString(
-        "whitelisted-user",
-        "Whitelisted User",
-        "This user will be ignored by the kill aura",
-        "Pansexuel");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("whitelisted-user")
+        .uiName("Whitelisted User")
+        .description("This user will be ignored by the kill aura")
+        .defaultValue("Pansexuel")
+        .build();
     public static final DoubleProperty HIT_RANGE =
-      BUILDER.ofDouble(
-        "hit-range",
-        "Hit Range",
-        "Range for the kill aura where the bot will start hitting the entity",
-        3.0d,
-        0.5d,
-        6.0d,
-        0.1d);
+      ImmutableDoubleProperty.builder()
+        .namespace(NAMESPACE)
+        .key("hit-range")
+        .uiName("Hit Range")
+        .description("Range for the kill aura where the bot will start hitting the entity")
+        .defaultValue(3.0d)
+        .minValue(0.5d)
+        .maxValue(6.0d)
+        .stepValue(0.1d)
+        .build();
     public static final DoubleProperty SWING_RANGE =
-      BUILDER.ofDouble(
-        "swing-range",
-        "Swing Range",
-        "Range for the kill aura where the bot will start swinging arm, set to 0 to disable",
-        3.5d,
-        0.0d,
-        10.0d,
-        0.1d);
+      ImmutableDoubleProperty.builder()
+        .namespace(NAMESPACE)
+        .key("swing-range")
+        .uiName("Swing Range")
+        .description("Range for the kill aura where the bot will start swinging arm, set to 0 to disable")
+        .defaultValue(3.5d)
+        .minValue(0.0d)
+        .maxValue(10.0d)
+        .stepValue(0.1d)
+        .build();
     public static final DoubleProperty LOOK_RANGE =
-      BUILDER.ofDouble(
-        "look-range",
-        "Look Range",
-        "Range for the kill aura where the bot will start looking at the entity, set to 0 to disable",
-        4.8d,
-        0.0d,
-        25.0d,
-        0.1d);
+      ImmutableDoubleProperty.builder()
+        .namespace(NAMESPACE)
+        .key("look-range")
+        .uiName("Look Range")
+        .description("Range for the kill aura where the bot will start looking at the entity, set to 0 to disable")
+        .defaultValue(4.8d)
+        .minValue(0.0d)
+        .maxValue(25.0d)
+        .stepValue(0.1d)
+        .build();
     public static final BooleanProperty CHECK_WALLS =
-      BUILDER.ofBoolean(
-        "check-walls",
-        "Check Walls",
-        "Check if the entity is behind a wall",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("check-walls")
+        .uiName("Check Walls")
+        .description("Check if the entity is behind a wall")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty IGNORE_COOLDOWN =
-      BUILDER.ofBoolean(
-        "ignore-cooldown",
-        "Ignore Cooldown",
-        "Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura",
-        false);
-    public static final MinMaxPropertyLink ATTACK_DELAY_TICKS =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "attack-delay-ticks-min",
-          "Attack Delay Ticks Min",
-          "Minimum tick delay between attacks on pre-1.9 versions",
-          8,
-          1,
-          20,
-          1),
-        BUILDER.ofInt(
-          "attack-delay-ticks-max",
-          "Attack Delay Ticks Max",
-          "Maximum tick delay between attacks on pre-1.9 versions",
-          12,
-          1,
-          20,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("ignore-cooldown")
+        .uiName("Ignore Cooldown")
+        .description("Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura")
+        .defaultValue(false)
+        .build();
+    public static final MinMaxProperty ATTACK_DELAY_TICKS =
+      ImmutableMinMaxProperty.builder()
+        .namespace(NAMESPACE)
+        .key("attack-delay-ticks")
+        .minUiName("Attack Delay Ticks Min")
+        .maxUiName("Attack Delay Ticks Max")
+        .minDescription("Minimum tick delay between attacks on pre-1.9 versions")
+        .maxDescription("Maximum tick delay between attacks on pre-1.9 versions")
+        .minDefaultValue(8)
+        .maxDefaultValue(12)
+        .minValue(1)
+        .maxValue(20)
+        .stepValue(1)
+        .build();
   }
 
   private record AttackEntity(Entity attackEntity, double distance) {}

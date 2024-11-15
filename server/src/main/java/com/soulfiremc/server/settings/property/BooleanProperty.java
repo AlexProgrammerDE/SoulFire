@@ -17,10 +17,16 @@
  */
 package com.soulfiremc.server.settings.property;
 
-public record BooleanProperty(
-  String namespace,
-  String key,
-  String uiName,
-  String description,
-  boolean defaultValue)
-  implements SingleProperty {}
+import org.immutables.value.Value;
+
+@Value.Immutable
+@Value.Style(stagedBuilder = true)
+public non-sealed abstract class BooleanProperty implements Property {
+  public abstract String key();
+
+  public abstract String uiName();
+
+  public abstract String description();
+
+  public abstract boolean defaultValue();
+}

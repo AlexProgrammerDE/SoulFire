@@ -24,8 +24,9 @@ import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -88,30 +89,28 @@ public class AutoRespawn extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoRespawnSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-respawn");
+    private static final String NAMESPACE = "auto-respawn";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Respawn",
-        "Respawn automatically after death",
-        true);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between respawns",
-          1,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between respawns",
-          3,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Respawn")
+        .description("Respawn automatically after death")
+        .defaultValue(true)
+        .build();
+    public static final MinMaxProperty DELAY =
+      ImmutableMinMaxProperty.builder()
+        .namespace(NAMESPACE)
+        .key("delay")
+        .minUiName("Min delay (seconds)")
+        .maxUiName("Max delay (seconds)")
+        .minDescription("Minimum delay between respawns")
+        .maxDescription("Maximum delay between respawns")
+        .minDefaultValue(1)
+        .maxDefaultValue(3)
+        .minValue(0)
+        .maxValue(Integer.MAX_VALUE)
+        .stepValue(1)
+        .build();
   }
 }

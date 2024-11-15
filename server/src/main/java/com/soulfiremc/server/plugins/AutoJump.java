@@ -23,8 +23,9 @@ import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -74,30 +75,28 @@ public class AutoJump extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoJumpSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("auto-jump");
+    private static final String NAMESPACE = "auto-jump";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Auto Jump",
-        "Attempt to jump automatically in random intervals",
-        false);
-    public static final MinMaxPropertyLink DELAY =
-      new MinMaxPropertyLink(
-        BUILDER.ofInt(
-          "min-delay",
-          "Min delay (seconds)",
-          "Minimum delay between jumps",
-          2,
-          0,
-          Integer.MAX_VALUE,
-          1),
-        BUILDER.ofInt(
-          "max-delay",
-          "Max delay (seconds)",
-          "Maximum delay between jumps",
-          5,
-          0,
-          Integer.MAX_VALUE,
-          1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Auto Jump")
+        .description("Attempt to jump automatically in random intervals")
+        .defaultValue(false)
+        .build();
+    public static final MinMaxProperty DELAY =
+      ImmutableMinMaxProperty.builder()
+        .namespace(NAMESPACE)
+        .key("delay")
+        .minUiName("Min delay (seconds)")
+        .maxUiName("Max delay (seconds)")
+        .minDescription("Minimum delay between jumps")
+        .maxDescription("Maximum delay between jumps")
+        .minDefaultValue(2)
+        .maxDefaultValue(5)
+        .minValue(0)
+        .maxValue(Integer.MAX_VALUE)
+        .stepValue(1)
+        .build();
   }
 }

@@ -27,8 +27,9 @@ import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxPropertyLink;
-import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,46 +84,40 @@ public class AntiAFK extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AntiAFKSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("anti-afk");
+    private static final String NAMESPACE = "anti-afk";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Enable Anti AFK",
-        "Enable the Anti AFK feature",
-        false);
-    public static final MinMaxPropertyLink DISTANCE = new MinMaxPropertyLink(
-      BUILDER.ofInt(
-        "min-distance",
-        "Min distance (blocks)",
-        "Minimum distance to walk",
-        10,
-        1,
-        Integer.MAX_VALUE,
-        1),
-      BUILDER.ofInt(
-        "max-distance",
-        "Max distance (blocks)",
-        "Maximum distance to walk",
-        30,
-        1,
-        Integer.MAX_VALUE,
-        1));
-    public static final MinMaxPropertyLink DELAY = new MinMaxPropertyLink(
-      BUILDER.ofInt(
-        "min-delay",
-        "Min delay (seconds)",
-        "Minimum delay between moves",
-        15,
-        0,
-        Integer.MAX_VALUE,
-        1),
-      BUILDER.ofInt(
-        "max-delay",
-        "Max delay (seconds)",
-        "Maximum delay between moves",
-        45,
-        0,
-        Integer.MAX_VALUE,
-        1));
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable Anti AFK")
+        .description("Enable the Anti AFK feature")
+        .defaultValue(false)
+        .build();
+    public static final MinMaxProperty DISTANCE = ImmutableMinMaxProperty.builder()
+      .namespace(NAMESPACE)
+      .key("distance")
+      .minUiName("Min distance (blocks)")
+      .maxUiName("Max distance (blocks)")
+      .minDescription("Minimum distance to walk")
+      .maxDescription("Maximum distance to walk")
+      .minDefaultValue(10)
+      .maxDefaultValue(30)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
+    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+      .namespace(NAMESPACE)
+      .key("delay")
+      .minUiName("Min delay (seconds)")
+      .maxUiName("Max delay (seconds)")
+      .minDescription("Minimum delay between moves")
+      .maxDescription("Maximum delay between moves")
+      .minDefaultValue(15)
+      .maxDefaultValue(30)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
   }
 }

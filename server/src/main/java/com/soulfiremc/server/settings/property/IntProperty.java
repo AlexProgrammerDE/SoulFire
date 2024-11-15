@@ -17,16 +17,26 @@
  */
 package com.soulfiremc.server.settings.property;
 
-import javax.annotation.Nullable;
+import org.immutables.value.Value;
 
-public record IntProperty(
-  String namespace,
-  String key,
-  String uiName,
-  String description,
-  int defaultValue,
-  int minValue,
-  int maxValue,
-  int stepValue,
-  @Nullable String format)
-  implements SingleProperty {}
+import java.util.Optional;
+
+@Value.Immutable
+@Value.Style(stagedBuilder = true)
+public non-sealed abstract class IntProperty implements Property {
+  public abstract String key();
+
+  public abstract String uiName();
+
+  public abstract String description();
+
+  public abstract int defaultValue();
+
+  public abstract int minValue();
+
+  public abstract int maxValue();
+
+  public abstract int stepValue();
+
+  public abstract Optional<String> format();
+}

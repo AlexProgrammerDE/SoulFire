@@ -104,111 +104,140 @@ public class ClientSettings extends InternalPlugin {
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ClientSettingsSettings implements SettingsObject {
-    private static final Property.Builder BUILDER = Property.builder("client-settings");
+    private static final String NAMESPACE = "client-settings";
     public static final BooleanProperty ENABLED =
-      BUILDER.ofBoolean(
-        "enabled",
-        "Send client settings",
-        "Send client settings to the server when joining",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Send client settings")
+        .description("Send client settings to the server when joining")
+        .defaultValue(true)
+        .build();
     public static final StringProperty CLIENT_LOCALE =
-      BUILDER.ofString(
-        "client-locale",
-        "Client locale",
-        "The locale the client uses for translations",
-        "en_gb");
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("client-locale")
+        .uiName("Client locale")
+        .description("The locale the client uses for translations")
+        .defaultValue("en_gb")
+        .build();
     public static final IntProperty RENDER_DISTANCE =
-      BUILDER.ofInt(
-        "render-distance",
-        "Render distance",
-        "How far the client renders chunks. (Use this to load more or less chunks from the server)",
-        8,
-        2,
-        32,
-        1);
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("render-distance")
+        .uiName("Render distance")
+        .description("How far the client renders chunks. (Use this to load more or less chunks from the server)")
+        .defaultValue(8)
+        .minValue(2)
+        .maxValue(32)
+        .stepValue(1)
+        .build();
     public static final ComboProperty CHAT_VISIBILITY =
-      BUILDER.ofEnumMapped(
-        "chat-visibility",
-        "Chat visibility",
-        "What type of chat messages the client will receive",
-        ChatVisibility.values(),
-        ChatVisibility.FULL,
-        ComboProperty::capitalizeEnum);
+      ImmutableComboProperty.builder()
+        .namespace(NAMESPACE)
+        .key("chat-visibility")
+        .uiName("Chat visibility")
+        .description("What type of chat messages the client will receive")
+        .defaultValue(ChatVisibility.FULL.name())
+        .addOptions(ComboProperty.optionsFromEnum(ChatVisibility.values(), ComboProperty::capitalizeEnum))
+        .build();
     public static final BooleanProperty USE_CHAT_COLORS =
-      BUILDER.ofBoolean(
-        "use-chat-colors",
-        "Use chat colors",
-        "Whether the client will use chat colors",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("use-chat-colors")
+        .uiName("Use chat colors")
+        .description("Whether the client will use chat colors")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty CAPE_ENABLED =
-      BUILDER.ofBoolean(
-        "cape-enabled",
-        "Cape enabled",
-        "Whether to display the bots cape if it has one",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("cape-enabled")
+        .uiName("Cape enabled")
+        .description("Whether to display the bots cape if it has one")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty JACKET_ENABLED =
-      BUILDER.ofBoolean(
-        "jacket-enabled",
-        "Jacket enabled",
-        "Whether to render the jacket overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("jacket-enabled")
+        .uiName("Jacket enabled")
+        .description("Whether to render the jacket overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty LEFT_SLEEVE_ENABLED =
-      BUILDER.ofBoolean(
-        "left-sleeve-enabled",
-        "Left sleeve enabled",
-        "Whether to render the left overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("left-sleeve-enabled")
+        .uiName("Left sleeve enabled")
+        .description("Whether to render the left overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty RIGHT_SLEEVE_ENABLED =
-      BUILDER.ofBoolean(
-        "right-sleeve-enabled",
-        "Right sleeve enabled",
-        "Whether to render the right overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("right-sleeve-enabled")
+        .uiName("Right sleeve enabled")
+        .description("Whether to render the right overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty LEFT_PANTS_LEG_ENABLED =
-      BUILDER.ofBoolean(
-        "left-pants-leg-enabled",
-        "Left pants leg enabled",
-        "Whether to render the left pants leg overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("left-pants-leg-enabled")
+        .uiName("Left pants leg enabled")
+        .description("Whether to render the left pants leg overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty RIGHT_PANTS_LEG_ENABLED =
-      BUILDER.ofBoolean(
-        "right-pants-leg-enabled",
-        "Right pants leg enabled",
-        "Whether to render the right pants leg overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("right-pants-leg-enabled")
+        .uiName("Right pants leg enabled")
+        .description("Whether to render the right pants leg overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty HAT_ENABLED =
-      BUILDER.ofBoolean(
-        "hat-enabled",
-        "Hat enabled",
-        "Whether to render the hat overlay skin layer",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("hat-enabled")
+        .uiName("Hat enabled")
+        .description("Whether to render the hat overlay skin layer")
+        .defaultValue(true)
+        .build();
     public static final ComboProperty HAND_PREFERENCE =
-      BUILDER.ofEnumMapped(
-        "hand-preference",
-        "Hand preference",
-        "What hand the client prefers to use for items",
-        HandPreference.values(),
-        HandPreference.RIGHT_HAND,
-        ComboProperty::capitalizeEnum);
+      ImmutableComboProperty.builder()
+        .namespace(NAMESPACE)
+        .key("hand-preference")
+        .uiName("Hand preference")
+        .description("What hand the client prefers to use for items")
+        .defaultValue(HandPreference.RIGHT_HAND.name())
+        .addOptions(ComboProperty.optionsFromEnum(HandPreference.values(), ComboProperty::capitalizeEnum))
+        .build();
     public static final BooleanProperty TEXT_FILTERING_ENABLED =
-      BUILDER.ofBoolean(
-        "text-filtering-enabled",
-        "Text filtering enabled",
-        "Whether to filter chat messages from the server",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("text-filtering-enabled")
+        .uiName("Text filtering enabled")
+        .description("Whether to filter chat messages from the server")
+        .defaultValue(true)
+        .build();
     public static final BooleanProperty ALLOWS_LISTING =
-      BUILDER.ofBoolean(
-        "allows-listing",
-        "Allows listing",
-        "Whether the client wants their username to be shown in the server list",
-        true);
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("allows-listing")
+        .uiName("Allows listing")
+        .description("Whether the client wants their username to be shown in the server list")
+        .defaultValue(true)
+        .build();
     public static final ComboProperty PARTICLE_STATUS =
-      BUILDER.ofEnumMapped(
-        "particle-status",
-        "Particle Status",
-        "How many particles the client will render",
-        ParticleStatus.values(),
-        ParticleStatus.ALL,
-        ComboProperty::capitalizeEnum);
+      ImmutableComboProperty.builder()
+        .namespace(NAMESPACE)
+        .key("particle-status")
+        .uiName("Particle Status")
+        .description("How many particles the client will render")
+        .defaultValue(ParticleStatus.ALL.name())
+        .addOptions(ComboProperty.optionsFromEnum(ParticleStatus.values(), ComboProperty::capitalizeEnum))
+        .build();
   }
 }

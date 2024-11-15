@@ -53,7 +53,7 @@ public interface SettingsSource {
   }
 
   default <T> T get(ComboProperty property, Function<String, T> converter) {
-    return converter.apply(getAsType(property.propertyKey(), property.options()[property.defaultValue()].id(), String.class));
+    return converter.apply(getAsType(property.propertyKey(), property.defaultValue(), String.class));
   }
 
   default <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
@@ -64,8 +64,15 @@ public interface SettingsSource {
     return List.of(getAsType(property.propertyKey(), property.defaultValue().toArray(new String[0]), String[].class));
   }
 
-  default CustomIntSupplier getRandom(MinMaxPropertyLink property) {
-    return () -> SFHelpers.getRandomInt(get(property.min()), get(property.max()));
+  default MinMaxProperty.DataLayout get(MinMaxProperty property) {
+    return getAsType(property.propertyKey(), property.defaultDataLayout(), MinMaxProperty.DataLayout.class);
+  }
+
+  default CustomIntSupplier getRandom(MinMaxProperty property) {
+    return () -> {
+      var layout = get(property);
+      return SFHelpers.getRandomInt(layout.min(), layout.max());
+    };
   }
 
   default <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
