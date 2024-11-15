@@ -30,11 +30,11 @@ public class ViaBedrockConfigMixin {
 
   @Overwrite
   public ViaBedrockConfig.BlobCacheMode getBlobCacheMode() {
-    return Boolean.getBoolean("sf.unit.test") ? ViaBedrockConfig.BlobCacheMode.MEMORY : net.raphimc.viabedrock.platform.ViaBedrockConfig.BlobCacheMode.DISK;
+    return ViaBedrockConfig.BlobCacheMode.MEMORY;
   }
 
   @Overwrite
   public ViaBedrockConfig.PackCacheMode getPackCacheMode() {
-    return Boolean.getBoolean("sf.unit.test") ? ViaBedrockConfig.PackCacheMode.MEMORY : ViaBedrockConfig.PackCacheMode.DISK;
+    return ViaBedrockConfig.PackCacheMode.MEMORY;
   }
 }
