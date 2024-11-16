@@ -39,4 +39,9 @@ public non-sealed abstract class DoubleProperty implements Property {
   public abstract double stepValue();
 
   public abstract Optional<String> format();
+
+  @Value.Default
+  public String placeholder() {
+    return "";
+  }
 }

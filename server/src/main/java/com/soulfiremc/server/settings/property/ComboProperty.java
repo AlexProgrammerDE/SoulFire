@@ -27,12 +27,6 @@ import java.util.function.Function;
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class ComboProperty implements Property {
-  public static <T extends Enum<T>> String[] capitalizeEnum(T[] enumValue) {
-    return Arrays.stream(enumValue)
-      .map(ComboProperty::capitalizeEnum)
-      .toArray(String[]::new);
-  }
-
   public static <T extends Enum<T>> ComboOption[] optionsFromEnum(
     T[] values, Function<T, String> mapper) {
     var options = new ComboOption[values.length];

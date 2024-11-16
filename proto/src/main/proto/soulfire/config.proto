@@ -16,6 +16,7 @@ message StringSetting {
   string def = 3;
   bool secret = 4;
   bool textarea = 5;
+  string placeholder = 6;
 }
 
 message IntSetting {
@@ -26,6 +27,7 @@ message IntSetting {
   int32 max = 5;
   int32 step = 6;
   optional string format = 7;
+  string placeholder = 8;
 }
 
 message DoubleSetting {
@@ -36,6 +38,7 @@ message DoubleSetting {
   double max = 5;
   double step = 6;
   optional string format = 7;
+  string placeholder = 8;
 }
 
 message BoolSetting {
@@ -76,6 +79,8 @@ message MinMaxSetting {
   int32 max = 8;
   int32 step = 9;
   optional string format = 10;
+  string minPlaceholder = 11;
+  string maxPlaceholder = 12;
 }
 
 // A single setting type with optional default value

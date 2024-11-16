@@ -39,4 +39,9 @@ public non-sealed abstract class IntProperty implements Property {
   public abstract int stepValue();
 
   public abstract Optional<String> format();
+
+  @Value.Default
+  public String placeholder() {
+    return "";
+  }
 }

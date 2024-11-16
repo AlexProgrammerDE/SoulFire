@@ -39,4 +39,9 @@ public non-sealed abstract class StringProperty implements Property {
   public boolean textarea() {
     return false;
   }
+
+  @Value.Default
+  public String placeholder() {
+    return "";
+  }
 }

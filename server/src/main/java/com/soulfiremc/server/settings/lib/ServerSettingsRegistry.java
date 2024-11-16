@@ -45,7 +45,8 @@ public class ServerSettingsRegistry {
         .setDef(property.defaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
-        .setStep(property.stepValue());
+        .setStep(property.stepValue())
+        .setPlaceholder(property.placeholder());
 
     property.format().ifPresent(builder::setFormat);
 
@@ -60,7 +61,8 @@ public class ServerSettingsRegistry {
         .setDef(property.defaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
-        .setStep(property.stepValue());
+        .setStep(property.stepValue())
+        .setPlaceholder(property.placeholder());
 
     property.format().ifPresent(builder::setFormat);
 
@@ -78,7 +80,9 @@ public class ServerSettingsRegistry {
         .setMaxDef(property.maxDefaultValue())
         .setMin(property.minValue())
         .setMax(property.maxValue())
-        .setStep(property.stepValue());
+        .setStep(property.stepValue())
+        .setMinPlaceholder(property.minPlaceholder())
+        .setMaxPlaceholder(property.maxPlaceholder());
 
     property.format().ifPresent(builder::setFormat);
 
@@ -190,6 +194,7 @@ public class ServerSettingsRegistry {
                     .setDef(stringProperty.defaultValue())
                     .setSecret(stringProperty.secret())
                     .setTextarea(stringProperty.textarea())
+                    .setPlaceholder(stringProperty.placeholder())
                     .build())
                 .build())
             .build();

@@ -48,6 +48,16 @@ public non-sealed abstract class MinMaxProperty implements Property {
 
   public abstract Optional<String> format();
 
+  @Value.Default
+  public String minPlaceholder() {
+    return "";
+  }
+
+  @Value.Default
+  public String maxPlaceholder() {
+    return "";
+  }
+
   public DataLayout defaultDataLayout() {
     return new DataLayout(minDefaultValue(), maxDefaultValue());
   }
