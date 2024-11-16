@@ -106,6 +106,17 @@ Feel free to join our Discord community server:
 This project is in active development, so if you have any feature requests or issues, please submit them here on GitHub.
 PRs are welcome, too.
 
+## Sponsors
+
+<table>
+ <tbody>
+  <tr>
+   <td align="center"><img alt="[SignPath]" src="https://avatars.githubusercontent.com/u/34448643" height="30"/></td>
+   <td>Free code signing on Windows provided by <a href="https://signpath.io/?utm_source=foundation&utm_medium=github&utm_campaign=soulfire">SignPath.io</a>, certificate by <a href="https://signpath.org/?utm_source=foundation&utm_medium=github&utm_campaign=soulfire">SignPath Foundation</a></td>
+  </tr>
+ </tbody>
+</table>
+
 ## 🌟 Star History
 
 <a href="https://star-history.com/#AlexProgrammerDE/SoulFire&Date">
