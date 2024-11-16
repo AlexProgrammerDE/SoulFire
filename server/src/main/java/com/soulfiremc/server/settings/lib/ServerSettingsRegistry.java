@@ -189,6 +189,7 @@ public class ServerSettingsRegistry {
                     .setDescription(stringProperty.description())
                     .setDef(stringProperty.defaultValue())
                     .setSecret(stringProperty.secret())
+                    .setTextarea(stringProperty.textarea())
                     .build())
                 .build())
             .build();

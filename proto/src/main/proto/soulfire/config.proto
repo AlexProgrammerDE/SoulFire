@@ -15,6 +15,7 @@ message StringSetting {
   string description = 2;
   string def = 3;
   bool secret = 4;
+  bool textarea = 5;
 }
 
 message IntSetting {
