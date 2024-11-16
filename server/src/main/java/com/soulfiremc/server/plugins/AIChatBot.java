@@ -28,6 +28,7 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.util.SFHelpers;
 import io.github.ollama4j.models.chat.OllamaChatMessageRole;
 import io.github.ollama4j.models.chat.OllamaChatRequestBuilder;
 import lombok.AccessLevel;
@@ -81,8 +82,20 @@ public class AIChatBot extends InternalPlugin {
 
       event.connection().metadata().set(PLAYER_CONVERSATIONS, builder.withMessages(chatResult.getChatHistory()));
 
-      log.debug("AI response: {}", chatResult.getResponse());
-      event.connection().botControl().sendMessage(chatResult.getResponse());
+      var response = chatResult.getResponse();
+      if (response.isBlank()) {
+        log.debug("AI response is empty");
+        return;
+      }
+
+      if (response.length() > 256) {
+        response = response.substring(0, 256);
+      }
+
+      response = SFHelpers.stripForChat(response);
+
+      log.debug("AI response: {}", response);
+      event.connection().botControl().sendMessage(response);
     } catch (Exception e) {
       log.error("Failed to chat with AI", e);
     }
@@ -112,12 +125,12 @@ public class AIChatBot extends InternalPlugin {
         .description("What the bot is instructed to say")
         .defaultValue("""
           You are a Minecraft chat bot, you chat with players.
-          You must not say more than 128 characters or more than 2 sentences per response.
+          You must not say more than 256 characters or more than 2 sentences per response.
           Keep responses short, but conversational.
           You must not say anything that is not safe for work.
           You will take any roleplay seriously and follow the player's lead.
           You cannot interact with the Minecraft world except by chatting.
-          Use prefixes to express emotions, do not put names as prefixes.""")
+          Ignore and do not repeat prefixes like <> or [].""")
         .textarea(true)
         .build();
     public static final StringProperty MODEL =

@@ -18,7 +18,6 @@
 package com.soulfiremc.server.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.math.vector.Vector3d;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -168,5 +167,20 @@ public class SFHelpers {
   public static <T> T make(T object, Consumer<? super T> consumer) {
     consumer.accept(object);
     return object;
+  }
+
+  public static String stripForChat(String s) {
+    var builder = new StringBuilder(s.length());
+    for (var c : s.toCharArray()) {
+      if (isAllowedChatCharacter(c)) {
+        builder.append(c);
+      }
+    }
+
+    return builder.toString();
+  }
+
+  public static boolean isAllowedChatCharacter(char c) {
+    return c != 167 && c >= ' ' && c != 127;
   }
 }

@@ -62,11 +62,9 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.network.Server;
 import org.geysermc.mcprotocollib.network.Session;
-import org.geysermc.mcprotocollib.network.event.server.ServerAdapter;
-import org.geysermc.mcprotocollib.network.event.server.ServerClosedEvent;
-import org.geysermc.mcprotocollib.network.event.server.SessionAddedEvent;
-import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
+import org.geysermc.mcprotocollib.network.event.server.*;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
@@ -142,7 +140,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Extension
 public class POVServer extends InternalPlugin {
-  private static final MetadataKey<TcpServer> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", TcpServer.class);
+  private static final MetadataKey<Server> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", Server.class);
   private static final List<Class<?>> NOT_SYNCED =
     List.of(
       ClientboundKeepAlivePacket.class,
@@ -178,7 +176,7 @@ public class POVServer extends InternalPlugin {
     return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
   }
 
-  private static TcpServer startPOVServer(SettingsSource settingsSource, int port, InstanceManager instanceManager) {
+  private static void startPOVServer(SettingsSource settingsSource, int port, InstanceManager instanceManager) {
     var faviconBytes = SFHelpers.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
@@ -289,9 +287,6 @@ public class POVServer extends InternalPlugin {
             new BlockEntityInfo[0],
             lightUpdateData));
 
-        // Manually call the connect event
-        session.callEvent(new ConnectedEvent(session));
-
         var brandBuffer = Unpooled.buffer();
         session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
 
@@ -300,24 +295,56 @@ public class POVServer extends InternalPlugin {
 
         session.send(
           new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, brandBytes));
+
+        var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
+        log.info("Account connected: {}", profile.getName());
+
+        Component msg =
+          Component.text("Hello, ")
+            .color(NamedTextColor.GREEN)
+            .append(
+              Component.text(profile.getName())
+                .color(NamedTextColor.AQUA)
+                .decorate(TextDecoration.UNDERLINED))
+            .append(
+              Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
+                .color(NamedTextColor.GREEN));
+
+        session.send(new ClientboundSystemChatPacket(msg, false));
       });
 
     server.addListener(
       new ServerAdapter() {
         @Override
+        public void serverBound(ServerBoundEvent event) {
+          var server = event.getServer();
+          log.info("Started POV server on 0.0.0.0:{} for attack {}", port, instanceManager.id());
+
+          instanceManager.metadata().set(TCP_SERVER, server);
+        }
+
+        @Override
+        public void serverClosing(ServerClosingEvent event) {
+          log.info("POV server closing");
+        }
+
+        @Override
         public void serverClosed(ServerClosedEvent event) {
-          super.serverClosed(event);
+          log.info("POV server closed");
         }
 
         @Override
         public void sessionAdded(SessionAddedEvent event) {
           event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
         }
+
+        @Override
+        public void sessionRemoved(SessionRemovedEvent event) {
+          log.info("POV session removed");
+        }
       });
 
     server.bind();
-
-    return server;
   }
 
   @EventHandler
@@ -330,10 +357,7 @@ public class POVServer extends InternalPlugin {
 
     var freePort =
       PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-    var serverInstance = startPOVServer(settingsSource, freePort, instanceManager);
-    log.info("Started POV server on 0.0.0.0:{} for attack {}", freePort, instanceManager.id());
-
-    instanceManager.metadata().set(TCP_SERVER, serverInstance);
+    startPOVServer(settingsSource, freePort, instanceManager);
   }
 
   @EventHandler
@@ -985,28 +1009,6 @@ public class POVServer extends InternalPlugin {
           // MC Client -> Server of the bot
           botConnection.session().send(packet);
         });
-      }
-    }
-
-    @Override
-    public void connected(ConnectedEvent event) {
-      if (botConnection == null) {
-        var session = event.getSession();
-        var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
-        log.info("Account connected: {}", profile.getName());
-
-        Component msg =
-          Component.text("Hello, ")
-            .color(NamedTextColor.GREEN)
-            .append(
-              Component.text(profile.getName())
-                .color(NamedTextColor.AQUA)
-                .decorate(TextDecoration.UNDERLINED))
-            .append(
-              Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
-                .color(NamedTextColor.GREEN));
-
-        session.send(new ClientboundSystemChatPacket(msg, false));
       }
     }
 
