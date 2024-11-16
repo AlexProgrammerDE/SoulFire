@@ -106,7 +106,7 @@ Feel free to join our Discord community server:
 This project is in active development, so if you have any feature requests or issues, please submit them here on GitHub.
 PRs are welcome, too.
 
-## 🎖 Sponsors
+## 🏅 Sponsors
 
 <table>
  <tbody>
