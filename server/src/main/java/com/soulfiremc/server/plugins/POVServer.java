@@ -49,6 +49,7 @@ import com.soulfiremc.server.util.TimeUtil;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -310,678 +311,7 @@ public class POVServer extends InternalPlugin {
 
         @Override
         public void sessionAdded(SessionAddedEvent event) {
-          var session = event.getSession();
-
-          session.addListener(
-            new SessionAdapter() {
-              private BotConnection botConnection;
-              private boolean enableForwarding;
-              private double lastX;
-              private double lastY;
-              private double lastZ;
-
-              @Override
-              public void packetSent(Session session, Packet packet) {
-                log.debug("POV -> C: {}", packet.getClass().getSimpleName());
-              }
-
-              @Override
-              public void packetReceived(Session session, Packet packet) {
-                log.debug("C -> POV: {}", packet.getClass().getSimpleName());
-                if (botConnection == null) {
-                  if (packet instanceof ServerboundChatPacket chatPacket) {
-                    var profile =
-                      event.getSession().getFlag(MinecraftConstants.PROFILE_KEY);
-
-                    var selectedName = chatPacket.getMessage();
-                    log.info("{}: {}", profile.getName(), selectedName);
-
-                    var first =
-                      instanceManager.botConnections().values().stream()
-                        .filter(c -> c.accountName().equals(selectedName))
-                        .findFirst();
-                    if (first.isEmpty()) {
-                      session.send(
-                        new ClientboundSystemChatPacket(
-                          Component.text("Bot not found!").color(NamedTextColor.RED),
-                          false));
-                      return;
-                    }
-
-                    botConnection = first.get();
-                    var povSession = session;
-                    botConnection
-                      .session()
-                      .addListener(
-                        new SessionAdapter() {
-                          @Override
-                          public void packetReceived(Session session, Packet packet) {
-                            if (!enableForwarding
-                              || NOT_SYNCED.contains(packet.getClass())) {
-                              return;
-                            }
-
-                            if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-                              // To avoid signature issues since the signature is for the bot, not the connected user
-                              povSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
-                                botConnection.dataManager().getComponentForPlayerChat(chatPacket),
-                                chatPacket.getName(),
-                                chatPacket.getTargetName()
-                              )), false));
-                              return;
-                            }
-
-                            // MC Server of the bot -> MC Client
-                            povSession.send(packet);
-                          }
-
-                          @Override
-                          public void packetSent(Session session, Packet packet) {
-                            if (!enableForwarding
-                              || NOT_SYNCED.contains(packet.getClass())) {
-                              return;
-                            }
-
-                            var clientEntity =
-                              botConnection.dataManager().clientEntity();
-                            // Bot -> MC Client
-                            switch (packet) {
-                              case ServerboundMovePlayerPosRotPacket posRot -> {
-                                povSession.send(
-                                  new ClientboundMoveEntityPosRotPacket(
-                                    clientEntity.entityId(),
-                                    (posRot.getX() * 32 - lastX * 32) * 128,
-                                    (posRot.getY() * 32 - lastY * 32) * 128,
-                                    (posRot.getZ() * 32 - lastZ * 32) * 128,
-                                    posRot.getYaw(),
-                                    posRot.getPitch(),
-                                    clientEntity.onGround()));
-                                lastX = posRot.getX();
-                                lastY = posRot.getY();
-                                lastZ = posRot.getZ();
-                              }
-                              case ServerboundMovePlayerPosPacket pos -> {
-                                povSession.send(
-                                  new ClientboundMoveEntityPosPacket(
-                                    clientEntity.entityId(),
-                                    (pos.getX() * 32 - lastX * 32) * 128,
-                                    (pos.getY() * 32 - lastY * 32) * 128,
-                                    (pos.getZ() * 32 - lastZ * 32) * 128,
-                                    clientEntity.onGround()));
-                                lastX = pos.getX();
-                                lastY = pos.getY();
-                                lastZ = pos.getZ();
-                              }
-                              case ServerboundMovePlayerRotPacket rot -> povSession.send(
-                                new ClientboundMoveEntityRotPacket(
-                                  clientEntity.entityId(),
-                                  rot.getYaw(),
-                                  rot.getPitch(),
-                                  clientEntity.onGround()));
-                              default -> {
-                              }
-                            }
-                          }
-                        });
-                    Thread.ofPlatform()
-                      .name("SyncTask")
-                      .start(
-                        () -> {
-                          syncBotAndUser();
-                          session.send(
-                            new ClientboundSystemChatPacket(
-                              Component.text("Connected to bot ")
-                                .color(NamedTextColor.GREEN)
-                                .append(
-                                  Component.text(
-                                      botConnection.accountName())
-                                    .color(NamedTextColor.AQUA)
-                                    .decorate(TextDecoration.UNDERLINED))
-                                .append(Component.text("!"))
-                                .color(NamedTextColor.GREEN),
-                              false));
-                        });
-                  }
-                } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
-                  // For data consistence, ensure all packets sent from client -> server are
-                  // handled on the bots tick event loop
-                  botConnection.preTickHooks().add(() -> {
-                    var clientEntity = botConnection.dataManager().clientEntity();
-                    switch (packet) {
-                      case ServerboundMovePlayerPosRotPacket posRot -> {
-                        lastX = posRot.getX();
-                        lastY = posRot.getY();
-                        lastZ = posRot.getZ();
-
-                        clientEntity.x(posRot.getX());
-                        clientEntity.y(posRot.getY());
-                        clientEntity.z(posRot.getZ());
-                        clientEntity.yRot(posRot.getYaw());
-                        clientEntity.xRot(posRot.getPitch());
-                      }
-                      case ServerboundMovePlayerPosPacket pos -> {
-                        lastX = pos.getX();
-                        lastY = pos.getY();
-                        lastZ = pos.getZ();
-
-                        clientEntity.x(pos.getX());
-                        clientEntity.y(pos.getY());
-                        clientEntity.z(pos.getZ());
-                      }
-                      case ServerboundMovePlayerRotPacket rot -> {
-                        clientEntity.yRot(rot.getYaw());
-                        clientEntity.xRot(rot.getPitch());
-                      }
-                      case ServerboundAcceptTeleportationPacket teleportationPacket -> {
-                        // This was a forced teleport, the server should not know about it
-                        if (teleportationPacket.getId() == Integer.MIN_VALUE) {
-                          return;
-                        }
-                      }
-                      case ServerboundChatPacket chatPacket -> {
-                        if (settingsSource.get(POVServerSettings.ENABLE_COMMANDS)) {
-                          var message = chatPacket.getMessage();
-                          var prefix = settingsSource.get(POVServerSettings.COMMAND_PREFIX);
-                          if (message.startsWith(prefix)) {
-                            var command = message.substring(prefix.length());
-                            var source = new PovServerUser(session, session.getFlag(MinecraftConstants.PROFILE_KEY).getName());
-                            var code = instanceManager
-                              .soulFireServer()
-                              .injector()
-                              .getSingleton(ServerCommandManager.class)
-                              .execute(command, source);
-
-                            log.info("Command \"{}\" executed! (Code: {})", command, code);
-                            return;
-                          }
-                        }
-                      }
-                      default -> {
-                      }
-                    }
-
-                    // The client spams too many packets when being force-moved,
-                    // so we'll just ignore them
-                    if (botConnection.controlState().isActivelyControlling()) {
-                      return;
-                    }
-
-                    // MC Client -> Server of the bot
-                    botConnection.session().send(packet);
-                  });
-                }
-              }
-
-              @Override
-              public void connected(ConnectedEvent event) {
-                if (botConnection == null) {
-                  var session = event.getSession();
-                  var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
-                  log.info("Account connected: {}", profile.getName());
-
-                  Component msg =
-                    Component.text("Hello, ")
-                      .color(NamedTextColor.GREEN)
-                      .append(
-                        Component.text(profile.getName())
-                          .color(NamedTextColor.AQUA)
-                          .decorate(TextDecoration.UNDERLINED))
-                      .append(
-                        Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
-                          .color(NamedTextColor.GREEN));
-
-                  session.send(new ClientboundSystemChatPacket(msg, false));
-                }
-              }
-
-              @Override
-              public void packetError(PacketErrorEvent event) {
-                log.error("Packet error", event.getCause());
-              }
-
-              @Override
-              public void disconnected(DisconnectedEvent event) {
-                log.info("Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
-              }
-
-              private <T> T awaitReceived(Class<T> clazz) {
-                var future = new CompletableFuture<T>();
-
-                session.addListener(
-                  new SessionAdapter() {
-                    @Override
-                    public void packetReceived(Session session, Packet packet) {
-                      if (clazz.isInstance(packet)) {
-                        future.complete(clazz.cast(packet));
-                      }
-                    }
-                  });
-
-                return future.orTimeout(30, TimeUnit.SECONDS).join();
-              }
-
-              private void syncBotAndUser() {
-                Objects.requireNonNull(botConnection);
-                var dataManager = botConnection.dataManager();
-
-                session.send(new ClientboundStartConfigurationPacket());
-                session.switchOutboundState(() -> ((MinecraftProtocol) session.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
-                awaitReceived(ServerboundConfigurationAcknowledgedPacket.class);
-
-                if (dataManager.serverEnabledFeatures() != null) {
-                  session.send(
-                    new ClientboundUpdateEnabledFeaturesPacket(
-                      dataManager.serverEnabledFeatures()));
-                }
-
-                if (dataManager.serverKnownPacks() != null) {
-                  session.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
-                }
-
-                var clientPacks = awaitReceived(ServerboundSelectKnownPacks.class);
-                for (var entry : dataManager.resolvedRegistryData().entrySet()) {
-                  var registryKey = entry.getKey();
-
-                  var sentEntries = new ArrayList<RegistryEntry>();
-                  for (var value : entry.getValue()) {
-                    var holderKey = value.getId();
-                    var serverHolderData = value.getData();
-                    var packData = BuiltInKnownPackRegistry.INSTANCE.findDataOptionally(registryKey, holderKey, clientPacks.getKnownPacks());
-
-                    RegistryEntry entryToSend;
-                    if (packData.isPresent() && packData.get().equals(serverHolderData)) {
-                      entryToSend = new RegistryEntry(holderKey, null);
-                    } else {
-                      entryToSend = new RegistryEntry(holderKey, serverHolderData);
-                    }
-
-                    sentEntries.add(entryToSend);
-                  }
-
-                  session.send(new ClientboundRegistryDataPacket(registryKey.key(), sentEntries));
-                }
-
-                var tagsPacket = new ClientboundUpdateTagsPacket();
-                tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
-                session.send(tagsPacket);
-
-                session.send(new ClientboundFinishConfigurationPacket());
-                awaitReceived(ServerboundFinishConfigurationPacket.class);
-
-                var spawnInfo =
-                  new PlayerSpawnInfo(
-                    dataManager.currentLevel().dimensionType().id(),
-                    dataManager.currentLevel().worldKey(),
-                    dataManager.currentLevel().hashedSeed(),
-                    dataManager.gameMode(),
-                    dataManager.previousGameMode(),
-                    dataManager.currentLevel().debug(),
-                    dataManager.currentLevel().flat(),
-                    dataManager.lastDeathPos(),
-                    dataManager.portalCooldown(),
-                    dataManager.currentLevel().seaLevel());
-                session.send(
-                  new ClientboundLoginPacket(
-                    dataManager.clientEntity().entityId(),
-                    dataManager.loginData().hardcore(),
-                    dataManager.loginData().worldNames(),
-                    dataManager.loginData().maxPlayers(),
-                    dataManager.serverViewDistance(),
-                    dataManager.serverSimulationDistance(),
-                    dataManager.clientEntity().showReducedDebug(),
-                    dataManager.enableRespawnScreen(),
-                    dataManager.doLimitedCrafting(),
-                    spawnInfo,
-                    dataManager.loginData().enforcesSecureChat()));
-                session.send(new ClientboundRespawnPacket(spawnInfo, false, false));
-
-                var difficultyData = dataManager.difficultyData();
-                if (difficultyData != null) {
-                  session.send(
-                    new ClientboundChangeDifficultyPacket(
-                      difficultyData.difficulty(),
-                      difficultyData.locked()));
-                }
-
-                var abilitiesData = dataManager.clientEntity().abilitiesData();
-                session.send(
-                  new ClientboundPlayerAbilitiesPacket(
-                    abilitiesData.invulnerable(),
-                    abilitiesData.flying(),
-                    abilitiesData.mayfly(),
-                    abilitiesData.instabuild(),
-                    abilitiesData.flySpeed(),
-                    abilitiesData.walkSpeed()));
-
-                session.send(
-                  new ClientboundGameEventPacket(
-                    GameEvent.CHANGE_GAMEMODE, dataManager.gameMode()));
-
-                var borderState = dataManager.borderState();
-                if (borderState != null) {
-                  session.send(
-                    new ClientboundInitializeBorderPacket(
-                      borderState.centerX(),
-                      borderState.centerZ(),
-                      borderState.oldSize(),
-                      borderState.newSize(),
-                      borderState.lerpTime(),
-                      borderState.newAbsoluteMaxSize(),
-                      borderState.warningBlocks(),
-                      borderState.warningTime()));
-                }
-
-                var defaultSpawnData = dataManager.defaultSpawnData();
-                if (defaultSpawnData != null) {
-                  session.send(
-                    new ClientboundSetDefaultSpawnPositionPacket(
-                      defaultSpawnData.position(),
-                      defaultSpawnData.angle()));
-                }
-
-                if (dataManager.weatherState() != null) {
-                  session.send(
-                    new ClientboundGameEventPacket(
-                      dataManager.weatherState().raining()
-                        ? GameEvent.START_RAIN
-                        : GameEvent.STOP_RAIN,
-                      null));
-                  session.send(
-                    new ClientboundGameEventPacket(
-                      GameEvent.RAIN_STRENGTH,
-                      new RainStrengthValue(
-                        dataManager.weatherState().rainStrength())));
-                  session.send(
-                    new ClientboundGameEventPacket(
-                      GameEvent.THUNDER_STRENGTH,
-                      new ThunderStrengthValue(
-                        dataManager.weatherState().thunderStrength())));
-                }
-
-                var healthData = dataManager.healthData();
-                if (healthData != null) {
-                  session.send(
-                    new ClientboundSetHealthPacket(
-                      healthData.health(),
-                      healthData.food(),
-                      healthData.saturation()));
-                }
-
-                var experienceData = dataManager.experienceData();
-                if (experienceData != null) {
-                  session.send(
-                    new ClientboundSetExperiencePacket(
-                      experienceData.experience(),
-                      experienceData.level(),
-                      experienceData.totalExperience()));
-                }
-
-                // Give initial coordinates to the client
-                session.send(
-                  new ClientboundPlayerPositionPacket(
-                    Integer.MIN_VALUE,
-                    dataManager.clientEntity().pos(),
-                    Vector3d.ZERO,
-                    dataManager.clientEntity().yRot(),
-                    dataManager.clientEntity().xRot(),
-                    List.of()));
-
-                if (dataManager.playerListState().header() != null
-                  && dataManager.playerListState().footer() != null) {
-                  session.send(
-                    new ClientboundTabListPacket(
-                      dataManager.playerListState().header(),
-                      dataManager.playerListState().footer()));
-                }
-
-                var currentId =
-                  session.getFlag(MinecraftConstants.PROFILE_KEY).getId();
-                session.send(
-                  new ClientboundPlayerInfoUpdatePacket(
-                    EnumSet.of(
-                      PlayerListEntryAction.ADD_PLAYER,
-                      PlayerListEntryAction.INITIALIZE_CHAT,
-                      PlayerListEntryAction.UPDATE_GAME_MODE,
-                      PlayerListEntryAction.UPDATE_LISTED,
-                      PlayerListEntryAction.UPDATE_LATENCY,
-                      PlayerListEntryAction.UPDATE_DISPLAY_NAME),
-                    dataManager.playerListState().entries().values().stream()
-                      .map(
-                        entry -> {
-                          if (entry
-                            .getProfileId()
-                            .equals(dataManager.botProfile().getId())) {
-                            GameProfile newGameProfile;
-                            if (entry.getProfile() == null) {
-                              newGameProfile = null;
-                            } else {
-                              newGameProfile =
-                                new GameProfile(
-                                  currentId, entry.getProfile().getName());
-                              newGameProfile.setProperties(
-                                entry.getProfile().getProperties());
-                            }
-
-                            return new PlayerListEntry(
-                              currentId,
-                              newGameProfile,
-                              entry.isListed(),
-                              entry.getLatency(),
-                              entry.getGameMode(),
-                              entry.getDisplayName(),
-                              entry.getListOrder(),
-                              entry.getSessionId(),
-                              entry.getExpiresAt(),
-                              entry.getPublicKey(),
-                              entry.getKeySignature());
-                          } else {
-                            return entry;
-                          }
-                        })
-                      .toList()
-                      .toArray(new PlayerListEntry[0])));
-
-                if (dataManager.centerChunk() != null) {
-                  session.send(
-                    new ClientboundSetChunkCacheCenterPacket(
-                      dataManager.centerChunk().chunkX(),
-                      dataManager.centerChunk().chunkZ()));
-                }
-
-                session.send(
-                  new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
-
-                for (var chunkEntry :
-                  dataManager.currentLevel()
-                    .chunks()
-                    .getChunks()
-                    .long2ObjectEntrySet()) {
-                  var chunkKey = ChunkKey.fromKey(chunkEntry.getLongKey());
-                  var chunk = chunkEntry.getValue();
-                  var buf = Unpooled.buffer();
-
-                  for (var i = 0; i < chunk.getSectionCount(); i++) {
-                    SFProtocolHelper.writeChunkSection(
-                      buf,
-                      chunk.getSection(i),
-                      dataManager.codecHelper());
-                  }
-
-                  var chunkBytes = new byte[buf.readableBytes()];
-                  buf.readBytes(chunkBytes);
-
-                  var lightMask = new BitSet();
-                  lightMask.set(0, chunk.getSectionCount() + 2);
-                  var skyUpdateList = new ArrayList<byte[]>();
-                  for (var i = 0; i < chunk.getSectionCount() + 2; i++) {
-                    skyUpdateList.add(FULL_LIGHT); // sky light
-                  }
-
-                  var lightUpdateData =
-                    new LightUpdateData(
-                      lightMask,
-                      new BitSet(),
-                      new BitSet(),
-                      lightMask,
-                      skyUpdateList,
-                      List.of());
-
-                  session.send(
-                    new ClientboundLevelChunkWithLightPacket(
-                      chunkKey.chunkX(),
-                      chunkKey.chunkZ(),
-                      chunkBytes,
-                      NbtMap.EMPTY,
-                      new BlockEntityInfo[0],
-                      lightUpdateData));
-                }
-
-                if (botConnection.inventoryManager() != null) {
-                  session.send(
-                    new ClientboundSetHeldSlotPacket(
-                      botConnection.inventoryManager().heldItemSlot()));
-                  var stateIndex = 0;
-                  for (var container :
-                    botConnection.inventoryManager().containerData().values()) {
-                    session.send(
-                      new ClientboundContainerSetContentPacket(
-                        container.id(),
-                        stateIndex++,
-                        Arrays.stream(
-                            botConnection
-                              .inventoryManager()
-                              .playerInventory()
-                              .slots())
-                          .map(ContainerSlot::item)
-                          .toList()
-                          .toArray(new ItemStack[0]),
-                        botConnection.inventoryManager().cursorItem()));
-
-                    if (container.properties() != null) {
-                      for (var containerProperty : container.properties().int2IntEntrySet()) {
-                        session.send(
-                          new ClientboundContainerSetDataPacket(
-                            container.id(),
-                            containerProperty.getIntKey(),
-                            containerProperty.getIntValue()));
-                      }
-                    }
-                  }
-                }
-
-                for (var entity : dataManager.entityTrackerState().getEntities()) {
-                  if (entity instanceof ClientEntity clientEntity) {
-                    session.send(
-                      new ClientboundEntityEventPacket(
-                        clientEntity.entityId(),
-                        switch (clientEntity.opPermissionLevel()) {
-                          case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
-                          case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
-                          case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
-                          case 3 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_3;
-                          case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
-                          default -> throw new IllegalStateException(
-                            "Unexpected value: "
-                              + clientEntity.opPermissionLevel());
-                        }));
-                    session.send(
-                      new ClientboundEntityEventPacket(
-                        clientEntity.entityId(),
-                        clientEntity.showReducedDebug()
-                          ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
-                          : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
-                  } else if (entity instanceof RawEntity rawEntity) {
-                    session.send(
-                      new ClientboundAddEntityPacket(
-                        entity.entityId(),
-                        entity.uuid(),
-                        EntityType.from(entity.entityType().id()),
-                        rawEntity.data(),
-                        entity.x(),
-                        entity.y(),
-                        entity.z(),
-                        entity.yRot(),
-                        entity.headYRot(),
-                        entity.xRot(),
-                        entity.motionX(),
-                        entity.motionY(),
-                        entity.motionZ()));
-                  } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
-                    session.send(
-                      new ClientboundAddExperienceOrbPacket(
-                        entity.entityId(),
-                        entity.x(),
-                        entity.y(),
-                        entity.z(),
-                        experienceOrbEntity.expValue()));
-                  }
-
-                  for (var effect : entity.effectState().effects().entrySet()) {
-                    session.send(
-                      new ClientboundUpdateMobEffectPacket(
-                        entity.entityId(),
-                        effect.getKey(),
-                        effect.getValue().amplifier(),
-                        effect.getValue().duration(),
-                        effect.getValue().ambient(),
-                        effect.getValue().showParticles(),
-                        effect.getValue().showIcon(),
-                        effect.getValue().blend()));
-                  }
-
-                  if (!entity.metadataState().metadataStore().isEmpty()) {
-                    session.send(
-                      new ClientboundSetEntityDataPacket(
-                        entity.entityId(),
-                        entity
-                          .metadataState()
-                          .metadataStore()
-                          .values()
-                          .toArray(new EntityMetadata<?, ?>[0])));
-                  }
-
-                  if (!entity.attributeState().attributeStore().isEmpty()) {
-                    session.send(
-                      new ClientboundUpdateAttributesPacket(
-                        entity.entityId(),
-                        entity.attributeState().attributeStore().values().stream()
-                          .map(
-                            attributeState ->
-                              new Attribute(
-                                new AttributeType() {
-                                  @Override
-                                  public Key getIdentifier() {
-                                    return attributeState.type().key();
-                                  }
-
-                                  @Override
-                                  public int getId() {
-                                    return attributeState.type().id();
-                                  }
-                                },
-                                attributeState.baseValue(),
-                                attributeState.modifiers().values().stream()
-                                  .map(
-                                    modifier ->
-                                      new AttributeModifier(
-                                        modifier.id(),
-                                        modifier.amount(),
-                                        switch (modifier.operation()) {
-                                          case ADD_VALUE -> ModifierOperation.ADD;
-                                          case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
-                                          case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
-                                        }))
-                                  .toList()))
-                          .toList()));
-                  }
-                }
-
-                // Give the client a few moments to process the packets
-                TimeUtil.waitTime(2, TimeUnit.SECONDS);
-
-                enableForwarding = true;
-              }
-            });
+          event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
         }
       });
 
@@ -1016,6 +346,679 @@ public class POVServer extends InternalPlugin {
 
     log.info("Stopping POV server for attack {}", instanceManager.id());
     currentInstance.close();
+  }
+
+  private static <T> T awaitReceived(Session session, Class<T> clazz) {
+    var future = new CompletableFuture<T>();
+
+    session.addListener(
+      new SessionAdapter() {
+        @Override
+        public void packetReceived(Session session, Packet packet) {
+          if (clazz.isInstance(packet)) {
+            future.complete(clazz.cast(packet));
+          }
+        }
+      });
+
+    return future.orTimeout(30, TimeUnit.SECONDS).join();
+  }
+
+  private static void syncBotAndUser(BotConnection botConnection, Session clientSession) {
+    Objects.requireNonNull(botConnection);
+    var dataManager = botConnection.dataManager();
+
+    clientSession.send(new ClientboundStartConfigurationPacket());
+    clientSession.switchOutboundState(() -> ((MinecraftProtocol) clientSession.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
+    awaitReceived(clientSession, ServerboundConfigurationAcknowledgedPacket.class);
+
+    if (dataManager.serverEnabledFeatures() != null) {
+      clientSession.send(
+        new ClientboundUpdateEnabledFeaturesPacket(
+          dataManager.serverEnabledFeatures()));
+    }
+
+    if (dataManager.serverKnownPacks() != null) {
+      clientSession.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
+    }
+
+    var clientPacks = awaitReceived(clientSession, ServerboundSelectKnownPacks.class);
+    for (var entry : dataManager.resolvedRegistryData().entrySet()) {
+      var registryKey = entry.getKey();
+
+      var sentEntries = new ArrayList<RegistryEntry>();
+      for (var value : entry.getValue()) {
+        var holderKey = value.getId();
+        var serverHolderData = value.getData();
+        var packData = BuiltInKnownPackRegistry.INSTANCE.findDataOptionally(registryKey, holderKey, clientPacks.getKnownPacks());
+
+        RegistryEntry entryToSend;
+        if (packData.isPresent() && packData.get().equals(serverHolderData)) {
+          entryToSend = new RegistryEntry(holderKey, null);
+        } else {
+          entryToSend = new RegistryEntry(holderKey, serverHolderData);
+        }
+
+        sentEntries.add(entryToSend);
+      }
+
+      clientSession.send(new ClientboundRegistryDataPacket(registryKey.key(), sentEntries));
+    }
+
+    var tagsPacket = new ClientboundUpdateTagsPacket();
+    tagsPacket.getTags().putAll(dataManager.tagsState().exportTags());
+    clientSession.send(tagsPacket);
+
+    clientSession.send(new ClientboundFinishConfigurationPacket());
+    awaitReceived(clientSession, ServerboundFinishConfigurationPacket.class);
+
+    var spawnInfo =
+      new PlayerSpawnInfo(
+        dataManager.currentLevel().dimensionType().id(),
+        dataManager.currentLevel().worldKey(),
+        dataManager.currentLevel().hashedSeed(),
+        dataManager.gameMode(),
+        dataManager.previousGameMode(),
+        dataManager.currentLevel().debug(),
+        dataManager.currentLevel().flat(),
+        dataManager.lastDeathPos(),
+        dataManager.portalCooldown(),
+        dataManager.currentLevel().seaLevel());
+    clientSession.send(
+      new ClientboundLoginPacket(
+        dataManager.clientEntity().entityId(),
+        dataManager.loginData().hardcore(),
+        dataManager.loginData().worldNames(),
+        dataManager.loginData().maxPlayers(),
+        dataManager.serverViewDistance(),
+        dataManager.serverSimulationDistance(),
+        dataManager.clientEntity().showReducedDebug(),
+        dataManager.enableRespawnScreen(),
+        dataManager.doLimitedCrafting(),
+        spawnInfo,
+        dataManager.loginData().enforcesSecureChat()));
+    clientSession.send(new ClientboundRespawnPacket(spawnInfo, false, false));
+
+    var difficultyData = dataManager.difficultyData();
+    if (difficultyData != null) {
+      clientSession.send(
+        new ClientboundChangeDifficultyPacket(
+          difficultyData.difficulty(),
+          difficultyData.locked()));
+    }
+
+    var abilitiesData = dataManager.clientEntity().abilitiesData();
+    clientSession.send(
+      new ClientboundPlayerAbilitiesPacket(
+        abilitiesData.invulnerable(),
+        abilitiesData.flying(),
+        abilitiesData.mayfly(),
+        abilitiesData.instabuild(),
+        abilitiesData.flySpeed(),
+        abilitiesData.walkSpeed()));
+
+    clientSession.send(
+      new ClientboundGameEventPacket(
+        GameEvent.CHANGE_GAMEMODE, dataManager.gameMode()));
+
+    var borderState = dataManager.borderState();
+    if (borderState != null) {
+      clientSession.send(
+        new ClientboundInitializeBorderPacket(
+          borderState.centerX(),
+          borderState.centerZ(),
+          borderState.oldSize(),
+          borderState.newSize(),
+          borderState.lerpTime(),
+          borderState.newAbsoluteMaxSize(),
+          borderState.warningBlocks(),
+          borderState.warningTime()));
+    }
+
+    var defaultSpawnData = dataManager.defaultSpawnData();
+    if (defaultSpawnData != null) {
+      clientSession.send(
+        new ClientboundSetDefaultSpawnPositionPacket(
+          defaultSpawnData.position(),
+          defaultSpawnData.angle()));
+    }
+
+    if (dataManager.weatherState() != null) {
+      clientSession.send(
+        new ClientboundGameEventPacket(
+          dataManager.weatherState().raining()
+            ? GameEvent.START_RAIN
+            : GameEvent.STOP_RAIN,
+          null));
+      clientSession.send(
+        new ClientboundGameEventPacket(
+          GameEvent.RAIN_STRENGTH,
+          new RainStrengthValue(
+            dataManager.weatherState().rainStrength())));
+      clientSession.send(
+        new ClientboundGameEventPacket(
+          GameEvent.THUNDER_STRENGTH,
+          new ThunderStrengthValue(
+            dataManager.weatherState().thunderStrength())));
+    }
+
+    var healthData = dataManager.healthData();
+    if (healthData != null) {
+      clientSession.send(
+        new ClientboundSetHealthPacket(
+          healthData.health(),
+          healthData.food(),
+          healthData.saturation()));
+    }
+
+    var experienceData = dataManager.experienceData();
+    if (experienceData != null) {
+      clientSession.send(
+        new ClientboundSetExperiencePacket(
+          experienceData.experience(),
+          experienceData.level(),
+          experienceData.totalExperience()));
+    }
+
+    // Give initial coordinates to the client
+    clientSession.send(
+      new ClientboundPlayerPositionPacket(
+        Integer.MIN_VALUE,
+        dataManager.clientEntity().pos(),
+        Vector3d.ZERO,
+        dataManager.clientEntity().yRot(),
+        dataManager.clientEntity().xRot(),
+        List.of()));
+
+    if (dataManager.playerListState().header() != null
+      && dataManager.playerListState().footer() != null) {
+      clientSession.send(
+        new ClientboundTabListPacket(
+          dataManager.playerListState().header(),
+          dataManager.playerListState().footer()));
+    }
+
+    var currentId =
+      clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getId();
+    clientSession.send(
+      new ClientboundPlayerInfoUpdatePacket(
+        EnumSet.of(
+          PlayerListEntryAction.ADD_PLAYER,
+          PlayerListEntryAction.INITIALIZE_CHAT,
+          PlayerListEntryAction.UPDATE_GAME_MODE,
+          PlayerListEntryAction.UPDATE_LISTED,
+          PlayerListEntryAction.UPDATE_LATENCY,
+          PlayerListEntryAction.UPDATE_DISPLAY_NAME),
+        dataManager.playerListState().entries().values().stream()
+          .map(
+            entry -> {
+              if (entry
+                .getProfileId()
+                .equals(dataManager.botProfile().getId())) {
+                GameProfile newGameProfile;
+                if (entry.getProfile() == null) {
+                  newGameProfile = null;
+                } else {
+                  newGameProfile =
+                    new GameProfile(
+                      currentId, entry.getProfile().getName());
+                  newGameProfile.setProperties(
+                    entry.getProfile().getProperties());
+                }
+
+                return new PlayerListEntry(
+                  currentId,
+                  newGameProfile,
+                  entry.isListed(),
+                  entry.getLatency(),
+                  entry.getGameMode(),
+                  entry.getDisplayName(),
+                  entry.getListOrder(),
+                  entry.getSessionId(),
+                  entry.getExpiresAt(),
+                  entry.getPublicKey(),
+                  entry.getKeySignature());
+              } else {
+                return entry;
+              }
+            })
+          .toList()
+          .toArray(new PlayerListEntry[0])));
+
+    if (dataManager.centerChunk() != null) {
+      clientSession.send(
+        new ClientboundSetChunkCacheCenterPacket(
+          dataManager.centerChunk().chunkX(),
+          dataManager.centerChunk().chunkZ()));
+    }
+
+    clientSession.send(
+      new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+
+    for (var chunkEntry :
+      dataManager.currentLevel()
+        .chunks()
+        .getChunks()
+        .long2ObjectEntrySet()) {
+      var chunkKey = ChunkKey.fromKey(chunkEntry.getLongKey());
+      var chunk = chunkEntry.getValue();
+      var buf = Unpooled.buffer();
+
+      for (var i = 0; i < chunk.getSectionCount(); i++) {
+        SFProtocolHelper.writeChunkSection(
+          buf,
+          chunk.getSection(i),
+          dataManager.codecHelper());
+      }
+
+      var chunkBytes = new byte[buf.readableBytes()];
+      buf.readBytes(chunkBytes);
+
+      var lightMask = new BitSet();
+      lightMask.set(0, chunk.getSectionCount() + 2);
+      var skyUpdateList = new ArrayList<byte[]>();
+      for (var i = 0; i < chunk.getSectionCount() + 2; i++) {
+        skyUpdateList.add(FULL_LIGHT); // sky light
+      }
+
+      var lightUpdateData =
+        new LightUpdateData(
+          lightMask,
+          new BitSet(),
+          new BitSet(),
+          lightMask,
+          skyUpdateList,
+          List.of());
+
+      clientSession.send(
+        new ClientboundLevelChunkWithLightPacket(
+          chunkKey.chunkX(),
+          chunkKey.chunkZ(),
+          chunkBytes,
+          NbtMap.EMPTY,
+          new BlockEntityInfo[0],
+          lightUpdateData));
+    }
+
+    if (botConnection.inventoryManager() != null) {
+      clientSession.send(
+        new ClientboundSetHeldSlotPacket(
+          botConnection.inventoryManager().heldItemSlot()));
+      var stateIndex = 0;
+      for (var container :
+        botConnection.inventoryManager().containerData().values()) {
+        clientSession.send(
+          new ClientboundContainerSetContentPacket(
+            container.id(),
+            stateIndex++,
+            Arrays.stream(
+                botConnection
+                  .inventoryManager()
+                  .playerInventory()
+                  .slots())
+              .map(ContainerSlot::item)
+              .toList()
+              .toArray(new ItemStack[0]),
+            botConnection.inventoryManager().cursorItem()));
+
+        if (container.properties() != null) {
+          for (var containerProperty : container.properties().int2IntEntrySet()) {
+            clientSession.send(
+              new ClientboundContainerSetDataPacket(
+                container.id(),
+                containerProperty.getIntKey(),
+                containerProperty.getIntValue()));
+          }
+        }
+      }
+    }
+
+    for (var entity : dataManager.entityTrackerState().getEntities()) {
+      if (entity instanceof ClientEntity clientEntity) {
+        clientSession.send(
+          new ClientboundEntityEventPacket(
+            clientEntity.entityId(),
+            switch (clientEntity.opPermissionLevel()) {
+              case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
+              case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
+              case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
+              case 3 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_3;
+              case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
+              default -> throw new IllegalStateException(
+                "Unexpected value: "
+                  + clientEntity.opPermissionLevel());
+            }));
+        clientSession.send(
+          new ClientboundEntityEventPacket(
+            clientEntity.entityId(),
+            clientEntity.showReducedDebug()
+              ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
+              : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
+      } else if (entity instanceof RawEntity rawEntity) {
+        clientSession.send(
+          new ClientboundAddEntityPacket(
+            entity.entityId(),
+            entity.uuid(),
+            EntityType.from(entity.entityType().id()),
+            rawEntity.data(),
+            entity.x(),
+            entity.y(),
+            entity.z(),
+            entity.yRot(),
+            entity.headYRot(),
+            entity.xRot(),
+            entity.motionX(),
+            entity.motionY(),
+            entity.motionZ()));
+      } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
+        clientSession.send(
+          new ClientboundAddExperienceOrbPacket(
+            entity.entityId(),
+            entity.x(),
+            entity.y(),
+            entity.z(),
+            experienceOrbEntity.expValue()));
+      }
+
+      for (var effect : entity.effectState().effects().entrySet()) {
+        clientSession.send(
+          new ClientboundUpdateMobEffectPacket(
+            entity.entityId(),
+            effect.getKey(),
+            effect.getValue().amplifier(),
+            effect.getValue().duration(),
+            effect.getValue().ambient(),
+            effect.getValue().showParticles(),
+            effect.getValue().showIcon(),
+            effect.getValue().blend()));
+      }
+
+      if (!entity.metadataState().metadataStore().isEmpty()) {
+        clientSession.send(
+          new ClientboundSetEntityDataPacket(
+            entity.entityId(),
+            entity
+              .metadataState()
+              .metadataStore()
+              .values()
+              .toArray(new EntityMetadata<?, ?>[0])));
+      }
+
+      if (!entity.attributeState().attributeStore().isEmpty()) {
+        clientSession.send(
+          new ClientboundUpdateAttributesPacket(
+            entity.entityId(),
+            entity.attributeState().attributeStore().values().stream()
+              .map(
+                attributeState ->
+                  new Attribute(
+                    new AttributeType() {
+                      @Override
+                      public Key getIdentifier() {
+                        return attributeState.type().key();
+                      }
+
+                      @Override
+                      public int getId() {
+                        return attributeState.type().id();
+                      }
+                    },
+                    attributeState.baseValue(),
+                    attributeState.modifiers().values().stream()
+                      .map(
+                        modifier ->
+                          new AttributeModifier(
+                            modifier.id(),
+                            modifier.amount(),
+                            switch (modifier.operation()) {
+                              case ADD_VALUE -> ModifierOperation.ADD;
+                              case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
+                              case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
+                            }))
+                      .toList()))
+              .toList()));
+      }
+    }
+  }
+
+  @RequiredArgsConstructor
+  private static class POVClientSessionAdapter extends SessionAdapter {
+    private final InstanceManager instanceManager;
+    private final SettingsSource settingsSource;
+    private BotConnection botConnection;
+    private boolean enableForwarding;
+    private double lastX;
+    private double lastY;
+    private double lastZ;
+
+    @Override
+    public void packetSent(Session clientSession, Packet packet) {
+      log.debug("POV -> C: {}", packet.getClass().getSimpleName());
+    }
+
+    @Override
+    public void packetReceived(Session clientSession, Packet packet) {
+      log.debug("C -> POV: {}", packet.getClass().getSimpleName());
+      if (botConnection == null) {
+        if (packet instanceof ServerboundChatPacket chatPacket) {
+          var profile =
+            clientSession.getFlag(MinecraftConstants.PROFILE_KEY);
+
+          var selectedName = chatPacket.getMessage();
+          log.info("{}: {}", profile.getName(), selectedName);
+
+          var first =
+            instanceManager.botConnections().values().stream()
+              .filter(c -> c.accountName().equals(selectedName))
+              .findFirst();
+          if (first.isEmpty()) {
+            clientSession.send(
+              new ClientboundSystemChatPacket(
+                Component.text("Bot not found!").color(NamedTextColor.RED),
+                false));
+            return;
+          }
+
+          botConnection = first.get();
+          botConnection
+            .session()
+            .addListener(
+              new SessionAdapter() {
+                @Override
+                public void packetReceived(Session botSession, Packet packet) {
+                  if (!enableForwarding
+                    || NOT_SYNCED.contains(packet.getClass())) {
+                    return;
+                  }
+
+                  if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+                    // To avoid signature issues since the signature is for the bot, not the connected user
+                    clientSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
+                      botConnection.dataManager().getComponentForPlayerChat(chatPacket),
+                      chatPacket.getName(),
+                      chatPacket.getTargetName()
+                    )), false));
+                    return;
+                  }
+
+                  // MC Server of the bot -> MC Client
+                  clientSession.send(packet);
+                }
+
+                @Override
+                public void packetSent(Session botSession, Packet packet) {
+                  if (!enableForwarding
+                    || NOT_SYNCED.contains(packet.getClass())) {
+                    return;
+                  }
+
+                  var clientEntity =
+                    botConnection.dataManager().clientEntity();
+                  // Bot -> MC Client
+                  switch (packet) {
+                    case ServerboundMovePlayerPosRotPacket posRot -> {
+                      clientSession.send(
+                        new ClientboundMoveEntityPosRotPacket(
+                          clientEntity.entityId(),
+                          (posRot.getX() * 32 - lastX * 32) * 128,
+                          (posRot.getY() * 32 - lastY * 32) * 128,
+                          (posRot.getZ() * 32 - lastZ * 32) * 128,
+                          posRot.getYaw(),
+                          posRot.getPitch(),
+                          clientEntity.onGround()));
+                      lastX = posRot.getX();
+                      lastY = posRot.getY();
+                      lastZ = posRot.getZ();
+                    }
+                    case ServerboundMovePlayerPosPacket pos -> {
+                      clientSession.send(
+                        new ClientboundMoveEntityPosPacket(
+                          clientEntity.entityId(),
+                          (pos.getX() * 32 - lastX * 32) * 128,
+                          (pos.getY() * 32 - lastY * 32) * 128,
+                          (pos.getZ() * 32 - lastZ * 32) * 128,
+                          clientEntity.onGround()));
+                      lastX = pos.getX();
+                      lastY = pos.getY();
+                      lastZ = pos.getZ();
+                    }
+                    case ServerboundMovePlayerRotPacket rot -> clientSession.send(
+                      new ClientboundMoveEntityRotPacket(
+                        clientEntity.entityId(),
+                        rot.getYaw(),
+                        rot.getPitch(),
+                        clientEntity.onGround()));
+                    default -> {
+                    }
+                  }
+                }
+              });
+          Thread.ofPlatform()
+            .name("SyncTask")
+            .start(
+              () -> {
+                syncBotAndUser(botConnection, clientSession);
+
+                // Give the client a few moments to process the packets
+                TimeUtil.waitTime(2, TimeUnit.SECONDS);
+
+                enableForwarding = true;
+
+                clientSession.send(
+                  new ClientboundSystemChatPacket(
+                    Component.text("Connected to bot ")
+                      .color(NamedTextColor.GREEN)
+                      .append(
+                        Component.text(
+                            botConnection.accountName())
+                          .color(NamedTextColor.AQUA)
+                          .decorate(TextDecoration.UNDERLINED))
+                      .append(Component.text("!"))
+                      .color(NamedTextColor.GREEN),
+                    false));
+              });
+        }
+      } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
+        // For data consistence, ensure all packets sent from client -> server are
+        // handled on the bots tick event loop
+        botConnection.preTickHooks().add(() -> {
+          var clientEntity = botConnection.dataManager().clientEntity();
+          switch (packet) {
+            case ServerboundMovePlayerPosRotPacket posRot -> {
+              lastX = posRot.getX();
+              lastY = posRot.getY();
+              lastZ = posRot.getZ();
+
+              clientEntity.x(posRot.getX());
+              clientEntity.y(posRot.getY());
+              clientEntity.z(posRot.getZ());
+              clientEntity.yRot(posRot.getYaw());
+              clientEntity.xRot(posRot.getPitch());
+            }
+            case ServerboundMovePlayerPosPacket pos -> {
+              lastX = pos.getX();
+              lastY = pos.getY();
+              lastZ = pos.getZ();
+
+              clientEntity.x(pos.getX());
+              clientEntity.y(pos.getY());
+              clientEntity.z(pos.getZ());
+            }
+            case ServerboundMovePlayerRotPacket rot -> {
+              clientEntity.yRot(rot.getYaw());
+              clientEntity.xRot(rot.getPitch());
+            }
+            case ServerboundAcceptTeleportationPacket teleportationPacket -> {
+              // This was a forced teleport, the server should not know about it
+              if (teleportationPacket.getId() == Integer.MIN_VALUE) {
+                return;
+              }
+            }
+            case ServerboundChatPacket chatPacket -> {
+              if (settingsSource.get(POVServerSettings.ENABLE_COMMANDS)) {
+                var message = chatPacket.getMessage();
+                var prefix = settingsSource.get(POVServerSettings.COMMAND_PREFIX);
+                if (message.startsWith(prefix)) {
+                  var command = message.substring(prefix.length());
+                  var source = new PovServerUser(clientSession, clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getName());
+                  var code = instanceManager
+                    .soulFireServer()
+                    .injector()
+                    .getSingleton(ServerCommandManager.class)
+                    .execute(command, source);
+
+                  log.info("Command \"{}\" executed! (Code: {})", command, code);
+                  return;
+                }
+              }
+            }
+            default -> {
+            }
+          }
+
+          // The client spams too many packets when being force-moved,
+          // so we'll just ignore them
+          if (botConnection.controlState().isActivelyControlling()) {
+            return;
+          }
+
+          // MC Client -> Server of the bot
+          botConnection.session().send(packet);
+        });
+      }
+    }
+
+    @Override
+    public void connected(ConnectedEvent event) {
+      if (botConnection == null) {
+        var session = event.getSession();
+        var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
+        log.info("Account connected: {}", profile.getName());
+
+        Component msg =
+          Component.text("Hello, ")
+            .color(NamedTextColor.GREEN)
+            .append(
+              Component.text(profile.getName())
+                .color(NamedTextColor.AQUA)
+                .decorate(TextDecoration.UNDERLINED))
+            .append(
+              Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
+                .color(NamedTextColor.GREEN));
+
+        session.send(new ClientboundSystemChatPacket(msg, false));
+      }
+    }
+
+    @Override
+    public void packetError(PacketErrorEvent event) {
+      log.error("Packet error", event.getCause());
+    }
+
+    @Override
+    public void disconnected(DisconnectedEvent event) {
+      log.info("Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
+    }
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
