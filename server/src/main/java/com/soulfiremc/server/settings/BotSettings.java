@@ -139,7 +139,9 @@ public class BotSettings implements SettingsObject {
       .namespace(NAMESPACE)
       .key("restore-on-reboot")
       .uiName("Restore on Reboot")
-      .description("Whether the attack should be restored after a reboot of the SoulFire machine. If turned off, the attack will not be restored after a reboot.")
+      .description("""
+        Whether the attack should be restored after a reboot of the SoulFire machine.
+        If turned off, the attack will not be restored after a reboot.""")
       .defaultValue(true)
       .build();
 
