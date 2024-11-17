@@ -31,6 +31,7 @@ import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.util.SFHelpers;
 import io.github.ollama4j.models.chat.OllamaChatMessageRole;
 import io.github.ollama4j.models.chat.OllamaChatRequestBuilder;
+import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,11 +70,11 @@ public class AIChatBot extends InternalPlugin {
       var model = settingsSource.get(AIChatBotSettings.MODEL);
       AISettings.pullIfNecessary(api, model, settingsSource);
 
-      var builder = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> {
-        var newBuilder = OllamaChatRequestBuilder.getInstance(model);
-        newBuilder.withMessage(OllamaChatMessageRole.SYSTEM, settingsSource.get(AIChatBotSettings.PROMPT));
-        return newBuilder;
-      });
+      var builder = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> OllamaChatRequestBuilder.getInstance(model)
+        .withMessage(OllamaChatMessageRole.SYSTEM, settingsSource.get(AIChatBotSettings.PROMPT))
+        .withOptions(new OptionsBuilder()
+          .setNumPredict(64) // 256 / 4 = 64
+          .build()));
       var requestModel = builder.withMessage(OllamaChatMessageRole.USER, message)
         .build();
 
