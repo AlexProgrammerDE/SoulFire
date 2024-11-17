@@ -60,9 +60,9 @@ public class AISettings implements SettingsObject {
       .key("api-request-timeout")
       .uiName("API Request Timeout")
       .description("Ollama API request timeout (seconds)")
-      .defaultValue(5)
-      .minValue(1)
-      .maxValue(6)
+      .defaultValue(60)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
       .stepValue(1)
       .build();
   public static final BooleanProperty PULL_MODELS =
