@@ -397,7 +397,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       } else if (graph.doUsableBlocksDecreaseWhenPlaced()) {
         // After the place we'll have one less usable block item
         afterBreakUsableBlockItems--;
-        cost += Costs.PLACE_BLOCK;
+        cost += Costs.PLACE_BLOCK_PENALTY;
       }
 
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);

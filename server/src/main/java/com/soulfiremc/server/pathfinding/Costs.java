@@ -52,11 +52,11 @@ public class Costs {
   /**
    * We don't want a bot that frequently tries to break blocks instead of walking around them.
    */
-  public static final double BREAK_BLOCK_ADDITION = 2;
+  public static final double BREAK_BLOCK_PENALTY = 2;
   /**
    * We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
    */
-  public static final double PLACE_BLOCK = 5;
+  public static final double PLACE_BLOCK_PENALTY = 5;
   /**
    * A normal server runs at 20 ticks per second.
    */
@@ -126,7 +126,7 @@ public class Costs {
     }
 
     return new BlockMiningCosts(
-      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_ADDITION, bestItem, willDropUsableBlockItem);
+      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_PENALTY, bestItem, willDropUsableBlockItem);
   }
 
   // Time in ticks

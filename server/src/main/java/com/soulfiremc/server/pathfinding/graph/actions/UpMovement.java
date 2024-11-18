@@ -180,7 +180,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     } else if (graph.doUsableBlocksDecreaseWhenPlaced()) {
       // After the place we'll have one less usable block item
       afterBreakUsableBlockItems--;
-      cost += Costs.PLACE_BLOCK;
+      cost += Costs.PLACE_BLOCK_PENALTY;
     }
 
     // Where we are standing right now, we'll place the target block below us after jumping
