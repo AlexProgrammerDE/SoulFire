@@ -33,11 +33,11 @@ public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
       return true;
     }
 
-    if (!(o instanceof NodeState nodeState)) {
+    if (!(o instanceof NodeState(var otherBlockPosition, var otherUsableBlockItems))) {
       return false;
     }
 
-    return usableBlockItems == nodeState.usableBlockItems && blockPosition.equals(nodeState.blockPosition);
+    return usableBlockItems == otherUsableBlockItems && blockPosition.equals(otherBlockPosition);
   }
 
   @Override

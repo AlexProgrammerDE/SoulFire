@@ -1014,12 +1014,12 @@ public class POVServer extends InternalPlugin {
 
     @Override
     public void packetError(PacketErrorEvent event) {
-      log.error("Packet error", event.getCause());
+      log.error("POV -> C Packet error", event.getCause());
     }
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-      log.info("Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
+      log.info("POV -> C Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
     }
   }
 

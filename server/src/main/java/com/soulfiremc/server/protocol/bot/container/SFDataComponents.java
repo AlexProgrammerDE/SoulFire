@@ -26,7 +26,7 @@ import java.util.Optional;
 public record SFDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> dataComponents) {
   @SuppressWarnings("unchecked")
   public <T> Optional<T> getOptional(DataComponentType<T> type) {
-    // DataComponents can be a null values in this HashMap (even if containsKey() == true)
+    // DataComponents can be a null value in this HashMap (even if containsKey() == true)
     // This means it will even remove the explicit vanilla default value for the component key
     var component = dataComponents.get(type);
     return component == null ? Optional.empty() : Optional.of((T) component.getValue());

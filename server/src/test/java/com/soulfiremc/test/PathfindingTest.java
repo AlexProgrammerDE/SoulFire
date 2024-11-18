@@ -249,7 +249,7 @@ public class PathfindingTest {
     var accessor = new TestBlockAccessor();
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
-    var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.STONE).withAmount(amount)), TestPathConstraint.INSTANCE);
+    var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeWithAmount(ItemType.STONE, amount)), TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
       accessor,
       inventory,

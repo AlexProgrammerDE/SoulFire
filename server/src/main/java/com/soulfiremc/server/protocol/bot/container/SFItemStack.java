@@ -56,7 +56,12 @@ public class SFItemStack extends ItemStack {
 
   @VisibleForTesting
   public static SFItemStack forTypeSingle(ItemType itemType) {
-    return new SFItemStack(itemType, 1);
+    return forTypeWithAmount(itemType, 1);
+  }
+
+  @VisibleForTesting
+  public static SFItemStack forTypeWithAmount(ItemType itemType, int amount) {
+    return new SFItemStack(itemType, amount);
   }
 
   @Deprecated
@@ -77,10 +82,6 @@ public class SFItemStack extends ItemStack {
     }
 
     return newComponents;
-  }
-
-  public SFItemStack withAmount(int amount) {
-    return new SFItemStack(this, amount);
   }
 
   public boolean canStackWith(SFItemStack other) {

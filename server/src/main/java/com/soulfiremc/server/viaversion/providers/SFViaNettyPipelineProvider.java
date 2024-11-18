@@ -18,7 +18,6 @@
 package com.soulfiremc.server.viaversion.providers;
 
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
-import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
