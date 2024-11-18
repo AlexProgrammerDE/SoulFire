@@ -120,7 +120,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         bestNode.node().blockPosition().formatXYZ(),
         bestNode.totalRouteScore() - bestNode.sourceCost()
       );
-    }, 1, TimeUnit.SECONDS);
+    }, 1, TimeUnit.SECONDS, true);
     var cleaner = new CallLimiter(() -> {
       if (Boolean.getBoolean("sf.pathfinding-no-prune")) {
         return;
@@ -132,7 +132,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       openSet.clear();
       openSet.enqueue(bestNode);
       routeIndex.clear();
-    }, 5, TimeUnit.SECONDS);
+    }, 5, TimeUnit.SECONDS, true);
     while (!openSet.isEmpty()) {
       if (Thread.currentThread().isInterrupted()) {
         stopwatch.stop();

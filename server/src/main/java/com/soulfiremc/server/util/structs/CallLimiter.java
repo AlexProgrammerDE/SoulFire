@@ -25,15 +25,22 @@ import java.util.concurrent.TimeUnit;
 public class CallLimiter implements Runnable {
   private final Runnable c;
   private final long interval;
+  private final boolean skipInitial;
   private volatile long lastCalled;
 
-  public CallLimiter(Runnable c, long interval, TimeUnit unit) {
+  public CallLimiter(Runnable c, long interval, TimeUnit unit, boolean skipInitial) {
     this.c = c;
     this.interval = unit.toMillis(interval);
+    this.skipInitial = skipInitial;
   }
 
   @Override
   public void run() {
+    if (skipInitial && lastCalled == 0) {
+      lastCalled = System.currentTimeMillis();
+      return;
+    }
+
     if (lastCalled + interval < System.currentTimeMillis()) {
       lastCalled = System.currentTimeMillis();
       c.run();
