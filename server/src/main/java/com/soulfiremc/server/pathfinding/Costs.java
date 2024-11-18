@@ -52,11 +52,11 @@ public class Costs {
   /**
    * We don't want a bot that frequently tries to break blocks instead of walking around them.
    */
-  public static final double BREAK_BLOCK_PENALTY = 2;
+  public static final double BREAK_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-break-block-penalty", 2);
   /**
    * We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
    */
-  public static final double PLACE_BLOCK_PENALTY = 5;
+  public static final double PLACE_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-place-block-penalty", 5);
   /**
    * A normal server runs at 20 ticks per second.
    */
