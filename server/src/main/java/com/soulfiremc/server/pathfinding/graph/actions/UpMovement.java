@@ -176,10 +176,14 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
     // We need a block to place below us
     if (afterBreakUsableBlockItems < 1) {
+      // Not enough blocks to place below us
       return Collections.emptyList();
-    } else if (graph.doUsableBlocksDecreaseWhenPlaced()) {
-      // After the place we'll have one less usable block item
-      afterBreakUsableBlockItems--;
+    } else {
+      if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+        // After the place we'll have one less usable block item
+        afterBreakUsableBlockItems--;
+      }
+
       cost += Costs.PLACE_BLOCK_PENALTY;
     }
 
