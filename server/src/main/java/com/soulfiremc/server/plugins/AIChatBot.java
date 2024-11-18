@@ -96,6 +96,10 @@ public class AIChatBot extends InternalPlugin {
 
       response = SFHelpers.stripForChat(response);
 
+      if (settingsSource.get(AIChatBotSettings.FILTER_KEYWORD)) {
+        response = response.replace(settingsSource.get(AIChatBotSettings.KEYWORD), "");
+      }
+
       log.debug("AI response: {}", response);
       event.connection().botControl().sendMessage(response);
     } catch (Exception e) {
@@ -150,6 +154,14 @@ public class AIChatBot extends InternalPlugin {
         .uiName("Keyword")
         .description("Only respond to messages containing this keyword")
         .defaultValue("!ai")
+        .build();
+    public static final BooleanProperty FILTER_KEYWORD =
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("filter-keyword")
+        .uiName("Filter keyword")
+        .description("Filter out the keyword from messages sent by the AI")
+        .defaultValue(true)
         .build();
   }
 }
