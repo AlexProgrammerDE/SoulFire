@@ -24,10 +24,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableStringProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import io.github.ollama4j.models.chat.OllamaChatMessageRole;
 import io.github.ollama4j.models.chat.OllamaChatRequestBuilder;
@@ -81,8 +78,12 @@ public class AIChatBot extends InternalPlugin {
 
       log.debug("Chatting with AI: {}", requestModel);
       var chatResult = api.chat(requestModel);
+      var chatHistory = chatResult.getChatHistory();
+      if (chatHistory.size() > settingsSource.get(AIChatBotSettings.HISTORY_LENGTH)) {
+        chatHistory.removeFirst();
+      }
 
-      event.connection().metadata().set(PLAYER_CONVERSATIONS, builder.withMessages(chatResult.getChatHistory()));
+      event.connection().metadata().set(PLAYER_CONVERSATIONS, builder.withMessages(chatHistory));
 
       var response = chatResult.getResponse();
       if (response.isBlank()) {
@@ -162,6 +163,17 @@ public class AIChatBot extends InternalPlugin {
         .uiName("Filter keyword")
         .description("Filter out the keyword from messages sent by the AI")
         .defaultValue(true)
+        .build();
+    public static final IntProperty HISTORY_LENGTH =
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("history-length")
+        .uiName("History length")
+        .description("Max number of messages to keep in the conversation history")
+        .defaultValue(10)
+        .minValue(1)
+        .maxValue(Integer.MAX_VALUE)
+        .stepValue(1)
         .build();
   }
 }
