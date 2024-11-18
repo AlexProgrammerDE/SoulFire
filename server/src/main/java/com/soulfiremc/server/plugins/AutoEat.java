@@ -44,7 +44,8 @@ public class AutoEat extends InternalPlugin {
       "1.0.0",
       "Automatically eats food when hungry",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

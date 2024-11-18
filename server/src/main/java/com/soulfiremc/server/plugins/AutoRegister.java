@@ -39,7 +39,8 @@ public class AutoRegister extends InternalPlugin {
       "1.0.0",
       "Automatically registers bots on servers",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

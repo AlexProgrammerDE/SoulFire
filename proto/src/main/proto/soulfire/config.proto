@@ -132,6 +132,7 @@ message ServerPlugin {
   string description = 3;
   string author = 4;
   string license = 5;
+  string website = 6;
 }
 
 message ClientDataResponse {

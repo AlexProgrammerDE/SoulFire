@@ -68,7 +68,8 @@ public class ForwardingBypass extends InternalPlugin {
       "1.0.0",
       "Allows bypassing proxy forwarding",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

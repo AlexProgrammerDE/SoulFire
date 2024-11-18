@@ -41,7 +41,8 @@ public class AutoJump extends InternalPlugin {
       "1.0.0",
       "Automatically jumps randomly",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

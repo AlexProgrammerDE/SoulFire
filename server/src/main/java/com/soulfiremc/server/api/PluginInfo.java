@@ -18,9 +18,9 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.ServerPlugin;
+import com.soulfiremc.server.util.pf4j.SFPluginDescriptor;
 import lombok.SneakyThrows;
 import org.pf4j.PluginClassLoader;
-import org.pf4j.PluginDescriptor;
 
 import java.lang.reflect.Field;
 
@@ -34,7 +34,7 @@ import java.lang.reflect.Field;
  * @param author      The plugin author
  * @param license     The plugin license
  */
-public record PluginInfo(String id, String version, String description, String author, String license) {
+public record PluginInfo(String id, String version, String description, String author, String license, String website) {
   private static final Field PLUGIN_DESCRIPTOR_FIELD;
 
   static {
@@ -60,13 +60,14 @@ public record PluginInfo(String id, String version, String description, String a
       throw new IllegalArgumentException("Class is not a plugin");
     }
 
-    var descriptor = (PluginDescriptor) PLUGIN_DESCRIPTOR_FIELD.get(plugin);
+    var descriptor = (SFPluginDescriptor) PLUGIN_DESCRIPTOR_FIELD.get(plugin);
     return new PluginInfo(
       descriptor.getPluginId(),
       descriptor.getVersion(),
       descriptor.getPluginDescription(),
       descriptor.getProvider(),
-      descriptor.getLicense()
+      descriptor.getLicense(),
+      descriptor.website()
     );
   }
 
@@ -77,6 +78,7 @@ public record PluginInfo(String id, String version, String description, String a
       .setDescription(description)
       .setAuthor(author)
       .setLicense(license)
+      .setWebsite(website)
       .build();
   }
 }

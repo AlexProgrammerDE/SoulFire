@@ -45,7 +45,8 @@ public class AutoArmor extends InternalPlugin {
       "1.0.0",
       "Automatically puts on the best armor",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

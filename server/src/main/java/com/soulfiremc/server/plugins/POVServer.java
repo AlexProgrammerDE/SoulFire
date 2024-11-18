@@ -163,7 +163,8 @@ public class POVServer extends InternalPlugin {
       "1.0.0",
       "A plugin that allows users to control bots from a first-person perspective.",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

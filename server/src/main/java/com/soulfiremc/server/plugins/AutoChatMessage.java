@@ -40,7 +40,8 @@ public class AutoChatMessage extends InternalPlugin {
       "1.0.0",
       "Automatically sends messages in a configured delay",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

@@ -44,7 +44,8 @@ public class ClientSettings extends InternalPlugin {
       "1.0.0",
       "Sends client settings to the server",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

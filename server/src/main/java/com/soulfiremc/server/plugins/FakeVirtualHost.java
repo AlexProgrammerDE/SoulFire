@@ -37,7 +37,8 @@ public class FakeVirtualHost extends InternalPlugin {
       "1.0.0",
       "Fakes the virtual host",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

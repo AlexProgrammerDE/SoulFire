@@ -41,7 +41,8 @@ public class ChatControl extends InternalPlugin {
       "1.0.0",
       "Control the bot with chat messages",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

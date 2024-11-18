@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.MixinExtension;
 import com.soulfiremc.server.injection.SFDefaultMixinExtension;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.pf4j.SFManifestPluginDescriptorFinder;
 import com.soulfiremc.server.util.structs.CustomClassProvider;
 import com.soulfiremc.server.util.structs.SFLogAppender;
 import io.netty.util.ResourceLeakDetector;
@@ -72,7 +73,12 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());
-  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory);
+  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory) {
+    @Override
+    protected SFManifestPluginDescriptorFinder createPluginDescriptorFinder() {
+      return new SFManifestPluginDescriptorFinder();
+    }
+  };
 
   protected SoulFireAbstractBootstrap() {}
 

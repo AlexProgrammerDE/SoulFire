@@ -58,7 +58,8 @@ public class ModLoaderSupport extends InternalPlugin {
       "1.0.0",
       "Supports mod loaders like Forge",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

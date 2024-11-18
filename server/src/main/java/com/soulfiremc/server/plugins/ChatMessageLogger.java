@@ -59,7 +59,8 @@ public class ChatMessageLogger extends InternalPlugin {
       "1.0.0",
       "Logs all received chat messages to the terminal",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 

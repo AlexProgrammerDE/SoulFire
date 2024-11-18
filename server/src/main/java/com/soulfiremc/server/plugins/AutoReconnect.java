@@ -42,7 +42,8 @@ public class AutoReconnect extends InternalPlugin {
       "1.0.0",
       "Automatically reconnects bots when they time out or are kicked",
       "AlexProgrammerDE",
-      "GPL-3.0"
+      "GPL-3.0",
+      "https://soulfiremc.com"
     ));
   }
 
