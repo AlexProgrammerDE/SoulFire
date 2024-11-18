@@ -31,7 +31,6 @@ public class MapColorJavaGenerator implements IDataGenerator {
   @SneakyThrows
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResourceAsString("/templates/MapColor.java");
     var registryField = MapColor.class.getDeclaredField("MATERIAL_COLORS");
     registryField.setAccessible(true);
     var registry = (MapColor[]) registryField.get(null);
@@ -47,6 +46,7 @@ public class MapColorJavaGenerator implements IDataGenerator {
       colorArray[i] = "new MapColor(%d, %s)".formatted(i, colField.get(registry[i]));
     }
 
+    var base = ResourceHelper.getResourceAsString("/templates/MapColor.java");
     return base.replace(
       GeneratorConstants.VALUES_REPLACE,
       "public static final MapColor[] COLORS = new MapColor[] {\n    %s\n  };".formatted(String.join(",\n    ", colorArray)));

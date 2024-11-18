@@ -21,16 +21,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.soulfiremc.generator.mixin.BlockAccessor;
 import com.soulfiremc.generator.util.BlockSettingsAccessor;
-import com.soulfiremc.generator.util.GsonInstance;
 import lombok.SneakyThrows;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 public class BlocksDataGenerator implements IDataGenerator {
   @SneakyThrows
@@ -59,23 +55,6 @@ public class BlocksDataGenerator implements IDataGenerator {
 
     blockDesc.addProperty("fluidType",
       BuiltInRegistries.FLUID.getKey(defaultState.getFluidState().getType()).toString());
-
-    JsonArray poolsArray;
-    var lootTable = block.getLootTable();
-    if (lootTable.isEmpty()) {
-      poolsArray = new JsonArray();
-    } else {
-      var lootTableFilePath = "/data/minecraft/loot_table/%s.json".formatted(lootTable.get().location().getPath());
-      try (var in = Objects.requireNonNull(BlocksDataGenerator.class.getResourceAsStream(lootTableFilePath))) {
-        var data = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        var dataJsonObject = GsonInstance.GSON.fromJson(data, JsonObject.class);
-
-        poolsArray = dataJsonObject.getAsJsonArray("pools");
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    blockDesc.add("lootTableData", poolsArray);
 
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();
