@@ -63,6 +63,14 @@ public class ModLoaderSupport extends InternalPlugin {
     ));
   }
 
+  private static String createFMLAddress(String initialHostname) {
+    return initialHostname + HOSTNAME_SEPARATOR + "FML" + HOSTNAME_SEPARATOR;
+  }
+
+  private static String createFML2Address(String initialHostname) {
+    return initialHostname + HOSTNAME_SEPARATOR + "FML2" + HOSTNAME_SEPARATOR;
+  }
+
   @Override
   public boolean isAvailable() {
     return Boolean.getBoolean("sf.mod_support");
@@ -71,14 +79,6 @@ public class ModLoaderSupport extends InternalPlugin {
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", this, "package");
-  }
-
-  private static String createFMLAddress(String initialHostname) {
-    return initialHostname + HOSTNAME_SEPARATOR + "FML" + HOSTNAME_SEPARATOR;
-  }
-
-  private static String createFML2Address(String initialHostname) {
-    return initialHostname + HOSTNAME_SEPARATOR + "FML2" + HOSTNAME_SEPARATOR;
   }
 
   @EventHandler

@@ -47,8 +47,8 @@ public class AntiAFK extends InternalPlugin {
       "1.0.0",
       "Automatically moves x amount of blocks in a random direction to prevent being kicked for being AFK",
       "AlexProgrammerDE",
-            "GPL-3.0",
-            "https://soulfiremc.com"));
+      "GPL-3.0",
+      "https://soulfiremc.com"));
   }
 
   @EventHandler

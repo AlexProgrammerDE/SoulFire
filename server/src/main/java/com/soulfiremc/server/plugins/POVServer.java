@@ -168,11 +168,6 @@ public class POVServer extends InternalPlugin {
     ));
   }
 
-  @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", this, "view");
-  }
-
   private static GameProfile getFakePlayerListEntry(Component text) {
     return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
   }
@@ -346,31 +341,6 @@ public class POVServer extends InternalPlugin {
       });
 
     server.bind();
-  }
-
-  @EventHandler
-  public void onAttackStart(AttackStartEvent event) {
-    var instanceManager = event.instanceManager();
-    var settingsSource = instanceManager.settingsSource();
-    if (!settingsSource.get(POVServerSettings.ENABLED)) {
-      return;
-    }
-
-    var freePort =
-      PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
-    startPOVServer(settingsSource, freePort, instanceManager);
-  }
-
-  @EventHandler
-  public void onAttackEnded(AttackEndedEvent event) {
-    var instanceManager = event.instanceManager();
-    var currentInstance = instanceManager.metadata().getAndRemove(TCP_SERVER);
-    if (currentInstance == null) {
-      return;
-    }
-
-    log.info("Stopping POV server for attack {}", instanceManager.id());
-    currentInstance.close();
   }
 
   private static <T> T awaitReceived(Session session, Class<T> clazz) {
@@ -804,6 +774,36 @@ public class POVServer extends InternalPlugin {
               .toList()));
       }
     }
+  }
+
+  @EventHandler
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", this, "view");
+  }
+
+  @EventHandler
+  public void onAttackStart(AttackStartEvent event) {
+    var instanceManager = event.instanceManager();
+    var settingsSource = instanceManager.settingsSource();
+    if (!settingsSource.get(POVServerSettings.ENABLED)) {
+      return;
+    }
+
+    var freePort =
+      PortHelper.getAvailablePort(settingsSource.get(POVServerSettings.PORT_START));
+    startPOVServer(settingsSource, freePort, instanceManager);
+  }
+
+  @EventHandler
+  public void onAttackEnded(AttackEndedEvent event) {
+    var instanceManager = event.instanceManager();
+    var currentInstance = instanceManager.metadata().getAndRemove(TCP_SERVER);
+    if (currentInstance == null) {
+      return;
+    }
+
+    log.info("Stopping POV server for attack {}", instanceManager.id());
+    currentInstance.close();
   }
 
   @RequiredArgsConstructor
