@@ -24,6 +24,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public final class MSJavaRefreshTokenAuthService
   implements MCAuthService<String, MSJavaRefreshTokenAuthService.MSJavaRefreshTokenAuthData> {
@@ -40,7 +41,7 @@ public final class MSJavaRefreshTokenAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepMsaToken.RefreshToken(data.refreshToken)));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }
@@ -60,7 +61,7 @@ public final class MSJavaRefreshTokenAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullJavaSession));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }

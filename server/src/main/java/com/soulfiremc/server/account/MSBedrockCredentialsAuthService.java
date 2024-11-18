@@ -25,6 +25,7 @@ import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public final class MSBedrockCredentialsAuthService
   implements MCAuthService<String, MSBedrockCredentialsAuthService.MSBedrockCredentialsAuthData> {
@@ -41,7 +42,7 @@ public final class MSBedrockCredentialsAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepCredentialsMsaCode.MsaCredentials(data.email, data.password)));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }
@@ -73,7 +74,7 @@ public final class MSBedrockCredentialsAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullBedrockSession));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }

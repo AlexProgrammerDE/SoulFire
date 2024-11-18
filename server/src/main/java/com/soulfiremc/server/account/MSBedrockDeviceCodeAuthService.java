@@ -24,6 +24,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 
 public final class MSBedrockDeviceCodeAuthService
@@ -41,7 +42,7 @@ public final class MSBedrockDeviceCodeAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           new StepMsaDeviceCode.MsaDeviceCodeCallback(data.callback)));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }
@@ -61,7 +62,7 @@ public final class MSBedrockDeviceCodeAuthService
           LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
           fullBedrockSession));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new CompletionException(e);
       }
     });
   }

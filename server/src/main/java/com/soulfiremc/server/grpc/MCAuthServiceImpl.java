@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -41,7 +42,15 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
       var service = MCAuthService.convertService(request.getService());
       var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);
       var results = SFHelpers.maxFutures(request.getMaxConcurrency(), request.getPayloadList(), payload ->
-        service.createDataAndLogin(payload, proxy).thenApply(MinecraftAccount::toProto));
+          service.createDataAndLogin(payload, proxy)
+            .thenApply(MinecraftAccount::toProto)
+            .exceptionally(t -> {
+              log.error("Error authenticating account", t);
+              return null;
+            }))
+        .stream()
+        .filter(Objects::nonNull)
+        .toList();
 
       responseObserver.onNext(CredentialsAuthResponse.newBuilder().addAllAccount(results).build());
       responseObserver.onCompleted();
