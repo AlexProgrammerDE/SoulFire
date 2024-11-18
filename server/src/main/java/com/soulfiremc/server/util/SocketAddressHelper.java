@@ -44,26 +44,26 @@ public class SocketAddressHelper {
   private SocketAddressHelper() {}
 
   public static String serialize(SocketAddress address) {
-    if (address instanceof InetSocketAddress inetSocketAddress) {
-      return "inet://%s:%d".formatted(inetSocketAddress.getHostString(), inetSocketAddress.getPort());
-    } else if (address instanceof UnixDomainSocketAddress unixSocketAddress) {
-      return "unix://%s".formatted(unixSocketAddress.getPath());
-    } else {
-      throw new IllegalArgumentException("Unsupported address type: " + address.getClass().getName());
-    }
+    return switch (address) {
+      case InetSocketAddress inet -> "inet://%s:%d".formatted(inet.getHostString(), inet.getPort());
+      case UnixDomainSocketAddress unix -> "unix://%s".formatted(unix.getPath());
+      default -> throw new IllegalArgumentException("Unsupported address type: " + address.getClass().getName());
+    };
   }
 
   public static SocketAddress deserialize(String uriString) {
     var uri = URI.create(uriString);
-    if ("inet".equals(uri.getScheme())) {
-      var host = uri.getHost();
-      var port = uri.getPort();
-      return new InetSocketAddress(host, port);
-    } else if ("unix".equals(uri.getScheme())) {
-      var path = uri.getPath();
-      return UnixDomainSocketAddress.of(path);
-    } else {
-      throw new IllegalArgumentException("Unsupported scheme: " + uri.getScheme());
-    }
+    return switch (uri.getScheme()) {
+      case "inet" -> {
+        var host = uri.getHost();
+        var port = uri.getPort();
+        yield new InetSocketAddress(host, port);
+      }
+      case "unix" -> {
+        var path = uri.getPath();
+        yield UnixDomainSocketAddress.of(path);
+      }
+      default -> throw new IllegalArgumentException("Unsupported scheme: " + uri.getScheme());
+    };
   }
 }
