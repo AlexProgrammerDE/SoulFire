@@ -91,6 +91,8 @@ reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", ve
 spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
 ollama4j = "io.github.ollama4j:ollama4j:1.0.89"
 immutables = "org.immutables:value:2.10.1 "
+graalvm-polyglot = "org.graalvm.polyglot:polyglot:24.1.1"
+graalvm-polyglot-js = "org.graalvm.polyglot:js:24.1.1"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit = "org.junit.jupiter:junit-jupiter:5.11.3"
 
@@ -103,3 +105,4 @@ kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
+graalvm-polyglot = ["graalvm-polyglot", "graalvm-polyglot-js"]

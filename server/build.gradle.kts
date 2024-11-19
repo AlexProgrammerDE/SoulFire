@@ -81,6 +81,7 @@ dependencies {
   api(libs.bundles.reactor.netty)
 
   api(libs.bundles.mixins)
+  api(libs.bundles.graalvm.polyglot)
   api(libs.reflect)
   api(libs.lambdaevents)
 
