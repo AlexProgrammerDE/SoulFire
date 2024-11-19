@@ -74,6 +74,7 @@ public abstract class Entity {
   protected boolean minorHorizontalCollision;
   protected boolean isInPowderSnow;
   protected boolean wasInPowderSnow;
+  public boolean noPhysics;
 
   public Entity(EntityType entityType, Level level) {
     this.entityType = entityType;

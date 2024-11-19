@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -39,10 +37,9 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class ClientEntity extends Entity {
+public class LocalPlayer extends AbstractClientPlayer {
   private final AbilitiesData abilitiesData = new AbilitiesData();
   private final BotConnection connection;
-  private final GameProfile gameProfile;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -55,20 +52,18 @@ public class ClientEntity extends Entity {
   private boolean wasShiftKeyDown = false;
   private boolean wasSprinting = false;
   private boolean noPhysics = false;
-  private boolean wasUnderwater = false;
   private int positionReminder = 0;
   private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
-  public ClientEntity(BotConnection connection, Level level, GameProfile gameProfile) {
-    super(EntityType.PLAYER, level);
+  public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
+    super(level, gameProfile);
     this.connection = connection;
-    this.gameProfile = gameProfile;
     uuid(gameProfile.getId());
   }
 
   @Override
   public void tick() {
-    playerTick();
+    super.tick();
 
     this.sendShiftKeyState();
 
@@ -80,38 +75,6 @@ public class ClientEntity extends Entity {
 
     // Send position changes
     sendPositionChanges();
-  }
-
-  private void playerTick() {
-    this.noPhysics = this.isSpectator();
-    if (this.isSpectator()) {
-      this.onGround(false);
-    }
-
-    this.wasUnderwater = this.isEyeInFluid(FluidTags.WATER);
-    livingEntityTick();
-
-    var x = MathHelper.clamp(this.x(), -2.9999999E7, 2.9999999E7);
-    var z = MathHelper.clamp(this.z(), -2.9999999E7, 2.9999999E7);
-    if (x != this.x() || z != this.z()) {
-      this.setPosition(x, this.y(), z);
-    }
-  }
-
-  private void livingEntityTick() {
-    super.tick();
-
-    // this.aiStep();
-
-    // if (this.isFallFlying()) {
-    //  this.fallFlyTicks++;
-    //  else {
-    //  this.fallFlyTicks = 0;
-    // }
-
-    if (this.isSleeping()) {
-      this.xRot(0.0F);
-    }
   }
 
   public void sendPositionChanges() {
@@ -241,14 +204,7 @@ public class ClientEntity extends Entity {
     return connection.controlState().sneaking() ? 1.5F : 1.8F;
   }
 
-  private boolean isSpectator() {
-    return false; // TODO
-  }
-
-  private boolean isSleeping() {
-    return false; // TODO
-  }
-
+  @Override
   public boolean isUnderWater() {
     return this.wasUnderwater;
   }

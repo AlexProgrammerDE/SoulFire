@@ -69,7 +69,7 @@ public class AntiAFK extends InternalPlugin {
             new AwayFromPosGoal(
               SFVec3i.fromDouble(connection
                 .dataManager()
-                .clientEntity()
+                .localPlayer()
                 .pos()),
               settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
             new PathConstraint(connection));

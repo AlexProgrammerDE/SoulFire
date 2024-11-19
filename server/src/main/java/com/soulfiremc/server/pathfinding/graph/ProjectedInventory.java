@@ -24,7 +24,7 @@ import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -50,10 +50,10 @@ public class ProjectedInventory {
   @ToString.Include
   private final SFItemStack[] usableToolsAndNull;
   private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
-  private final ClientEntity entity;
+  private final LocalPlayer entity;
   private final PlayerInventoryContainer playerInventory;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory, ClientEntity entity, PathConstraint pathConstraint) {
+  public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
@@ -62,7 +62,7 @@ public class ProjectedInventory {
       pathConstraint);
   }
 
-  public ProjectedInventory(List<SFItemStack> items, ClientEntity entity, PlayerInventoryContainer playerInventory, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, PlayerInventoryContainer playerInventory, PathConstraint pathConstraint) {
     this.entity = entity;
     this.playerInventory = playerInventory;
 

@@ -62,13 +62,13 @@ public final class BlockBreakAction implements WorldAction {
 
   @Override
   public SFVec3i targetPosition(BotConnection connection) {
-    return SFVec3i.fromDouble(connection.dataManager().clientEntity().pos());
+    return SFVec3i.fromDouble(connection.dataManager().localPlayer().pos());
   }
 
   @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.localPlayer();
     connection.controlState().resetAll();
 
     var level = dataManager.currentLevel();
@@ -102,7 +102,7 @@ public final class BlockBreakAction implements WorldAction {
       remainingTicks = totalTicks =
         Costs.getRequiredMiningTicks(
             dataManager.tagsState(),
-            dataManager.clientEntity(),
+            dataManager.localPlayer(),
             clientEntity.onGround(),
             connection.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)

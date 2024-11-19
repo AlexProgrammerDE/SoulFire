@@ -32,8 +32,8 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.*;
 import com.soulfiremc.server.protocol.bot.state.*;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
@@ -124,7 +124,7 @@ public final class SessionDataManager {
   private final TagsState tagsState = new TagsState();
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
-  private ClientEntity clientEntity;
+  private LocalPlayer localPlayer;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
   private HealthData healthData;
@@ -251,11 +251,11 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // Init client entity
-    clientEntity =
-      new ClientEntity(connection, currentLevel(), botProfile);
-    clientEntity.entityId(packet.getEntityId());
-    clientEntity.showReducedDebug(packet.isReducedDebugInfo());
-    entityTrackerState.addEntity(clientEntity);
+    localPlayer =
+      new LocalPlayer(connection, currentLevel(), botProfile);
+    localPlayer.entityId(packet.getEntityId());
+    localPlayer.showReducedDebug(packet.isReducedDebugInfo());
+    entityTrackerState.addEntity(localPlayer);
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
@@ -295,15 +295,15 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
-    var newMovement = EntityMovement.toAbsolute(clientEntity.toMovement(), new EntityMovement(
+    var newMovement = EntityMovement.toAbsolute(localPlayer.toMovement(), new EntityMovement(
       packet.getPosition(),
       packet.getDeltaMovement(),
       packet.getYRot(),
       packet.getXRot()
     ), packet.getRelatives());
-    clientEntity.setFrom(newMovement);
+    localPlayer.setFrom(newMovement);
 
-    var position = clientEntity.blockPos();
+    var position = localPlayer.blockPos();
     if (!joinedWorld) {
       joinedWorld = true;
 
@@ -333,7 +333,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onRotation(ClientboundPlayerRotationPacket packet) {
-    clientEntity.setRotation(
+    localPlayer.setRotation(
       packet.getYRot(),
       packet.getXRot()
     );
@@ -355,7 +355,7 @@ public final class SessionDataManager {
       }
     }
 
-    clientEntity.lookAt(packet.getOrigin(), targetPosition);
+    localPlayer.lookAt(packet.getOrigin(), targetPosition);
   }
 
   @EventHandler
@@ -363,7 +363,7 @@ public final class SessionDataManager {
     processSpawnInfo(packet.getCommonPlayerSpawnInfo());
 
     // We are now possibly in a new dimension
-    clientEntity.level(currentLevel());
+    localPlayer.level(currentLevel());
 
     log.info("Respawned");
   }
@@ -372,7 +372,7 @@ public final class SessionDataManager {
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
 
-    if (state == null || state != clientEntity) {
+    if (state == null || state != localPlayer) {
       log.debug("Received death for unknown or invalid entity {}", packet.getPlayerId());
       return;
     }
@@ -496,7 +496,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
-    var abilitiesData = clientEntity.abilitiesData();
+    var abilitiesData = localPlayer.abilitiesData();
     abilitiesData.flying = packet.isFlying();
     abilitiesData.instabuild = packet.isCreative();
     abilitiesData.invulnerable = packet.isInvincible();

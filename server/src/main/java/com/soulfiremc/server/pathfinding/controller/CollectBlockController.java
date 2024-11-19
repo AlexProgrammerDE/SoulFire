@@ -42,7 +42,7 @@ public class CollectBlockController {
   private int collectedAmount;
 
   public static Set<SFVec3i> searchWithinRadius(BotConnection botConnection, Predicate<BlockState> checker, int radius) {
-    var clientEntity = botConnection.dataManager().clientEntity();
+    var clientEntity = botConnection.dataManager().localPlayer();
     var level = clientEntity.level();
     var rootPosition = SFVec3i.fromInt(clientEntity.pos().toInt());
 

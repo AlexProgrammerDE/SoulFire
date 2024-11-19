@@ -71,13 +71,13 @@ public class BotControlAPI {
 
   public boolean toggleFlight() {
     var dataManager = connection.dataManager();
-    var abilitiesData = dataManager.clientEntity().abilitiesData();
+    var abilitiesData = dataManager.localPlayer().abilitiesData();
     if (abilitiesData != null && !abilitiesData.mayfly()) {
       throw new IllegalStateException("You can't fly! (Server said so)");
     }
 
-    var newFly = !dataManager.clientEntity().abilitiesData().flying();
-    dataManager.clientEntity().abilitiesData().flying(newFly);
+    var newFly = !dataManager.localPlayer().abilitiesData().flying();
+    dataManager.localPlayer().abilitiesData().flying(newFly);
 
     // Let the server know we are flying
     connection.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
@@ -93,7 +93,7 @@ public class BotControlAPI {
     // Let the server know we are sprinting
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.localPlayer().entityId(),
         newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
 
     return newSprint;
@@ -107,7 +107,7 @@ public class BotControlAPI {
     // Let the server know we are sneaking
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.clientEntity().entityId(),
+        dataManager.localPlayer().entityId(),
         newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
 
     return newSneak;
@@ -175,7 +175,7 @@ public class BotControlAPI {
     }
 
     var dataManager = connection.dataManager();
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.localPlayer().eyePosition();
 
     // sort by distance to the bot
     points.sort(Comparator.comparingDouble(eye::distance));
@@ -218,19 +218,19 @@ public class BotControlAPI {
     boolean onlyInteractable,
     boolean mustBeSeen) {
     var dataManager = connection.dataManager();
-    if (dataManager.clientEntity() == null) {
+    if (dataManager.localPlayer() == null) {
       return null;
     }
 
-    var x = dataManager.clientEntity().x();
-    var y = dataManager.clientEntity().y();
-    var z = dataManager.clientEntity().z();
+    var x = dataManager.localPlayer().x();
+    var y = dataManager.localPlayer().y();
+    var z = dataManager.localPlayer().z();
 
     Entity closest = null;
     var closestDistance = Double.MAX_VALUE;
 
     for (var entity : dataManager.entityTrackerState().getEntities()) {
-      if (entity.entityId() == dataManager.clientEntity().entityId()) {
+      if (entity.entityId() == dataManager.localPlayer().entityId()) {
         continue;
       }
 
@@ -263,11 +263,11 @@ public class BotControlAPI {
         && dataManager.connection().instanceManager().botConnections().values().stream()
         .anyMatch(
           b -> {
-            if (b.dataManager().clientEntity() == null) {
+            if (b.dataManager().localPlayer() == null) {
               return false;
             }
 
-            return b.dataManager().clientEntity().uuid().equals(entity.uuid());
+            return b.dataManager().localPlayer().uuid().equals(entity.uuid());
           })) {
         continue;
       }
@@ -293,7 +293,7 @@ public class BotControlAPI {
     var dataManager = connection.dataManager();
     var level = dataManager.currentLevel();
 
-    var eye = dataManager.clientEntity().eyePosition();
+    var eye = dataManager.localPlayer().eyePosition();
     var distance = eye.distance(vec);
     if (distance >= 256) {
       return false;
@@ -319,7 +319,7 @@ public class BotControlAPI {
 
     return (float)
       (1.0
-        / connection.dataManager().clientEntity().attributeValue(AttributeType.ATTACK_SPEED)
+        / connection.dataManager().localPlayer().attributeValue(AttributeType.ATTACK_SPEED)
         * 20.0);
   }
 }

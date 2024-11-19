@@ -48,7 +48,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   @Override
   public void tick(BotConnection connection) {
     var dataManager = connection.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.localPlayer();
     connection.controlState().resetAll();
 
     if (!putOnHotbar) {

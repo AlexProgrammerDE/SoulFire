@@ -35,7 +35,7 @@ public final class GapJumpAction implements WorldAction {
 
   @Override
   public boolean isCompleted(BotConnection connection) {
-    var clientEntity = connection.dataManager().clientEntity();
+    var clientEntity = connection.dataManager().localPlayer();
     var botPosition = clientEntity.pos();
     var level = connection.dataManager().currentLevel();
 
@@ -57,7 +57,7 @@ public final class GapJumpAction implements WorldAction {
 
   @Override
   public void tick(BotConnection connection) {
-    var clientEntity = connection.dataManager().clientEntity();
+    var clientEntity = connection.dataManager().localPlayer();
     connection.controlState().resetAll();
 
     var level = connection.dataManager().currentLevel();

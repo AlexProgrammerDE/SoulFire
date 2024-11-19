@@ -55,7 +55,7 @@ public class BotActionManager {
   public void useItemInHand(Hand hand) {
     incrementSequenceNumber();
     var dataManager = connection.dataManager();
-    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.clientEntity().yRot(), dataManager.clientEntity().xRot()));
+    connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.localPlayer().yRot(), dataManager.localPlayer().xRot()));
   }
 
   public void placeBlock(Hand hand, BlockPlaceAgainstData blockPlaceAgainstData) {
@@ -65,7 +65,7 @@ public class BotActionManager {
   public void placeBlock(Hand hand, Vector3i againstBlock, BlockFace againstFace) {
     incrementSequenceNumber();
     var dataManager = connection.dataManager();
-    var clientEntity = dataManager.clientEntity();
+    var clientEntity = dataManager.localPlayer();
     var level = dataManager.currentLevel();
 
     var eyePosition = clientEntity.eyePosition();

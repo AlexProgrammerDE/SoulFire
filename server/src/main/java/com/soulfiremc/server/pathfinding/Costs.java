@@ -22,7 +22,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.protocol.bot.state.entity.ClientEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.BlockTypeHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
@@ -105,7 +105,7 @@ public class Costs {
 
   public static BlockMiningCosts calculateBlockBreakCost(
     TagsState tagsState,
-    @Nullable ClientEntity entity,
+    @Nullable LocalPlayer entity,
     ProjectedInventory inventory,
     BlockType blockType) {
     var lowestMiningTicks = Integer.MAX_VALUE;
@@ -132,7 +132,7 @@ public class Costs {
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     TagsState tagsState,
-    @Nullable ClientEntity entity,
+    @Nullable LocalPlayer entity,
     boolean onGround,
     @Nullable SFItemStack itemStack,
     BlockType blockType) {
@@ -153,7 +153,7 @@ public class Costs {
   }
 
   private static float getBlockDamagePerTick(TagsState tagsState,
-                                             @Nullable ClientEntity entity,
+                                             @Nullable LocalPlayer entity,
                                              boolean onGround,
                                              @Nullable SFItemStack itemStack,
                                              BlockType blockType) {
@@ -173,7 +173,7 @@ public class Costs {
   }
 
   private static float getPlayerBlockDamagePerTick(TagsState tagsState,
-                                                   @Nullable ClientEntity entity,
+                                                   @Nullable LocalPlayer entity,
                                                    boolean onGround,
                                                    @Nullable SFItemStack itemStack,
                                                    BlockType blockType) {
