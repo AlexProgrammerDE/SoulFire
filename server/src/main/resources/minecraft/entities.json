@@ -9,7 +9,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 1,
@@ -21,7 +27,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 2,
@@ -33,7 +46,14 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "allay",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 3,
@@ -45,7 +65,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "area_effect_cloud",
+      "entity"
+    ]
   },
   {
     "id": 4,
@@ -57,7 +81,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "armadillo",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 5,
@@ -69,7 +102,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "armor_stand",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 6,
@@ -80,7 +118,13 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "arrow",
+      "abstract_arrow",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 7,
@@ -92,7 +136,16 @@
     "category": "axolotls",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "axolotl",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 8,
@@ -104,7 +157,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_raft",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 9,
@@ -116,7 +176,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "raft",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 10,
@@ -128,7 +194,14 @@
     "category": "ambient",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "bat",
+      "ambient_creature",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 11,
@@ -140,7 +213,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "bee",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 12,
@@ -152,7 +234,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 13,
@@ -164,7 +252,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 14,
@@ -175,7 +270,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "blaze",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 15,
@@ -187,7 +290,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "block_display",
+      "display",
+      "entity"
+    ]
   },
   {
     "id": 16,
@@ -198,7 +306,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "bogged",
+      "abstract_skeleton",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 17,
@@ -209,7 +326,15 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "breeze",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 18,
@@ -221,7 +346,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "breeze_wind_charge",
+      "abstract_wind_charge",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 19,
@@ -233,7 +365,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "camel",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 20,
@@ -245,7 +387,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "cat",
+      "tamable_animal",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 21,
@@ -256,7 +408,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "cave_spider",
+      "spider",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 22,
@@ -268,7 +429,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 23,
@@ -280,7 +447,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 24,
@@ -292,7 +466,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_chest",
+      "abstract_minecart_container",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 25,
@@ -304,7 +485,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chicken",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 26,
@@ -316,7 +506,17 @@
     "category": "water_ambient",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "cod",
+      "abstract_schooling_fish",
+      "abstract_fish",
+      "water_animal",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 27,
@@ -328,7 +528,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_command_block",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 28,
@@ -340,7 +546,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "cow",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 29,
@@ -351,7 +566,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "creaking",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 30,
@@ -361,7 +584,16 @@
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "creaking_transient",
+      "creaking",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 31,
@@ -372,7 +604,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "creeper",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 32,
@@ -384,7 +624,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 33,
@@ -396,7 +642,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 34,
@@ -408,7 +661,16 @@
     "category": "water_creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "dolphin",
+      "ageable_water_creature",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 35,
@@ -420,7 +682,18 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "donkey",
+      "abstract_chested_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 36,
@@ -432,7 +705,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "dragon_fireball",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 37,
@@ -443,7 +722,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "drowned",
+      "zombie",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 38,
@@ -455,7 +743,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "thrown_egg",
+      "throwable_item_projectile",
+      "throwable_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 39,
@@ -466,7 +761,16 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "elder_guardian",
+      "guardian",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 40,
@@ -477,7 +781,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ender_man",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 41,
@@ -488,7 +800,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "endermite",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 42,
@@ -499,7 +819,13 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ender_dragon",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 43,
@@ -511,7 +837,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "thrown_enderpearl",
+      "throwable_item_projectile",
+      "throwable_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 44,
@@ -523,7 +856,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "end_crystal",
+      "entity"
+    ]
   },
   {
     "id": 45,
@@ -534,7 +871,19 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "evoker",
+      "spellcaster_illager",
+      "abstract_illager",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 46,
@@ -546,7 +895,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "evoker_fangs",
+      "entity"
+    ]
   },
   {
     "id": 47,
@@ -558,7 +911,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "thrown_experience_bottle",
+      "throwable_item_projectile",
+      "throwable_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 48,
@@ -569,7 +929,11 @@
     "clientTrackingRange": 6,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "experience_orb",
+      "entity"
+    ]
   },
   {
     "id": 49,
@@ -580,7 +944,11 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "eye_of_ender",
+      "entity"
+    ]
   },
   {
     "id": 50,
@@ -591,7 +959,11 @@
     "clientTrackingRange": 10,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "falling_block_entity",
+      "entity"
+    ]
   },
   {
     "id": 51,
@@ -603,7 +975,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "large_fireball",
+      "fireball",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 52,
@@ -614,7 +993,12 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "firework_rocket_entity",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 53,
@@ -626,7 +1010,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "fox",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 54,
@@ -638,7 +1031,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "frog",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 55,
@@ -650,7 +1052,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_furnace",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 56,
@@ -661,7 +1069,14 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ghast",
+      "flying_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 57,
@@ -672,7 +1087,15 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "giant",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 58,
@@ -684,7 +1107,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "glow_item_frame",
+      "item_frame",
+      "hanging_entity",
+      "block_attached_entity",
+      "entity"
+    ]
   },
   {
     "id": 59,
@@ -696,7 +1126,17 @@
     "category": "underground_water_creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "glow_squid",
+      "squid",
+      "ageable_water_creature",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 60,
@@ -708,7 +1148,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "goat",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 61,
@@ -719,7 +1168,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "guardian",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 62,
@@ -730,7 +1187,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "hoglin",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 63,
@@ -742,7 +1208,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_hopper",
+      "abstract_minecart_container",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 64,
@@ -754,7 +1227,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 65,
@@ -765,7 +1248,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "husk",
+      "zombie",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 66,
@@ -776,7 +1268,19 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "illusioner",
+      "spellcaster_illager",
+      "abstract_illager",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 67,
@@ -788,7 +1292,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "interaction",
+      "entity"
+    ]
   },
   {
     "id": 68,
@@ -800,7 +1308,15 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "iron_golem",
+      "abstract_golem",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 69,
@@ -811,7 +1327,11 @@
     "clientTrackingRange": 6,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "item_entity",
+      "entity"
+    ]
   },
   {
     "id": 70,
@@ -823,7 +1343,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "item_display",
+      "display",
+      "entity"
+    ]
   },
   {
     "id": 71,
@@ -835,7 +1360,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "item_frame",
+      "hanging_entity",
+      "block_attached_entity",
+      "entity"
+    ]
   },
   {
     "id": 72,
@@ -847,7 +1378,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 73,
@@ -859,7 +1396,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 74,
@@ -871,7 +1415,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "leash_fence_knot_entity",
+      "block_attached_entity",
+      "entity"
+    ]
   },
   {
     "id": 75,
@@ -883,7 +1432,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "lightning_bolt",
+      "entity"
+    ]
   },
   {
     "id": 76,
@@ -895,7 +1448,18 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "llama",
+      "abstract_chested_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 77,
@@ -907,7 +1471,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "llama_spit",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 78,
@@ -918,7 +1487,14 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "magma_cube",
+      "slime",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 79,
@@ -930,7 +1506,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 80,
@@ -942,7 +1524,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 81,
@@ -954,7 +1543,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "marker",
+      "entity"
+    ]
   },
   {
     "id": 82,
@@ -966,7 +1559,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 83,
@@ -978,7 +1577,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "mushroom_cow",
+      "cow",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 84,
@@ -990,7 +1599,18 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "mule",
+      "abstract_chested_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 85,
@@ -1002,7 +1622,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 86,
@@ -1014,7 +1640,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 87,
@@ -1026,7 +1659,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ocelot",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 88,
@@ -1038,7 +1680,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ominous_item_spawner",
+      "entity"
+    ]
   },
   {
     "id": 89,
@@ -1050,7 +1696,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "painting",
+      "hanging_entity",
+      "block_attached_entity",
+      "entity"
+    ]
   },
   {
     "id": 90,
@@ -1062,7 +1714,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 91,
@@ -1074,7 +1732,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 92,
@@ -1086,7 +1751,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "panda",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 93,
@@ -1098,7 +1772,18 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "parrot",
+      "shoulder_riding_entity",
+      "tamable_animal",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 94,
@@ -1109,7 +1794,14 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "phantom",
+      "flying_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 95,
@@ -1121,7 +1813,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "pig",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 96,
@@ -1132,7 +1833,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "piglin",
+      "abstract_piglin",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 97,
@@ -1143,7 +1853,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "piglin_brute",
+      "abstract_piglin",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 98,
@@ -1154,7 +1873,18 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "pillager",
+      "abstract_illager",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 99,
@@ -1166,7 +1896,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "polar_bear",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 100,
@@ -1178,7 +1917,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "thrown_potion",
+      "throwable_item_projectile",
+      "throwable_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 101,
@@ -1190,7 +1936,16 @@
     "category": "water_ambient",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "pufferfish",
+      "abstract_fish",
+      "water_animal",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 102,
@@ -1202,7 +1957,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "rabbit",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 103,
@@ -1213,7 +1977,17 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "ravager",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 104,
@@ -1225,7 +1999,17 @@
     "category": "water_ambient",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "salmon",
+      "abstract_schooling_fish",
+      "abstract_fish",
+      "water_animal",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 105,
@@ -1237,7 +2021,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "sheep",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 106,
@@ -1248,7 +2041,15 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "shulker",
+      "abstract_golem",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 107,
@@ -1260,7 +2061,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "shulker_bullet",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 108,
@@ -1271,7 +2077,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "silverfish",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 109,
@@ -1282,7 +2096,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "skeleton",
+      "abstract_skeleton",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 110,
@@ -1294,7 +2117,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "skeleton_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 111,
@@ -1305,7 +2138,13 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "slime",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 112,
@@ -1317,7 +2156,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "small_fireball",
+      "fireball",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 113,
@@ -1329,7 +2175,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "sniffer",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 114,
@@ -1341,7 +2196,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "snowball",
+      "throwable_item_projectile",
+      "throwable_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 115,
@@ -1353,7 +2215,15 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "snow_golem",
+      "abstract_golem",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 116,
@@ -1365,7 +2235,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_spawner",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 117,
@@ -1376,7 +2252,13 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "spectral_arrow",
+      "abstract_arrow",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 118,
@@ -1387,7 +2269,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "spider",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 119,
@@ -1399,7 +2289,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 120,
@@ -1411,7 +2307,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "chest_boat",
+      "abstract_chest_boat",
+      "abstract_boat",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 121,
@@ -1423,7 +2326,16 @@
     "category": "water_creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "squid",
+      "ageable_water_creature",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 122,
@@ -1434,7 +2346,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "stray",
+      "abstract_skeleton",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 123,
@@ -1446,7 +2367,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "strider",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 124,
@@ -1458,7 +2388,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "tadpole",
+      "abstract_fish",
+      "water_animal",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 125,
@@ -1470,7 +2409,12 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "text_display",
+      "display",
+      "entity"
+    ]
   },
   {
     "id": 126,
@@ -1482,7 +2426,11 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "primed_tnt",
+      "entity"
+    ]
   },
   {
     "id": 127,
@@ -1494,7 +2442,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "minecart_tnt",
+      "abstract_minecart",
+      "vehicle_entity",
+      "entity"
+    ]
   },
   {
     "id": 128,
@@ -1506,7 +2460,19 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "trader_llama",
+      "llama",
+      "abstract_chested_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 129,
@@ -1517,7 +2483,13 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "summonable": true
+    "summonable": true,
+    "inheritedClasses": [
+      "thrown_trident",
+      "abstract_arrow",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 130,
@@ -1529,7 +2501,17 @@
     "category": "water_ambient",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "tropical_fish",
+      "abstract_schooling_fish",
+      "abstract_fish",
+      "water_animal",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 131,
@@ -1541,7 +2523,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "turtle",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 132,
@@ -1552,7 +2543,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "vex",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 133,
@@ -1564,7 +2563,16 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "villager",
+      "abstract_villager",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 134,
@@ -1575,7 +2583,18 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "vindicator",
+      "abstract_illager",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 135,
@@ -1587,7 +2606,16 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wandering_trader",
+      "abstract_villager",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 136,
@@ -1598,7 +2626,15 @@
     "clientTrackingRange": 16,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "warden",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 137,
@@ -1610,7 +2646,14 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wind_charge",
+      "abstract_wind_charge",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 138,
@@ -1621,7 +2664,17 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "witch",
+      "raider",
+      "patrolling_monster",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 139,
@@ -1632,7 +2685,15 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wither_boss",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 140,
@@ -1643,7 +2704,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wither_skeleton",
+      "abstract_skeleton",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 141,
@@ -1655,7 +2725,13 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wither_skull",
+      "abstract_hurting_projectile",
+      "projectile",
+      "entity"
+    ]
   },
   {
     "id": 142,
@@ -1667,7 +2743,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "wolf",
+      "tamable_animal",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 143,
@@ -1678,7 +2764,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "zoglin",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 144,
@@ -1689,7 +2783,15 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "zombie",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 145,
@@ -1701,7 +2803,17 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "zombie_horse",
+      "abstract_horse",
+      "animal",
+      "ageable_mob",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 146,
@@ -1712,7 +2824,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "zombie_villager",
+      "zombie",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 147,
@@ -1723,7 +2844,16 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "zombified_piglin",
+      "zombie",
+      "monster",
+      "pathfinder_mob",
+      "mob",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 148,
@@ -1734,7 +2864,13 @@
     "clientTrackingRange": 32,
     "category": "misc",
     "friendly": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "",
+      "player",
+      "living_entity",
+      "entity"
+    ]
   },
   {
     "id": 149,
@@ -1745,6 +2881,11 @@
     "clientTrackingRange": 4,
     "category": "misc",
     "friendly": true,
-    "attackable": true
+    "attackable": true,
+    "inheritedClasses": [
+      "fishing_hook",
+      "projectile",
+      "entity"
+    ]
   }
 ]

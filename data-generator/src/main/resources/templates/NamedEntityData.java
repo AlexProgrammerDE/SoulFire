@@ -17,34 +17,21 @@
  */
 package com.soulfiremc.data;
 
-import net.kyori.adventure.key.Key;
-
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record EntityType(
-  int id,
-  Key key,
-  float width,
-  float height,
-  int updateInterval,
-  int clientTrackingRange,
-  String category,
-  boolean friendly,
-  boolean summonable,
-  boolean attackable,
-  List<String> inheritedClasses) implements RegistryValue<EntityType> {
-  public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
+public record NamedEntityData(String key, int networkId, String entityClass) {
+  public static final List<NamedEntityData> VALUES = new ArrayList<>();
 
   //@formatter:off
   // VALUES REPLACE
   //@formatter:on
 
-  public static EntityType register(String key) {
-    var instance =
-      GsonDataHelper.fromJson("minecraft/entities.json", key, EntityType.class);
-
-    return REGISTRY.register(instance);
+  public static NamedEntityData register(String key, int networkId, String entityClass) {
+    var instance = new NamedEntityData(key, networkId, entityClass);
+    VALUES.add(instance);
+    return instance;
   }
 
   @Override
@@ -52,14 +39,14 @@ public record EntityType(
     if (this == o) {
       return true;
     }
-    if (!(o instanceof EntityType other)) {
+    if (!(o instanceof NamedEntityData other)) {
       return false;
     }
-    return id == other.id;
+    return key.equals(other.key) && entityClass.equals(other.entityClass);
   }
 
   @Override
   public int hashCode() {
-    return id;
+    return key.hashCode() + entityClass.hashCode();
   }
 }

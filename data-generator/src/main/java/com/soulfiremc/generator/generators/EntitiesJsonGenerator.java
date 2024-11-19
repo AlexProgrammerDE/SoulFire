@@ -19,12 +19,12 @@ package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.MCHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.GameType;
+
+import java.util.Locale;
 
 public class EntitiesJsonGenerator implements IDataGenerator {
 
@@ -51,20 +51,19 @@ public class EntitiesJsonGenerator implements IDataGenerator {
       entityDesc.addProperty("summonable", true);
     }
 
-    var defaultEntity = createEntity(entityType);
+    var defaultEntity = MCHelper.createEntity(entityType);
     if (defaultEntity.isAttackable()) {
       entityDesc.addProperty("attackable", true);
     }
 
+    var inheritedClasses = new JsonArray();
+    Class<?> clazz = defaultEntity.getClass();
+    do {
+      inheritedClasses.add(FieldGenerationHelper.toSnakeCase(clazz.getSimpleName()).toLowerCase(Locale.ROOT));
+    } while ((clazz = clazz.getSuperclass()) != null && clazz != Object.class);
+    entityDesc.add("inheritedClasses", inheritedClasses);
+
     return entityDesc;
-  }
-
-  private static <T extends Entity> T createEntity(EntityType<T> entityType) {
-    if (entityType == EntityType.PLAYER) {
-      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE));
-    }
-
-    return entityType.create(MCHelper.getLevel(), EntitySpawnReason.COMMAND);
   }
 
   @Override

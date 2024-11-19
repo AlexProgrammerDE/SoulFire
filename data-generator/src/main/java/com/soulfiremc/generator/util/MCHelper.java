@@ -21,6 +21,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
 
 public class MCHelper {
@@ -43,5 +47,13 @@ public class MCHelper {
         return MCHelper.getLevel();
       }
     };
+  }
+
+  public static <T extends Entity> T createEntity(EntityType<T> entityType) {
+    if (entityType == EntityType.PLAYER) {
+      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE));
+    }
+
+    return entityType.create(MCHelper.getLevel(), EntitySpawnReason.COMMAND);
   }
 }

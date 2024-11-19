@@ -19,6 +19,8 @@ package com.soulfiremc.server.data;
 
 import net.kyori.adventure.key.Key;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 public record EntityType(
   int id,
@@ -30,7 +32,8 @@ public record EntityType(
   String category,
   boolean friendly,
   boolean summonable,
-  boolean attackable) implements RegistryValue<EntityType> {
+  boolean attackable,
+  List<String> inheritedClasses) implements RegistryValue<EntityType> {
   public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
 
   //@formatter:off

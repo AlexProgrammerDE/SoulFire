@@ -44,6 +44,7 @@ public class DataGenerators {
       new EffectsJavaGenerator(),
       new EntitiesJsonGenerator(),
       new EntitiesJavaGenerator(),
+      new NamedEntityDataJavaGenerator(),
       new ItemsJsonGenerator(),
       new ItemsJavaGenerator(),
       new AttributesJsonGenerator(),

@@ -19,6 +19,7 @@ package com.soulfiremc.generator.util;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -53,5 +54,11 @@ public class FieldGenerationHelper {
   }
 
   public record FieldNameValuePair<T>(String name, T value) {
+  }
+
+  public static String toSnakeCase(String camelCase) {
+    return camelCase
+      .replaceAll("([a-z])([A-Z]+)", "$1_$2")
+      .toUpperCase(Locale.ROOT);
   }
 }
