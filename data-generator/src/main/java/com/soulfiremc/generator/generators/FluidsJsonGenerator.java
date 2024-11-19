@@ -22,7 +22,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.material.Fluid;
 
-public class FluidsDataGenerator implements IDataGenerator {
+public class FluidsJsonGenerator implements IDataGenerator {
   public static JsonObject generateFluid(Fluid fluid) {
     var fluidDesc = new JsonObject();
 

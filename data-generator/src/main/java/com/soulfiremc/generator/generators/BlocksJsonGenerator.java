@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-public class BlocksDataGenerator implements IDataGenerator {
+public class BlocksJsonGenerator implements IDataGenerator {
   @SneakyThrows
   public static JsonObject generateBlock(Block block) {
     var blockDesc = new JsonObject();

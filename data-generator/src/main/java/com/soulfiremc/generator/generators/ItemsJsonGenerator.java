@@ -32,7 +32,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 
-public class ItemsDataGenerator implements IDataGenerator {
+public class ItemsJsonGenerator implements IDataGenerator {
   public static JsonObject generateItem(Item item) {
     var itemDesc = new JsonObject();
 

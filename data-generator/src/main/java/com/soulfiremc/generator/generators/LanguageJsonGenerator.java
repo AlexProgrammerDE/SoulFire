@@ -17,28 +17,16 @@
  */
 package com.soulfiremc.generator.generators;
 
-import com.soulfiremc.generator.util.FieldGenerationHelper;
-import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.ResourceHelper;
-import lombok.extern.slf4j.Slf4j;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 
-@Slf4j
-public class RegistryKeysDataGenerator implements IDataGenerator {
+public class LanguageJsonGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
-    return "java/RegistryKeys.java";
+    return "data/en_us.json";
   }
 
   @Override
   public String generateDataJson() {
-    var base = ResourceHelper.getResourceAsString("/templates/RegistryKeys.java");
-    return base.replace(
-      GeneratorConstants.VALUES_REPLACE,
-      String.join("\n  ",
-        FieldGenerationHelper.mapFields(Registries.class, ResourceKey.class, ResourceKey::location)
-          .map(f -> "public static final ResourceKey<?> %s = ResourceKey.key(\"%s\");".formatted(f.name(), f.value()))
-          .toArray(String[]::new)));
+    return ResourceHelper.getResourceAsString("/assets/minecraft/lang/en_us.json");
   }
 }

@@ -26,7 +26,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 
-public class EntitiesDataGenerator implements IDataGenerator {
+public class EntitiesJsonGenerator implements IDataGenerator {
 
   public static JsonObject generateEntity(EntityType<?> entityType) {
     var entityDesc = new JsonObject();

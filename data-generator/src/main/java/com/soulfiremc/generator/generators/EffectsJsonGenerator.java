@@ -24,7 +24,7 @@ import net.minecraft.world.effect.MobEffect;
 
 import java.util.Objects;
 
-public class EffectsDataGenerator implements IDataGenerator {
+public class EffectsJsonGenerator implements IDataGenerator {
 
   public static JsonObject generateEffect(MobEffect effect) {
     var effectDesc = new JsonObject();
