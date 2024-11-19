@@ -22,9 +22,9 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public record NamedEntityData(String key, int networkId, String entityClass) {
-    public static final List<NamedEntityData> VALUES = new ArrayList<>();
+  public static final List<NamedEntityData> VALUES = new ArrayList<>();
 
-    //@formatter:off
+  //@formatter:off
   public static final NamedEntityData ABSTRACT_ARROW__ID_FLAGS = register("id_flags", 8, "abstract_arrow");
   public static final NamedEntityData ABSTRACT_ARROW__IN_GROUND = register("in_ground", 10, "abstract_arrow");
   public static final NamedEntityData ABSTRACT_ARROW__PIERCE_LEVEL = register("pierce_level", 9, "abstract_arrow");
@@ -237,25 +237,25 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData ZOMBIE__SPECIAL_TYPE_ID = register("special_type_id", 17, "zombie");
   //@formatter:on
 
-    public static NamedEntityData register(String key, int networkId, String entityClass) {
-        var instance = new NamedEntityData(key, networkId, entityClass);
-        VALUES.add(instance);
-        return instance;
-    }
+  public static NamedEntityData register(String key, int networkId, String entityClass) {
+    var instance = new NamedEntityData(key, networkId, entityClass);
+    VALUES.add(instance);
+    return instance;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof NamedEntityData other)) {
-            return false;
-        }
-        return key.equals(other.key) && entityClass.equals(other.entityClass);
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
+    if (!(o instanceof NamedEntityData other)) {
+      return false;
+    }
+    return key.equals(other.key) && entityClass.equals(other.entityClass);
+  }
 
-    @Override
-    public int hashCode() {
-        return key.hashCode() + entityClass.hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return key.hashCode() + entityClass.hashCode();
+  }
 }

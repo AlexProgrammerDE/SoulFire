@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.data;
+package com.soulfiremc.server.data;
 
 @SuppressWarnings("unused")
 public class RegistryKeys {
