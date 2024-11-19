@@ -27,12 +27,11 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundPlayerInputPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
-
-import java.util.UUID;
 
 /**
  * Represents the bot itself as an entity.
@@ -43,6 +42,7 @@ import java.util.UUID;
 public class ClientEntity extends Entity {
   private final AbilitiesData abilitiesData = new AbilitiesData();
   private final BotConnection connection;
+  private final GameProfile gameProfile;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -59,11 +59,11 @@ public class ClientEntity extends Entity {
   private int positionReminder = 0;
   private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
-  public ClientEntity(
-    int entityId, UUID uuid, BotConnection connection,
-    Level level) {
-    super(entityId, uuid, EntityType.PLAYER, level, 0, 0, 0, -180, 0, -180, 0, 0, 0);
+  public ClientEntity(BotConnection connection, Level level, GameProfile gameProfile) {
+    super(EntityType.PLAYER, level);
     this.connection = connection;
+    this.gameProfile = gameProfile;
+    uuid(gameProfile.getId());
   }
 
   @Override

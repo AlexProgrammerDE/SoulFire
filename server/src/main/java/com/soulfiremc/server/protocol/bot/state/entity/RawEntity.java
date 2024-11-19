@@ -22,22 +22,12 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
-
-import java.util.UUID;
 
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class RawEntity extends Entity {
-  private final ObjectData data;
-
-  public RawEntity(int entityId, UUID uuid, EntityType type, ObjectData data,
-                   Level level,
-                   double x, double y, double z,
-                   float yRot, float xRot, float headYRot,
-                   double motionX, double motionY, double motionZ) {
-    super(entityId, uuid, type, level, x, y, z, yRot, xRot, headYRot, motionX, motionY, motionZ);
-    this.data = data;
+  public RawEntity(EntityType type, Level level) {
+    super(type, level);
   }
 }

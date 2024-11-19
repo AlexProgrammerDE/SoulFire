@@ -22,15 +22,13 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.UUID;
-
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class ExperienceOrbEntity extends Entity {
   private final int expValue;
 
-  public ExperienceOrbEntity(int entityId, int expValue, Level level, double x, double y, double z) {
-    super(entityId, UUID.randomUUID(), EntityType.EXPERIENCE_ORB, level, x, y, z, 0, 0, 0, 0, 0, 0);
+  public ExperienceOrbEntity(Level level, int expValue) {
+    super(EntityType.EXPERIENCE_ORB, level);
     this.expValue = expValue;
   }
 }

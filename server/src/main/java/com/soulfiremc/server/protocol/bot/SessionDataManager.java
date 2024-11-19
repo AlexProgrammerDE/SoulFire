@@ -252,7 +252,8 @@ public final class SessionDataManager {
 
     // Init client entity
     clientEntity =
-      new ClientEntity(packet.getEntityId(), botProfile.getId(), connection, currentLevel());
+      new ClientEntity(connection, currentLevel(), botProfile);
+    clientEntity.entityId(packet.getEntityId());
     clientEntity.showReducedDebug(packet.isReducedDebugInfo());
     entityTrackerState.addEntity(clientEntity);
   }
@@ -795,20 +796,9 @@ public final class SessionDataManager {
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
     var entityState =
       new RawEntity(
-        packet.getEntityId(),
-        packet.getUuid(),
         EntityType.REGISTRY.getById(packet.getType().ordinal()),
-        packet.getData(),
-        currentLevel(),
-        packet.getX(),
-        packet.getY(),
-        packet.getZ(),
-        packet.getYaw(),
-        packet.getPitch(),
-        packet.getHeadYaw(),
-        packet.getMotionX(),
-        packet.getMotionY(),
-        packet.getMotionZ());
+        currentLevel());
+    entityState.fromAddEntityPacket(packet);
 
     entityTrackerState.addEntity(entityState);
   }
@@ -816,8 +806,9 @@ public final class SessionDataManager {
   @EventHandler
   public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
     var experienceOrbState =
-      new ExperienceOrbEntity(packet.getEntityId(), packet.getExp(), currentLevel(), packet.getX(), packet.getY(),
-        packet.getZ());
+      new ExperienceOrbEntity(currentLevel(), packet.getExp());
+    experienceOrbState.entityId(packet.getEntityId());
+    experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
 
     entityTrackerState.addEntity(experienceOrbState);
   }

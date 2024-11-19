@@ -35,6 +35,8 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -49,10 +51,11 @@ public abstract class Entity {
   private final EntityAttributeState attributeState = new EntityAttributeState();
   private final EntityEffectState effectState = new EntityEffectState();
   private final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
-  public float fallDistance;
-  private final int entityId;
-  private final UUID uuid;
   private final EntityType entityType;
+  public float fallDistance;
+  protected UUID uuid;
+  protected ObjectData data;
+  private int entityId;
   protected Level level;
   protected double x;
   protected double y;
@@ -72,24 +75,19 @@ public abstract class Entity {
   protected boolean isInPowderSnow;
   protected boolean wasInPowderSnow;
 
-  public Entity(int entityId, UUID uuid, EntityType entityType,
-                Level level,
-                double x, double y, double z,
-                float yRot, float xRot, float headYRot,
-                double motionX, double motionY, double motionZ) {
-    this.entityId = entityId;
-    this.uuid = uuid;
+  public Entity(EntityType entityType, Level level) {
     this.entityType = entityType;
     this.level = level;
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.yRot = yRot;
-    this.xRot = xRot;
-    this.headYRot = headYRot;
-    this.motionX = motionX;
-    this.motionY = motionY;
-    this.motionZ = motionZ;
+  }
+
+  public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
+    entityId(packet.getEntityId());
+    uuid(packet.getUuid());
+    data(packet.getData());
+    setPosition(packet.getX(), packet.getY(), packet.getZ());
+    setHeadRotation(packet.getHeadYaw());
+    setRotation(packet.getYaw(), packet.getPitch());
+    setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
   public EntityMovement toMovement() {
