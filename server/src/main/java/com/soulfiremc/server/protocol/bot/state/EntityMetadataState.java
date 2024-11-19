@@ -17,10 +17,14 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.NamedEntityData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+
+import java.util.Optional;
 
 @Data
 public class EntityMetadataState {
@@ -28,5 +32,15 @@ public class EntityMetadataState {
 
   public void setMetadata(EntityMetadata<?, ?> metadata) {
     this.metadataStore.put(metadata.getId(), metadata);
+  }
+
+  public <T> Optional<T> getMetadata(NamedEntityData namedEntityData, MetadataType<T> ignored) {
+    return getMetadata(namedEntityData.networkId(), ignored);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> Optional<T> getMetadata(int id, MetadataType<T> ignored) {
+    return (Optional<T>) Optional.ofNullable(this.metadataStore.get(id))
+      .map(EntityMetadata::getValue);
   }
 }
