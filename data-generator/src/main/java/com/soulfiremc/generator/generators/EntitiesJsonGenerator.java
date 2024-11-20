@@ -21,13 +21,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.MCHelper;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
+@Slf4j
 public class EntitiesJsonGenerator implements IDataGenerator {
 
+  @SneakyThrows
   public static JsonObject generateEntity(EntityType<?> entityType) {
     var entityDesc = new JsonObject();
 
@@ -63,6 +71,25 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     } while ((clazz = clazz.getSuperclass()) != null && clazz != Object.class);
     entityDesc.add("inheritedClasses", inheritedClasses);
 
+    entityDesc.addProperty("defaultEntityMetadata", MCHelper.serializeToBase64(registryBuf -> {
+      try {
+        var itemsByIdField = SynchedEntityData.class.getDeclaredField("itemsById");
+        itemsByIdField.setAccessible(true);
+        var itemsById = (SynchedEntityData.DataItem<?>[]) itemsByIdField.get(defaultEntity.getEntityData());
+        var list = new ArrayList<SynchedEntityData.DataValue<?>>();
+        var defaultField = SynchedEntityData.DataItem.class.getDeclaredField("initialValue");
+        defaultField.setAccessible(true);
+        for (var item : itemsById) {
+          list.add(createCasted(item.getAccessor(), defaultField.get(item)));
+        }
+        var packet = new ClientboundSetEntityDataPacket(-1, list);
+
+        ClientboundSetEntityDataPacket.STREAM_CODEC.encode(registryBuf, packet);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }));
+
     return entityDesc;
   }
 
@@ -76,5 +103,10 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     var resultArray = new JsonArray();
     BuiltInRegistries.ENTITY_TYPE.forEach(entity -> resultArray.add(generateEntity(entity)));
     return resultArray;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> SynchedEntityData.DataValue<T> createCasted(EntityDataAccessor<T> accessor, Object value) {
+    return SynchedEntityData.DataValue.create(accessor, (T) value);
   }
 }

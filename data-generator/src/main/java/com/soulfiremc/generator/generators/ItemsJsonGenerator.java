@@ -21,14 +21,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.generator.util.MCHelper;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.Item;
 
-import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 
@@ -41,14 +38,10 @@ public class ItemsJsonGenerator implements IDataGenerator {
 
     var sortedComponentObj = new JsonObject();
     item.components().stream().map(typed -> {
-        ByteBuf buf = Unpooled.buffer();
-        RegistryFriendlyByteBuf registryBuf = new RegistryFriendlyByteBuf(buf, MCHelper.getLevel().registryAccess());
-        registryBuf.writeVarInt(BuiltInRegistries.DATA_COMPONENT_TYPE.getId(typed.type()));
-        writeComponent(registryBuf, typed);
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        buf.release();
-        String data = Base64.getEncoder().encodeToString(bytes);
+        var data = MCHelper.serializeToBase64(registryBuf -> {
+          registryBuf.writeVarInt(BuiltInRegistries.DATA_COMPONENT_TYPE.getId(typed.type()));
+          writeComponent(registryBuf, typed);
+        });
 
         return Map.entry(
           Objects.requireNonNull(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(typed.type())).toString(),

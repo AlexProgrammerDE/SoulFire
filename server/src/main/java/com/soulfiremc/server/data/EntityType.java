@@ -33,7 +33,8 @@ public record EntityType(
   boolean friendly,
   boolean summonable,
   boolean attackable,
-  List<String> inheritedClasses) implements RegistryValue<EntityType> {
+  List<String> inheritedClasses,
+  String defaultEntityMetadata) implements RegistryValue<EntityType> {
   public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
 
   //@formatter:off

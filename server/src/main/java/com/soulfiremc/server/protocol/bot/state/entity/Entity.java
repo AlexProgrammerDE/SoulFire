@@ -28,16 +28,19 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -80,6 +83,13 @@ public abstract class Entity {
     this.metadataState = new EntityMetadataState(entityType);
     this.entityType = entityType;
     this.level = level;
+    var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
+    var buf = Unpooled.wrappedBuffer(bytes);
+    var helper = new MinecraftCodecHelper();
+    helper.readVarInt(buf);
+    for (var metadata : helper.readEntityMetadata(buf)) {
+      metadataState.setMetadata(metadata);
+    }
   }
 
   public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
