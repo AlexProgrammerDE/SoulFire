@@ -29,6 +29,6 @@ public class ClientConsoleCommandSource implements CommandSource {
 
   @Override
   public void sendMessage(Level level, Component message) {
-    log.atLevel(level).log(() -> ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
+    log.atLevel(level).setMessage("{}").addArgument(() -> ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message)).log();
   }
 }

@@ -18,8 +18,12 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.protocol.bot.state.Level;
+import lombok.Getter;
+import lombok.Setter;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 
+@Getter
+@Setter
 public abstract class AbstractClientPlayer extends Player {
   public AbstractClientPlayer(Level level, GameProfile gameProfile) {
     super(level, gameProfile);

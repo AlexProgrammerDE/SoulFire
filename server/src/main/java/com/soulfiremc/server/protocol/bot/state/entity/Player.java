@@ -19,13 +19,17 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidTags;
+import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
+import lombok.Setter;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 
 @Getter
+@Setter
 public abstract class Player extends LivingEntity {
+  private final AbilitiesData abilitiesData = new AbilitiesData();
   protected final GameProfile gameProfile;
   protected boolean wasUnderwater = false;
 

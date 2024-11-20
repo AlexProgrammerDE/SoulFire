@@ -35,10 +35,20 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class EntityMetadataState {
   private final EntityType entityType;
-  private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
+  private final Int2ObjectMap<Object> metadataStore = new Int2ObjectOpenHashMap<>();
 
   public void setMetadata(EntityMetadata<?, ?> metadata) {
-    this.metadataStore.put(metadata.getId(), metadata);
+    this.metadataStore.put(metadata.getId(), metadata.getValue());
+  }
+
+  public <T> void setMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType, T value) {
+    assert metadataType != null;
+
+    this.metadataStore.put(namedEntityData.networkId(), value);
+  }
+
+  public <T> T getMetadataThrown(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
+    return getMetadata(namedEntityData, metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
   }
 
   public <T> Optional<T> getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
@@ -47,16 +57,14 @@ public class EntityMetadataState {
 
   @SuppressWarnings("unchecked")
   public <T> Optional<T> getMetadata(int id, MetadataType<T> metadataType) {
+    assert metadataType != null;
+
     var metadata = this.metadataStore.get(id);
     if (metadata == null) {
       return Optional.empty();
     }
 
-    if (metadata.getId() != metadataType.getId()) {
-      throw new IllegalArgumentException("Metadata type mismatch");
-    }
-
-    return Optional.of((T) metadata.getValue());
+    return Optional.of((T) metadata);
   }
 
   public Map<String, ?> toNamedMap() {
@@ -74,7 +82,7 @@ public class EntityMetadataState {
       .forEach(namedData -> {
         var metadata = this.metadataStore.get(namedData.networkId());
         if (metadata != null) {
-          namedMap.put(namedData.key(), metadata.getValue());
+          namedMap.put(namedData.key(), metadata);
         }
       });
 

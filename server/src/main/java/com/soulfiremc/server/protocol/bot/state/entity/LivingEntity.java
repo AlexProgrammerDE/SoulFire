@@ -18,8 +18,14 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import lombok.Getter;
+import lombok.Setter;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 
+@Getter
+@Setter
 public abstract class LivingEntity extends Entity {
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
@@ -51,4 +57,15 @@ public abstract class LivingEntity extends Entity {
   }
 
   public abstract boolean isUnderWater();
+
+  protected void setLivingEntityFlag(int key, boolean value) {
+    int j = this.metadataState.getMetadataThrown(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
+    if (value) {
+      j |= key;
+    } else {
+      j &= ~key;
+    }
+
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, (byte) j);
+  }
 }

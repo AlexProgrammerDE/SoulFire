@@ -17,10 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.FluidType;
-import com.soulfiremc.server.data.TagKey;
+import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
@@ -37,6 +34,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
@@ -50,15 +48,15 @@ import java.util.UUID;
 @Setter
 public abstract class Entity {
   public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
-  private final EntityAttributeState attributeState = new EntityAttributeState();
-  private final EntityEffectState effectState = new EntityEffectState();
-  private final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
-  private final EntityType entityType;
-  private final EntityMetadataState metadataState;
-  public float fallDistance;
+  protected final EntityAttributeState attributeState = new EntityAttributeState();
+  protected final EntityEffectState effectState = new EntityEffectState();
+  protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
+  protected final EntityType entityType;
+  protected final EntityMetadataState metadataState;
+  protected float fallDistance;
   protected UUID uuid;
   protected ObjectData data;
-  private int entityId;
+  protected int entityId;
   protected Level level;
   protected double x;
   protected double y;
@@ -271,5 +269,18 @@ public abstract class Entity {
     var l = MathHelper.cos(h);
     var m = MathHelper.sin(h);
     return Vector3d.from(k * l, -m, (double) (j * l));
+  }
+
+  protected boolean getSharedFlag(int flag) {
+    return (this.metadataState.getMetadataThrown(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE) & 1 << flag) != 0;
+  }
+
+  protected void setSharedFlag(int flag, boolean set) {
+    byte b = this.metadataState.getMetadataThrown(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE);
+    if (set) {
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b | 1 << flag));
+    } else {
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b & ~(1 << flag)));
+    }
   }
 }

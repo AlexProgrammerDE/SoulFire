@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -38,7 +37,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class LocalPlayer extends AbstractClientPlayer {
-  private final AbilitiesData abilitiesData = new AbilitiesData();
   private final BotConnection connection;
   private boolean showReducedDebug;
   private int opPermissionLevel;
