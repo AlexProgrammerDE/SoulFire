@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -60,7 +60,7 @@ public class EntityMetadataState {
   }
 
   public Map<String, ?> toNamedMap() {
-    var namedMap = new HashMap<String, Object>();
+    var namedMap = new LinkedHashMap<String, Object>();
     entityType.inheritedClasses().stream().flatMap(clazz -> {
         var stream = Stream.<NamedEntityData>empty();
         for (var namedData : NamedEntityData.VALUES) {
