@@ -24,7 +24,6 @@ import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.BlockTypeHelper;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
 import org.jetbrains.annotations.Nullable;
@@ -262,8 +261,8 @@ public class Costs {
   }
 
   private static OptionalInt getDigSpeedAmplifier(EntityEffectState effectState) {
-    var hasteEffect = effectState.getEffect(Effect.HASTE);
-    var conduitPowerEffect = effectState.getEffect(Effect.CONDUIT_POWER);
+    var hasteEffect = effectState.getEffect(EffectType.DIG_SPEED);
+    var conduitPowerEffect = effectState.getEffect(EffectType.CONDUIT_POWER);
 
     if (hasteEffect.isPresent() && conduitPowerEffect.isPresent()) {
       return OptionalInt.of(
@@ -280,7 +279,7 @@ public class Costs {
   }
 
   private static OptionalInt getDigSlowdownAmplifier(EntityEffectState effectState) {
-    var miningFatigueEffect = effectState.getEffect(Effect.MINING_FATIGUE);
+    var miningFatigueEffect = effectState.getEffect(EffectType.DIG_SLOWDOWN);
 
     return miningFatigueEffect
       .map(effectData -> OptionalInt.of(effectData.amplifier()))

@@ -80,6 +80,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
 import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.Attribute;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
@@ -702,9 +703,9 @@ public class POVServer extends InternalPlugin {
             entity.yRot(),
             entity.headYRot(),
             entity.xRot(),
-            entity.motionX(),
-            entity.motionY(),
-            entity.motionZ()));
+            entity.deltaMovementX(),
+            entity.deltaMovementY(),
+            entity.deltaMovementZ()));
       } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
         clientSession.send(
           new ClientboundAddExperienceOrbPacket(
@@ -719,7 +720,7 @@ public class POVServer extends InternalPlugin {
         clientSession.send(
           new ClientboundUpdateMobEffectPacket(
             entity.entityId(),
-            effect.getKey(),
+            Effect.from(effect.getKey().id()),
             effect.getValue().amplifier(),
             effect.getValue().duration(),
             effect.getValue().ambient(),

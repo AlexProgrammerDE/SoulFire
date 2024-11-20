@@ -47,12 +47,8 @@ public class EntityMetadataState {
     this.metadataStore.put(namedEntityData.networkId(), value);
   }
 
-  public <T> T getMetadataThrown(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
-    return getMetadata(namedEntityData, metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
-  }
-
-  public <T> Optional<T> getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
-    return getMetadata(namedEntityData.networkId(), metadataType);
+  public <T> T getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
+    return getMetadata(namedEntityData.networkId(), metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
   }
 
   @SuppressWarnings("unchecked")

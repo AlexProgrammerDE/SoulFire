@@ -897,7 +897,7 @@ public final class SessionDataManager {
     state
       .effectState()
       .updateEffect(
-        packet.getEffect(),
+        EffectType.REGISTRY.getById(packet.getEffect().ordinal()),
         packet.getAmplifier(),
         packet.getDuration(),
         packet.isAmbient(),
@@ -915,7 +915,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.effectState().removeEffect(packet.getEffect());
+    state.effectState().removeEffect(EffectType.REGISTRY.getById(packet.getEffect().ordinal()));
   }
 
   @EventHandler
@@ -927,7 +927,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+    state.setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
   @EventHandler

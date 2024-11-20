@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.EffectType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -59,7 +61,7 @@ public abstract class LivingEntity extends Entity {
   public abstract boolean isUnderWater();
 
   protected void setLivingEntityFlag(int key, boolean value) {
-    int j = this.metadataState.getMetadataThrown(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
+    int j = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
     if (value) {
       j |= key;
     } else {
@@ -67,5 +69,15 @@ public abstract class LivingEntity extends Entity {
     }
 
     this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, (byte) j);
+  }
+
+  @Override
+  protected double getDefaultGravity() {
+    return this.attributeValue(AttributeType.GRAVITY);
+  }
+
+  protected double getEffectiveGravity() {
+    var bl = this.getDeltaMovement().getY() <= 0.0;
+    return bl && this.effectState().hasEffect(EffectType.SLOW_FALLING) ? Math.min(this.getGravity(), 0.01) : this.getGravity();
   }
 }

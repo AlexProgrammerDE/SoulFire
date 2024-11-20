@@ -64,9 +64,9 @@ public abstract class Entity {
   protected float yRot;
   protected float xRot;
   protected float headYRot;
-  protected double motionX;
-  protected double motionY;
-  protected double motionZ;
+  protected double deltaMovementX;
+  protected double deltaMovementY;
+  protected double deltaMovementZ;
   protected boolean onGround;
   protected int jumpTriggerTime;
   protected boolean horizontalCollision;
@@ -97,16 +97,16 @@ public abstract class Entity {
     setPosition(packet.getX(), packet.getY(), packet.getZ());
     setHeadRotation(packet.getHeadYaw());
     setRotation(packet.getYaw(), packet.getPitch());
-    setMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+    setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
   public EntityMovement toMovement() {
-    return new EntityMovement(Vector3d.from(x, y, z), Vector3d.from(motionX, motionY, motionZ), yRot, xRot);
+    return new EntityMovement(Vector3d.from(x, y, z), Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ), yRot, xRot);
   }
 
   public void setFrom(EntityMovement entityMovement) {
     setPosition(entityMovement.pos());
-    setMotion(entityMovement.deltaMovement());
+    setDeltaMovement(entityMovement.deltaMovement());
     setRotation(entityMovement.yRot(), entityMovement.xRot());
   }
 
@@ -135,14 +135,14 @@ public abstract class Entity {
     this.headYRot = headYRot;
   }
 
-  public void setMotion(Vector3d motion) {
-    setMotion(motion.getX(), motion.getY(), motion.getZ());
+  public void setDeltaMovement(double deltaMovementX, double deltaMovementY, double deltaMovementZ) {
+    this.deltaMovementX = deltaMovementX;
+    this.deltaMovementY = deltaMovementY;
+    this.deltaMovementZ = deltaMovementZ;
   }
 
-  public void setMotion(double motionX, double motionY, double motionZ) {
-    this.motionX = motionX;
-    this.motionY = motionY;
-    this.motionZ = motionZ;
+  protected boolean getSharedFlag(int flag) {
+    return (this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE) & 1 << flag) != 0;
   }
 
   public void tick() {
@@ -271,16 +271,43 @@ public abstract class Entity {
     return Vector3d.from(k * l, -m, (double) (j * l));
   }
 
-  protected boolean getSharedFlag(int flag) {
-    return (this.metadataState.getMetadataThrown(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE) & 1 << flag) != 0;
-  }
-
   protected void setSharedFlag(int flag, boolean set) {
-    byte b = this.metadataState.getMetadataThrown(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE);
+    byte b = this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE);
     if (set) {
       this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b | 1 << flag));
     } else {
       this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b & ~(1 << flag)));
+    }
+  }
+
+  protected Vector3d getDeltaMovement() {
+    return Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ);
+  }
+
+  public void setDeltaMovement(Vector3d motion) {
+    setDeltaMovement(motion.getX(), motion.getY(), motion.getZ());
+  }
+
+  public boolean isNoGravity() {
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataType.BOOLEAN);
+  }
+
+  public void setNoGravity(boolean noGravity) {
+    this.metadataState.setMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataType.BOOLEAN, noGravity);
+  }
+
+  protected double getDefaultGravity() {
+    return 0.0;
+  }
+
+  public final double getGravity() {
+    return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+  }
+
+  protected void applyGravity() {
+    var d = this.getGravity();
+    if (d != 0.0) {
+      this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d, 0.0));
     }
   }
 }

@@ -17,23 +17,23 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.data.EffectType;
 import com.soulfiremc.server.protocol.bot.model.EffectData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Data
 public class EntityEffectState {
-  private final Map<Effect, InternalEffectState> effects = new EnumMap<>(Effect.class);
+  private final Map<EffectType, InternalEffectState> effects = new HashMap<>();
 
   public void updateEffect(
-    Effect effect,
+    EffectType effect,
     int amplifier,
     int duration,
     boolean ambient,
@@ -45,11 +45,15 @@ public class EntityEffectState {
       new InternalEffectState(amplifier, ambient, showParticles, showIcon, blend, duration));
   }
 
-  public void removeEffect(Effect effect) {
+  public void removeEffect(EffectType effect) {
     effects.remove(effect);
   }
 
-  public Optional<EffectData> getEffect(Effect effect) {
+  public boolean hasEffect(EffectType effect) {
+    return effects.containsKey(effect);
+  }
+
+  public Optional<EffectData> getEffect(EffectType effect) {
     var state = effects.get(effect);
 
     if (state == null) {
@@ -67,7 +71,7 @@ public class EntityEffectState {
         state.blend()));
   }
 
-  public int getEffectAmplifier(Effect effect) {
+  public int getEffectAmplifier(EffectType effect) {
     return getEffect(effect).map(EffectData::amplifier).orElse(0);
   }
 

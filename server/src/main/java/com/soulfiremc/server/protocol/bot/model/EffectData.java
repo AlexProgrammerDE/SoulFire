@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.server.protocol.bot.model;
 
-import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
+import com.soulfiremc.server.data.EffectType;
 
 public record EffectData(
-  Effect effect,
+  EffectType effect,
   int amplifier,
   int duration,
   boolean ambient,
