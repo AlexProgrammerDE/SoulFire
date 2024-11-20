@@ -47,11 +47,11 @@ import java.util.UUID;
 @Setter
 public abstract class Entity {
   public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
-  private final EntityMetadataState metadataState = new EntityMetadataState();
   private final EntityAttributeState attributeState = new EntityAttributeState();
   private final EntityEffectState effectState = new EntityEffectState();
   private final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
   private final EntityType entityType;
+  private final EntityMetadataState metadataState;
   public float fallDistance;
   protected UUID uuid;
   protected ObjectData data;
@@ -77,6 +77,7 @@ public abstract class Entity {
   public boolean noPhysics;
 
   public Entity(EntityType entityType, Level level) {
+    this.metadataState = new EntityMetadataState(entityType);
     this.entityType = entityType;
     this.level = level;
   }

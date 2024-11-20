@@ -76,6 +76,11 @@ public class NamedEntityDataJavaGenerator implements IDataGenerator {
         dataName = dataName.substring(fieldPrefix.length());
       }
 
+      var fieldSuffix = "_ID";
+      if (dataName.endsWith(fieldSuffix)) {
+        dataName = dataName.substring(0, dataName.length() - fieldSuffix.length());
+      }
+
       field.setAccessible(true);
       var dataValue = (EntityDataAccessor<?>) field.get(null);
       fields.add("public static final NamedEntityData %s = register(\"%s\", %d, \"%s\");".formatted(

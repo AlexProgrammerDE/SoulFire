@@ -36,7 +36,6 @@ import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.grpc.ServerRPCConstants;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
@@ -53,7 +52,6 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.ServerCommandSource;
-import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -277,37 +275,14 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   return forEveryBot(
                     c,
                     bot -> {
-                      var dataManager = bot.dataManager();
-
-                      var parsedUniqueId = UUIDHelper.tryParseUniqueId(entityName);
-                      var entityId = -1;
-                      for (var entity : dataManager.entityTrackerState().getEntities()) {
-                        if (entity.entityType() != EntityType.PLAYER) {
-                          continue;
-                        }
-
-                        var connectedUsers = dataManager.playerListState();
-                        var entry = connectedUsers.entries().get(entity.uuid());
-                        if (entry != null
-                          && ((parsedUniqueId.isPresent() && entry.getProfileId().equals(parsedUniqueId.get()))
-                          || (entry.getProfile() != null && entry.getProfile().getName().equalsIgnoreCase(entityName)))
-                        ) {
-                          entityId = entity.entityId();
-                          break;
-                        }
-                      }
-
+                      var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
                       if (entityId == -1) {
-                        var parsedEntityId = SFHelpers.parseInt(entityName);
-                        if (parsedEntityId.isEmpty()) {
-                          c.getSource().sendWarn("Invalid entity specified!");
-                          return Command.SINGLE_SUCCESS;
-                        }
+                        c.getSource().sendWarn("Invalid entity specified!");
+                        return Command.SINGLE_SUCCESS;
                       }
 
-                      var finalEntityId = entityId;
                       bot.scheduler().schedule(() -> new FollowEntityController(
-                        finalEntityId,
+                        entityId,
                         maxRadius
                       ).start(bot));
 
@@ -681,6 +656,35 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
 
                   return Command.SINGLE_SUCCESS;
                 }))));
+    dispatcher.register(
+      literal("metadata")
+        .then(argument("entity", StringArgumentType.string())
+          .executes(
+            help(
+              "Makes selected bots follow an entity by id",
+              c -> {
+                var entityName = StringArgumentType.getString(c, "entity");
+
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
+                    if (entityId == -1) {
+                      c.getSource().sendWarn("Invalid entity specified!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId);
+                    if (entity == null) {
+                      c.getSource().sendWarn("Entity not found!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    c.getSource().sendInfo("Metadata for entity {}: {}", entityId, entity.metadataState().toNamedMap());
+
+                    return Command.SINGLE_SUCCESS;
+                  });
+              }))));
     dispatcher.register(
       literal("export-map")
         .executes(
