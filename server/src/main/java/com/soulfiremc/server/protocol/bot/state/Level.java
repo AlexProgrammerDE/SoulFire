@@ -111,12 +111,12 @@ public class Level implements LevelHeightAccessor {
   }
 
   public List<AABB> getCollisionBoxes(AABB aabb) {
-    var startX = MathHelper.floorDouble(aabb.minX - 1.0E-7) - 1;
-    var endX = MathHelper.floorDouble(aabb.maxX + 1.0E-7) + 1;
-    var startY = MathHelper.floorDouble(aabb.minY - 1.0E-7) - 1;
-    var endY = MathHelper.floorDouble(aabb.maxY + 1.0E-7) + 1;
-    var startZ = MathHelper.floorDouble(aabb.minZ - 1.0E-7) - 1;
-    var endZ = MathHelper.floorDouble(aabb.maxZ + 1.0E-7) + 1;
+    var startX = MathHelper.floorDouble(aabb.minX - AABB.EPSILON) - 1;
+    var endX = MathHelper.floorDouble(aabb.maxX + AABB.EPSILON) + 1;
+    var startY = MathHelper.floorDouble(aabb.minY - AABB.EPSILON) - 1;
+    var endY = MathHelper.floorDouble(aabb.maxY + AABB.EPSILON) + 1;
+    var startZ = MathHelper.floorDouble(aabb.minZ - AABB.EPSILON) - 1;
+    var endZ = MathHelper.floorDouble(aabb.maxZ + AABB.EPSILON) + 1;
 
     var predictedSize = (endX - startX + 1) * (endY - startY + 1) * (endZ - startZ + 1);
     var surroundingBBs = new ArrayList<AABB>(predictedSize);
@@ -137,5 +137,31 @@ public class Level implements LevelHeightAccessor {
     }
 
     return surroundingBBs;
+  }
+
+  public boolean containsAnyLiquid(AABB bb) {
+    var minX = MathHelper.floor(bb.minX);
+    var maxX = MathHelper.ceil(bb.maxX);
+    var minY = MathHelper.floor(bb.minY);
+    var maxY = MathHelper.ceil(bb.maxY);
+    var minZ = MathHelper.floor(bb.minZ);
+    var maxZ = MathHelper.ceil(bb.maxZ);
+
+    for (var x = minX; x < maxX; x++) {
+      for (var y = minY; y < maxY; y++) {
+        for (var z = minZ; z < maxZ; z++) {
+          var blockState = this.getBlockState(Vector3i.from(x, y, z));
+          if (!blockState.fluidState().empty()) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public boolean noCollision(AABB bb) {
+    return getCollisionBoxes(bb).isEmpty();
   }
 }

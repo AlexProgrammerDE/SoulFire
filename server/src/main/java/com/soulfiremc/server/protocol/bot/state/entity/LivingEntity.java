@@ -33,6 +33,7 @@ public abstract class LivingEntity extends Entity {
   private static final Attribute.Modifier SPEED_MODIFIER_SPRINTING = new Attribute.Modifier(
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
+  protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
 
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
@@ -64,6 +65,31 @@ public abstract class LivingEntity extends Entity {
   }
 
   public abstract boolean isUnderWater();
+
+  @Override
+  public final EntityDimensions getDimensions(Pose pose) {
+    return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : this.getDefaultDimensions(pose).scale(this.getScale());
+  }
+
+  protected EntityDimensions getDefaultDimensions(Pose pose) {
+    return this.entityType().dimensions().scale(this.getAgeScale());
+  }
+
+  public boolean isBaby() {
+    return false;
+  }
+
+  public float getAgeScale() {
+    return this.isBaby() ? 0.5F : 1.0F;
+  }
+
+  public final float getScale() {
+    return attributeState().hasAttribute(AttributeType.SCALE) ? this.sanitizeScale((float) attributeValue(AttributeType.SCALE)) : 1.0F;
+  }
+
+  protected float sanitizeScale(float scale) {
+    return scale;
+  }
 
   protected void setLivingEntityFlag(int key, boolean value) {
     int j = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
@@ -107,5 +133,9 @@ public abstract class LivingEntity extends Entity {
   @Override
   public boolean isVisuallySwimming() {
     return super.isVisuallySwimming() || !this.isFallFlying() && this.hasPose(Pose.FALL_FLYING);
+  }
+
+  public boolean isAutoSpinAttack() {
+    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE) & 4) != 0;
   }
 }

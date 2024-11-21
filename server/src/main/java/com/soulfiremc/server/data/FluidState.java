@@ -17,10 +17,25 @@
  */
 package com.soulfiremc.server.data;
 
+import com.soulfiremc.server.protocol.bot.state.Level;
+import org.cloudburstmc.math.vector.Vector3i;
+
 public record FluidState(
   FluidType type,
   int amount,
   float ownHeight,
-  boolean source
+  boolean source,
+  boolean empty
 ) {
+  private boolean hasSameAbove(Level level, Vector3i blockPos) {
+    return type.equals(level.getBlockState(blockPos.add(0, 1, 0)).fluidState().type());
+  }
+
+  public float getHeight(Level level, Vector3i blockPos) {
+    if (type == FluidType.EMPTY) {
+      return 0.0F;
+    } else {
+      return hasSameAbove(level, blockPos) ? 1.0F : ownHeight;
+    }
+  }
 }

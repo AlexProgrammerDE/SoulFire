@@ -156,8 +156,8 @@ public class BotControlAPI {
 
   public Vector3d getEntityVisiblePoint(Entity entity) {
     var points = new ArrayList<Vector3d>();
-    double halfWidth = entity.width() / 2;
-    double halfHeight = entity.height() / 2;
+    double halfWidth = entity.dimensions().width() / 2;
+    double halfHeight = entity.dimensions().height() / 2;
     for (var x = -1; x <= 1; x++) {
       for (var y = 0; y <= 2; y++) {
         for (var z = -1; z <= 1; z++) {

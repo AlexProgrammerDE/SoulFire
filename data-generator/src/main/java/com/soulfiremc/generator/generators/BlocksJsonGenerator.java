@@ -95,6 +95,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
       if (fluidState.isSource()) {
         fluidStateDesc.addProperty("source", true);
       }
+      if (fluidState.isEmpty()) {
+        fluidStateDesc.addProperty("empty", true);
+      }
 
       stateDesc.add("fluidState", fluidStateDesc);
 

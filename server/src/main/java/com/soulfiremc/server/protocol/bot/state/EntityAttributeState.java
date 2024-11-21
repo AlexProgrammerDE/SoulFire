@@ -48,6 +48,10 @@ public class EntityAttributeState {
     };
   }
 
+  public boolean hasAttribute(AttributeType type) {
+    return attributeStore.containsKey(type);
+  }
+
   public AttributeState getOrCreateAttribute(AttributeType type) {
     return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
   }

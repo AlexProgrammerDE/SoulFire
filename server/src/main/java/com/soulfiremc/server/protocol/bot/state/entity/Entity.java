@@ -18,14 +18,18 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.*;
+import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.SectionUtils;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,9 +60,11 @@ public abstract class Entity {
   private static final int FLAG_SWIMMING = 4;
   private static final int FLAG_INVISIBLE = 5;
   public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
+  private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
+  protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
   protected final EntityType entityType;
   protected final EntityMetadataState metadataState;
   protected float fallDistance;
@@ -66,9 +72,9 @@ public abstract class Entity {
   protected ObjectData data;
   protected int entityId;
   protected Level level;
-  protected double x;
-  protected double y;
-  protected double z;
+  protected BlockState inBlockState = null;
+  protected boolean firstTick = true;
+  private Vector3d pos;
   protected float yRot;
   protected float xRot;
   protected float headYRot;
@@ -85,12 +91,21 @@ public abstract class Entity {
   protected boolean wasInPowderSnow;
   protected boolean wasTouchingWater;
   protected boolean wasEyeInWater;
+  private Vector3i blockPosition;
+  private ChunkKey chunkPosition;
+  private EntityDimensions dimensions;
+  private float eyeHeight;
+  private AABB bb = INITIAL_AABB;
   public boolean noPhysics;
 
   public Entity(EntityType entityType, Level level) {
     this.metadataState = new EntityMetadataState(entityType);
     this.entityType = entityType;
     this.level = level;
+    this.dimensions = entityType.dimensions();
+    this.pos = Vector3d.ZERO;
+    this.blockPosition = Vector3i.ZERO;
+    this.chunkPosition = ChunkKey.ZERO;
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
     var helper = new MinecraftCodecHelper();
@@ -98,42 +113,81 @@ public abstract class Entity {
     for (var metadata : helper.readEntityMetadata(buf)) {
       metadataState.setMetadata(metadata);
     }
+
+    this.eyeHeight = entityType.dimensions().eyeHeight();
   }
 
   public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
     entityId(packet.getEntityId());
     uuid(packet.getUuid());
     data(packet.getData());
-    setPosition(packet.getX(), packet.getY(), packet.getZ());
+    setPos(packet.getX(), packet.getY(), packet.getZ());
     setHeadRotation(packet.getHeadYaw());
     setRotation(packet.getYaw(), packet.getPitch());
     setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
   public EntityMovement toMovement() {
-    return new EntityMovement(Vector3d.from(x, y, z), Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ), yRot, xRot);
+    return new EntityMovement(pos, Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ), yRot, xRot);
   }
 
   public void setFrom(EntityMovement entityMovement) {
-    setPosition(entityMovement.pos());
+    setPos(entityMovement.pos());
     setDeltaMovement(entityMovement.deltaMovement());
     setRotation(entityMovement.yRot(), entityMovement.xRot());
   }
 
-  public void setPosition(Vector3d pos) {
-    setPosition(pos.getX(), pos.getY(), pos.getZ());
+  public double x() {
+    return pos.getX();
   }
 
-  public void setPosition(double x, double y, double z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  public double y() {
+    return pos.getY();
   }
 
-  public void addPosition(double deltaX, double deltaY, double deltaZ) {
-    this.x += deltaX;
-    this.y += deltaY;
-    this.z += deltaZ;
+  public double z() {
+    return pos.getZ();
+  }
+
+  public EntityDimensions getDimensions(Pose pose) {
+    return entityType.dimensions();
+  }
+
+  public void setPos(Vector3d pos) {
+    setPos(pos.getX(), pos.getY(), pos.getZ());
+  }
+
+  public void setPos(double x, double y, double z) {
+    setPosRaw(x, y, z);
+    setBoundingBox(dimensions.makeBoundingBox(pos));
+  }
+
+  public void addPos(double deltaX, double deltaY, double deltaZ) {
+    setPos(pos.add(deltaX, deltaY, deltaZ));
+  }
+
+  public final void setPosRaw(double x, double y, double z) {
+    if (this.pos.getX() != x || this.pos.getY() != y || this.pos.getZ() != z) {
+      this.pos = Vector3d.from(x, y, z);
+      var blockX = MathHelper.floor(x);
+      var blockY = MathHelper.floor(y);
+      var blockZ = MathHelper.floor(z);
+      if (blockX != this.blockPosition.getX() || blockY != this.blockPosition.getY() || blockZ != this.blockPosition.getZ()) {
+        this.blockPosition = Vector3i.from(blockX, blockY, blockZ);
+        this.inBlockState = null;
+        if (SectionUtils.blockToSection(blockX) != this.chunkPosition.chunkX() || SectionUtils.blockToSection(blockZ) != this.chunkPosition.chunkZ()) {
+          this.chunkPosition = ChunkKey.fromBlock(this.blockPosition);
+        }
+      }
+    }
+  }
+
+  public final AABB getBoundingBox() {
+    return this.bb;
+  }
+
+  public final void setBoundingBox(AABB bb) {
+    this.bb = bb;
   }
 
   public void setRotation(float yRot, float xRot) {
@@ -163,7 +217,7 @@ public abstract class Entity {
     this.wasInPowderSnow = this.isInPowderSnow;
     this.isInPowderSnow = false;
     // this.updateInWaterStateAndDoFluidPushing();
-    // this.updateFluidOnEyes();
+    this.updateFluidOnEyes();
     // this.updateSwimming();
 
     // if (this.isInLava()) {
@@ -182,14 +236,6 @@ public abstract class Entity {
       case EYES -> eyePosition();
       case FEET -> pos();
     };
-  }
-
-  public boolean isEyeInFluid(TagKey<FluidType> fluid) {
-    var eyePos = eyePosition();
-    var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
-    var breathingCoords = breathingPos.toInt();
-
-    return level.tagsState().is(level.getBlockState(breathingCoords).fluidState().type(), fluid);
   }
 
   /**
@@ -213,54 +259,32 @@ public abstract class Entity {
       MathHelper.wrapDegrees((float) (Math.atan2(dz, dx) * 180.0F / (float) Math.PI) - 90.0F);
   }
 
-  public double eyeHeight() {
-    return 1.62F;
+  public final float eyeHeight(Pose pose) {
+    return this.getDimensions(pose).eyeHeight();
+  }
+
+  public final float eyeHeight() {
+    return this.eyeHeight;
   }
 
   public Vector3d eyePosition() {
-    return Vector3d.from(x, y + eyeHeight(), z);
+    return pos.add(0, eyeHeight(), 0);
   }
 
   public Vector3i blockPos() {
-    return Vector3i.from(blockX(), blockY(), blockZ());
+    return blockPosition;
   }
 
   public int blockX() {
-    return MathHelper.floorDouble(x);
+    return blockPosition.getX();
   }
 
   public int blockY() {
-    return MathHelper.floorDouble(y);
+    return blockPosition.getY();
   }
 
   public int blockZ() {
-    return MathHelper.floorDouble(z);
-  }
-
-  public Vector3d pos() {
-    return Vector3d.from(x, y, z);
-  }
-
-  public float width() {
-    return entityType.width();
-  }
-
-  public float height() {
-    return entityType.height();
-  }
-
-  public AABB boundingBox() {
-    return boundingBox(x, y, z);
-  }
-
-  public AABB boundingBox(Vector3d pos) {
-    return boundingBox(pos.getX(), pos.getY(), pos.getZ());
-  }
-
-  public AABB boundingBox(double x, double y, double z) {
-    var w = width() / 2F;
-    var h = height();
-    return new AABB(x - w, y, z - w, x + w, y + h, z + w);
+    return blockPosition.getZ();
   }
 
   public double attributeValue(AttributeType type) {
@@ -403,6 +427,51 @@ public abstract class Entity {
 
   public boolean isInWaterOrBubble() {
     return this.isInWater() || this.isInBubbleColumn();
+  }
+
+  public void refreshDimensions() {
+    var currentPos = this.getPose();
+    var poseDimensions = this.getDimensions(currentPos);
+    this.dimensions = poseDimensions;
+    this.eyeHeight = poseDimensions.eyeHeight();
+    this.reapplyPosition();
+  }
+
+  protected void reapplyPosition() {
+    setPos(pos);
+  }
+
+  public double getEyeY() {
+    return this.y() + this.eyeHeight();
+  }
+
+  public BlockState getInBlockState() {
+    if (this.inBlockState == null) {
+      this.inBlockState = this.level().getBlockState(this.blockPosition());
+    }
+
+    return this.inBlockState;
+  }
+
+  private void updateFluidOnEyes() {
+    this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
+    this.fluidOnEyes.clear();
+    var eyeY = this.getEyeY();
+
+    var blockPos = Vector3i.from(this.x(), eyeY, this.z());
+    var fluidState = this.level().getBlockState(blockPos).fluidState();
+    var fluidHeight = (double) ((float) blockPos.getY() + fluidState.getHeight(this.level(), blockPos));
+    if (fluidHeight > eyeY) {
+      this.fluidOnEyes.addAll(this.level.tagsState().getTags(fluidState.type()));
+    }
+  }
+
+  public boolean isEyeInFluid(TagKey<FluidType> fluidTag) {
+    return this.fluidOnEyes.contains(fluidTag);
+  }
+
+  public boolean isInLava() {
+    return !this.firstTick && this.fluidHeight.getDouble(FluidTags.LAVA) > 0.0;
   }
 
   public void updateSwimming() {

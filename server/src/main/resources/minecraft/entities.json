@@ -2,9 +2,11 @@
   {
     "id": 0,
     "key": "minecraft:acacia_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -22,9 +24,11 @@
   {
     "id": 1,
     "key": "minecraft:acacia_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -43,9 +47,11 @@
   {
     "id": 2,
     "key": "minecraft:allay",
-    "width": 0.35,
-    "height": 0.6,
-    "eyeHeight": 0.36,
+    "dimensions": {
+      "width": 0.35,
+      "height": 0.6,
+      "eyeHeight": 0.36
+    },
     "updateInterval": 2,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -64,9 +70,11 @@
   {
     "id": 3,
     "key": "minecraft:area_effect_cloud",
-    "width": 6.0,
-    "height": 0.5,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 6.0,
+      "height": 0.5,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -82,9 +90,11 @@
   {
     "id": 4,
     "key": "minecraft:armadillo",
-    "width": 0.7,
-    "height": 0.65,
-    "eyeHeight": 0.26,
+    "dimensions": {
+      "width": 0.7,
+      "height": 0.65,
+      "eyeHeight": 0.26
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -105,9 +115,11 @@
   {
     "id": 5,
     "key": "minecraft:armor_stand",
-    "width": 0.5,
-    "height": 1.975,
-    "eyeHeight": 1.7775,
+    "dimensions": {
+      "width": 0.5,
+      "height": 1.975,
+      "eyeHeight": 1.7775
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -124,9 +136,11 @@
   {
     "id": 6,
     "key": "minecraft:arrow",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.13,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.13
+    },
     "updateInterval": 20,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -143,9 +157,11 @@
   {
     "id": 7,
     "key": "minecraft:axolotl",
-    "width": 0.75,
-    "height": 0.42,
-    "eyeHeight": 0.2751,
+    "dimensions": {
+      "width": 0.75,
+      "height": 0.42,
+      "eyeHeight": 0.2751
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "axolotls",
@@ -166,9 +182,11 @@
   {
     "id": 8,
     "key": "minecraft:bamboo_chest_raft",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -187,9 +205,11 @@
   {
     "id": 9,
     "key": "minecraft:bamboo_raft",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -207,9 +227,11 @@
   {
     "id": 10,
     "key": "minecraft:bat",
-    "width": 0.5,
-    "height": 0.9,
-    "eyeHeight": 0.45,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.9,
+      "eyeHeight": 0.45
+    },
     "updateInterval": 3,
     "clientTrackingRange": 5,
     "category": "ambient",
@@ -228,9 +250,11 @@
   {
     "id": 11,
     "key": "minecraft:bee",
-    "width": 0.7,
-    "height": 0.6,
-    "eyeHeight": 0.3,
+    "dimensions": {
+      "width": 0.7,
+      "height": 0.6,
+      "eyeHeight": 0.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -251,9 +275,11 @@
   {
     "id": 12,
     "key": "minecraft:birch_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -271,9 +297,11 @@
   {
     "id": 13,
     "key": "minecraft:birch_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -292,9 +320,11 @@
   {
     "id": 14,
     "key": "minecraft:blaze",
-    "width": 0.6,
-    "height": 1.8,
-    "eyeHeight": 1.53,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.8,
+      "eyeHeight": 1.53
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -313,9 +343,11 @@
   {
     "id": 15,
     "key": "minecraft:block_display",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 1,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -332,9 +364,11 @@
   {
     "id": 16,
     "key": "minecraft:bogged",
-    "width": 0.6,
-    "height": 1.99,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.99,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -354,9 +388,11 @@
   {
     "id": 17,
     "key": "minecraft:breeze",
-    "width": 0.6,
-    "height": 1.77,
-    "eyeHeight": 1.3452,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.77,
+      "eyeHeight": 1.3452
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -375,9 +411,11 @@
   {
     "id": 18,
     "key": "minecraft:breeze_wind_charge",
-    "width": 0.3125,
-    "height": 0.3125,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.3125,
+      "height": 0.3125,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -396,9 +434,11 @@
   {
     "id": 19,
     "key": "minecraft:camel",
-    "width": 1.7,
-    "height": 2.375,
-    "eyeHeight": 2.275,
+    "dimensions": {
+      "width": 1.7,
+      "height": 2.375,
+      "eyeHeight": 2.275
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -420,9 +460,11 @@
   {
     "id": 20,
     "key": "minecraft:cat",
-    "width": 0.6,
-    "height": 0.7,
-    "eyeHeight": 0.35,
+    "dimensions": {
+      "width": 0.6,
+      "height": 0.7,
+      "eyeHeight": 0.35
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -444,9 +486,11 @@
   {
     "id": 21,
     "key": "minecraft:cave_spider",
-    "width": 0.7,
-    "height": 0.5,
-    "eyeHeight": 0.45,
+    "dimensions": {
+      "width": 0.7,
+      "height": 0.5,
+      "eyeHeight": 0.45
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -466,9 +510,11 @@
   {
     "id": 22,
     "key": "minecraft:cherry_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -486,9 +532,11 @@
   {
     "id": 23,
     "key": "minecraft:cherry_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -507,9 +555,11 @@
   {
     "id": 24,
     "key": "minecraft:chest_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -528,9 +578,11 @@
   {
     "id": 25,
     "key": "minecraft:chicken",
-    "width": 0.4,
-    "height": 0.7,
-    "eyeHeight": 0.644,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.7,
+      "eyeHeight": 0.644
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -551,9 +603,11 @@
   {
     "id": 26,
     "key": "minecraft:cod",
-    "width": 0.5,
-    "height": 0.3,
-    "eyeHeight": 0.195,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.3,
+      "eyeHeight": 0.195
+    },
     "updateInterval": 3,
     "clientTrackingRange": 4,
     "category": "water_ambient",
@@ -575,9 +629,11 @@
   {
     "id": 27,
     "key": "minecraft:command_block_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -595,9 +651,11 @@
   {
     "id": 28,
     "key": "minecraft:cow",
-    "width": 0.9,
-    "height": 1.4,
-    "eyeHeight": 1.3,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.4,
+      "eyeHeight": 1.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -618,9 +676,11 @@
   {
     "id": 29,
     "key": "minecraft:creaking",
-    "width": 0.9,
-    "height": 2.7,
-    "eyeHeight": 2.3,
+    "dimensions": {
+      "width": 0.9,
+      "height": 2.7,
+      "eyeHeight": 2.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -639,9 +699,11 @@
   {
     "id": 30,
     "key": "minecraft:creaking_transient",
-    "width": 0.9,
-    "height": 2.7,
-    "eyeHeight": 2.3,
+    "dimensions": {
+      "width": 0.9,
+      "height": 2.7,
+      "eyeHeight": 2.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -660,9 +722,11 @@
   {
     "id": 31,
     "key": "minecraft:creeper",
-    "width": 0.6,
-    "height": 1.7,
-    "eyeHeight": 1.445,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.7,
+      "eyeHeight": 1.445
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -681,9 +745,11 @@
   {
     "id": 32,
     "key": "minecraft:dark_oak_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -701,9 +767,11 @@
   {
     "id": 33,
     "key": "minecraft:dark_oak_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -722,9 +790,11 @@
   {
     "id": 34,
     "key": "minecraft:dolphin",
-    "width": 0.9,
-    "height": 0.6,
-    "eyeHeight": 0.3,
+    "dimensions": {
+      "width": 0.9,
+      "height": 0.6,
+      "eyeHeight": 0.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 5,
     "category": "water_creature",
@@ -745,9 +815,11 @@
   {
     "id": 35,
     "key": "minecraft:donkey",
-    "width": 1.3964844,
-    "height": 1.5,
-    "eyeHeight": 1.425,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.5,
+      "eyeHeight": 1.425
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -770,9 +842,11 @@
   {
     "id": 36,
     "key": "minecraft:dragon_fireball",
-    "width": 1.0,
-    "height": 1.0,
-    "eyeHeight": 0.85,
+    "dimensions": {
+      "width": 1.0,
+      "height": 1.0,
+      "eyeHeight": 0.85
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -790,9 +864,11 @@
   {
     "id": 37,
     "key": "minecraft:drowned",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -812,9 +888,11 @@
   {
     "id": 38,
     "key": "minecraft:egg",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -833,9 +911,11 @@
   {
     "id": 39,
     "key": "minecraft:elder_guardian",
-    "width": 1.9975,
-    "height": 1.9975,
-    "eyeHeight": 0.99875,
+    "dimensions": {
+      "width": 1.9975,
+      "height": 1.9975,
+      "eyeHeight": 0.99875
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -855,9 +935,11 @@
   {
     "id": 40,
     "key": "minecraft:enderman",
-    "width": 0.6,
-    "height": 2.9,
-    "eyeHeight": 2.55,
+    "dimensions": {
+      "width": 0.6,
+      "height": 2.9,
+      "eyeHeight": 2.55
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -876,9 +958,11 @@
   {
     "id": 41,
     "key": "minecraft:endermite",
-    "width": 0.4,
-    "height": 0.3,
-    "eyeHeight": 0.13,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.3,
+      "eyeHeight": 0.13
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -897,9 +981,11 @@
   {
     "id": 42,
     "key": "minecraft:ender_dragon",
-    "width": 16.0,
-    "height": 8.0,
-    "eyeHeight": 6.8,
+    "dimensions": {
+      "width": 16.0,
+      "height": 8.0,
+      "eyeHeight": 6.8
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -916,9 +1002,11 @@
   {
     "id": 43,
     "key": "minecraft:ender_pearl",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -937,9 +1025,11 @@
   {
     "id": 44,
     "key": "minecraft:end_crystal",
-    "width": 2.0,
-    "height": 2.0,
-    "eyeHeight": 1.7,
+    "dimensions": {
+      "width": 2.0,
+      "height": 2.0,
+      "eyeHeight": 1.7
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 16,
     "category": "misc",
@@ -955,9 +1045,11 @@
   {
     "id": 45,
     "key": "minecraft:evoker",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.6575,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.6575
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -980,9 +1072,11 @@
   {
     "id": 46,
     "key": "minecraft:evoker_fangs",
-    "width": 0.5,
-    "height": 0.8,
-    "eyeHeight": 0.68,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.8,
+      "eyeHeight": 0.68
+    },
     "updateInterval": 2,
     "clientTrackingRange": 6,
     "category": "misc",
@@ -998,9 +1092,11 @@
   {
     "id": 47,
     "key": "minecraft:experience_bottle",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -1019,9 +1115,11 @@
   {
     "id": 48,
     "key": "minecraft:experience_orb",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 20,
     "clientTrackingRange": 6,
     "category": "misc",
@@ -1036,9 +1134,11 @@
   {
     "id": 49,
     "key": "minecraft:eye_of_ender",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 4,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -1053,9 +1153,11 @@
   {
     "id": 50,
     "key": "minecraft:falling_block",
-    "width": 0.98,
-    "height": 0.98,
-    "eyeHeight": 0.83300006,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.98,
+      "eyeHeight": 0.83300006
+    },
     "updateInterval": 20,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1070,9 +1172,11 @@
   {
     "id": 51,
     "key": "minecraft:fireball",
-    "width": 1.0,
-    "height": 1.0,
-    "eyeHeight": 0.85,
+    "dimensions": {
+      "width": 1.0,
+      "height": 1.0,
+      "eyeHeight": 0.85
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -1091,9 +1195,11 @@
   {
     "id": 52,
     "key": "minecraft:firework_rocket",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -1109,9 +1215,11 @@
   {
     "id": 53,
     "key": "minecraft:fox",
-    "width": 0.6,
-    "height": 0.7,
-    "eyeHeight": 0.4,
+    "dimensions": {
+      "width": 0.6,
+      "height": 0.7,
+      "eyeHeight": 0.4
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -1132,9 +1240,11 @@
   {
     "id": 54,
     "key": "minecraft:frog",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1155,9 +1265,11 @@
   {
     "id": 55,
     "key": "minecraft:furnace_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -1175,9 +1287,11 @@
   {
     "id": 56,
     "key": "minecraft:ghast",
-    "width": 4.0,
-    "height": 4.0,
-    "eyeHeight": 2.6,
+    "dimensions": {
+      "width": 4.0,
+      "height": 4.0,
+      "eyeHeight": 2.6
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -1195,9 +1309,11 @@
   {
     "id": 57,
     "key": "minecraft:giant",
-    "width": 3.6,
-    "height": 12.0,
-    "eyeHeight": 10.44,
+    "dimensions": {
+      "width": 3.6,
+      "height": 12.0,
+      "eyeHeight": 10.44
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -1216,9 +1332,11 @@
   {
     "id": 58,
     "key": "minecraft:glow_item_frame",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1237,9 +1355,11 @@
   {
     "id": 59,
     "key": "minecraft:glow_squid",
-    "width": 0.8,
-    "height": 0.8,
-    "eyeHeight": 0.4,
+    "dimensions": {
+      "width": 0.8,
+      "height": 0.8,
+      "eyeHeight": 0.4
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "underground_water_creature",
@@ -1261,9 +1381,11 @@
   {
     "id": 60,
     "key": "minecraft:goat",
-    "width": 0.9,
-    "height": 1.3,
-    "eyeHeight": 1.105,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.3,
+      "eyeHeight": 1.105
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1284,9 +1406,11 @@
   {
     "id": 61,
     "key": "minecraft:guardian",
-    "width": 0.85,
-    "height": 0.85,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 0.85,
+      "height": 0.85,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1305,9 +1429,11 @@
   {
     "id": 62,
     "key": "minecraft:hoglin",
-    "width": 1.3964844,
-    "height": 1.4,
-    "eyeHeight": 1.19,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.4,
+      "eyeHeight": 1.19
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1327,9 +1453,11 @@
   {
     "id": 63,
     "key": "minecraft:hopper_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -1348,9 +1476,11 @@
   {
     "id": 64,
     "key": "minecraft:horse",
-    "width": 1.3964844,
-    "height": 1.6,
-    "eyeHeight": 1.52,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.6,
+      "eyeHeight": 1.52
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1372,9 +1502,11 @@
   {
     "id": 65,
     "key": "minecraft:husk",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1394,9 +1526,11 @@
   {
     "id": 66,
     "key": "minecraft:illusioner",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.6575,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.6575
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1419,9 +1553,11 @@
   {
     "id": 67,
     "key": "minecraft:interaction",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1437,9 +1573,11 @@
   {
     "id": 68,
     "key": "minecraft:iron_golem",
-    "width": 1.4,
-    "height": 2.7,
-    "eyeHeight": 2.295,
+    "dimensions": {
+      "width": 1.4,
+      "height": 2.7,
+      "eyeHeight": 2.295
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1459,9 +1597,11 @@
   {
     "id": 69,
     "key": "minecraft:item",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 20,
     "clientTrackingRange": 6,
     "category": "misc",
@@ -1476,9 +1616,11 @@
   {
     "id": 70,
     "key": "minecraft:item_display",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 1,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1495,9 +1637,11 @@
   {
     "id": 71,
     "key": "minecraft:item_frame",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1515,9 +1659,11 @@
   {
     "id": 72,
     "key": "minecraft:jungle_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1535,9 +1681,11 @@
   {
     "id": 73,
     "key": "minecraft:jungle_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1556,9 +1704,11 @@
   {
     "id": 74,
     "key": "minecraft:leash_knot",
-    "width": 0.375,
-    "height": 0.5,
-    "eyeHeight": 0.0625,
+    "dimensions": {
+      "width": 0.375,
+      "height": 0.5,
+      "eyeHeight": 0.0625
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1575,9 +1725,11 @@
   {
     "id": 75,
     "key": "minecraft:lightning_bolt",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 16,
     "category": "misc",
@@ -1593,9 +1745,11 @@
   {
     "id": 76,
     "key": "minecraft:llama",
-    "width": 0.9,
-    "height": 1.87,
-    "eyeHeight": 1.7765,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.87,
+      "eyeHeight": 1.7765
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1618,9 +1772,11 @@
   {
     "id": 77,
     "key": "minecraft:llama_spit",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -1637,9 +1793,11 @@
   {
     "id": 78,
     "key": "minecraft:magma_cube",
-    "width": 0.52,
-    "height": 0.52,
-    "eyeHeight": 0.325,
+    "dimensions": {
+      "width": 0.52,
+      "height": 0.52,
+      "eyeHeight": 0.325
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1657,9 +1815,11 @@
   {
     "id": 79,
     "key": "minecraft:mangrove_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1677,9 +1837,11 @@
   {
     "id": 80,
     "key": "minecraft:mangrove_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1698,9 +1860,11 @@
   {
     "id": 81,
     "key": "minecraft:marker",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 3,
     "clientTrackingRange": 0,
     "category": "misc",
@@ -1716,9 +1880,11 @@
   {
     "id": 82,
     "key": "minecraft:minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -1736,9 +1902,11 @@
   {
     "id": 83,
     "key": "minecraft:mooshroom",
-    "width": 0.9,
-    "height": 1.4,
-    "eyeHeight": 1.3,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.4,
+      "eyeHeight": 1.3
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1760,9 +1928,11 @@
   {
     "id": 84,
     "key": "minecraft:mule",
-    "width": 1.3964844,
-    "height": 1.6,
-    "eyeHeight": 1.52,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.6,
+      "eyeHeight": 1.52
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -1785,9 +1955,11 @@
   {
     "id": 85,
     "key": "minecraft:oak_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1805,9 +1977,11 @@
   {
     "id": 86,
     "key": "minecraft:oak_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1826,9 +2000,11 @@
   {
     "id": 87,
     "key": "minecraft:ocelot",
-    "width": 0.6,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.6,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1849,9 +2025,11 @@
   {
     "id": 88,
     "key": "minecraft:ominous_item_spawner",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -1867,9 +2045,11 @@
   {
     "id": 89,
     "key": "minecraft:painting",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 2147483647,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1887,9 +2067,11 @@
   {
     "id": 90,
     "key": "minecraft:pale_oak_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1907,9 +2089,11 @@
   {
     "id": 91,
     "key": "minecraft:pale_oak_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -1928,9 +2112,11 @@
   {
     "id": 92,
     "key": "minecraft:panda",
-    "width": 1.3,
-    "height": 1.25,
-    "eyeHeight": 1.0625,
+    "dimensions": {
+      "width": 1.3,
+      "height": 1.25,
+      "eyeHeight": 1.0625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -1951,9 +2137,11 @@
   {
     "id": 93,
     "key": "minecraft:parrot",
-    "width": 0.5,
-    "height": 0.9,
-    "eyeHeight": 0.54,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.9,
+      "eyeHeight": 0.54
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -1976,9 +2164,11 @@
   {
     "id": 94,
     "key": "minecraft:phantom",
-    "width": 0.9,
-    "height": 0.5,
-    "eyeHeight": 0.175,
+    "dimensions": {
+      "width": 0.9,
+      "height": 0.5,
+      "eyeHeight": 0.175
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -1996,9 +2186,11 @@
   {
     "id": 95,
     "key": "minecraft:pig",
-    "width": 0.9,
-    "height": 0.9,
-    "eyeHeight": 0.765,
+    "dimensions": {
+      "width": 0.9,
+      "height": 0.9,
+      "eyeHeight": 0.765
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2019,9 +2211,11 @@
   {
     "id": 96,
     "key": "minecraft:piglin",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.79,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.79
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2041,9 +2235,11 @@
   {
     "id": 97,
     "key": "minecraft:piglin_brute",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.79,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.79
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2063,9 +2259,11 @@
   {
     "id": 98,
     "key": "minecraft:pillager",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.6575,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.6575
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2087,9 +2285,11 @@
   {
     "id": 99,
     "key": "minecraft:polar_bear",
-    "width": 1.4,
-    "height": 1.4,
-    "eyeHeight": 1.19,
+    "dimensions": {
+      "width": 1.4,
+      "height": 1.4,
+      "eyeHeight": 1.19
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2110,9 +2310,11 @@
   {
     "id": 100,
     "key": "minecraft:potion",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2131,9 +2333,11 @@
   {
     "id": 101,
     "key": "minecraft:pufferfish",
-    "width": 0.7,
-    "height": 0.7,
-    "eyeHeight": 0.455,
+    "dimensions": {
+      "width": 0.7,
+      "height": 0.7,
+      "eyeHeight": 0.455
+    },
     "updateInterval": 3,
     "clientTrackingRange": 4,
     "category": "water_ambient",
@@ -2154,9 +2358,11 @@
   {
     "id": 102,
     "key": "minecraft:rabbit",
-    "width": 0.4,
-    "height": 0.5,
-    "eyeHeight": 0.425,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.5,
+      "eyeHeight": 0.425
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "creature",
@@ -2177,9 +2383,11 @@
   {
     "id": 103,
     "key": "minecraft:ravager",
-    "width": 1.95,
-    "height": 2.2,
-    "eyeHeight": 1.8700001,
+    "dimensions": {
+      "width": 1.95,
+      "height": 2.2,
+      "eyeHeight": 1.8700001
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -2200,9 +2408,11 @@
   {
     "id": 104,
     "key": "minecraft:salmon",
-    "width": 0.7,
-    "height": 0.4,
-    "eyeHeight": 0.26,
+    "dimensions": {
+      "width": 0.7,
+      "height": 0.4,
+      "eyeHeight": 0.26
+    },
     "updateInterval": 3,
     "clientTrackingRange": 4,
     "category": "water_ambient",
@@ -2224,9 +2434,11 @@
   {
     "id": 105,
     "key": "minecraft:sheep",
-    "width": 0.9,
-    "height": 1.3,
-    "eyeHeight": 1.235,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.3,
+      "eyeHeight": 1.235
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2247,9 +2459,11 @@
   {
     "id": 106,
     "key": "minecraft:shulker",
-    "width": 1.0,
-    "height": 1.0,
-    "eyeHeight": 0.5,
+    "dimensions": {
+      "width": 1.0,
+      "height": 1.0,
+      "eyeHeight": 0.5
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -2268,9 +2482,11 @@
   {
     "id": 107,
     "key": "minecraft:shulker_bullet",
-    "width": 0.3125,
-    "height": 0.3125,
-    "eyeHeight": 0.265625,
+    "dimensions": {
+      "width": 0.3125,
+      "height": 0.3125,
+      "eyeHeight": 0.265625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -2287,9 +2503,11 @@
   {
     "id": 108,
     "key": "minecraft:silverfish",
-    "width": 0.4,
-    "height": 0.3,
-    "eyeHeight": 0.13,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.3,
+      "eyeHeight": 0.13
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2308,9 +2526,11 @@
   {
     "id": 109,
     "key": "minecraft:skeleton",
-    "width": 0.6,
-    "height": 1.99,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.99,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2330,9 +2550,11 @@
   {
     "id": 110,
     "key": "minecraft:skeleton_horse",
-    "width": 1.3964844,
-    "height": 1.6,
-    "eyeHeight": 1.52,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.6,
+      "eyeHeight": 1.52
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2354,9 +2576,11 @@
   {
     "id": 111,
     "key": "minecraft:slime",
-    "width": 0.52,
-    "height": 0.52,
-    "eyeHeight": 0.325,
+    "dimensions": {
+      "width": 0.52,
+      "height": 0.52,
+      "eyeHeight": 0.325
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -2373,9 +2597,11 @@
   {
     "id": 112,
     "key": "minecraft:small_fireball",
-    "width": 0.3125,
-    "height": 0.3125,
-    "eyeHeight": 0.265625,
+    "dimensions": {
+      "width": 0.3125,
+      "height": 0.3125,
+      "eyeHeight": 0.265625
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2394,9 +2620,11 @@
   {
     "id": 113,
     "key": "minecraft:sniffer",
-    "width": 1.9,
-    "height": 1.75,
-    "eyeHeight": 1.05,
+    "dimensions": {
+      "width": 1.9,
+      "height": 1.75,
+      "eyeHeight": 1.05
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2417,9 +2645,11 @@
   {
     "id": 114,
     "key": "minecraft:snowball",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2438,9 +2668,11 @@
   {
     "id": 115,
     "key": "minecraft:snow_golem",
-    "width": 0.7,
-    "height": 1.9,
-    "eyeHeight": 1.7,
+    "dimensions": {
+      "width": 0.7,
+      "height": 1.9,
+      "eyeHeight": 1.7
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -2460,9 +2692,11 @@
   {
     "id": 116,
     "key": "minecraft:spawner_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -2480,9 +2714,11 @@
   {
     "id": 117,
     "key": "minecraft:spectral_arrow",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.13,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.13
+    },
     "updateInterval": 20,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2499,9 +2735,11 @@
   {
     "id": 118,
     "key": "minecraft:spider",
-    "width": 1.4,
-    "height": 0.9,
-    "eyeHeight": 0.65,
+    "dimensions": {
+      "width": 1.4,
+      "height": 0.9,
+      "eyeHeight": 0.65
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2520,9 +2758,11 @@
   {
     "id": 119,
     "key": "minecraft:spruce_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -2540,9 +2780,11 @@
   {
     "id": 120,
     "key": "minecraft:spruce_chest_boat",
-    "width": 1.375,
-    "height": 0.5625,
-    "eyeHeight": 0.5625,
+    "dimensions": {
+      "width": 1.375,
+      "height": 0.5625,
+      "eyeHeight": 0.5625
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -2561,9 +2803,11 @@
   {
     "id": 121,
     "key": "minecraft:squid",
-    "width": 0.8,
-    "height": 0.8,
-    "eyeHeight": 0.4,
+    "dimensions": {
+      "width": 0.8,
+      "height": 0.8,
+      "eyeHeight": 0.4
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "water_creature",
@@ -2584,9 +2828,11 @@
   {
     "id": 122,
     "key": "minecraft:stray",
-    "width": 0.6,
-    "height": 1.99,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.99,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2606,9 +2852,11 @@
   {
     "id": 123,
     "key": "minecraft:strider",
-    "width": 0.9,
-    "height": 1.7,
-    "eyeHeight": 1.445,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.7,
+      "eyeHeight": 1.445
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2629,9 +2877,11 @@
   {
     "id": 124,
     "key": "minecraft:tadpole",
-    "width": 0.4,
-    "height": 0.3,
-    "eyeHeight": 0.19500001,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.3,
+      "eyeHeight": 0.19500001
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2652,9 +2902,11 @@
   {
     "id": 125,
     "key": "minecraft:text_display",
-    "width": 0.0,
-    "height": 0.0,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.0,
+      "height": 0.0,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 1,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -2671,9 +2923,11 @@
   {
     "id": 126,
     "key": "minecraft:tnt",
-    "width": 0.98,
-    "height": 0.98,
-    "eyeHeight": 0.15,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.98,
+      "eyeHeight": 0.15
+    },
     "updateInterval": 10,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -2689,9 +2943,11 @@
   {
     "id": 127,
     "key": "minecraft:tnt_minecart",
-    "width": 0.98,
-    "height": 0.7,
-    "eyeHeight": 0.595,
+    "dimensions": {
+      "width": 0.98,
+      "height": 0.7,
+      "eyeHeight": 0.595
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "misc",
@@ -2709,9 +2965,11 @@
   {
     "id": 128,
     "key": "minecraft:trader_llama",
-    "width": 0.9,
-    "height": 1.87,
-    "eyeHeight": 1.7765,
+    "dimensions": {
+      "width": 0.9,
+      "height": 1.87,
+      "eyeHeight": 1.7765
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2735,9 +2993,11 @@
   {
     "id": 129,
     "key": "minecraft:trident",
-    "width": 0.5,
-    "height": 0.5,
-    "eyeHeight": 0.13,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.5,
+      "eyeHeight": 0.13
+    },
     "updateInterval": 20,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2754,9 +3014,11 @@
   {
     "id": 130,
     "key": "minecraft:tropical_fish",
-    "width": 0.5,
-    "height": 0.4,
-    "eyeHeight": 0.26,
+    "dimensions": {
+      "width": 0.5,
+      "height": 0.4,
+      "eyeHeight": 0.26
+    },
     "updateInterval": 3,
     "clientTrackingRange": 4,
     "category": "water_ambient",
@@ -2778,9 +3040,11 @@
   {
     "id": 131,
     "key": "minecraft:turtle",
-    "width": 1.2,
-    "height": 0.4,
-    "eyeHeight": 0.34,
+    "dimensions": {
+      "width": 1.2,
+      "height": 0.4,
+      "eyeHeight": 0.34
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2801,9 +3065,11 @@
   {
     "id": 132,
     "key": "minecraft:vex",
-    "width": 0.4,
-    "height": 0.8,
-    "eyeHeight": 0.51875,
+    "dimensions": {
+      "width": 0.4,
+      "height": 0.8,
+      "eyeHeight": 0.51875
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2822,9 +3088,11 @@
   {
     "id": 133,
     "key": "minecraft:villager",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.62,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.62
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "misc",
@@ -2845,9 +3113,11 @@
   {
     "id": 134,
     "key": "minecraft:vindicator",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.6575,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.6575
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2869,9 +3139,11 @@
   {
     "id": 135,
     "key": "minecraft:wandering_trader",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.62,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.62
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -2892,9 +3164,11 @@
   {
     "id": 136,
     "key": "minecraft:warden",
-    "width": 0.9,
-    "height": 2.9,
-    "eyeHeight": 2.4650002,
+    "dimensions": {
+      "width": 0.9,
+      "height": 2.9,
+      "eyeHeight": 2.4650002
+    },
     "updateInterval": 3,
     "clientTrackingRange": 16,
     "category": "monster",
@@ -2913,9 +3187,11 @@
   {
     "id": 137,
     "key": "minecraft:wind_charge",
-    "width": 0.3125,
-    "height": 0.3125,
-    "eyeHeight": 0.0,
+    "dimensions": {
+      "width": 0.3125,
+      "height": 0.3125,
+      "eyeHeight": 0.0
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -2934,9 +3210,11 @@
   {
     "id": 138,
     "key": "minecraft:witch",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.62,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.62
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -2957,9 +3235,11 @@
   {
     "id": 139,
     "key": "minecraft:wither",
-    "width": 0.9,
-    "height": 3.5,
-    "eyeHeight": 2.9750001,
+    "dimensions": {
+      "width": 0.9,
+      "height": 3.5,
+      "eyeHeight": 2.9750001
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "monster",
@@ -2978,9 +3258,11 @@
   {
     "id": 140,
     "key": "minecraft:wither_skeleton",
-    "width": 0.7,
-    "height": 2.4,
-    "eyeHeight": 2.1,
+    "dimensions": {
+      "width": 0.7,
+      "height": 2.4,
+      "eyeHeight": 2.1
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -3000,9 +3282,11 @@
   {
     "id": 141,
     "key": "minecraft:wither_skull",
-    "width": 0.3125,
-    "height": 0.3125,
-    "eyeHeight": 0.265625,
+    "dimensions": {
+      "width": 0.3125,
+      "height": 0.3125,
+      "eyeHeight": 0.265625
+    },
     "updateInterval": 10,
     "clientTrackingRange": 4,
     "category": "misc",
@@ -3020,9 +3304,11 @@
   {
     "id": 142,
     "key": "minecraft:wolf",
-    "width": 0.6,
-    "height": 0.85,
-    "eyeHeight": 0.68,
+    "dimensions": {
+      "width": 0.6,
+      "height": 0.85,
+      "eyeHeight": 0.68
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -3044,9 +3330,11 @@
   {
     "id": 143,
     "key": "minecraft:zoglin",
-    "width": 1.3964844,
-    "height": 1.4,
-    "eyeHeight": 1.19,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.4,
+      "eyeHeight": 1.19
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -3065,9 +3353,11 @@
   {
     "id": 144,
     "key": "minecraft:zombie",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -3086,9 +3376,11 @@
   {
     "id": 145,
     "key": "minecraft:zombie_horse",
-    "width": 1.3964844,
-    "height": 1.6,
-    "eyeHeight": 1.52,
+    "dimensions": {
+      "width": 1.3964844,
+      "height": 1.6,
+      "eyeHeight": 1.52
+    },
     "updateInterval": 3,
     "clientTrackingRange": 10,
     "category": "creature",
@@ -3110,9 +3402,11 @@
   {
     "id": 146,
     "key": "minecraft:zombie_villager",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.74,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.74
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -3132,9 +3426,11 @@
   {
     "id": 147,
     "key": "minecraft:zombified_piglin",
-    "width": 0.6,
-    "height": 1.95,
-    "eyeHeight": 1.79,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.95,
+      "eyeHeight": 1.79
+    },
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
@@ -3154,9 +3450,11 @@
   {
     "id": 148,
     "key": "minecraft:player",
-    "width": 0.6,
-    "height": 1.8,
-    "eyeHeight": 1.62,
+    "dimensions": {
+      "width": 0.6,
+      "height": 1.8,
+      "eyeHeight": 1.62
+    },
     "updateInterval": 2,
     "clientTrackingRange": 32,
     "category": "misc",
@@ -3173,9 +3471,11 @@
   {
     "id": 149,
     "key": "minecraft:fishing_bobber",
-    "width": 0.25,
-    "height": 0.25,
-    "eyeHeight": 0.2125,
+    "dimensions": {
+      "width": 0.25,
+      "height": 0.25,
+      "eyeHeight": 0.2125
+    },
     "updateInterval": 5,
     "clientTrackingRange": 4,
     "category": "misc",

@@ -17,15 +17,30 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 @Getter
 @Setter
 public abstract class AbstractClientPlayer extends Player {
-  public AbstractClientPlayer(Level level, GameProfile gameProfile) {
+  private final BotConnection connection;
+
+  public AbstractClientPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     super(level, gameProfile);
+    this.connection = connection;
+  }
+
+  @Override
+  public boolean isSpectator() {
+    return connection.dataManager().gameMode() == GameMode.SPECTATOR;
+  }
+
+  @Override
+  public boolean isCreative() {
+    return connection.dataManager().gameMode() == GameMode.CREATIVE;
   }
 }

@@ -808,7 +808,7 @@ public final class SessionDataManager {
     var experienceOrbState =
       new ExperienceOrbEntity(currentLevel(), packet.getExp());
     experienceOrbState.entityId(packet.getEntityId());
-    experienceOrbState.setPosition(packet.getX(), packet.getY(), packet.getZ());
+    experienceOrbState.setPos(packet.getX(), packet.getY(), packet.getZ());
 
     entityTrackerState.addEntity(experienceOrbState);
   }
@@ -939,7 +939,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+    state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
     state.onGround(packet.isOnGround());
   }
 
@@ -978,7 +978,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.addPosition(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+    state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
     state.setRotation(packet.getYaw(), packet.getPitch());
     state.onGround(packet.isOnGround());
   }

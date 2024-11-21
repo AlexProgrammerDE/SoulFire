@@ -20,7 +20,6 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,7 +54,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
-    super(level, gameProfile);
+    super(connection, level, gameProfile);
     this.connection = connection;
     uuid(gameProfile.getId());
   }
@@ -80,9 +79,9 @@ public class LocalPlayer extends AbstractClientPlayer {
     sendIsSprintingIfNeeded();
 
     // Detect whether anything changed
-    var xDiff = x - lastX;
-    var yDiff = y - lastY;
-    var zDiff = z - lastZ;
+    var xDiff = x() - lastX;
+    var yDiff = y() - lastY;
+    var zDiff = z() - lastZ;
     var yRotDiff = (double) (yRot - lastYRot);
     var xRotDiff = (double) (xRot - lastXRot);
     var sendPos =
@@ -116,45 +115,32 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
   }
 
-  @Override
-  public double eyeHeight() {
-    if (connection.controlState().sneaking()) {
-      return connection
-        .protocolVersion()
-        .newerThanOrEqualTo(ProtocolVersion.v1_14)
-        ? 1.27F
-        : 1.54F;
-    } else {
-      return 1.62F;
-    }
-  }
-
   public void sendPosRot() {
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
-    lastX = x;
-    lastY = y;
-    lastZ = z;
+    lastX = x();
+    lastY = y();
+    lastZ = z();
     positionReminder = 0;
 
     lastYRot = yRot;
     lastXRot = xRot;
 
     connection.sendPacket(
-      new ServerboundMovePlayerPosRotPacket(onGround, horizontalCollision, x, y, z, yRot, xRot));
+      new ServerboundMovePlayerPosRotPacket(onGround, horizontalCollision, x(), y(), z(), yRot, xRot));
   }
 
   public void sendPos() {
     lastOnGround = onGround;
     lastHorizontalCollision = horizontalCollision;
 
-    lastX = x;
-    lastY = y;
-    lastZ = z;
+    lastX = x();
+    lastY = y();
+    lastZ = z();
     positionReminder = 0;
 
-    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, horizontalCollision, x, y, z));
+    connection.sendPacket(new ServerboundMovePlayerPosPacket(onGround, horizontalCollision, x(), y(), z()));
   }
 
   public void sendRot() {
@@ -196,11 +182,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public void jump() {
     jumpTriggerTime = 7;
-  }
-
-  @Override
-  public float height() {
-    return connection.controlState().sneaking() ? 1.5F : 1.8F;
   }
 
   @Override

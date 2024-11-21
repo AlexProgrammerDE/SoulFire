@@ -48,7 +48,7 @@ public final class MovementAction implements WorldAction {
       // We want to be on the same Y level
       return false;
     } else {
-      var halfDiagonal = clientEntity.boundingBox().diagonalXZLength() / 2;
+      var halfDiagonal = clientEntity.getBoundingBox().diagonalXZLength() / 2;
 
       // Leave more space to allow falling
       var adjustedHalfDiagonal = halfDiagonal - 0.05;

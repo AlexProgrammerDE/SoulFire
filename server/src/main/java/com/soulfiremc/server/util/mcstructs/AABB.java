@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AABB {
-  private static final double EPSILON = 1.0E-7;
+  public static final double EPSILON = 1.0E-7;
   public final double minX;
   public final double minY;
   public final double minZ;
@@ -111,21 +111,21 @@ public class AABB {
   private static Direction getDirection(
     double d, double e, double f, double g, double h, double i, Vector3d arg, double[] ds, @Nullable Direction arg2, double j, double k, double l
   ) {
-    if (j > 1.0E-7) {
+    if (j > EPSILON) {
       arg2 = clipPoint(ds, arg2, j, k, l, d, e, h, f, i, Direction.WEST, arg.getX(), arg.getY(), arg.getZ());
-    } else if (j < -1.0E-7) {
+    } else if (j < -EPSILON) {
       arg2 = clipPoint(ds, arg2, j, k, l, g, e, h, f, i, Direction.EAST, arg.getX(), arg.getY(), arg.getZ());
     }
 
-    if (k > 1.0E-7) {
+    if (k > EPSILON) {
       arg2 = clipPoint(ds, arg2, k, l, j, e, f, i, d, g, Direction.DOWN, arg.getY(), arg.getZ(), arg.getX());
-    } else if (k < -1.0E-7) {
+    } else if (k < -EPSILON) {
       arg2 = clipPoint(ds, arg2, k, l, j, h, f, i, d, g, Direction.UP, arg.getY(), arg.getZ(), arg.getX());
     }
 
-    if (l > 1.0E-7) {
+    if (l > EPSILON) {
       arg2 = clipPoint(ds, arg2, l, j, k, f, d, g, e, h, Direction.NORTH, arg.getZ(), arg.getX(), arg.getY());
-    } else if (l < -1.0E-7) {
+    } else if (l < -EPSILON) {
       arg2 = clipPoint(ds, arg2, l, j, k, i, d, g, e, h, Direction.SOUTH, arg.getZ(), arg.getX(), arg.getY());
     }
 
@@ -152,7 +152,7 @@ public class AABB {
     var o = (minSide - startSide) / distanceSide;
     var p = startOtherA + o * distanceOtherA;
     var q = startOtherB + o * distanceOtherB;
-    if (0.0 < o && o < minDistance[0] && minOtherA - 1.0E-7 < p && p < maxOtherA + 1.0E-7 && minOtherB - 1.0E-7 < q && q < maxOtherB + 1.0E-7) {
+    if (0.0 < o && o < minDistance[0] && minOtherA - EPSILON < p && p < maxOtherA + EPSILON && minOtherB - EPSILON < q && q < maxOtherB + EPSILON) {
       minDistance[0] = o;
       return hitSide;
     } else {

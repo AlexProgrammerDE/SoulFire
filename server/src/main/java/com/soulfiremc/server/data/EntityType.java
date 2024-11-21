@@ -25,10 +25,7 @@ import java.util.List;
 public record EntityType(
   int id,
   Key key,
-  float width,
-  float height,
-  float eyeHeight,
-  boolean fixed,
+  EntityDimensions dimensions,
   int updateInterval,
   int clientTrackingRange,
   String category,

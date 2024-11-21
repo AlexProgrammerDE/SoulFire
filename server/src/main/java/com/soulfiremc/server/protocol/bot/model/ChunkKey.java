@@ -17,7 +17,16 @@
  */
 package com.soulfiremc.server.protocol.bot.model;
 
+import com.soulfiremc.server.util.SectionUtils;
+import org.cloudburstmc.math.vector.Vector3i;
+
 public record ChunkKey(int chunkX, int chunkZ) {
+  public static final ChunkKey ZERO = new ChunkKey(0, 0);
+
+  public static ChunkKey fromBlock(Vector3i block) {
+    return new ChunkKey(SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
+  }
+
   public static long calculateKey(int chunkX, int chunkZ) {
     return (long) chunkX & 0xffffffffL | ((long) chunkZ & 0xffffffffL) << 32;
   }

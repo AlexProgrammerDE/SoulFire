@@ -955,9 +955,7 @@ public class POVServer extends InternalPlugin {
               lastY = posRot.getY();
               lastZ = posRot.getZ();
 
-              clientEntity.x(posRot.getX());
-              clientEntity.y(posRot.getY());
-              clientEntity.z(posRot.getZ());
+              clientEntity.setPos(posRot.getX(), posRot.getY(), posRot.getZ());
               clientEntity.yRot(posRot.getYaw());
               clientEntity.xRot(posRot.getPitch());
             }
@@ -966,9 +964,7 @@ public class POVServer extends InternalPlugin {
               lastY = pos.getY();
               lastZ = pos.getZ();
 
-              clientEntity.x(pos.getX());
-              clientEntity.y(pos.getY());
-              clientEntity.z(pos.getZ());
+              clientEntity.setPos(pos.getX(), pos.getY(), pos.getZ());
             }
             case ServerboundMovePlayerRotPacket rot -> {
               clientEntity.yRot(rot.getYaw());
