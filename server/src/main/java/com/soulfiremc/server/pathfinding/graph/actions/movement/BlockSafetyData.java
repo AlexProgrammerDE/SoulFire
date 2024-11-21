@@ -26,13 +26,13 @@ public record BlockSafetyData(SFVec3i position, BlockSafetyType type) {
     FALLING_AND_FLUIDS {
       @Override
       public boolean isUnsafeBlock(BlockState state) {
-        return state.blockType().fluidType() != FluidType.EMPTY || state.blockType().fallingBlock();
+        return state.fluidState().type() != FluidType.EMPTY || state.blockType().fallingBlock();
       }
     },
     FLUIDS {
       @Override
       public boolean isUnsafeBlock(BlockState state) {
-        return state.blockType().fluidType() != FluidType.EMPTY;
+        return state.fluidState().type() != FluidType.EMPTY;
       }
     };
 

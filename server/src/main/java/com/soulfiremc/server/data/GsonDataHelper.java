@@ -65,7 +65,7 @@ public class GsonDataHelper {
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz,
                                Map<Class<?>, TypeAdapter<?>> typeAdapters) {
-    var gson = GSON_FACTORY.apply(typeAdapters);
+    var gson = createGson(typeAdapters);
     var array =
       LOADED_DATA.computeIfAbsent(
         dataFile,
@@ -86,5 +86,9 @@ public class GsonDataHelper {
     }
 
     throw new RuntimeException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
+  }
+
+  public static Gson createGson(Map<Class<?>, TypeAdapter<?>> typeAdapters) {
+    return GSON_FACTORY.apply(typeAdapters);
   }
 }

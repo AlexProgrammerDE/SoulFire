@@ -84,7 +84,14 @@ public class BlocksJsonGenerator implements IDataGenerator {
       var fluidStateDesc = new JsonObject();
       var fluidState = state.getFluidState();
       fluidStateDesc.addProperty("type", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
-      fluidStateDesc.addProperty("amount", fluidState.getAmount());
+      var amount = fluidState.getAmount();
+      if (amount != 0) {
+        fluidStateDesc.addProperty("amount", amount);
+      }
+      var ownHeight = fluidState.getOwnHeight();
+      if (ownHeight != 0) {
+        fluidStateDesc.addProperty("ownHeight", ownHeight);
+      }
       if (fluidState.isSource()) {
         fluidStateDesc.addProperty("source", true);
       }

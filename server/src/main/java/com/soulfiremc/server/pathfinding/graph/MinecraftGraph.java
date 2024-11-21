@@ -97,7 +97,7 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   public static boolean isBlockFree(BlockState blockState) {
-    return blockState.blockShapeGroup().hasNoCollisions() && blockState.blockType().fluidType() == FluidType.EMPTY;
+    return blockState.blockShapeGroup().hasNoCollisions() && blockState.fluidState().type() == FluidType.EMPTY;
   }
 
   public boolean doUsableBlocksDecreaseWhenPlaced() {

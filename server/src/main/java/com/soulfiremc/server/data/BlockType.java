@@ -25,7 +25,6 @@ import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("unused")
 public record BlockType(
@@ -37,7 +36,6 @@ public record BlockType(
   boolean fallingBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
-  FluidType fluidType,
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) implements RegistryValue<BlockType> {
@@ -1151,12 +1149,7 @@ public record BlockType(
   }
 
   public static BlockType register(String key) {
-    var instance = GsonDataHelper.fromJson("minecraft/blocks.json", key, BlockType.class, Map.of(
-      FluidType.class,
-      CUSTOM_FLUID_TYPE
-    ));
-
-    return REGISTRY.register(instance);
+    return REGISTRY.register(GsonDataHelper.fromJson("minecraft/blocks.json", key, BlockType.class));
   }
 
   @Override

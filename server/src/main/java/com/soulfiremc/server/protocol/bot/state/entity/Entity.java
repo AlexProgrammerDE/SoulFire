@@ -84,6 +84,7 @@ public abstract class Entity {
   protected boolean isInPowderSnow;
   protected boolean wasInPowderSnow;
   protected boolean wasTouchingWater;
+  protected boolean wasEyeInWater;
   public boolean noPhysics;
 
   public Entity(EntityType entityType, Level level) {
@@ -188,7 +189,7 @@ public abstract class Entity {
     var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
     var breathingCoords = breathingPos.toInt();
 
-    return level.tagsState().is(level.getBlockState(breathingCoords).blockType().fluidType(), fluid);
+    return level.tagsState().is(level.getBlockState(breathingCoords).fluidState().type(), fluid);
   }
 
   /**
@@ -409,10 +410,12 @@ public abstract class Entity {
       this.setSwimming(this.isSprinting() && this.isInWater());
     } else {
       this.setSwimming(
-        this.isSprinting() && this.isUnderWater() && this.level.tagsState().is(this.level().getBlockState(blockPos()).blockType().fluidType(), FluidTags.WATER)
+        this.isSprinting() && this.isUnderWater() && this.level.tagsState().is(this.level().getBlockState(blockPos()).fluidState().type(), FluidTags.WATER)
       );
     }
   }
 
-  public abstract boolean isUnderWater();
+  public boolean isUnderWater() {
+    return this.wasEyeInWater && this.isInWater();
+  }
 }
