@@ -23,8 +23,11 @@ import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -75,12 +78,16 @@ public abstract class LivingEntity extends Entity {
     this.effectState.tick();
   }
 
+  public Optional<Vector3i> getSleepingPos() {
+    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataType.OPTIONAL_POSITION);
+  }
+
   public boolean isSpectator() {
-    return false; // TODO
+    return false;
   }
 
   public boolean isSleeping() {
-    return false; // TODO
+    return this.getSleepingPos().isPresent();
   }
 
   public abstract boolean isUnderWater();
