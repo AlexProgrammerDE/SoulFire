@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.structs.TickRateManager;
 import lombok.Getter;
@@ -112,7 +113,7 @@ public class Level implements LevelHeightAccessor {
     return chunks.getBlockState(x, y, z);
   }
 
-  public List<AABB> getCollisionBoxes(AABB aabb) {
+  public List<Vector3i> getTouchedPositions(AABB aabb) {
     var startX = MathHelper.floorDouble(aabb.minX - AABB.EPSILON) - 1;
     var endX = MathHelper.floorDouble(aabb.maxX + AABB.EPSILON) + 1;
     var startY = MathHelper.floorDouble(aabb.minY - AABB.EPSILON) - 1;
@@ -121,24 +122,24 @@ public class Level implements LevelHeightAccessor {
     var endZ = MathHelper.floorDouble(aabb.maxZ + AABB.EPSILON) + 1;
 
     var predictedSize = (endX - startX + 1) * (endY - startY + 1) * (endZ - startZ + 1);
-    var surroundingBBs = new ArrayList<AABB>(predictedSize);
+    var surroundingBlocks = new ArrayList<Vector3i>(predictedSize);
 
     for (var x = startX; x <= endX; x++) {
       for (var y = startY; y <= endY; y++) {
         for (var z = startZ; z <= endZ; z++) {
-          var cursor = Vector3i.from(x, y, z);
-          var blockState = getBlockState(cursor);
-
-          for (var collisionBox : blockState.getCollisionBoxes(cursor)) {
-            if (collisionBox.intersects(aabb)) {
-              surroundingBBs.add(collisionBox);
-            }
-          }
+          surroundingBlocks.add(Vector3i.from(x, y, z));
         }
       }
     }
 
-    return surroundingBBs;
+    return surroundingBlocks;
+  }
+
+  public List<AABB> getCollisionBoxes(AABB aabb) {
+    return getTouchedPositions(aabb).stream()
+      .flatMap(cursor -> getBlockState(cursor).getCollisionBoxes(cursor).stream())
+      .filter(collisionBox -> collisionBox.intersects(aabb))
+      .toList();
   }
 
   public boolean containsAnyLiquid(AABB bb) {
@@ -168,6 +169,17 @@ public class Level implements LevelHeightAccessor {
   }
 
   public Optional<Vector3i> findSupportingBlock(Entity entity, AABB bb) {
-    return Optional.empty(); // TODO
+    Vector3i block = null;
+    var distance = Double.MAX_VALUE;
+
+    for (var position : getTouchedPositions(bb)) {
+      var distanceToCenter = VectorHelper.distToCenterSqr(position, entity.pos());
+      if (distanceToCenter < distance || distanceToCenter == distance && (block == null || block.compareTo(position) < 0)) {
+        block = position;
+        distance = distanceToCenter;
+      }
+    }
+
+    return Optional.ofNullable(block);
   }
 }

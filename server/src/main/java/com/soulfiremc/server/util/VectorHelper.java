@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.server.data.BlockShapeGroup;
 import com.soulfiremc.server.data.BlockState;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 
 public class VectorHelper {
   private VectorHelper() {}
@@ -62,5 +63,12 @@ public class VectorHelper {
   public static Vector3d normalizeSafe(Vector3d vec) {
     var length = vec.length();
     return length < 1.0E-5F ? Vector3d.ZERO : Vector3d.from(vec.getX() / length, vec.getY() / length, vec.getZ() / length);
+  }
+
+  public static double distToCenterSqr(Vector3i current, Vector3d other) {
+    var x = current.getX() + 0.5 - other.getX();
+    var y = current.getY() + 0.5 - other.getY();
+    var z = current.getZ() + 0.5 - other.getZ();
+    return x * x + y * y + z * z;
   }
 }
