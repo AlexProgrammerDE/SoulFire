@@ -21,6 +21,7 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
@@ -30,5 +31,10 @@ public class ExperienceOrbEntity extends Entity {
   public ExperienceOrbEntity(Level level, int expValue) {
     super(EntityType.EXPERIENCE_ORB, level);
     this.expValue = expValue;
+  }
+
+  @Override
+  public Vector3i getBlockPosBelowThatAffectsMyMovement() {
+    return this.getOnPos(0.999999F);
   }
 }

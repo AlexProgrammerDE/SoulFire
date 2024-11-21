@@ -28,7 +28,7 @@ public class BlockItems {
   static {
     for (var itemType : ItemType.REGISTRY.values()) {
       for (var blockType : BlockType.REGISTRY.values()) {
-        var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockShapeGroup();
+        var blockShapeTypes = BlockState.forDefaultBlockType(blockType).blockCollisionShapeGroup();
 
         // Let's not use bedrock as a building block
         if (BlockTypeHelper.isDiggable(blockType)

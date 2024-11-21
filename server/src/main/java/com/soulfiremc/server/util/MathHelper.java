@@ -509,6 +509,10 @@ public class MathHelper {
     return start + delta * (end - start);
   }
 
+  public static float lerp(float delta, float start, float end) {
+    return start + delta * (end - start);
+  }
+
   public static int roundToward(int value, int factor) {
     return positiveCeilDiv(value, factor) * factor;
   }

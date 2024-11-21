@@ -26,6 +26,7 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SectionUtils;
+import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
@@ -42,11 +43,9 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTyp
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Getter
@@ -74,6 +73,9 @@ public abstract class Entity {
   protected Level level;
   protected BlockState inBlockState = null;
   protected boolean firstTick = true;
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public Optional<Vector3i> mainSupportingBlockPos = Optional.empty();
+  private boolean onGroundNoBlocks = false;
   private Vector3d pos;
   protected float yRot;
   protected float xRot;
@@ -180,6 +182,47 @@ public abstract class Entity {
         }
       }
     }
+  }
+
+  public void setOnGround(boolean onGround) {
+    this.onGround = onGround;
+    this.checkSupportingBlock(onGround, null);
+  }
+
+  public void setOnGroundWithMovement(boolean onGround, boolean horizontalCollision, Vector3d arg) {
+    this.onGround = onGround;
+    this.horizontalCollision = horizontalCollision;
+    this.checkSupportingBlock(onGround, arg);
+  }
+
+  public boolean isSupportedBy(Vector3i pos) {
+    return this.mainSupportingBlockPos.isPresent() && this.mainSupportingBlockPos.get().equals(pos);
+  }
+
+  protected void checkSupportingBlock(boolean onGround, @Nullable Vector3d movement) {
+    if (onGround) {
+      var boundingBox = this.getBoundingBox();
+      var checkBoundingBox = new AABB(boundingBox.minX, boundingBox.minY - 1.0E-6, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ);
+      var optional = this.level.findSupportingBlock(this, checkBoundingBox);
+      if (optional.isPresent() || this.onGroundNoBlocks) {
+        this.mainSupportingBlockPos = optional;
+      } else if (movement != null) {
+        var movedBoundingBox = checkBoundingBox.move(-movement.getX(), 0.0, -movement.getZ());
+        optional = this.level.findSupportingBlock(this, movedBoundingBox);
+        this.mainSupportingBlockPos = optional;
+      }
+
+      this.onGroundNoBlocks = optional.isEmpty();
+    } else {
+      this.onGroundNoBlocks = false;
+      if (this.mainSupportingBlockPos.isPresent()) {
+        this.mainSupportingBlockPos = Optional.empty();
+      }
+    }
+  }
+
+  public boolean onGround() {
+    return this.onGround;
   }
 
   public final AABB getBoundingBox() {
@@ -476,6 +519,55 @@ public abstract class Entity {
     }
   }
 
+  protected boolean isHorizontalCollisionMinor(Vector3d deltaMovement) {
+    return false;
+  }
+
+  public Vector3i getBlockPosBelowThatAffectsMyMovement() {
+    return this.getOnPos(0.500001F);
+  }
+
+  public Vector3i getOnPos() {
+    return this.getOnPos(1.0E-5F);
+  }
+
+  protected Vector3i getOnPos(float yOffset) {
+    if (this.mainSupportingBlockPos.isPresent()) {
+      var supportingBlockPos = this.mainSupportingBlockPos.get();
+      if (!(yOffset > 1.0E-5F)) {
+        return supportingBlockPos;
+      } else {
+        var blockState = this.level().getBlockState(supportingBlockPos);
+        return (!((double) yOffset <= 0.5) || !this.level().tagsState().is(blockState.blockType(), BlockTags.FENCES))
+          && !this.level().tagsState().is(blockState.blockType(), BlockTags.WALLS)
+          && !(blockState.blockType().fenceGateBlock())
+          ? Vector3i.from(supportingBlockPos.getX(), MathHelper.floor(this.pos.getY() - (double) yOffset), supportingBlockPos.getZ())
+          : supportingBlockPos;
+      }
+    } else {
+      var x = MathHelper.floor(this.pos.getX());
+      var y = MathHelper.floor(this.pos.getY() - (double) yOffset);
+      var z = MathHelper.floor(this.pos.getZ());
+      return Vector3i.from(x, y, z);
+    }
+  }
+
+  protected float getBlockJumpFactor() {
+    var f = this.level().getBlockState(this.blockPosition()).blockType().jumpFactor();
+    var g = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).blockType().jumpFactor();
+    return (double) f == 1.0 ? g : f;
+  }
+
+  protected float getBlockSpeedFactor() {
+    var blockType = this.level().getBlockState(this.blockPosition()).blockType();
+    var speedFactor = blockType.speedFactor();
+    if (blockType != BlockType.WATER && blockType != BlockType.BUBBLE_COLUMN) {
+      return (double) speedFactor == 1.0 ? this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).blockType().speedFactor() : speedFactor;
+    } else {
+      return speedFactor;
+    }
+  }
+
   public boolean touchingUnloadedChunk() {
     var lv = this.getBoundingBox().inflate(1.0);
     var i = MathHelper.floor(lv.minX);
@@ -515,12 +607,13 @@ public abstract class Entity {
                 bl2 = true;
                 height = Math.max(f - lv.minY, height);
                 if (pushedByFluid) {
-                  var lv5 = lv4.getFlow(this.level(), lv3);
+                  var flowDirection = lv4.getFlow(this.level(), lv3);
+                  System.out.println(flowDirection);
                   if (height < 0.4) {
-                    lv5 = lv5.mul(height);
+                    flowDirection = flowDirection.mul(height);
                   }
 
-                  flow = flow.add(lv5);
+                  flow = flow.add(flowDirection);
                   o++;
                 }
               }
@@ -535,14 +628,14 @@ public abstract class Entity {
         }
 
         if (!(this instanceof Player)) {
-          flow = flow.normalize();
+          flow = VectorHelper.normalizeSafe(flow);
         }
 
         var deltaMovement = this.getDeltaMovement();
         flow = flow.mul(motionScale);
         var g = 0.003;
         if (Math.abs(deltaMovement.getX()) < 0.003 && Math.abs(deltaMovement.getZ()) < 0.003 && flow.length() < 0.0045000000000000005) {
-          flow = flow.normalize().mul(0.0045000000000000005);
+          flow = VectorHelper.normalizeSafe(flow).mul(0.0045000000000000005);
         }
 
         this.setDeltaMovement(this.getDeltaMovement().add(flow));

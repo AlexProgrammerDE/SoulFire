@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
@@ -30,6 +31,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class Level implements LevelHeightAccessor {
@@ -163,5 +165,9 @@ public class Level implements LevelHeightAccessor {
 
   public boolean noCollision(AABB bb) {
     return getCollisionBoxes(bb).isEmpty();
+  }
+
+  public Optional<Vector3i> findSupportingBlock(Entity entity, AABB bb) {
+    return Optional.empty(); // TODO
   }
 }

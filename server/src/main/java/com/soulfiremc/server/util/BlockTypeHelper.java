@@ -28,7 +28,7 @@ public class BlockTypeHelper {
   private BlockTypeHelper() {}
 
   public static boolean isFullBlock(BlockState meta) {
-    return meta.blockShapeGroup().isFullBlock();
+    return meta.blockCollisionShapeGroup().isFullBlock();
   }
 
   public static boolean isHurtOnTouchSide(BlockType type) {
@@ -45,7 +45,7 @@ public class BlockTypeHelper {
   }
 
   public static boolean isSafeBlockToStandOn(BlockState meta) {
-    return isRoughlyFullBlock(meta.blockShapeGroup()) && !isHurtWhenStoodOn(meta.blockType());
+    return isRoughlyFullBlock(meta.blockCollisionShapeGroup()) && !isHurtWhenStoodOn(meta.blockType());
   }
 
   public static boolean isRoughlyFullBlock(BlockShapeGroup type) {

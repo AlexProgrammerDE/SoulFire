@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
@@ -36,6 +37,9 @@ public abstract class LivingEntity extends Entity {
   protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
   protected int fallFlyTicks;
   protected float appliedScale = 1.0F;
+  public float xxa;
+  public float yya;
+  public float zza;
 
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
@@ -152,5 +156,10 @@ public abstract class LivingEntity extends Entity {
 
   public boolean isAutoSpinAttack() {
     return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE) & 4) != 0;
+  }
+
+  @Override
+  protected float getBlockSpeedFactor() {
+    return MathHelper.lerp((float) this.attributeValue(AttributeType.MOVEMENT_EFFICIENCY), super.getBlockSpeedFactor(), 1.0F);
   }
 }

@@ -34,8 +34,8 @@ public class DataGenerators {
   private static final List<IDataGenerator> GENERATORS =
     List.of(
       new RegistryKeysJavaGenerator(),
-      new BlockCollisionShapesDataGenerator.BlockShapesGenerator(),
-      new BlockCollisionShapesDataGenerator.BlockStatesGenerator(),
+      new BlockShapesDataGenerator.BlockShapesGenerator(),
+      new BlockShapesDataGenerator.BlockStatesGenerator(),
       new BlocksJsonGenerator(),
       new BlocksJavaGenerator(),
       new FluidsJsonGenerator(),

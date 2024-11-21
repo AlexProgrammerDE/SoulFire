@@ -25,7 +25,7 @@ public class VectorHelper {
   private VectorHelper() {}
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
-    return topMiddleOfBlock(vector, blockState.blockShapeGroup());
+    return topMiddleOfBlock(vector, blockState.blockCollisionShapeGroup());
   }
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
@@ -57,5 +57,10 @@ public class VectorHelper {
     var e = base.getY() * (double) g - base.getX() * (double) h;
     var i = base.getZ();
     return Vector3d.from(d, e, i);
+  }
+
+  public static Vector3d normalizeSafe(Vector3d vec) {
+    var length = vec.length();
+    return length < 1.0E-5F ? Vector3d.ZERO : Vector3d.from(vec.getX() / length, vec.getY() / length, vec.getZ() / length);
   }
 }

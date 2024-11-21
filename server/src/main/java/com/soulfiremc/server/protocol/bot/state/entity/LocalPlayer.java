@@ -23,6 +23,7 @@ import com.soulfiremc.server.util.MathHelper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
@@ -197,6 +198,24 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Override
   public boolean isCrouching() {
     return this.crouching;
+  }
+
+  @Override
+  protected boolean isHorizontalCollisionMinor(Vector3d deltaMovement) {
+    var f = this.yRot() * (float) (Math.PI / 180.0);
+    var d = (double) MathHelper.sin(f);
+    var e = (double) MathHelper.cos(f);
+    var g = (double) this.xxa * e - (double) this.zza * d;
+    var h = (double) this.zza * e + (double) this.xxa * d;
+    var i = MathHelper.square(g) + MathHelper.square(h);
+    var j = MathHelper.square(deltaMovement.getX()) + MathHelper.square(deltaMovement.getZ());
+    if (!(i < 1.0E-5F) && !(j < 1.0E-5F)) {
+      var k = g * deltaMovement.getX() + h * deltaMovement.getZ();
+      var l = Math.acos(k / Math.sqrt(i * j));
+      return l < 0.13962634F;
+    } else {
+      return false;
+    }
   }
 
   public boolean isMovingSlowly() {

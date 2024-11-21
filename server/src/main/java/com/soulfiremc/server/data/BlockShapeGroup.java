@@ -19,6 +19,7 @@ package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.AABB;
+import com.soulfiremc.server.util.mcstructs.Direction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -27,23 +28,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockShapeGroup(int id, List<AABB> blockShapes, double highestY) {
+public record BlockShapeGroup(int id, List<AABB> blockShapes, double highestY, List<Direction> fullFaceDirections) {
   public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
   public static final BlockShapeGroup EMPTY;
 
   static {
-    SFHelpers.getResourceAsString("minecraft/blockshapes.txt")
+    SFHelpers.getResourceAsString("minecraft/block-shapes.txt")
       .lines()
       .forEach(
         line -> {
-          var parts = line.split("\\|");
+          var parts = line.split("\\|", -1);
 
           var id = Integer.parseInt(parts[0]);
           var blockShapes = new ArrayList<AABB>();
+          var fullFaceDirections = new ArrayList<Direction>();
 
-          if (parts.length > 1) {
-            for (var i = 1; i < parts.length; i++) {
-              var part = parts[i];
+          var shapeString = parts[1];
+          if (!shapeString.isEmpty()) {
+            var shapeParts = shapeString.split(";");
+            for (var part : shapeParts) {
               var subParts = part.split(",");
               var shape =
                 new AABB(
@@ -57,12 +60,21 @@ public record BlockShapeGroup(int id, List<AABB> blockShapes, double highestY) {
             }
           }
 
+          var faceString = parts[2];
+          if (!faceString.isEmpty()) {
+            var fullFaces = faceString.split(",");
+            for (var face : fullFaces) {
+              fullFaceDirections.add(Direction.valueOf(face));
+            }
+          }
+
           FROM_ID.put(
             id,
             new BlockShapeGroup(
               id,
               blockShapes,
-              blockShapes.stream().mapToDouble(a -> a.maxY).max().orElse(0)));
+              blockShapes.stream().mapToDouble(a -> a.maxY).max().orElse(0),
+              fullFaceDirections));
         });
 
     EMPTY = getById(0);

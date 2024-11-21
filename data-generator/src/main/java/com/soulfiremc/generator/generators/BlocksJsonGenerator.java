@@ -26,6 +26,7 @@ import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
@@ -40,6 +41,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
 
     blockDesc.addProperty("destroyTime", block.defaultDestroyTime());
     blockDesc.addProperty("explosionResistance", block.getExplosionResistance());
+    blockDesc.addProperty("friction", block.getFriction());
+    blockDesc.addProperty("jumpFactor", block.getJumpFactor());
+    blockDesc.addProperty("speedFactor", block.getSpeedFactor());
 
     var defaultState = block.defaultBlockState();
     if (defaultState.isAir()) {
@@ -50,6 +54,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
     }
     if (block instanceof IceBlock) {
       blockDesc.addProperty("iceBlock", true);
+    }
+    if (block instanceof FenceGateBlock) {
+      blockDesc.addProperty("fenceGateBlock", true);
     }
     if (defaultState.canBeReplaced()) {
       blockDesc.addProperty("replaceable", true);

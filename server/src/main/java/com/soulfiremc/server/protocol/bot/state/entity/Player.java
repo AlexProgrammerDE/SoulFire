@@ -125,4 +125,9 @@ public abstract class Player extends LivingEntity {
   public boolean isPushedByFluid() {
     return !this.abilitiesData.flying;
   }
+
+  @Override
+  protected float getBlockSpeedFactor() {
+    return !this.abilitiesData.flying && !this.isFallFlying() ? super.getBlockSpeedFactor() : 1.0F;
+  }
 }

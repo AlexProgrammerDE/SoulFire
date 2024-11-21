@@ -40,10 +40,10 @@ public class DataTest {
     var airBlockState = BlockState.forDefaultBlockType(BlockType.AIR);
     var dirtBlockState = BlockState.forDefaultBlockType(BlockType.DIRT);
 
-    assertNotEquals(airBlockState.blockShapeGroup(), dirtBlockState.blockShapeGroup());
-    assertNotSame(airBlockState.blockShapeGroup(), dirtBlockState.blockShapeGroup());
+    assertNotEquals(airBlockState.blockCollisionShapeGroup(), dirtBlockState.blockCollisionShapeGroup());
+    assertNotSame(airBlockState.blockCollisionShapeGroup(), dirtBlockState.blockCollisionShapeGroup());
 
-    assertEquals(airBlockState.blockShapeGroup().blockShapes().size(), 0);
-    assertEquals(dirtBlockState.blockShapeGroup().blockShapes().size(), 1);
+    assertEquals(airBlockState.blockCollisionShapeGroup().blockShapes().size(), 0);
+    assertEquals(dirtBlockState.blockCollisionShapeGroup().blockShapes().size(), 1);
   }
 }

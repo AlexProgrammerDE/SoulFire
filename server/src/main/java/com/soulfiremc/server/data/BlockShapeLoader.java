@@ -27,11 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockShapeLoader {
-  public static final Map<Key, List<BlockShapeGroup>> BLOCK_SHAPES =
+  public static final Map<Key, List<BlockShapeGroup>> BLOCK_COLLISION_SHAPES =
+    new Object2ObjectOpenHashMap<>();
+  public static final Map<Key, List<BlockShapeGroup>> BLOCK_SUPPORT_SHAPES =
     new Object2ObjectOpenHashMap<>();
 
   static {
-    SFHelpers.getResourceAsString("minecraft/blockstates.txt")
+    SFHelpers.getResourceAsString("minecraft/block-states.txt")
       .lines()
       .forEach(
         line -> {
@@ -39,19 +41,30 @@ public class BlockShapeLoader {
           @Subst("empty") var keyString = parts[0];
           var key = Key.key(keyString);
 
-          var blockShapeTypes = new ArrayList<BlockShapeGroup>();
+          var blockCollisionShapeTypes = new ArrayList<BlockShapeGroup>();
+          var blockSupportShapeTypes = new ArrayList<BlockShapeGroup>();
           if (parts.length > 1) {
-            var part = parts[1];
+            {
+              var subParts = parts[1].split(",");
+              for (var subPart : subParts) {
+                var id = Integer.parseInt(subPart);
+                var blockShapeType = BlockShapeGroup.getById(id);
+                blockCollisionShapeTypes.add(blockShapeType);
+              }
+            }
 
-            var subParts = part.split(",");
-            for (var subPart : subParts) {
-              var id = Integer.parseInt(subPart);
-              var blockShapeType = BlockShapeGroup.getById(id);
-              blockShapeTypes.add(blockShapeType);
+            {
+              var subParts = parts[2].split(",");
+              for (var subPart : subParts) {
+                var id = Integer.parseInt(subPart);
+                var blockShapeType = BlockShapeGroup.getById(id);
+                blockSupportShapeTypes.add(blockShapeType);
+              }
             }
           }
 
-          BLOCK_SHAPES.put(key, blockShapeTypes);
+          BLOCK_COLLISION_SHAPES.put(key, blockCollisionShapeTypes);
+          BLOCK_SUPPORT_SHAPES.put(key, blockSupportShapeTypes);
         });
   }
 }

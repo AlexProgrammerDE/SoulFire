@@ -22,6 +22,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.List;
+import java.util.Map;
 
 public record BlockState(
   int id,
@@ -30,7 +31,8 @@ public record BlockState(
   boolean blocksMotion,
   FluidState fluidState,
   BlockStateProperties properties,
-  BlockShapeGroup blockShapeGroup) {
+  BlockShapeGroup blockCollisionShapeGroup,
+  BlockShapeGroup blockSupportShapeGroup) {
   public BlockState(
     int id,
     boolean defaultState,
@@ -40,15 +42,23 @@ public record BlockState(
     BlockType blockType,
     Key key,
     int stateIndex) {
-    this(id, blockType, defaultState, blocksMotion, fluidState, properties, getBlockShapeGroup(key, stateIndex));
+    this(id, blockType, defaultState, blocksMotion, fluidState, properties, getBlockCollisionShapeGroup(key, stateIndex), getBlockSupportShapeGroup(key, stateIndex));
   }
 
   public static BlockState forDefaultBlockType(BlockType blockType) {
     return blockType.statesData().defaultState();
   }
 
-  private static BlockShapeGroup getBlockShapeGroup(Key key, int stateIndex) {
-    var shapeGroups = BlockShapeLoader.BLOCK_SHAPES.get(key);
+  private static BlockShapeGroup getBlockCollisionShapeGroup(Key key, int stateIndex) {
+    return getFromBlockShapeGroup(BlockShapeLoader.BLOCK_COLLISION_SHAPES, key, stateIndex);
+  }
+
+  private static BlockShapeGroup getBlockSupportShapeGroup(Key key, int stateIndex) {
+    return getFromBlockShapeGroup(BlockShapeLoader.BLOCK_SUPPORT_SHAPES, key, stateIndex);
+  }
+
+  private static BlockShapeGroup getFromBlockShapeGroup(Map<Key, List<BlockShapeGroup>> map, Key key, int stateIndex) {
+    var shapeGroups = map.get(key);
     var size = shapeGroups.size();
     if (size == 0) {
       // This block has no shape stored, this is for example for air or grass
@@ -62,7 +72,7 @@ public record BlockState(
   }
 
   public List<AABB> getCollisionBoxes(Vector3i block) {
-    return blockShapeGroup.getCollisionBoxes(block, blockType);
+    return blockCollisionShapeGroup.getCollisionBoxes(block, blockType);
   }
 
   @Override
@@ -86,7 +96,7 @@ public record BlockState(
     return "BlockState{" +
       "id=" + id +
       ", properties=" + properties +
-      ", blockShapeGroup=" + blockShapeGroup +
+      ", blockCollisionShapeGroup=" + blockCollisionShapeGroup +
       '}';
   }
 }

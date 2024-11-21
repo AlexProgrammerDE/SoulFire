@@ -18,6 +18,7 @@
 package com.soulfiremc.server.data;
 
 import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.Direction;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -51,50 +52,50 @@ public record FluidState(
       return Vector3d.ZERO;
     }
 
-    var d = 0.0;
-    var e = 0.0;
+    var xFlow = 0.0;
+    var zFlow = 0.0;
     var currentBlock = Vector3i.ZERO;
 
     for (var direction : Direction.Plane.HORIZONTAL) {
       currentBlock = direction.offset(blockPos);
       var relativeFluidState = level.getBlockState(currentBlock).fluidState();
       if (this.affectsFlow(relativeFluidState)) {
-        var f = relativeFluidState.ownHeight();
-        var g = 0.0F;
-        if (f == 0.0F) {
+        var otherStrength = relativeFluidState.ownHeight();
+        var strength = 0.0F;
+        if (otherStrength == 0.0F) {
           if (!level.getBlockState(currentBlock).blocksMotion()) {
-            var lv4 = currentBlock.add(0, -1, 0);
-            var lv5 = level.getBlockState(lv4).fluidState();
-            if (this.affectsFlow(lv5)) {
-              f = lv5.ownHeight();
-              if (f > 0.0F) {
-                g = ownHeight - (f - 0.8888889F);
+            var neighborBlock = currentBlock.add(0, -1, 0);
+            var neighborBlockState = level.getBlockState(neighborBlock).fluidState();
+            if (this.affectsFlow(neighborBlockState)) {
+              otherStrength = neighborBlockState.ownHeight();
+              if (otherStrength > 0.0F) {
+                strength = ownHeight - (otherStrength - 0.8888889F);
               }
             }
           }
-        } else if (f > 0.0F) {
-          g = ownHeight - f;
+        } else if (otherStrength > 0.0F) {
+          strength = ownHeight - otherStrength;
         }
 
-        if (g != 0.0F) {
-          d += (float) direction.getStepX() * g;
-          e += (float) direction.getStepZ() * g;
+        if (strength != 0.0F) {
+          xFlow += (float) direction.getStepX() * strength;
+          zFlow += (float) direction.getStepZ() * strength;
         }
       }
     }
 
-    var lv6 = Vector3d.from(d, 0.0, e);
+    var flowVector = Vector3d.from(xFlow, 0.0, zFlow);
     if (properties.getBoolean("falling")) {
       for (var direction : Direction.Plane.HORIZONTAL) {
         currentBlock = direction.offset(blockPos);
         if (this.isSolidFace(level, currentBlock, direction) || this.isSolidFace(level, currentBlock.add(0, 1, 0), direction)) {
-          lv6 = lv6.normalize().add(0.0, -6.0, 0.0);
+          flowVector = VectorHelper.normalizeSafe(flowVector).add(0.0, -6.0, 0.0);
           break;
         }
       }
     }
 
-    return lv6.normalize();
+    return VectorHelper.normalizeSafe(flowVector);
   }
 
   private boolean isSolidFace(Level level, Vector3i neighborPos, Direction side) {
@@ -105,7 +106,7 @@ public record FluidState(
     } else if (side == Direction.UP) {
       return true;
     } else {
-      return blockState.blockType().iceBlock() ? false : blockState.isFaceSturdy(level, neighborPos, side);
+      return !blockState.blockType().iceBlock() && blockState.blockSupportShapeGroup().fullFaceDirections().contains(side);
     }
   }
 }
