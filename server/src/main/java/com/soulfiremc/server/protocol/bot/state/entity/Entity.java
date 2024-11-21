@@ -584,13 +584,12 @@ public abstract class Entity {
   }
 
   public boolean touchingUnloadedChunk() {
-    var lv = this.getBoundingBox().inflate(1.0);
-    var i = MathHelper.floor(lv.minX);
-    var j = MathHelper.ceil(lv.maxX);
-    var k = MathHelper.floor(lv.minZ);
-    var l = MathHelper.ceil(lv.maxZ);
-    // return !this.level().hasChunksAt(i, k, j, l); // TODO
-    return false;
+    var bb = this.getBoundingBox().inflate(1.0);
+    var minX = MathHelper.floor(bb.minX);
+    var maxX = MathHelper.ceil(bb.maxX);
+    var minZ = MathHelper.floor(bb.minZ);
+    var maxZ = MathHelper.ceil(bb.maxZ);
+    return this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
   }
 
   public boolean updateFluidHeightAndDoFluidPushing(TagKey<FluidType> fluidTag, double motionScale) {

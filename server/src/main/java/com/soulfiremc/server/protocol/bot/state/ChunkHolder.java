@@ -94,6 +94,23 @@ public class ChunkHolder implements BlockAccessor {
     }
   }
 
+  public boolean hasChunksAt(int fromBlockX, int fromBlockZ, int toBlockX, int toBlockZ) {
+    var fromSectionX = SectionUtils.blockToSection(fromBlockX);
+    var toSectionX = SectionUtils.blockToSection(toBlockX);
+    var fromSectionZ = SectionUtils.blockToSection(fromBlockZ);
+    var toSectionZ = SectionUtils.blockToSection(toBlockZ);
+
+    for (var sectionX = fromSectionX; sectionX <= toSectionX; sectionX++) {
+      for (var sectionZ = fromSectionZ; sectionZ <= toSectionZ; sectionZ++) {
+        if (!this.isChunkSectionLoaded(sectionX, sectionZ)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   public ChunkData getOrCreateChunkSection(int sectionX, int sectionZ) {
     TimeUtil.lockYielding(writeLock);
     try {
