@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util.mcstructs;
 
+import com.google.common.collect.Iterators;
 import com.soulfiremc.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -244,6 +246,10 @@ public enum Direction {
     return getApproximateNearest(arg.getX(), arg.getY(), arg.getZ());
   }
 
+  public Vector3i offset(Vector3i arg) {
+    return arg.add(this.normal);
+  }
+
   @Nullable
   @Contract("_,_,_,!null->!null;_,_,_,_->_")
   public static Direction getNearest(int i, int j, int k, @Nullable Direction arg) {
@@ -394,6 +400,13 @@ public enum Direction {
       return direction != null && direction.getAxis() == this;
     }
 
+    public Direction.Plane getPlane() {
+      return switch (this) {
+        case X, Z -> Direction.Plane.HORIZONTAL;
+        case Y -> Direction.Plane.VERTICAL;
+      };
+    }
+
     public abstract int choose(int x, int y, int z);
 
     public abstract double choose(double x, double y, double z);
@@ -426,6 +439,36 @@ public enum Direction {
 
     public Direction.AxisDirection opposite() {
       return this == POSITIVE ? NEGATIVE : POSITIVE;
+    }
+  }
+
+  public enum Plane implements Iterable<Direction>, Predicate<Direction> {
+    HORIZONTAL(new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}, new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}),
+    VERTICAL(new Direction[]{Direction.UP, Direction.DOWN}, new Direction.Axis[]{Direction.Axis.Y});
+
+    private final Direction[] faces;
+    private final Direction.Axis[] axis;
+
+    Plane(final Direction[] args, final Direction.Axis[] args2) {
+      this.faces = args;
+      this.axis = args2;
+    }
+
+    public boolean test(@Nullable Direction direction) {
+      return direction != null && direction.getAxis().getPlane() == this;
+    }
+
+    @Override
+    public Iterator<Direction> iterator() {
+      return Iterators.forArray(this.faces);
+    }
+
+    public Stream<Direction> stream() {
+      return Arrays.stream(this.faces);
+    }
+
+    public int length() {
+      return this.faces.length;
     }
   }
 }

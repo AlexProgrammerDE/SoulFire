@@ -34,6 +34,7 @@ public record BlockType(
   float explosionResistance,
   boolean air,
   boolean fallingBlock,
+  boolean iceBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
   List<LootPoolEntry> lootTableData,

@@ -26,9 +26,11 @@ import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class BlocksJsonGenerator implements IDataGenerator {
+  @SuppressWarnings("deprecation")
   @SneakyThrows
   public static JsonObject generateBlock(Block block) {
     var blockDesc = new JsonObject();
@@ -45,6 +47,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
     }
     if (block instanceof FallingBlock) {
       blockDesc.addProperty("fallingBlock", true);
+    }
+    if (block instanceof IceBlock) {
+      blockDesc.addProperty("iceBlock", true);
     }
     if (defaultState.canBeReplaced()) {
       blockDesc.addProperty("replaceable", true);
@@ -81,6 +86,10 @@ public class BlocksJsonGenerator implements IDataGenerator {
         stateDesc.addProperty("default", true);
       }
 
+      if (state.blocksMotion()) {
+        stateDesc.addProperty("blocksMotion", state.blocksMotion());
+      }
+
       var fluidStateDesc = new JsonObject();
       var fluidState = state.getFluidState();
       fluidStateDesc.addProperty("type", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
@@ -97,6 +106,22 @@ public class BlocksJsonGenerator implements IDataGenerator {
       }
       if (fluidState.isEmpty()) {
         fluidStateDesc.addProperty("empty", true);
+      }
+
+      var fluidPropertiesDesc = new JsonObject();
+      for (var property : fluidState.getProperties()) {
+        var value = fluidState.getValue(property);
+        if (value instanceof Integer integer) {
+          fluidPropertiesDesc.addProperty(property.getName(), integer);
+        } else if (value instanceof Boolean bool) {
+          fluidPropertiesDesc.addProperty(property.getName(), bool);
+        } else {
+          fluidPropertiesDesc.addProperty(property.getName(), Util.getPropertyName(property, value));
+        }
+      }
+
+      if (!fluidPropertiesDesc.isEmpty()) {
+        fluidStateDesc.add("properties", fluidPropertiesDesc);
       }
 
       stateDesc.add("fluidState", fluidStateDesc);

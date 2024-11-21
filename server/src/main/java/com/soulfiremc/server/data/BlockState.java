@@ -27,18 +27,20 @@ public record BlockState(
   int id,
   BlockType blockType,
   boolean defaultState,
+  boolean blocksMotion,
   FluidState fluidState,
   BlockStateProperties properties,
   BlockShapeGroup blockShapeGroup) {
   public BlockState(
     int id,
     boolean defaultState,
+    boolean blocksMotion,
     FluidState fluidState,
     BlockStateProperties properties,
     BlockType blockType,
     Key key,
     int stateIndex) {
-    this(id, blockType, defaultState, fluidState, properties, getBlockShapeGroup(key, stateIndex));
+    this(id, blockType, defaultState, blocksMotion, fluidState, properties, getBlockShapeGroup(key, stateIndex));
   }
 
   public static BlockState forDefaultBlockType(BlockType blockType) {

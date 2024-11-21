@@ -17,12 +17,15 @@
  */
 package com.soulfiremc.server.data;
 
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.ToString;
 
 @ToString
 public class BlockStateProperties {
+  public static final JsonDeserializer<BlockStateProperties> BLOCK_STATE_PROPERTIES =
+    (json, typeOfT, context) -> new BlockStateProperties(json.getAsJsonObject());
   private final Object2BooleanMap<String> booleanProperties;
   private final Object2IntMap<String> intProperties;
   private final Object2ObjectMap<String, String> stringProperties;

@@ -22,5 +22,11 @@ import net.fabricmc.api.ModInitializer;
 public class Main implements ModInitializer {
   @Override
   public void onInitialize() {
+    // Entity.class;
+    // LivingEntity.class;
+    // Player.class;
+    // AbstractClientPlayer.class;
+    // LocalPlayer.class;
+    // FluidState
   }
 }

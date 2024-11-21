@@ -120,4 +120,9 @@ public abstract class Player extends LivingEntity {
   }
 
   public abstract boolean isCreative();
+
+  @Override
+  public boolean isPushedByFluid() {
+    return !this.abilitiesData.flying;
+  }
 }

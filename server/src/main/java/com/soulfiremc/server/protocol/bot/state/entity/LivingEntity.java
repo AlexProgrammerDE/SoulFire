@@ -34,6 +34,8 @@ public abstract class LivingEntity extends Entity {
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
   protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
+  protected int fallFlyTicks;
+  protected float appliedScale = 1.0F;
 
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
@@ -45,15 +47,28 @@ public abstract class LivingEntity extends Entity {
 
     // this.aiStep();
 
-    // if (this.isFallFlying()) {
-    //  this.fallFlyTicks++;
-    //  else {
-    //  this.fallFlyTicks = 0;
-    // }
+    if (this.isFallFlying()) {
+      this.fallFlyTicks++;
+    } else {
+      this.fallFlyTicks = 0;
+    }
 
     if (this.isSleeping()) {
       this.xRot(0.0F);
     }
+
+    var currentScale = this.getScale();
+    if (currentScale != this.appliedScale) {
+      this.appliedScale = currentScale;
+      this.refreshDimensions();
+    }
+  }
+
+  @Override
+  public void baseTick() {
+    super.baseTick();
+
+    this.effectState.tick();
   }
 
   public boolean isSpectator() {
@@ -92,14 +107,14 @@ public abstract class LivingEntity extends Entity {
   }
 
   protected void setLivingEntityFlag(int key, boolean value) {
-    int j = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
+    int currentFlags = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
     if (value) {
-      j |= key;
+      currentFlags |= key;
     } else {
-      j &= ~key;
+      currentFlags &= ~key;
     }
 
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, (byte) j);
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, (byte) currentFlags);
   }
 
   @Override

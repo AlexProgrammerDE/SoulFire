@@ -216,15 +216,13 @@ public abstract class Entity {
   public void baseTick() {
     this.wasInPowderSnow = this.isInPowderSnow;
     this.isInPowderSnow = false;
-    // this.updateInWaterStateAndDoFluidPushing();
+    this.updateInWaterStateAndDoFluidPushing();
     this.updateFluidOnEyes();
-    // this.updateSwimming();
+    this.updateSwimming();
 
-    // if (this.isInLava()) {
-    //   this.fallDistance *= 0.5F;
-    // }
-
-    effectState.tick();
+    if (this.isInLava()) {
+      this.fallDistance *= 0.5F;
+    }
   }
 
   public void handleEntityEvent(EntityEvent event) {
@@ -430,8 +428,8 @@ public abstract class Entity {
   }
 
   public void refreshDimensions() {
-    var currentPos = this.getPose();
-    var poseDimensions = this.getDimensions(currentPos);
+    var currentPose = this.getPose();
+    var poseDimensions = this.getDimensions(currentPose);
     this.dimensions = poseDimensions;
     this.eyeHeight = poseDimensions.eyeHeight();
     this.reapplyPosition();
@@ -451,6 +449,108 @@ public abstract class Entity {
     }
 
     return this.inBlockState;
+  }
+
+  public void resetFallDistance() {
+    this.fallDistance = 0.0F;
+  }
+
+  public boolean isPushedByFluid() {
+    return true;
+  }
+
+  protected boolean updateInWaterStateAndDoFluidPushing() {
+    this.fluidHeight.clear();
+    this.updateInWaterStateAndDoWaterCurrentPushing();
+    var d = this.level().dimensionType().ultrawarm() ? 0.007 : 0.0023333333333333335;
+    var bl = this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
+    return this.isInWater() || bl;
+  }
+
+  void updateInWaterStateAndDoWaterCurrentPushing() {
+    if (this.updateFluidHeightAndDoFluidPushing(FluidTags.WATER, 0.014)) {
+      this.resetFallDistance();
+      this.wasTouchingWater = true;
+    } else {
+      this.wasTouchingWater = false;
+    }
+  }
+
+  public boolean touchingUnloadedChunk() {
+    var lv = this.getBoundingBox().inflate(1.0);
+    var i = MathHelper.floor(lv.minX);
+    var j = MathHelper.ceil(lv.maxX);
+    var k = MathHelper.floor(lv.minZ);
+    var l = MathHelper.ceil(lv.maxZ);
+    // return !this.level().hasChunksAt(i, k, j, l); // TODO
+    return false;
+  }
+
+  public boolean updateFluidHeightAndDoFluidPushing(TagKey<FluidType> fluidTag, double motionScale) {
+    if (this.touchingUnloadedChunk()) {
+      return false;
+    } else {
+      var lv = this.getBoundingBox().deflate(0.001);
+      var minX = MathHelper.floor(lv.minX);
+      var maxX = MathHelper.ceil(lv.maxX);
+      var minY = MathHelper.floor(lv.minY);
+      var maxY = MathHelper.ceil(lv.maxY);
+      var minZ = MathHelper.floor(lv.minZ);
+      var maxZ = MathHelper.ceil(lv.maxZ);
+      var height = 0.0;
+      var pushedByFluid = this.isPushedByFluid();
+      var bl2 = false;
+      var flow = Vector3d.ZERO;
+      var o = 0;
+      var lv3 = Vector3i.ZERO;
+
+      for (var x = minX; x < maxX; x++) {
+        for (var y = minY; y < maxY; y++) {
+          for (var z = minZ; z < maxZ; z++) {
+            lv3 = Vector3i.from(x, y, z);
+            var lv4 = this.level().getBlockState(lv3).fluidState();
+            if (this.level().tagsState().is(lv4.type(), fluidTag)) {
+              var f = (double) ((float) y + lv4.getHeight(this.level(), lv3));
+              if (f >= lv.minY) {
+                bl2 = true;
+                height = Math.max(f - lv.minY, height);
+                if (pushedByFluid) {
+                  var lv5 = lv4.getFlow(this.level(), lv3);
+                  if (height < 0.4) {
+                    lv5 = lv5.mul(height);
+                  }
+
+                  flow = flow.add(lv5);
+                  o++;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (flow.length() > 0.0) {
+        if (o > 0) {
+          flow = flow.mul(1.0 / (double) o);
+        }
+
+        if (!(this instanceof Player)) {
+          flow = flow.normalize();
+        }
+
+        var deltaMovement = this.getDeltaMovement();
+        flow = flow.mul(motionScale);
+        var g = 0.003;
+        if (Math.abs(deltaMovement.getX()) < 0.003 && Math.abs(deltaMovement.getZ()) < 0.003 && flow.length() < 0.0045000000000000005) {
+          flow = flow.normalize().mul(0.0045000000000000005);
+        }
+
+        this.setDeltaMovement(this.getDeltaMovement().add(flow));
+      }
+
+      this.fluidHeight.put(fluidTag, height);
+      return bl2;
+    }
   }
 
   private void updateFluidOnEyes() {

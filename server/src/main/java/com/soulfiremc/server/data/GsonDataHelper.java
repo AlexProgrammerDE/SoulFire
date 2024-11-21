@@ -47,7 +47,7 @@ public class GsonDataHelper {
         return Key.key(key);
       }
     };
-  private static final Function<Map<Class<?>, TypeAdapter<?>>, Gson> GSON_FACTORY = (typeAdapters) -> {
+    private static final Function<Map<Class<?>, Object>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
       .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
       .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
@@ -64,7 +64,7 @@ public class GsonDataHelper {
   }
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz,
-                               Map<Class<?>, TypeAdapter<?>> typeAdapters) {
+                               Map<Class<?>, Object> typeAdapters) {
     var gson = createGson(typeAdapters);
     var array =
       LOADED_DATA.computeIfAbsent(
@@ -88,7 +88,7 @@ public class GsonDataHelper {
     throw new RuntimeException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
   }
 
-  public static Gson createGson(Map<Class<?>, TypeAdapter<?>> typeAdapters) {
+    public static Gson createGson(Map<Class<?>, Object> typeAdapters) {
     return GSON_FACTORY.apply(typeAdapters);
   }
 }
