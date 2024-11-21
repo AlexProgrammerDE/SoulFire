@@ -50,6 +50,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   private boolean wasShiftKeyDown = false;
   private boolean wasSprinting = false;
   private boolean noPhysics = false;
+  private boolean crouching;
   private int positionReminder = 0;
   private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
 
@@ -205,5 +206,19 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Override
   public boolean isUnderWater() {
     return this.wasUnderwater;
+  }
+
+  @Override
+  public boolean isShiftKeyDown() {
+    return connection.controlState().sneaking();
+  }
+
+  @Override
+  public boolean isCrouching() {
+    return this.crouching;
+  }
+
+  public boolean isMovingSlowly() {
+    return this.isCrouching() || this.isVisuallyCrawling();
   }
 }

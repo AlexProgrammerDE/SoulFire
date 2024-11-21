@@ -35,7 +35,7 @@ public class TagsState {
     tags.putAll(updateTags);
   }
 
-  public <T extends RegistryValue<T>> boolean isValueInTag(T value, TagKey<T> tagKey) {
+  public <T extends RegistryValue<T>> boolean is(T value, TagKey<T> tagKey) {
     return Arrays.stream(getValuesOfTag(tagKey)).anyMatch(t -> t == value.id());
   }
 

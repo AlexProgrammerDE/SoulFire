@@ -35,6 +35,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
@@ -47,6 +48,13 @@ import java.util.UUID;
 @Getter
 @Setter
 public abstract class Entity {
+  protected static final int FLAG_ONFIRE = 0;
+  protected static final int FLAG_GLOWING = 6;
+  protected static final int FLAG_FALL_FLYING = 7;
+  private static final int FLAG_SHIFT_KEY_DOWN = 1;
+  private static final int FLAG_SPRINTING = 3;
+  private static final int FLAG_SWIMMING = 4;
+  private static final int FLAG_INVISIBLE = 5;
   public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
   protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
@@ -75,6 +83,7 @@ public abstract class Entity {
   protected boolean minorHorizontalCollision;
   protected boolean isInPowderSnow;
   protected boolean wasInPowderSnow;
+  protected boolean wasTouchingWater;
   public boolean noPhysics;
 
   public Entity(EntityType entityType, Level level) {
@@ -179,7 +188,7 @@ public abstract class Entity {
     var breathingPos = eyePos.sub(0, BREATHING_DISTANCE_BELOW_EYES, 0);
     var breathingCoords = breathingPos.toInt();
 
-    return level.tagsState().isValueInTag(level.getBlockState(breathingCoords).blockType().fluidType(), fluid);
+    return level.tagsState().is(level.getBlockState(breathingCoords).blockType().fluidType(), fluid);
   }
 
   /**
@@ -292,10 +301,6 @@ public abstract class Entity {
     return this.metadataState.getMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataType.BOOLEAN);
   }
 
-  public void setNoGravity(boolean noGravity) {
-    this.metadataState.setMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataType.BOOLEAN, noGravity);
-  }
-
   protected double getDefaultGravity() {
     return 0.0;
   }
@@ -310,4 +315,104 @@ public abstract class Entity {
       this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d, 0.0));
     }
   }
+
+  public Pose getPose() {
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE);
+  }
+
+  public void setPose(Pose pose) {
+    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE, pose);
+  }
+
+  public boolean hasPose(Pose pose) {
+    return this.getPose() == pose;
+  }
+
+  public boolean isShiftKeyDown() {
+    return this.getSharedFlag(FLAG_SHIFT_KEY_DOWN);
+  }
+
+  public void setShiftKeyDown(boolean keyDown) {
+    this.setSharedFlag(FLAG_SHIFT_KEY_DOWN, keyDown);
+  }
+
+  public boolean isSteppingCarefully() {
+    return this.isShiftKeyDown();
+  }
+
+  public boolean isSuppressingBounce() {
+    return this.isShiftKeyDown();
+  }
+
+  public boolean isDiscrete() {
+    return this.isShiftKeyDown();
+  }
+
+  public boolean isDescending() {
+    return this.isShiftKeyDown();
+  }
+
+  public boolean isCrouching() {
+    return this.hasPose(Pose.SNEAKING);
+  }
+
+  public boolean isSprinting() {
+    return this.getSharedFlag(FLAG_SPRINTING);
+  }
+
+  public void setSprinting(boolean sprinting) {
+    this.setSharedFlag(FLAG_SPRINTING, sprinting);
+  }
+
+  public boolean isSwimming() {
+    return this.getSharedFlag(FLAG_SWIMMING);
+  }
+
+  public void setSwimming(boolean swimming) {
+    this.setSharedFlag(FLAG_SWIMMING, swimming);
+  }
+
+  public boolean isVisuallySwimming() {
+    return this.hasPose(Pose.SWIMMING);
+  }
+
+  public boolean isVisuallyCrawling() {
+    return this.isVisuallySwimming() && !this.isInWater();
+  }
+
+  public boolean isInWater() {
+    return this.wasTouchingWater;
+  }
+
+  private boolean isInRain() {
+    return false; // TODO
+  }
+
+  private boolean isInBubbleColumn() {
+    return this.level().getBlockState(blockPos()).blockType().equals(BlockType.BUBBLE_COLUMN);
+  }
+
+  public boolean isInWaterOrRain() {
+    return this.isInWater() || this.isInRain();
+  }
+
+  public boolean isInWaterRainOrBubble() {
+    return this.isInWater() || this.isInRain() || this.isInBubbleColumn();
+  }
+
+  public boolean isInWaterOrBubble() {
+    return this.isInWater() || this.isInBubbleColumn();
+  }
+
+  public void updateSwimming() {
+    if (this.isSwimming()) {
+      this.setSwimming(this.isSprinting() && this.isInWater());
+    } else {
+      this.setSwimming(
+        this.isSprinting() && this.isUnderWater() && this.level.tagsState().is(this.level().getBlockState(blockPos()).blockType().fluidType(), FluidTags.WATER)
+      );
+    }
+  }
+
+  public abstract boolean isUnderWater();
 }

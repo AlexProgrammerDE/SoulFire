@@ -53,9 +53,6 @@ public class BlocksJsonGenerator implements IDataGenerator {
       blockDesc.addProperty("requiresCorrectToolForDrops", true);
     }
 
-    blockDesc.addProperty("fluidType",
-      BuiltInRegistries.FLUID.getKey(defaultState.getFluidState().getType()).toString());
-
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();
 
@@ -83,6 +80,16 @@ public class BlocksJsonGenerator implements IDataGenerator {
       if (state == defaultState) {
         stateDesc.addProperty("default", true);
       }
+
+      var fluidStateDesc = new JsonObject();
+      var fluidState = state.getFluidState();
+      fluidStateDesc.addProperty("type", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
+      fluidStateDesc.addProperty("amount", fluidState.getAmount());
+      if (fluidState.isSource()) {
+        fluidStateDesc.addProperty("source", true);
+      }
+
+      stateDesc.add("fluidState", fluidStateDesc);
 
       var propertiesDesc = new JsonObject();
       for (var property : state.getProperties()) {

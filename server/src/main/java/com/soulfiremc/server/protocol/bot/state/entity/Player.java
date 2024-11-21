@@ -55,4 +55,9 @@ public abstract class Player extends LivingEntity {
       this.setPosition(x, this.y(), z);
     }
   }
+
+  @Override
+  public boolean isSwimming() {
+    return !this.abilitiesData.flying && !this.isSpectator() && super.isSwimming();
+  }
 }

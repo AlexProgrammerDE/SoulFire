@@ -17,18 +17,23 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.EffectType;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.NamedEntityData;
+import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 
 @Getter
 @Setter
 public abstract class LivingEntity extends Entity {
+  private static final Key SPEED_MODIFIER_POWDER_SNOW_ID = Key.key("powder_snow");
+  private static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
+  private static final Attribute.Modifier SPEED_MODIFIER_SPRINTING = new Attribute.Modifier(
+    SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
+  );
+
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
   }
@@ -79,5 +84,28 @@ public abstract class LivingEntity extends Entity {
   protected double getEffectiveGravity() {
     var bl = this.getDeltaMovement().getY() <= 0.0;
     return bl && this.effectState().hasEffect(EffectType.SLOW_FALLING) ? Math.min(this.getGravity(), 0.01) : this.getGravity();
+  }
+
+  @Override
+  public void setSprinting(boolean sprinting) {
+    super.setSprinting(sprinting);
+    var lv = this.attributeState.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
+    lv.removeModifier(SPEED_MODIFIER_SPRINTING.id());
+    if (sprinting) {
+      lv.addModifier(SPEED_MODIFIER_SPRINTING);
+    }
+  }
+
+  public boolean isSuppressingSlidingDownLadder() {
+    return this.isShiftKeyDown();
+  }
+
+  public boolean isFallFlying() {
+    return this.getSharedFlag(FLAG_FALL_FLYING);
+  }
+
+  @Override
+  public boolean isVisuallySwimming() {
+    return super.isVisuallySwimming() || !this.isFallFlying() && this.hasPose(Pose.FALL_FLYING);
   }
 }

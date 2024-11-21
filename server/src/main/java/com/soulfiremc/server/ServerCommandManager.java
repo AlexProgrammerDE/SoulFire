@@ -235,7 +235,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       literal("collect")
         .then(argument("block", new TagBasedArgumentType<BlockType, BlockTagResolvable>(
           key -> tags -> block -> block.key().equals(key),
-          key -> tags -> block -> tags.isValueInTag(block, key),
+          key -> tags -> block -> tags.is(block, key),
           BlockType.REGISTRY.values().stream().map(BlockType::key).toList(),
           BlockTags.TAGS
         ))

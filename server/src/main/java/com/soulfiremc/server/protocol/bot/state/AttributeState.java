@@ -61,4 +61,12 @@ public class AttributeState {
     return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)
       ::iterator;
   }
+
+  public void addModifier(Attribute.Modifier modifier) {
+    modifiers.put(modifier.id(), modifier);
+  }
+
+  public void removeModifier(Key id) {
+    modifiers.remove(id);
+  }
 }
