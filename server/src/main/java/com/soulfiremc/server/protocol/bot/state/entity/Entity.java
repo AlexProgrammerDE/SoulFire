@@ -80,12 +80,10 @@ public abstract class Entity {
   public Optional<Vector3i> mainSupportingBlockPos = Optional.empty();
   private boolean onGroundNoBlocks = false;
   private Vector3d pos;
+  protected Vector3d deltaMovement = Vector3d.ZERO;
   protected float yRot;
   protected float xRot;
   protected float headYRot;
-  protected double deltaMovementX;
-  protected double deltaMovementY;
-  protected double deltaMovementZ;
   protected boolean onGround;
   protected int jumpTriggerTime;
   protected boolean horizontalCollision;
@@ -133,7 +131,7 @@ public abstract class Entity {
   }
 
   public EntityMovement toMovement() {
-    return new EntityMovement(pos, Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ), yRot, xRot);
+    return new EntityMovement(pos, deltaMovement, yRot, xRot);
   }
 
   public void setFrom(EntityMovement entityMovement) {
@@ -262,9 +260,11 @@ public abstract class Entity {
   }
 
   public void setDeltaMovement(double deltaMovementX, double deltaMovementY, double deltaMovementZ) {
-    this.deltaMovementX = deltaMovementX;
-    this.deltaMovementY = deltaMovementY;
-    this.deltaMovementZ = deltaMovementZ;
+    this.setDeltaMovement(Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ));
+  }
+
+  protected Vector3d getDeltaMovement() {
+    return deltaMovement;
   }
 
   protected boolean getSharedFlag(int flag) {
@@ -374,12 +374,8 @@ public abstract class Entity {
     }
   }
 
-  protected Vector3d getDeltaMovement() {
-    return Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ);
-  }
-
-  public void setDeltaMovement(Vector3d motion) {
-    setDeltaMovement(motion.getX(), motion.getY(), motion.getZ());
+  public void setDeltaMovement(Vector3d deltaMovement) {
+    this.deltaMovement = deltaMovement;
   }
 
   public boolean isNoGravity() {

@@ -703,9 +703,9 @@ public class POVServer extends InternalPlugin {
             entity.yRot(),
             entity.headYRot(),
             entity.xRot(),
-            entity.deltaMovementX(),
-            entity.deltaMovementY(),
-            entity.deltaMovementZ()));
+            entity.deltaMovement().getX(),
+            entity.deltaMovement().getY(),
+            entity.deltaMovement().getZ()));
       } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
         clientSession.send(
           new ClientboundAddExperienceOrbPacket(
