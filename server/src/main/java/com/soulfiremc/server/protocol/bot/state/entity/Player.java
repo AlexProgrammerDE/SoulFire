@@ -60,7 +60,7 @@ public abstract class Player extends LivingEntity {
   public void tick() {
     this.noPhysics = this.isSpectator();
     if (this.isSpectator()) {
-      this.onGround(false);
+      this.setOnGround(false);
     }
 
     this.wasUnderwater = this.isEyeInFluid(FluidTags.WATER);

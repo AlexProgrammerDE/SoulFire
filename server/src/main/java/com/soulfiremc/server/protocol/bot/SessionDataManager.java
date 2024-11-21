@@ -333,7 +333,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onRotation(ClientboundPlayerRotationPacket packet) {
-    localPlayer.setRotation(
+    localPlayer.setRot(
       packet.getYRot(),
       packet.getXRot()
     );
@@ -940,7 +940,7 @@ public final class SessionDataManager {
     }
 
     state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
-    state.onGround(packet.isOnGround());
+    state.setOnGround(packet.isOnGround());
   }
 
   @EventHandler
@@ -952,8 +952,8 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setRotation(packet.getYaw(), packet.getPitch());
-    state.onGround(packet.isOnGround());
+    state.setRot(packet.getYaw(), packet.getPitch());
+    state.setOnGround(packet.isOnGround());
   }
 
   @EventHandler
@@ -979,8 +979,8 @@ public final class SessionDataManager {
     }
 
     state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
-    state.setRotation(packet.getYaw(), packet.getPitch());
-    state.onGround(packet.isOnGround());
+    state.setRot(packet.getYaw(), packet.getPitch());
+    state.setOnGround(packet.isOnGround());
   }
 
   @EventHandler
@@ -998,7 +998,7 @@ public final class SessionDataManager {
       packet.getYRot(),
       packet.getXRot()
     ), packet.getRelatives()));
-    state.onGround(packet.isOnGround());
+    state.setOnGround(packet.isOnGround());
   }
 
   @EventHandler
@@ -1016,7 +1016,7 @@ public final class SessionDataManager {
       packet.getYRot(),
       packet.getXRot()
     ));
-    state.onGround(packet.isOnGround());
+    state.setOnGround(packet.isOnGround());
   }
 
   @EventHandler

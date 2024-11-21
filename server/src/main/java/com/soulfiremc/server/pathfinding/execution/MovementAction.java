@@ -73,7 +73,7 @@ public final class MovementAction implements WorldAction {
 
     var previousYRot = clientEntity.yRot();
     clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
-    clientEntity.xRot(0);
+    clientEntity.setXRot(0);
     var newYRot = clientEntity.yRot();
 
     var yRotDifference = Math.abs(MathHelper.wrapDegrees(newYRot - previousYRot));

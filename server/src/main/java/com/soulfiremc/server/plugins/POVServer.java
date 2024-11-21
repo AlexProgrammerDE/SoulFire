@@ -956,8 +956,8 @@ public class POVServer extends InternalPlugin {
               lastZ = posRot.getZ();
 
               clientEntity.setPos(posRot.getX(), posRot.getY(), posRot.getZ());
-              clientEntity.yRot(posRot.getYaw());
-              clientEntity.xRot(posRot.getPitch());
+              clientEntity.setYRot(posRot.getYaw());
+              clientEntity.setXRot(posRot.getPitch());
             }
             case ServerboundMovePlayerPosPacket pos -> {
               lastX = pos.getX();
@@ -967,8 +967,8 @@ public class POVServer extends InternalPlugin {
               clientEntity.setPos(pos.getX(), pos.getY(), pos.getZ());
             }
             case ServerboundMovePlayerRotPacket rot -> {
-              clientEntity.yRot(rot.getYaw());
-              clientEntity.xRot(rot.getPitch());
+              clientEntity.setYRot(rot.getYaw());
+              clientEntity.setXRot(rot.getPitch());
             }
             case ServerboundAcceptTeleportationPacket teleportationPacket -> {
               // This was a forced teleport, the server should not know about it

@@ -49,7 +49,6 @@ import java.util.*;
 
 @Slf4j
 @Getter
-@Setter
 public abstract class Entity {
   protected static final int FLAG_ONFIRE = 0;
   protected static final int FLAG_GLOWING = 6;
@@ -67,9 +66,13 @@ public abstract class Entity {
   protected final EntityType entityType;
   protected final EntityMetadataState metadataState;
   protected float fallDistance;
+  @Setter
   protected UUID uuid;
+  @Setter
   protected ObjectData data;
+  @Setter
   protected int entityId;
+  @Setter
   protected Level level;
   protected BlockState inBlockState = null;
   protected boolean firstTick = true;
@@ -125,7 +128,7 @@ public abstract class Entity {
     data(packet.getData());
     setPos(packet.getX(), packet.getY(), packet.getZ());
     setHeadRotation(packet.getHeadYaw());
-    setRotation(packet.getYaw(), packet.getPitch());
+    setRot(packet.getYaw(), packet.getPitch());
     setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
@@ -136,7 +139,7 @@ public abstract class Entity {
   public void setFrom(EntityMovement entityMovement) {
     setPos(entityMovement.pos());
     setDeltaMovement(entityMovement.deltaMovement());
-    setRotation(entityMovement.yRot(), entityMovement.xRot());
+    setRot(entityMovement.yRot(), entityMovement.xRot());
   }
 
   public double x() {
@@ -233,9 +236,25 @@ public abstract class Entity {
     this.bb = bb;
   }
 
-  public void setRotation(float yRot, float xRot) {
-    this.yRot = yRot;
-    this.xRot = xRot;
+  public void setRot(float yRot, float xRot) {
+    this.setYRot(yRot % 360.0F);
+    this.setXRot(xRot % 360.0F);
+  }
+
+  public void setYRot(float yRot) {
+    if (!Float.isFinite(yRot)) {
+      log.warn("Invalid entity y rotation: {}, discarding.", yRot);
+    } else {
+      this.yRot = yRot;
+    }
+  }
+
+  public void setXRot(float xRot) {
+    if (!Float.isFinite(xRot)) {
+      log.warn("Invalid entity x rotation: {}, discarding.", xRot);
+    } else {
+      this.xRot = Math.clamp(xRot % 360.0F, -90.0F, 90.0F);
+    }
   }
 
   public void setHeadRotation(float headYRot) {
@@ -608,7 +627,6 @@ public abstract class Entity {
                 height = Math.max(f - lv.minY, height);
                 if (pushedByFluid) {
                   var flowDirection = lv4.getFlow(this.level(), lv3);
-                  System.out.println(flowDirection);
                   if (height < 0.4) {
                     flowDirection = flowDirection.mul(height);
                   }

@@ -58,7 +58,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     if (this.isSleeping()) {
-      this.xRot(0.0F);
+      this.setXRot(0.0F);
     }
 
     var currentScale = this.getScale();
