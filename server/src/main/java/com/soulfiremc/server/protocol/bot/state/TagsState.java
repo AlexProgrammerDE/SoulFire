@@ -24,6 +24,7 @@ import lombok.Getter;
 import net.kyori.adventure.key.Key;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -37,6 +38,13 @@ public class TagsState {
 
   public <T extends RegistryValue<T>> boolean is(T value, TagKey<T> tagKey) {
     return Arrays.stream(getValuesOfTag(tagKey)).anyMatch(t -> t == value.id());
+  }
+
+  public <T extends RegistryValue<T>> List<TagKey<T>> getTags(T value) {
+    return tags.getOrDefault(value.registry().registryKey().key(), Map.of()).entrySet().stream()
+      .filter(entry -> Arrays.stream(entry.getValue()).anyMatch(t -> t == value.id()))
+      .map(entry -> new TagKey<>(value.registry().registryKey(), entry.getKey()))
+      .toList();
   }
 
   public <T extends RegistryValue<T>> int[] getValuesOfTag(TagKey<T> tagKey) {

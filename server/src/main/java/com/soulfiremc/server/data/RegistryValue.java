@@ -23,4 +23,6 @@ public interface RegistryValue<T extends RegistryValue<T>> {
   int id();
 
   Key key();
+
+  Registry<T> registry();
 }

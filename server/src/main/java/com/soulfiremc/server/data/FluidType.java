@@ -56,4 +56,9 @@ public record FluidType(int id, Key key) implements RegistryValue<FluidType> {
   public int hashCode() {
     return id;
   }
+
+  @Override
+  public Registry<FluidType> registry() {
+    return REGISTRY;
+  }
 }

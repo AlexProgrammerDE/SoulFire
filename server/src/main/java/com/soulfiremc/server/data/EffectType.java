@@ -91,6 +91,11 @@ public record EffectType(int id, Key key, EffectCategory category, boolean benef
     return id;
   }
 
+  @Override
+  public Registry<EffectType> registry() {
+    return REGISTRY;
+  }
+
   public enum EffectCategory {
     BENEFICIAL,
     HARMFUL,

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.state.registry;
 
+import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public class DimensionType implements RegistryValue<DimensionType> {
   private final Key key;
   private final int id;
+  private final Registry<DimensionType> registry;
   private final String infiniburn;
   private final String effects;
   private final byte ultrawarm;
@@ -45,9 +47,10 @@ public class DimensionType implements RegistryValue<DimensionType> {
   private final byte hasRaids;
   private final byte respawnAnchorWorks;
 
-  public DimensionType(Key key, int id, NbtMap dimensionTypeData) {
+  public DimensionType(Key key, int id, Registry<DimensionType> registry, NbtMap dimensionTypeData) {
     this.key = key;
     this.id = id;
+    this.registry = registry;
     this.infiniburn = dimensionTypeData.getString("infiniburn");
     this.effects = dimensionTypeData.getString("effects");
     this.ultrawarm = dimensionTypeData.getByte("ultrawarm");

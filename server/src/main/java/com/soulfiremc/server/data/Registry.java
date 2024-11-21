@@ -62,7 +62,7 @@ public class Registry<T extends RegistryValue<T>> {
   }
 
   public RegistryDataWriter writer(FromRegistryDataFactory<T> factory) {
-    return (key, id, data) -> register(factory.create(key, id, data));
+    return (key, id, data) -> register(factory.create(key, id, this, data));
   }
 
   public interface RegistryDataWriter {
@@ -72,6 +72,6 @@ public class Registry<T extends RegistryValue<T>> {
   }
 
   public interface FromRegistryDataFactory<T extends RegistryValue<T>> {
-    T create(Key key, int id, NbtMap data);
+    T create(Key key, int id, Registry<T> registry, NbtMap data);
   }
 }

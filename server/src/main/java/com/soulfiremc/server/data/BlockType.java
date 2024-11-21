@@ -1168,6 +1168,11 @@ public record BlockType(
     return id;
   }
 
+  @Override
+  public Registry<BlockType> registry() {
+    return REGISTRY;
+  }
+
   public record OffsetData(
     float maxHorizontalOffset, float maxVerticalOffset, OffsetType offsetType) {
     public enum OffsetType {

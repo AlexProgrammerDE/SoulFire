@@ -27,6 +27,8 @@ public record EntityType(
   Key key,
   float width,
   float height,
+  float eyeHeight,
+  boolean fixed,
   int updateInterval,
   int clientTrackingRange,
   String category,
@@ -62,5 +64,10 @@ public record EntityType(
   @Override
   public int hashCode() {
     return id;
+  }
+
+  @Override
+  public Registry<EntityType> registry() {
+    return REGISTRY;
   }
 }

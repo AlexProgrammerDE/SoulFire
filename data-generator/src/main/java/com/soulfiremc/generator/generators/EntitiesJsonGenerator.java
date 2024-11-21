@@ -46,6 +46,11 @@ public class EntitiesJsonGenerator implements IDataGenerator {
 
     entityDesc.addProperty("width", dimensions.width());
     entityDesc.addProperty("height", dimensions.height());
+    entityDesc.addProperty("eyeHeight", dimensions.eyeHeight());
+    if (dimensions.fixed()) {
+      entityDesc.addProperty("fixed", true);
+    }
+
     entityDesc.addProperty("updateInterval", entityType.updateInterval());
     entityDesc.addProperty("clientTrackingRange", entityType.clientTrackingRange());
 

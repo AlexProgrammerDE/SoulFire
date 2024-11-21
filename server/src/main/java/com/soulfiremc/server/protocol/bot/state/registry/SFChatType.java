@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state.registry;
 
 import com.google.gson.JsonElement;
+import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -54,11 +55,13 @@ public class SFChatType implements RegistryValue<SFChatType> {
   private static final IStyleSerializer<JsonElement> JSON_STYLE_SERIALIZER = CODEC.getJsonSerializer().getStyleSerializer();
   private final Key key;
   private final int id;
+  private final Registry<SFChatType> registry;
   private final ChatType mcplChatType;
 
-  public SFChatType(Key key, int id, NbtMap chatTypeData) {
+  public SFChatType(Key key, int id, Registry<SFChatType> registry, NbtMap chatTypeData) {
     this.key = key;
     this.id = id;
+    this.registry = registry;
     this.mcplChatType = new ChatType(
       readDecoration(chatTypeData.getCompound("chat")),
       readDecoration(chatTypeData.getCompound("narration"))

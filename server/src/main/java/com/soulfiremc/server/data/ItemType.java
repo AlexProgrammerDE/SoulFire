@@ -1426,4 +1426,9 @@ public record ItemType(
   public int hashCode() {
     return id;
   }
+
+  @Override
+  public Registry<ItemType> registry() {
+    return REGISTRY;
+  }
 }
