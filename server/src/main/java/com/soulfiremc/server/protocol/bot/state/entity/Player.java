@@ -97,6 +97,13 @@ public abstract class Player extends LivingEntity {
     }
   }
 
+  @Override
+  protected void serverAiStep() {
+    super.serverAiStep();
+
+    // TODO: yHeadRot important here?
+  }
+
   protected void updatePlayerPose() {
     if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
       Pose mainPose;

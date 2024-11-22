@@ -126,7 +126,7 @@ public abstract class LivingEntity extends Entity {
       this.xxa = 0.0F;
       this.zza = 0.0F;
     } else if (this.isEffectiveAi()) {
-      // this.serverAiStep(); // TODO
+      this.serverAiStep();
     }
 
     if (this.jumping && this.isAffectedByFluids()) {
@@ -172,6 +172,9 @@ public abstract class LivingEntity extends Entity {
     this.tryAddFrost();
 
     // this.pushEntities(); // TODO
+  }
+
+  protected void serverAiStep() {
   }
 
   protected void removeFrost() {

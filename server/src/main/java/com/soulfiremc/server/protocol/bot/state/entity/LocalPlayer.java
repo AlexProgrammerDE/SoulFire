@@ -216,6 +216,16 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
   }
 
+  @Override
+  public void serverAiStep() {
+    super.serverAiStep();
+    if (this.isControlledCamera()) {
+      this.xxa = this.input.leftImpulse;
+      this.zza = this.input.forwardImpulse;
+      this.jumping = this.input.keyPresses.jump();
+    }
+  }
+
   private boolean canStartSprinting() {
     return !this.isSprinting()
       && this.hasEnoughImpulseToStartSprinting()
