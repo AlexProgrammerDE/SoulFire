@@ -211,6 +211,8 @@ public abstract class LivingEntity extends Entity {
 
     this.removeFrost();
     this.tryAddFrost();
+
+    this.pushEntities();
   }
 
   protected void serverAiStep() {
@@ -574,6 +576,26 @@ public abstract class LivingEntity extends Entity {
 
       this.hasImpulse = true;
     }
+  }
+
+  protected void pushEntities() {
+    this.level().getEntities(this.getBoundingBox()).forEach(this::doPush);
+  }
+
+  protected void doPush(Entity entity) {
+    entity.push(this);
+  }
+
+  @Override
+  public void push(Entity entity) {
+    if (!this.isSleeping()) {
+      super.push(entity);
+    }
+  }
+
+  @Override
+  public boolean isPushable() {
+    return this.isAlive() && !this.isSpectator() && !this.onClimbable();
   }
 
   protected void goDownInWater() {

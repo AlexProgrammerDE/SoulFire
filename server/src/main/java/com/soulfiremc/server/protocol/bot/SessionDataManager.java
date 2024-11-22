@@ -262,6 +262,7 @@ public final class SessionDataManager {
     level =
       new Level(
         tagsState,
+        entityTrackerState,
         dimensionTypeRegistry.getById(spawnInfo.getDimension()),
         spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),

@@ -670,6 +670,44 @@ public abstract class Entity {
     return Vector3d.from(this.xOld, this.yOld, this.zOld);
   }
 
+  public boolean isPushable() {
+    return false;
+  }
+
+  public void push(Entity entity) {
+    if (!entity.noPhysics && !this.noPhysics) {
+      var d = entity.x() - this.x();
+      var e = entity.z() - this.z();
+      var f = MathHelper.absMax(d, e);
+      if (f >= 0.01F) {
+        f = Math.sqrt(f);
+        d /= f;
+        e /= f;
+        var g = 1.0 / f;
+        if (g > 1.0) {
+          g = 1.0;
+        }
+
+        d *= g;
+        e *= g;
+        d *= 0.05F;
+        e *= 0.05F;
+        if (this.isPushable()) {
+          this.push(-d, 0.0, -e);
+        }
+
+        if (entity.isPushable()) {
+          entity.push(d, 0.0, e);
+        }
+      }
+    }
+  }
+
+  public void push(double x, double y, double z) {
+    this.setDeltaMovement(this.getDeltaMovement().add(x, y, z));
+    this.hasImpulse = true;
+  }
+
   public void move(MoverType type, Vector3d pos) {
     if (this.noPhysics) {
       this.setPos(this.x() + pos.getX(), this.y() + pos.getY(), this.z() + pos.getZ());

@@ -37,6 +37,7 @@ import java.util.Optional;
 @Getter
 public class Level implements LevelHeightAccessor {
   private final TickRateManager tickRateManager = new TickRateManager();
+  private final EntityTrackerState entityTracker;
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final DimensionType dimensionType;
@@ -55,6 +56,7 @@ public class Level implements LevelHeightAccessor {
 
   public Level(
     TagsState tagsState,
+    EntityTrackerState entityTracker,
     DimensionType dimensionType,
     Key worldKey,
     long hashedSeed,
@@ -62,6 +64,7 @@ public class Level implements LevelHeightAccessor {
     boolean flat,
     int seaLevel) {
     this.tagsState = tagsState;
+    this.entityTracker = entityTracker;
     this.dimensionType = dimensionType;
     this.worldKey = worldKey;
     this.hashedSeed = hashedSeed;
@@ -111,6 +114,20 @@ public class Level implements LevelHeightAccessor {
 
   public BlockState getBlockState(int x, int y, int z) {
     return chunks.getBlockState(x, y, z);
+  }
+
+  public List<Entity> getEntities() {
+    return entityTracker.getEntities()
+      .stream()
+      .filter(e -> e.level() == this)
+      .toList();
+  }
+
+  public List<Entity> getEntities(AABB bounds) {
+    return getEntities()
+      .stream()
+      .filter(e -> e.getBoundingBox().intersects(bounds))
+      .toList();
   }
 
   public List<Vector3i> getTouchedPositions(AABB aabb) {
