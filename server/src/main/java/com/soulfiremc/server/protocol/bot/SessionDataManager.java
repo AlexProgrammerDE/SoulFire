@@ -295,13 +295,12 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
-    var newMovement = EntityMovement.toAbsolute(localPlayer.toMovement(), new EntityMovement(
+    localPlayer.setFrom(new EntityMovement(
       packet.getPosition(),
       packet.getDeltaMovement(),
       packet.getYRot(),
       packet.getXRot()
     ), packet.getRelatives());
-    localPlayer.setFrom(newMovement);
 
     var position = localPlayer.blockPos();
     if (!joinedWorld) {
@@ -322,11 +321,11 @@ public final class SessionDataManager {
     connection.sendPacket(new ServerboundMovePlayerPosRotPacket(
       false,
       false,
-      newMovement.pos().getX(),
-      newMovement.pos().getY(),
-      newMovement.pos().getZ(),
-      newMovement.yRot(),
-      newMovement.xRot()
+      localPlayer.pos().getX(),
+      localPlayer.pos().getY(),
+      localPlayer.pos().getZ(),
+      localPlayer.yRot(),
+      localPlayer.xRot()
     ));
     connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
   }
@@ -337,6 +336,7 @@ public final class SessionDataManager {
       packet.getYRot(),
       packet.getXRot()
     );
+    localPlayer.setOldRot();
     connection.sendPacket(new ServerboundMovePlayerRotPacket(
       false,
       false,
@@ -805,12 +805,19 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
-    var experienceOrbState =
+    var x = packet.getX();
+    var y = packet.getY();
+    var z = packet.getZ();
+    var orb =
       new ExperienceOrbEntity(currentLevel(), packet.getExp());
-    experienceOrbState.entityId(packet.getEntityId());
-    experienceOrbState.setPos(packet.getX(), packet.getY(), packet.getZ());
+    orb.setPos(x, y, z);
+    orb.syncPacketPositionCodec(x, y, z);
+    orb.setYRot(0.0F);
+    orb.setXRot(0.0F);
+    orb.entityId(packet.getEntityId());
+    orb.setPos(packet.getX(), packet.getY(), packet.getZ());
 
-    entityTrackerState.addEntity(experienceOrbState);
+    entityTrackerState.addEntity(orb);
   }
 
   @EventHandler
@@ -939,8 +946,15 @@ public final class SessionDataManager {
       return;
     }
 
-    state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
-    state.setOnGround(packet.isOnGround());
+    if (state.isControlledByLocalInstance()) {
+      var newPos = state.getPositionCodec().decode(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+      state.getPositionCodec().base(newPos);
+    } else {
+      var newPos = state.getPositionCodec().decode(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+      state.getPositionCodec().base(newPos);
+      state.setPos(newPos);
+      state.setOnGround(packet.isOnGround());
+    }
   }
 
   @EventHandler
@@ -952,8 +966,10 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setRot(packet.getYaw(), packet.getPitch());
-    state.setOnGround(packet.isOnGround());
+    if (!state.isControlledByLocalInstance()) {
+      state.setRot(packet.getYaw(), packet.getPitch());
+      state.setOnGround(packet.isOnGround());
+    }
   }
 
   @EventHandler
@@ -978,31 +994,20 @@ public final class SessionDataManager {
       return;
     }
 
-    state.addPos(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
-    state.setRot(packet.getYaw(), packet.getPitch());
-    state.setOnGround(packet.isOnGround());
+    if (state.isControlledByLocalInstance()) {
+      var newPos = state.getPositionCodec().decode(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+      state.getPositionCodec().base(newPos);
+    } else {
+      var newPos = state.getPositionCodec().decode(packet.getMoveX(), packet.getMoveY(), packet.getMoveZ());
+      state.getPositionCodec().base(newPos);
+      state.setPos(newPos);
+      state.setRot(packet.getYaw(), packet.getPitch());
+      state.setOnGround(packet.isOnGround());
+    }
   }
 
   @EventHandler
   public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getId());
-
-    if (state == null) {
-      log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
-      return;
-    }
-
-    state.setFrom(EntityMovement.toAbsolute(state.toMovement(), new EntityMovement(
-      packet.getPosition(),
-      packet.getDeltaMovement(),
-      packet.getYRot(),
-      packet.getXRot()
-    ), packet.getRelatives()));
-    state.setOnGround(packet.isOnGround());
-  }
-
-  @EventHandler
-  public void onEntityPositionSync(ClientboundEntityPositionSyncPacket packet) {
     var state = entityTrackerState.getEntity(packet.getId());
 
     if (state == null) {
@@ -1015,8 +1020,27 @@ public final class SessionDataManager {
       packet.getDeltaMovement(),
       packet.getYRot(),
       packet.getXRot()
-    ));
+    ), packet.getRelatives());
     state.setOnGround(packet.isOnGround());
+  }
+
+  @EventHandler
+  public void onEntityPositionSync(ClientboundEntityPositionSyncPacket packet) {
+    var state = entityTrackerState.getEntity(packet.getId());
+
+    if (state == null) {
+      log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
+      return;
+    }
+
+    state.getPositionCodec().base(packet.getPosition());
+    if (!state.isControlledByLocalInstance()) {
+      var yRot = packet.getYRot();
+      var xRot = packet.getXRot();
+      state.moveTo(packet.getPosition().getX(), packet.getPosition().getY(), packet.getPosition().getZ(), yRot, xRot);
+
+      state.setOnGround(packet.isOnGround());
+    }
   }
 
   @EventHandler

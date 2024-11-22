@@ -30,6 +30,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
 import java.util.Optional;
 
@@ -94,6 +95,41 @@ public abstract class LivingEntity extends Entity {
       var equippable = stack.get(DataComponentType.EQUIPPABLE);
       return equippable != null && slow == EquipmentSlot.fromMCPl(equippable.slot()) && !stack.nextDamageWillBreak();
     }
+  }
+
+  @Override
+  public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
+    var x = packet.getX();
+    var y = packet.getY();
+    var z = packet.getZ();
+    var yRot = packet.getYaw();
+    var xRot = packet.getPitch();
+    this.syncPacketPositionCodec(x, y, z);
+    this.entityId(packet.getEntityId());
+    this.uuid(packet.getUuid());
+    this.absMoveTo(x, y, z, yRot, xRot);
+    this.setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+  }
+
+  public void absMoveTo(double x, double y, double z, float yRot, float xRot) {
+    this.absMoveTo(x, y, z);
+    this.absRotateTo(yRot, xRot);
+  }
+
+  public void absRotateTo(float yRot, float xRot) {
+    this.setYRot(yRot % 360.0F);
+    this.setXRot(MathHelper.clamp(xRot, -90.0F, 90.0F) % 360.0F);
+    this.yRotO = this.yRot();
+    this.xRotO = this.xRot();
+  }
+
+  public void absMoveTo(double x, double y, double z) {
+    var xClamp = MathHelper.clamp(x, -3.0E7, 3.0E7);
+    var zClamp = MathHelper.clamp(z, -3.0E7, 3.0E7);
+    this.xo = xClamp;
+    this.yo = y;
+    this.zo = zClamp;
+    this.setPos(xClamp, y, zClamp);
   }
 
   public void aiStep() {

@@ -32,6 +32,7 @@ import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.Direction;
 import com.soulfiremc.server.util.mcstructs.MoverType;
+import com.soulfiremc.server.util.mcstructs.VecDeltaCodec;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.floats.FloatArraySet;
 import it.unimi.dsi.fastutil.floats.FloatArrays;
@@ -53,6 +54,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +76,7 @@ public abstract class Entity {
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
   protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
+  private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
   protected final EntityType entityType;
   protected final EntityMetadataState metadataState;
   protected float fallDistance;
@@ -146,23 +149,44 @@ public abstract class Entity {
   }
 
   public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
-    entityId(packet.getEntityId());
+    var x = packet.getX();
+    var y = packet.getY();
+    var z = packet.getZ();
+    this.syncPacketPositionCodec(x, y, z);
+    this.moveTo(x, y, z, packet.getYaw(), packet.getPitch());
     uuid(packet.getUuid());
-    data(packet.getData());
-    setPos(packet.getX(), packet.getY(), packet.getZ());
-    setHeadRotation(packet.getHeadYaw());
-    setRot(packet.getYaw(), packet.getPitch());
-    setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+    entityId(packet.getEntityId());
   }
 
   public EntityMovement toMovement() {
     return new EntityMovement(pos, deltaMovement, yRot, xRot);
   }
 
-  public void setFrom(EntityMovement entityMovement) {
+  public void setFrom(EntityMovement packetMovement, List<PositionElement> relatives) {
+    var entityMovement = EntityMovement.toAbsolute(toMovement(), packetMovement, relatives);
     setPos(entityMovement.pos());
     setDeltaMovement(entityMovement.deltaMovement());
     setRot(entityMovement.yRot(), entityMovement.xRot());
+
+    var oldMovement = new EntityMovement(oldPosition(), Vector3d.ZERO, yRotO, xRotO);
+    var absoluteOldMovement = EntityMovement.toAbsolute(oldMovement, packetMovement, relatives);
+    setOldPosAndRot(absoluteOldMovement.pos(), absoluteOldMovement.yRot(), absoluteOldMovement.xRot());
+  }
+
+  public void syncPacketPositionCodec(double x, double y, double z) {
+    this.packetPositionCodec.base(Vector3d.from(x, y, z));
+  }
+
+  public VecDeltaCodec getPositionCodec() {
+    return this.packetPositionCodec;
+  }
+
+  public void moveTo(double x, double y, double z, float yRot, float xRot) {
+    this.setPosRaw(x, y, z);
+    this.setYRot(yRot);
+    this.setXRot(xRot);
+    this.setOldPosAndRot();
+    this.reapplyPosition();
   }
 
   public double x() {
