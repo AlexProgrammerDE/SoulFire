@@ -508,8 +508,7 @@ public class AABB {
   }
 
   public boolean isFull(int x, int y, int z) {
-    System.out.println("x: " + x + ", y: " + y + ", z: " + z);
-    return true; // TODO
+    return x == 0 && y == 0 && z == 0; // TODO: Think about is this is correct
   }
 
   protected double collideX(AxisCycle movementAxis, AABB collisionBox, double desiredOffset) {
