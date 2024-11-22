@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.ImmutableList;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
@@ -28,9 +30,18 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SectionUtils;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
+import com.soulfiremc.server.util.mcstructs.Direction;
+import com.soulfiremc.server.util.mcstructs.MoverType;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.floats.FloatArraySet;
+import it.unimi.dsi.fastutil.floats.FloatArrays;
+import it.unimi.dsi.fastutil.floats.FloatSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,17 +57,19 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Getter
 public abstract class Entity {
   protected static final int FLAG_ONFIRE = 0;
-  protected static final int FLAG_GLOWING = 6;
-  protected static final int FLAG_FALL_FLYING = 7;
   private static final int FLAG_SHIFT_KEY_DOWN = 1;
   private static final int FLAG_SPRINTING = 3;
   private static final int FLAG_SWIMMING = 4;
   private static final int FLAG_INVISIBLE = 5;
+  protected static final int FLAG_GLOWING = 6;
+  protected static final int FLAG_FALL_FLYING = 7;
   public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
   private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   protected final EntityAttributeState attributeState = new EntityAttributeState();
@@ -83,6 +96,14 @@ public abstract class Entity {
   protected Vector3d deltaMovement = Vector3d.ZERO;
   protected float yRot;
   protected float xRot;
+  private final List<Entity.Movement> movementThisTick = new ArrayList<>();
+  private final Set<BlockState> blocksInside = new ReferenceArraySet<>();
+  private final LongSet visitedBlocks = new LongOpenHashSet();
+  public double xo;
+  public double yo;
+  public double zo;
+  public double xOld;
+  public double yOld;
   protected float headYRot;
   protected boolean onGround;
   protected int jumpTriggerTime;
@@ -90,7 +111,7 @@ public abstract class Entity {
   protected boolean verticalCollision;
   protected boolean verticalCollisionBelow;
   protected boolean minorHorizontalCollision;
-  protected boolean isInPowderSnow;
+  public double zOld;
   protected boolean wasInPowderSnow;
   protected boolean wasTouchingWater;
   protected boolean wasEyeInWater;
@@ -99,6 +120,11 @@ public abstract class Entity {
   private EntityDimensions dimensions;
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
+  public float yRotO;
+  public float xRotO;
+  @Setter
+  protected boolean isInPowderSnow;
+  protected Vector3d stuckSpeedMultiplier = Vector3d.ZERO;
   public boolean noPhysics;
   public boolean hasImpulse;
 
@@ -356,8 +382,148 @@ public abstract class Entity {
     return attributeState.getOrCreateAttribute(type).calculateValue();
   }
 
-  public final Vector3d getViewVector() {
-    return this.calculateViewVector(xRot, yRot);
+  private static float[] collectCandidateStepUpHeights(AABB box, List<AABB> colliders, float deltaY, float maxUpStep) {
+    FloatSet floatSet = new FloatArraySet(4);
+
+    for (var collider : colliders) {
+      var doubleList = collider.getCoords(Direction.Axis.Y);
+      for (double coord : doubleList) {
+        var h = (float) (coord - box.minY);
+        if (!(h < 0.0F) && h != maxUpStep) {
+          if (h > deltaY) {
+            break;
+          }
+
+          floatSet.add(h);
+        }
+      }
+    }
+
+    var fs = floatSet.toFloatArray();
+    FloatArrays.unstableSort(fs);
+    return fs;
+  }
+
+  static Iterable<Vector3i> boxTraverseBlocks(Vector3d from, Vector3d to, AABB bb) {
+    var length = to.sub(from);
+    var iterable = betweenClosed(bb);
+    if (length.lengthSquared() < (double) MathHelper.square(0.99999F)) {
+      return iterable;
+    } else {
+      Set<Vector3i> set = new ObjectLinkedOpenHashSet<>();
+      var normalizedLength = length.normalize().mul(1.0E-7);
+      var offsetMin = bb.getMinPosition().add(normalizedLength);
+      var lv4 = bb.getMinPosition().sub(length).sub(normalizedLength);
+      addCollisionsAlongTravel(set, lv4, offsetMin, bb);
+
+      for (var pos : iterable) {
+        set.add(pos);
+      }
+
+      return set;
+    }
+  }
+
+  private static void addCollisionsAlongTravel(Set<Vector3i> set, Vector3d from, Vector3d to, AABB bb) {
+    var length = to.sub(from);
+    var startX = MathHelper.floor(from.getX());
+    var startY = MathHelper.floor(from.getY());
+    var startZ = MathHelper.floor(from.getZ());
+    var l = MathHelper.sign(length.getX());
+    var m = MathHelper.sign(length.getY());
+    var n = MathHelper.sign(length.getZ());
+    var d = l == 0 ? Double.MAX_VALUE : (double) l / length.getX();
+    var e = m == 0 ? Double.MAX_VALUE : (double) m / length.getY();
+    var f = n == 0 ? Double.MAX_VALUE : (double) n / length.getZ();
+    var g = d * (l > 0 ? 1.0 - MathHelper.frac(from.getX()) : MathHelper.frac(from.getX()));
+    var h = e * (m > 0 ? 1.0 - MathHelper.frac(from.getY()) : MathHelper.frac(from.getY()));
+    var o = f * (n > 0 ? 1.0 - MathHelper.frac(from.getZ()) : MathHelper.frac(from.getZ()));
+    var p = 0;
+
+    while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
+      if (g < h) {
+        if (g < o) {
+          startX += l;
+          g += d;
+        } else {
+          startZ += n;
+          o += f;
+        }
+      } else if (h < o) {
+        startY += m;
+        h += e;
+      } else {
+        startZ += n;
+        o += f;
+      }
+
+      if (p++ > 16) {
+        break;
+      }
+
+      var optional = AABB.clip(startX, startY, startZ, startX + 1, startY + 1, startZ + 1, from, to);
+      if (optional.isPresent()) {
+        var lv2 = optional.get();
+        var xClamp = MathHelper.clamp(lv2.getX(), (double) startX + 1.0E-5F, (double) startX + 1.0 - 1.0E-5F);
+        var yClamp = MathHelper.clamp(lv2.getY(), (double) startY + 1.0E-5F, (double) startY + 1.0 - 1.0E-5F);
+        var zClamp = MathHelper.clamp(lv2.getZ(), (double) startZ + 1.0E-5F, (double) startZ + 1.0 - 1.0E-5F);
+        var endX = MathHelper.floor(xClamp + bb.getXsize());
+        var endY = MathHelper.floor(yClamp + bb.getYsize());
+        var endZ = MathHelper.floor(zClamp + bb.getZsize());
+
+        for (var x = startX; x <= endX; x++) {
+          for (var y = startY; y <= endY; y++) {
+            for (var z = startZ; z <= endZ; z++) {
+              set.add(Vector3i.from(x, y, z));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static Iterable<Vector3i> betweenClosed(AABB arg) {
+    var lv = Vector3i.from(arg.minX, arg.minY, arg.minZ);
+    var lv2 = Vector3i.from(arg.maxX, arg.maxY, arg.maxZ);
+    return betweenClosed(lv, lv2);
+  }
+
+  public static Iterable<Vector3i> betweenClosed(Vector3i firstPos, Vector3i secondPos) {
+    return betweenClosed(
+      Math.min(firstPos.getX(), secondPos.getX()),
+      Math.min(firstPos.getY(), secondPos.getY()),
+      Math.min(firstPos.getZ(), secondPos.getZ()),
+      Math.max(firstPos.getX(), secondPos.getX()),
+      Math.max(firstPos.getY(), secondPos.getY()),
+      Math.max(firstPos.getZ(), secondPos.getZ())
+    );
+  }
+
+  public static Stream<Vector3i> betweenClosedStream(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    return StreamSupport.stream(betweenClosed(minX, minY, minZ, maxX, maxY, maxZ).spliterator(), false);
+  }
+
+  public static Iterable<Vector3i> betweenClosed(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    var o = maxX - minX + 1;
+    var p = maxY - minY + 1;
+    var q = maxZ - minZ + 1;
+    var r = o * p * q;
+    return () -> new AbstractIterator<>() {
+      private int index;
+
+      protected Vector3i computeNext() {
+        if (this.index == r) {
+          return this.endOfData();
+        } else {
+          var i = this.index % o;
+          var j = this.index / o;
+          var k = j % p;
+          var l = j / p;
+          this.index++;
+          return Vector3i.from(minX + i, minY + k, minZ + l);
+        }
+      }
+    };
   }
 
   public final Vector3d calculateViewVector(float xRot, float yRot) {
@@ -368,6 +534,310 @@ public abstract class Entity {
     var l = MathHelper.cos(h);
     var m = MathHelper.sin(h);
     return Vector3d.from(k * l, -m, (double) (j * l));
+  }
+
+  public static Vector3d collideBoundingBox(@Nullable Entity entity, Vector3d vec, AABB collisionBox, Level level, List<AABB> potentialHits) {
+    var list2 = collectColliders(entity, level, potentialHits, collisionBox.expandTowards(vec));
+    return collideWithShapes(vec, collisionBox, list2);
+  }
+
+  private static List<AABB> collectColliders(@Nullable Entity entity, Level level, List<AABB> collisions, AABB boundingBox) {
+    ImmutableList.Builder<AABB> builder = ImmutableList.builderWithExpectedSize(collisions.size() + 1);
+    if (!collisions.isEmpty()) {
+      builder.addAll(collisions);
+    }
+
+    // TODO: WorldBorder
+    // WorldBorder lv = level.getWorldBorder();
+    // boolean bl = entity != null && lv.isInsideCloseToBorder(entity, boundingBox);
+    // if (bl) {
+    //   builder.add(lv.getCollisionShape());
+    // }
+
+    builder.addAll(level.getBlockCollisionBoxes(boundingBox));
+    return builder.build();
+  }
+
+  public static double collide(Direction.Axis movementAxis, AABB collisionBox, Iterable<AABB> possibleHits, double desiredOffset) {
+    for (var hit : possibleHits) {
+      if (Math.abs(desiredOffset) < 1.0E-7) {
+        return 0.0;
+      }
+
+      desiredOffset = hit.collide(movementAxis, collisionBox, desiredOffset);
+    }
+
+    return desiredOffset;
+  }
+
+  private static Vector3d collideWithShapes(Vector3d deltaMovement, AABB entityBB, List<AABB> shapes) {
+    if (shapes.isEmpty()) {
+      return deltaMovement;
+    } else {
+      var x = deltaMovement.getX();
+      var y = deltaMovement.getY();
+      var z = deltaMovement.getZ();
+      if (y != 0.0) {
+        y = collide(Direction.Axis.Y, entityBB, shapes, y);
+        if (y != 0.0) {
+          entityBB = entityBB.move(0.0, y, 0.0);
+        }
+      }
+
+      var bl = Math.abs(x) < Math.abs(z);
+      if (bl && z != 0.0) {
+        z = collide(Direction.Axis.Z, entityBB, shapes, z);
+        if (z != 0.0) {
+          entityBB = entityBB.move(0.0, 0.0, z);
+        }
+      }
+
+      if (x != 0.0) {
+        x = collide(Direction.Axis.X, entityBB, shapes, x);
+        if (!bl && x != 0.0) {
+          entityBB = entityBB.move(x, 0.0, 0.0);
+        }
+      }
+
+      if (!bl && z != 0.0) {
+        z = collide(Direction.Axis.Z, entityBB, shapes, z);
+      }
+
+      return Vector3d.from(x, y, z);
+    }
+  }
+
+  protected static Vector3d getInputVector(Vector3d relative, float motionScale, float facing) {
+    var d = relative.lengthSquared();
+    if (d < 1.0E-7) {
+      return Vector3d.ZERO;
+    } else {
+      var scaledMotion = (d > 1.0 ? relative.normalize() : relative).mul((double) motionScale);
+      var h = MathHelper.sin(facing * (float) (Math.PI / 180.0));
+      var i = MathHelper.cos(facing * (float) (Math.PI / 180.0));
+      return Vector3d.from(scaledMotion.getX() * (double) i - scaledMotion.getZ() * (double) h, scaledMotion.getY(), scaledMotion.getZ() * (double) i + scaledMotion.getX() * (double) h);
+    }
+  }
+
+  public final void setOldPosAndRot() {
+    this.setOldPos();
+    this.setOldRot();
+  }
+
+  public final void setOldPosAndRot(Vector3d vec, float f, float g) {
+    this.setOldPos(vec);
+    this.setOldRot(f, g);
+  }
+
+  protected void setOldPos() {
+    this.setOldPos(this.pos);
+  }
+
+  public void setOldRot() {
+    this.setOldRot(this.yRot(), this.xRot());
+  }
+
+  private void setOldPos(Vector3d vec) {
+    this.xo = this.xOld = vec.getX();
+    this.yo = this.yOld = vec.getY();
+    this.zo = this.zOld = vec.getZ();
+  }
+
+  private void setOldRot(float f, float g) {
+    this.yRotO = f;
+    this.xRotO = g;
+  }
+
+  public final Vector3d oldPosition() {
+    return Vector3d.from(this.xOld, this.yOld, this.zOld);
+  }
+
+  public void move(MoverType type, Vector3d pos) {
+    if (this.noPhysics) {
+      this.setPos(this.x() + pos.getX(), this.y() + pos.getY(), this.z() + pos.getZ());
+    } else {
+      if (type == MoverType.PISTON) {
+        throw new IllegalArgumentException("Invalid move type " + type);
+      }
+
+      if (this.stuckSpeedMultiplier.lengthSquared() > 1.0E-7) {
+        pos = pos.mul(this.stuckSpeedMultiplier);
+        this.stuckSpeedMultiplier = Vector3d.ZERO;
+        this.setDeltaMovement(Vector3d.ZERO);
+      }
+
+      pos = this.maybeBackOffFromEdge(pos, type);
+      var collideOffset = this.collide(pos);
+      var d = collideOffset.lengthSquared();
+      if (d > 1.0E-7 || pos.lengthSquared() - d < 1.0E-7) {
+        if (this.fallDistance != 0.0F && d >= 1.0) {
+          var touchedPositions = this.level().getTouchedPositions(new AABB(this.pos(), this.pos().add(collideOffset)));
+          for (var touchedPos : touchedPositions) {
+            var blockState = this.level().getBlockState(touchedPos);
+            if (!blockState.fluidState().empty() || this.level().tagsState().is(blockState.blockType(), BlockTags.FALL_DAMAGE_RESETTING)) {
+              this.resetFallDistance();
+              break;
+            }
+          }
+        }
+
+        this.setPos(this.x() + collideOffset.getX(), this.y() + collideOffset.getY(), this.z() + collideOffset.getZ());
+      }
+
+      var xCollision = !MathHelper.equal(pos.getX(), collideOffset.getX());
+      var zCollision = !MathHelper.equal(pos.getZ(), collideOffset.getZ());
+      this.horizontalCollision = xCollision || zCollision;
+      this.verticalCollision = pos.getY() != collideOffset.getY();
+      this.verticalCollisionBelow = this.verticalCollision && pos.getY() < 0.0;
+      if (this.horizontalCollision) {
+        this.minorHorizontalCollision = this.isHorizontalCollisionMinor(collideOffset);
+      } else {
+        this.minorHorizontalCollision = false;
+      }
+
+      this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, collideOffset);
+      var onPos = this.getOnPosLegacy();
+      var onBlockState = this.level().getBlockState(onPos);
+      if (this.isControlledByLocalInstance()) {
+        this.checkFallDamage(collideOffset.getY(), this.onGround(), onBlockState, onPos);
+      }
+
+      if (this.horizontalCollision) {
+        var currentDeltaMovement = this.getDeltaMovement();
+        this.setDeltaMovement(xCollision ? 0.0 : currentDeltaMovement.getX(), currentDeltaMovement.getY(), zCollision ? 0.0 : currentDeltaMovement.getZ());
+      }
+
+      if (this.isControlledByLocalInstance()) {
+        if (pos.getY() != collideOffset.getY()) {
+          BlockBehaviour.updateEntityMovementAfterFallOn(onBlockState.blockType(), this);
+        }
+      }
+
+      var factor = this.getBlockSpeedFactor();
+      this.setDeltaMovement(this.getDeltaMovement().mul(factor, 1.0, factor));
+    }
+  }
+
+  private Vector3d collide(Vector3d vec) {
+    var bb = this.getBoundingBox();
+    List<AABB> list = new ArrayList<>(); // TODO: Implement shulker collisions
+    var collidedBB = vec.lengthSquared() == 0.0 ? vec : collideBoundingBox(this, vec, bb, this.level(), list);
+    var xDiff = vec.getX() != collidedBB.getX();
+    var yDiff = vec.getY() != collidedBB.getY();
+    var zDiff = vec.getZ() != collidedBB.getZ();
+    var bl4 = yDiff && vec.getY() < 0.0;
+    if (this.maxUpStep() > 0.0F && (bl4 || this.onGround()) && (xDiff || zDiff)) {
+      var lv3 = bl4 ? bb.move(0.0, collidedBB.getY(), 0.0) : bb;
+      var lv4 = lv3.expandTowards(vec.getX(), this.maxUpStep(), vec.getZ());
+      if (!bl4) {
+        lv4 = lv4.expandTowards(0.0, -1.0E-5F, 0.0);
+      }
+
+      var list2 = collectColliders(this, this.level, list, lv4);
+      var f = (float) collidedBB.getY();
+      var stepUpHeights = collectCandidateStepUpHeights(lv3, list2, this.maxUpStep(), f);
+
+      for (var stepUpHeight : stepUpHeights) {
+        var collidedShapes = collideWithShapes(Vector3d.from(vec.getX(), stepUpHeight, vec.getZ()), lv3, list2);
+        if (VectorHelper.horizontalDistanceSqr(collidedShapes) > VectorHelper.horizontalDistanceSqr(collidedBB)) {
+          var d = bb.minY - lv3.minY;
+          return collidedShapes.add(0.0, -d, 0.0);
+        }
+      }
+    }
+
+    return collidedBB;
+  }
+
+  public void applyEffectsFromBlocks() {
+    this.applyEffectsFromBlocks(this.oldPosition(), this.pos);
+  }
+
+  public void applyEffectsFromBlocks(Vector3d from, Vector3d to) {
+    if (this.isAffectedByBlocks()) {
+      if (this.onGround()) {
+        var onPos = this.getOnPosLegacy();
+        var lv2 = this.level().getBlockState(onPos);
+        BlockBehaviour.stepOn(lv2.blockType(), this);
+      }
+
+      this.movementThisTick.add(new Entity.Movement(from, to));
+      this.checkInsideBlocks(this.movementThisTick, this.blocksInside);
+      this.movementThisTick.clear();
+      this.blocksInside.clear();
+    }
+  }
+
+  private void checkInsideBlocks(List<Entity.Movement> list, Set<BlockState> set) {
+    if (this.isAffectedByBlocks()) {
+      var bb = this.getBoundingBox().deflate(1.0E-5F);
+      var longSet = this.visitedBlocks;
+
+      for (var movement : list) {
+        var from = movement.from();
+        var to = movement.to();
+
+        for (var pos : boxTraverseBlocks(from, to, bb)) {
+          if (!this.isAlive()) {
+            return;
+          }
+
+          var blockState = this.level().getBlockState(pos);
+          if (!blockState.blockType().air() && longSet.add(VectorHelper.asLong(pos))) {
+            BlockBehaviour.onInsideBlock(pos, blockState, this);
+
+            set.add(blockState);
+          }
+        }
+      }
+
+      longSet.clear();
+    }
+  }
+
+  public void onAboveBubbleCol(boolean downwards) {
+    var deltaMovement = this.getDeltaMovement();
+    double d;
+    if (downwards) {
+      d = Math.max(-0.9, deltaMovement.getY() - 0.03);
+    } else {
+      d = Math.min(1.8, deltaMovement.getY() + 0.1);
+    }
+
+    this.setDeltaMovement(deltaMovement.getX(), d, deltaMovement.getZ());
+  }
+
+  public void onInsideBubbleColumn(boolean downwards) {
+    var deltaMovement = this.getDeltaMovement();
+    double d;
+    if (downwards) {
+      d = Math.max(-0.3, deltaMovement.getY() - 0.03);
+    } else {
+      d = Math.min(0.7, deltaMovement.getY() + 0.06);
+    }
+
+    this.setDeltaMovement(deltaMovement.getX(), d, deltaMovement.getZ());
+    this.resetFallDistance();
+  }
+
+  public boolean isAlive() {
+    return true;
+  }
+
+  protected boolean isAffectedByBlocks() {
+    return !this.noPhysics;
+  }
+
+  public boolean isFree(double x, double y, double z) {
+    return this.isFree(this.getBoundingBox().move(x, y, z));
+  }
+
+  private boolean isFree(AABB box) {
+    return this.level().noCollision(box) && !this.level().containsAnyLiquid(box);
+  }
+
+  protected Vector3d maybeBackOffFromEdge(Vector3d vec, MoverType mover) {
+    return vec;
   }
 
   protected void setSharedFlag(int flag, boolean set) {
@@ -528,12 +998,12 @@ public abstract class Entity {
     return true;
   }
 
-  protected boolean updateInWaterStateAndDoFluidPushing() {
-    this.fluidHeight.clear();
-    this.updateInWaterStateAndDoWaterCurrentPushing();
-    var d = this.level().dimensionType().ultrawarm() ? 0.007 : 0.0023333333333333335;
-    var bl = this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
-    return this.isInWater() || bl;
+  protected void checkFallDamage(double y, boolean onGround, BlockState state, Vector3i pos) {
+    if (onGround) {
+      this.resetFallDistance();
+    } else if (y < 0.0) {
+      this.fallDistance -= (float) y;
+    }
   }
 
   void updateInWaterStateAndDoWaterCurrentPushing() {
@@ -607,71 +1077,11 @@ public abstract class Entity {
     return this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
   }
 
-  public boolean updateFluidHeightAndDoFluidPushing(TagKey<FluidType> fluidTag, double motionScale) {
-    if (this.touchingUnloadedChunk()) {
-      return false;
-    } else {
-      var lv = this.getBoundingBox().deflate(0.001);
-      var minX = MathHelper.floor(lv.minX);
-      var maxX = MathHelper.ceil(lv.maxX);
-      var minY = MathHelper.floor(lv.minY);
-      var maxY = MathHelper.ceil(lv.maxY);
-      var minZ = MathHelper.floor(lv.minZ);
-      var maxZ = MathHelper.ceil(lv.maxZ);
-      var height = 0.0;
-      var pushedByFluid = this.isPushedByFluid();
-      var bl2 = false;
-      var flow = Vector3d.ZERO;
-      var o = 0;
-      var lv3 = Vector3i.ZERO;
-
-      for (var x = minX; x < maxX; x++) {
-        for (var y = minY; y < maxY; y++) {
-          for (var z = minZ; z < maxZ; z++) {
-            lv3 = Vector3i.from(x, y, z);
-            var lv4 = this.level().getBlockState(lv3).fluidState();
-            if (this.level().tagsState().is(lv4.type(), fluidTag)) {
-              var f = (double) ((float) y + lv4.getHeight(this.level(), lv3));
-              if (f >= lv.minY) {
-                bl2 = true;
-                height = Math.max(f - lv.minY, height);
-                if (pushedByFluid) {
-                  var flowDirection = lv4.getFlow(this.level(), lv3);
-                  if (height < 0.4) {
-                    flowDirection = flowDirection.mul(height);
-                  }
-
-                  flow = flow.add(flowDirection);
-                  o++;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (flow.length() > 0.0) {
-        if (o > 0) {
-          flow = flow.mul(1.0 / (double) o);
-        }
-
-        if (!(this instanceof Player)) {
-          flow = VectorHelper.normalizeSafe(flow);
-        }
-
-        var deltaMovement = this.getDeltaMovement();
-        flow = flow.mul(motionScale);
-        var g = 0.003;
-        if (Math.abs(deltaMovement.getX()) < 0.003 && Math.abs(deltaMovement.getZ()) < 0.003 && flow.length() < 0.0045000000000000005) {
-          flow = VectorHelper.normalizeSafe(flow).mul(0.0045000000000000005);
-        }
-
-        this.setDeltaMovement(this.getDeltaMovement().add(flow));
-      }
-
-      this.fluidHeight.put(fluidTag, height);
-      return bl2;
-    }
+  protected void updateInWaterStateAndDoFluidPushing() {
+    this.fluidHeight.clear();
+    this.updateInWaterStateAndDoWaterCurrentPushing();
+    var d = this.level().dimensionType().ultrawarm() ? 0.007 : 0.0023333333333333335;
+    this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
   }
 
   private void updateFluidOnEyes() {
@@ -756,5 +1166,97 @@ public abstract class Entity {
 
   public final float getBbHeight() {
     return this.dimensions.height();
+  }
+
+  public boolean updateFluidHeightAndDoFluidPushing(TagKey<FluidType> fluidTag, double motionScale) {
+    if (this.touchingUnloadedChunk()) {
+      return false;
+    } else {
+      var lv = this.getBoundingBox().deflate(0.001);
+      var minX = MathHelper.floor(lv.minX);
+      var maxX = MathHelper.ceil(lv.maxX);
+      var minY = MathHelper.floor(lv.minY);
+      var maxY = MathHelper.ceil(lv.maxY);
+      var minZ = MathHelper.floor(lv.minZ);
+      var maxZ = MathHelper.ceil(lv.maxZ);
+      var height = 0.0;
+      var pushedByFluid = this.isPushedByFluid();
+      var bl2 = false;
+      var flow = Vector3d.ZERO;
+      var o = 0;
+      var lv3 = Vector3i.ZERO;
+
+      for (var x = minX; x < maxX; x++) {
+        for (var y = minY; y < maxY; y++) {
+          for (var z = minZ; z < maxZ; z++) {
+            lv3 = Vector3i.from(x, y, z);
+            var lv4 = this.level().getBlockState(lv3).fluidState();
+            if (this.level().tagsState().is(lv4.type(), fluidTag)) {
+              var f = (double) ((float) y + lv4.getHeight(this.level(), lv3));
+              if (f >= lv.minY) {
+                bl2 = true;
+                height = Math.max(f - lv.minY, height);
+                if (pushedByFluid) {
+                  var flowDirection = lv4.getFlow(this.level(), lv3);
+                  if (height < 0.4) {
+                    flowDirection = flowDirection.mul(height);
+                  }
+
+                  flow = flow.add(flowDirection);
+                  o++;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (flow.length() > 0.0) {
+        if (o > 0) {
+          flow = flow.mul(1.0 / (double) o);
+        }
+
+        if (!(this instanceof Player)) {
+          flow = VectorHelper.normalizeSafe(flow);
+        }
+
+        var deltaMovement = this.getDeltaMovement();
+        flow = flow.mul(motionScale);
+        var g = 0.003;
+        if (Math.abs(deltaMovement.getX()) < g && Math.abs(deltaMovement.getZ()) < g && flow.length() < 0.0045000000000000005) {
+          flow = VectorHelper.normalizeSafe(flow).mul(0.0045000000000000005);
+        }
+
+        this.setDeltaMovement(this.getDeltaMovement().add(flow));
+      }
+
+      this.fluidHeight.put(fluidTag, height);
+      return bl2;
+    }
+  }
+
+  public Vector3d getLookAngle() {
+    return this.calculateViewVector(this.xRot(), this.yRot());
+  }
+
+  public boolean canSprint() {
+    return false;
+  }
+
+  public float maxUpStep() {
+    return 0.0F;
+  }
+
+  public void moveRelative(float amount, Vector3d relative) {
+    var inputVector = getInputVector(relative, amount, this.yRot());
+    this.setDeltaMovement(this.getDeltaMovement().add(inputVector));
+  }
+
+  public void makeStuckInBlock(Vector3d motionMultiplier) {
+    this.resetFallDistance();
+    this.stuckSpeedMultiplier = motionMultiplier;
+  }
+
+  record Movement(Vector3d from, Vector3d to) {
   }
 }

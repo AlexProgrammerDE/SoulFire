@@ -75,7 +75,7 @@ public class BotActionManager {
     clientEntity.lookAt(RotationOrigin.EYES, againstPlacePosition);
     clientEntity.sendPositionChanges();
 
-    var viewDirection = clientEntity.getViewVector();
+    var viewDirection = clientEntity.getLookAngle();
     var blockInteractionRange = clientEntity.attributeValue(AttributeType.BLOCK_INTERACTION_RANGE);
     var endPos = eyePosition.add(
       viewDirection.getX() * blockInteractionRange,
@@ -89,7 +89,7 @@ public class BotActionManager {
       return;
     }
 
-    var insideBlock = !level.getCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
+    var insideBlock = !level.getBlockCollisionBoxes(new AABB(eyePosition, eyePosition)).isEmpty();
 
     var blockPlacePosition = hitResult.getVector3i();
     var blockPlaceLocation = hitResult.location();

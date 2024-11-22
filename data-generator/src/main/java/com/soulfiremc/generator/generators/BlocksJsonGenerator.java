@@ -58,6 +58,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
     if (block instanceof TrapDoorBlock) {
       blockDesc.addProperty("trapDoorBlock", true);
     }
+    if (block instanceof BedBlock) {
+      blockDesc.addProperty("bedBlock", true);
+    }
     if (defaultState.canBeReplaced()) {
       blockDesc.addProperty("replaceable", true);
     }

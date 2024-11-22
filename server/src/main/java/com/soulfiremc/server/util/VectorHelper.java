@@ -23,6 +23,16 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class VectorHelper {
+  public static final int PACKED_HORIZONTAL_LENGTH = 1 + MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(30000000));
+  public static final int PACKED_Y_LENGTH = 64 - 2 * PACKED_HORIZONTAL_LENGTH;
+  private static final long PACKED_Y_MASK = (1L << PACKED_Y_LENGTH) - 1L;
+  private static final int Z_OFFSET = PACKED_Y_LENGTH;
+  private static final int X_OFFSET = PACKED_Y_LENGTH + PACKED_HORIZONTAL_LENGTH;
+  public static final int MAX_HORIZONTAL_COORDINATE = (1 << PACKED_HORIZONTAL_LENGTH) / 2 - 1;
+  private static final long PACKED_X_MASK = (1L << PACKED_HORIZONTAL_LENGTH) - 1L;
+  private static final long PACKED_Z_MASK = (1L << PACKED_HORIZONTAL_LENGTH) - 1L;
+  private static final int Y_OFFSET = 0;
+
   private VectorHelper() {}
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
@@ -74,5 +84,20 @@ public class VectorHelper {
 
   public static double horizontalDistance(Vector3d vec) {
     return Math.sqrt(vec.getX() * vec.getX() + vec.getZ() * vec.getZ());
+  }
+
+  public static double horizontalDistanceSqr(Vector3d vec) {
+    return vec.getX() * vec.getX() + vec.getZ() * vec.getZ();
+  }
+
+  public static long asLong(Vector3i vec) {
+    return asLong(vec.getX(), vec.getY(), vec.getZ());
+  }
+
+  public static long asLong(int x, int y, int z) {
+    var l = 0L;
+    l |= ((long) x & PACKED_X_MASK) << X_OFFSET;
+    l |= ((long) y & PACKED_Y_MASK) << 0;
+    return l | ((long) z & PACKED_Z_MASK) << Z_OFFSET;
   }
 }

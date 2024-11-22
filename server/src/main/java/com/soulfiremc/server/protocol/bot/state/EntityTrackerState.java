@@ -46,6 +46,9 @@ public class EntityTrackerState {
   }
 
   public void tick() {
-    entitiesMap.values().forEach(Entity::tick);
+    entitiesMap.values().forEach(entity -> {
+      entity.setOldPosAndRot();
+      entity.tick();
+    });
   }
 }

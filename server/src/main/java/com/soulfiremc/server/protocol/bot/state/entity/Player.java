@@ -27,8 +27,11 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
+import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
 import lombok.Setter;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 
@@ -102,6 +105,27 @@ public abstract class Player extends LivingEntity {
     super.serverAiStep();
 
     // TODO: yHeadRot important here?
+  }
+
+  @Override
+  public void travel(Vector3d travelVector) {
+    if (this.isSwimming()) {
+      var d = this.getLookAngle().getY();
+      var e = d < -0.2 ? 0.085 : 0.06;
+      if (d <= 0.0 || this.jumping || !this.level().getBlockState(Vector3i.from(this.x(), this.y() + 1.0 - 0.1, this.z())).fluidState().empty()) {
+        var lv = this.getDeltaMovement();
+        this.setDeltaMovement(lv.add(0.0, (d - lv.getY()) * e, 0.0));
+      }
+    }
+
+    if (this.abilitiesData().flying) {
+      var d = this.getDeltaMovement().getY();
+      super.travel(travelVector);
+      var deltaMovement = this.getDeltaMovement();
+      this.setDeltaMovement(Vector3d.from(deltaMovement.getX(), d * 0.6, deltaMovement.getZ()));
+    } else {
+      super.travel(travelVector);
+    }
   }
 
   protected void updatePlayerPose() {
@@ -188,5 +212,102 @@ public abstract class Player extends LivingEntity {
   public void stopFallFlying() {
     this.setSharedFlag(FLAG_FALL_FLYING, true);
     this.setSharedFlag(FLAG_FALL_FLYING, false);
+  }
+
+  @Override
+  public boolean canSprint() {
+    return true;
+  }
+
+  @Override
+  protected float getFlyingSpeed() {
+    if (this.abilitiesData.flying) {
+      return this.isSprinting() ? this.abilitiesData.flySpeed() * 2.0F : this.abilitiesData.flySpeed();
+    } else {
+      return this.isSprinting() ? 0.025999999F : 0.02F;
+    }
+  }
+
+  @Override
+  protected Vector3d maybeBackOffFromEdge(Vector3d vec, MoverType mover) {
+    var maxUpStep = this.maxUpStep();
+    if (!this.abilitiesData.flying
+      && !(vec.getY() > 0.0)
+      && (mover == MoverType.SELF || mover == MoverType.PLAYER)
+      && this.isStayingOnGroundSurface()
+      && this.isAboveGround(maxUpStep)) {
+      var d = vec.getX();
+      var e = vec.getZ();
+      var min = 0.05;
+      var h = Math.signum(d) * min;
+
+      double i;
+      for (i = Math.signum(e) * min; d != 0.0 && this.canFallAtLeast(d, 0.0, maxUpStep); d -= h) {
+        if (Math.abs(d) <= min) {
+          d = 0.0;
+          break;
+        }
+      }
+
+      while (e != 0.0 && this.canFallAtLeast(0.0, e, maxUpStep)) {
+        if (Math.abs(e) <= min) {
+          e = 0.0;
+          break;
+        }
+
+        e -= i;
+      }
+
+      while (d != 0.0 && e != 0.0 && this.canFallAtLeast(d, e, maxUpStep)) {
+        if (Math.abs(d) <= min) {
+          d = 0.0;
+        } else {
+          d -= h;
+        }
+
+        if (Math.abs(e) <= min) {
+          e = 0.0;
+        } else {
+          e -= i;
+        }
+      }
+
+      return Vector3d.from(d, vec.getY(), e);
+    } else {
+      return vec;
+    }
+  }
+
+  private boolean isAboveGround(float maxUpStep) {
+    return this.onGround() || this.fallDistance < maxUpStep && !this.canFallAtLeast(0.0, 0.0, maxUpStep - this.fallDistance);
+  }
+
+  private boolean canFallAtLeast(double x, double z, float distance) {
+    var lv = this.getBoundingBox();
+    return this.level().noCollision(new AABB(lv.minX + x, lv.minY - (double) distance - 1.0E-5F, lv.minZ + z, lv.maxX + x, lv.minY, lv.maxZ + z));
+  }
+
+  public boolean isSecondaryUseActive() {
+    return this.isShiftKeyDown();
+  }
+
+  protected boolean wantsToStopRiding() {
+    return this.isShiftKeyDown();
+  }
+
+  protected boolean isStayingOnGroundSurface() {
+    return this.isShiftKeyDown();
+  }
+
+  @Override
+  public float getSpeed() {
+    return (float) this.attributeValue(AttributeType.MOVEMENT_SPEED);
+  }
+
+  @Override
+  public void makeStuckInBlock(Vector3d motionMultiplier) {
+    if (!this.abilitiesData.flying) {
+      super.makeStuckInBlock(motionMultiplier);
+    }
   }
 }

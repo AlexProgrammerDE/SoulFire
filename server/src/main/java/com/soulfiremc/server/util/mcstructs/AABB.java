@@ -18,6 +18,7 @@
 package com.soulfiremc.server.util.mcstructs;
 
 import com.soulfiremc.server.util.MathHelper;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -464,5 +465,105 @@ public class AABB {
 
   public boolean isBlockXZCollision() {
     return minX == 0 && minZ == 0 && maxX == 1 && maxZ == 1;
+  }
+
+  public boolean isEmpty() {
+    return this.minX >= this.maxX || this.minY >= this.maxY || this.minZ >= this.maxZ;
+  }
+
+  public DoubleList getCoords(Direction.Axis axis) {
+    return switch (axis) {
+      case X -> DoubleList.of(this.minX, this.maxX);
+      case Y -> DoubleList.of(this.minY, this.maxY);
+      case Z -> DoubleList.of(this.minZ, this.maxZ);
+    };
+  }
+
+  protected double get(Direction.Axis axis, int index) {
+    return this.getCoords(axis).getDouble(index);
+  }
+
+  public int getSize(Direction.Axis axis) {
+    return this.getCoords(axis).size() - 1;
+  }
+
+  protected int findIndex(Direction.Axis axis, double position) {
+    return MathHelper.binarySearch(0, this.getSize(axis) + 1, value -> position < this.get(axis, value)) - 1;
+  }
+
+  public double collide(Direction.Axis movementAxis, AABB collisionBox, double desiredOffset) {
+    return this.collideX(AxisCycle.between(movementAxis, Direction.Axis.X), collisionBox, desiredOffset);
+  }
+
+  public boolean isFullWide(AxisCycle axis, int x, int y, int z) {
+    return this.isFullWide(axis.cycle(x, y, z, Direction.Axis.X), axis.cycle(x, y, z, Direction.Axis.Y), axis.cycle(x, y, z, Direction.Axis.Z));
+  }
+
+  public boolean isFullWide(int x, int y, int z) {
+    if (x < 0 || y < 0 || z < 0) {
+      return false;
+    } else {
+      return x < getSize(Direction.Axis.X) && y < getSize(Direction.Axis.Y) && z < getSize(Direction.Axis.Z) && this.isFull(x, y, z);
+    }
+  }
+
+  public boolean isFull(int x, int y, int z) {
+    System.out.println("x: " + x + ", y: " + y + ", z: " + z);
+    return true; // TODO
+  }
+
+  protected double collideX(AxisCycle movementAxis, AABB collisionBox, double desiredOffset) {
+    if (this.isEmpty()) {
+      return desiredOffset;
+    } else if (Math.abs(desiredOffset) < 1.0E-7) {
+      return 0.0;
+    } else {
+      var axisInverse = movementAxis.inverse();
+      var xCycle = axisInverse.cycle(Direction.Axis.X);
+      var yCycle = axisInverse.cycle(Direction.Axis.Y);
+      var zCycle = axisInverse.cycle(Direction.Axis.Z);
+      var maxOnCycle = collisionBox.max(xCycle);
+      var minOnCycle = collisionBox.min(xCycle);
+      var i = this.findIndex(xCycle, minOnCycle + 1.0E-7);
+      var startX = this.findIndex(xCycle, maxOnCycle - 1.0E-7);
+      var startY = Math.max(0, this.findIndex(yCycle, collisionBox.min(yCycle) + 1.0E-7));
+      var endY = Math.min(this.getSize(yCycle), this.findIndex(yCycle, collisionBox.max(yCycle) - 1.0E-7) + 1);
+      var startZ = Math.max(0, this.findIndex(zCycle, collisionBox.min(zCycle) + 1.0E-7));
+      var endZ = Math.min(this.getSize(zCycle), this.findIndex(zCycle, collisionBox.max(zCycle) - 1.0E-7) + 1);
+      var endX = this.getSize(xCycle);
+      if (desiredOffset > 0.0) {
+        for (var x = startX + 1; x < endX; x++) {
+          for (var y = startY; y < endY; y++) {
+            for (var z = startZ; z < endZ; z++) {
+              if (this.isFullWide(axisInverse, x, y, z)) {
+                var g = this.get(xCycle, x) - maxOnCycle;
+                if (g >= -1.0E-7) {
+                  desiredOffset = Math.min(desiredOffset, g);
+                }
+
+                return desiredOffset;
+              }
+            }
+          }
+        }
+      } else if (desiredOffset < 0.0) {
+        for (var x = i - 1; x >= 0; x--) {
+          for (var y = startY; y < endY; y++) {
+            for (var z = startZ; z < endZ; z++) {
+              if (this.isFullWide(axisInverse, x, y, z)) {
+                var g = this.get(xCycle, x + 1) - minOnCycle;
+                if (g <= 1.0E-7) {
+                  desiredOffset = Math.max(desiredOffset, g);
+                }
+
+                return desiredOffset;
+              }
+            }
+          }
+        }
+      }
+
+      return desiredOffset;
+    }
   }
 }

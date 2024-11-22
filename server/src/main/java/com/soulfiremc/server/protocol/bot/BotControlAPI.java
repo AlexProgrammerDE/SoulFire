@@ -305,7 +305,7 @@ public class BotControlAPI {
     }
 
     var segment = new Segment(eye, vec);
-    var boxes = level.getCollisionBoxes(new AABB(eye, vec));
+    var boxes = level.getBlockCollisionBoxes(new AABB(eye, vec));
     return !segment.intersects(boxes);
   }
 

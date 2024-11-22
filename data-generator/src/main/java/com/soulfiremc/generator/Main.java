@@ -27,6 +27,5 @@ public class Main implements ModInitializer {
     // Player.class;
     // AbstractClientPlayer.class;
     // LocalPlayer.class;
-    // FluidState
   }
 }

@@ -21,8 +21,9 @@ import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.VectorHelper;
+import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -33,7 +34,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponen
 import java.util.Optional;
 
 @Getter
-@Setter
 public abstract class LivingEntity extends Entity {
   private static final Key SPEED_MODIFIER_POWDER_SNOW_ID = Key.key("powder_snow");
   private static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
@@ -49,6 +49,7 @@ public abstract class LivingEntity extends Entity {
   protected boolean jumping;
   private int noJumpDelay;
   private float speed;
+  private final boolean discardFriction = false;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 
@@ -60,7 +61,7 @@ public abstract class LivingEntity extends Entity {
   public void tick() {
     super.tick();
 
-    // this.aiStep();
+    this.aiStep();
 
     if (this.isFallFlying()) {
       this.fallFlyTicks++;
@@ -166,15 +167,206 @@ public abstract class LivingEntity extends Entity {
       this.resetFallDistance();
     }
 
-    // this.travel(moveVector); // TODO
+    this.travel(moveVector);
+
+    if (this.isControlledByLocalInstance()) {
+      this.applyEffectsFromBlocks();
+    }
 
     this.removeFrost();
     this.tryAddFrost();
-
-    // this.pushEntities(); // TODO
   }
 
   protected void serverAiStep() {
+  }
+
+  public void travel(Vector3d travelVector) {
+    if (this.isControlledByLocalInstance()) {
+      var currentFluidState = this.level().getBlockState(this.blockPosition()).fluidState();
+      if ((this.isInWater() || this.isInLava()) && this.isAffectedByFluids() && !this.canStandOnFluid(currentFluidState)) {
+        this.travelInFluid(travelVector);
+      } else if (this.isFallFlying()) {
+        this.travelFallFlying();
+      } else {
+        this.travelInAir(travelVector);
+      }
+    }
+  }
+
+  private void travelInFluid(Vector3d arg) {
+    var bl = this.getDeltaMovement().getY() <= 0.0;
+    var d = this.y();
+    var e = this.getEffectiveGravity();
+    if (this.isInWater()) {
+      var f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
+      var g = 0.02F;
+      var h = (float) this.attributeValue(AttributeType.WATER_MOVEMENT_EFFICIENCY);
+      if (!this.onGround()) {
+        h *= 0.5F;
+      }
+
+      if (h > 0.0F) {
+        f += (0.54600006F - f) * h;
+        g += (this.getSpeed() - g) * h;
+      }
+
+      if (this.effectState.hasEffect(EffectType.DOLPHINS_GRACE)) {
+        f = 0.96F;
+      }
+
+      this.moveRelative(g, arg);
+      this.move(MoverType.SELF, this.getDeltaMovement());
+      var lv = this.getDeltaMovement();
+      if (this.horizontalCollision && this.onClimbable()) {
+        lv = Vector3d.from(lv.getX(), 0.2, lv.getZ());
+      }
+
+      lv = lv.mul(f, 0.8F, (double) f);
+      this.setDeltaMovement(this.getFluidFallingAdjustedMovement(e, bl, lv));
+    } else {
+      this.moveRelative(0.02F, arg);
+      this.move(MoverType.SELF, this.getDeltaMovement());
+      if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
+        this.setDeltaMovement(this.getDeltaMovement().mul(0.5, 0.8F, 0.5));
+        var lv2 = this.getFluidFallingAdjustedMovement(e, bl, this.getDeltaMovement());
+        this.setDeltaMovement(lv2);
+      } else {
+        this.setDeltaMovement(this.getDeltaMovement().mul(0.5));
+      }
+
+      if (e != 0.0) {
+        this.setDeltaMovement(this.getDeltaMovement().add(0.0, -e / 4.0, 0.0));
+      }
+    }
+
+    var newDelta = this.getDeltaMovement();
+    if (this.horizontalCollision && this.isFree(newDelta.getX(), newDelta.getY() + 0.6F - this.y() + d, newDelta.getZ())) {
+      this.setDeltaMovement(newDelta.getX(), 0.3F, newDelta.getZ());
+    }
+  }
+
+  public Vector3d getFluidFallingAdjustedMovement(double gravity, boolean isFalling, Vector3d deltaMovement) {
+    if (gravity != 0.0 && !this.isSprinting()) {
+      double e;
+      if (isFalling && Math.abs(deltaMovement.getY() - 0.005) >= 0.003 && Math.abs(deltaMovement.getY() - gravity / 16.0) < 0.003) {
+        e = -0.003;
+      } else {
+        e = deltaMovement.getY() - gravity / 16.0;
+      }
+
+      return Vector3d.from(deltaMovement.getX(), e, deltaMovement.getZ());
+    } else {
+      return deltaMovement;
+    }
+  }
+
+  protected float getWaterSlowDown() {
+    return 0.8F;
+  }
+
+  private void travelInAir(Vector3d arg) {
+    var blockPosBelow = this.getBlockPosBelowThatAffectsMyMovement();
+    var f = this.onGround() ? this.level().getBlockState(blockPosBelow).blockType().friction() : 1.0F;
+    var g = f * 0.91F;
+    var lv2 = this.handleRelativeFrictionAndCalculateMovement(arg, f);
+    var d = lv2.getY();
+    var lv3 = this.effectState.getEffect(EffectType.LEVITATION);
+    if (lv3.isPresent()) {
+      d += (0.05 * (double) (lv3.get().amplifier() + 1) - lv2.getY()) * 0.2;
+    } else if (this.level().isChunkPositionLoaded(blockPosBelow.getX(), blockPosBelow.getZ())) {
+      d -= this.getEffectiveGravity();
+    } else if (this.y() > (double) this.level().getMinBuildHeight()) {
+      d = -0.1;
+    } else {
+      d = 0.0;
+    }
+
+    if (this.shouldDiscardFriction()) {
+      this.setDeltaMovement(lv2.getX(), d, lv2.getZ());
+    } else {
+      this.setDeltaMovement(lv2.getX() * (double) g, d * (double) 0.98F, lv2.getZ() * (double) g);
+    }
+  }
+
+  private Vector3d handleRelativeFrictionAndCalculateMovement(Vector3d deltaMovement, float friction) {
+    this.moveRelative(this.getFrictionInfluencedSpeed(friction), deltaMovement);
+    this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
+    this.move(MoverType.SELF, this.getDeltaMovement());
+    var newDelta = this.getDeltaMovement();
+    if ((this.horizontalCollision || this.jumping)
+      && (this.onClimbable() || this.getInBlockState().blockType() == BlockType.POWDER_SNOW && canEntityWalkOnPowderSnow(this))) {
+      newDelta = Vector3d.from(newDelta.getX(), 0.2, newDelta.getZ());
+    }
+
+    return newDelta;
+  }
+
+  public boolean canEntityWalkOnPowderSnow(Entity entity) {
+    if (this.level().tagsState().is(entity.entityType(), EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) {
+      return true;
+    } else {
+      return entity instanceof LivingEntity le && le.getItemBySlot(EquipmentSlot.FEET).type() == ItemType.LEATHER_BOOTS;
+    }
+  }
+
+  private Vector3d handleOnClimbable(Vector3d deltaMovement) {
+    if (this.onClimbable()) {
+      this.resetFallDistance();
+      var f = 0.15F;
+      var d = MathHelper.clamp(deltaMovement.getX(), -0.15F, 0.15F);
+      var e = MathHelper.clamp(deltaMovement.getZ(), -0.15F, 0.15F);
+      var g = Math.max(deltaMovement.getY(), -0.15F);
+      if (g < 0.0 && this.getInBlockState().blockType() != BlockType.SCAFFOLDING && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
+        g = 0.0;
+      }
+
+      deltaMovement = Vector3d.from(d, g, e);
+    }
+
+    return deltaMovement;
+  }
+
+  private float getFrictionInfluencedSpeed(float friction) {
+    return this.onGround() ? this.getSpeed() * (0.21600002F / (friction * friction * friction)) : this.getFlyingSpeed();
+  }
+
+  public boolean shouldDiscardFriction() {
+    return this.discardFriction;
+  }
+
+  public boolean canStandOnFluid(FluidState fluidState) {
+    return false;
+  }
+
+  private void travelFallFlying() {
+    var deltaMovement = this.getDeltaMovement();
+    this.setDeltaMovement(this.updateFallFlyingMovement(deltaMovement));
+    this.move(MoverType.SELF, this.getDeltaMovement());
+  }
+
+  private Vector3d updateFallFlyingMovement(Vector3d inputDelta) {
+    var lookAngle = this.getLookAngle();
+    var f = this.xRot() * (float) (Math.PI / 180.0);
+    var d = Math.sqrt(lookAngle.getX() * lookAngle.getX() + lookAngle.getZ() * lookAngle.getZ());
+    var e = VectorHelper.horizontalDistance(inputDelta);
+    var g = this.getEffectiveGravity();
+    var h = MathHelper.square(Math.cos(f));
+    inputDelta = inputDelta.add(0.0, g * (-1.0 + h * 0.75), 0.0);
+    if (inputDelta.getY() < 0.0 && d > 0.0) {
+      var i = inputDelta.getY() * -0.1 * h;
+      inputDelta = inputDelta.add(lookAngle.getX() * i / d, i, lookAngle.getZ() * i / d);
+    }
+
+    if (f < 0.0F && d > 0.0) {
+      var i = e * (double) (-MathHelper.sin(f)) * 0.04;
+      inputDelta = inputDelta.add(-lookAngle.getX() * i / d, i * 3.2, -lookAngle.getZ() * i / d);
+    }
+
+    if (d > 0.0) {
+      inputDelta = inputDelta.add((lookAngle.getX() / d * e - inputDelta.getX()) * 0.1, 0.0, (lookAngle.getZ() / d * e - inputDelta.getZ()) * 0.1);
+    }
+
+    return inputDelta.mul(0.99F, 0.98F, 0.99F);
   }
 
   protected void removeFrost() {
@@ -408,4 +600,13 @@ public abstract class LivingEntity extends Entity {
   }
 
   public abstract SFItemStack getItemBySlot(EquipmentSlot slot);
+
+  protected float getFlyingSpeed() {
+    return 0.02F;
+  }
+
+  @Override
+  public float maxUpStep() {
+    return (float) this.attributeValue(AttributeType.STEP_HEIGHT);
+  }
 }

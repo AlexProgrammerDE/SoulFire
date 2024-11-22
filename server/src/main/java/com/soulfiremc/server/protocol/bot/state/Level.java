@@ -135,7 +135,7 @@ public class Level implements LevelHeightAccessor {
     return surroundingBlocks;
   }
 
-  public List<AABB> getCollisionBoxes(AABB aabb) {
+  public List<AABB> getBlockCollisionBoxes(AABB aabb) {
     return getTouchedPositions(aabb).stream()
       .flatMap(cursor -> getBlockState(cursor).getCollisionBoxes(cursor).stream())
       .filter(collisionBox -> collisionBox.intersects(aabb))
@@ -165,7 +165,7 @@ public class Level implements LevelHeightAccessor {
   }
 
   public boolean noCollision(AABB bb) {
-    return getCollisionBoxes(bb).isEmpty();
+    return getBlockCollisionBoxes(bb).isEmpty();
   }
 
   public Optional<Vector3i> findSupportingBlock(Entity entity, AABB bb) {
