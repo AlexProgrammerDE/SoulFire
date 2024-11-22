@@ -1044,6 +1044,13 @@ public final class SessionDataManager {
   }
 
   @EventHandler
+  public void onExplosion(ClientboundExplodePacket packet) {
+    if (packet.getPlayerKnockback() != null) {
+      localPlayer.addDeltaMovement(packet.getPlayerKnockback());
+    }
+  }
+
+  @EventHandler
   public void onResourcePack(ClientboundResourcePackPushPacket packet) {
     if (!isValidResourcePackUrl(packet.getUrl())) {
       connection.sendPacket(new ServerboundResourcePackPacket(packet.getId(), ResourcePackStatus.INVALID_URL));
