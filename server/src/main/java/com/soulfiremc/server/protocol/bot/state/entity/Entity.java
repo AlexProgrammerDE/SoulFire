@@ -57,8 +57,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Getter
@@ -499,10 +497,6 @@ public abstract class Entity {
     );
   }
 
-  public static Stream<Vector3i> betweenClosedStream(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-    return StreamSupport.stream(betweenClosed(minX, minY, minZ, maxX, maxY, maxZ).spliterator(), false);
-  }
-
   public static Iterable<Vector3i> betweenClosed(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
     var o = maxX - minX + 1;
     var p = maxY - minY + 1;
@@ -757,8 +751,8 @@ public abstract class Entity {
     if (this.isAffectedByBlocks()) {
       if (this.onGround()) {
         var onPos = this.getOnPosLegacy();
-        var lv2 = this.level().getBlockState(onPos);
-        BlockBehaviour.stepOn(lv2.blockType(), this);
+        var onBlockState = this.level().getBlockState(onPos);
+        BlockBehaviour.stepOn(onBlockState.blockType(), this);
       }
 
       this.movementThisTick.add(new Entity.Movement(from, to));
