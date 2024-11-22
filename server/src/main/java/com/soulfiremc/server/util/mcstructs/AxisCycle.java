@@ -97,4 +97,3 @@ public enum AxisCycle {
 
   public abstract AxisCycle inverse();
 }
-
