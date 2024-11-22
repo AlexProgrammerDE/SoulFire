@@ -115,7 +115,7 @@ public class ChunkHolder implements BlockAccessor {
     TimeUtil.lockYielding(writeLock);
     try {
       return chunks.computeIfAbsent(
-        ChunkKey.calculateKey(sectionX, sectionZ), (key) -> new ChunkData(levelHeightAccessor, false));
+        ChunkKey.calculateKey(sectionX, sectionZ), (key) -> new ChunkData(levelHeightAccessor));
     } finally {
       writeLock.unlock();
     }
