@@ -1092,7 +1092,7 @@ public abstract class Entity {
     var maxX = MathHelper.ceil(bb.maxX);
     var minZ = MathHelper.floor(bb.minZ);
     var maxZ = MathHelper.ceil(bb.maxZ);
-    return this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
+    return !this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
   }
 
   protected void updateInWaterStateAndDoFluidPushing() {
