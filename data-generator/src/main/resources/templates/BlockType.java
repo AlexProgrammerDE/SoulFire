@@ -40,6 +40,7 @@ public record BlockType(
   boolean fallingBlock,
   boolean iceBlock,
   boolean fenceGateBlock,
+  boolean trapDoorBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
   List<LootPoolEntry> lootTableData,

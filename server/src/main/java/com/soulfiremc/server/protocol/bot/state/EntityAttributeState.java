@@ -38,13 +38,13 @@ public class EntityAttributeState {
       case ANY -> true;
       case MAIN_HAND -> comparedTo == EquipmentSlot.MAINHAND;
       case OFF_HAND -> comparedTo == EquipmentSlot.OFFHAND;
-      case HAND -> comparedTo == EquipmentSlot.MAINHAND || comparedTo == EquipmentSlot.OFFHAND;
+      case HAND -> comparedTo.isHand();
       case FEET -> comparedTo == EquipmentSlot.FEET;
       case LEGS -> comparedTo == EquipmentSlot.LEGS;
       case CHEST -> comparedTo == EquipmentSlot.CHEST;
       case HEAD -> comparedTo == EquipmentSlot.HEAD;
-      case ARMOR -> comparedTo == EquipmentSlot.CHEST || comparedTo == EquipmentSlot.LEGS || comparedTo == EquipmentSlot.FEET;
-      case BODY -> comparedTo == EquipmentSlot.HEAD || comparedTo == EquipmentSlot.CHEST || comparedTo == EquipmentSlot.LEGS || comparedTo == EquipmentSlot.FEET;
+      case ARMOR -> comparedTo.isArmor();
+      case BODY -> comparedTo == EquipmentSlot.BODY;
     };
   }
 

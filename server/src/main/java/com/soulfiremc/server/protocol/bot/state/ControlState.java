@@ -20,7 +20,6 @@ package com.soulfiremc.server.protocol.bot.state;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundPlayerInputPacket;
 
 @Setter
 @Getter
@@ -31,9 +30,9 @@ public class ControlState {
   private boolean backward;
   private boolean left;
   private boolean right;
-  private boolean sprinting;
   private boolean jumping;
   private boolean sneaking;
+  private boolean sprinting;
   private boolean flying;
 
   public void incrementActivelyControlling() {
@@ -63,7 +62,7 @@ public class ControlState {
     flying = false;
   }
 
-  public ServerboundPlayerInputPacket toServerboundPlayerInputPacket() {
-    return new ServerboundPlayerInputPacket(forward, backward, left, right, jumping, sneaking, sprinting);
+  public KeyPresses toKeyPresses() {
+    return new KeyPresses(forward, backward, left, right, jumping, sneaking, sprinting);
   }
 }

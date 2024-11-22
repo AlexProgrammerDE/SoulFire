@@ -17,17 +17,27 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
+import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.protocol.bot.state.InputState;
+import com.soulfiremc.server.protocol.bot.state.KeyPresses;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.mcstructs.AABB;
+import com.soulfiremc.server.util.mcstructs.Direction;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundPlayerInputPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
 /**
@@ -38,6 +48,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 @EqualsAndHashCode(callSuper = true)
 public class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
+  private final InputState input;
   private boolean showReducedDebug;
   private int opPermissionLevel;
   private double lastX = 0;
@@ -50,14 +61,22 @@ public class LocalPlayer extends AbstractClientPlayer {
   private boolean wasShiftKeyDown = false;
   private boolean wasSprinting = false;
   private boolean noPhysics = false;
+  protected int sprintTriggerTime;
   private boolean crouching;
   private int positionReminder = 0;
-  private ServerboundPlayerInputPacket lastSentInput = new ServerboundPlayerInputPacket(false, false, false, false, false, false, false);
+  private boolean wasFallFlying;
+  private int autoJumpTime;
+  private KeyPresses lastSentInput = KeyPresses.EMPTY;
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     super(connection, level, gameProfile);
     this.connection = connection;
+    this.input = new InputState(connection.controlState());
     uuid(gameProfile.getId());
+  }
+
+  public static boolean isAlwaysFlying(GameMode gameMode) {
+    return gameMode == GameMode.SPECTATOR;
   }
 
   @Override
@@ -66,14 +85,153 @@ public class LocalPlayer extends AbstractClientPlayer {
 
     this.sendShiftKeyState();
 
-    var keyPressPacket = connection.controlState().toServerboundPlayerInputPacket();
-    if (!keyPressPacket.equals(this.lastSentInput)) {
-      this.connection.sendPacket(keyPressPacket);
-      this.lastSentInput = keyPressPacket;
+    if (!input.keyPresses.equals(this.lastSentInput)) {
+      this.connection.sendPacket(input.keyPresses.toServerboundPlayerInputPacket());
+      this.lastSentInput = input.keyPresses;
     }
 
     // Send position changes
     sendPositionChanges();
+  }
+
+  @Override
+  public void aiStep() {
+    if (this.sprintTriggerTime > 0) {
+      this.sprintTriggerTime--;
+    }
+
+    var jumping = this.input.keyPresses.jump();
+    var sneaking = this.input.keyPresses.shift();
+    var enoughImpulseToStartSprint = this.hasEnoughImpulseToStartSprinting();
+    var abilities = this.abilitiesData();
+    this.crouching = !abilities.flying
+      && !this.isSwimming()
+      && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SNEAKING)
+      && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
+    var f = (float) this.attributeValue(AttributeType.SNEAKING_SPEED);
+    this.input.tick(this.isMovingSlowly(), f);
+    if (this.isUsingItem()) {
+      this.input.leftImpulse *= 0.2F;
+      this.input.forwardImpulse *= 0.2F;
+      this.sprintTriggerTime = 0;
+    }
+
+    var hasAutoJumped = false;
+    if (this.autoJumpTime > 0) {
+      this.autoJumpTime--;
+      hasAutoJumped = true;
+      this.input.makeJump();
+    }
+
+    if (!this.noPhysics) {
+      this.moveTowardsClosestSpace(this.x() - (double) this.getBbWidth() * 0.35, this.z() + (double) this.getBbWidth() * 0.35);
+      this.moveTowardsClosestSpace(this.x() - (double) this.getBbWidth() * 0.35, this.z() - (double) this.getBbWidth() * 0.35);
+      this.moveTowardsClosestSpace(this.x() + (double) this.getBbWidth() * 0.35, this.z() - (double) this.getBbWidth() * 0.35);
+      this.moveTowardsClosestSpace(this.x() + (double) this.getBbWidth() * 0.35, this.z() + (double) this.getBbWidth() * 0.35);
+    }
+
+    if (sneaking) {
+      this.sprintTriggerTime = 0;
+    }
+
+    var canStartSprinting = this.canStartSprinting();
+    var onGround = this.onGround();
+    var tooWeak = !sneaking && !enoughImpulseToStartSprint;
+    if ((onGround || this.isUnderWater()) && tooWeak && canStartSprinting) {
+      if (this.sprintTriggerTime <= 0 && !this.input.keyPresses.sprint()) {
+        this.sprintTriggerTime = 7;
+      } else {
+        this.setSprinting(true);
+      }
+    }
+
+    if ((!this.isInWater() || this.isUnderWater()) && canStartSprinting && this.input.keyPresses.sprint()) {
+      this.setSprinting(true);
+    }
+
+    if (this.isSprinting()) {
+      var bl8 = !this.input.hasForwardImpulse() || !this.hasEnoughFoodToStartSprinting();
+      var bl9 = bl8 || this.horizontalCollision && !this.minorHorizontalCollision || this.isInWater() && !this.isUnderWater();
+      if (this.isSwimming()) {
+        if (!this.onGround() && !this.input.keyPresses.shift() && bl8 || !this.isInWater()) {
+          this.setSprinting(false);
+        }
+      } else if (bl9) {
+        this.setSprinting(false);
+      }
+    }
+
+    var bl8 = false;
+    if (abilities.mayfly) {
+      if (isAlwaysFlying(this.connection.dataManager().gameMode())) {
+        if (!abilities.flying) {
+          abilities.flying = true;
+          bl8 = true;
+          this.onUpdateAbilities();
+        }
+      } else if (!jumping && this.input.keyPresses.jump() && !hasAutoJumped) {
+        if (this.jumpTriggerTime == 0) {
+          this.jumpTriggerTime = 7;
+        } else if (!this.isSwimming()) {
+          abilities.flying = !abilities.flying;
+          if (abilities.flying && this.onGround()) {
+            this.jumpFromGround();
+          }
+
+          bl8 = true;
+          this.onUpdateAbilities();
+          this.jumpTriggerTime = 0;
+        }
+      }
+    }
+
+    if (this.input.keyPresses.jump() && !bl8 && !jumping && !this.onClimbable() && this.tryToStartFallFlying()) {
+      this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId, PlayerState.START_ELYTRA_FLYING));
+    }
+
+    this.wasFallFlying = this.isFallFlying();
+    if (this.isInWater() && this.input.keyPresses.shift() && this.isAffectedByFluids()) {
+      this.goDownInWater();
+    }
+
+    if (abilities.flying && this.isControlledCamera()) {
+      var i = 0;
+      if (this.input.keyPresses.shift()) {
+        i--;
+      }
+
+      if (this.input.keyPresses.jump()) {
+        i++;
+      }
+
+      if (i != 0) {
+        this.setDeltaMovement(this.getDeltaMovement().add(0.0, (float) i * abilities.flySpeed() * 3.0F, 0.0));
+      }
+    }
+
+    super.aiStep();
+    if (this.onGround() && abilities.flying && !isAlwaysFlying(this.connection.dataManager().gameMode())) {
+      abilities.flying = false;
+      this.onUpdateAbilities();
+    }
+  }
+
+  private boolean canStartSprinting() {
+    return !this.isSprinting()
+      && this.hasEnoughImpulseToStartSprinting()
+      && this.hasEnoughFoodToStartSprinting()
+      && !this.isUsingItem()
+      && !this.effectState.hasEffect(EffectType.BLINDNESS)
+      && !this.isFallFlying();
+  }
+
+  private boolean hasEnoughFoodToStartSprinting() {
+    return (float) this.connection.dataManager().healthData().food() > 6.0F || this.abilitiesData().mayfly;
+  }
+
+  private boolean hasEnoughImpulseToStartSprinting() {
+    var minImpulse = 0.8;
+    return this.isUnderWater() ? this.input.hasForwardImpulse() : (double) this.input.forwardImpulse >= minImpulse;
   }
 
   public void sendPositionChanges() {
@@ -101,6 +259,46 @@ public class LocalPlayer extends AbstractClientPlayer {
     } else if (sendStatus) {
       sendStatus();
     }
+  }
+
+  private void moveTowardsClosestSpace(double x, double z) {
+    var vec = Vector3i.from(x, this.y(), z);
+    if (this.suffocatesAt(vec)) {
+      var f = x - (double) vec.getX();
+      var g = z - (double) vec.getZ();
+      Direction bestDirection = null;
+      var h = Double.MAX_VALUE;
+      var directions = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH};
+
+      for (var direction : directions) {
+        var i = direction.getAxis().choose(f, 0.0, g);
+        var j = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - i : i;
+        if (j < h && !this.suffocatesAt(direction.offset(vec))) {
+          h = j;
+          bestDirection = direction;
+        }
+      }
+
+      if (bestDirection != null) {
+        var deltaMovement = this.getDeltaMovement();
+        if (bestDirection.getAxis() == Direction.Axis.X) {
+          this.setDeltaMovement(0.1 * (double) bestDirection.getStepX(), deltaMovement.getY(), deltaMovement.getZ());
+        } else {
+          this.setDeltaMovement(deltaMovement.getX(), deltaMovement.getY(), 0.1 * (double) bestDirection.getStepZ());
+        }
+      }
+    }
+  }
+
+  private boolean suffocatesAt(Vector3i pos) {
+    var lv = this.getBoundingBox();
+    var lv2 = new AABB(pos.getX(), lv.minY, pos.getZ(), (double) pos.getX() + 1.0, lv.maxY, (double) pos.getZ() + 1.0).deflate(1.0E-7);
+    // return this.level().collidesWithSuffocatingBlock(this, lv2); // TODO
+    return false;
+  }
+
+  protected boolean isControlledCamera() {
+    return true;
   }
 
   public void handleEntityEvent(EntityEvent event) {
@@ -162,7 +360,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   private void sendShiftKeyState() {
-    var sneaking = connection.controlState().sneaking();
+    var sneaking = input.keyPresses.shift();
     if (sneaking != this.wasShiftKeyDown) {
       this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sneaking
         ? PlayerState.START_SNEAKING
@@ -172,7 +370,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   private void sendIsSprintingIfNeeded() {
-    var sprinting = connection.controlState().sprinting();
+    var sprinting = input.keyPresses.sprint();
     if (sprinting != this.wasSprinting) {
       this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId(), sprinting
         ? PlayerState.START_SPRINTING
@@ -192,7 +390,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   @Override
   public boolean isShiftKeyDown() {
-    return connection.controlState().sneaking();
+    return input.keyPresses.shift();
   }
 
   @Override
@@ -220,5 +418,35 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public boolean isMovingSlowly() {
     return this.isCrouching() || this.isVisuallyCrawling();
+  }
+
+  @Override
+  public boolean isEffectiveAi() {
+    return true;
+  }
+
+  @Override
+  public boolean isLocalPlayer() {
+    return true;
+  }
+
+  @Override
+  public void onUpdateAbilities() {
+    this.connection.sendPacket(this.abilitiesData().toPacket());
+  }
+
+  @Override
+  protected boolean isImmobile() {
+    return super.isImmobile() || this.isSleeping();
+  }
+
+  @Override
+  public SFItemStack getItemBySlot(EquipmentSlot slot) {
+    return this.connection.inventoryManager().playerInventory().getEquipmentSlotItem(slot);
+  }
+
+  @Override
+  public boolean isAffectedByFluids() {
+    return !this.abilitiesData().flying;
   }
 }

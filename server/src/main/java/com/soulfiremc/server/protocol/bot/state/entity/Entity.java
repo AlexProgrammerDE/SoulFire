@@ -100,6 +100,7 @@ public abstract class Entity {
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
   public boolean noPhysics;
+  public boolean hasImpulse;
 
   public Entity(EntityType entityType, Level level) {
     this.metadataState = new EntityMetadataState(entityType);
@@ -261,6 +262,10 @@ public abstract class Entity {
 
   public void setDeltaMovement(double deltaMovementX, double deltaMovementY, double deltaMovementZ) {
     this.setDeltaMovement(Vector3d.from(deltaMovementX, deltaMovementY, deltaMovementZ));
+  }
+
+  public void addDeltaMovement(Vector3d addend) {
+    this.setDeltaMovement(this.getDeltaMovement().add(addend));
   }
 
   protected Vector3d getDeltaMovement() {
@@ -509,6 +514,12 @@ public abstract class Entity {
     return this.inBlockState;
   }
 
+  public void checkSlowFallDistance() {
+    if (this.getDeltaMovement().getY() > -0.5 && this.fallDistance > 1.0F) {
+      this.fallDistance = 1.0F;
+    }
+  }
+
   public void resetFallDistance() {
     this.fallDistance = 0.0F;
   }
@@ -540,6 +551,10 @@ public abstract class Entity {
 
   public Vector3i getBlockPosBelowThatAffectsMyMovement() {
     return this.getOnPos(0.500001F);
+  }
+
+  public Vector3i getOnPosLegacy() {
+    return this.getOnPos(0.2F);
   }
 
   public Vector3i getOnPos() {
@@ -692,5 +707,54 @@ public abstract class Entity {
 
   public boolean isUnderWater() {
     return this.wasEyeInWater && this.isInWater();
+  }
+
+  public boolean isEffectiveAi() {
+    return false;
+  }
+
+  public double getFluidHeight(TagKey<FluidType> fluidTag) {
+    return this.fluidHeight.getDouble(fluidTag);
+  }
+
+  public double getFluidJumpThreshold() {
+    return (double) this.eyeHeight() < 0.4 ? 0.0 : 0.4;
+  }
+
+  public boolean isControlledByLocalInstance() {
+    return this.isEffectiveAi();
+  }
+
+  public int getMaxAirSupply() {
+    return 300;
+  }
+
+  public int getTicksFrozen() {
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataType.INT);
+  }
+
+  public float getPercentFrozen() {
+    var i = this.getTicksRequiredToFreeze();
+    return (float) Math.min(this.getTicksFrozen(), i) / (float) i;
+  }
+
+  public boolean isFullyFrozen() {
+    return this.getTicksFrozen() >= this.getTicksRequiredToFreeze();
+  }
+
+  public int getTicksRequiredToFreeze() {
+    return 140;
+  }
+
+  protected BlockState getBlockStateOnLegacy() {
+    return this.level().getBlockState(this.getOnPosLegacy());
+  }
+
+  public final float getBbWidth() {
+    return this.dimensions.width();
+  }
+
+  public final float getBbHeight() {
+    return this.dimensions.height();
   }
 }

@@ -69,4 +69,8 @@ public class AttributeState {
   public void removeModifier(Key id) {
     modifiers.remove(id);
   }
+
+  public Attribute.Modifier getModifier(Key id) {
+    return modifiers.get(id);
+  }
 }

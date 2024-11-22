@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.model;
 
 import lombok.*;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 
 @Setter
 @Getter
@@ -35,5 +36,9 @@ public final class AbilitiesData {
 
   public AbilitiesData() {
     this(false, false, false, false, true, 0.05F, 0.1F);
+  }
+
+  public ServerboundPlayerAbilitiesPacket toPacket() {
+    return new ServerboundPlayerAbilitiesPacket(flying);
   }
 }

@@ -71,4 +71,8 @@ public class VectorHelper {
     var z = current.getZ() + 0.5 - other.getZ();
     return x * x + y * y + z * z;
   }
+
+  public static double horizontalDistance(Vector3d vec) {
+    return Math.sqrt(vec.getX() * vec.getX() + vec.getZ() * vec.getZ());
+  }
 }

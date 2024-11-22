@@ -44,14 +44,19 @@ public class PlayerInventoryContainer extends Container {
     this.inventoryManager = inventoryManager;
   }
 
-  public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {
+  public SFItemStack getEquipmentSlotItem(EquipmentSlot slot) {
+    return getEquipmentSlot(slot).map(ContainerSlot::item).orElse(null);
+  }
+
+  public Optional<ContainerSlot> getEquipmentSlot(EquipmentSlot slot) {
     return switch (slot) {
-      case MAINHAND -> getHeldItem();
-      case OFFHAND -> getOffhand();
-      case HEAD -> getHelmet();
-      case CHEST -> getChestplate();
-      case LEGS -> getLeggings();
-      case FEET -> getBoots();
+      case MAINHAND -> Optional.of(getHeldItem());
+      case OFFHAND -> Optional.of(getOffhand());
+      case HEAD -> Optional.of(getHelmet());
+      case CHEST -> Optional.of(getChestplate());
+      case LEGS -> Optional.of(getLeggings());
+      case FEET -> Optional.of(getBoots());
+      case BODY -> Optional.empty();
     };
   }
 

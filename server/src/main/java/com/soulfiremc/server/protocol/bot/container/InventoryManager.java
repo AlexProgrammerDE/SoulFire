@@ -165,7 +165,7 @@ public class InventoryManager {
   }
 
   private void applyIfMatches(EquipmentSlot equipmentSlot) {
-    var item = playerInventory.getEquipmentSlot(equipmentSlot).item();
+    var item = playerInventory.getEquipmentSlotItem(equipmentSlot);
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {

@@ -24,10 +24,7 @@ import com.soulfiremc.generator.util.BlockSettingsAccessor;
 import lombok.SneakyThrows;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.FallingBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.IceBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class BlocksJsonGenerator implements IDataGenerator {
@@ -57,6 +54,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
     }
     if (block instanceof FenceGateBlock) {
       blockDesc.addProperty("fenceGateBlock", true);
+    }
+    if (block instanceof TrapDoorBlock) {
+      blockDesc.addProperty("trapDoorBlock", true);
     }
     if (defaultState.canBeReplaced()) {
       blockDesc.addProperty("replaceable", true);

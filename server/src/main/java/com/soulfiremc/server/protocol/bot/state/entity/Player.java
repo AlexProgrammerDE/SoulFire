@@ -18,12 +18,14 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.google.common.collect.ImmutableMap;
+import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityDimensions;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import lombok.Getter;
 import lombok.Setter;
@@ -73,6 +75,26 @@ public abstract class Player extends LivingEntity {
     }
 
     this.updatePlayerPose();
+  }
+
+  @Override
+  public void aiStep() {
+    if (this.jumpTriggerTime > 0) {
+      this.jumpTriggerTime--;
+    }
+
+    if (this.abilitiesData().flying) {
+      this.resetFallDistance();
+    }
+
+    super.aiStep();
+    this.setSpeed((float) this.attributeValue(AttributeType.MOVEMENT_SPEED));
+    float f;
+    if (this.onGround() && !this.isDeadOrDying() && !this.isSwimming()) {
+      f = Math.min(0.1F, (float) VectorHelper.horizontalDistance(this.getDeltaMovement()));
+    } else {
+      f = 0.0F;
+    }
   }
 
   protected void updatePlayerPose() {
@@ -129,5 +151,35 @@ public abstract class Player extends LivingEntity {
   @Override
   protected float getBlockSpeedFactor() {
     return !this.abilitiesData.flying && !this.isFallFlying() ? super.getBlockSpeedFactor() : 1.0F;
+  }
+
+  public boolean isLocalPlayer() {
+    return false;
+  }
+
+  public void onUpdateAbilities() {
+  }
+
+  public boolean tryToStartFallFlying() {
+    if (!this.isFallFlying() && this.canGlide() && !this.isInWater()) {
+      this.startFallFlying();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  protected boolean canGlide() {
+    return !this.abilitiesData().flying && super.canGlide();
+  }
+
+  public void startFallFlying() {
+    this.setSharedFlag(FLAG_FALL_FLYING, true);
+  }
+
+  public void stopFallFlying() {
+    this.setSharedFlag(FLAG_FALL_FLYING, true);
+    this.setSharedFlag(FLAG_FALL_FLYING, false);
   }
 }

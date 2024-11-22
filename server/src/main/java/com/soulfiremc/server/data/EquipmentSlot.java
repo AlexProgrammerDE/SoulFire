@@ -17,11 +17,55 @@
  */
 package com.soulfiremc.server.data;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum EquipmentSlot {
-  MAINHAND,
-  OFFHAND,
-  FEET,
-  LEGS,
-  CHEST,
-  HEAD
+  MAINHAND(Type.HAND),
+  OFFHAND(Type.HAND),
+  FEET(Type.HUMANOID_ARMOR),
+  LEGS(Type.HUMANOID_ARMOR),
+  CHEST(Type.HUMANOID_ARMOR),
+  HEAD(Type.HUMANOID_ARMOR),
+  BODY(Type.ANIMAL_ARMOR);
+
+  private final Type type;
+
+  public static EquipmentSlot fromMCPl(org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot slot) {
+    return switch (slot) {
+      case MAIN_HAND -> MAINHAND;
+      case OFF_HAND -> OFFHAND;
+      case BOOTS -> FEET;
+      case LEGGINGS -> LEGS;
+      case CHESTPLATE -> CHEST;
+      case HELMET -> HEAD;
+      case BODY -> BODY;
+    };
+  }
+
+  public boolean isArmor() {
+    return type == Type.HUMANOID_ARMOR || type == Type.ANIMAL_ARMOR;
+  }
+
+  public boolean isHand() {
+    return type == Type.HAND;
+  }
+
+  public org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot toMCPl() {
+    return switch (this) {
+      case MAINHAND -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.MAIN_HAND;
+      case OFFHAND -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.OFF_HAND;
+      case FEET -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.BOOTS;
+      case LEGS -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.LEGGINGS;
+      case CHEST -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.CHESTPLATE;
+      case HEAD -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.HELMET;
+      case BODY -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.BODY;
+    };
+  }
+
+  public enum Type {
+    HAND,
+    HUMANOID_ARMOR,
+    ANIMAL_ARMOR
+  }
 }
