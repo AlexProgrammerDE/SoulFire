@@ -133,11 +133,11 @@ public final class BotConnection {
   }
 
   public CompletableFuture<?> connect() {
-    return CompletableFuture.runAsync(
+    return scheduler.runAsync(
       () -> {
         SoulFireAPI.postEvent(new PreBotConnectEvent(this));
         session.connect(true);
-      }, scheduler);
+      });
   }
 
   public boolean isOnline() {

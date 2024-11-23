@@ -46,6 +46,7 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Represents a single instance.
  * An instance persists settings over restarts and managed attack session and attack state.
  */
+@Slf4j
 @Getter
 public class InstanceManager {
   private static final Gson GSON = new Gson();
@@ -168,16 +170,16 @@ public class InstanceManager {
     return switch (targetState) {
       case STARTING, RUNNING -> switch (attackLifecycle) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
-        case PAUSED -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING, scheduler);
-        case STOPPED -> CompletableFuture.runAsync(this::start, scheduler);
+        case PAUSED -> scheduler.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING);
+        case STOPPED -> scheduler.runAsync(this::start);
       };
       case PAUSED -> switch (attackLifecycle) {
-        case STARTING, RUNNING -> CompletableFuture.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED, scheduler);
+        case STARTING, RUNNING -> scheduler.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED);
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
-        case STOPPED -> CompletableFuture.runAsync(() -> {
+        case STOPPED -> scheduler.runAsync(() -> {
           start();
           this.attackLifecycle = AttackLifecycle.PAUSED;
-        }, scheduler);
+        });
       };
       case STOPPING, STOPPED -> switch (attackLifecycle) {
         case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
@@ -357,13 +359,13 @@ public class InstanceManager {
   }
 
   public CompletableFuture<?> stopAttackSession() {
-    return CompletableFuture.runAsync(() -> {
+    return scheduler.runAsync(() -> {
       logger.info("Disconnecting bots");
       do {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         for (var entry : Map.copyOf(botConnections).entrySet()) {
-          disconnectFuture.add(CompletableFuture.runAsync(entry.getValue()::gracefulDisconnect, scheduler));
+          disconnectFuture.add(scheduler.runAsync(entry.getValue()::gracefulDisconnect));
           eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
           botConnections.remove(entry.getKey());
         }
@@ -389,7 +391,7 @@ public class InstanceManager {
 
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
-    }, scheduler);
+    });
   }
 
   public InstanceListResponse.Instance toProto() {

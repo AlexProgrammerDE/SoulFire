@@ -126,6 +126,25 @@ public class SoulFireScheduler implements Executor {
     drainQueue();
   }
 
+  public CompletableFuture<?> runAsync(Runnable command) {
+    return CompletableFuture.runAsync(wrapFuture(command), this);
+  }
+
+  public Runnable wrapFuture(Runnable command) {
+    return () -> {
+      if (blockNewTasks) {
+        return;
+      }
+
+      try {
+        runnableWrapper.apply(command).run();
+      } catch (Exception e) {
+        logger.error("Error in async executor", e);
+        throw new CompletionException(e);
+      }
+    };
+  }
+
   private void runCommand(Runnable command) {
     if (blockNewTasks) {
       return;

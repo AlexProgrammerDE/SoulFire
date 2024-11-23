@@ -122,7 +122,7 @@ public class SoulFireServer {
 
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
-      CompletableFuture.runAsync(
+      scheduler.runAsync(
         () -> {
           ViaLoader.init(
             new SFViaPlatform(configDirectory.resolve("ViaVersion")),
@@ -137,13 +137,13 @@ public class SoulFireServer {
           );
 
           TimeUtil.waitCondition(SFHelpers.not(Via.getManager().getProtocolManager()::hasLoadedMappings));
-        }, scheduler);
+        });
     var sparkStart =
-      CompletableFuture.runAsync(
+      scheduler.runAsync(
         () -> {
           var sparkPlugin = new SFSparkPlugin(configDirectory.resolve("spark"), this);
           sparkPlugin.init();
-        }, scheduler);
+        });
 
     var updateCheck =
       CompletableFuture.supplyAsync(
