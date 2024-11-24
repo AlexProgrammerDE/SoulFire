@@ -579,7 +579,10 @@ public abstract class LivingEntity extends Entity {
   }
 
   protected void pushEntities() {
-    this.level().getEntities(this.getBoundingBox()).forEach(this::doPush);
+    this.level().getEntities(this.getBoundingBox())
+      .stream()
+      .filter(e -> e instanceof Player)
+      .forEach(this::doPush);
   }
 
   protected void doPush(Entity entity) {
