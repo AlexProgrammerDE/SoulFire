@@ -107,7 +107,6 @@ public abstract class Entity {
   public double yOld;
   protected float headYRot;
   protected boolean onGround;
-  protected int jumpTriggerTime;
   protected boolean horizontalCollision;
   protected boolean verticalCollision;
   protected boolean verticalCollisionBelow;

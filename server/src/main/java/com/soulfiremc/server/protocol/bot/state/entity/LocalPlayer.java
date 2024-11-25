@@ -161,31 +161,26 @@ public class LocalPlayer extends AbstractClientPlayer {
       }
     }
 
-    var bl8 = false;
+    var flyingChanged = false;
     if (abilities.mayfly) {
       if (isAlwaysFlying(this.connection.dataManager().gameMode())) {
         if (!abilities.flying) {
           abilities.flying = true;
-          bl8 = true;
+          flyingChanged = true;
           this.onUpdateAbilities();
         }
-      } else if (!jumping && this.input.keyPresses.jump() && !hasAutoJumped) {
-        if (this.jumpTriggerTime == 0) {
-          this.jumpTriggerTime = 7;
-        } else if (!this.isSwimming()) {
-          abilities.flying = !abilities.flying;
-          if (abilities.flying && this.onGround()) {
-            this.jumpFromGround();
-          }
+      } else if (abilities.flying != connection.controlState().flying()) {
+        abilities.flying = connection.controlState().flying();
+        if (abilities.flying && this.onGround()) {
+          this.jumpFromGround();
+        }
 
-          bl8 = true;
-          this.onUpdateAbilities();
-          this.jumpTriggerTime = 0;
-        }
+        flyingChanged = true;
+        this.onUpdateAbilities();
       }
     }
 
-    if (this.input.keyPresses.jump() && !bl8 && !jumping && !this.onClimbable() && this.tryToStartFallFlying()) {
+    if (this.input.keyPresses.jump() && !flyingChanged && !jumping && !this.onClimbable() && this.tryToStartFallFlying()) {
       this.connection.sendPacket(new ServerboundPlayerCommandPacket(entityId, PlayerState.START_ELYTRA_FLYING));
     }
 
@@ -214,6 +209,11 @@ public class LocalPlayer extends AbstractClientPlayer {
       abilities.flying = false;
       this.onUpdateAbilities();
     }
+  }
+
+  @Override
+  public boolean isSuppressingSlidingDownLadder() {
+    return !this.abilitiesData().flying && super.isSuppressingSlidingDownLadder();
   }
 
   @Override
@@ -387,10 +387,6 @@ public class LocalPlayer extends AbstractClientPlayer {
         : PlayerState.STOP_SPRINTING));
       this.wasSprinting = sprinting;
     }
-  }
-
-  public void jump() {
-    jumpTriggerTime = 7;
   }
 
   @Override

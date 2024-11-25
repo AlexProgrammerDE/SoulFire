@@ -82,10 +82,6 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public void aiStep() {
-    if (this.jumpTriggerTime > 0) {
-      this.jumpTriggerTime--;
-    }
-
     if (this.abilitiesData().flying) {
       this.resetFallDistance();
     }

@@ -62,7 +62,7 @@ public class AutoJump extends InternalPlugin {
           && clientEntity.level().isChunkPositionLoaded(clientEntity.blockX(), clientEntity.blockZ())
           && clientEntity.onGround()) {
           connection.logger().debug("[AutoJump] Jumping!");
-          clientEntity.jump();
+          clientEntity.jumpFromGround();
         }
       },
       settingsSource.getRandom(AutoJumpSettings.DELAY).asLongSupplier(),

@@ -23,7 +23,8 @@ import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 
 public class BlockTypeHelper {
-  private static final double SAFE_BLOCK_MIN_HEIGHT = 0.9;
+  // A player can jump up 1.25 blocks
+  private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
 
   private BlockTypeHelper() {}
 
