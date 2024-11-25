@@ -13,6 +13,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -35,6 +36,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -193,6 +195,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_raft",
       "abstract_chest_boat",
@@ -216,6 +219,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "raft",
       "abstract_boat",
@@ -286,6 +290,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -308,6 +313,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -422,6 +428,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "windChargeEntity": true,
     "inheritedClasses": [
       "breeze_wind_charge",
       "abstract_wind_charge",
@@ -521,6 +528,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -543,6 +551,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -566,6 +575,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_chest",
       "abstract_minecart_container",
@@ -640,6 +650,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_command_block",
       "abstract_minecart",
@@ -756,6 +767,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -778,6 +790,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -1276,6 +1289,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_furnace",
       "abstract_minecart",
@@ -1464,6 +1478,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_hopper",
       "abstract_minecart_container",
@@ -1670,6 +1685,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -1692,6 +1708,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -1826,6 +1843,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -1848,6 +1866,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -1891,6 +1910,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart",
       "abstract_minecart",
@@ -1966,6 +1986,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -1988,6 +2009,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -2078,6 +2100,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -2100,6 +2123,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -2703,6 +2727,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_spawner",
       "abstract_minecart",
@@ -2769,6 +2794,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "boat",
       "abstract_boat",
@@ -2791,6 +2817,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "boatEntity": true,
     "inheritedClasses": [
       "chest_boat",
       "abstract_chest_boat",
@@ -2954,6 +2981,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "minecartEntity": true,
     "inheritedClasses": [
       "minecart_tnt",
       "abstract_minecart",
@@ -3198,6 +3226,7 @@
     "friendly": true,
     "summonable": true,
     "attackable": true,
+    "windChargeEntity": true,
     "inheritedClasses": [
       "wind_charge",
       "abstract_wind_charge",

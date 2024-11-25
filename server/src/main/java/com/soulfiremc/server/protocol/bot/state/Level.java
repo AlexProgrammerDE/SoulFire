@@ -199,4 +199,19 @@ public class Level implements LevelHeightAccessor {
 
     return Optional.ofNullable(block);
   }
+
+  public List<AABB> getEntityCollisions(Entity entity, AABB aabb) {
+    if (aabb.getSize() < 1.0E-7) {
+      return List.of();
+    } else {
+      var collisionBOx = aabb.inflate(1.0E-7);
+
+      return getEntities().stream()
+        .filter(e -> e != entity)
+        .filter(entity::canCollideWith)
+        .map(Entity::getBoundingBox)
+        .filter(e -> e.intersects(collisionBOx))
+        .toList();
+    }
+  }
 }

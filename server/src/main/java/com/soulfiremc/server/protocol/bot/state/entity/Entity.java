@@ -776,7 +776,7 @@ public abstract class Entity {
 
   private Vector3d collide(Vector3d vec) {
     var bb = this.getBoundingBox();
-    List<AABB> list = new ArrayList<>(); // TODO: Implement shulker collisions
+    var list = this.level().getEntityCollisions(this, bb.expandTowards(vec));
     var collidedBB = vec.lengthSquared() == 0.0 ? vec : collideBoundingBox(this, vec, bb, this.level(), list);
     var xDiff = vec.getX() != collidedBB.getX();
     var yDiff = vec.getY() != collidedBB.getY();
@@ -1131,6 +1131,22 @@ public abstract class Entity {
     var minZ = MathHelper.floor(bb.minZ);
     var maxZ = MathHelper.ceil(bb.maxZ);
     return !this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
+  }
+
+  public boolean canCollideWith(Entity pushed) {
+    if (entityType.windChargeEntity() && pushed.entityType().windChargeEntity()) {
+      return false;
+    }
+
+    if (entityType.boatEntity() || entityType.minecartEntity()) {
+      return pushed.canBeCollidedWith() || pushed.isPushable();
+    } else {
+      return pushed.canBeCollidedWith();
+    }
+  }
+
+  public boolean canBeCollidedWith() {
+    return entityType.boatEntity() || entityType == EntityType.SHULKER;
   }
 
   protected void updateInWaterStateAndDoFluidPushing() {

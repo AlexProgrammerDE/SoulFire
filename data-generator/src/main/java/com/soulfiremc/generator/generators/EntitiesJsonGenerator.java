@@ -28,6 +28,9 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -70,6 +73,15 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     var defaultEntity = MCHelper.createEntity(entityType);
     if (defaultEntity.isAttackable()) {
       entityDesc.addProperty("attackable", true);
+    }
+    if (defaultEntity instanceof AbstractBoat) {
+      entityDesc.addProperty("boatEntity", true);
+    }
+    if (defaultEntity instanceof AbstractMinecart) {
+      entityDesc.addProperty("minecartEntity", true);
+    }
+    if (defaultEntity instanceof AbstractWindCharge) {
+      entityDesc.addProperty("windChargeEntity", true);
     }
 
     var inheritedClasses = new JsonArray();

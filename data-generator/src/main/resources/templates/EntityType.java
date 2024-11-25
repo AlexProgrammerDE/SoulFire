@@ -32,6 +32,9 @@ public record EntityType(
   boolean friendly,
   boolean summonable,
   boolean attackable,
+  boolean boatEntity,
+  boolean minecartEntity,
+  boolean windChargeEntity,
   List<String> inheritedClasses,
   String defaultEntityMetadata) implements RegistryValue<EntityType> {
   public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);
