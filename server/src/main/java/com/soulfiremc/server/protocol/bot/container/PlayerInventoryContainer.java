@@ -44,8 +44,8 @@ public class PlayerInventoryContainer extends Container {
     this.inventoryManager = inventoryManager;
   }
 
-  public SFItemStack getEquipmentSlotItem(EquipmentSlot slot) {
-    return getEquipmentSlot(slot).map(ContainerSlot::item).orElse(null);
+  public Optional<SFItemStack> getEquipmentSlotItem(EquipmentSlot slot) {
+    return getEquipmentSlot(slot).map(ContainerSlot::item);
   }
 
   public Optional<ContainerSlot> getEquipmentSlot(EquipmentSlot slot) {

@@ -169,7 +169,7 @@ public class InventoryManager {
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {
-      if (item == null || previousItem.type() != item.type()) {
+      if (item.isEmpty() || previousItem.type() != item.get().type()) {
         // Item before, but we don't have one now, or it's different
         hasChanged = true;
 
@@ -181,13 +181,13 @@ public class InventoryManager {
       }
     } else {
       // No item before, but we have one now
-      hasChanged = item != null;
+      hasChanged = item.isPresent();
     }
 
-    if (hasChanged && item != null) {
-      connection.dataManager().localPlayer().attributeState().putItemModifiers(item, equipmentSlot);
+    if (hasChanged && item.isPresent()) {
+      connection.dataManager().localPlayer().attributeState().putItemModifiers(item.get(), equipmentSlot);
     }
 
-    lastInEquipment.put(equipmentSlot, item);
+    lastInEquipment.put(equipmentSlot, item.orElse(null));
   }
 }

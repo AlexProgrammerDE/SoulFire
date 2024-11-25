@@ -40,6 +40,8 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
+import java.util.Optional;
+
 /**
  * Represents the bot itself as an entity.
  */
@@ -447,7 +449,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   @Override
-  public SFItemStack getItemBySlot(EquipmentSlot slot) {
+  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
     return this.connection.inventoryManager().playerInventory().getEquipmentSlotItem(slot);
   }
 

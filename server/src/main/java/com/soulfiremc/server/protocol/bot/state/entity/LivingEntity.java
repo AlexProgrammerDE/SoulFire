@@ -343,7 +343,9 @@ public abstract class LivingEntity extends Entity {
     if (this.level().tagsState().is(entity.entityType(), EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) {
       return true;
     } else {
-      return entity instanceof LivingEntity le && le.getItemBySlot(EquipmentSlot.FEET).type() == ItemType.LEATHER_BOOTS;
+      return entity instanceof LivingEntity le && le.getItemBySlot(EquipmentSlot.FEET)
+        .map(item -> item.type() == ItemType.LEATHER_BOOTS)
+        .orElse(false);
     }
   }
 
@@ -650,8 +652,9 @@ public abstract class LivingEntity extends Entity {
 
   protected boolean canGlide() {
     if (!this.onGround() && !this.effectState().hasEffect(EffectType.LEVITATION)) {
-      for (var lv : EquipmentSlot.values()) {
-        if (canGlideUsing(this.getItemBySlot(lv), lv)) {
+      for (var slot : EquipmentSlot.values()) {
+        var item = this.getItemBySlot(slot);
+        if (item.isPresent() && canGlideUsing(item.get(), slot)) {
           return true;
         }
       }
@@ -660,7 +663,7 @@ public abstract class LivingEntity extends Entity {
     return false;
   }
 
-  public abstract SFItemStack getItemBySlot(EquipmentSlot slot);
+  public abstract Optional<SFItemStack> getItemBySlot(EquipmentSlot slot);
 
   protected float getFlyingSpeed() {
     return 0.02F;
