@@ -27,6 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,12 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
           new ProjectedInventory(bot.inventoryManager().playerInventory(), dataManager.localPlayer(), pathConstraint);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
+        var startBlockState = level.getBlockState(start);
+        if (BlockTypeHelper.isRoughlyFullBlock(startBlockState.blockCollisionShapeGroup())) {
+          // If the player is inside a block, move them up
+          start = start.add(0, 1, 0);
+        }
+
         var routeFinder =
           new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, pathConstraint), goalScorer);
 
@@ -145,6 +152,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     this.worldActionQueue.clear();
     this.worldActionQueue.addAll(worldActions);
     this.totalMovements = worldActions.size();
+    this.ticks = 0;
     this.movementNumber = 1;
   }
 
