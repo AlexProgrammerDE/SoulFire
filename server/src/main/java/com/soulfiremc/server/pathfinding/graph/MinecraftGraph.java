@@ -26,7 +26,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.structs.LazyBoolean;
-import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,9 +55,6 @@ public record MinecraftGraph(TagsState tagsState,
                              BlockAccessor blockAccessor,
                              ProjectedInventory inventory,
                              PathConstraint pathConstraint) {
-  private static final Object2ObjectFunction<
-    ? super SFVec3i, ? extends List<WrappedActionSubscription>>
-    CREATE_MISSING_FUNCTION = k -> new ArrayList<>();
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
@@ -69,7 +65,7 @@ public record MinecraftGraph(TagsState tagsState,
     var currentSubscriptions = new AtomicInteger(0);
     BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) -> {
       currentSubscriptions.incrementAndGet();
-      blockSubscribers.computeIfAbsent(key, CREATE_MISSING_FUNCTION).add(new WrappedActionSubscription(actions.size(), value));
+      blockSubscribers.computeIfAbsent(key, k -> new ArrayList<>()).add(new WrappedActionSubscription(actions.size(), value));
     };
     Consumer<GraphAction> actionAdder = action -> {
       actions.add(action);

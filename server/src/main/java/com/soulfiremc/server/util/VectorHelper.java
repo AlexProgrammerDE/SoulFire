@@ -97,7 +97,7 @@ public class VectorHelper {
   public static long asLong(int x, int y, int z) {
     var l = 0L;
     l |= ((long) x & PACKED_X_MASK) << X_OFFSET;
-    l |= ((long) y & PACKED_Y_MASK) << 0;
+    l |= ((long) y & PACKED_Y_MASK);
     return l | ((long) z & PACKED_Z_MASK) << Z_OFFSET;
   }
 }

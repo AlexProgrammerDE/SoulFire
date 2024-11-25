@@ -19,14 +19,13 @@ package com.soulfiremc.test.utils;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-
-import java.util.Map;
+import com.soulfiremc.server.util.VectorHelper;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
 public class TestBlockAccessor implements BlockAccessor {
-  private final Map<SFVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
+  private final Long2ObjectMap<BlockState> blocks = new Long2ObjectOpenHashMap<>();
   private final BlockState defaultBlock;
 
   public TestBlockAccessor() {
@@ -38,11 +37,11 @@ public class TestBlockAccessor implements BlockAccessor {
   }
 
   public void setBlockAt(int x, int y, int z, BlockType block) {
-    blocks.put(new SFVec3i(x, y, z), BlockState.forDefaultBlockType(block));
+    blocks.put(VectorHelper.asLong(x, y, z), BlockState.forDefaultBlockType(block));
   }
 
   @Override
   public BlockState getBlockState(int x, int y, int z) {
-    return blocks.getOrDefault(new SFVec3i(x, y, z), defaultBlock);
+    return blocks.getOrDefault(VectorHelper.asLong(x, y, z), defaultBlock);
   }
 }
