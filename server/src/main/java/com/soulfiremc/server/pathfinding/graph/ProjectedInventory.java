@@ -51,20 +51,19 @@ public class ProjectedInventory {
   private final SFItemStack[] usableToolsAndNull;
   private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
   private final LocalPlayer entity;
-  private final PlayerInventoryContainer playerInventory;
 
   public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
         .filter(item -> item != null && item.getAmount() > 0)
-        .toList(), entity, playerInventory,
+        .toList(),
+      entity,
       pathConstraint);
   }
 
-  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, PlayerInventoryContainer playerInventory, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, PathConstraint pathConstraint) {
     this.entity = entity;
-    this.playerInventory = playerInventory;
 
     var blockItems = 0;
     var usableToolsAndNull = new HashSet<SFItemStack>();
@@ -87,7 +86,7 @@ public class ProjectedInventory {
 
   @VisibleForTesting
   public static ProjectedInventory forUnitTest(List<SFItemStack> items, PathConstraint pathConstraint) {
-    return new ProjectedInventory(items, null, null, pathConstraint);
+    return new ProjectedInventory(items, null, pathConstraint);
   }
 
   public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
