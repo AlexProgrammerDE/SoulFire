@@ -317,4 +317,16 @@ public abstract class Player extends LivingEntity {
       super.makeStuckInBlock(motionMultiplier);
     }
   }
+
+  public boolean canUseGameMasterBlocks() {
+    return this.abilitiesData().instabuild && this.permissionLevel() >= 2;
+  }
+
+  protected int permissionLevel() {
+    return 0;
+  }
+
+  public boolean hasPermissions(int i) {
+    return this.permissionLevel() >= i;
+  }
 }

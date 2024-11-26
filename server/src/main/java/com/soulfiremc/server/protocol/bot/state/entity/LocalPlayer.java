@@ -53,7 +53,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
   private final InputState input;
   private boolean showReducedDebug;
-  private int opPermissionLevel;
+  private int permissionLevel;
   private double lastX = 0;
   private double lastY = 0;
   private double lastZ = 0;
@@ -316,11 +316,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public void handleEntityEvent(EntityEvent event) {
     switch (event) {
-      case PLAYER_OP_PERMISSION_LEVEL_0 -> opPermissionLevel = 0;
-      case PLAYER_OP_PERMISSION_LEVEL_1 -> opPermissionLevel = 1;
-      case PLAYER_OP_PERMISSION_LEVEL_2 -> opPermissionLevel = 2;
-      case PLAYER_OP_PERMISSION_LEVEL_3 -> opPermissionLevel = 3;
-      case PLAYER_OP_PERMISSION_LEVEL_4 -> opPermissionLevel = 4;
+      case PLAYER_OP_PERMISSION_LEVEL_0 -> permissionLevel(0);
+      case PLAYER_OP_PERMISSION_LEVEL_1 -> permissionLevel(1);
+      case PLAYER_OP_PERMISSION_LEVEL_2 -> permissionLevel(2);
+      case PLAYER_OP_PERMISSION_LEVEL_3 -> permissionLevel(3);
+      case PLAYER_OP_PERMISSION_LEVEL_4 -> permissionLevel(4);
       default -> super.handleEntityEvent(event);
     }
   }
@@ -460,5 +460,10 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Override
   public boolean isAffectedByFluids() {
     return !this.abilitiesData().flying;
+  }
+
+  @Override
+  protected int permissionLevel() {
+    return this.permissionLevel;
   }
 }
