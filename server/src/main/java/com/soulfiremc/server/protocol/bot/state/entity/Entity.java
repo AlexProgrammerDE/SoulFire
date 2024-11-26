@@ -398,18 +398,6 @@ public abstract class Entity {
     return blockPosition;
   }
 
-  public int blockX() {
-    return blockPosition.getX();
-  }
-
-  public int blockY() {
-    return blockPosition.getY();
-  }
-
-  public int blockZ() {
-    return blockPosition.getZ();
-  }
-
   public double attributeValue(AttributeType type) {
     return attributeState.getOrCreateAttribute(type).calculateValue();
   }
