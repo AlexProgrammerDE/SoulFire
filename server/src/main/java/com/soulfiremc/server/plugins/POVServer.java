@@ -674,7 +674,7 @@ public class POVServer extends InternalPlugin {
         clientSession.send(
           new ClientboundEntityEventPacket(
             localPlayer.entityId(),
-            switch (localPlayer.opPermissionLevel()) {
+            switch (localPlayer.permissionLevel()) {
               case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
               case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
               case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
@@ -682,7 +682,7 @@ public class POVServer extends InternalPlugin {
               case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
               default -> throw new IllegalStateException(
                 "Unexpected value: "
-                  + localPlayer.opPermissionLevel());
+                  + localPlayer.permissionLevel());
             }));
         clientSession.send(
           new ClientboundEntityEventPacket(

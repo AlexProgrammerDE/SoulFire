@@ -463,7 +463,7 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   @Override
-  protected int permissionLevel() {
+  public int permissionLevel() {
     return this.permissionLevel;
   }
 }
