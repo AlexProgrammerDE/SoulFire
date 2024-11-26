@@ -70,7 +70,6 @@ public abstract class Entity {
   private static final int FLAG_INVISIBLE = 5;
   protected static final int FLAG_GLOWING = 6;
   protected static final int FLAG_FALL_FLYING = 7;
-  public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
   private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
@@ -268,6 +267,18 @@ public abstract class Entity {
         this.mainSupportingBlockPos = Optional.empty();
       }
     }
+  }
+
+  public boolean fireImmune() {
+    return this.entityType.fireImmune();
+  }
+
+  public boolean isCurrentlyGlowing() {
+    return this.getSharedFlag(FLAG_GLOWING);
+  }
+
+  public boolean isInvisible() {
+    return this.getSharedFlag(FLAG_INVISIBLE);
   }
 
   public boolean onGround() {

@@ -31,6 +31,7 @@ public record EntityType(
   String category,
   boolean friendly,
   boolean summonable,
+  boolean fireImmune,
   boolean attackable,
   boolean boatEntity,
   boolean minecartEntity,

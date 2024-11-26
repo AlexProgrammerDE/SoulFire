@@ -82,6 +82,7 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "area_effect_cloud",
@@ -335,6 +336,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "blaze",
@@ -696,6 +698,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "creaking",
@@ -718,6 +721,7 @@
     "updateInterval": 3,
     "clientTrackingRange": 8,
     "category": "monster",
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "creaking_transient",
@@ -1003,6 +1007,7 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "ender_dragon",
@@ -1048,6 +1053,7 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "end_crystal",
@@ -1310,6 +1316,7 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "ghast",
@@ -1819,6 +1826,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "magma_cube",
@@ -2492,6 +2500,7 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "shulker",
@@ -2889,6 +2898,7 @@
     "category": "creature",
     "friendly": true,
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "strider",
@@ -2960,6 +2970,7 @@
     "category": "misc",
     "friendly": true,
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "primed_tnt",
@@ -3102,6 +3113,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "vex",
@@ -3201,6 +3213,7 @@
     "clientTrackingRange": 16,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "warden",
@@ -3273,6 +3286,7 @@
     "clientTrackingRange": 10,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "wither_boss",
@@ -3296,6 +3310,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "wither_skeleton",
@@ -3368,6 +3383,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "zoglin",
@@ -3464,6 +3480,7 @@
     "clientTrackingRange": 8,
     "category": "monster",
     "summonable": true,
+    "fireImmune": true,
     "attackable": true,
     "inheritedClasses": [
       "zombified_piglin",

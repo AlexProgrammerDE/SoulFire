@@ -70,6 +70,10 @@ public class EntitiesJsonGenerator implements IDataGenerator {
       entityDesc.addProperty("summonable", true);
     }
 
+    if (entityType.fireImmune()) {
+      entityDesc.addProperty("fireImmune", true);
+    }
+
     var defaultEntity = MCHelper.createEntity(entityType);
     if (defaultEntity.isAttackable()) {
       entityDesc.addProperty("attackable", true);
