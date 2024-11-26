@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.EquipmentSlot;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -58,6 +59,10 @@ public class PlayerInventoryContainer extends Container {
       case FEET -> Optional.of(getBoots());
       case BODY -> Optional.empty();
     };
+  }
+
+  public void setEquipmentSlotItem(EquipmentSlot slot, @Nullable SFItemStack item) {
+    getEquipmentSlot(slot).ifPresent(containerSlot -> containerSlot.setItem(item));
   }
 
   public ContainerSlot getHeldItem() {

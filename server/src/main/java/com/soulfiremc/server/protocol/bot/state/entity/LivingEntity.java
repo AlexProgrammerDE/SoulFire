@@ -27,11 +27,13 @@ import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 @Getter
@@ -86,6 +88,19 @@ public abstract class LivingEntity extends Entity {
     super.baseTick();
 
     this.effectState.tick();
+  }
+
+  @Override
+  public void handleEntityEvent(EntityEvent event) {
+    switch (event) {
+      case LIVING_DEATH -> {
+        if (!(this instanceof Player)) {
+          this.setHealth(0.0F);
+        }
+      }
+      case PLAYER_SWAP_SAME_ITEM -> this.swapHandItems();
+      default -> super.handleEntityEvent(event);
+    }
   }
 
   public static boolean canGlideUsing(SFItemStack stack, EquipmentSlot slow) {
@@ -665,6 +680,8 @@ public abstract class LivingEntity extends Entity {
 
   public abstract Optional<SFItemStack> getItemBySlot(EquipmentSlot slot);
 
+  public abstract void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item);
+
   protected float getFlyingSpeed() {
     return 0.02F;
   }
@@ -672,5 +689,11 @@ public abstract class LivingEntity extends Entity {
   @Override
   public float maxUpStep() {
     return (float) this.attributeValue(AttributeType.STEP_HEIGHT);
+  }
+
+  private void swapHandItems() {
+    var item = this.getItemBySlot(EquipmentSlot.OFFHAND).orElse(null);
+    this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND).orElse(null));
+    this.setItemSlot(EquipmentSlot.MAINHAND, item);
   }
 }

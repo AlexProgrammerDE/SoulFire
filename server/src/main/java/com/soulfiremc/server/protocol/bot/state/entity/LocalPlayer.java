@@ -39,6 +39,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -449,6 +450,11 @@ public class LocalPlayer extends AbstractClientPlayer {
   @Override
   public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
     return this.connection.inventoryManager().playerInventory().getEquipmentSlotItem(slot);
+  }
+
+  @Override
+  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+    this.connection.inventoryManager().playerInventory().setEquipmentSlotItem(slot, item);
   }
 
   @Override

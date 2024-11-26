@@ -351,7 +351,7 @@ public abstract class Entity {
   }
 
   public void handleEntityEvent(EntityEvent event) {
-    log.debug("Unhandled entity event for entity {}: {}", entityId, event.name());
+    log.trace("Unhandled entity event for entity {}: {}", entityId, event.name());
   }
 
   public Vector3d originPosition(RotationOrigin origin) {
