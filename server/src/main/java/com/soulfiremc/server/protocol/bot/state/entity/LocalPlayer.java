@@ -315,8 +315,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public void handleEntityEvent(EntityEvent event) {
     switch (event) {
-      case PLAYER_ENABLE_REDUCED_DEBUG -> showReducedDebug = true;
-      case PLAYER_DISABLE_REDUCED_DEBUG -> showReducedDebug = false;
       case PLAYER_OP_PERMISSION_LEVEL_0 -> opPermissionLevel = 0;
       case PLAYER_OP_PERMISSION_LEVEL_1 -> opPermissionLevel = 1;
       case PLAYER_OP_PERMISSION_LEVEL_2 -> opPermissionLevel = 2;

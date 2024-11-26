@@ -33,6 +33,7 @@ import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 
 import java.util.Map;
@@ -54,6 +55,7 @@ public abstract class Player extends LivingEntity {
     .build();
   protected final GameProfile gameProfile;
   protected boolean wasUnderwater = false;
+  private boolean reducedDebugInfo;
 
   public Player(Level level, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);
@@ -78,6 +80,15 @@ public abstract class Player extends LivingEntity {
     }
 
     this.updatePlayerPose();
+  }
+
+  @Override
+  public void handleEntityEvent(EntityEvent event) {
+    switch (event) {
+      case PLAYER_ENABLE_REDUCED_DEBUG -> this.reducedDebugInfo = true;
+      case PLAYER_DISABLE_REDUCED_DEBUG -> this.reducedDebugInfo = false;
+      default -> super.handleEntityEvent(event);
+    }
   }
 
   @Override
