@@ -30,6 +30,8 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.FloatEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
@@ -495,7 +497,7 @@ public abstract class LivingEntity extends Entity {
       currentFlags &= ~key;
     }
 
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, (byte) currentFlags);
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
   }
 
   @Override
@@ -557,7 +559,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public void setHealth(float health) {
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataType.FLOAT, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataType.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
   }
 
   public boolean isDeadOrDying() {

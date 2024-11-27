@@ -41,8 +41,8 @@ public class EntityMetadataState {
     this.metadataStore.put(metadata.getId(), metadata);
   }
 
-  public <V, T extends MetadataType<V>> void setMetadata(NamedEntityData namedEntityData, T metadataType, V value) {
-    this.metadataStore.put(namedEntityData.networkId(), metadataType.getMetadataFactory().create(namedEntityData.networkId(), metadataType, value));
+  public <V, T extends MetadataType<V>> void setMetadata(NamedEntityData namedEntityData, T metadataType, MetadataFactory<V, T> factory, V value) {
+    this.metadataStore.put(namedEntityData.networkId(), factory.create(namedEntityData.networkId(), metadataType, value));
   }
 
   public <T> T getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
@@ -83,4 +83,7 @@ public class EntityMetadataState {
     return namedMap;
   }
 
+  public interface MetadataFactory<V, T extends MetadataType<V>> {
+    EntityMetadata<V, ? extends MetadataType<V>> create(int id, T type, V value);
+  }
 }

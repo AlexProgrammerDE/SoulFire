@@ -53,6 +53,8 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
@@ -897,9 +899,9 @@ public abstract class Entity {
   protected void setSharedFlag(int flag, boolean set) {
     byte b = this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE);
     if (set) {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b | 1 << flag));
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
     } else {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, (byte) (b & ~(1 << flag)));
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
     }
   }
 
@@ -931,7 +933,7 @@ public abstract class Entity {
   }
 
   public void setPose(Pose pose) {
-    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE, pose);
+    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE, ObjectEntityMetadata::new, pose);
   }
 
   public boolean hasPose(Pose pose) {
