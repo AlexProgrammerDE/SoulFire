@@ -44,6 +44,7 @@ public record BlockType(
   boolean bedBlock,
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
+  boolean blocksMotion,
   List<LootPoolEntry> lootTableData,
   OffsetData offsetData,
   BlockStates statesData) implements RegistryValue<BlockType> {

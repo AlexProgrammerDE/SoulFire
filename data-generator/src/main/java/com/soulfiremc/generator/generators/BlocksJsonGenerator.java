@@ -67,6 +67,9 @@ public class BlocksJsonGenerator implements IDataGenerator {
     if (defaultState.requiresCorrectToolForDrops()) {
       blockDesc.addProperty("requiresCorrectToolForDrops", true);
     }
+    if (defaultState.blocksMotion()) {
+      blockDesc.addProperty("blocksMotion", true);
+    }
 
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();

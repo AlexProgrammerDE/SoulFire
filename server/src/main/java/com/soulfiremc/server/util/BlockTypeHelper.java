@@ -28,8 +28,8 @@ public class BlockTypeHelper {
 
   private BlockTypeHelper() {}
 
-  public static boolean isFullBlock(BlockState meta) {
-    return meta.blockCollisionShapeGroup().isFullBlock();
+  public static boolean isFullBlock(BlockState state) {
+    return state.blockCollisionShapeGroup().isFullBlock();
   }
 
   public static boolean isHurtOnTouchSide(BlockType type) {
@@ -45,8 +45,8 @@ public class BlockTypeHelper {
     return type == BlockType.MAGMA_BLOCK;
   }
 
-  public static boolean isSafeBlockToStandOn(BlockState meta) {
-    return isRoughlyFullBlock(meta.blockCollisionShapeGroup()) && !isHurtWhenStoodOn(meta.blockType());
+  public static boolean isSafeBlockToStandOn(BlockState state) {
+    return isRoughlyFullBlock(state.blockCollisionShapeGroup()) && !isHurtWhenStoodOn(state.blockType());
   }
 
   public static boolean isRoughlyFullBlock(BlockShapeGroup type) {
@@ -69,5 +69,10 @@ public class BlockTypeHelper {
   public static boolean isEmptyBlock(BlockType type) {
     // Void air stands for not loaded blocks, so we do not know what is there
     return type.air() && type != BlockType.VOID_AIR;
+  }
+
+  public static boolean isSuffocating(BlockState state) {
+    // TODO: Handle edge cases like pistons
+    return state.blockType().blocksMotion() && isFullBlock(state);
   }
 }

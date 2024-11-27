@@ -25,6 +25,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.InputState;
 import com.soulfiremc.server.protocol.bot.state.KeyPresses;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.util.BlockTypeHelper;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.Direction;
@@ -304,9 +305,22 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   private boolean suffocatesAt(Vector3i pos) {
-    var lv = this.getBoundingBox();
-    var lv2 = new AABB(pos.getX(), lv.minY, pos.getZ(), (double) pos.getX() + 1.0, lv.maxY, (double) pos.getZ() + 1.0).deflate(1.0E-7);
-    // return this.level().collidesWithSuffocatingBlock(this, lv2); // TODO
+    var bb = this.getBoundingBox();
+    var checkBox = new AABB(pos.getX(), bb.minY, pos.getZ(), (double) pos.getX() + 1.0, bb.maxY, (double) pos.getZ() + 1.0).deflate(1.0E-7);
+    for (var touchedPos : this.level().getTouchedPositions(checkBox)) {
+      var blockState = this.level().getBlockState(touchedPos);
+      if (!BlockTypeHelper.isSuffocating(blockState)) {
+        continue;
+      }
+
+      var collisionBoxes = blockState.getCollisionBoxes(touchedPos);
+      for (var collisionBox : collisionBoxes) {
+        if (collisionBox.intersects(checkBox)) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
