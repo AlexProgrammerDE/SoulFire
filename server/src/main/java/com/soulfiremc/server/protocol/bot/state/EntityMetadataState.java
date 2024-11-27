@@ -35,16 +35,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class EntityMetadataState {
   private final EntityType entityType;
-  private final Int2ObjectMap<Object> metadataStore = new Int2ObjectOpenHashMap<>();
+  private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
 
   public void setMetadata(EntityMetadata<?, ?> metadata) {
-    this.metadataStore.put(metadata.getId(), metadata.getValue());
+    this.metadataStore.put(metadata.getId(), metadata);
   }
 
-  public <T> void setMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType, T value) {
-    assert metadataType != null;
-
-    this.metadataStore.put(namedEntityData.networkId(), value);
+  public <V, T extends MetadataType<V>> void setMetadata(NamedEntityData namedEntityData, T metadataType, V value) {
+    this.metadataStore.put(namedEntityData.networkId(), metadataType.getMetadataFactory().create(namedEntityData.networkId(), metadataType, value));
   }
 
   public <T> T getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
@@ -60,7 +58,7 @@ public class EntityMetadataState {
       return Optional.empty();
     }
 
-    return Optional.of((T) metadata);
+    return Optional.of((T) metadata.getValue());
   }
 
   public Map<String, ?> toNamedMap() {
@@ -78,7 +76,7 @@ public class EntityMetadataState {
       .forEach(namedData -> {
         var metadata = this.metadataStore.get(namedData.networkId());
         if (metadata != null) {
-          namedMap.put(namedData.key(), metadata);
+          namedMap.put(namedData.key(), metadata.getValue());
         }
       });
 
