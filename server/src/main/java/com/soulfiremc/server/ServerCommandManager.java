@@ -172,6 +172,37 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     // Pathfinding
     dispatcher.register(
       literal("walk")
+        .then(argument("entity", StringArgumentType.string())
+          .executes(
+            help(
+              "Makes selected bots walk to a entity",
+              c -> {
+                var entityName = StringArgumentType.getString(c, "entity");
+
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
+                    if (entityId == -1) {
+                      c.getSource().sendWarn("Invalid entity specified!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId);
+                    if (entity == null) {
+                      c.getSource().sendWarn("Entity not found!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    PathExecutor.executePathfinding(
+                      bot,
+                      new PosGoal(SFVec3i.fromDouble(entity.pos())),
+                      new PathConstraint(bot)
+                    );
+
+                    return Command.SINGLE_SUCCESS;
+                  });
+              })))
         .then(
           literal("radius")
             .then(

@@ -131,12 +131,12 @@ public class Level implements LevelHeightAccessor {
   }
 
   public List<Vector3i> getTouchedPositions(AABB aabb) {
-    var startX = MathHelper.floorDouble(aabb.minX - AABB.EPSILON) - 1;
-    var endX = MathHelper.floorDouble(aabb.maxX + AABB.EPSILON) + 1;
-    var startY = MathHelper.floorDouble(aabb.minY - AABB.EPSILON) - 1;
-    var endY = MathHelper.floorDouble(aabb.maxY + AABB.EPSILON) + 1;
-    var startZ = MathHelper.floorDouble(aabb.minZ - AABB.EPSILON) - 1;
-    var endZ = MathHelper.floorDouble(aabb.maxZ + AABB.EPSILON) + 1;
+    var startX = MathHelper.floor(aabb.minX - AABB.EPSILON) - 1;
+    var endX = MathHelper.floor(aabb.maxX + AABB.EPSILON) + 1;
+    var startY = MathHelper.floor(aabb.minY - AABB.EPSILON) - 1;
+    var endY = MathHelper.floor(aabb.maxY + AABB.EPSILON) + 1;
+    var startZ = MathHelper.floor(aabb.minZ - AABB.EPSILON) - 1;
+    var endZ = MathHelper.floor(aabb.maxZ + AABB.EPSILON) + 1;
 
     var predictedSize = (endX - startX + 1) * (endY - startY + 1) * (endZ - startZ + 1);
     var surroundingBlocks = new ArrayList<Vector3i>(predictedSize);

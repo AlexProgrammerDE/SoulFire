@@ -27,29 +27,6 @@ import java.util.stream.IntStream;
 public class MathHelper {
   private MathHelper() {}
 
-  /**
-   * Returns the greatest integer less than or equal to the double argument.
-   *
-   * @param value A double
-   * @return The greatest integer less than or equal to the double argument
-   */
-  public static int floorDouble(double value) {
-    var i = (int) value;
-    return value < (double) i ? i - 1 : i;
-  }
-
-  public static short shortClamp(short value, short min, short max) {
-    return value < min ? min : (value > max ? max : value);
-  }
-
-  public static double doubleClamp(double value, double min, double max) {
-    if (value < min) {
-      return min;
-    } else {
-      return Math.min(value, max);
-    }
-  }
-
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
   }

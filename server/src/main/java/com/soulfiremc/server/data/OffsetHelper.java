@@ -36,12 +36,12 @@ public class OffsetHelper {
         var yOffset =
           ((double) ((float) (seed >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalOffset;
         var xOffset =
-          MathHelper.doubleClamp(
+          MathHelper.clamp(
             ((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5,
             -maxHorizontalOffset,
             maxHorizontalOffset);
         var zOffset =
-          MathHelper.doubleClamp(
+          MathHelper.clamp(
             ((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5,
             -maxHorizontalOffset,
             maxHorizontalOffset);
@@ -49,12 +49,12 @@ public class OffsetHelper {
       }
       case XZ -> {
         var xOffset =
-          MathHelper.doubleClamp(
+          MathHelper.clamp(
             ((double) ((float) (seed & 15L) / 15.0F) - 0.5) * 0.5,
             -maxHorizontalOffset,
             maxHorizontalOffset);
         var zOffset =
-          MathHelper.doubleClamp(
+          MathHelper.clamp(
             ((double) ((float) (seed >> 8 & 15L) / 15.0F) - 0.5) * 0.5,
             -maxHorizontalOffset,
             maxHorizontalOffset);

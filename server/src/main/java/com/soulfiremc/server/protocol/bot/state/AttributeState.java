@@ -54,7 +54,7 @@ public class AttributeState {
       finalValue *= 1.0 + attributeModifier.amount();
     }
 
-    return MathHelper.doubleClamp(finalValue, type.min(), type.max());
+    return MathHelper.clamp(finalValue, type.min(), type.max());
   }
 
   private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
