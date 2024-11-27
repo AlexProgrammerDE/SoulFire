@@ -59,7 +59,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     try {
       var optionalDeletion = soulFireServer.deleteInstance(instanceId);
       if (optionalDeletion.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
       optionalDeletion.get().join();
@@ -91,7 +91,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
       var instance = optionalInstance.get();
@@ -115,7 +115,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
       var instance = optionalInstance.get();
@@ -137,7 +137,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
       var instance = optionalInstance.get();
@@ -159,7 +159,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found"));
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
       var instance = optionalInstance.get();
