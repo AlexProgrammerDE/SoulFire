@@ -26,7 +26,7 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
 import com.soulfiremc.server.settings.property.MinMaxProperty;
-import com.soulfiremc.server.util.ItemTypeHelper;
+import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -70,7 +70,7 @@ public class AutoEat extends InternalPlugin {
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && ItemTypeHelper.isGoodEdibleFood(slot.item()));
+          slot -> slot.item() != null && SFItemHelpers.isGoodEdibleFood(slot.item()));
         if (edibleSlot.isEmpty()) {
           return;
         }

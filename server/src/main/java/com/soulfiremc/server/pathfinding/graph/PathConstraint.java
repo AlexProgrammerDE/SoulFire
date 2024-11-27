@@ -24,8 +24,8 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.util.BlockTypeHelper;
-import com.soulfiremc.server.util.ItemTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -44,11 +44,11 @@ public class PathConstraint {
   }
 
   public boolean isPlaceable(SFItemStack item) {
-    return ItemTypeHelper.isSafeFullBlockItem(item);
+    return SFItemHelpers.isSafeFullBlockItem(item);
   }
 
   public boolean isTool(SFItemStack item) {
-    return ItemTypeHelper.isTool(item);
+    return SFItemHelpers.isTool(item);
   }
 
   public boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
@@ -68,6 +68,6 @@ public class PathConstraint {
       return true;
     }
 
-    return BlockTypeHelper.isDiggable(blockType);
+    return SFBlockHelpers.isDiggable(blockType);
   }
 }

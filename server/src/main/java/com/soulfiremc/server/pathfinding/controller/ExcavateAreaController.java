@@ -23,7 +23,7 @@ import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,7 +67,7 @@ public class ExcavateAreaController {
   private boolean someBlocksCanBeMined(BotConnection bot) {
     return blocksToMine.stream().anyMatch(blockPos -> {
       var blockState = bot.dataManager().currentLevel().getBlockState(blockPos);
-      return BlockTypeHelper.isFullBlock(blockState) && BlockTypeHelper.isDiggable(blockState.blockType());
+      return SFBlockHelpers.isFullBlock(blockState) && SFBlockHelpers.isDiggable(blockState.blockType());
     });
   }
 

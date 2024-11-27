@@ -27,7 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var startBlockState = level.getBlockState(start);
-        if (BlockTypeHelper.isRoughlyFullBlock(startBlockState.blockCollisionShapeGroup())) {
+        if (SFBlockHelpers.isRoughlyFullBlock(startBlockState.blockCollisionShapeGroup())) {
           // If the player is inside a block, move them up
           start = start.add(0, 1, 0);
         }

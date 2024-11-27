@@ -28,7 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 
@@ -245,7 +245,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
-          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
             // We found a block to fall on
             downMovement.closestBlockToFallOn = yLevel;
           }

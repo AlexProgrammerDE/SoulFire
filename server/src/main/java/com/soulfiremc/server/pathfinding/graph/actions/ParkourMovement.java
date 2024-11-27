@@ -28,7 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 
@@ -170,7 +170,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
           // We only want to jump over dangerous blocks/gaps
           // So either a non-full-block like water or lava or magma
           // since it hurts to stand on.
-          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           }
 
@@ -178,7 +178,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
         }
         case MOVEMENT_SOLID -> {
           // Block is safe to walk on, no need to check for more
-          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 

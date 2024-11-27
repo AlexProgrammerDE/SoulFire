@@ -23,8 +23,8 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ConsumeEffect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 
-public class ItemTypeHelper {
-  private ItemTypeHelper() {}
+public class SFItemHelpers {
+  private SFItemHelpers() {}
 
   public static boolean isSafeFullBlockItem(SFItemStack itemStack) {
     var blockType = BlockItems.getBlockType(itemStack.type());

@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
 import org.jetbrains.annotations.Nullable;
@@ -141,7 +141,7 @@ public class Costs {
     var damage = getBlockDamagePerTick(tagsState, entity, onGround, itemStack, blockType);
 
     var creativeMode = entity != null && entity.abilitiesData().instabuild();
-    var willDropUsableBlockItem = correctToolUsed && !creativeMode && BlockTypeHelper.isUsableBlockItem(blockType);
+    var willDropUsableBlockItem = correctToolUsed && !creativeMode && SFBlockHelpers.isUsableBlockItem(blockType);
 
     // Insta mine
     if (damage >= 1) {

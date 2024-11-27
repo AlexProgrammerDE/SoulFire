@@ -22,11 +22,11 @@ import com.soulfiremc.server.data.BlockShapeGroup;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 
-public class BlockTypeHelper {
+public class SFBlockHelpers {
   // A player can jump up 1.25 blocks
   private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
 
-  private BlockTypeHelper() {}
+  private SFBlockHelpers() {}
 
   public static boolean isFullBlock(BlockState state) {
     return state.blockCollisionShapeGroup().isFullBlock();

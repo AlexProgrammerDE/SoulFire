@@ -30,7 +30,7 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -533,7 +533,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
         case MOVEMENT_SOLID -> {
           // Block is safe to walk on, no need to check for more
-          if (BlockTypeHelper.isSafeBlockToStandOn(blockState)) {
+          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
             yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
           }
 
@@ -564,7 +564,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
         }
         case MOVEMENT_DIAGONAL_COLLISION -> {
-          if (BlockTypeHelper.isHurtOnTouchSide(blockState.blockType())) {
+          if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
             // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
           } else if (blockState.blockCollisionShapeGroup().isFullBlock()) {

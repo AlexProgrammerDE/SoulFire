@@ -20,7 +20,7 @@ package com.soulfiremc.server.pathfinding.execution;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.util.BlockTypeHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
@@ -37,7 +37,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
 
-    return BlockTypeHelper.isFullBlock(level.getBlockState(blockPlacePosition));
+    return SFBlockHelpers.isFullBlock(level.getBlockState(blockPlacePosition));
   }
 
   @Override
