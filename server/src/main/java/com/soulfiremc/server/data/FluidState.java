@@ -63,7 +63,7 @@ public record FluidState(
         var otherStrength = relativeFluidState.ownHeight();
         var strength = 0.0F;
         if (otherStrength == 0.0F) {
-          if (!level.getBlockState(currentBlock).blocksMotion()) {
+          if (!level.getBlockState(currentBlock).blockType().blocksMotion()) {
             var neighborBlock = currentBlock.add(0, -1, 0);
             var neighborBlockState = level.getBlockState(neighborBlock).fluidState();
             if (this.affectsFlow(neighborBlockState)) {

@@ -111,6 +111,10 @@ public record BlockShapeGroup(int id, List<AABB> blockShapes, double highestY, L
     return blockShapes.getFirst().fullBlock();
   }
 
+  public boolean hasCollisions() {
+    return !blockShapes.isEmpty();
+  }
+
   public boolean hasNoCollisions() {
     return blockShapes.isEmpty();
   }

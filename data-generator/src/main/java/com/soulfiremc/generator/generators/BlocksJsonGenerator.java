@@ -99,10 +99,6 @@ public class BlocksJsonGenerator implements IDataGenerator {
         stateDesc.addProperty("default", true);
       }
 
-      if (state.blocksMotion()) {
-        stateDesc.addProperty("blocksMotion", state.blocksMotion());
-      }
-
       var fluidStateDesc = new JsonObject();
       var fluidState = state.getFluidState();
       fluidStateDesc.addProperty("type", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());

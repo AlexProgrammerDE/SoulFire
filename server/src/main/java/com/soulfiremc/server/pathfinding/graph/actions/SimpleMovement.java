@@ -567,7 +567,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
           if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
             // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
             yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-          } else if (blockState.blockCollisionShapeGroup().isFullBlock()) {
+          } else if (blockState.blockCollisionShapeGroup().hasCollisions()) {
             var blockedSide = simpleMovement.blockedSide;
             if (blockedSide == null) {
               simpleMovement.blockedSide = side;
