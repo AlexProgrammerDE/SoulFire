@@ -322,7 +322,7 @@ public abstract class Player extends LivingEntity {
     return this.abilitiesData().instabuild && this.permissionLevel() >= 2;
   }
 
-  protected int permissionLevel() {
+  public int permissionLevel() {
     return 0;
   }
 
