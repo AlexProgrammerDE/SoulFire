@@ -1,6 +1,6 @@
 [versions]
-log4j = "2.24.1"
-grpc = "1.68.1"
+log4j = "2.24.2"
+grpc = "1.68.2"
 protobuf = "3.25.5"
 via-version = "5.1.1"
 via-backwards = "5.1.1"
