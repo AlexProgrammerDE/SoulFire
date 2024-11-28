@@ -20,33 +20,55 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lombok.Data;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@Data
 public class EntityTrackerState {
   private final Int2ObjectMap<Entity> entitiesMap = new Int2ObjectOpenHashMap<>();
+  private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
   public void addEntity(Entity entity) {
-    entitiesMap.put(entity.entityId(), entity);
+    try {
+      lock.writeLock().lock();
+      entitiesMap.put(entity.entityId(), entity);
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public void removeEntity(int entityId) {
-    entitiesMap.remove(entityId);
+    try {
+      lock.writeLock().lock();
+      entitiesMap.remove(entityId);
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public @Nullable Entity getEntity(int entityId) {
-    return entitiesMap.get(entityId);
+    try {
+      lock.readLock().lock();
+      return entitiesMap.get(entityId);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public Collection<Entity> getEntities() {
-    return entitiesMap.values();
+    try {
+      lock.readLock().lock();
+      return List.copyOf(entitiesMap.values());
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void tick() {
-    entitiesMap.values().forEach(entity -> {
+    getEntities().forEach(entity -> {
       entity.setOldPosAndRot();
       entity.tick();
     });
