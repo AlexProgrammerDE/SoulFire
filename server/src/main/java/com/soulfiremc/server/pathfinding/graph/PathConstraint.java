@@ -28,13 +28,12 @@ import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3d;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
 public class PathConstraint {
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
-  private static final boolean DO_NOT_SQUEEZING_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
+  private static final boolean DO_NOT_SQUEEZE_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
 
@@ -74,11 +73,11 @@ public class PathConstraint {
     return SFBlockHelpers.isDiggable(blockType);
   }
 
-  public boolean collidesWithAtEdge(SFVec3i block, BlockState blockState, Vector3d position) {
-    if (DO_NOT_SQUEEZING_THROUGH_DIAGONALS) {
+  public boolean collidesWithAtEdge(SFVec3i block, BlockState blockState, SFVec3i position) {
+    if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
       return blockState.collisionShape().hasCollisions();
     }
 
-    return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position));
+    return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position.toVector3d()));
   }
 }

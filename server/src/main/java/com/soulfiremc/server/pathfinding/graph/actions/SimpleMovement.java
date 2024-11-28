@@ -34,7 +34,6 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.math.vector.Vector3d;
 import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
@@ -213,13 +212,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  public List<Triplet<SFVec3i, MovementSide, Vector3d>> listDiagonalCollisionBlocks() {
+  public List<Triplet<SFVec3i, MovementSide, SFVec3i>> listDiagonalCollisionBlocks() {
     if (!diagonal) {
       return List.of();
     }
 
-    var list = new ArrayList<Triplet<SFVec3i, MovementSide, Vector3d>>(4);
-    var collisionCheck = modifier.offsetIfJump(direction.offset(FEET_POSITION_RELATIVE_BLOCK).toVector3d().mul(0.5));
+    var list = new ArrayList<Triplet<SFVec3i, MovementSide, SFVec3i>>(4);
+    var collisionCheck = modifier.offsetIfJump(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
@@ -535,14 +534,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementDiagonalCollisionSubscription(MovementSide side, Vector3d collisionCheck) implements SimpleMovementSubscription {
+  record MovementDiagonalCollisionSubscription(MovementSide side, SFVec3i collisionCheck) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      } else if (graph.pathConstraint().collidesWithAtEdge(absoluteKey, blockState, absoluteKey.sub(key).toVector3d().add(collisionCheck))) {
+      } else if (graph.pathConstraint().collidesWithAtEdge(absoluteKey, blockState, absoluteKey.sub(key).add(collisionCheck))) {
         var blockedSide = simpleMovement.blockedSide;
         if (blockedSide == null) {
           simpleMovement.blockedSide = side;
