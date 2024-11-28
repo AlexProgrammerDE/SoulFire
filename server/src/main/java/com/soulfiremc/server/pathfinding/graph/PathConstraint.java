@@ -23,17 +23,22 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
 public class PathConstraint {
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
   private static final boolean DO_NOT_SQUEEZE_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
+  private static final boolean DO_NOT_AVOID_HARMFUL_ENTITIES = Boolean.getBoolean("sf.pathfinding-do-not-avoid-harmful-entities");
+  private static final int MAX_CLOSE_TO_ENEMY_PENALTY = Integer.getInteger("sf.pathfinding-max-close-to-enemy-penalty", 50);
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
 
@@ -79,5 +84,34 @@ public class PathConstraint {
     }
 
     return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position.toVector3d()));
+  }
+
+  public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
+    if (!DO_NOT_AVOID_HARMFUL_ENTITIES) {
+      var addedPenalty = 0D;
+      for (var entity : getEntities()) {
+        if (!entity.entityType().friendly()) {
+          var followRange = entity.entityType().defaultFollowRange();
+          var distance = instruction.node().blockPosition().distance(SFVec3i.fromInt(entity.blockPosition()));
+          if (distance <= followRange) {
+            addedPenalty += MAX_CLOSE_TO_ENEMY_PENALTY * (followRange - distance) / followRange;
+          }
+        }
+      }
+
+      if (addedPenalty > 0) {
+        instruction = instruction.withActionCost(instruction.actionCost() + addedPenalty);
+      }
+    }
+
+    return instruction;
+  }
+
+  private List<Entity> getEntities() {
+    if (entity == null) {
+      return List.of();
+    }
+
+    return entity.level().getEntities();
   }
 }

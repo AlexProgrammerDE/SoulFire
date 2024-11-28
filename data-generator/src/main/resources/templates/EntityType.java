@@ -33,6 +33,7 @@ public record EntityType(
   boolean summonable,
   boolean fireImmune,
   boolean attackable,
+  double defaultFollowRange,
   boolean boatEntity,
   boolean minecartEntity,
   boolean windChargeEntity,

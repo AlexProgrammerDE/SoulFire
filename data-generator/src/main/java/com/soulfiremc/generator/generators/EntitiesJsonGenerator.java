@@ -28,6 +28,8 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
 import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -77,6 +79,9 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     var defaultEntity = MCHelper.createEntity(entityType);
     if (defaultEntity.isAttackable()) {
       entityDesc.addProperty("attackable", true);
+    }
+    if (defaultEntity instanceof LivingEntity le && le.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
+      entityDesc.addProperty("defaultFollowRange", le.getAttributeValue(Attributes.FOLLOW_RANGE));
     }
     if (defaultEntity instanceof AbstractBoat) {
       entityDesc.addProperty("boatEntity", true);

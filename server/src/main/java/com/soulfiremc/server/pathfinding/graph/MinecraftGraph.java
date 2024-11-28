@@ -173,7 +173,7 @@ public record MinecraftGraph(TagsState tagsState,
           }
 
           for (var instruction : action.getInstructions(this, node)) {
-            callback.accept(instruction);
+            callback.accept(pathConstraint.modifyAsNeeded(instruction));
           }
         }
         case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
