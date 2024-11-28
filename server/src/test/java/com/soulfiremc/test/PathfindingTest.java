@@ -113,10 +113,10 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
     // Barricade
-    accessor.setBlockAt(1, 1, 2, BlockType.STONE);
-    accessor.setBlockAt(1, 2, 2, BlockType.STONE);
-    accessor.setBlockAt(2, 1, 1, BlockType.STONE);
-    accessor.setBlockAt(2, 2, 1, BlockType.STONE);
+    accessor.setBlockAt(1, 1, 2, BlockType.BEDROCK);
+    accessor.setBlockAt(1, 2, 2, BlockType.BEDROCK);
+    accessor.setBlockAt(2, 1, 1, BlockType.BEDROCK);
+    accessor.setBlockAt(2, 2, 1, BlockType.BEDROCK);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
