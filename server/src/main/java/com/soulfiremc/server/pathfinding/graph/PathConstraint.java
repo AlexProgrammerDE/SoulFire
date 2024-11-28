@@ -19,11 +19,13 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.EntityDimensions;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +80,6 @@ public class PathConstraint {
       return blockState.collisionShape().hasCollisions();
     }
 
-    return blockState.collidesWith(block.toVector3i(), entity.dimensions().makeBoundingBox(position));
+    return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position));
   }
 }
