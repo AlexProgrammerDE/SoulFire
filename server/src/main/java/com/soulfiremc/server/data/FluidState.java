@@ -106,7 +106,7 @@ public record FluidState(
     } else if (side == Direction.UP) {
       return true;
     } else {
-      return !blockState.blockType().iceBlock() && blockState.blockSupportShapeGroup().fullFaceDirections().contains(side);
+      return !blockState.blockType().iceBlock() && blockState.supportShape().fullFaceDirections().contains(side);
     }
   }
 }

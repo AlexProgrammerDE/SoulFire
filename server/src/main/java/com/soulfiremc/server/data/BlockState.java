@@ -30,8 +30,8 @@ public record BlockState(
   boolean defaultState,
   FluidState fluidState,
   BlockStateProperties properties,
-  BlockShapeGroup blockCollisionShapeGroup,
-  BlockShapeGroup blockSupportShapeGroup) {
+  BlockShapeGroup collisionShape,
+  BlockShapeGroup supportShape) {
   public BlockState(
     int id,
     boolean defaultState,
@@ -70,7 +70,17 @@ public record BlockState(
   }
 
   public List<AABB> getCollisionBoxes(Vector3i block) {
-    return blockCollisionShapeGroup.getCollisionBoxes(block, blockType);
+    return collisionShape.getCollisionBoxes(block, blockType);
+  }
+
+  public boolean collidesWith(Vector3i block, AABB bb) {
+    for (var shape : getCollisionBoxes(block)) {
+      if (shape.intersects(bb)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Override
@@ -94,7 +104,7 @@ public record BlockState(
     return "BlockState{" +
       "id=" + id +
       ", properties=" + properties +
-      ", blockCollisionShapeGroup=" + blockCollisionShapeGroup +
+      ", collisionShape=" + collisionShape +
       '}';
   }
 }

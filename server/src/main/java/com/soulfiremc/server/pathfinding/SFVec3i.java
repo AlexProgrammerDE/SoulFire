@@ -89,6 +89,10 @@ public class SFVec3i {
     return new SFVec3i(this.x - x, this.y - y, this.z - z);
   }
 
+  public SFVec3i sub(SFVec3i other) {
+    return sub(other.x, other.y, other.z);
+  }
+
   public Vector3i toVector3i() {
     return Vector3i.from(x, y, z);
   }

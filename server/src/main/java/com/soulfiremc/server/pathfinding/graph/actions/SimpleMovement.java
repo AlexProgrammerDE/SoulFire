@@ -34,6 +34,8 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.cloudburstmc.math.vector.Vector3d;
+import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -149,7 +151,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     {
       for (var diagonalCollisionBlock : movement.listDiagonalCollisionBlocks()) {
         blockSubscribers
-          .accept(diagonalCollisionBlock.key(), new MovementDiagonalCollisionSubscription(diagonalCollisionBlock.value()));
+          .accept(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(diagonalCollisionBlock.getB(), diagonalCollisionBlock.getC()));
       }
     }
 
@@ -211,19 +213,24 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  public List<Pair<SFVec3i, MovementSide>> listDiagonalCollisionBlocks() {
+  public List<Triplet<SFVec3i, MovementSide, Vector3d>> listDiagonalCollisionBlocks() {
     if (!diagonal) {
       return List.of();
     }
 
-    var list = new ArrayList<Pair<SFVec3i, MovementSide>>(4);
+    var list = new ArrayList<Triplet<SFVec3i, MovementSide, Vector3d>>(4);
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
       var corner = direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK);
+      var collisionCheck = direction.offset(SFVec3i.ZERO).toVector3d().mul(0.5);
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
-        list.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(corner)), side));
+        list.add(new Triplet<>(
+          bodyOffset.offset(modifier.offsetIfJump(corner)),
+          side,
+          collisionCheck
+        ));
       }
     }
 
@@ -528,14 +535,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementDiagonalCollisionSubscription(MovementSide side) implements SimpleMovementSubscription {
+  record MovementDiagonalCollisionSubscription(MovementSide side, Vector3d collisionCheck) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      } else if (blockState.blockCollisionShapeGroup().hasCollisions()) {
+      } else if (graph.pathConstraint().collidesWithAtEdge(absoluteKey, blockState, absoluteKey.sub(key).toVector3d().add(collisionCheck))) {
         var blockedSide = simpleMovement.blockedSide;
         if (blockedSide == null) {
           simpleMovement.blockedSide = side;
@@ -563,7 +570,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // This block should not be placed against
-      if (!blockState.blockCollisionShapeGroup().isFullBlock()) {
+      if (!blockState.collisionShape().isFullBlock()) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 

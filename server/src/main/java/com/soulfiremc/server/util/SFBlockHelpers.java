@@ -29,7 +29,7 @@ public class SFBlockHelpers {
   private SFBlockHelpers() {}
 
   public static boolean isFullBlock(BlockState state) {
-    return state.blockCollisionShapeGroup().isFullBlock();
+    return state.collisionShape().isFullBlock();
   }
 
   public static boolean isHurtOnTouchSide(BlockType type) {
@@ -46,7 +46,7 @@ public class SFBlockHelpers {
   }
 
   public static boolean isSafeBlockToStandOn(BlockState state) {
-    return isRoughlyFullBlock(state.blockCollisionShapeGroup()) && !isHurtWhenStoodOn(state.blockType());
+    return isRoughlyFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state.blockType());
   }
 
   public static boolean isRoughlyFullBlock(BlockShapeGroup type) {

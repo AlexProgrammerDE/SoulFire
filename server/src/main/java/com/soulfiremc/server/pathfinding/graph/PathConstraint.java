@@ -27,11 +27,13 @@ import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector3d;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
 public class PathConstraint {
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
+  private static final boolean DO_NOT_SQUEEZING_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
 
@@ -69,5 +71,14 @@ public class PathConstraint {
     }
 
     return SFBlockHelpers.isDiggable(blockType);
+  }
+
+  public boolean collidesWithAtEdge(SFVec3i block, BlockState blockState, Vector3d position) {
+    System.out.println("collidesWithAtEdge block: " + block + " blockState: " + blockState + " position: " + position);
+    if (DO_NOT_SQUEEZING_THROUGH_DIAGONALS && blockState.collisionShape().hasCollisions()) {
+      return true;
+    }
+
+    return blockState.collidesWith(block.toVector3i(), entity.dimensions().makeBoundingBox(position));
   }
 }

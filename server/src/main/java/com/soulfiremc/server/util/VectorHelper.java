@@ -36,7 +36,7 @@ public class VectorHelper {
   private VectorHelper() {}
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
-    return topMiddleOfBlock(vector, blockState.blockCollisionShapeGroup());
+    return topMiddleOfBlock(vector, blockState.collisionShape());
   }
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
