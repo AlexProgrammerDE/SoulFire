@@ -75,13 +75,13 @@ public final class UpMovement extends GraphAction implements Cloneable {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks) {
         blockSubscribers
-          .accept(freeBlock.key(), new UpMovementBlockSubscription(UpMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+          .accept(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
       }
     }
 
     {
       blockSubscribers
-        .accept(movement.blockPlacePosition(), new UpMovementBlockSubscription(UpMovementBlockSubscription.SubscriptionType.MOVEMENT_SOLID));
+        .accept(movement.blockPlacePosition(), new MovementSolidSubscription());
     }
 
     {
@@ -94,10 +94,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
         for (var block : savedBlock) {
           blockSubscribers
-            .accept(block.position(), new UpMovementBlockSubscription(
-              UpMovementBlockSubscription.SubscriptionType.MOVEMENT_BREAK_SAFETY_CHECK,
-              i,
-              block.type()));
+            .accept(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
         }
       }
     }
@@ -219,106 +216,89 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record UpMovementBlockSubscription(
-    SubscriptionType type,
-    int blockArrayIndex,
-    BlockFace blockBreakSideHint,
-    BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<UpMovement> {
-    UpMovementBlockSubscription(SubscriptionType type) {
-      this(type, -1, null, null);
+  interface UpMovementSubscription extends MinecraftGraph.MovementSubscription<UpMovement> {
+    @Override
+    default UpMovement castAction(GraphAction action) {
+      return (UpMovement) action;
     }
+  }
 
-    UpMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
-      this(type, blockArrayIndex, blockBreakSideHint, null);
-    }
-
-    UpMovementBlockSubscription(
-      SubscriptionType subscriptionType,
-      int i,
-      BlockSafetyData.BlockSafetyType type) {
-      this(subscriptionType, i, null, type);
-    }
-
+  record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements UpMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      return switch (type) {
-        case MOVEMENT_FREE -> {
-          if (isFree.get()) {
-            upMovement.noNeedToBreak[blockArrayIndex] = true;
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
+      if (isFree.get()) {
+        upMovement.noNeedToBreak[blockArrayIndex] = true;
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
 
-          // Search for a way to break this block
-          if (graph.disallowedToBreakBlock(absoluteKey)
-            || graph.disallowedToBreakBlockType(blockState.blockType())
-            || upMovement.unsafeToBreak[blockArrayIndex]) {
-            // No way to break this block
-            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-          }
+      // Search for a way to break this block
+      if (graph.disallowedToBreakBlock(absoluteKey)
+        || graph.disallowedToBreakBlockType(blockState.blockType())
+        || upMovement.unsafeToBreak[blockArrayIndex]) {
+        // No way to break this block
+        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+      }
 
-          var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
-          // We can mine this block, lets add costs and continue
-          upMovement.blockBreakCosts[blockArrayIndex] =
-            new MovementMiningCost(
-              absoluteKey,
-              cacheableMiningCost.miningCost(),
-              cacheableMiningCost.willDropUsableBlockItem(),
-              blockBreakSideHint);
-          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-        }
-        case MOVEMENT_SOLID -> {
-          // Towering requires placing a block at old feet position
-          if (graph.disallowedToPlaceBlock(absoluteKey)) {
-            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-          }
-
-          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-        }
-        case MOVEMENT_BREAK_SAFETY_CHECK -> {
-          // There is no need to break this block, so there is no need for safety checks
-          if (upMovement.noNeedToBreak[blockArrayIndex]) {
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          // The block was already marked as unsafe
-          if (upMovement.unsafeToBreak[blockArrayIndex]) {
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          var unsafe = safetyType.isUnsafeBlock(blockState);
-
-          if (!unsafe) {
-            // All good, we can continue
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          var currentValue = upMovement.blockBreakCosts[blockArrayIndex];
-
-          if (currentValue != null) {
-            // We learned that this block needs to be broken, so we need to set it as impossible
-            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-          }
-
-          // Store for a later time that this is unsafe,
-          // so if we check this block,
-          // we know it's unsafe
-          upMovement.unsafeToBreak[blockArrayIndex] = true;
-
-          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-        }
-      };
+      var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
+      // We can mine this block, lets add costs and continue
+      upMovement.blockBreakCosts[blockArrayIndex] =
+        new MovementMiningCost(
+          absoluteKey,
+          cacheableMiningCost.miningCost(),
+          cacheableMiningCost.willDropUsableBlockItem(),
+          blockBreakSideHint);
+      return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
+  }
 
+  record MovementSolidSubscription() implements UpMovementSubscription {
     @Override
-    public UpMovement castAction(GraphAction action) {
-      return (UpMovement) action;
-    }
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
+                                                                BlockState blockState, SFVec3i absoluteKey) {
+      // Towering requires placing a block at old feet position
+      if (graph.disallowedToPlaceBlock(absoluteKey)) {
+        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+      }
 
-    enum SubscriptionType {
-      MOVEMENT_FREE,
-      MOVEMENT_SOLID,
-      MOVEMENT_BREAK_SAFETY_CHECK
+      return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+    }
+  }
+
+  record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements UpMovementSubscription {
+    @Override
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
+                                                                BlockState blockState, SFVec3i absoluteKey) {
+      // There is no need to break this block, so there is no need for safety checks
+      if (upMovement.noNeedToBreak[blockArrayIndex]) {
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      // The block was already marked as unsafe
+      if (upMovement.unsafeToBreak[blockArrayIndex]) {
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      var unsafe = safetyType.isUnsafeBlock(blockState);
+
+      if (!unsafe) {
+        // All good, we can continue
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      var currentValue = upMovement.blockBreakCosts[blockArrayIndex];
+
+      if (currentValue != null) {
+        // We learned that this block needs to be broken, so we need to set it as impossible
+        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+      }
+
+      // Store for a later time that this is unsafe,
+      // so if we check this block,
+      // we know it's unsafe
+      upMovement.unsafeToBreak[blockArrayIndex] = true;
+
+      return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
   }
 }

@@ -25,9 +25,7 @@ import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
-import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
@@ -62,21 +60,20 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
     ParkourMovement movement) {
     {
-      var blockId = 0;
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
         blockSubscribers
-          .accept(freeBlock.key(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.MOVEMENT_FREE, blockId++, freeBlock.value()));
+          .accept(freeBlock.key(), new MovementFreeSubscription());
       }
     }
 
     {
       blockSubscribers
-        .accept(movement.requiredUnsafeBlock(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.PARKOUR_UNSAFE_TO_STAND_ON));
+        .accept(movement.requiredUnsafeBlock(), new ParkourUnsafeToStandOnSubscription());
     }
 
     {
       blockSubscribers
-        .accept(movement.requiredSolidBlock(), new ParkourMovementBlockSubscription(ParkourMovementBlockSubscription.SubscriptionType.MOVEMENT_SOLID));
+        .accept(movement.requiredSolidBlock(), new MovementSolidSubscription());
     }
 
     return movement;
@@ -140,62 +137,50 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record ParkourMovementBlockSubscription(
-    SubscriptionType type,
-    int blockArrayIndex,
-    BlockFace blockBreakSideHint,
-    BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst,
-    BlockSafetyData.BlockSafetyType safetyType) implements MinecraftGraph.MovementSubscription<ParkourMovement> {
-    ParkourMovementBlockSubscription(SubscriptionType type) {
-      this(type, -1, null, null, null);
+  interface ParkourMovementSubscription extends MinecraftGraph.MovementSubscription<ParkourMovement> {
+    @Override
+    default ParkourMovement castAction(GraphAction action) {
+      return (ParkourMovement) action;
     }
+  }
 
-    ParkourMovementBlockSubscription(SubscriptionType type, int blockArrayIndex, BlockFace blockBreakSideHint) {
-      this(type, blockArrayIndex, blockBreakSideHint, null, null);
-    }
-
+  record MovementFreeSubscription() implements ParkourMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
+      if (isFree.get()) {
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
 
-      return switch (type) {
-        case MOVEMENT_FREE -> {
-          if (isFree.get()) {
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-        }
-        case PARKOUR_UNSAFE_TO_STAND_ON -> {
-          // We only want to jump over dangerous blocks/gaps
-          // So either a non-full-block like water or lava or magma
-          // since it hurts to stand on.
-          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
-            yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-          }
-
-          yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-        }
-        case MOVEMENT_SOLID -> {
-          // Block is safe to walk on, no need to check for more
-          if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
-            yield MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-          }
-
-          yield MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-        }
-      };
+      return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
     }
+  }
 
+  record ParkourUnsafeToStandOnSubscription() implements ParkourMovementSubscription {
     @Override
-    public ParkourMovement castAction(GraphAction action) {
-      return (ParkourMovement) action;
-    }
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
+                                                                BlockState blockState, SFVec3i absoluteKey) {
+      // We only want to jump over dangerous blocks/gaps
+      // So either a non-full-block like water or lava or magma
+      // since it hurts to stand on.
+      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
+        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+      }
 
-    enum SubscriptionType {
-      MOVEMENT_FREE,
-      PARKOUR_UNSAFE_TO_STAND_ON,
-      MOVEMENT_SOLID
+      return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+    }
+  }
+
+  record MovementSolidSubscription() implements ParkourMovementSubscription {
+    @Override
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
+                                                                BlockState blockState, SFVec3i absoluteKey) {
+      // Block is safe to walk on, no need to check for more
+      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
     }
   }
 }

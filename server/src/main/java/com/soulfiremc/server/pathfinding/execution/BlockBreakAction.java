@@ -49,8 +49,9 @@ public final class BlockBreakAction implements WorldAction {
   @Override
   public boolean isCompleted(BotConnection connection) {
     var level = connection.dataManager().currentLevel();
+    var blockType = level.getBlockState(blockPosition).blockType();
 
-    return SFBlockHelpers.isEmptyBlock(level.getBlockState(blockPosition).blockType());
+    return SFBlockHelpers.isEmptyBlock(blockType);
   }
 
   @Override
