@@ -74,9 +74,8 @@ public class PathConstraint {
   }
 
   public boolean collidesWithAtEdge(SFVec3i block, BlockState blockState, Vector3d position) {
-    System.out.println("collidesWithAtEdge block: " + block + " blockState: " + blockState + " position: " + position);
-    if (DO_NOT_SQUEEZING_THROUGH_DIAGONALS && blockState.collisionShape().hasCollisions()) {
-      return true;
+    if (DO_NOT_SQUEEZING_THROUGH_DIAGONALS) {
+      return blockState.collisionShape().hasCollisions();
     }
 
     return blockState.collidesWith(block.toVector3i(), entity.dimensions().makeBoundingBox(position));

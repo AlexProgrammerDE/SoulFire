@@ -45,7 +45,6 @@ public final class MovementAction implements WorldAction {
     var blockMeta = level.getBlockState(blockPosition);
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
     if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.25)) {
-      System.out.println("Y level is off");
       // We want to be on the same Y level
       return false;
     } else {

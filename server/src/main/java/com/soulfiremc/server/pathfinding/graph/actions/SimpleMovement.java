@@ -222,12 +222,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
-      var corner = direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK);
-      var collisionCheck = direction.offset(SFVec3i.ZERO).toVector3d().mul(0.5);
+      var corner = modifier.offsetIfJump(direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
+      var collisionCheck = modifier.offsetIfJump(direction.offset(FEET_POSITION_RELATIVE_BLOCK).toVector3d().mul(0.5));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
         list.add(new Triplet<>(
-          bodyOffset.offset(modifier.offsetIfJump(corner)),
+          bodyOffset.offset(corner),
           side,
           collisionCheck
         ));

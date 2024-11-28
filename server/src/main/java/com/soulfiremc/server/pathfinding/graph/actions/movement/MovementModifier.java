@@ -19,6 +19,7 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector3d;
 
 @RequiredArgsConstructor
 public enum MovementModifier {
@@ -41,6 +42,10 @@ public enum MovementModifier {
   }
 
   public SFVec3i offsetIfJump(SFVec3i vector) {
+    return this == MovementModifier.JUMP_UP_BLOCK ? vector.add(0, 1, 0) : vector;
+  }
+
+  public Vector3d offsetIfJump(Vector3d vector) {
     return this == MovementModifier.JUMP_UP_BLOCK ? vector.add(0, 1, 0) : vector;
   }
 }
