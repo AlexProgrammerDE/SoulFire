@@ -105,6 +105,31 @@ public class PathfindingTest {
     assertEquals(2, route.size());
   }
 
+  @Test
+  public void testPathfindingDiagonalImpossible() {
+    var accessor = new TestBlockAccessor();
+    accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+    accessor.setBlockAt(1, 0, 1, BlockType.STONE);
+    accessor.setBlockAt(2, 0, 2, BlockType.STONE);
+
+    // Barricade
+    accessor.setBlockAt(1, 1, 2, BlockType.STONE);
+    accessor.setBlockAt(1, 2, 2, BlockType.STONE);
+    accessor.setBlockAt(2, 1, 1, BlockType.STONE);
+    accessor.setBlockAt(2, 2, 1, BlockType.STONE);
+
+    var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+      accessor,
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(2, 1, 2));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    assertThrowsExactly(
+      NoRouteFoundException.class, () -> routeFinder.findRouteSync(initialState, false));
+  }
+
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3})
   public void testPathfindingJump(int height) {
