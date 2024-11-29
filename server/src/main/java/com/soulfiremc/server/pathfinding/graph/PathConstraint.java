@@ -83,6 +83,10 @@ public class PathConstraint {
       return blockState.collisionShape().hasCollisions();
     }
 
+    if (blockState.collisionShape().hasNoCollisions()) {
+      return false;
+    }
+
     return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position.toVector3d()));
   }
 
