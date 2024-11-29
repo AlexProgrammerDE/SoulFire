@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util.pf4j;
 
+import com.google.common.base.Strings;
 import org.pf4j.ManifestPluginDescriptorFinder;
 import org.pf4j.PluginDescriptor;
 
@@ -31,7 +32,24 @@ public class SFManifestPluginDescriptorFinder extends ManifestPluginDescriptorFi
 
     descriptor.website(attributes.getValue(PLUGIN_WEBSITE));
 
+    // Validate required fields
+    checkNotNull(descriptor.getPluginId(), ManifestPluginDescriptorFinder.PLUGIN_ID);
+    checkNotNull(descriptor.getPluginDescription(), ManifestPluginDescriptorFinder.PLUGIN_DESCRIPTION);
+    checkNotNull(descriptor.getVersion(), ManifestPluginDescriptorFinder.PLUGIN_VERSION);
+    checkNotNull(descriptor.getProvider(), ManifestPluginDescriptorFinder.PLUGIN_PROVIDER);
+    checkNotNull(descriptor.getRequires(), ManifestPluginDescriptorFinder.PLUGIN_REQUIRES);
+    checkNotNull(descriptor.getLicense(), ManifestPluginDescriptorFinder.PLUGIN_LICENSE);
+    checkNotNull(descriptor.website(), SFManifestPluginDescriptorFinder.PLUGIN_WEBSITE);
+
+    // Dependencies and class can be null
+
     return descriptor;
+  }
+
+  private void checkNotNull(String value, String name) {
+    if (Strings.isNullOrEmpty(value)) {
+      throw new IllegalArgumentException(name + " cannot be null or empty");
+    }
   }
 
   @Override
