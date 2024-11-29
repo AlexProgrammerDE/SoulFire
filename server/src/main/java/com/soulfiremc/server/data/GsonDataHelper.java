@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 public class GsonDataHelper {
   private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
-  private static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
+  public static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
     new TypeAdapter<>() {
       @Override
       public void write(JsonWriter out, Key value) throws IOException {

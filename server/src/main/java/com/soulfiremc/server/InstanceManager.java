@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
@@ -42,6 +41,7 @@ import com.soulfiremc.server.settings.lib.SettingsDelegate;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Getter
 public class InstanceManager {
-  private static final Gson GSON = new Gson();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final UUID id;
@@ -87,9 +86,9 @@ public class InstanceManager {
   }
 
   public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
-    var id = GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
+    var id = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
     var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
-    var state = GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
+    var state = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
     var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
 
     var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);

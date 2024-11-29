@@ -18,7 +18,12 @@
 package com.soulfiremc.server.util.structs;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.soulfiremc.server.data.GsonDataHelper;
+import net.kyori.adventure.key.Key;
 
 public class GsonInstance {
-  public static final Gson GSON = new Gson();
+  public static final Gson GSON = new GsonBuilder()
+    .registerTypeAdapter(Key.class, GsonDataHelper.RESOURCE_KEY_ADAPTER)
+    .create();
 }

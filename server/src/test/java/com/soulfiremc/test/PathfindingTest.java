@@ -27,9 +27,9 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
-import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.test.utils.TestBlockAccessor;
 import com.soulfiremc.test.utils.TestPathConstraint;
+import com.soulfiremc.test.utils.TestTagsState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -40,9 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class PathfindingTest {
-  // TODO: Implement default tagstate for testing
-  private static final TagsState TAGS_STATE = new TagsState();
-
   @Test
   public void testPathfindingStraight() {
     var accessor = new TestBlockAccessor();
@@ -51,7 +48,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor, inventory,
       TestPathConstraint.INSTANCE), new PosGoal(2, 1, 0));
 
@@ -72,7 +69,7 @@ public class PathfindingTest {
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
     var routeFinder =
       new RouteFinder(
-        new MinecraftGraph(TAGS_STATE,
+        new MinecraftGraph(TestTagsState.TAGS_STATE,
           accessor,
           inventory,
           TestPathConstraint.INSTANCE),
@@ -93,7 +90,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 2, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(2, 1, 2));
@@ -119,7 +116,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 2, 1, BlockType.BEDROCK);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(2, 1, 2));
@@ -138,7 +135,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, height, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(1, height + 1, 0));
@@ -162,7 +159,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, height, 1, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(1, height + 1, 1));
@@ -186,7 +183,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, -height, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(1, -height + 1, 0));
@@ -210,7 +207,7 @@ public class PathfindingTest {
     accessor.setBlockAt(1, -height, 1, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(1, -height + 1, 1));
@@ -234,7 +231,7 @@ public class PathfindingTest {
     accessor.setBlockAt(gapLength + 1, 0, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(gapLength + 1, 1, 0));
@@ -257,7 +254,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.STONE)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(0, 2, 0));
@@ -275,7 +272,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeWithAmount(ItemType.STONE, amount)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(0, 21, 0));
@@ -298,7 +295,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -1, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(0, 0, 0));
@@ -319,7 +316,7 @@ public class PathfindingTest {
     accessor.setBlockAt(2, 0, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(2, 1, 0));
@@ -328,6 +325,33 @@ public class PathfindingTest {
 
     var route = routeFinder.findRouteSync(initialState, false);
     assertEquals(3, route.size());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testPathfindingMoveUpSideUnsafe(boolean unsafe) {
+    var accessor = new TestBlockAccessor();
+    accessor.setBlockAt(0, 0, 0, BlockType.STONE);
+    accessor.setBlockAt(0, 3, 0, BlockType.STONE);
+    if (unsafe) {
+      accessor.setBlockAt(1, 3, 0, BlockType.WATER);
+    }
+
+    var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)), TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
+      accessor,
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(0, 2, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    if (unsafe) {
+      assertThrowsExactly(
+        NoRouteFoundException.class, () -> routeFinder.findRouteSync(initialState, false));
+    } else {
+      var route = routeFinder.findRouteSync(initialState, false);
+      assertEquals(2, route.size());
+    }
   }
 
   @ParameterizedTest
@@ -341,7 +365,7 @@ public class PathfindingTest {
     }
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(0, 0, 0));
@@ -370,7 +394,7 @@ public class PathfindingTest {
     accessor.setBlockAt(0, -level, 0, BlockType.STONE);
 
     var inventory = ProjectedInventory.forUnitTest(List.of(SFItemStack.forTypeSingle(ItemType.DIAMOND_PICKAXE)), TestPathConstraint.INSTANCE);
-    var routeFinder = new RouteFinder(new MinecraftGraph(TAGS_STATE,
+    var routeFinder = new RouteFinder(new MinecraftGraph(TestTagsState.TAGS_STATE,
       accessor,
       inventory,
       TestPathConstraint.INSTANCE), new PosGoal(0, 0, 0));
