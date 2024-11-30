@@ -43,6 +43,7 @@ import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.util.DefaultTagsState;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
@@ -67,6 +68,7 @@ import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.server.*;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
+import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.tcp.TcpServer;
@@ -331,6 +333,26 @@ public class POVServer extends InternalPlugin {
         @Override
         public void sessionAdded(SessionAddedEvent event) {
           event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
+          event.getSession().addListener(new SessionAdapter() {
+            private boolean fixedOnce;
+
+            @Override
+            public void packetSending(PacketSendingEvent event) {
+              if (fixedOnce) {
+                return;
+              }
+
+              if (event.getPacket() instanceof ClientboundFinishConfigurationPacket) {
+                fixedOnce = true;
+
+                event.setCancelled(true);
+                var tagsPacket = new ClientboundUpdateTagsPacket();
+                tagsPacket.getTags().putAll(DefaultTagsState.TAGS_STATE.exportTags());
+                event.getSession().send(tagsPacket);
+                event.getSession().send(new ClientboundFinishConfigurationPacket());
+              }
+            }
+          });
         }
 
         @Override
@@ -445,8 +467,8 @@ public class POVServer extends InternalPlugin {
     clientSession.send(
       new ClientboundPlayerAbilitiesPacket(
         abilitiesData.invulnerable(),
-        abilitiesData.flying(),
         abilitiesData.mayfly(),
+        abilitiesData.flying(),
         abilitiesData.instabuild(),
         abilitiesData.flySpeed(),
         abilitiesData.walkSpeed()));

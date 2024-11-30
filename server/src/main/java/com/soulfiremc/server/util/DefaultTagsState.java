@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test.utils;
+package com.soulfiremc.server.util;
 
 import com.google.gson.reflect.TypeToken;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import net.kyori.adventure.key.Key;
 
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 @SuppressWarnings("unchecked")
-public class TestTagsState {
+public class DefaultTagsState {
   public static final TagsState TAGS_STATE = new TagsState();
 
   static {
