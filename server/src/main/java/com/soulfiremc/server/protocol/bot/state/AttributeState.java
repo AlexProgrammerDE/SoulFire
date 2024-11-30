@@ -19,13 +19,13 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.ModifierOperation;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ public class AttributeState {
   public double calculateValue() {
     var value = baseValue;
 
-    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_VALUE)) {
+    for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD)) {
       value += attributeModifier.amount();
     }
 

@@ -872,11 +872,7 @@ public final class SessionDataManager {
                 new Attribute.Modifier(
                   modifier.getId(),
                   modifier.getAmount(),
-                  switch (modifier.getOperation()) {
-                    case ADD -> ModifierOperation.ADD_VALUE;
-                    case ADD_MULTIPLIED_BASE -> ModifierOperation.ADD_MULTIPLIED_BASE;
-                    case ADD_MULTIPLIED_TOTAL -> ModifierOperation.ADD_MULTIPLIED_TOTAL;
-                  }))
+                  modifier.getOperation()))
             .collect(Collectors.toMap(Attribute.Modifier::id, Function.identity())));
     }
   }

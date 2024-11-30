@@ -18,6 +18,7 @@
 package com.soulfiremc.server.data;
 
 import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 
 import java.util.List;
 

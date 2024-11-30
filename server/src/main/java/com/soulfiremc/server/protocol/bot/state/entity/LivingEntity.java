@@ -28,6 +28,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
@@ -445,7 +446,7 @@ public abstract class LivingEntity extends Entity {
         }
 
         var f = -0.05F * this.getPercentFrozen();
-        speedAttribute.addModifier(new Attribute.Modifier(SPEED_MODIFIER_POWDER_SNOW_ID, f, ModifierOperation.ADD_VALUE));
+        speedAttribute.addModifier(new Attribute.Modifier(SPEED_MODIFIER_POWDER_SNOW_ID, f, ModifierOperation.ADD));
       }
     }
   }
