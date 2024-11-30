@@ -65,6 +65,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.*;
 import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatType;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
@@ -866,14 +867,9 @@ public final class SessionDataManager {
       attribute
         .modifiers()
         .putAll(
-          entry.getModifiers().stream()
-            .map(
-              modifier ->
-                new Attribute.Modifier(
-                  modifier.getId(),
-                  modifier.getAmount(),
-                  modifier.getOperation()))
-            .collect(Collectors.toMap(Attribute.Modifier::id, Function.identity())));
+          entry.getModifiers()
+            .stream()
+            .collect(Collectors.toMap(AttributeModifier::getId, Function.identity())));
     }
   }
 

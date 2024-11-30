@@ -83,7 +83,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.Attribute;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
@@ -759,14 +758,7 @@ public class POVServer extends InternalPlugin {
                       }
                     },
                     attributeState.baseValue(),
-                    attributeState.modifiers().values().stream()
-                      .map(
-                        modifier ->
-                          new AttributeModifier(
-                            modifier.id(),
-                            modifier.amount(),
-                            modifier.operation()))
-                      .toList()))
+                    List.copyOf(attributeState.modifiers().values())))
               .toList()));
       }
     }

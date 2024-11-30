@@ -17,11 +17,9 @@
  */
 package com.soulfiremc.server.data;
 
-import net.kyori.adventure.key.Key;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 
 import java.util.List;
 
-public record Attribute(AttributeType type, List<Modifier> modifiers) {
-  public record Modifier(Key id, double amount, ModifierOperation operation) {}
+public record Attribute(AttributeType type, List<AttributeModifier> modifiers) {
 }

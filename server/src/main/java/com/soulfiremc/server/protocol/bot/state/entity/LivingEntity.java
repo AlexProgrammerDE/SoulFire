@@ -28,6 +28,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
@@ -43,7 +44,7 @@ import java.util.Optional;
 public abstract class LivingEntity extends Entity {
   private static final Key SPEED_MODIFIER_POWDER_SNOW_ID = Key.key("powder_snow");
   private static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
-  private static final Attribute.Modifier SPEED_MODIFIER_SPRINTING = new Attribute.Modifier(
+  private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
   protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
@@ -446,7 +447,7 @@ public abstract class LivingEntity extends Entity {
         }
 
         var f = -0.05F * this.getPercentFrozen();
-        speedAttribute.addModifier(new Attribute.Modifier(SPEED_MODIFIER_POWDER_SNOW_ID, f, ModifierOperation.ADD));
+        speedAttribute.addModifier(new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_ID, f, ModifierOperation.ADD));
       }
     }
   }
@@ -515,7 +516,7 @@ public abstract class LivingEntity extends Entity {
   public void setSprinting(boolean sprinting) {
     super.setSprinting(sprinting);
     var lv = this.attributeState.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
-    lv.removeModifier(SPEED_MODIFIER_SPRINTING.id());
+    lv.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
     if (sprinting) {
       lv.addModifier(SPEED_MODIFIER_SPRINTING);
     }

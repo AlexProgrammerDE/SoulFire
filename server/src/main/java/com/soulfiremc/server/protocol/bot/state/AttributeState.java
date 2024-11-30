@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -25,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 
 import java.util.Map;
@@ -34,43 +34,45 @@ import java.util.Map;
 @AllArgsConstructor
 public class AttributeState {
   private final AttributeType type;
-  private final Map<Key, Attribute.Modifier> modifiers = new Object2ObjectOpenHashMap<>();
+  private final Map<Key, AttributeModifier> modifiers = new Object2ObjectOpenHashMap<>();
   private double baseValue;
 
   public double calculateValue() {
     var value = baseValue;
 
     for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD)) {
-      value += attributeModifier.amount();
+      value += attributeModifier.getAmount();
     }
 
     var finalValue = value;
 
     for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_MULTIPLIED_BASE)) {
-      finalValue += value * attributeModifier.amount();
+      finalValue += value * attributeModifier.getAmount();
     }
 
     for (var attributeModifier : this.getModifiersOrEmpty(ModifierOperation.ADD_MULTIPLIED_TOTAL)) {
-      finalValue *= 1.0 + attributeModifier.amount();
+      finalValue *= 1.0 + attributeModifier.getAmount();
     }
 
     return MathHelper.clamp(finalValue, type.min(), type.max());
   }
 
-  private Iterable<Attribute.Modifier> getModifiersOrEmpty(ModifierOperation operation) {
-    return modifiers.values().stream().filter(modifier -> modifier.operation() == operation)
+  private Iterable<AttributeModifier> getModifiersOrEmpty(ModifierOperation operation) {
+    return modifiers.values()
+      .stream()
+      .filter(modifier -> modifier.getOperation() == operation)
       ::iterator;
   }
 
-  public void addModifier(Attribute.Modifier modifier) {
-    modifiers.put(modifier.id(), modifier);
+  public void addModifier(AttributeModifier modifier) {
+    modifiers.put(modifier.getId(), modifier);
   }
 
   public void removeModifier(Key id) {
     modifiers.remove(id);
   }
 
-  public Attribute.Modifier getModifier(Key id) {
+  public AttributeModifier getModifier(Key id) {
     return modifiers.get(id);
   }
 }

@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.data.Attribute;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
 
@@ -64,7 +64,7 @@ public class EntityAttributeState {
 
       getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
         .modifiers()
-        .put(modifier.getModifier().getId(), new Attribute.Modifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), modifier.getModifier().getOperation()));
+        .put(modifier.getModifier().getId(), new AttributeModifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), modifier.getModifier().getOperation()));
     }
   }
 
