@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.server.account.service.*;
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.NonNull;
 
 import java.util.UUID;
@@ -72,12 +73,12 @@ public record MinecraftAccount(
         .setProfileId(profileId.toString())
         .setLastKnownName(lastKnownName);
 
-    switch (accountData) {
-      case BedrockData bedrockData -> builder.setBedrockData(bedrockData.toProto());
-      case OfflineJavaData offlineJavaData -> builder.setOfflineJavaData(offlineJavaData.toProto());
-      case OnlineSimpleJavaData onlineSimpleJavaData -> builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
-      case OnlineChainJavaData onlineChainJavaData -> builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
-    }
+    SFHelpers.mustSupply(() -> switch (accountData) {
+      case BedrockData bedrockData -> () -> builder.setBedrockData(bedrockData.toProto());
+      case OfflineJavaData offlineJavaData -> () -> builder.setOfflineJavaData(offlineJavaData.toProto());
+      case OnlineSimpleJavaData onlineSimpleJavaData -> () -> builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
+      case OnlineChainJavaData onlineChainJavaData -> () -> builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
+    });
 
     return builder.build();
   }

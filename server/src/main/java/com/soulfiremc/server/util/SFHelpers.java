@@ -29,6 +29,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Slf4j
 public class SFHelpers {
@@ -182,5 +183,9 @@ public class SFHelpers {
 
   public static boolean isAllowedChatCharacter(char c) {
     return c != 167 && c >= ' ' && c != 127;
+  }
+
+  public static void mustSupply(Supplier<Runnable> supplier) {
+    supplier.get().run();
   }
 }

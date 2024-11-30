@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.util.SFHelpers;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.proxy.HttpProxyHandler;
@@ -43,16 +44,16 @@ public class SFNettyHelper {
 
   public static void addProxy(ChannelPipeline pipeline, SFProxy proxy) {
     var address = proxy.getSocketAddress();
-    switch (proxy.type()) {
-      case HTTP -> {
+    SFHelpers.mustSupply(() -> switch (proxy.type()) {
+      case HTTP -> () -> {
         if (proxy.username() != null && proxy.password() != null) {
           pipeline.addLast("proxy", new HttpProxyHandler(address, proxy.username(), proxy.password()));
         } else {
           pipeline.addLast("proxy", new HttpProxyHandler(address));
         }
-      }
-      case SOCKS4 -> pipeline.addLast("proxy", new Socks4ProxyHandler(address, proxy.username()));
-      case SOCKS5 -> pipeline.addLast("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
-    }
+      };
+      case SOCKS4 -> () -> pipeline.addLast("proxy", new Socks4ProxyHandler(address, proxy.username()));
+      case SOCKS5 -> () -> pipeline.addLast("proxy", new Socks5ProxyHandler(address, proxy.username(), proxy.password()));
+    });
   }
 }

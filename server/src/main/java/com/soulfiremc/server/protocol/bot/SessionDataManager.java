@@ -457,19 +457,20 @@ public final class SessionDataManager {
     for (var update : packet.getEntries()) {
       var entry = playerListState.entries().computeIfAbsent(update.getProfileId(), k -> update);
       for (var action : packet.getActions()) {
-        switch (action) {
-          case ADD_PLAYER -> entry.setProfile(update.getProfile());
-          case INITIALIZE_CHAT -> {
+        SFHelpers.mustSupply(() -> switch (action) {
+          case ADD_PLAYER -> () -> entry.setProfile(update.getProfile());
+          case INITIALIZE_CHAT -> () -> {
             entry.setSessionId(update.getSessionId());
             entry.setExpiresAt(update.getExpiresAt());
             entry.setKeySignature(update.getKeySignature());
             entry.setPublicKey(update.getPublicKey());
-          }
-          case UPDATE_GAME_MODE -> entry.setGameMode(update.getGameMode());
-          case UPDATE_LISTED -> entry.setListed(update.isListed());
-          case UPDATE_LATENCY -> entry.setLatency(update.getLatency());
-          case UPDATE_DISPLAY_NAME -> entry.setDisplayName(update.getDisplayName());
-        }
+          };
+          case UPDATE_GAME_MODE -> () -> entry.setGameMode(update.getGameMode());
+          case UPDATE_LISTED -> () -> entry.setListed(update.isListed());
+          case UPDATE_LATENCY -> () -> entry.setLatency(update.getLatency());
+          case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(update.getDisplayName());
+          case UPDATE_LIST_ORDER -> () -> entry.setListOrder(update.getListOrder());
+        });
       }
     }
   }
@@ -639,28 +640,29 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onGameEvent(ClientboundGameEventPacket packet) {
-    switch (packet.getNotification()) {
-      case INVALID_BED -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
-      case START_RAIN -> weatherState.raining(true);
-      case STOP_RAIN -> weatherState.raining(false);
-      case CHANGE_GAMEMODE -> {
+    SFHelpers.mustSupply(() -> switch (packet.getNotification()) {
+      case INVALID_BED -> () -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
+      case START_RAIN -> () -> weatherState.raining(true);
+      case STOP_RAIN -> () -> weatherState.raining(false);
+      case CHANGE_GAMEMODE -> () -> {
         previousGameMode = gameMode;
         gameMode = (GameMode) packet.getValue();
-      }
-      case ENTER_CREDITS -> {
+      };
+      case ENTER_CREDITS -> () -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
         connection.sendPacket(
           new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
-      }
-      case DEMO_MESSAGE -> log.debug("Demo event: {}", packet.getValue());
-      case ARROW_HIT_PLAYER -> log.debug("Arrow hit player");
-      case RAIN_STRENGTH -> weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
-      case THUNDER_STRENGTH -> weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
-      case PUFFERFISH_STING_SOUND -> log.debug("Pufferfish sting sound");
-      case AFFECTED_BY_ELDER_GUARDIAN -> log.debug("Affected by elder guardian");
-      case ENABLE_RESPAWN_SCREEN -> enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
-      case LIMITED_CRAFTING -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
-    }
+      };
+      case DEMO_MESSAGE -> () -> log.debug("Demo event: {}", packet.getValue());
+      case ARROW_HIT_PLAYER -> () -> log.debug("Arrow hit player");
+      case RAIN_STRENGTH -> () -> weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
+      case THUNDER_STRENGTH -> () -> weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
+      case PUFFERFISH_STING_SOUND -> () -> log.debug("Pufferfish sting sound");
+      case AFFECTED_BY_ELDER_GUARDIAN -> () -> log.debug("Affected by elder guardian");
+      case ENABLE_RESPAWN_SCREEN -> () -> enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
+      case LIMITED_CRAFTING -> () -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
+      case LEVEL_CHUNKS_LOAD_START -> () -> log.debug("Level chunks load start");
+    });
   }
 
   @EventHandler

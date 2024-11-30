@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.registry;
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.kyori.adventure.key.Key;
@@ -101,11 +102,11 @@ public class SFChatType implements RegistryValue<SFChatType> {
   public static TranslatableComponent buildComponent(ChatTypeDecoration decoration, BoundChatMessageInfo chatInfo) {
     var translationArgs = new ArrayList<ComponentLike>();
     for (var parameter : decoration.parameters()) {
-      switch (parameter) {
-        case ChatTypeDecoration.Parameter.CONTENT -> translationArgs.add(chatInfo.content);
-        case ChatTypeDecoration.Parameter.SENDER -> translationArgs.add(chatInfo.sender);
-        case ChatTypeDecoration.Parameter.TARGET -> translationArgs.add(Objects.requireNonNullElse(chatInfo.target, Component.empty()));
-      }
+      SFHelpers.mustSupply(() -> switch (parameter) {
+        case ChatTypeDecoration.Parameter.CONTENT -> () -> translationArgs.add(chatInfo.content);
+        case ChatTypeDecoration.Parameter.SENDER -> () -> translationArgs.add(chatInfo.sender);
+        case ChatTypeDecoration.Parameter.TARGET -> () -> translationArgs.add(Objects.requireNonNullElse(chatInfo.target, Component.empty()));
+      });
     }
 
     return Component.translatable(decoration.translationKey(), null, deserializeStyle(decoration.style()), translationArgs);
