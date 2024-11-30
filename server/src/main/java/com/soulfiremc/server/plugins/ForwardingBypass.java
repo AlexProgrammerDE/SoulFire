@@ -189,6 +189,11 @@ public class ForwardingBypass extends InternalPlugin {
             getForwardedIp(),
             hostname,
             settingsSource.get(ForwardingBypassSettings.SECRET))));
+      case SF_BYPASS -> event.packet(
+        handshake.withHostname(
+          createSoulFireBypassAddress(
+            hostname,
+            settingsSource.get(ForwardingBypassSettings.SECRET))));
     }
   }
 
@@ -276,6 +281,10 @@ public class ForwardingBypass extends InternalPlugin {
         ImmutableList.<GameProfile.Property>builder().addAll(properties).add(property).build());
   }
 
+  private String createSoulFireBypassAddress(String initialHostname, String forwardingSecret) {
+    return initialHostname + LEGACY_FORWARDING_SEPARATOR + "SF_%s".formatted(forwardingSecret);
+  }
+
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "forwarding-bypass";
@@ -303,7 +312,8 @@ public class ForwardingBypass extends InternalPlugin {
       NONE("None"),
       LEGACY("Legacy"),
       BUNGEE_GUARD("BungeeGuard"),
-      MODERN("Modern");
+      MODERN("Modern"),
+      SF_BYPASS("SoulFire Bypass");
 
       private final String displayName;
 
