@@ -32,11 +32,11 @@ import java.util.function.LongSupplier;
  * Used for most of the async tasks in the server, bots and plugins.
  */
 public class SoulFireScheduler implements Executor {
-  private static final ForkJoinPool SF_FORK_JOIN_POOL = new ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
-    ForkJoinPool.defaultForkJoinWorkerThreadFactory,
-    null, true);
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
+    .factory());
+  private final ExecutorService executor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
+    .name("SoulFireScheduler-Task-", 0)
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final Logger logger;
@@ -76,7 +76,7 @@ public class SoulFireScheduler implements Executor {
       return;
     }
 
-    SF_FORK_JOIN_POOL.execute(() -> runCommand(command));
+    executor.execute(() -> runCommand(command));
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
