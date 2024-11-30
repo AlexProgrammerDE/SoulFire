@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.controller;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.CloseToPosGoal;
+import com.soulfiremc.server.pathfinding.goals.DynamicGoalScorer;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
@@ -48,7 +49,7 @@ public class FollowEntityController {
       }
 
       try {
-        PathExecutor.executePathfinding(bot, new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius), new PathConstraint(bot)).get();
+        PathExecutor.executePathfinding(bot, (DynamicGoalScorer) () -> new CloseToPosGoal(SFVec3i.fromInt(entity.blockPos()), maxRadius), new PathConstraint(bot)).get();
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);
         return;
