@@ -34,7 +34,7 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
-import oshi.util.tuples.Triplet;
+import oshi.util.tuples.Quartet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,7 +150,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     {
       for (var diagonalCollisionBlock : movement.listDiagonalCollisionBlocks()) {
         blockSubscribers
-          .accept(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(diagonalCollisionBlock.getB(), diagonalCollisionBlock.getC()));
+          .accept(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(
+            diagonalCollisionBlock.getB(),
+            diagonalCollisionBlock.getC(),
+            diagonalCollisionBlock.getD()
+          ));
       }
     }
 
@@ -212,23 +216,23 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  public List<Triplet<SFVec3i, MovementSide, SFVec3i>> listDiagonalCollisionBlocks() {
+  public List<Quartet<SFVec3i, MovementSide, Integer, BodyPart>> listDiagonalCollisionBlocks() {
     if (!diagonal) {
       return List.of();
     }
 
-    var list = new ArrayList<Triplet<SFVec3i, MovementSide, SFVec3i>>(4);
-    var collisionCheck = modifier.offsetIfJump(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
+    var list = new ArrayList<Quartet<SFVec3i, MovementSide, Integer, BodyPart>>(4);
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
       var corner = modifier.offsetIfJump(direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
-        list.add(new Triplet<>(
+        list.add(new Quartet<>(
           bodyOffset.offset(corner),
           side,
-          collisionCheck
+          direction.diagonalArrayIndex(),
+          bodyOffset
         ));
       }
     }
@@ -534,14 +538,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementDiagonalCollisionSubscription(MovementSide side, SFVec3i collisionCheck) implements SimpleMovementSubscription {
+  record MovementDiagonalCollisionSubscription(MovementSide side, int diagonalArrayIndex, BodyPart bodyPart) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      } else if (graph.pathConstraint().collidesWithAtEdge(absoluteKey, blockState, absoluteKey.sub(key).add(collisionCheck))) {
+      } else if (graph.pathConstraint().collidesWithAtEdge(blockState, diagonalArrayIndex, bodyPart)) {
         var blockedSide = simpleMovement.blockedSide;
         if (blockedSide == null) {
           simpleMovement.blockedSide = side;

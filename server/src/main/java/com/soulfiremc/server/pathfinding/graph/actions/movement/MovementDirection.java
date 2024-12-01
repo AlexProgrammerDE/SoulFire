@@ -19,8 +19,10 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum MovementDirection {
   NORTH,
@@ -33,6 +35,9 @@ public enum MovementDirection {
   SOUTH_WEST;
 
   public static final MovementDirection[] VALUES = values();
+  public static final MovementDirection[] DIAGONALS = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+
+  private final int diagonalArrayIndex = calculateDiagonalArrayIndex();
 
   public SkyDirection side(MovementSide side) {
     return switch (this) {
@@ -89,7 +94,27 @@ public enum MovementDirection {
     };
   }
 
+  public SFVec3i offsetSide(SFVec3i vector) {
+    return switch (this) {
+      case NORTH_EAST -> vector.add(1, 0, 0);
+      case NORTH_WEST -> vector.add(0, 0, 0);
+      case SOUTH_EAST -> vector.add(1, 0, 1);
+      case SOUTH_WEST -> vector.add(0, 0, 1);
+      default -> throw new IllegalStateException("Unexpected value: " + this);
+    };
+  }
+
   public boolean isDiagonal() {
-    return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
+    return diagonalArrayIndex != -1;
+  }
+
+  private int calculateDiagonalArrayIndex() {
+    return switch (this) {
+      case NORTH_EAST -> 0;
+      case NORTH_WEST -> 1;
+      case SOUTH_EAST -> 2;
+      case SOUTH_WEST -> 3;
+      default -> -1;
+    };
   }
 }

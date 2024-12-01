@@ -20,17 +20,19 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
@@ -41,6 +43,7 @@ public class PathConstraint {
   private static final int MAX_CLOSE_TO_ENEMY_PENALTY = Integer.getInteger("sf.pathfinding-max-close-to-enemy-penalty", 50);
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
+  private final CachedLazyObject<List<Entity>> entities = new CachedLazyObject<>(this::getEntitiesExpensive, 10, TimeUnit.SECONDS);
 
   public PathConstraint(BotConnection botConnection) {
     this(botConnection.dataManager().localPlayer(), botConnection.dataManager().currentLevel());
@@ -78,7 +81,7 @@ public class PathConstraint {
     return SFBlockHelpers.isDiggable(blockType);
   }
 
-  public boolean collidesWithAtEdge(SFVec3i block, BlockState blockState, SFVec3i position) {
+  public boolean collidesWithAtEdge(BlockState blockState, int diagonalArrayIndex, BodyPart bodyPart) {
     if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
       return blockState.collisionShape().hasCollisions();
     }
@@ -87,13 +90,13 @@ public class PathConstraint {
       return false;
     }
 
-    return blockState.collidesWith(block.toVector3i(), Player.STANDING_DIMENSIONS.makeBoundingBox(position.toVector3d()));
+    return CollisionCalculator.collidesWith(blockState, diagonalArrayIndex, bodyPart);
   }
 
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
     if (!DO_NOT_AVOID_HARMFUL_ENTITIES) {
       var addedPenalty = 0D;
-      for (var entity : getEntities()) {
+      for (var entity : entities.get()) {
         if (!entity.entityType().friendly()) {
           var followRange = entity.entityType().defaultFollowRange();
           var distance = instruction.node().blockPosition().distance(SFVec3i.fromInt(entity.blockPosition()));
@@ -111,7 +114,7 @@ public class PathConstraint {
     return instruction;
   }
 
-  private List<Entity> getEntities() {
+  private List<Entity> getEntitiesExpensive() {
     if (entity == null) {
       return List.of();
     }

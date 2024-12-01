@@ -48,4 +48,8 @@ public class GlobalBlockPalette {
   public BlockState getBlockStateForStateId(int id) {
     return stateIdToBlockState[id];
   }
+
+  public BlockState[] getBlockStates() {
+    return stateIdToBlockState;
+  }
 }
