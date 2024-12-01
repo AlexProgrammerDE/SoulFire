@@ -422,6 +422,11 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onServerChat(ClientboundSystemChatPacket packet) {
+    if (packet.isOverlay()) {
+      // Action bar message
+      return;
+    }
+
     onChat(System.currentTimeMillis(), packet.getContent());
   }
 
