@@ -54,4 +54,3 @@ public class CollisionCalculator {
     return COLLISIONS[blockState.id()][diagonalArrayIndex][bodyPart.ordinal()];
   }
 }
-
