@@ -39,7 +39,7 @@ public class CollisionCalculator {
         var bodyPartArray = new boolean[BodyPart.VALUES.length];
         for (var bodyPart : BodyPart.VALUES) {
           bodyPartArray[bodyPart.ordinal()] = blockState.collidesWith(
-            bodyPart.offset(SFVec3i.ZERO).toVector3i(),
+            bodyPart.offset(SFVec3i.from(0, 1, 0)).toVector3i(),
             Player.STANDING_DIMENSIONS.makeBoundingBox(diagonal.offsetSide(SFVec3i.ZERO).toVector3d())
           );
         }
