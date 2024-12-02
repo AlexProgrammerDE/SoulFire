@@ -372,9 +372,9 @@ public abstract class LivingEntity extends Entity {
     if (this.onClimbable()) {
       this.resetFallDistance();
       var f = 0.15F;
-      var d = MathHelper.clamp(deltaMovement.getX(), -0.15F, 0.15F);
-      var e = MathHelper.clamp(deltaMovement.getZ(), -0.15F, 0.15F);
-      var g = Math.max(deltaMovement.getY(), -0.15F);
+      var d = MathHelper.clamp(deltaMovement.getX(), -f, f);
+      var e = MathHelper.clamp(deltaMovement.getZ(), -f, f);
+      var g = Math.max(deltaMovement.getY(), -f);
       if (g < 0.0 && this.getInBlockState().blockType() != BlockType.SCAFFOLDING && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
         g = 0.0;
       }
@@ -515,10 +515,10 @@ public abstract class LivingEntity extends Entity {
   @Override
   public void setSprinting(boolean sprinting) {
     super.setSprinting(sprinting);
-    var lv = this.attributeState.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
-    lv.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
+    var speedAttribute = this.attributeState.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
+    speedAttribute.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
     if (sprinting) {
-      lv.addModifier(SPEED_MODIFIER_SPRINTING);
+      speedAttribute.addModifier(SPEED_MODIFIER_SPRINTING);
     }
   }
 

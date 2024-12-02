@@ -1329,6 +1329,13 @@ public abstract class Entity {
     this.stuckSpeedMultiplier = motionMultiplier;
   }
 
+  public final boolean isRemoved() {
+    return false;
+  }
+
+  public void playerTouch(Player player) {
+  }
+
   record Movement(Vector3d from, Vector3d to) {
   }
 }

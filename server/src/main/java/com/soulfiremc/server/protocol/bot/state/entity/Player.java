@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityDimensions;
 import com.soulfiremc.server.data.EntityType;
@@ -25,6 +26,7 @@ import com.soulfiremc.server.data.FluidTags;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.MoverType;
@@ -36,6 +38,7 @@ import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -105,13 +108,27 @@ public abstract class Player extends LivingEntity {
     } else {
       f = 0.0F;
     }
+    if (this.getHealth() > 0.0F && !this.isSpectator()) {
+      var bb = this.getBoundingBox().inflate(1.0, 0.5, 1.0);
+      var list = this.level().getEntities(bb);
+      List<Entity> orbList = Lists.newArrayList();
+
+      for (var entity : list) {
+        if (entity.entityType() == EntityType.EXPERIENCE_ORB) {
+          orbList.add(entity);
+        } else if (!entity.isRemoved()) {
+          this.touch(entity);
+        }
+      }
+
+      if (!orbList.isEmpty()) {
+        this.touch(SFHelpers.getRandomEntry(orbList));
+      }
+    }
   }
 
-  @Override
-  protected void serverAiStep() {
-    super.serverAiStep();
-
-    // TODO: yHeadRot important here?
+  private void touch(Entity entity) {
+    entity.playerTouch(this);
   }
 
   @Override
