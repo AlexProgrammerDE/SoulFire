@@ -65,6 +65,7 @@ public class CollisionCalculator {
 
           bodyPartArray[bodyPart.ordinal()] = sideArray;
         }
+
         diagonalsArray[diagonal.diagonalArrayIndex()] = bodyPartArray;
       }
 
