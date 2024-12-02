@@ -32,9 +32,10 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.*;
 import com.soulfiremc.server.protocol.bot.state.*;
+import com.soulfiremc.server.protocol.bot.state.entity.EntityFactory;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
@@ -256,6 +257,8 @@ public final class SessionDataManager {
       new LocalPlayer(connection, currentLevel(), botProfile);
     localPlayer.entityId(packet.getEntityId());
     localPlayer.showReducedDebug(packet.isReducedDebugInfo());
+    connection.inventoryManager().setContainer(0, localPlayer.inventory());
+
     entityTrackerState.addEntity(localPlayer);
   }
 
@@ -607,7 +610,22 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetSlot(ClientboundSetHeldSlotPacket packet) {
-    connection.inventoryManager().heldItemSlot(packet.getSlot());
+    localPlayer.inventory().selected = packet.getSlot();
+  }
+
+  @EventHandler
+  public void onSetEquipment(ClientboundSetEquipmentPacket packet) {
+    var entity = entityTrackerState.getEntity(packet.getEntityId());
+    if (entity == null) {
+      log.debug("Received equipment update for unknown entity {}", packet.getEntityId());
+      return;
+    }
+
+    if (entity instanceof LivingEntity le) {
+      for (var entry : packet.getEquipment()) {
+        le.setItemSlot(EquipmentSlot.fromMCPl(entry.getSlot()), SFItemStack.from(entry.getItem()));
+      }
+    }
   }
 
   @EventHandler
@@ -803,10 +821,11 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-    var entityState =
-      new RawEntity(
-        EntityType.REGISTRY.getById(packet.getType().ordinal()),
-        currentLevel());
+    var entityState = EntityFactory.createEntity(
+      connection,
+      EntityType.REGISTRY.getById(packet.getType().ordinal()),
+      currentLevel(),
+      packet.getUuid());
     entityState.fromAddEntityPacket(packet);
 
     entityTrackerState.addEntity(entityState);

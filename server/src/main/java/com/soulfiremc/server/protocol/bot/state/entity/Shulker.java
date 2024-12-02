@@ -17,30 +17,20 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import lombok.Getter;
-import lombok.Setter;
-import org.geysermc.mcprotocollib.auth.GameProfile;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
-@Getter
-@Setter
-public abstract class AbstractClientPlayer extends Player {
-  private final BotConnection connection;
-
-  public AbstractClientPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
-    super(level, gameProfile);
-    this.connection = connection;
+public class Shulker extends Mob {
+  public Shulker(EntityType entityType, Level level) {
+    super(entityType, level);
   }
 
   @Override
-  public boolean isSpectator() {
-    return connection.getEntityGameMode(uuid) == GameMode.SPECTATOR;
+  public boolean canBeCollidedWith() {
+    return this.isAlive();
   }
 
   @Override
-  public boolean isCreative() {
-    return connection.getEntityGameMode(uuid) == GameMode.CREATIVE;
+  public void push(Entity entity) {
   }
 }

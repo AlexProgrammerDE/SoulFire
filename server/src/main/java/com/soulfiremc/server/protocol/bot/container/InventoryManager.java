@@ -39,15 +39,12 @@ import java.util.concurrent.locks.ReentrantLock;
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
-  private final PlayerInventoryContainer playerInventory = new PlayerInventoryContainer(this);
-  private final Int2ObjectMap<Container> containerData =
-    new Int2ObjectOpenHashMap<>(Map.of(0, playerInventory));
+  private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
   private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   private final ReentrantLock inventoryControlLock = new ReentrantLock();
   @ToString.Exclude
   private final BotConnection connection;
   private Container currentContainer;
-  private int heldItemSlot = 0;
   private int lastStateId = 0;
   private SFItemStack cursorItem;
 
@@ -77,7 +74,7 @@ public class InventoryManager {
   }
 
   private void sendHeldItemChange() {
-    connection.sendPacket(new ServerboundSetCarriedItemPacket(heldItemSlot));
+    connection.sendPacket(new ServerboundSetCarriedItemPacket(playerInventory().selected));
   }
 
   public void closeInventory() {
@@ -90,15 +87,19 @@ public class InventoryManager {
   }
 
   public boolean lookingAtForeignContainer() {
-    return currentContainer != null && currentContainer != playerInventory;
+    return currentContainer != null && currentContainer != playerInventory();
   }
 
   public void openPlayerInventory() {
     currentContainer = playerInventory();
   }
 
+  public PlayerInventoryContainer playerInventory() {
+    return connection.dataManager().localPlayer().inventory();
+  }
+
   public void changeHeldItem(int slot) {
-    heldItemSlot = slot;
+    playerInventory().selected = slot;
     sendHeldItemChange();
   }
 
@@ -165,7 +166,7 @@ public class InventoryManager {
   }
 
   private void applyIfMatches(EquipmentSlot equipmentSlot) {
-    var item = playerInventory.getEquipmentSlotItem(equipmentSlot);
+    var item = playerInventory().getEquipmentSlotItem(equipmentSlot);
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {

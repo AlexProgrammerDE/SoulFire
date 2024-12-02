@@ -19,15 +19,13 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.soulfiremc.server.data.AttributeType;
-import com.soulfiremc.server.data.EntityDimensions;
-import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.FluidTags;
+import com.soulfiremc.server.data.*;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
@@ -37,13 +35,16 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
 public abstract class Player extends LivingEntity {
+  private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
   private final AbilitiesData abilitiesData = new AbilitiesData();
   public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F)
     .withEyeHeight(1.62F);
@@ -102,12 +103,7 @@ public abstract class Player extends LivingEntity {
 
     super.aiStep();
     this.setSpeed((float) this.attributeValue(AttributeType.MOVEMENT_SPEED));
-    float f;
-    if (this.onGround() && !this.isDeadOrDying() && !this.isSwimming()) {
-      f = Math.min(0.1F, (float) VectorHelper.horizontalDistance(this.getDeltaMovement()));
-    } else {
-      f = 0.0F;
-    }
+
     if (this.getHealth() > 0.0F && !this.isSpectator()) {
       var bb = this.getBoundingBox().inflate(1.0, 0.5, 1.0);
       var list = this.level().getEntities(bb);
@@ -227,6 +223,16 @@ public abstract class Player extends LivingEntity {
   @Override
   protected boolean canGlide() {
     return !this.abilitiesData().flying && super.canGlide();
+  }
+
+  @Override
+  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
+    return inventory.getEquipmentSlotItem(slot);
+  }
+
+  @Override
+  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+    inventory.setEquipmentSlotItem(slot, item);
   }
 
   public void startFallFlying() {

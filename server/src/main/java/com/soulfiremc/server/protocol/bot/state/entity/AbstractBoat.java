@@ -17,30 +17,37 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import lombok.Getter;
-import lombok.Setter;
-import org.geysermc.mcprotocollib.auth.GameProfile;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
-@Getter
-@Setter
-public abstract class AbstractClientPlayer extends Player {
-  private final BotConnection connection;
-
-  public AbstractClientPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
-    super(level, gameProfile);
-    this.connection = connection;
+public class AbstractBoat extends VehicleEntity {
+  public AbstractBoat(EntityType entityType, Level level) {
+    super(entityType, level);
   }
 
   @Override
-  public boolean isSpectator() {
-    return connection.getEntityGameMode(uuid) == GameMode.SPECTATOR;
+  public boolean canCollideWith(Entity entity) {
+    return entity.canBeCollidedWith() || entity.isPushable();
   }
 
   @Override
-  public boolean isCreative() {
-    return connection.getEntityGameMode(uuid) == GameMode.CREATIVE;
+  public boolean canBeCollidedWith() {
+    return true;
+  }
+
+  @Override
+  public boolean isPushable() {
+    return true;
+  }
+
+  @Override
+  public void push(Entity entity) {
+    if (entity instanceof AbstractBoat) {
+      if (entity.getBoundingBox().minY < this.getBoundingBox().maxY) {
+        super.push(entity);
+      }
+    } else if (entity.getBoundingBox().minY <= this.getBoundingBox().minY) {
+      super.push(entity);
+    }
   }
 }

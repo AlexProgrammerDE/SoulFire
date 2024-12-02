@@ -33,9 +33,9 @@ import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.protocol.bot.state.entity.RawEntity;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -659,7 +659,7 @@ public class POVServer extends InternalPlugin {
     if (botConnection.inventoryManager() != null) {
       clientSession.send(
         new ClientboundSetHeldSlotPacket(
-          botConnection.inventoryManager().heldItemSlot()));
+          botConnection.inventoryManager().playerInventory().selected));
       var stateIndex = 0;
       for (var container :
         botConnection.inventoryManager().containerData().values()) {
@@ -710,7 +710,15 @@ public class POVServer extends InternalPlugin {
             localPlayer.showReducedDebug()
               ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
               : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
-      } else if (entity instanceof RawEntity rawEntity) {
+      } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
+        clientSession.send(
+          new ClientboundAddExperienceOrbPacket(
+            entity.entityId(),
+            entity.x(),
+            entity.y(),
+            entity.z(),
+            experienceOrbEntity.expValue()));
+      } else if (entity instanceof Entity rawEntity) {
         clientSession.send(
           new ClientboundAddEntityPacket(
             entity.entityId(),
@@ -726,14 +734,6 @@ public class POVServer extends InternalPlugin {
             entity.deltaMovement().getX(),
             entity.deltaMovement().getY(),
             entity.deltaMovement().getZ()));
-      } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
-        clientSession.send(
-          new ClientboundAddExperienceOrbPacket(
-            entity.entityId(),
-            entity.x(),
-            entity.y(),
-            entity.z(),
-            experienceOrbEntity.expValue()));
       }
 
       for (var effect : entity.effectState().effects().entrySet()) {

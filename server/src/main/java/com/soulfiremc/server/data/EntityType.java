@@ -34,9 +34,12 @@ public record EntityType(
   boolean fireImmune,
   boolean attackable,
   double defaultFollowRange,
+  boolean playerEntity,
+  boolean livingEntity,
   boolean boatEntity,
   boolean minecartEntity,
   boolean windChargeEntity,
+  boolean shulkerEntity,
   List<String> inheritedClasses,
   String defaultEntityMetadata) implements RegistryValue<EntityType> {
   public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);

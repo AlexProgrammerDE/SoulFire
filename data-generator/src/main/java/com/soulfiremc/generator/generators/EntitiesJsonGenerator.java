@@ -30,6 +30,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
 import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -83,6 +85,12 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     if (defaultEntity instanceof LivingEntity le && le.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
       entityDesc.addProperty("defaultFollowRange", le.getAttributeValue(Attributes.FOLLOW_RANGE));
     }
+    if (defaultEntity instanceof Player) {
+      entityDesc.addProperty("playerEntity", true);
+    }
+    if (defaultEntity instanceof LivingEntity) {
+      entityDesc.addProperty("livingEntity", true);
+    }
     if (defaultEntity instanceof AbstractBoat) {
       entityDesc.addProperty("boatEntity", true);
     }
@@ -91,6 +99,9 @@ public class EntitiesJsonGenerator implements IDataGenerator {
     }
     if (defaultEntity instanceof AbstractWindCharge) {
       entityDesc.addProperty("windChargeEntity", true);
+    }
+    if (defaultEntity instanceof Shulker) {
+      entityDesc.addProperty("shulkerEntity", true);
     }
 
     var inheritedClasses = new JsonArray();

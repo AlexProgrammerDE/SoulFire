@@ -462,16 +462,6 @@ public class LocalPlayer extends AbstractClientPlayer {
   }
 
   @Override
-  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
-    return this.connection.inventoryManager().playerInventory().getEquipmentSlotItem(slot);
-  }
-
-  @Override
-  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
-    this.connection.inventoryManager().playerInventory().setEquipmentSlotItem(slot, item);
-  }
-
-  @Override
   public boolean isAffectedByFluids() {
     return !this.abilitiesData().flying;
   }

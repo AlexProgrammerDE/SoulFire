@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.data;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum EquipmentSlot {
   MAINHAND(Type.HAND),

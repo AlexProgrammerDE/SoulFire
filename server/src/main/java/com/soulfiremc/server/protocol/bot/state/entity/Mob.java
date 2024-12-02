@@ -18,16 +18,29 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.EquipmentSlot;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-public class RawEntity extends Entity {
-  public RawEntity(EntityType type, Level level) {
-    super(type, level);
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
+
+public class Mob extends LivingEntity {
+  private final Map<EquipmentSlot, SFItemStack> slots = new EnumMap<>(EquipmentSlot.class);
+
+  public Mob(EntityType entityType, Level level) {
+    super(entityType, level);
+  }
+
+  @Override
+  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
+    return Optional.ofNullable(slots.get(slot));
+  }
+
+  @Override
+  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+    slots.put(slot, item);
   }
 }

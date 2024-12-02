@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 
 @Getter
 public class PlayerInventoryContainer extends Container {
-  private final InventoryManager inventoryManager;
   private final ContainerSlot[] mainInventory = getSlots(9, 35);
   private final ContainerSlot[] hotbar = getSlots(36, 44);
 
@@ -39,10 +38,10 @@ public class PlayerInventoryContainer extends Container {
   private final ContainerSlot[] armor = getSlots(5, 8);
   @Getter
   private final ContainerSlot[] craftingGrid = getSlots(1, 4);
+  public int selected;
 
-  public PlayerInventoryContainer(InventoryManager inventoryManager) {
+  public PlayerInventoryContainer() {
     super(46, 0);
-    this.inventoryManager = inventoryManager;
   }
 
   public Optional<SFItemStack> getEquipmentSlotItem(EquipmentSlot slot) {
@@ -66,7 +65,7 @@ public class PlayerInventoryContainer extends Container {
   }
 
   public ContainerSlot getHeldItem() {
-    return hotbarSlot(inventoryManager.heldItemSlot());
+    return hotbarSlot(selected);
   }
 
   public boolean isHeldItem(ContainerSlot slot) {

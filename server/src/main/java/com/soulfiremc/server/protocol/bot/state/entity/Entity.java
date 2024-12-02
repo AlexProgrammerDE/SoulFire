@@ -64,7 +64,7 @@ import java.util.*;
 
 @Slf4j
 @Getter
-public abstract class Entity {
+public class Entity {
   protected static final int FLAG_ONFIRE = 0;
   private static final int FLAG_SHIFT_KEY_DOWN = 1;
   private static final int FLAG_SPRINTING = 3;
@@ -1133,20 +1133,12 @@ public abstract class Entity {
     return !this.level.chunks().hasChunksAt(minX, minZ, maxX, maxZ);
   }
 
-  public boolean canCollideWith(Entity pushed) {
-    if (entityType.windChargeEntity() && pushed.entityType().windChargeEntity()) {
-      return false;
-    }
-
-    if (entityType.boatEntity() || entityType.minecartEntity()) {
-      return pushed.canBeCollidedWith() || pushed.isPushable();
-    } else {
-      return pushed.canBeCollidedWith();
-    }
+  public boolean canCollideWith(Entity entity) {
+    return entity.canBeCollidedWith();
   }
 
   public boolean canBeCollidedWith() {
-    return entityType.boatEntity() || entityType == EntityType.SHULKER;
+    return false;
   }
 
   protected void updateInWaterStateAndDoFluidPushing() {

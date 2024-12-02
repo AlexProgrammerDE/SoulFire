@@ -464,8 +464,6 @@ public abstract class LivingEntity extends Entity {
     return this.getSleepingPos().isPresent();
   }
 
-  public abstract boolean isUnderWater();
-
   @Override
   public final EntityDimensions getDimensions(Pose pose) {
     return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : this.getDefaultDimensions(pose).scale(this.getScale());
