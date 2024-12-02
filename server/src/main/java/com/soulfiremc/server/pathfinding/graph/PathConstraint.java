@@ -20,7 +20,6 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
@@ -81,16 +80,16 @@ public class PathConstraint {
     return SFBlockHelpers.isDiggable(blockType);
   }
 
-  public boolean collidesWithAtEdge(BlockState blockState, int diagonalArrayIndex, BodyPart bodyPart) {
+  public boolean collidesWithAtEdge(CollisionCalculator.CollisionData collisionData) {
     if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
-      return blockState.collisionShape().hasCollisions();
+      return collisionData.blockState().collisionShape().hasCollisions();
     }
 
-    if (blockState.collisionShape().hasNoCollisions()) {
+    if (collisionData.blockState().collisionShape().hasNoCollisions()) {
       return false;
     }
 
-    return CollisionCalculator.collidesWith(blockState, diagonalArrayIndex, bodyPart);
+    return CollisionCalculator.collidesWith(collisionData);
   }
 
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {

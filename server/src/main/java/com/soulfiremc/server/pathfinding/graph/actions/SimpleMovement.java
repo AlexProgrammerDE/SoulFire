@@ -26,6 +26,7 @@ import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
 import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
+import com.soulfiremc.server.pathfinding.graph.CollisionCalculator;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
@@ -545,7 +546,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      } else if (graph.pathConstraint().collidesWithAtEdge(blockState, diagonalArrayIndex, bodyPart)) {
+      } else if (graph.pathConstraint().collidesWithAtEdge(new CollisionCalculator.CollisionData(blockState, diagonalArrayIndex, bodyPart, side))) {
         var blockedSide = simpleMovement.blockedSide;
         if (blockedSide == null) {
           simpleMovement.blockedSide = side;
