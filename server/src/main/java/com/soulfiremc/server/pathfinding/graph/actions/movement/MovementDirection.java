@@ -94,7 +94,7 @@ public enum MovementDirection {
     };
   }
 
-  public SFVec3i offsetSide(SFVec3i vector) {
+  public SFVec3i edgeOffset(SFVec3i vector) {
     return switch (this) {
       case NORTH_EAST -> vector.add(1, 0, 0);
       case NORTH_WEST -> vector.add(0, 0, 0);
