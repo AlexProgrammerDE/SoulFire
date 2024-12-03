@@ -34,10 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -61,7 +58,22 @@ public class ClientSettingsManager {
   }
 
   public InstanceConfig exportSettingsProto() {
+    gatherProviders();
     return settingsSource.toProto();
+  }
+
+  public void gatherProviders() {
+    var settings = new HashMap<String, Map<String, JsonElement>>();
+    providers.forEach((namespace, properties) -> {
+      var namespaceMap = new HashMap<String, JsonElement>();
+      properties.forEach((key, provider) -> {
+        namespaceMap.put(key, provider.get());
+      });
+
+      settings.put(namespace, namespaceMap);
+    });
+
+    settingsSource = settingsSource.withSettings(settings);
   }
 
   public void loadFromString(String data, ProxyParser proxyParser) {
