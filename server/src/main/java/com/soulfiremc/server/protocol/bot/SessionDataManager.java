@@ -477,6 +477,7 @@ public final class SessionDataManager {
           case UPDATE_LISTED -> () -> entry.setListed(update.isListed());
           case UPDATE_LATENCY -> () -> entry.setLatency(update.getLatency());
           case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(update.getDisplayName());
+          case UPDATE_HAT -> () -> entry.setShowHat(update.isShowHat());
           case UPDATE_LIST_ORDER -> () -> entry.setListOrder(update.getListOrder());
         });
       }

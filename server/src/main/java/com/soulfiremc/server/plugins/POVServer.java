@@ -589,6 +589,7 @@ public class POVServer extends InternalPlugin {
                   entry.getLatency(),
                   entry.getGameMode(),
                   entry.getDisplayName(),
+                  entry.isShowHat(),
                   entry.getListOrder(),
                   entry.getSessionId(),
                   entry.getExpiresAt(),
