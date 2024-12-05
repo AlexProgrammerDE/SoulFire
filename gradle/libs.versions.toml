@@ -1,7 +1,7 @@
 [versions]
 log4j = "2.24.2"
 grpc = "1.68.2"
-protobuf = "4.29.0"
+protobuf = "4.29.1"
 via-version = "5.1.1"
 via-backwards = "5.1.1"
 via-rewind = "4.0.3"
@@ -13,7 +13,7 @@ mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.17.0"
 reactor = "1.2.0"
 classtransform = "1.14.0"
-armeria = "1.31.1"
+armeria = "1.31.2"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
@@ -26,7 +26,7 @@ gradle-plugin-shadow = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 gradle-plugin-licenser = "gradle.plugin.org.cadixdev.gradle:licenser:0.6.1"
 gradle-plugin-lombok = "io.freefair.gradle:lombok-plugin:8.11"
 gradle-plugin-indra-git = "net.kyori:indra-git:3.1.3"
-gradle-plugin-unimined = "xyz.wagyourtail.unimined:xyz.wagyourtail.unimined.gradle.plugin:1.3.10"
+gradle-plugin-unimined = "xyz.wagyourtail.unimined:xyz.wagyourtail.unimined.gradle.plugin:1.3.11"
 gradle-plugin-spotless = "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
 gradle-plugin-freefair = "io.freefair.gradle:maven-plugin:8.11"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
@@ -45,7 +45,7 @@ brigadier = "com.mojang:brigadier:1.1.8"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
 mcprotocollib = { group = "org.geysermc.mcprotocollib", name = "protocol", version.ref = "mcprotocollib" }
-mcstructs = "net.lenni0451.mcstructs:all:2.5.4"
+mcstructs = "net.lenni0451.mcstructs:all:2.5.5"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
