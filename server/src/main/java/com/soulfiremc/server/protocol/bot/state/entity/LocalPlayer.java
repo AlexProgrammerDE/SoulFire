@@ -19,9 +19,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EffectType;
-import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.InputState;
 import com.soulfiremc.server.protocol.bot.state.KeyPresses;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -40,9 +38,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 /**
  * Represents the bot itself as an entity.
@@ -85,17 +80,20 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   @Override
   public void tick() {
-    super.tick();
+    this.tickClientLoadTimeout();
+    if (this.hasClientLoaded()) {
+      super.tick();
 
-    this.sendShiftKeyState();
+      this.sendShiftKeyState();
 
-    if (!input.keyPresses.equals(this.lastSentInput)) {
-      this.connection.sendPacket(input.keyPresses.toServerboundPlayerInputPacket());
-      this.lastSentInput = input.keyPresses;
+      if (!input.keyPresses.equals(this.lastSentInput)) {
+        this.connection.sendPacket(input.keyPresses.toServerboundPlayerInputPacket());
+        this.lastSentInput = input.keyPresses;
+      }
+
+      // Send position changes
+      sendPositionChanges();
     }
-
-    // Send position changes
-    sendPositionChanges();
   }
 
   @Override
