@@ -13,9 +13,10 @@ message HeaderPair {
 }
 
 message DownloadRequest {
-  string uri = 1;
-  repeated HeaderPair headers = 2;
-  optional ProxyProto proxy = 3;
+  string instanceId = 1;
+  string uri = 2;
+  repeated HeaderPair headers = 3;
+  optional ProxyProto proxy = 4;
 }
 
 message DownloadResponse {

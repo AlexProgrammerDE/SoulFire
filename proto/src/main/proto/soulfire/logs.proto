@@ -6,7 +6,8 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 message PreviousLogRequest {
-  int32 count = 1;
+  string instanceId = 1;
+  int32 count = 2;
 }
 
 message PreviousLogResponse {
@@ -14,6 +15,7 @@ message PreviousLogResponse {
 }
 
 message LogRequest {
+  string instanceId = 1;
 }
 
 message LogResponse {

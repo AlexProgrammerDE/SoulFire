@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 message ViewerListRequest {
+  string instanceId = 1;
 }
 
 message ViewerListResponse {
