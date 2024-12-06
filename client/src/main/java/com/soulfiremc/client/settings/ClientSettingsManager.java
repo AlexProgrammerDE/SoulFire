@@ -20,20 +20,23 @@ package com.soulfiremc.client.settings;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
+import com.soulfiremc.client.cli.SFCommandDefinition;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -45,6 +48,8 @@ public class ClientSettingsManager {
     Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();
   private final RPCClient rpcClient;
+  @Setter
+  private SFCommandDefinition commandDefinition;
   private SettingsImpl settingsSource = SettingsImpl.EMPTY;
 
   public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
@@ -57,12 +62,35 @@ public class ClientSettingsManager {
     listeners.put(property, listener);
   }
 
-  public InstanceConfig exportSettingsProto() {
+  public InstanceConfig exportSettingsProto(UUID instanceId) {
+    // Load accounts
+    if (commandDefinition.accountFile() != null && commandDefinition.authType() != null) {
+      try {
+        loadFromString(instanceId, Files.readString(commandDefinition.accountFile()), commandDefinition.authType());
+      } catch (IOException e) {
+        log.error("Failed to load accounts!", e);
+        throw new RuntimeException(e);
+      }
+    }
+
+    // Load proxies
+    if (commandDefinition.proxyFile() != null) {
+      try {
+        loadFromString(
+          Files.readString(commandDefinition.proxyFile()),
+          commandDefinition.proxyType() == null ? ProxyParser.uriParser() : ProxyParser.typeParser(commandDefinition.proxyType()));
+      } catch (IOException e) {
+        log.error("Failed to load proxies!", e);
+        throw new RuntimeException(e);
+      }
+    }
+
+    // Load settings
     gatherProviders();
     return settingsSource.toProto();
   }
 
-  public void gatherProviders() {
+  private void gatherProviders() {
     var settings = new HashMap<String, Map<String, JsonElement>>();
     providers.forEach((namespace, properties) -> {
       var namespaceMap = new HashMap<String, JsonElement>();
@@ -76,7 +104,7 @@ public class ClientSettingsManager {
     settingsSource = settingsSource.withSettings(settings);
   }
 
-  public void loadFromString(String data, ProxyParser proxyParser) {
+  private void loadFromString(String data, ProxyParser proxyParser) {
     try {
       var newProxies =
         data.lines()
@@ -99,14 +127,14 @@ public class ClientSettingsManager {
     }
   }
 
-  public void loadFromString(String data, AuthType authType, SFProxy proxy) {
+  private void loadFromString(UUID instanceId, String data, AuthType authType) {
     try {
       var newAccounts =
-        fromStringList(data.lines()
+        fromStringList(instanceId, data.lines()
           .map(String::strip)
           .filter(Predicate.not(String::isBlank))
           .distinct()
-          .toList(), authType, proxy);
+          .toList(), authType);
 
       if (newAccounts.isEmpty()) {
         log.warn("No accounts found in the provided data!");
@@ -121,16 +149,13 @@ public class ClientSettingsManager {
     }
   }
 
-  private List<MinecraftAccount> fromStringList(List<String> accounts, AuthType authType, SFProxy proxy) {
+  private List<MinecraftAccount> fromStringList(UUID instanceId, List<String> accounts, AuthType authType) {
     try {
       var request =
         CredentialsAuthRequest.newBuilder()
+          .setInstanceId(instanceId.toString())
           .setService(AccountTypeCredentials.valueOf(authType.name()))
           .addAllPayload(accounts);
-
-      if (proxy != null) {
-        request.setProxy(proxy.toProto());
-      }
 
       return rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()).getAccountList()
         .stream()

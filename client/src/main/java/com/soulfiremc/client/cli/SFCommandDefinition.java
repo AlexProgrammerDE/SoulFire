@@ -20,9 +20,9 @@ package com.soulfiremc.client.cli;
 import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.client.settings.ProxyParser;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,14 +30,13 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Getter
 @RequiredArgsConstructor
 @Command(
   name = "soulfire",
@@ -120,29 +119,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     // Delayed to here, so help and version do not get cut off
     GenericTerminalConsole.setupStreams();
 
-    if (accountFile != null && authType != null) {
-      try {
-        cliManager
-          .clientSettingsManager()
-          .loadFromString(Files.readString(accountFile), authType, null);
-      } catch (IOException e) {
-        log.error("Failed to load accounts!", e);
-        return 1;
-      }
-    }
-
-    if (proxyFile != null) {
-      try {
-        cliManager
-          .clientSettingsManager()
-          .loadFromString(
-            Files.readString(proxyFile),
-            proxyType == null ? ProxyParser.uriParser() : ProxyParser.typeParser(proxyType));
-      } catch (IOException e) {
-        log.error("Failed to load proxies!", e);
-        return 1;
-      }
-    }
+    cliManager.clientSettingsManager().commandDefinition(this);
 
     if (start) {
       cliManager.clientCommandManager().execute("start-attack", new ClientConsoleCommandSource());

@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.UUID;
 
 import static com.soulfiremc.client.ClientBrigadierHelper.help;
 import static com.soulfiremc.client.ClientBrigadierHelper.literal;
@@ -64,7 +65,7 @@ public class ClientCommandManager implements PlatformCommandManager<CommandSourc
                       rpcClient
                         .instanceStub().updateInstanceConfig(InstanceUpdateConfigRequest.newBuilder()
                           .setId(value.getId())
-                          .setConfig(clientSettingsManager.exportSettingsProto())
+                          .setConfig(clientSettingsManager.exportSettingsProto(UUID.fromString(value.getId())))
                           .build(), new StreamObserver<>() {
                           @Override
                           public void onNext(InstanceUpdateConfigResponse instanceUpdateResponse) {
