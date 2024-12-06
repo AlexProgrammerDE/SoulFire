@@ -22,7 +22,9 @@ import com.soulfiremc.grpc.generated.ProxyCheckRequest;
 import com.soulfiremc.grpc.generated.ProxyCheckResponse;
 import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
 import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
@@ -36,6 +38,7 @@ import reactor.core.publisher.Mono;
 import javax.inject.Inject;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -43,19 +46,26 @@ import java.util.concurrent.TimeUnit;
 public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   private static final URL IPIFY_URL = ReactorHttpHelper.createURL("https://api.ipify.org");
   private static final URL AWS_URL = ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
+  private final SoulFireServer soulFireServer;
 
   @Override
   public void check(
     ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CHECK_PROXY);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+    var settings = instance.settingsSource();
 
     try {
-      var url =
-        switch (request.getTarget()) {
-          case IPIFY -> IPIFY_URL;
-          case AWS -> AWS_URL;
-          case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized target");
-        };
+      var url = switch (settings.get(ProxySettings.PROXY_CHECK_SERVICE, ProxySettings.ProxyCheckService.class)) {
+        case IPIFY -> IPIFY_URL;
+        case AWS -> AWS_URL;
+      };
 
       var responses = new ArrayList<ProxyCheckResponseSingle>();
       for (var proxy : request.getProxyList().stream().map(SFProxy::fromProto).toList()) {

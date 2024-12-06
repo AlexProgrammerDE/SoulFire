@@ -18,10 +18,7 @@
 package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableIntProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -47,4 +44,18 @@ public class ProxySettings implements SettingsObject {
       .description("Should the proxy order be random when connecting bots?")
       .defaultValue(false)
       .build();
+  public static final ComboProperty PROXY_CHECK_SERVICE =
+    ImmutableComboProperty.builder()
+      .namespace(NAMESPACE)
+      .key("proxy-check-service")
+      .uiName("Proxy check service")
+      .description("What service to use to check if a proxy is working")
+      .defaultValue(ProxyCheckService.IPIFY.name())
+      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), ComboProperty::capitalizeEnum))
+      .build();
+
+  public enum ProxyCheckService {
+    IPIFY,
+    AWS
+  }
 }

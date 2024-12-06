@@ -8,10 +8,9 @@ package soulfire.v1;
 import "soulfire/common.proto";
 
 message CredentialsAuthRequest {
-  AccountTypeCredentials service = 1;
-  optional ProxyProto proxy = 2;
-  int32 maxConcurrency = 3;
-  repeated string payload = 4;
+  string instanceId = 1;
+  AccountTypeCredentials service = 2;
+  repeated string payload = 3;
 }
 
 message CredentialsAuthResponse {
@@ -19,8 +18,8 @@ message CredentialsAuthResponse {
 }
 
 message DeviceCodeAuthRequest {
-  AccountTypeDeviceCode service = 1;
-  optional ProxyProto proxy = 2;
+  string instanceId = 1;
+  AccountTypeDeviceCode service = 2;
 }
 
 message DeviceCode {
@@ -38,8 +37,8 @@ message DeviceCodeAuthResponse {
 }
 
 message RefreshRequest {
-  MinecraftAccountProto account = 1;
-  optional ProxyProto proxy = 2;
+  string instanceId = 1;
+  MinecraftAccountProto account = 2;
 }
 
 message RefreshResponse {

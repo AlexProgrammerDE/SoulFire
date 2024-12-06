@@ -18,8 +18,10 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.user.Permissions;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
@@ -30,19 +32,30 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
+  private final SoulFireServer soulFireServer;
+
   @Override
   public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+    var settings = instance.settingsSource();
+
     try {
       var service = MCAuthService.convertService(request.getService());
-      var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);
-      var results = SFHelpers.maxFutures(request.getMaxConcurrency(), request.getPayloadList(), payload ->
-          service.createDataAndLogin(payload, proxy)
+      var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
+          service.createDataAndLogin(payload, settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
             .thenApply(MinecraftAccount::toProto)
             .exceptionally(t -> {
               log.error("Error authenticating account", t);
@@ -64,6 +77,15 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+    var settings = instance.settingsSource();
+
     MCAuthService.convertService(request.getService()).createDataAndLogin(deviceCode ->
           responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
             .setDeviceCode(
@@ -75,7 +97,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
                 .build()
             ).build()
           ),
-        RPCUtils.convertProxy(request::hasProxy, request::getProxy))
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -91,10 +113,19 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   public void refresh(RefreshRequest request, StreamObserver<RefreshResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT);
 
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+    var settings = instance.settingsSource();
+
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
       var account = MCAuthService.convertService(request.getAccount().getType()).refresh(receivedAccount,
-        RPCUtils.convertProxy(request::hasProxy, request::getProxy)).join();
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

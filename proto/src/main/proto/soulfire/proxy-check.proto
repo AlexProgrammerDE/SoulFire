@@ -8,13 +8,8 @@ package soulfire.v1;
 import "soulfire/common.proto";
 
 message ProxyCheckRequest {
-  enum Target {
-    IPIFY = 0;
-    AWS = 1;
-  }
-
-  repeated ProxyProto proxy = 1;
-  Target target = 2;
+  string instanceId = 1;
+  repeated ProxyProto proxy = 2;
 }
 
 message ProxyCheckResponseSingle {

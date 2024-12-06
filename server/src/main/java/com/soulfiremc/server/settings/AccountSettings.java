@@ -18,10 +18,7 @@
 package com.soulfiremc.server.settings;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableStringProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -43,5 +40,26 @@ public class AccountSettings implements SettingsObject {
       .uiName("Shuffle accounts")
       .description("Should the accounts order be random when connecting bots?")
       .defaultValue(false)
+      .build();
+  public static final BooleanProperty USE_PROXIES_FOR_ACCOUNT_IMPORT =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("use-proxies-for-account-import")
+      .uiName("Use proxies for account import")
+      .description("""
+        Should the imported proxies be used to import accounts? (Contact Microsoft login, input credentials, etc.)
+        Otherwise the SF server will import accounts directly.""")
+      .defaultValue(false)
+      .build();
+  public static final IntProperty ACCOUNT_IMPORT_CONCURRENCY =
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("account-import-concurrency")
+      .uiName("Account import concurrency")
+      .description("For credentials-like auth, how many accounts should be imported at once?")
+      .defaultValue(3)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
       .build();
 }
