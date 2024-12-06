@@ -51,7 +51,7 @@ public class ProxySettings implements SettingsObject {
       .uiName("Proxy check service")
       .description("What service to use to check if a proxy is working")
       .defaultValue(ProxyCheckService.IPIFY.name())
-      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), ComboProperty::capitalizeEnum))
+      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), Enum::name))
       .build();
 
   public enum ProxyCheckService {
