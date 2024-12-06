@@ -253,6 +253,8 @@ public record ItemType(
   public static final ItemType RED_WOOL = register("minecraft:red_wool");
   public static final ItemType BLACK_WOOL = register("minecraft:black_wool");
   public static final ItemType DANDELION = register("minecraft:dandelion");
+  public static final ItemType OPEN_EYEBLOSSOM = register("minecraft:open_eyeblossom");
+  public static final ItemType CLOSED_EYEBLOSSOM = register("minecraft:closed_eyeblossom");
   public static final ItemType POPPY = register("minecraft:poppy");
   public static final ItemType BLUE_ORCHID = register("minecraft:blue_orchid");
   public static final ItemType ALLIUM = register("minecraft:allium");
@@ -401,6 +403,13 @@ public record ItemType(
   public static final ItemType MELON = register("minecraft:melon");
   public static final ItemType VINE = register("minecraft:vine");
   public static final ItemType GLOW_LICHEN = register("minecraft:glow_lichen");
+  public static final ItemType RESIN_CLUMP = register("minecraft:resin_clump");
+  public static final ItemType RESIN_BLOCK = register("minecraft:resin_block");
+  public static final ItemType RESIN_BRICKS = register("minecraft:resin_bricks");
+  public static final ItemType RESIN_BRICK_STAIRS = register("minecraft:resin_brick_stairs");
+  public static final ItemType RESIN_BRICK_SLAB = register("minecraft:resin_brick_slab");
+  public static final ItemType RESIN_BRICK_WALL = register("minecraft:resin_brick_wall");
+  public static final ItemType CHISELED_RESIN_BRICKS = register("minecraft:chiseled_resin_bricks");
   public static final ItemType BRICK_STAIRS = register("minecraft:brick_stairs");
   public static final ItemType STONE_BRICK_STAIRS = register("minecraft:stone_brick_stairs");
   public static final ItemType MUD_BRICK_STAIRS = register("minecraft:mud_brick_stairs");
@@ -1185,6 +1194,7 @@ public record ItemType(
   public static final ItemType FIREWORK_STAR = register("minecraft:firework_star");
   public static final ItemType ENCHANTED_BOOK = register("minecraft:enchanted_book");
   public static final ItemType NETHER_BRICK = register("minecraft:nether_brick");
+  public static final ItemType RESIN_BRICK = register("minecraft:resin_brick");
   public static final ItemType PRISMARINE_SHARD = register("minecraft:prismarine_shard");
   public static final ItemType PRISMARINE_CRYSTALS = register("minecraft:prismarine_crystals");
   public static final ItemType RABBIT = register("minecraft:rabbit");

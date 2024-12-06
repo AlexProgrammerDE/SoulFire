@@ -74,8 +74,8 @@ public class BlockTags {
   public static final TagKey<BlockType> SMALL_FLOWERS = register("minecraft:small_flowers");
   public static final TagKey<BlockType> BEDS = register("minecraft:beds");
   public static final TagKey<BlockType> FENCES = register("minecraft:fences");
-  public static final TagKey<BlockType> TALL_FLOWERS = register("minecraft:tall_flowers");
   public static final TagKey<BlockType> FLOWERS = register("minecraft:flowers");
+  public static final TagKey<BlockType> BEE_ATTRACTIVE = register("minecraft:bee_attractive");
   public static final TagKey<BlockType> PIGLIN_REPELLENTS = register("minecraft:piglin_repellents");
   public static final TagKey<BlockType> GOLD_ORES = register("minecraft:gold_ores");
   public static final TagKey<BlockType> IRON_ORES = register("minecraft:iron_ores");

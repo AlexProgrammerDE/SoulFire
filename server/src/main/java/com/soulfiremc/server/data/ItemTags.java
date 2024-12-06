@@ -71,8 +71,6 @@ public class ItemTags {
   public static final TagKey<ItemType> SMALL_FLOWERS = register("minecraft:small_flowers");
   public static final TagKey<ItemType> BEDS = register("minecraft:beds");
   public static final TagKey<ItemType> FENCES = register("minecraft:fences");
-  public static final TagKey<ItemType> TALL_FLOWERS = register("minecraft:tall_flowers");
-  public static final TagKey<ItemType> FLOWERS = register("minecraft:flowers");
   public static final TagKey<ItemType> PIGLIN_REPELLENTS = register("minecraft:piglin_repellents");
   public static final TagKey<ItemType> PIGLIN_LOVED = register("minecraft:piglin_loved");
   public static final TagKey<ItemType> IGNORED_BY_PIGLIN_BABIES = register("minecraft:ignored_by_piglin_babies");
@@ -163,7 +161,6 @@ public class ItemTags {
   public static final TagKey<ItemType> SKULLS = register("minecraft:skulls");
   public static final TagKey<ItemType> TRIMMABLE_ARMOR = register("minecraft:trimmable_armor");
   public static final TagKey<ItemType> TRIM_MATERIALS = register("minecraft:trim_materials");
-  public static final TagKey<ItemType> TRIM_TEMPLATES = register("minecraft:trim_templates");
   public static final TagKey<ItemType> DECORATED_POT_SHERDS = register("minecraft:decorated_pot_sherds");
   public static final TagKey<ItemType> DECORATED_POT_INGREDIENTS = register("minecraft:decorated_pot_ingredients");
   public static final TagKey<ItemType> SWORDS = register("minecraft:swords");
@@ -177,6 +174,11 @@ public class ItemTags {
   public static final TagKey<ItemType> DYEABLE = register("minecraft:dyeable");
   public static final TagKey<ItemType> FURNACE_MINECART_FUEL = register("minecraft:furnace_minecart_fuel");
   public static final TagKey<ItemType> BUNDLES = register("minecraft:bundles");
+  public static final TagKey<ItemType> SKELETON_PREFERRED_WEAPONS = register("minecraft:skeleton_preferred_weapons");
+  public static final TagKey<ItemType> DROWNED_PREFERRED_WEAPONS = register("minecraft:drowned_preferred_weapons");
+  public static final TagKey<ItemType> PIGLIN_PREFERRED_WEAPONS = register("minecraft:piglin_preferred_weapons");
+  public static final TagKey<ItemType> PILLAGER_PREFERRED_WEAPONS = register("minecraft:pillager_preferred_weapons");
+  public static final TagKey<ItemType> WITHER_SKELETON_DISLIKED_WEAPONS = register("minecraft:wither_skeleton_disliked_weapons");
   public static final TagKey<ItemType> FOOT_ARMOR_ENCHANTABLE = register("minecraft:enchantable/foot_armor");
   public static final TagKey<ItemType> LEG_ARMOR_ENCHANTABLE = register("minecraft:enchantable/leg_armor");
   public static final TagKey<ItemType> CHEST_ARMOR_ENCHANTABLE = register("minecraft:enchantable/chest_armor");
