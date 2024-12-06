@@ -70,7 +70,9 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData CAT__RELAX_STATE_ONE = register("relax_state_one", 21, "cat");
   public static final NamedEntityData CAT__VARIANT = register("variant", 19, "cat");
   public static final NamedEntityData CREAKING__CAN_MOVE = register("can_move", 16, "creaking");
+  public static final NamedEntityData CREAKING__HOME_POS = register("home_pos", 19, "creaking");
   public static final NamedEntityData CREAKING__IS_ACTIVE = register("is_active", 17, "creaking");
+  public static final NamedEntityData CREAKING__IS_TEARING_DOWN = register("is_tearing_down", 18, "creaking");
   public static final NamedEntityData CREEPER__IS_IGNITED = register("is_ignited", 18, "creeper");
   public static final NamedEntityData CREEPER__IS_POWERED = register("is_powered", 17, "creeper");
   public static final NamedEntityData CREEPER__SWELL_DIR = register("swell_dir", 16, "creeper");

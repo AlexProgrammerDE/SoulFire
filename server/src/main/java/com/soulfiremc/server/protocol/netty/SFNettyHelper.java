@@ -27,13 +27,11 @@ import io.netty.handler.proxy.Socks5ProxyHandler;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 
 public class SFNettyHelper {
-  public static final TransportHelper.TransportType TRANSPORT_TYPE = TransportHelper.determineTransportMethod();
-
   private SFNettyHelper() {}
 
   public static EventLoopGroup createEventLoopGroup(String name) {
     var group =
-      TRANSPORT_TYPE.eventLoopGroupFactory().apply(
+      TransportHelper.TRANSPORT_TYPE.eventLoopGroupFactory().apply(
         r ->
           Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r));
 

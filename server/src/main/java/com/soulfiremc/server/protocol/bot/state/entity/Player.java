@@ -60,6 +60,8 @@ public abstract class Player extends LivingEntity {
   protected final GameProfile gameProfile;
   protected boolean wasUnderwater = false;
   private boolean reducedDebugInfo;
+  protected int clientLoadedTimeoutTimer = 60;
+  private boolean clientLoaded = false;
 
   public Player(Level level, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);
@@ -351,5 +353,22 @@ public abstract class Player extends LivingEntity {
 
   public boolean hasPermissions(int i) {
     return this.permissionLevel() >= i;
+  }
+
+  public boolean hasClientLoaded() {
+    return this.clientLoaded || this.clientLoadedTimeoutTimer <= 0;
+  }
+
+  public void tickClientLoadTimeout() {
+    if (!this.clientLoaded) {
+      this.clientLoadedTimeoutTimer--;
+    }
+  }
+
+  public void setClientLoaded(boolean clientLoaded) {
+    this.clientLoaded = clientLoaded;
+    if (!this.clientLoaded) {
+      this.clientLoadedTimeoutTimer = 60;
+    }
   }
 }

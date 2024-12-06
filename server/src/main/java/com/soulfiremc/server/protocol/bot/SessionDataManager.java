@@ -42,6 +42,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.mcstructs.LevelLoadStatusManager;
 import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
@@ -91,6 +92,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.*
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundPlayerLoadedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
@@ -127,6 +129,7 @@ public final class SessionDataManager {
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private LocalPlayer localPlayer;
+  private LevelLoadStatusManager levelLoadStatusManager;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
   private HealthData healthData;
@@ -178,9 +181,9 @@ public final class SessionDataManager {
 
   private float getTickTargetMillis(float defaultValue) {
     if (this.level != null) {
-      var lv = this.level.tickRateManager();
-      if (lv.runsNormally()) {
-        return Math.max(defaultValue, lv.millisecondsPerTick());
+      var tickRateManager = this.level.tickRateManager();
+      if (tickRateManager.runsNormally()) {
+        return Math.max(defaultValue, tickRateManager.millisecondsPerTick());
       }
     }
 
@@ -260,6 +263,8 @@ public final class SessionDataManager {
     connection.inventoryManager().setContainer(0, localPlayer.inventory());
 
     entityTrackerState.addEntity(localPlayer);
+
+    startWaitingForNewLevel(localPlayer, currentLevel());
   }
 
   private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
@@ -277,6 +282,10 @@ public final class SessionDataManager {
     previousGameMode = spawnInfo.getPreviousGamemode();
     lastDeathPos = spawnInfo.getLastDeathPos();
     portalCooldown = spawnInfo.getPortalCooldown();
+  }
+
+  private void startWaitingForNewLevel(LocalPlayer player, Level level) {
+    this.levelLoadStatusManager = new LevelLoadStatusManager(player, level);
   }
 
   @EventHandler
@@ -369,6 +378,8 @@ public final class SessionDataManager {
 
     // We are now possibly in a new dimension
     localPlayer.level(currentLevel());
+
+    this.startWaitingForNewLevel(localPlayer, currentLevel());
 
     log.info("Respawned");
   }
@@ -477,6 +488,7 @@ public final class SessionDataManager {
           case UPDATE_LISTED -> () -> entry.setListed(update.isListed());
           case UPDATE_LATENCY -> () -> entry.setLatency(update.getLatency());
           case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(update.getDisplayName());
+          case UPDATE_HAT -> () -> entry.setShowHat(update.isShowHat());
           case UPDATE_LIST_ORDER -> () -> entry.setListOrder(update.getListOrder());
         });
       }
@@ -684,7 +696,12 @@ public final class SessionDataManager {
       case AFFECTED_BY_ELDER_GUARDIAN -> () -> log.debug("Affected by elder guardian");
       case ENABLE_RESPAWN_SCREEN -> () -> enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
       case LIMITED_CRAFTING -> () -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
-      case LEVEL_CHUNKS_LOAD_START -> () -> log.debug("Level chunks load start");
+      case LEVEL_CHUNKS_LOAD_START -> () -> {
+        log.debug("Level chunks load start");
+        if (levelLoadStatusManager != null) {
+          levelLoadStatusManager.loadingPacketsReceived();
+        }
+      };
     });
   }
 
@@ -1178,6 +1195,14 @@ public final class SessionDataManager {
         } else {
           entry.setValue(ticks);
         }
+      }
+    }
+
+    if (this.levelLoadStatusManager != null) {
+      this.levelLoadStatusManager.tick();
+      if (this.levelLoadStatusManager.levelReady() && !this.localPlayer.hasClientLoaded()) {
+        this.connection.sendPacket(ServerboundPlayerLoadedPacket.INSTANCE);
+        this.localPlayer.setClientLoaded(true);
       }
     }
   }

@@ -44,6 +44,7 @@ import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.network.codec.PacketCodecHelper;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
+import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.tcp.*;
@@ -131,9 +132,9 @@ public class ViaClientSession extends TcpSession {
       }
 
       bootstrap.channelFactory(
-        RakChannelFactory.client(SFNettyHelper.TRANSPORT_TYPE.datagramChannelClass()));
+        RakChannelFactory.client(TransportHelper.TRANSPORT_TYPE.datagramChannelClass()));
     } else {
-      bootstrap.channel(SFNettyHelper.TRANSPORT_TYPE.socketChannelClass());
+      bootstrap.channel(TransportHelper.TRANSPORT_TYPE.socketChannelClass());
     }
 
     bootstrap
@@ -151,7 +152,7 @@ public class ViaClientSession extends TcpSession {
     } else {
       bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true);
 
-      if (SFNettyHelper.TRANSPORT_TYPE.supportsTcpFastOpenClient()) {
+      if (TransportHelper.TRANSPORT_TYPE.supportsTcpFastOpenClient()) {
         bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
       }
     }

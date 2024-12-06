@@ -24,7 +24,6 @@ import com.google.gson.stream.JsonWriter;
 import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
-import java.util.List;
 
 @SuppressWarnings("unused")
 public record BlockType(
@@ -394,12 +393,19 @@ public record BlockType(
   public static final BlockType MELON_STEM = register("minecraft:melon_stem");
   public static final BlockType VINE = register("minecraft:vine");
   public static final BlockType GLOW_LICHEN = register("minecraft:glow_lichen");
+  public static final BlockType RESIN_CLUMP = register("minecraft:resin_clump");
   public static final BlockType OAK_FENCE_GATE = register("minecraft:oak_fence_gate");
   public static final BlockType BRICK_STAIRS = register("minecraft:brick_stairs");
   public static final BlockType STONE_BRICK_STAIRS = register("minecraft:stone_brick_stairs");
   public static final BlockType MUD_BRICK_STAIRS = register("minecraft:mud_brick_stairs");
   public static final BlockType MYCELIUM = register("minecraft:mycelium");
   public static final BlockType LILY_PAD = register("minecraft:lily_pad");
+  public static final BlockType RESIN_BLOCK = register("minecraft:resin_block");
+  public static final BlockType RESIN_BRICKS = register("minecraft:resin_bricks");
+  public static final BlockType RESIN_BRICK_STAIRS = register("minecraft:resin_brick_stairs");
+  public static final BlockType RESIN_BRICK_SLAB = register("minecraft:resin_brick_slab");
+  public static final BlockType RESIN_BRICK_WALL = register("minecraft:resin_brick_wall");
+  public static final BlockType CHISELED_RESIN_BRICKS = register("minecraft:chiseled_resin_bricks");
   public static final BlockType NETHER_BRICKS = register("minecraft:nether_bricks");
   public static final BlockType NETHER_BRICK_FENCE = register("minecraft:nether_brick_fence");
   public static final BlockType NETHER_BRICK_STAIRS = register("minecraft:nether_brick_stairs");
@@ -1145,6 +1151,10 @@ public record BlockType(
   public static final BlockType PALE_MOSS_BLOCK = register("minecraft:pale_moss_block");
   public static final BlockType PALE_MOSS_CARPET = register("minecraft:pale_moss_carpet");
   public static final BlockType PALE_HANGING_MOSS = register("minecraft:pale_hanging_moss");
+  public static final BlockType OPEN_EYEBLOSSOM = register("minecraft:open_eyeblossom");
+  public static final BlockType CLOSED_EYEBLOSSOM = register("minecraft:closed_eyeblossom");
+  public static final BlockType POTTED_OPEN_EYEBLOSSOM = register("minecraft:potted_open_eyeblossom");
+  public static final BlockType POTTED_CLOSED_EYEBLOSSOM = register("minecraft:potted_closed_eyeblossom");
   //@formatter:on
 
   public BlockType {

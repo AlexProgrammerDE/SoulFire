@@ -75,7 +75,6 @@ public record EntityType(
   public static final EntityType COMMAND_BLOCK_MINECART = register("minecraft:command_block_minecart");
   public static final EntityType COW = register("minecraft:cow");
   public static final EntityType CREAKING = register("minecraft:creaking");
-  public static final EntityType CREAKING_TRANSIENT = register("minecraft:creaking_transient");
   public static final EntityType CREEPER = register("minecraft:creeper");
   public static final EntityType DARK_OAK_BOAT = register("minecraft:dark_oak_boat");
   public static final EntityType DARK_OAK_CHEST_BOAT = register("minecraft:dark_oak_chest_boat");
