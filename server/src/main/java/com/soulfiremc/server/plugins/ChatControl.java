@@ -33,6 +33,8 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
+import java.util.List;
+
 @Extension
 public class ChatControl extends InternalPlugin {
   public ChatControl() {
@@ -64,6 +66,8 @@ public class ChatControl extends InternalPlugin {
     plainMessage = plainMessage.substring(prefixIndex);
     var command = plainMessage.substring(prefix.length());
     connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
+
+    ServerCommandManager.putInstanceIds(List.of(connection.instanceManager().id()));
     var code = connection.instanceManager()
       .soulFireServer()
       .injector()

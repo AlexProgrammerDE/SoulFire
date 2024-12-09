@@ -27,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -39,6 +41,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_EXECUTION);
 
     try {
+      ServerCommandManager.putInstanceIds(List.of(UUID.fromString(request.getInstanceId())));
       var code = serverCommandManager.execute(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());

@@ -75,6 +75,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
@@ -86,6 +87,8 @@ import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
 public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
     ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
+  private static final String INSTANCE_IDS_KEY = "instance_ids";
+  private static final String BOT_NAMES_KEY = "bot_names";
   @Getter
   private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
@@ -98,6 +101,42 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     } else {
       return currentUser.getUsername();
     }
+  }
+
+  public static void putInstanceIds(List<UUID> ids) {
+    if (hasInstanceIds()) {
+      throw new IllegalStateException("Instance ids already set!");
+    }
+
+    COMMAND_CONTEXT.get().put(INSTANCE_IDS_KEY, ids.stream().map(UUID::toString).collect(Collectors.joining(",")));
+  }
+
+  public static void putBotNames(List<String> names) {
+    if (hasBotNames()) {
+      throw new IllegalStateException("Bot names already set!");
+    }
+
+    COMMAND_CONTEXT.get().put(BOT_NAMES_KEY, String.join(",", names));
+  }
+
+  public static boolean hasBotNames() {
+    return COMMAND_CONTEXT.get().containsKey(BOT_NAMES_KEY);
+  }
+
+  public static boolean hasInstanceIds() {
+    return COMMAND_CONTEXT.get().containsKey(INSTANCE_IDS_KEY);
+  }
+
+  public static List<String> getBotNames() {
+    return List.of(COMMAND_CONTEXT.get().get(BOT_NAMES_KEY).split(","));
+  }
+
+  public static List<UUID> getInstanceIds() {
+    return Arrays.stream(COMMAND_CONTEXT.get().get(INSTANCE_IDS_KEY).split(",")).map(UUID::fromString).toList();
+  }
+
+  public static void clearContext() {
+    COMMAND_CONTEXT.get().clear();
   }
 
   @PostConstruct
@@ -815,7 +854,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               helpRedirect(
                 "Instead of running a command for selected bots, run it for a specific list of bots. Use a comma to separate the names",
                 c -> {
-                  COMMAND_CONTEXT.get().put("bot_names", StringArgumentType.getString(c, "bot_names"));
+                  putBotNames(List.of(StringArgumentType.getString(c, "bot_names").split(",")));
                   return Collections.singleton(c.getSource());
                 }),
               false)));
@@ -841,7 +880,11 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               helpRedirect(
                 "Instead of running a command for selected attacks, run it for a specific list of attacks. Use a comma to separate the ids",
                 c -> {
-                  COMMAND_CONTEXT.get().put("attack_ids", StringArgumentType.getString(c, "attack_ids"));
+                  putInstanceIds(Arrays.stream(StringArgumentType.getString(c, "attack_ids").split(","))
+                    .map(UUIDHelper::tryParseUniqueId)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList());
                   return Collections.singleton(c.getSource());
                 }),
               false)));
@@ -899,11 +942,9 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var instanceManager : soulFireServer.instances().values()) {
-      if (COMMAND_CONTEXT.get().containsKey("attack_ids")
-        && Arrays.stream(COMMAND_CONTEXT.get().get("attack_ids").split(","))
-        .map(UUIDHelper::tryParseUniqueId)
-        .filter(Optional::isPresent)
-        .noneMatch(i -> i.orElseThrow().equals(instanceManager.id()))) {
+      if (hasInstanceIds() && getInstanceIds()
+        .stream()
+        .noneMatch(instanceManager.id()::equals)) {
         continue;
       }
 
@@ -960,9 +1001,9 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       instanceManager -> {
         var resultCode = Command.SINGLE_SUCCESS;
         for (var bot : instanceManager.botConnections().values()) {
-          if (COMMAND_CONTEXT.get().containsKey("bot_names")
-            && Arrays.stream(COMMAND_CONTEXT.get().get("bot_names").split(","))
-            .noneMatch(s -> s.equals(bot.accountName()))) {
+          if (hasBotNames() && getBotNames()
+            .stream()
+            .noneMatch(bot.accountName()::equals)) {
             continue;
           }
 
@@ -1003,7 +1044,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       source.sendWarn(e.getMessage());
       return Command.SINGLE_SUCCESS;
     } finally {
-      COMMAND_CONTEXT.get().clear();
+      clearContext();
     }
   }
 
@@ -1018,7 +1059,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
         .map(Suggestion::getText)
         .toList();
     } finally {
-      COMMAND_CONTEXT.get().clear();
+      clearContext();
     }
   }
 

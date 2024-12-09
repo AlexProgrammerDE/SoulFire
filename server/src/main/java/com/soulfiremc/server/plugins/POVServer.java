@@ -993,6 +993,8 @@ public class POVServer extends InternalPlugin {
                 if (message.startsWith(prefix)) {
                   var command = message.substring(prefix.length());
                   var source = new PovServerUser(clientSession, clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getName());
+
+                  ServerCommandManager.putInstanceIds(List.of(instanceManager.id()));
                   var code = instanceManager
                     .soulFireServer()
                     .injector()
