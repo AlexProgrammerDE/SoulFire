@@ -18,6 +18,7 @@
 package com.soulfiremc.generator.generators;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
@@ -31,6 +32,7 @@ import net.minecraft.tags.TagNetworkSerialization;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
@@ -73,9 +75,11 @@ public class DefaultTagsDataGenerator implements IDataGenerator {
           registryObj.add(tag.getKey().toString(), tagObj);
         }
 
+        registryObj = toSorted(registryObj);
         rootObj.add(registry.location().toString(), registryObj);
       }
 
+      rootObj = toSorted(rootObj);
       Streams.write(rootObj, jsonWriter);
 
       jsonWriter.flush();
@@ -84,5 +88,17 @@ public class DefaultTagsDataGenerator implements IDataGenerator {
     }
 
     return byteOutputStream.toByteArray();
+  }
+
+  private static JsonObject toSorted(JsonObject obj) {
+    var sorted = new LinkedHashMap<String, JsonElement>();
+    obj.entrySet().stream()
+      .sorted(Map.Entry.comparingByKey())
+      .forEachOrdered(e -> sorted.put(e.getKey(), e.getValue()));
+
+    var result = new JsonObject();
+    sorted.forEach(result::add);
+
+    return result;
   }
 }
