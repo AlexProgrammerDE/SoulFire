@@ -30,9 +30,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCo
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
-import it.unimi.dsi.fastutil.Pair;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -60,92 +58,44 @@ public final class DownMovement extends GraphAction implements Cloneable {
   private static DownMovement registerDownMovement(
     SubscriptionConsumer blockSubscribers,
     DownMovement movement) {
-    {
-      for (var safetyBlock : movement.listSafetyCheckBlocks()) {
-        blockSubscribers.subscribe(safetyBlock, new DownSafetyCheckSubscription());
-      }
-    }
-
-    {
-      for (var obstructingBlock : movement.listObstructFallCheckBlocks()) {
-        blockSubscribers.subscribe(obstructingBlock, new ObstructingFallCheckSubscription());
-      }
-    }
-
-    {
-      var freeBlock = movement.blockToBreak();
-      blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(freeBlock.value()));
-    }
-
-    {
-      var safeBlocks = movement.listCheckSafeMineBlocks();
-      for (var savedBlock : safeBlocks) {
-        if (savedBlock == null) {
-          continue;
-        }
-
-        for (var block : savedBlock) {
-          blockSubscribers.subscribe(block.position(), new MovementBreakSafetyCheckSubscription(block.type()));
-        }
-      }
-    }
+    movement.registerSafetyCheckBlocks(blockSubscribers);
+    movement.registerObstructFallCheckBlocks(blockSubscribers);
+    movement.registerBlockToBreak(blockSubscribers);
+    movement.registerCheckSafeMineBlocks(blockSubscribers);
 
     return movement;
   }
 
-  public Pair<SFVec3i, BlockFace> blockToBreak() {
-    return Pair.of(targetToMineBlock, BlockFace.TOP);
+  public void registerBlockToBreak(SubscriptionConsumer blockSubscribers) {
+    blockSubscribers.subscribe(targetToMineBlock, new MovementFreeSubscription(BlockFace.TOP));
   }
 
   // These blocks are possibly safe blocks we can fall on top of
-  public List<SFVec3i> listSafetyCheckBlocks() {
-    var requiredFreeBlocks = new ArrayList<SFVec3i>();
-
+  public void registerSafetyCheckBlocks(SubscriptionConsumer blockSubscribers) {
     // Falls one block
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0), DownSafetyCheckSubscription.INSTANCE);
 
     // Falls two blocks
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0), DownSafetyCheckSubscription.INSTANCE);
 
     // Falls three blocks
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0));
-
-    return requiredFreeBlocks;
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0), DownSafetyCheckSubscription.INSTANCE);
   }
 
-  public List<SFVec3i> listObstructFallCheckBlocks() {
-    var requiredFreeBlocks = new ArrayList<SFVec3i>();
-
+  public void registerObstructFallCheckBlocks(SubscriptionConsumer blockSubscribers) {
     // Block below the block we mine can obstruct a 2 block fall
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0));
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0), ObstructingFallCheckSubscription.INSTANCE);
 
     // Block below the block we mine can obstruct a 3 block fall
-    requiredFreeBlocks.add(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0));
-
-    return requiredFreeBlocks;
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0), ObstructingFallCheckSubscription.INSTANCE);
   }
 
-  public BlockSafetyData[][] listCheckSafeMineBlocks() {
-    var results = new BlockSafetyData[1][];
-
-    var firstDirection = SkyDirection.NORTH;
-    var oppositeDirection = firstDirection.opposite();
-    var leftDirectionSide = firstDirection.leftSide();
-    var rightDirectionSide = firstDirection.rightSide();
-
-    results[0] =
-      new BlockSafetyData[]{
-        new BlockSafetyData(
-          firstDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-        new BlockSafetyData(
-          oppositeDirection.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-        new BlockSafetyData(
-          leftDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS),
-        new BlockSafetyData(
-          rightDirectionSide.offset(targetToMineBlock), BlockSafetyData.BlockSafetyType.FLUIDS)
-      };
-
-    return results;
+  public void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
+    for (var skyDirection : SkyDirection.VALUES) {
+      blockSubscribers.subscribe(
+        skyDirection.offset(targetToMineBlock),
+        new MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType.FLUIDS));
+    }
   }
 
   @Override
@@ -217,6 +167,8 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   record DownSafetyCheckSubscription() implements DownMovementSubscription {
+    private static final DownSafetyCheckSubscription INSTANCE = new DownSafetyCheckSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -254,6 +206,8 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   record ObstructingFallCheckSubscription() implements DownMovementSubscription {
+    private static final ObstructingFallCheckSubscription INSTANCE = new ObstructingFallCheckSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {

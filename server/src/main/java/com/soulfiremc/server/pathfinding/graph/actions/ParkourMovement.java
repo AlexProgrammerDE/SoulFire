@@ -22,15 +22,12 @@ import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
-import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
-import it.unimi.dsi.fastutil.Pair;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -58,55 +55,40 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   private static ParkourMovement registerParkourMovement(
     SubscriptionConsumer blockSubscribers,
     ParkourMovement movement) {
-    {
-      for (var freeBlock : movement.listRequiredFreeBlocks()) {
-        blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription());
-      }
-    }
-
-    {
-      blockSubscribers.subscribe(movement.requiredUnsafeBlock(), new ParkourUnsafeToStandOnSubscription());
-    }
-
-    {
-      blockSubscribers.subscribe(movement.requiredSolidBlock(), new MovementSolidSubscription());
-    }
+    movement.registerRequiredFreeBlocks(blockSubscribers);
+    movement.registerRequiredUnsafeBlock(blockSubscribers);
+    movement.registerRequiredSolidBlock(blockSubscribers);
 
     return movement;
   }
 
-  public List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ArrayList<Pair<SFVec3i, BlockFace>>();
-
+  public void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
     // Make block above the head block free for jump
-    requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
 
     var oneFurther = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-    var blockDigDirection = direction.toSkyDirection().opposite().toBlockFace();
 
     // Room for jumping
-    requiredFreeBlocks.add(Pair.of(oneFurther, blockDigDirection));
-    requiredFreeBlocks.add(Pair.of(oneFurther.add(0, 1, 0), blockDigDirection));
-    requiredFreeBlocks.add(Pair.of(oneFurther.add(0, 2, 0), blockDigDirection));
+    blockSubscribers.subscribe(oneFurther, MovementFreeSubscription.INSTANCE);
+    blockSubscribers.subscribe(oneFurther.add(0, 1, 0), MovementFreeSubscription.INSTANCE);
+    blockSubscribers.subscribe(oneFurther.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
 
     var twoFurther = direction.offset(oneFurther);
 
     // Room for jumping
-    requiredFreeBlocks.add(Pair.of(twoFurther, blockDigDirection));
-    requiredFreeBlocks.add(Pair.of(twoFurther.add(0, 1, 0), blockDigDirection));
-    requiredFreeBlocks.add(Pair.of(twoFurther.add(0, 2, 0), blockDigDirection));
-
-    return requiredFreeBlocks;
+    blockSubscribers.subscribe(twoFurther, MovementFreeSubscription.INSTANCE);
+    blockSubscribers.subscribe(twoFurther.add(0, 1, 0), MovementFreeSubscription.INSTANCE);
+    blockSubscribers.subscribe(twoFurther.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
   }
 
-  public SFVec3i requiredUnsafeBlock() {
+  public void registerRequiredUnsafeBlock(SubscriptionConsumer blockSubscribers) {
     // The gap to jump over, needs to be unsafe for this movement to be possible
-    return direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0);
+    blockSubscribers.subscribe(direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0), ParkourUnsafeToStandOnSubscription.INSTANCE);
   }
 
-  public SFVec3i requiredSolidBlock() {
+  public void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
     // Floor block
-    return targetFeetBlock.sub(0, 1, 0);
+    blockSubscribers.subscribe(targetFeetBlock.sub(0, 1, 0), MovementSolidSubscription.INSTANCE);
   }
 
   @Override
@@ -141,6 +123,8 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   record MovementFreeSubscription() implements ParkourMovementSubscription {
+    private static final MovementFreeSubscription INSTANCE = new MovementFreeSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -153,6 +137,8 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   record ParkourUnsafeToStandOnSubscription() implements ParkourMovementSubscription {
+    private static final ParkourUnsafeToStandOnSubscription INSTANCE = new ParkourUnsafeToStandOnSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -168,6 +154,8 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   record MovementSolidSubscription() implements ParkourMovementSubscription {
+    private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
