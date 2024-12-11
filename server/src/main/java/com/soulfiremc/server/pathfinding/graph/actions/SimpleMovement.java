@@ -33,7 +33,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
-import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -49,7 +48,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private final SFVec3i targetFeetBlock;
   private final boolean diagonal;
   private final boolean allowBlockActions;
-  private final List<Pair<SFVec3i, BlockFace>> requiredFreeBlocks;
   // Mutable
   private MovementMiningCost[] blockBreakCosts;
   // Mutable
@@ -90,36 +88,15 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         case FALL_2, FALL_3 -> false;
       };
 
-    this.requiredFreeBlocks = listRequiredFreeBlocks();
+    var arraySize = registerRequiredFreeBlocks(blockSubscribers);
     if (allowBlockActions) {
-      blockBreakCosts = new MovementMiningCost[requiredFreeBlocks.size()];
-      unsafeToBreak = new boolean[requiredFreeBlocks.size()];
-      noNeedToBreak = new boolean[requiredFreeBlocks.size()];
+      blockBreakCosts = new MovementMiningCost[arraySize];
+      unsafeToBreak = new boolean[arraySize];
+      noNeedToBreak = new boolean[arraySize];
     } else {
       blockBreakCosts = null;
       unsafeToBreak = null;
       noNeedToBreak = null;
-    }
-
-    {
-      var blockId = 0;
-      for (var freeBlock : this.requiredFreeBlocks) {
-        blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
-      }
-    }
-
-    {
-      var safeBlocks = this.listCheckSafeMineBlocks();
-      for (var i = 0; i < safeBlocks.length; i++) {
-        var savedBlock = safeBlocks[i];
-        if (savedBlock == null) {
-          continue;
-        }
-
-        for (var block : savedBlock) {
-          blockSubscribers.subscribe(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
-        }
-      }
     }
 
     this.registerRequiredSolidBlock(blockSubscribers);
@@ -135,22 +112,30 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private int freeBlockIndex(SFVec3i block) {
-    for (var i = 0; i < requiredFreeBlocks.size(); i++) {
-      if (requiredFreeBlocks.get(i).left().equals(block)) {
-        return i;
-      }
-    }
+  private int registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
+    var blockIndexCounter = 0;
 
-    throw new IllegalArgumentException("Block not found in required free blocks");
-  }
+    var blockDirection = direction.toSkyDirection();
 
-  private List<Pair<SFVec3i, BlockFace>> listRequiredFreeBlocks() {
-    var requiredFreeBlocks = new ArrayList<Pair<SFVec3i, BlockFace>>();
+    var leftDirectionSide = blockDirection.leftSide();
+    var rightDirectionSide = blockDirection.rightSide();
 
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
+      var aboveHeadBlockIndex = blockIndexCounter++;
+      var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
+
       // Make block above the head block free for jump
-      requiredFreeBlocks.add(Pair.of(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), BlockFace.BOTTOM));
+      blockSubscribers.subscribe(aboveHead, new MovementFreeSubscription(aboveHeadBlockIndex, BlockFace.BOTTOM));
+
+      if (allowBlockActions) {
+        blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
+          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+
+        for (var skyDirection : SkyDirection.VALUES) {
+          blockSubscribers.subscribe(skyDirection.offset(aboveHead),
+            new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        }
+      }
     }
 
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
@@ -162,25 +147,66 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         blockBreakSideHint = direction.toBlockFace();
       }
 
+      var blockIndex = blockIndexCounter++;
+
       // Apply jump shift to target diagonal and offset for body part
-      requiredFreeBlocks.add(Pair.of(bodyOffset.offset(modifier.offsetIfJump(targetEdge)), blockBreakSideHint));
+      var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
+
+      // Apply jump shift to target diagonal and offset for body part
+      blockSubscribers.subscribe(block,
+        new MovementFreeSubscription(blockIndex, blockBreakSideHint));
+
+      if (allowBlockActions) {
+        if (bodyOffset == BodyPart.HEAD) {
+          blockSubscribers.subscribe(block.add(0, 1, 0),
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+        }
+
+        blockSubscribers.subscribe(direction.offset(block),
+          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        blockSubscribers.subscribe(leftDirectionSide.offset(block),
+          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        blockSubscribers.subscribe(rightDirectionSide.offset(block),
+          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+      }
     }
 
     // Require free blocks to fall into the target position
     switch (modifier) {
-      case FALL_1 -> requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
+      case FALL_1 -> {
+        var fallOneBlockIndex = blockIndexCounter++;
+        var fallFree = MovementModifier.FALL_1.offset(targetEdge);
+
+        blockSubscribers.subscribe(fallFree,
+          new MovementFreeSubscription(fallOneBlockIndex, BlockFace.TOP));
+
+        // Require free blocks to fall into the target position
+        if (allowBlockActions) {
+          blockSubscribers.subscribe(direction.offset(fallFree),
+            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+          blockSubscribers.subscribe(leftDirectionSide.offset(fallFree),
+            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+          blockSubscribers.subscribe(rightDirectionSide.offset(fallFree),
+            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        }
+      }
       case FALL_2 -> {
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
+        blockSubscribers.subscribe(MovementModifier.FALL_1.offset(targetEdge),
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+        blockSubscribers.subscribe(MovementModifier.FALL_2.offset(targetEdge),
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
       }
       case FALL_3 -> {
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_1.offset(targetEdge), BlockFace.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_2.offset(targetEdge), BlockFace.TOP));
-        requiredFreeBlocks.add(Pair.of(MovementModifier.FALL_3.offset(targetEdge), BlockFace.TOP));
+        blockSubscribers.subscribe(MovementModifier.FALL_1.offset(targetEdge),
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+        blockSubscribers.subscribe(MovementModifier.FALL_2.offset(targetEdge),
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+        blockSubscribers.subscribe(MovementModifier.FALL_3.offset(targetEdge),
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
       }
     }
 
-    return requiredFreeBlocks;
+    return blockIndexCounter;
   }
 
   private void registerDiagonalCollisionBlocks(SubscriptionConsumer blockSubscribers) {
@@ -205,80 +231,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
     // Floor block
     blockSubscribers.subscribe(targetFeetBlock.sub(0, 1, 0), MovementSolidSubscription.INSTANCE);
-  }
-
-  private BlockSafetyData[][] listCheckSafeMineBlocks() {
-    // This also excludes diagonal movement, so we only worry about digging straight
-    if (!allowBlockActions) {
-      return new BlockSafetyData[0][];
-    }
-
-    var results = new BlockSafetyData[requiredFreeBlocks.size()][];
-
-    var blockDirection = direction.toSkyDirection();
-
-    var oppositeDirection = blockDirection.opposite();
-    var leftDirectionSide = blockDirection.leftSide();
-    var rightDirectionSide = blockDirection.rightSide();
-
-    if (modifier == MovementModifier.JUMP_UP_BLOCK) {
-      var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
-      results[freeBlockIndex(aboveHead)] =
-        new BlockSafetyData[]{
-          new BlockSafetyData(
-            aboveHead.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
-          new BlockSafetyData(
-            oppositeDirection.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            leftDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            rightDirectionSide.offset(aboveHead), BlockSafetyData.BlockSafetyType.FLUIDS)
-        };
-    }
-
-    var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-    for (var bodyOffset : BodyPart.VALUES) {
-      // Apply jump shift to target diagonal and offset for body part
-      var block = bodyOffset.offset(modifier.offsetIfJump(targetEdge));
-      var index = freeBlockIndex(block);
-
-      if (bodyOffset == BodyPart.HEAD) {
-        results[index] =
-          new BlockSafetyData[]{
-            new BlockSafetyData(
-              block.add(0, 1, 0), BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS),
-            new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
-            new BlockSafetyData(
-              leftDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
-            new BlockSafetyData(
-              rightDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS)
-          };
-      } else {
-        results[index] =
-          new BlockSafetyData[]{
-            new BlockSafetyData(direction.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
-            new BlockSafetyData(
-              leftDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS),
-            new BlockSafetyData(
-              rightDirectionSide.offset(block), BlockSafetyData.BlockSafetyType.FLUIDS)
-          };
-      }
-    }
-
-    // Require free blocks to fall into the target position
-    if (modifier == MovementModifier.FALL_1) {
-      var fallFree = MovementModifier.FALL_1.offset(targetEdge);
-      results[freeBlockIndex(fallFree)] =
-        new BlockSafetyData[]{
-          new BlockSafetyData(direction.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            leftDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS),
-          new BlockSafetyData(
-            rightDirectionSide.offset(fallFree), BlockSafetyData.BlockSafetyType.FLUIDS)
-        };
-    }
-
-    return results;
   }
 
   private void registerPossibleBlocksToPlaceAgainst(SubscriptionConsumer blockSubscribers) {
