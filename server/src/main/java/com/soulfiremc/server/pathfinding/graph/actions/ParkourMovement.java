@@ -37,25 +37,19 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   private final ParkourDirection direction;
   private final SFVec3i targetFeetBlock;
 
-  private ParkourMovement(ParkourDirection direction) {
+  private ParkourMovement(ParkourDirection direction, SubscriptionConsumer blockSubscribers) {
     this.direction = direction;
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
-  }
 
-  public static void registerParkourMovements(
-    Consumer<GraphAction> callback,
-    SubscriptionConsumer blockSubscribers) {
-    for (var direction : ParkourDirection.VALUES) {
-      callback.accept(new ParkourMovement(direction).registerParkourMovement(blockSubscribers));
-    }
-  }
-
-  private ParkourMovement registerParkourMovement(SubscriptionConsumer blockSubscribers) {
     this.registerRequiredFreeBlocks(blockSubscribers);
     this.registerRequiredUnsafeBlock(blockSubscribers);
     this.registerRequiredSolidBlock(blockSubscribers);
+  }
 
-    return this;
+  public static void registerParkourMovements(Consumer<GraphAction> callback, SubscriptionConsumer blockSubscribers) {
+    for (var direction : ParkourDirection.VALUES) {
+      callback.accept(new ParkourMovement(direction, blockSubscribers));
+    }
   }
 
   private void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {

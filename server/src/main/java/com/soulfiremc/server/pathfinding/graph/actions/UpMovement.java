@@ -50,45 +50,45 @@ public final class UpMovement extends GraphAction implements Cloneable {
   // Mutable
   private boolean[] noNeedToBreak;
 
-  private UpMovement() {
+  private UpMovement(SubscriptionConsumer blockSubscribers) {
     this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
 
-    this.blockBreakCosts = new MovementMiningCost[1];
-    this.unsafeToBreak = new boolean[1];
-    this.noNeedToBreak = new boolean[1];
-  }
+    var arraySize = this.registerRequiredFreeBlocks(blockSubscribers);
+    this.blockBreakCosts = new MovementMiningCost[arraySize];
+    this.unsafeToBreak = new boolean[arraySize];
+    this.noNeedToBreak = new boolean[arraySize];
 
-  public static void registerUpMovements(
-    Consumer<GraphAction> callback,
-    SubscriptionConsumer blockSubscribers) {
-    callback.accept(new UpMovement().registerUpMovement(blockSubscribers));
-  }
-
-  private UpMovement registerUpMovement(SubscriptionConsumer blockSubscribers) {
-    this.registerRequiredFreeBlocks(blockSubscribers);
     this.registerBlockPlacePosition(blockSubscribers);
-    this.registerCheckSafeMineBlocks(blockSubscribers);
-
-    return this;
   }
 
-  private void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
-    // The one above the head to jump
-    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), new MovementFreeSubscription(0, BlockFace.BOTTOM));
+  public static void registerUpMovements(Consumer<GraphAction> callback, SubscriptionConsumer blockSubscribers) {
+    callback.accept(new UpMovement(blockSubscribers));
+  }
+
+  private int registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
+    var blockIndexCounter = 0;
+
+    {
+      var aboveHeadBlockIndex = blockIndexCounter++;
+      var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
+
+      // The one above the head to jump
+      blockSubscribers.subscribe(aboveHead, new MovementFreeSubscription(aboveHeadBlockIndex, BlockFace.BOTTOM));
+
+      blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
+        new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+
+      for (var skyDirection : SkyDirection.VALUES) {
+        blockSubscribers.subscribe(skyDirection.offset(aboveHead),
+          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+      }
+    }
+
+    return blockIndexCounter;
   }
 
   private void registerBlockPlacePosition(SubscriptionConsumer blockSubscribers) {
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK, MovementSolidSubscription.INSTANCE);
-  }
-
-  private void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
-    var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
-
-    blockSubscribers.subscribe(aboveHead.add(0, 1, 0), new MovementBreakSafetyCheckSubscription(0, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
-
-    for (var skyDirection : SkyDirection.VALUES) {
-      blockSubscribers.subscribe(skyDirection.offset(aboveHead), new MovementBreakSafetyCheckSubscription(0, BlockSafetyData.BlockSafetyType.FLUIDS));
-    }
   }
 
   @Override

@@ -45,23 +45,17 @@ public final class DownMovement extends GraphAction implements Cloneable {
   // Mutable
   private int closestObstructingBlock = Integer.MIN_VALUE;
 
-  private DownMovement() {
+  private DownMovement(SubscriptionConsumer blockSubscribers) {
     this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
-  }
 
-  public static void registerDownMovements(
-    Consumer<GraphAction> callback,
-    SubscriptionConsumer blockSubscribers) {
-    callback.accept(new DownMovement().registerDownMovement(blockSubscribers));
-  }
-
-  private DownMovement registerDownMovement(SubscriptionConsumer blockSubscribers) {
     this.registerSafetyCheckBlocks(blockSubscribers);
     this.registerObstructFallCheckBlocks(blockSubscribers);
     this.registerBlockToBreak(blockSubscribers);
     this.registerCheckSafeMineBlocks(blockSubscribers);
+  }
 
-    return this;
+  public static void registerDownMovements(Consumer<GraphAction> callback, SubscriptionConsumer blockSubscribers) {
+    callback.accept(new DownMovement(blockSubscribers));
   }
 
   // These blocks are possibly safe blocks we can fall on top of
