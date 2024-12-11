@@ -88,7 +88,7 @@ armeria-grpc-protocol = { module = "com.linecorp.armeria:armeria-grpc-protocol" 
 armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
-spark = "com.github.AlexProgrammerDE.spark:spark-common:2ba922a171"
+spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
 ollama4j = "io.github.ollama4j:ollama4j:1.0.90"
 immutables = "org.immutables:value:2.10.1 "
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
