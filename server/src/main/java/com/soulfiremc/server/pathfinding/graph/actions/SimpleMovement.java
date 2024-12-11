@@ -35,7 +35,6 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.extern.slf4j.Slf4j;
-import oshi.util.tuples.Quartet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -140,25 +139,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
-    {
-      blockSubscribers.subscribe(movement.requiredSolidBlock(), new MovementSolidSubscription());
-    }
-
-    {
-      for (var diagonalCollisionBlock : movement.listDiagonalCollisionBlocks()) {
-        blockSubscribers.subscribe(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(
-            diagonalCollisionBlock.getB(),
-            diagonalCollisionBlock.getC(),
-            diagonalCollisionBlock.getD()
-          ));
-      }
-    }
-
-    {
-      for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-        blockSubscribers.subscribe(againstBlock.againstPos(), new MovementAgainstPlaceSolidSubscription(againstBlock));
-      }
-    }
+    movement.registerRequiredSolidBlock(blockSubscribers);
+    movement.registerDiagonalCollisionBlocks(blockSubscribers);
+    movement.registerPossibleBlocksToPlaceAgainst(blockSubscribers);
 
     return movement;
   }
@@ -211,33 +194,28 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  public List<Quartet<SFVec3i, MovementSide, Integer, BodyPart>> listDiagonalCollisionBlocks() {
+  public void registerDiagonalCollisionBlocks(SubscriptionConsumer blockSubscribers) {
     if (!diagonal) {
-      return List.of();
+      return;
     }
-
-    var list = new ArrayList<Quartet<SFVec3i, MovementSide, Integer, BodyPart>>(4);
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
       var corner = modifier.offsetIfJump(direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
-        list.add(new Quartet<>(
-          bodyOffset.offset(corner),
+        blockSubscribers.subscribe(bodyOffset.offset(corner), new MovementDiagonalCollisionSubscription(
           side,
           direction.diagonalArrayIndex(),
           bodyOffset
         ));
       }
     }
-
-    return list;
   }
 
-  public SFVec3i requiredSolidBlock() {
+  public void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
     // Floor block
-    return targetFeetBlock.sub(0, 1, 0);
+    blockSubscribers.subscribe(targetFeetBlock.sub(0, 1, 0), MovementSolidSubscription.INSTANCE);
   }
 
   public BlockSafetyData[][] listCheckSafeMineBlocks() {
@@ -314,50 +292,36 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return results;
   }
 
-  public List<BotActionManager.BlockPlaceAgainstData> possibleBlocksToPlaceAgainst() {
+  public void registerPossibleBlocksToPlaceAgainst(SubscriptionConsumer blockSubscribers) {
     if (!allowBlockActions) {
-      return List.of();
+      return;
     }
 
-    var blockDirection = direction.toSkyDirection();
-
-    var oppositeDirection = blockDirection.opposite();
-    var leftDirectionSide = blockDirection.leftSide();
-    var rightDirectionSide = blockDirection.rightSide();
-
     var floorBlock = targetFeetBlock.sub(0, 1, 0);
-    return switch (modifier) {
-      case NORMAL -> // 5
-        List.of(
-          // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
-          // In front
-          new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
-          // Scaffolding
-          new BotActionManager.BlockPlaceAgainstData(
-            oppositeDirection.offset(floorBlock), blockDirection.toBlockFace()),
-          // Left side
-          new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
-          // Right side
-          new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
-      case JUMP_UP_BLOCK, FALL_1 -> // 4 - no scaffolding
-        List.of(
-          // Below
-          new BotActionManager.BlockPlaceAgainstData(floorBlock.sub(0, 1, 0), BlockFace.TOP),
-          // In front
-          new BotActionManager.BlockPlaceAgainstData(
-            blockDirection.offset(floorBlock), oppositeDirection.toBlockFace()),
-          // Left side
-          new BotActionManager.BlockPlaceAgainstData(
-            leftDirectionSide.offset(floorBlock), rightDirectionSide.toBlockFace()),
-          // Right side
-          new BotActionManager.BlockPlaceAgainstData(
-            rightDirectionSide.offset(floorBlock), leftDirectionSide.toBlockFace()));
+    switch (modifier) {
+      case NORMAL -> { // 5
+        // Below
+        blockSubscribers.subscribe(floorBlock.sub(0, 1, 0), new MovementAgainstPlaceSolidSubscription(BlockFace.TOP));
+
+        for (var skyDirection : SkyDirection.VALUES) {
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+        }
+      }
+      case JUMP_UP_BLOCK, FALL_1 -> { // 4 - no scaffolding
+        // Below
+        blockSubscribers.subscribe(floorBlock.sub(0, 1, 0), new MovementAgainstPlaceSolidSubscription(BlockFace.TOP));
+        for (var skyDirection : SkyDirection.VALUES) {
+          if (skyDirection == direction.toSkyDirection().opposite()) {
+            // Cannot do scaffolding here
+            continue;
+          }
+
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+        }
+      }
       default -> throw new IllegalStateException("Unexpected value: " + modifier);
-    };
+    }
+    ;
   }
 
   @Override
@@ -513,6 +477,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   record MovementSolidSubscription() implements SimpleMovementSubscription {
+    private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
+
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -558,7 +524,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementAgainstPlaceSolidSubscription(BotActionManager.BlockPlaceAgainstData blockToPlaceAgainst) implements SimpleMovementSubscription {
+  record MovementAgainstPlaceSolidSubscription(BlockFace againstFace) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -574,7 +540,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       // Fixup the position to be the block we are placing against instead of relative
       simpleMovement.blockPlaceAgainstData = new BotActionManager.BlockPlaceAgainstData(
-        absoluteKey, blockToPlaceAgainst.blockFace());
+        absoluteKey, againstFace);
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
   }
