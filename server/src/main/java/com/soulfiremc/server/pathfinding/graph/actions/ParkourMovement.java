@@ -37,7 +37,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   private final ParkourDirection direction;
   private final SFVec3i targetFeetBlock;
 
-  public ParkourMovement(ParkourDirection direction) {
+  private ParkourMovement(ParkourDirection direction) {
     this.direction = direction;
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
   }
@@ -46,23 +46,19 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     Consumer<GraphAction> callback,
     SubscriptionConsumer blockSubscribers) {
     for (var direction : ParkourDirection.VALUES) {
-      callback.accept(
-        ParkourMovement.registerParkourMovement(
-          blockSubscribers, new ParkourMovement(direction)));
+      callback.accept(new ParkourMovement(direction).registerParkourMovement(blockSubscribers));
     }
   }
 
-  private static ParkourMovement registerParkourMovement(
-    SubscriptionConsumer blockSubscribers,
-    ParkourMovement movement) {
-    movement.registerRequiredFreeBlocks(blockSubscribers);
-    movement.registerRequiredUnsafeBlock(blockSubscribers);
-    movement.registerRequiredSolidBlock(blockSubscribers);
+  private ParkourMovement registerParkourMovement(SubscriptionConsumer blockSubscribers) {
+    this.registerRequiredFreeBlocks(blockSubscribers);
+    this.registerRequiredUnsafeBlock(blockSubscribers);
+    this.registerRequiredSolidBlock(blockSubscribers);
 
-    return movement;
+    return this;
   }
 
-  public void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
+  private void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
     // Make block above the head block free for jump
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
 
@@ -81,12 +77,12 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     blockSubscribers.subscribe(twoFurther.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
   }
 
-  public void registerRequiredUnsafeBlock(SubscriptionConsumer blockSubscribers) {
+  private void registerRequiredUnsafeBlock(SubscriptionConsumer blockSubscribers) {
     // The gap to jump over, needs to be unsafe for this movement to be possible
     blockSubscribers.subscribe(direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0), ParkourUnsafeToStandOnSubscription.INSTANCE);
   }
 
-  public void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
+  private void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
     // Floor block
     blockSubscribers.subscribe(targetFeetBlock.sub(0, 1, 0), MovementSolidSubscription.INSTANCE);
   }
@@ -115,14 +111,14 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
-  interface ParkourMovementSubscription extends MinecraftGraph.MovementSubscription<ParkourMovement> {
+  private interface ParkourMovementSubscription extends MinecraftGraph.MovementSubscription<ParkourMovement> {
     @Override
     default ParkourMovement castAction(GraphAction action) {
       return (ParkourMovement) action;
     }
   }
 
-  record MovementFreeSubscription() implements ParkourMovementSubscription {
+  private record MovementFreeSubscription() implements ParkourMovementSubscription {
     private static final MovementFreeSubscription INSTANCE = new MovementFreeSubscription();
 
     @Override
@@ -136,7 +132,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record ParkourUnsafeToStandOnSubscription() implements ParkourMovementSubscription {
+  private record ParkourUnsafeToStandOnSubscription() implements ParkourMovementSubscription {
     private static final ParkourUnsafeToStandOnSubscription INSTANCE = new ParkourUnsafeToStandOnSubscription();
 
     @Override
@@ -153,7 +149,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementSolidSubscription() implements ParkourMovementSubscription {
+  private record MovementSolidSubscription() implements ParkourMovementSubscription {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override

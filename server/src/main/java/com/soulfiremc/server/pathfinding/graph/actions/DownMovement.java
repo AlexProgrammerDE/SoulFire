@@ -45,29 +45,27 @@ public final class DownMovement extends GraphAction implements Cloneable {
   // Mutable
   private int closestObstructingBlock = Integer.MIN_VALUE;
 
-  public DownMovement() {
+  private DownMovement() {
     this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
   }
 
   public static void registerDownMovements(
     Consumer<GraphAction> callback,
     SubscriptionConsumer blockSubscribers) {
-    callback.accept(registerDownMovement(blockSubscribers, new DownMovement()));
+    callback.accept(new DownMovement().registerDownMovement(blockSubscribers));
   }
 
-  private static DownMovement registerDownMovement(
-    SubscriptionConsumer blockSubscribers,
-    DownMovement movement) {
-    movement.registerSafetyCheckBlocks(blockSubscribers);
-    movement.registerObstructFallCheckBlocks(blockSubscribers);
-    movement.registerBlockToBreak(blockSubscribers);
-    movement.registerCheckSafeMineBlocks(blockSubscribers);
+  private DownMovement registerDownMovement(SubscriptionConsumer blockSubscribers) {
+    this.registerSafetyCheckBlocks(blockSubscribers);
+    this.registerObstructFallCheckBlocks(blockSubscribers);
+    this.registerBlockToBreak(blockSubscribers);
+    this.registerCheckSafeMineBlocks(blockSubscribers);
 
-    return movement;
+    return this;
   }
 
   // These blocks are possibly safe blocks we can fall on top of
-  public void registerSafetyCheckBlocks(SubscriptionConsumer blockSubscribers) {
+  private void registerSafetyCheckBlocks(SubscriptionConsumer blockSubscribers) {
     // Falls one block
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0), DownSafetyCheckSubscription.INSTANCE);
 
@@ -78,7 +76,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 4, 0), DownSafetyCheckSubscription.INSTANCE);
   }
 
-  public void registerObstructFallCheckBlocks(SubscriptionConsumer blockSubscribers) {
+  private void registerObstructFallCheckBlocks(SubscriptionConsumer blockSubscribers) {
     // Block below the block we mine can obstruct a 2 block fall
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 2, 0), ObstructingFallCheckSubscription.INSTANCE);
 
@@ -86,11 +84,11 @@ public final class DownMovement extends GraphAction implements Cloneable {
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0), ObstructingFallCheckSubscription.INSTANCE);
   }
 
-  public void registerBlockToBreak(SubscriptionConsumer blockSubscribers) {
+  private void registerBlockToBreak(SubscriptionConsumer blockSubscribers) {
     blockSubscribers.subscribe(targetToMineBlock, new MovementFreeSubscription(BlockFace.TOP));
   }
 
-  public void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
+  private void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
     for (var skyDirection : SkyDirection.VALUES) {
       blockSubscribers.subscribe(
         skyDirection.offset(targetToMineBlock),
@@ -138,14 +136,14 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  interface DownMovementSubscription extends MinecraftGraph.MovementSubscription<DownMovement> {
+  private interface DownMovementSubscription extends MinecraftGraph.MovementSubscription<DownMovement> {
     @Override
     default DownMovement castAction(GraphAction action) {
       return (DownMovement) action;
     }
   }
 
-  record MovementFreeSubscription(BlockFace blockBreakSideHint) implements DownMovementSubscription {
+  private record MovementFreeSubscription(BlockFace blockBreakSideHint) implements DownMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -166,7 +164,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record DownSafetyCheckSubscription() implements DownMovementSubscription {
+  private record DownSafetyCheckSubscription() implements DownMovementSubscription {
     private static final DownSafetyCheckSubscription INSTANCE = new DownSafetyCheckSubscription();
 
     @Override
@@ -188,7 +186,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType safetyType) implements DownMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType safetyType) implements DownMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -205,7 +203,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record ObstructingFallCheckSubscription() implements DownMovementSubscription {
+  private record ObstructingFallCheckSubscription() implements DownMovementSubscription {
     private static final ObstructingFallCheckSubscription INSTANCE = new ObstructingFallCheckSubscription();
 
     @Override

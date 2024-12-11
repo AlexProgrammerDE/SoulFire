@@ -65,7 +65,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   // Mutable
   private boolean requiresAgainstBlock = false;
 
-  public SimpleMovement(MovementDirection direction, MovementModifier modifier) {
+  private SimpleMovement(MovementDirection direction, MovementModifier modifier) {
     this.direction = direction;
     this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
@@ -107,26 +107,21 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     SubscriptionConsumer blockSubscribers) {
     for (var direction : MovementDirection.VALUES) {
       for (var modifier : MovementModifier.VALUES) {
-        callback.accept(
-          SimpleMovement.registerMovement(
-            blockSubscribers,
-            new SimpleMovement(direction, modifier)));
+        callback.accept(new SimpleMovement(direction, modifier).registerMovement(blockSubscribers));
       }
     }
   }
 
-  private static SimpleMovement registerMovement(
-    SubscriptionConsumer blockSubscribers,
-    SimpleMovement movement) {
+  private SimpleMovement registerMovement(SubscriptionConsumer blockSubscribers) {
     {
       var blockId = 0;
-      for (var freeBlock : movement.requiredFreeBlocks) {
+      for (var freeBlock : this.requiredFreeBlocks) {
         blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
       }
     }
 
     {
-      var safeBlocks = movement.listCheckSafeMineBlocks();
+      var safeBlocks = this.listCheckSafeMineBlocks();
       for (var i = 0; i < safeBlocks.length; i++) {
         var savedBlock = safeBlocks[i];
         if (savedBlock == null) {
@@ -139,11 +134,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
-    movement.registerRequiredSolidBlock(blockSubscribers);
-    movement.registerDiagonalCollisionBlocks(blockSubscribers);
-    movement.registerPossibleBlocksToPlaceAgainst(blockSubscribers);
+    this.registerRequiredSolidBlock(blockSubscribers);
+    this.registerDiagonalCollisionBlocks(blockSubscribers);
+    this.registerPossibleBlocksToPlaceAgainst(blockSubscribers);
 
-    return movement;
+    return this;
   }
 
   private int freeBlockIndex(SFVec3i block) {
@@ -194,7 +189,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return requiredFreeBlocks;
   }
 
-  public void registerDiagonalCollisionBlocks(SubscriptionConsumer blockSubscribers) {
+  private void registerDiagonalCollisionBlocks(SubscriptionConsumer blockSubscribers) {
     if (!diagonal) {
       return;
     }
@@ -213,12 +208,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  public void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
+  private void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
     // Floor block
     blockSubscribers.subscribe(targetFeetBlock.sub(0, 1, 0), MovementSolidSubscription.INSTANCE);
   }
 
-  public BlockSafetyData[][] listCheckSafeMineBlocks() {
+  private BlockSafetyData[][] listCheckSafeMineBlocks() {
     // This also excludes diagonal movement, so we only worry about digging straight
     if (!allowBlockActions) {
       return new BlockSafetyData[0][];
@@ -292,7 +287,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return results;
   }
 
-  public void registerPossibleBlocksToPlaceAgainst(SubscriptionConsumer blockSubscribers) {
+  private void registerPossibleBlocksToPlaceAgainst(SubscriptionConsumer blockSubscribers) {
     if (!allowBlockActions) {
       return;
     }
@@ -321,7 +316,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
       default -> throw new IllegalStateException("Unexpected value: " + modifier);
     }
-    ;
   }
 
   @Override
@@ -398,14 +392,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  interface SimpleMovementSubscription extends MinecraftGraph.MovementSubscription<SimpleMovement> {
+  private interface SimpleMovementSubscription extends MinecraftGraph.MovementSubscription<SimpleMovement> {
     @Override
     default SimpleMovement castAction(GraphAction action) {
       return (SimpleMovement) action;
     }
   }
 
-  record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
+  private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -439,7 +433,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements SimpleMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -476,7 +470,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementSolidSubscription() implements SimpleMovementSubscription {
+  private record MovementSolidSubscription() implements SimpleMovementSubscription {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override
@@ -499,7 +493,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementDiagonalCollisionSubscription(MovementSide side, int diagonalArrayIndex, BodyPart bodyPart) implements SimpleMovementSubscription {
+  private record MovementDiagonalCollisionSubscription(MovementSide side, int diagonalArrayIndex, BodyPart bodyPart) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -524,7 +518,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementAgainstPlaceSolidSubscription(BlockFace againstFace) implements SimpleMovementSubscription {
+  private record MovementAgainstPlaceSolidSubscription(BlockFace againstFace) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -539,8 +533,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Fixup the position to be the block we are placing against instead of relative
-      simpleMovement.blockPlaceAgainstData = new BotActionManager.BlockPlaceAgainstData(
-        absoluteKey, againstFace);
+      simpleMovement.blockPlaceAgainstData = new BotActionManager.BlockPlaceAgainstData(absoluteKey, againstFace);
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
   }

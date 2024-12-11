@@ -44,35 +44,37 @@ public final class UpMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
   private final SFVec3i targetFeetBlock;
   // Mutable
-  private MovementMiningCost blockBreakCost;
+  private MovementMiningCost[] blockBreakCosts;
   // Mutable
-  private boolean unsafeToBreak;
+  private boolean[] unsafeToBreak;
   // Mutable
-  private boolean noNeedToBreak;
+  private boolean[] noNeedToBreak;
 
-  public UpMovement() {
+  private UpMovement() {
     this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
+
+    this.blockBreakCosts = new MovementMiningCost[1];
+    this.unsafeToBreak = new boolean[1];
+    this.noNeedToBreak = new boolean[1];
   }
 
   public static void registerUpMovements(
     Consumer<GraphAction> callback,
     SubscriptionConsumer blockSubscribers) {
-    callback.accept(registerUpMovement(blockSubscribers, new UpMovement()));
+    callback.accept(new UpMovement().registerUpMovement(blockSubscribers));
   }
 
-  private static UpMovement registerUpMovement(
-    SubscriptionConsumer blockSubscribers,
-    UpMovement movement) {
-    movement.registerRequiredFreeBlocks(blockSubscribers);
-    movement.registerBlockPlacePosition(blockSubscribers);
-    movement.registerCheckSafeMineBlocks(blockSubscribers);
+  private UpMovement registerUpMovement(SubscriptionConsumer blockSubscribers) {
+    this.registerRequiredFreeBlocks(blockSubscribers);
+    this.registerBlockPlacePosition(blockSubscribers);
+    this.registerCheckSafeMineBlocks(blockSubscribers);
 
-    return movement;
+    return this;
   }
 
   private void registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
     // The one above the head to jump
-    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), new MovementFreeSubscription(BlockFace.BOTTOM));
+    blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), new MovementFreeSubscription(0, BlockFace.BOTTOM));
   }
 
   private void registerBlockPlacePosition(SubscriptionConsumer blockSubscribers) {
@@ -82,10 +84,10 @@ public final class UpMovement extends GraphAction implements Cloneable {
   private void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
     var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
 
-    blockSubscribers.subscribe(aboveHead.add(0, 1, 0), new MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+    blockSubscribers.subscribe(aboveHead.add(0, 1, 0), new MovementBreakSafetyCheckSubscription(0, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
 
     for (var skyDirection : SkyDirection.VALUES) {
-      blockSubscribers.subscribe(skyDirection.offset(aboveHead), new MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType.FLUIDS));
+      blockSubscribers.subscribe(skyDirection.offset(aboveHead), new MovementBreakSafetyCheckSubscription(0, BlockSafetyData.BlockSafetyType.FLUIDS));
     }
   }
 
@@ -95,11 +97,15 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var cost = Costs.JUMP_UP_BLOCK;
 
     var usableBlockItemsDiff = 0;
-    if (blockBreakCost != null) {
-      cost += blockBreakCost.miningCost();
-      actions.add(new BlockBreakAction(blockBreakCost));
+    for (var breakCost : blockBreakCosts) {
+      if (breakCost == null) {
+        continue;
+      }
 
-      if (blockBreakCost.willDropUsableBlockItem()) {
+      cost += breakCost.miningCost();
+      actions.add(new BlockBreakAction(breakCost));
+
+      if (breakCost.willDropUsableBlockItem()) {
         usableBlockItemsDiff++;
       }
     }
@@ -139,39 +145,45 @@ public final class UpMovement extends GraphAction implements Cloneable {
   @Override
   public UpMovement clone() {
     try {
-      return (UpMovement) super.clone();
+      var c = (UpMovement) super.clone();
+
+      c.blockBreakCosts = new MovementMiningCost[this.blockBreakCosts.length];
+      c.unsafeToBreak = new boolean[this.unsafeToBreak.length];
+      c.noNeedToBreak = new boolean[this.noNeedToBreak.length];
+
+      return c;
     } catch (CloneNotSupportedException cantHappen) {
       throw new InternalError();
     }
   }
 
-  interface UpMovementSubscription extends MinecraftGraph.MovementSubscription<UpMovement> {
+  private interface UpMovementSubscription extends MinecraftGraph.MovementSubscription<UpMovement> {
     @Override
     default UpMovement castAction(GraphAction action) {
       return (UpMovement) action;
     }
   }
 
-  record MovementFreeSubscription(BlockFace blockBreakSideHint) implements UpMovementSubscription {
+  private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements UpMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       if (isFree.get()) {
-        upMovement.noNeedToBreak = true;
+        upMovement.noNeedToBreak[blockArrayIndex] = true;
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
       // Search for a way to break this block
       if (graph.disallowedToBreakBlock(absoluteKey)
         || graph.disallowedToBreakBlockType(blockState.blockType())
-        || upMovement.unsafeToBreak) {
+        || upMovement.unsafeToBreak[blockArrayIndex]) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
       var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
       // We can mine this block, lets add costs and continue
-      upMovement.blockBreakCost =
+      upMovement.blockBreakCosts[blockArrayIndex] =
         new MovementMiningCost(
           absoluteKey,
           cacheableMiningCost.miningCost(),
@@ -181,7 +193,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementSolidSubscription() implements UpMovementSubscription {
+  private record MovementSolidSubscription() implements UpMovementSubscription {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override
@@ -196,17 +208,17 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
   }
 
-  record MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType safetyType) implements UpMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements UpMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // There is no need to break this block, so there is no need for safety checks
-      if (upMovement.noNeedToBreak) {
+      if (upMovement.noNeedToBreak[blockArrayIndex]) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
       // The block was already marked as unsafe
-      if (upMovement.unsafeToBreak) {
+      if (upMovement.unsafeToBreak[blockArrayIndex]) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
@@ -217,7 +229,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      var currentValue = upMovement.blockBreakCost;
+      var currentValue = upMovement.blockBreakCosts;
 
       if (currentValue != null) {
         // We learned that this block needs to be broken, so we need to set it as impossible
@@ -227,7 +239,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       // Store for a later time that this is unsafe,
       // so if we check this block,
       // we know it's unsafe
-      upMovement.unsafeToBreak = true;
+      upMovement.unsafeToBreak[blockArrayIndex] = true;
 
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
