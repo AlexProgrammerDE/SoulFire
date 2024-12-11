@@ -35,7 +35,6 @@ import it.unimi.dsi.fastutil.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class DownMovement extends GraphAction implements Cloneable {
@@ -54,31 +53,28 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
   public static void registerDownMovements(
     Consumer<GraphAction> callback,
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    SubscriptionConsumer blockSubscribers) {
     callback.accept(registerDownMovement(blockSubscribers, new DownMovement()));
   }
 
   private static DownMovement registerDownMovement(
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    SubscriptionConsumer blockSubscribers,
     DownMovement movement) {
     {
       for (var safetyBlock : movement.listSafetyCheckBlocks()) {
-        blockSubscribers
-          .accept(safetyBlock, new DownSafetyCheckSubscription());
+        blockSubscribers.subscribe(safetyBlock, new DownSafetyCheckSubscription());
       }
     }
 
     {
       for (var obstructingBlock : movement.listObstructFallCheckBlocks()) {
-        blockSubscribers
-          .accept(obstructingBlock, new ObstructingFallCheckSubscription());
+        blockSubscribers.subscribe(obstructingBlock, new ObstructingFallCheckSubscription());
       }
     }
 
     {
       var freeBlock = movement.blockToBreak();
-      blockSubscribers
-        .accept(freeBlock.key(), new MovementFreeSubscription(freeBlock.value()));
+      blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(freeBlock.value()));
     }
 
     {
@@ -89,8 +85,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          blockSubscribers
-            .accept(block.position(), new MovementBreakSafetyCheckSubscription(block.type()));
+          blockSubscribers.subscribe(block.position(), new MovementBreakSafetyCheckSubscription(block.type()));
         }
       }
     }

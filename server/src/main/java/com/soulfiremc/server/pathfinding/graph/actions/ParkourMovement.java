@@ -33,7 +33,6 @@ import it.unimi.dsi.fastutil.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
@@ -48,7 +47,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
   public static void registerParkourMovements(
     Consumer<GraphAction> callback,
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    SubscriptionConsumer blockSubscribers) {
     for (var direction : ParkourDirection.VALUES) {
       callback.accept(
         ParkourMovement.registerParkourMovement(
@@ -57,23 +56,20 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   private static ParkourMovement registerParkourMovement(
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    SubscriptionConsumer blockSubscribers,
     ParkourMovement movement) {
     {
       for (var freeBlock : movement.listRequiredFreeBlocks()) {
-        blockSubscribers
-          .accept(freeBlock.key(), new MovementFreeSubscription());
+        blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription());
       }
     }
 
     {
-      blockSubscribers
-        .accept(movement.requiredUnsafeBlock(), new ParkourUnsafeToStandOnSubscription());
+      blockSubscribers.subscribe(movement.requiredUnsafeBlock(), new ParkourUnsafeToStandOnSubscription());
     }
 
     {
-      blockSubscribers
-        .accept(movement.requiredSolidBlock(), new MovementSolidSubscription());
+      blockSubscribers.subscribe(movement.requiredSolidBlock(), new MovementSolidSubscription());
     }
 
     return movement;

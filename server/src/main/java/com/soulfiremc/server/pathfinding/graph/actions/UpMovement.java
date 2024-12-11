@@ -38,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -64,24 +63,22 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
   public static void registerUpMovements(
     Consumer<GraphAction> callback,
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    SubscriptionConsumer blockSubscribers) {
     callback.accept(registerUpMovement(blockSubscribers, new UpMovement()));
   }
 
   private static UpMovement registerUpMovement(
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    SubscriptionConsumer blockSubscribers,
     UpMovement movement) {
     {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks) {
-        blockSubscribers
-          .accept(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
+        blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
       }
     }
 
     {
-      blockSubscribers
-        .accept(movement.blockPlacePosition(), new MovementSolidSubscription());
+      blockSubscribers.subscribe(movement.blockPlacePosition(), new MovementSolidSubscription());
     }
 
     {
@@ -93,8 +90,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          blockSubscribers
-            .accept(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
+          blockSubscribers.subscribe(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
         }
       }
     }

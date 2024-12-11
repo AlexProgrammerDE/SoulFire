@@ -40,7 +40,6 @@ import oshi.util.tuples.Quartet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -106,7 +105,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   public static void registerMovements(
     Consumer<GraphAction> callback,
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers) {
+    SubscriptionConsumer blockSubscribers) {
     for (var direction : MovementDirection.VALUES) {
       for (var modifier : MovementModifier.VALUES) {
         callback.accept(
@@ -118,13 +117,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   private static SimpleMovement registerMovement(
-    BiConsumer<SFVec3i, MinecraftGraph.MovementSubscription<?>> blockSubscribers,
+    SubscriptionConsumer blockSubscribers,
     SimpleMovement movement) {
     {
       var blockId = 0;
       for (var freeBlock : movement.requiredFreeBlocks) {
-        blockSubscribers
-          .accept(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
+        blockSubscribers.subscribe(freeBlock.key(), new MovementFreeSubscription(blockId++, freeBlock.value()));
       }
     }
 
@@ -137,21 +135,18 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         }
 
         for (var block : savedBlock) {
-          blockSubscribers
-            .accept(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
+          blockSubscribers.subscribe(block.position(), new MovementBreakSafetyCheckSubscription(i, block.type()));
         }
       }
     }
 
     {
-      blockSubscribers
-        .accept(movement.requiredSolidBlock(), new MovementSolidSubscription());
+      blockSubscribers.subscribe(movement.requiredSolidBlock(), new MovementSolidSubscription());
     }
 
     {
       for (var diagonalCollisionBlock : movement.listDiagonalCollisionBlocks()) {
-        blockSubscribers
-          .accept(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(
+        blockSubscribers.subscribe(diagonalCollisionBlock.getA(), new MovementDiagonalCollisionSubscription(
             diagonalCollisionBlock.getB(),
             diagonalCollisionBlock.getC(),
             diagonalCollisionBlock.getD()
@@ -161,8 +156,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     {
       for (var againstBlock : movement.possibleBlocksToPlaceAgainst()) {
-        blockSubscribers
-          .accept(againstBlock.againstPos(), new MovementAgainstPlaceSolidSubscription(againstBlock));
+        blockSubscribers.subscribe(againstBlock.againstPos(), new MovementAgainstPlaceSolidSubscription(againstBlock));
       }
     }
 

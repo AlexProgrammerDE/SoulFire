@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -63,7 +62,7 @@ public record MinecraftGraph(TagsState tagsState,
     var blockSubscribers = new Object2ObjectOpenHashMap<SFVec3i, List<WrappedActionSubscription>>();
     var actions = new ArrayList<GraphAction>();
     var currentSubscriptions = new AtomicInteger(0);
-    BiConsumer<SFVec3i, MovementSubscription<?>> blockSubscribersConsumer = (key, value) -> {
+    SubscriptionConsumer blockSubscribersConsumer = (key, value) -> {
       currentSubscriptions.incrementAndGet();
       blockSubscribers.computeIfAbsent(key, k -> new ArrayList<>()).add(new WrappedActionSubscription(actions.size(), value));
     };
