@@ -41,7 +41,7 @@ import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.services.ProtoReflectionService;
+import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -110,7 +110,7 @@ public class RPCServer {
         .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
         .addService(injector.getSingleton(DownloadServiceImpl.class))
         // Allow collecting info about callable methods.
-        .addService(ProtoReflectionService.newInstance())
+        .addService(ProtoReflectionServiceV1.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)
         .maxResponseMessageLength(Integer.MAX_VALUE)
         .supportedSerializationFormats(GrpcSerializationFormats.values())
