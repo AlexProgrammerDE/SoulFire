@@ -66,10 +66,6 @@ public final class DownMovement extends GraphAction implements Cloneable {
     return movement;
   }
 
-  public void registerBlockToBreak(SubscriptionConsumer blockSubscribers) {
-    blockSubscribers.subscribe(targetToMineBlock, new MovementFreeSubscription(BlockFace.TOP));
-  }
-
   // These blocks are possibly safe blocks we can fall on top of
   public void registerSafetyCheckBlocks(SubscriptionConsumer blockSubscribers) {
     // Falls one block
@@ -88,6 +84,10 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     // Block below the block we mine can obstruct a 3 block fall
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.sub(0, 3, 0), ObstructingFallCheckSubscription.INSTANCE);
+  }
+
+  public void registerBlockToBreak(SubscriptionConsumer blockSubscribers) {
+    blockSubscribers.subscribe(targetToMineBlock, new MovementFreeSubscription(BlockFace.TOP));
   }
 
   public void registerCheckSafeMineBlocks(SubscriptionConsumer blockSubscribers) {
