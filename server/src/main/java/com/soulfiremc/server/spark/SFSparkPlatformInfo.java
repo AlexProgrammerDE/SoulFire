@@ -33,6 +33,11 @@ public class SFSparkPlatformInfo implements PlatformInfo {
   }
 
   @Override
+  public String getBrand() {
+    return "SoulFire";
+  }
+
+  @Override
   public String getVersion() {
     return BuildData.VERSION;
   }

@@ -85,6 +85,19 @@ public class SFSparkPlugin implements SparkPlugin {
   }
 
   @Override
+  public void log(Level level, String s, Throwable throwable) {
+    if (level == Level.INFO) {
+      log.info(s, throwable);
+    } else if (level == Level.WARNING) {
+      log.warn(s, throwable);
+    } else if (level == Level.SEVERE) {
+      log.error(s, throwable);
+    } else {
+      throw new IllegalArgumentException(level.getName());
+    }
+  }
+
+  @Override
   public PlatformInfo getPlatformInfo() {
     return new SFSparkPlatformInfo();
   }
