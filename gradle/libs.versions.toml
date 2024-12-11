@@ -1,5 +1,5 @@
 [versions]
-log4j = "2.24.2"
+log4j = "2.25.0-SNAPSHOT"
 grpc = "1.69.0"
 protobuf = "4.29.1"
 via-version = "5.2.0"
