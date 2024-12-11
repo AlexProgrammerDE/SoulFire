@@ -115,11 +115,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private int registerRequiredFreeBlocks(SubscriptionConsumer blockSubscribers) {
     var blockIndexCounter = 0;
 
-    var blockDirection = direction.toSkyDirection();
-
-    var leftDirectionSide = blockDirection.leftSide();
-    var rightDirectionSide = blockDirection.rightSide();
-
     if (modifier == MovementModifier.JUMP_UP_BLOCK) {
       var aboveHeadBlockIndex = blockIndexCounter++;
       var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
@@ -162,6 +157,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
         }
 
+        var blockDirection = direction.toSkyDirection();
+
+        var leftDirectionSide = blockDirection.leftSide();
+        var rightDirectionSide = blockDirection.rightSide();
         blockSubscribers.subscribe(direction.offset(block),
           new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
         blockSubscribers.subscribe(leftDirectionSide.offset(block),
@@ -182,6 +181,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
         // Require free blocks to fall into the target position
         if (allowBlockActions) {
+          var blockDirection = direction.toSkyDirection();
+
+          var leftDirectionSide = blockDirection.leftSide();
+          var rightDirectionSide = blockDirection.rightSide();
+
           blockSubscribers.subscribe(direction.offset(fallFree),
             new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
           blockSubscribers.subscribe(leftDirectionSide.offset(fallFree),
