@@ -42,7 +42,7 @@ public enum MovementDirection {
   private int diagonalArrayIndex;
 
   static {
-    for (var direction : DIAGONALS) {
+    for (var direction : VALUES) {
       direction.diagonalArrayIndex = List.of(DIAGONALS).indexOf(direction);
     }
   }
