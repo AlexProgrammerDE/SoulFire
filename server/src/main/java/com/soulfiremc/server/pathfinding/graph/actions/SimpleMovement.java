@@ -65,7 +65,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   // Mutable
   private boolean requiresAgainstBlock = false;
 
-  private SimpleMovement(MovementDirection direction, MovementModifier modifier) {
+  private SimpleMovement(MovementDirection direction, MovementModifier modifier, SubscriptionConsumer blockSubscribers) {
     this.direction = direction;
     this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
@@ -100,19 +100,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       unsafeToBreak = null;
       noNeedToBreak = null;
     }
-  }
 
-  public static void registerMovements(
-    Consumer<GraphAction> callback,
-    SubscriptionConsumer blockSubscribers) {
-    for (var direction : MovementDirection.VALUES) {
-      for (var modifier : MovementModifier.VALUES) {
-        callback.accept(new SimpleMovement(direction, modifier).registerMovement(blockSubscribers));
-      }
-    }
-  }
-
-  private SimpleMovement registerMovement(SubscriptionConsumer blockSubscribers) {
     {
       var blockId = 0;
       for (var freeBlock : this.requiredFreeBlocks) {
@@ -137,8 +125,14 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     this.registerRequiredSolidBlock(blockSubscribers);
     this.registerDiagonalCollisionBlocks(blockSubscribers);
     this.registerPossibleBlocksToPlaceAgainst(blockSubscribers);
+  }
 
-    return this;
+  public static void registerMovements(Consumer<GraphAction> callback, SubscriptionConsumer blockSubscribers) {
+    for (var direction : MovementDirection.VALUES) {
+      for (var modifier : MovementModifier.VALUES) {
+        callback.accept(new SimpleMovement(direction, modifier, blockSubscribers));
+      }
+    }
   }
 
   private int freeBlockIndex(SFVec3i block) {
