@@ -157,16 +157,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
         }
 
-        var blockDirection = direction.toSkyDirection();
-
-        var leftDirectionSide = blockDirection.leftSide();
-        var rightDirectionSide = blockDirection.rightSide();
-        blockSubscribers.subscribe(direction.offset(block),
-          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
-        blockSubscribers.subscribe(leftDirectionSide.offset(block),
-          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
-        blockSubscribers.subscribe(rightDirectionSide.offset(block),
-          new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        for (var skyDirection : SkyDirection.VALUES) {
+          blockSubscribers.subscribe(skyDirection.offset(block),
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+        }
       }
     }
 
@@ -181,17 +175,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
         // Require free blocks to fall into the target position
         if (allowBlockActions) {
-          var blockDirection = direction.toSkyDirection();
-
-          var leftDirectionSide = blockDirection.leftSide();
-          var rightDirectionSide = blockDirection.rightSide();
-
-          blockSubscribers.subscribe(direction.offset(fallFree),
-            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
-          blockSubscribers.subscribe(leftDirectionSide.offset(fallFree),
-            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
-          blockSubscribers.subscribe(rightDirectionSide.offset(fallFree),
-            new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+          for (var skyDirection : SkyDirection.VALUES) {
+            blockSubscribers.subscribe(skyDirection.offset(fallFree),
+              new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+          }
         }
       }
       case FALL_2 -> {
