@@ -40,7 +40,8 @@ public class VectorHelper {
   }
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
-    return vector.floor().add(0.5, blockShapeGroup.maxY(), 0.5);
+    return vector.floor().add(0.5, blockShapeGroup.blockShapes()
+      .stream().mapToDouble(a -> a.maxY).max().orElse(0), 0.5);
   }
 
   public static Vector3d xRot(Vector3d base, float pitch) {

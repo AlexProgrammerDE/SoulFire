@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public record BlockShapeGroup(int id, List<AABB> blockShapes, double minY, double maxY, List<Direction> fullFaceDirections) {
+public record BlockShapeGroup(int id, List<AABB> blockShapes, List<Direction> fullFaceDirections) implements IDValue {
   public static final Int2ObjectMap<BlockShapeGroup> FROM_ID = new Int2ObjectOpenHashMap<>();
   public static final BlockShapeGroup EMPTY;
 
@@ -73,8 +73,6 @@ public record BlockShapeGroup(int id, List<AABB> blockShapes, double minY, doubl
             new BlockShapeGroup(
               id,
               blockShapes,
-              blockShapes.stream().mapToDouble(a -> a.minY).min().orElse(0),
-              blockShapes.stream().mapToDouble(a -> a.maxY).max().orElse(0),
               fullFaceDirections));
         });
 
