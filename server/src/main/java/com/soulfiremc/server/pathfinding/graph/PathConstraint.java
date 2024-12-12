@@ -80,7 +80,7 @@ public class PathConstraint {
     return SFBlockHelpers.isDiggable(blockType);
   }
 
-  public boolean collidesWithAtEdge(CollisionCalculator.CollisionData collisionData) {
+  public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
     if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
       return collisionData.blockState().collisionShape().hasCollisions();
     }
@@ -89,7 +89,7 @@ public class PathConstraint {
       return false;
     }
 
-    return CollisionCalculator.collidesWith(collisionData);
+    return DiagonalCollisionCalculator.collidesWith(collisionData);
   }
 
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {

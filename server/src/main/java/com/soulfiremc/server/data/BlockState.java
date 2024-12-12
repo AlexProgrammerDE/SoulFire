@@ -31,7 +31,7 @@ public record BlockState(
   FluidState fluidState,
   BlockStateProperties properties,
   BlockShapeGroup collisionShape,
-  BlockShapeGroup supportShape) {
+  BlockShapeGroup supportShape) implements IDValue {
   public BlockState(
     int id,
     boolean defaultState,

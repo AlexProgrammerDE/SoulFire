@@ -24,57 +24,50 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirectio
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
+import com.soulfiremc.server.util.IDMap;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public class CollisionCalculator {
+public class DiagonalCollisionCalculator {
   private static final Vector3d START_POSITION = Vector3d.from(0.5, 0, 0.5);
   private static final Vector3d[] STEPS = new Vector3d[]{Vector3d.from(0.25, 0, 0.25), Vector3d.from(0.5, 0, 0.5), Vector3d.from(0.75, 0, 0.75)};
-  private static final boolean[][][][] COLLISIONS;
+  private static final IDMap<BlockState, boolean[][][]> COLLISIONS = new IDMap<>(GlobalBlockPalette.INSTANCE.getBlockStates(), blockState -> {
+    var diagonalsArray = new boolean[MovementDirection.DIAGONALS.length][][];
 
-  static {
-    var blockStates = GlobalBlockPalette.INSTANCE.getBlockStates();
+    for (var diagonal : MovementDirection.DIAGONALS) {
+      var baseOffset = diagonal.offset(SFVec3i.ZERO);
 
-    COLLISIONS = new boolean[blockStates.length][][][];
-    for (var i = 0; i < blockStates.length; i++) {
-      var diagonalsArray = new boolean[MovementDirection.DIAGONALS.length][][];
-      var blockState = blockStates[i];
+      var bodyPartArray = new boolean[BodyPart.VALUES.length][];
+      for (var bodyPart : BodyPart.VALUES) {
+        var sideArray = new boolean[MovementSide.VALUES.length];
+        for (var side : MovementSide.VALUES) {
+          var collides = false;
 
-      for (var diagonal : MovementDirection.DIAGONALS) {
-        var baseOffset = diagonal.offset(SFVec3i.ZERO);
+          for (var step : STEPS) {
+            var currentPosition = START_POSITION.add(step.mul(baseOffset.toVector3d()));
+            collides = blockState.collidesWith(
+              bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toVector3i(),
+              Player.STANDING_DIMENSIONS.makeBoundingBox(currentPosition)
+            );
 
-        var bodyPartArray = new boolean[BodyPart.VALUES.length][];
-        for (var bodyPart : BodyPart.VALUES) {
-          var sideArray = new boolean[MovementSide.VALUES.length];
-          for (var side : MovementSide.VALUES) {
-            var collides = false;
-
-            for (var step : STEPS) {
-              if (collides) {
-                break;
-              }
-
-              var currentPosition = START_POSITION.add(step.mul(baseOffset.toVector3d()));
-              collides = blockState.collidesWith(
-                bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toVector3i(),
-                Player.STANDING_DIMENSIONS.makeBoundingBox(currentPosition)
-              );
+            if (collides) {
+              break;
             }
-
-            sideArray[side.ordinal()] = collides;
           }
 
-          bodyPartArray[bodyPart.ordinal()] = sideArray;
+          sideArray[side.ordinal()] = collides;
         }
 
-        diagonalsArray[diagonal.diagonalArrayIndex()] = bodyPartArray;
+        bodyPartArray[bodyPart.ordinal()] = sideArray;
       }
 
-      COLLISIONS[i] = diagonalsArray;
+      diagonalsArray[diagonal.diagonalArrayIndex()] = bodyPartArray;
     }
-  }
+
+    return diagonalsArray;
+  });
 
   public static boolean collidesWith(CollisionData collisionData) {
-    return COLLISIONS[collisionData.blockState.id()][collisionData.diagonalArrayIndex][collisionData.bodyPart.ordinal()][collisionData.side.ordinal()];
+    return COLLISIONS.get(collisionData.blockState)[collisionData.diagonalArrayIndex][collisionData.bodyPart.ordinal()][collisionData.side.ordinal()];
   }
 
   public record CollisionData(BlockState blockState, int diagonalArrayIndex, BodyPart bodyPart, MovementSide side) {

@@ -22,6 +22,7 @@ import com.soulfiremc.server.data.BlockType;
 import lombok.ToString;
 
 import java.util.Collection;
+import java.util.List;
 
 @ToString
 public class GlobalBlockPalette {
@@ -49,7 +50,7 @@ public class GlobalBlockPalette {
     return stateIdToBlockState[id];
   }
 
-  public BlockState[] getBlockStates() {
-    return stateIdToBlockState;
+  public Collection<BlockState> getBlockStates() {
+    return List.of(stateIdToBlockState);
   }
 }
