@@ -463,7 +463,7 @@ public class AABB {
     return Math.sqrt(x * x + z * z);
   }
 
-  public boolean isBlockXZCollision() {
+  public boolean isFullBlockXZ() {
     return minX == 0 && minZ == 0 && maxX == 1 && maxZ == 1;
   }
 

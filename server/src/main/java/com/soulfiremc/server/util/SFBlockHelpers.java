@@ -60,9 +60,9 @@ public class SFBlockHelpers {
     return tagsState.is(state.blockType(), BlockTags.STAIRS) && !isHurtWhenStoodOn(state);
   }
 
-  public static boolean isTopFullBlock(BlockShapeGroup type) {
-    for (var shape : type.blockShapes()) {
-      if (shape.isBlockXZCollision() && shape.maxY >= SAFE_BLOCK_MIN_HEIGHT) {
+  public static boolean isTopFullBlock(BlockShapeGroup shapeGroup) {
+    for (var shape : shapeGroup.blockShapes()) {
+      if (shape.isFullBlockXZ() && shape.maxY >= SAFE_BLOCK_MIN_HEIGHT) {
         return true;
       }
     }
