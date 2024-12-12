@@ -53,20 +53,21 @@ public class SFBlockHelpers {
   }
 
   public static boolean isSafeBlockToStandOn(BlockState state) {
-    return isRoughlyFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state);
+    return isTopFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state);
   }
 
   public static boolean isStairsBlockToStandOn(TagsState tagsState, BlockState state) {
     return tagsState.is(state.blockType(), BlockTags.STAIRS) && !isHurtWhenStoodOn(state);
   }
 
-  public static boolean isRoughlyFullBlock(BlockShapeGroup type) {
-    if (type.blockShapes().size() != 1) {
-      return false;
+  public static boolean isTopFullBlock(BlockShapeGroup type) {
+    for (var shape : type.blockShapes()) {
+      if (shape.isBlockXZCollision() && shape.maxY >= SAFE_BLOCK_MIN_HEIGHT) {
+        return true;
+      }
     }
 
-    var shape = type.blockShapes().getFirst();
-    return shape.isBlockXZCollision() && shape.minY == 0 && shape.maxY >= SAFE_BLOCK_MIN_HEIGHT;
+    return false;
   }
 
   public static boolean isDiggable(BlockType type) {

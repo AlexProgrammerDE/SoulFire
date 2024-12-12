@@ -75,7 +75,7 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var startBlockState = level.getBlockState(start);
-        if (SFBlockHelpers.isRoughlyFullBlock(startBlockState.collisionShape())) {
+        if (SFBlockHelpers.isTopFullBlock(startBlockState.collisionShape())) {
           // If the player is inside a block, move them up
           start = start.add(0, 1, 0);
         }
