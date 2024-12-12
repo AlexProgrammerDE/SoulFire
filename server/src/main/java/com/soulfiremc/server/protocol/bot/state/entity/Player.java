@@ -138,19 +138,19 @@ public abstract class Player extends LivingEntity {
   @Override
   public void travel(Vector3d travelVector) {
     if (this.isSwimming()) {
-      var d = this.getLookAngle().getY();
-      var e = d < -0.2 ? 0.085 : 0.06;
-      if (d <= 0.0 || this.jumping || !this.level().getBlockState(Vector3i.from(this.x(), this.y() + 1.0 - 0.1, this.z())).fluidState().empty()) {
-        var lv = this.getDeltaMovement();
-        this.setDeltaMovement(lv.add(0.0, (d - lv.getY()) * e, 0.0));
+      var lookAngleY = this.getLookAngle().getY();
+      var fixedAngleMultiplier = lookAngleY < -0.2 ? 0.085 : 0.06;
+      if (lookAngleY <= 0.0 || this.jumping || !this.level().getBlockState(Vector3i.from(this.x(), this.y() + 1.0 - 0.1, this.z())).fluidState().empty()) {
+        var deltaMovement = this.getDeltaMovement();
+        this.setDeltaMovement(deltaMovement.add(0.0, (lookAngleY - deltaMovement.getY()) * fixedAngleMultiplier, 0.0));
       }
     }
 
     if (this.abilitiesData().flying) {
-      var d = this.getDeltaMovement().getY();
+      var yDelta = this.getDeltaMovement().getY();
       super.travel(travelVector);
       var deltaMovement = this.getDeltaMovement();
-      this.setDeltaMovement(Vector3d.from(deltaMovement.getX(), d * 0.6, deltaMovement.getZ()));
+      this.setDeltaMovement(Vector3d.from(deltaMovement.getX(), yDelta * 0.6, deltaMovement.getZ()));
     } else {
       super.travel(travelVector);
     }
@@ -274,43 +274,43 @@ public abstract class Player extends LivingEntity {
       && (mover == MoverType.SELF || mover == MoverType.PLAYER)
       && this.isStayingOnGroundSurface()
       && this.isAboveGround(maxUpStep)) {
-      var d = vec.getX();
-      var e = vec.getZ();
+      var currentX = vec.getX();
+      var currentZ = vec.getZ();
       var min = 0.05;
-      var h = Math.signum(d) * min;
+      var h = Math.signum(currentX) * min;
 
-      double i;
-      for (i = Math.signum(e) * min; d != 0.0 && this.canFallAtLeast(d, 0.0, maxUpStep); d -= h) {
-        if (Math.abs(d) <= min) {
-          d = 0.0;
+      double zBackoff;
+      for (zBackoff = Math.signum(currentZ) * min; currentX != 0.0 && this.canFallAtLeast(currentX, 0.0, maxUpStep); currentX -= h) {
+        if (Math.abs(currentX) <= min) {
+          currentX = 0.0;
           break;
         }
       }
 
-      while (e != 0.0 && this.canFallAtLeast(0.0, e, maxUpStep)) {
-        if (Math.abs(e) <= min) {
-          e = 0.0;
+      while (currentZ != 0.0 && this.canFallAtLeast(0.0, currentZ, maxUpStep)) {
+        if (Math.abs(currentZ) <= min) {
+          currentZ = 0.0;
           break;
         }
 
-        e -= i;
+        currentZ -= zBackoff;
       }
 
-      while (d != 0.0 && e != 0.0 && this.canFallAtLeast(d, e, maxUpStep)) {
-        if (Math.abs(d) <= min) {
-          d = 0.0;
+      while (currentX != 0.0 && currentZ != 0.0 && this.canFallAtLeast(currentX, currentZ, maxUpStep)) {
+        if (Math.abs(currentX) <= min) {
+          currentX = 0.0;
         } else {
-          d -= h;
+          currentX -= h;
         }
 
-        if (Math.abs(e) <= min) {
-          e = 0.0;
+        if (Math.abs(currentZ) <= min) {
+          currentZ = 0.0;
         } else {
-          e -= i;
+          currentZ -= zBackoff;
         }
       }
 
-      return Vector3d.from(d, vec.getY(), e);
+      return Vector3d.from(currentX, vec.getY(), currentZ);
     } else {
       return vec;
     }
@@ -321,8 +321,8 @@ public abstract class Player extends LivingEntity {
   }
 
   private boolean canFallAtLeast(double x, double z, float distance) {
-    var lv = this.getBoundingBox();
-    return this.level().noCollision(new AABB(lv.minX + x, lv.minY - (double) distance - 1.0E-5F, lv.minZ + z, lv.maxX + x, lv.minY, lv.maxZ + z));
+    var bb = this.getBoundingBox();
+    return this.level().noCollision(new AABB(bb.minX + x, bb.minY - (double) distance - 1.0E-5F, bb.minZ + z, bb.maxX + x, bb.minY, bb.maxZ + z));
   }
 
   public boolean isSecondaryUseActive() {

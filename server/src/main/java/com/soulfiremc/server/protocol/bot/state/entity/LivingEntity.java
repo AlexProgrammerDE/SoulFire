@@ -57,6 +57,14 @@ public abstract class LivingEntity extends Entity {
   private int noJumpDelay;
   private float speed;
   private final boolean discardFriction = false;
+  protected int lerpSteps;
+  protected double lerpX;
+  protected double lerpY;
+  protected double lerpZ;
+  protected double lerpYRot;
+  protected double lerpXRot;
+  protected double lerpYHeadRot;
+  protected int lerpHeadSteps;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 
@@ -151,12 +159,30 @@ public abstract class LivingEntity extends Entity {
     this.setPos(xClamp, y, zClamp);
   }
 
+  @Override
+  public void cancelLerp() {
+    this.lerpSteps = 0;
+  }
+
+  @Override
+  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+    this.lerpX = x;
+    this.lerpY = y;
+    this.lerpZ = z;
+    this.lerpYRot = yRot;
+    this.lerpXRot = xRot;
+    this.lerpSteps = steps;
+  }
+
   public void aiStep() {
     if (this.noJumpDelay > 0) {
       this.noJumpDelay--;
     }
 
-    if (!this.isEffectiveAi()) {
+    if (this.lerpSteps > 0) {
+      this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
+      this.lerpSteps--;
+    } else if (!this.isEffectiveAi()) {
       this.setDeltaMovement(this.getDeltaMovement().mul(0.98));
     }
 

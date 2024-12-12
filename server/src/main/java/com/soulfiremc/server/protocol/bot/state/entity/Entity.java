@@ -234,6 +234,29 @@ public class Entity {
     }
   }
 
+  protected void lerpPositionAndRotationStep(int steps, double targetX, double targetY, double targetZ, double targetYRot, double targetXRot) {
+    var partialStep = 1.0 / (double) steps;
+    var xLerp = MathHelper.lerp(partialStep, this.x(), targetX);
+    var yLerp = MathHelper.lerp(partialStep, this.y(), targetY);
+    var zLerp = MathHelper.lerp(partialStep, this.z(), targetZ);
+    var yRotLerp = (float) MathHelper.rotLerp(partialStep, this.yRot(), targetYRot);
+    var xRotLerp = (float) MathHelper.lerp(partialStep, this.xRot(), targetXRot);
+    this.setPos(xLerp, yLerp, zLerp);
+    this.setRot(yRotLerp, xRotLerp);
+  }
+
+  public void lerpMotion(double x, double y, double z) {
+    this.setDeltaMovement(x, y, z);
+  }
+
+  public void cancelLerp() {
+  }
+
+  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+    this.setPos(x, y, z);
+    this.setRot(yRot, xRot);
+  }
+
   public void setOnGround(boolean onGround) {
     this.onGround = onGround;
     this.checkSupportingBlock(onGround, null);

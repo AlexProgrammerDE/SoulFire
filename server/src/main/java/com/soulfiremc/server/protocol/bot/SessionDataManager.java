@@ -970,7 +970,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
+    state.lerpMotion(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
   @EventHandler

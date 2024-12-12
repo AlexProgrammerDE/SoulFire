@@ -33,4 +33,11 @@ public class Shulker extends Mob {
   @Override
   public void push(Entity entity) {
   }
+
+  @Override
+  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+    this.lerpSteps = 0;
+    this.setPos(x, y, z);
+    this.setRot(yRot, xRot);
+  }
 }

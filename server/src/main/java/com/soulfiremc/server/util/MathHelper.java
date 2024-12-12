@@ -482,6 +482,10 @@ public class MathHelper {
     return value * value;
   }
 
+  public static double rotLerp(double delta, double start, double end) {
+    return start + delta * wrapDegrees(end - start);
+  }
+
   public static double lerp(double delta, double start, double end) {
     return start + delta * (end - start);
   }
