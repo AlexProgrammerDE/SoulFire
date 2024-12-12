@@ -34,6 +34,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.jetbrains.annotations.Nullable;
 
@@ -214,6 +215,20 @@ public abstract class Player extends LivingEntity {
 
   public boolean isLocalPlayer() {
     return false;
+  }
+
+  public int getScore() {
+    return this.metadataState.getMetadata(NamedEntityData.PLAYER__SCORE, MetadataType.INT);
+  }
+
+  @Override
+  public boolean canBeSeenAsEnemy() {
+    return !this.abilitiesData().invulnerable && super.canBeSeenAsEnemy();
+  }
+
+  @Override
+  public boolean onClimbable() {
+    return !this.abilitiesData().flying && super.onClimbable();
   }
 
   public void onUpdateAbilities() {

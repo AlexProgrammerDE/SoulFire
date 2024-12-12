@@ -724,4 +724,16 @@ public abstract class LivingEntity extends Entity {
     this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND).orElse(null));
     this.setItemSlot(EquipmentSlot.MAINHAND, item);
   }
+
+  public boolean isInvulnerable() {
+    return false;
+  }
+
+  public boolean canBeSeenAsEnemy() {
+    return !this.isInvulnerable() && this.canBeSeenByAnyone();
+  }
+
+  public boolean canBeSeenByAnyone() {
+    return !this.isSpectator() && this.isAlive();
+  }
 }
