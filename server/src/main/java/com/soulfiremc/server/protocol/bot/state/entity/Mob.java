@@ -19,8 +19,10 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.EquipmentSlot;
+import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -28,6 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Mob extends LivingEntity {
+  private static final int MOB_FLAG_NO_AI = 1;
+  private static final int MOB_FLAG_LEFTHANDED = 2;
+  private static final int MOB_FLAG_AGGRESSIVE = 4;
   private final Map<EquipmentSlot, SFItemStack> slots = new EnumMap<>(EquipmentSlot.class);
 
   public Mob(EntityType entityType, Level level) {
@@ -42,5 +47,22 @@ public class Mob extends LivingEntity {
   @Override
   public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
     slots.put(slot, item);
+  }
+
+  @Override
+  public boolean isEffectiveAi() {
+    return super.isEffectiveAi() && !this.isNoAi();
+  }
+
+  public boolean isNoAi() {
+    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataType.BYTE) & MOB_FLAG_NO_AI) != 0;
+  }
+
+  public boolean isLeftHanded() {
+    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataType.BYTE) & MOB_FLAG_LEFTHANDED) != 0;
+  }
+
+  public boolean isAggressive() {
+    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataType.BYTE) & MOB_FLAG_AGGRESSIVE) != 0;
   }
 }

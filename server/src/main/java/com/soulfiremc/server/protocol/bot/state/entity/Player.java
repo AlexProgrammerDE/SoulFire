@@ -46,21 +46,27 @@ import java.util.Optional;
 public abstract class Player extends LivingEntity {
   private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
   private final AbilitiesData abilitiesData = new AbilitiesData();
+  public static final float CROUCH_BB_HEIGHT = 1.5F;
+  public static final float SWIMMING_BB_WIDTH = 0.6F;
+  public static final float SWIMMING_BB_HEIGHT = 0.6F;
+  public static final float DEFAULT_EYE_HEIGHT = 1.62F;
   public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F)
-    .withEyeHeight(1.62F);
+    .withEyeHeight(DEFAULT_EYE_HEIGHT);
   private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.<Pose, EntityDimensions>builder()
     .put(Pose.STANDING, STANDING_DIMENSIONS)
     .put(Pose.SLEEPING, SLEEPING_DIMENSIONS)
     .put(Pose.FALL_FLYING, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
-    .put(Pose.SWIMMING, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
+    .put(Pose.SWIMMING, EntityDimensions.scalable(SWIMMING_BB_WIDTH, SWIMMING_BB_HEIGHT).withEyeHeight(0.4F))
     .put(Pose.SPIN_ATTACK, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
-    .put(Pose.SNEAKING, EntityDimensions.scalable(0.6F, 1.5F).withEyeHeight(1.27F))
-    .put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(1.62F))
+    .put(Pose.SNEAKING, EntityDimensions.scalable(0.6F, CROUCH_BB_HEIGHT).withEyeHeight(1.27F))
+    .put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(DEFAULT_EYE_HEIGHT))
     .build();
+  public static final int CLIENT_LOADED_TIMEOUT_TIME = 60;
   protected final GameProfile gameProfile;
   protected boolean wasUnderwater = false;
   private boolean reducedDebugInfo;
-  protected int clientLoadedTimeoutTimer = 60;
+  protected final float defaultFlySpeed = 0.02F;
+  protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
   private boolean clientLoaded = false;
 
   public Player(Level level, GameProfile gameProfile) {
@@ -256,7 +262,7 @@ public abstract class Player extends LivingEntity {
     if (this.abilitiesData.flying) {
       return this.isSprinting() ? this.abilitiesData.flySpeed() * 2.0F : this.abilitiesData.flySpeed();
     } else {
-      return this.isSprinting() ? 0.025999999F : 0.02F;
+      return this.isSprinting() ? 0.025999999F : defaultFlySpeed;
     }
   }
 
