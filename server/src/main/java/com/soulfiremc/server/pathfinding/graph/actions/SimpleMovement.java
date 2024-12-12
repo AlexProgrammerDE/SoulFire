@@ -418,6 +418,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
+      // Stairs blocks are pretty much identical to full blocks
+      if (SFBlockHelpers.isStairsBlockToStandOn(graph.tagsState(), blockState)) {
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
       if (graph.disallowedToPlaceBlock(absoluteKey)
         || !simpleMovement.allowBlockActions
         || !blockState.blockType().replaceable()) {
@@ -434,7 +439,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (SFBlockHelpers.isHurtOnTouchSide(blockState.blockType())) {
+      if (SFBlockHelpers.isHurtOnTouchSide(blockState)) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       } else if (graph.pathConstraint().collidesWithAtEdge(new CollisionCalculator.CollisionData(blockState, diagonalArrayIndex, bodyPart, side))) {

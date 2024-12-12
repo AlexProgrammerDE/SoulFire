@@ -15,15 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.data;
+package com.soulfiremc.server.util;
 
-import net.kyori.adventure.key.Key;
+import com.soulfiremc.server.data.IDValue;
 
-public interface RegistryValue<T extends RegistryValue<T>> extends IDValue {
-  @Override
-  int id();
+import java.util.Collection;
+import java.util.function.Function;
 
-  Key key();
+public class IDMap<K extends IDValue, V> {
+  private final Object[] values;
 
-  Registry<T> registry();
+  public IDMap(Collection<K> collection, Function<K, V> valueFunction) {
+    values = new Object[collection.size()];
+
+    for (var key : collection) {
+      values[key.id()] = valueFunction.apply(key);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public V get(K key) {
+    return (V) values[key.id()];
+  }
 }

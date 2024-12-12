@@ -17,11 +17,10 @@
  */
 package com.soulfiremc.server.util;
 
-import com.soulfiremc.server.data.BlockItems;
-import com.soulfiremc.server.data.BlockShapeGroup;
-import com.soulfiremc.server.data.BlockState;
-import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.*;
+import com.soulfiremc.server.protocol.bot.state.TagsState;
 
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class SFBlockHelpers {
   // A player can jump up 1.25 blocks
   private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
@@ -32,21 +31,33 @@ public class SFBlockHelpers {
     return state.collisionShape().isFullBlock();
   }
 
-  public static boolean isHurtOnTouchSide(BlockType type) {
-    return type == BlockType.CACTUS
-      || type == BlockType.SWEET_BERRY_BUSH
-      || type == BlockType.WITHER_ROSE
-      || type == BlockType.FIRE
-      || type == BlockType.SOUL_FIRE
-      || type == BlockType.LAVA;
+  public static boolean isHurtOnTouchFluid(FluidType fluidType) {
+    return fluidType == FluidType.LAVA
+      || fluidType == FluidType.FLOWING_LAVA;
   }
 
-  public static boolean isHurtWhenStoodOn(BlockType type) {
-    return type == BlockType.MAGMA_BLOCK;
+  public static boolean isHurtOnTouchSide(BlockState blockState) {
+    var blockType = blockState.blockType();
+    return blockType == BlockType.CACTUS
+      || blockType == BlockType.SWEET_BERRY_BUSH
+      || blockType == BlockType.WITHER_ROSE
+      || blockType == BlockType.FIRE
+      || blockType == BlockType.SOUL_FIRE
+      || isHurtOnTouchFluid(blockState.fluidState().type());
+  }
+
+  public static boolean isHurtWhenStoodOn(BlockState blockState) {
+    var blockType = blockState.blockType();
+    return blockType == BlockType.MAGMA_BLOCK
+      || isHurtOnTouchFluid(blockState.fluidState().type());
   }
 
   public static boolean isSafeBlockToStandOn(BlockState state) {
-    return isRoughlyFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state.blockType());
+    return isRoughlyFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state);
+  }
+
+  public static boolean isStairsBlockToStandOn(TagsState tagsState, BlockState state) {
+    return tagsState.is(state.blockType(), BlockTags.STAIRS) && !isHurtWhenStoodOn(state);
   }
 
   public static boolean isRoughlyFullBlock(BlockShapeGroup type) {
