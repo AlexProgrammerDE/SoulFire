@@ -222,6 +222,12 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
   }
 
+  public void setExperienceValues(float currentXP, int maxXP, int level) {
+    this.experienceProgress = currentXP;
+    this.totalExperience = maxXP;
+    this.experienceLevel = level;
+  }
+
   public void resetPos() {
     this.setPose(Pose.STANDING);
     if (this.level() != null) {

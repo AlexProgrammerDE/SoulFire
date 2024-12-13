@@ -166,10 +166,6 @@ public final class BotConnection {
   }
 
   public void tick(int ticks) {
-    if (ticks <= 0) {
-      return;
-    }
-
     try {
       session.tick(); // Ensure all packets are handled before ticking
 

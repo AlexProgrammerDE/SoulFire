@@ -510,15 +510,6 @@ public class POVServer extends InternalPlugin {
           borderState.warningTime()));
     }
 
-    var experienceData = dataManager.experienceData();
-    if (experienceData != null) {
-      clientSession.send(
-        new ClientboundSetExperiencePacket(
-          experienceData.experience(),
-          experienceData.level(),
-          experienceData.totalExperience()));
-    }
-
     // Give initial coordinates to the client
     clientSession.send(
       new ClientboundPlayerPositionPacket(
@@ -688,6 +679,11 @@ public class POVServer extends InternalPlugin {
                 "Unexpected value: "
                   + localPlayer.permissionLevel());
             }));
+        clientSession.send(
+          new ClientboundSetExperiencePacket(
+            localPlayer.experienceProgress,
+            localPlayer.experienceLevel,
+            localPlayer.totalExperience));
         clientSession.send(
           new ClientboundEntityEventPacket(
             localPlayer.entityId(),

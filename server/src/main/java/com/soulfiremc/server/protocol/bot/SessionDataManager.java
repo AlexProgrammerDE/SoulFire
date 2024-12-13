@@ -31,7 +31,6 @@ import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
-import com.soulfiremc.server.protocol.bot.model.ExperienceData;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.state.*;
 import com.soulfiremc.server.protocol.bot.state.entity.EntityFactory;
@@ -142,7 +141,6 @@ public final class SessionDataManager {
   private int serverChunkRadius = 3;
   private int serverSimulationDistance = 3;
   private boolean serverEnforcesSecureChat;
-  private @Nullable ExperienceData experienceData;
   private @Nullable ChunkKey centerChunk;
   private boolean joinedWorld = false;
   private String serverBrand;
@@ -587,8 +585,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onExperience(ClientboundSetExperiencePacket packet) {
-    experienceData =
-      new ExperienceData(packet.getExperience(), packet.getLevel(), packet.getTotalExperience());
+    localPlayer.setExperienceValues(packet.getExperience(), packet.getTotalExperience(), packet.getLevel());
   }
 
   @EventHandler

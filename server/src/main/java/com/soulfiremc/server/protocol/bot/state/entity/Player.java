@@ -64,6 +64,9 @@ public abstract class Player extends LivingEntity {
     .put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(DEFAULT_EYE_HEIGHT))
     .build();
   public static final int CLIENT_LOADED_TIMEOUT_TIME = 60;
+  public int experienceLevel;
+  public int totalExperience;
+  public float experienceProgress;
   protected final GameProfile gameProfile;
   protected boolean wasUnderwater = false;
   private boolean reducedDebugInfo;
