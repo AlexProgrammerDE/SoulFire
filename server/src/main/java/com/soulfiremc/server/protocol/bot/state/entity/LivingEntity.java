@@ -40,6 +40,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @Getter
 public abstract class LivingEntity extends Entity {
@@ -623,8 +624,7 @@ public abstract class LivingEntity extends Entity {
   protected void pushEntities() {
     this.level().getEntities(this.getBoundingBox())
       .stream()
-      .<Optional<Player>>map(e -> e instanceof Player player ? Optional.of(player) : Optional.empty())
-      .flatMap(Optional::stream)
+      .flatMap(e -> e instanceof Player player ? Stream.of(player) : Stream.empty())
       .filter(Predicate.not(Entity::isSpectator))
       .filter(Entity::isPushable)
       .filter(Player::isLocalPlayer)
