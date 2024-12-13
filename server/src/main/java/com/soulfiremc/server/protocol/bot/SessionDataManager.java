@@ -387,6 +387,7 @@ public final class SessionDataManager {
         "Position updated: X {} Y {} Z {}", position.getX(), position.getY(), position.getZ());
     }
 
+    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
     connection.sendPacket(new ServerboundMovePlayerPosRotPacket(
       false,
       false,
@@ -396,7 +397,6 @@ public final class SessionDataManager {
       localPlayer.yRot(),
       localPlayer.xRot()
     ));
-    connection.sendPacket(new ServerboundAcceptTeleportationPacket(packet.getId()));
   }
 
   @EventHandler
