@@ -318,28 +318,29 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public void sendPositionChanges() {
     sendIsSprintingIfNeeded();
+    if (isControlledCamera()) {
+      // Detect whether anything changed
+      var xDiff = x() - lastX;
+      var yDiff = y() - lastY;
+      var zDiff = z() - lastZ;
+      var yRotDiff = (double) (yRot - lastYRot);
+      var xRotDiff = (double) (xRot - lastXRot);
+      var sendPos =
+        MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
+          || ++positionReminder >= 20;
+      var sendRot = xRotDiff != 0.0 || yRotDiff != 0.0;
+      var sendStatus = onGround != lastOnGround || horizontalCollision != lastHorizontalCollision;
 
-    // Detect whether anything changed
-    var xDiff = x() - lastX;
-    var yDiff = y() - lastY;
-    var zDiff = z() - lastZ;
-    var yRotDiff = (double) (yRot - lastYRot);
-    var xRotDiff = (double) (xRot - lastXRot);
-    var sendPos =
-      MathHelper.lengthSquared(xDiff, yDiff, zDiff) > MathHelper.square(2.0E-4)
-        || ++positionReminder >= 20;
-    var sendRot = xRotDiff != 0.0 || yRotDiff != 0.0;
-    var sendStatus = onGround != lastOnGround || horizontalCollision != lastHorizontalCollision;
-
-    // Send position packets if changed
-    if (sendPos && sendRot) {
-      sendPosRot();
-    } else if (sendPos) {
-      sendPos();
-    } else if (sendRot) {
-      sendRot();
-    } else if (sendStatus) {
-      sendStatus();
+      // Send position packets if changed
+      if (sendPos && sendRot) {
+        sendPosRot();
+      } else if (sendPos) {
+        sendPos();
+      } else if (sendRot) {
+        sendRot();
+      } else if (sendStatus) {
+        sendStatus();
+      }
     }
   }
 
