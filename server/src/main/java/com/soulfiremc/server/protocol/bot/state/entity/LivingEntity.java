@@ -76,6 +76,9 @@ public abstract class LivingEntity extends Entity {
 
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
+    this.setHealth(this.getMaxHealth());
+    this.reapplyPosition();
+    this.setYRot((float) (Math.random() * (float) (Math.PI * 2)));
   }
 
   @Override

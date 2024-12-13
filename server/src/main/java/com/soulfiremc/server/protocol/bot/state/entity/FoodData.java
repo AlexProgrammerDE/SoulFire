@@ -17,11 +17,9 @@
  */
 package com.soulfiremc.server.protocol.bot.state.entity;
 
-
 public class FoodData {
   private int foodLevel = 20;
   private float saturationLevel = 5.0F;
-  private float exhaustionLevel;
 
   public int getFoodLevel() {
     return this.foodLevel;

@@ -153,6 +153,7 @@ public class Entity {
       metadataState.setMetadata(metadata);
     }
 
+    this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();
   }
 

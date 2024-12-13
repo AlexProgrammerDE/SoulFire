@@ -30,7 +30,7 @@ public abstract class AbstractClientPlayer extends Player {
   private final BotConnection connection;
 
   public AbstractClientPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
-    super(level, gameProfile);
+    super(level, level.levelData().spawnPos(), level.levelData().spawnAngle(), gameProfile);
     this.connection = connection;
   }
 

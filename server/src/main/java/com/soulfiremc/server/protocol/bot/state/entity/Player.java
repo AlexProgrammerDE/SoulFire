@@ -72,10 +72,11 @@ public abstract class Player extends LivingEntity {
   private boolean clientLoaded = false;
   private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 
-  public Player(Level level, GameProfile gameProfile) {
+  public Player(Level level, Vector3i spawnBlockPos, float spawnYRot, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);
-    this.gameProfile = gameProfile;
     uuid(gameProfile.getId());
+    this.gameProfile = gameProfile;
+    this.moveTo((double) spawnBlockPos.getX() + 0.5, spawnBlockPos.getY() + 1, (double) spawnBlockPos.getZ() + 0.5, spawnYRot, 0.0F);
   }
 
   @Override
