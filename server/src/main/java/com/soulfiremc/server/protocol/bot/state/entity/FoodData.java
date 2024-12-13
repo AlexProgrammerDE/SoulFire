@@ -47,4 +47,3 @@ public class FoodData {
     this.saturationLevel = saturationLevel;
   }
 }
-
