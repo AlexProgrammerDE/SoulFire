@@ -35,7 +35,7 @@ public class LevelLoadStatusManager {
       case WAITING_FOR_PLAYER_CHUNK -> {
         var blockPos = this.player.blockPosition();
         var outsideHeight = this.level.isOutsideBuildHeight(blockPos.getY());
-        if (outsideHeight || this.player.isSpectator() || !this.player.isAlive()) {
+        if (outsideHeight || this.level.isChunkPositionLoaded(blockPos.getX(), blockPos.getZ()) || this.player.isSpectator() || !this.player.isAlive()) {
           this.status = LevelLoadStatusManager.Status.LEVEL_READY;
         }
       }
