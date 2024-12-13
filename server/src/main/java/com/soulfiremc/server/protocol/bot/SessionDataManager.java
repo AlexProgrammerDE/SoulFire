@@ -266,14 +266,17 @@ public final class SessionDataManager {
     localPlayer.entityId(packet.getEntityId());
     entityTrackerState.addEntity(localPlayer);
 
-    gameModeState.adjustPlayer(localPlayer);
+    this.gameModeState.adjustPlayer(localPlayer);
+
     startWaitingForNewLevel(localPlayer, currentLevel());
+
     localPlayer.setReducedDebugInfo(packet.isReducedDebugInfo());
     localPlayer.setShowDeathScreen(packet.isEnableRespawnScreen());
     localPlayer.setDoLimitedCrafting(packet.isDoLimitedCrafting());
     localPlayer.setLastDeathLocation(Optional.ofNullable(spawnInfo.getLastDeathPos()));
     localPlayer.setPortalCooldown(spawnInfo.getPortalCooldown());
-    gameModeState.setLocalMode(localPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
+
+    this.gameModeState.setLocalMode(localPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
 
     serverEnforcesSecureChat = packet.isEnforcesSecureChat();
   }
@@ -301,6 +304,7 @@ public final class SessionDataManager {
     connection.inventoryManager().setContainer(0, newLocalPlayer.inventory());
 
     this.startWaitingForNewLevel(newLocalPlayer, currentLevel());
+
     newLocalPlayer.entityId(oldLocalPlayer.entityId());
 
     this.localPlayer = newLocalPlayer;
@@ -324,12 +328,13 @@ public final class SessionDataManager {
     entityTrackerState.addEntity(newLocalPlayer);
 
     this.gameModeState.adjustPlayer(newLocalPlayer);
+
     newLocalPlayer.setReducedDebugInfo(oldLocalPlayer.isReducedDebugInfo());
     newLocalPlayer.setShowDeathScreen(oldLocalPlayer.shouldShowDeathScreen());
     newLocalPlayer.setLastDeathLocation(Optional.ofNullable(spawnInfo.getLastDeathPos()));
     newLocalPlayer.setPortalCooldown(spawnInfo.getPortalCooldown());
 
-    gameModeState.setLocalMode(newLocalPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
+    this.gameModeState.setLocalMode(newLocalPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
 
     log.info("Respawned");
   }
@@ -425,17 +430,13 @@ public final class SessionDataManager {
   @EventHandler
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
-
-    if (state == null || state != localPlayer) {
-      log.debug("Received death for unknown or invalid entity {}", packet.getPlayerId());
-      return;
-    }
-
-    if (localPlayer.shouldShowDeathScreen()) {
-      log.info("Died");
-    } else {
-      log.info("Died, respawning due to game rule");
-      connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+    if (state == localPlayer) {
+      if (localPlayer.shouldShowDeathScreen()) {
+        log.info("Died");
+      } else {
+        log.info("Died, respawning due to game rule");
+        connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+      }
     }
   }
 
