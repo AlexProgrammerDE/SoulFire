@@ -296,12 +296,12 @@ public final class SessionDataManager {
     }
 
     var oldLocalPlayer = localPlayer;
-    var newLocalPlayer = packet.isKeepMetadata() ? new LocalPlayer(connection, currentLevel(), botProfile, localPlayer.isShiftKeyDown(), localPlayer.isSprinting())
+    var newLocalPlayer = packet.isKeepMetadata() ? new LocalPlayer(connection, currentLevel(), botProfile, oldLocalPlayer.isShiftKeyDown(), oldLocalPlayer.isSprinting())
       : new LocalPlayer(connection, currentLevel(), botProfile);
-    connection.inventoryManager().setContainer(0, localPlayer.inventory());
+    connection.inventoryManager().setContainer(0, newLocalPlayer.inventory());
 
     this.startWaitingForNewLevel(newLocalPlayer, currentLevel());
-    localPlayer.entityId(oldLocalPlayer.entityId());
+    newLocalPlayer.entityId(oldLocalPlayer.entityId());
 
     this.localPlayer = newLocalPlayer;
     if (packet.isKeepMetadata()) {
@@ -321,7 +321,7 @@ public final class SessionDataManager {
       newLocalPlayer.attributeState().assignBaseValues(oldLocalPlayer.attributeState());
     }
 
-    entityTrackerState.addEntity(localPlayer);
+    entityTrackerState.addEntity(newLocalPlayer);
 
     this.gameModeState.adjustPlayer(newLocalPlayer);
     newLocalPlayer.setReducedDebugInfo(oldLocalPlayer.isReducedDebugInfo());
