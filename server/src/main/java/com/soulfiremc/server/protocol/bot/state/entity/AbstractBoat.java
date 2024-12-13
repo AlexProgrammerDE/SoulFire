@@ -18,9 +18,31 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.util.MathHelper;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata;
 
 public class AbstractBoat extends VehicleEntity {
+  private final float[] paddlePositions = new float[2];
+  private float invFriction;
+  private float outOfControlTicks;
+  private int lerpSteps;
+  private double lerpX;
+  private double lerpY;
+  private double lerpZ;
+  private double lerpYRot;
+  private double lerpXRot;
+  private AbstractBoat.Status status;
+  private AbstractBoat.Status oldStatus;
+  private double lastYd;
+  private boolean isAboveBubbleColumn;
+  private boolean bubbleColumnDirectionIsDown;
+  private float bubbleMultiplier;
+  private float bubbleAngle;
+  private float bubbleAngleO;
+
   public AbstractBoat(EntityType entityType, Level level) {
     super(entityType, level);
   }
@@ -49,5 +71,69 @@ public class AbstractBoat extends VehicleEntity {
     } else if (entity.getBoundingBox().minY <= this.getBoundingBox().minY) {
       super.push(entity);
     }
+  }
+
+  private void tickBubbleColumn() {
+    var i = this.getBubbleTime();
+    if (i > 0) {
+      this.bubbleMultiplier += 0.05F;
+    } else {
+      this.bubbleMultiplier -= 0.1F;
+    }
+
+    this.bubbleMultiplier = MathHelper.clamp(this.bubbleMultiplier, 0.0F, 1.0F);
+    this.bubbleAngleO = this.bubbleAngle;
+    this.bubbleAngle = 10.0F * (float) Math.sin((0.5F * (float) this.level().levelData().gameTime())) * this.bubbleMultiplier;
+  }
+
+  @Override
+  public void cancelLerp() {
+    this.lerpSteps = 0;
+  }
+
+  @Override
+  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+    this.lerpX = x;
+    this.lerpY = y;
+    this.lerpZ = z;
+    this.lerpYRot = yRot;
+    this.lerpXRot = xRot;
+    this.lerpSteps = steps;
+  }
+
+  @Override
+  protected double getDefaultGravity() {
+    return 0.04;
+  }
+
+  private void tickLerp() {
+    if (this.lerpSteps > 0) {
+      this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
+      this.lerpSteps--;
+    }
+  }
+
+  public boolean getPaddleState(int i) {
+    return this.metadataState.getMetadata(i == 0 ? NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_LEFT : NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_RIGHT, MetadataType.BOOLEAN) && this.getControllingPassenger() != null;
+  }
+
+  private int getBubbleTime() {
+    return this.metadataState.getMetadata(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataType.INT);
+  }
+
+  private void setBubbleTime(int i) {
+    this.metadataState.setMetadata(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataType.INT, IntEntityMetadata::new, i);
+  }
+
+  public float getBubbleAngle(float f) {
+    return MathHelper.lerp(f, this.bubbleAngleO, this.bubbleAngle);
+  }
+
+  public enum Status {
+    IN_WATER,
+    UNDER_WATER,
+    UNDER_FLOWING_WATER,
+    ON_LAND,
+    IN_AIR
   }
 }

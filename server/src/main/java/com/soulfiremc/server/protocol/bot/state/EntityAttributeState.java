@@ -80,4 +80,20 @@ public class EntityAttributeState {
         .remove(modifier.getModifier().getId());
     }
   }
+
+  public void assignAllValues(EntityAttributeState other) {
+    other.attributeStore.forEach((type, state) -> {
+      var attribute = getOrCreateAttribute(type);
+      attribute.baseValue(state.baseValue());
+      attribute.modifiers().clear();
+      attribute.modifiers().putAll(state.modifiers());
+    });
+  }
+
+  public void assignBaseValues(EntityAttributeState other) {
+    other.attributeStore.forEach((type, state) -> {
+      var attribute = getOrCreateAttribute(type);
+      attribute.baseValue(state.baseValue());
+    });
+  }
 }

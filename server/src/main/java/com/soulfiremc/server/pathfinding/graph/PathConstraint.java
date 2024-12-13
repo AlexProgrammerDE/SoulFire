@@ -49,7 +49,7 @@ public class PathConstraint {
   }
 
   public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return entity == null || !entity.abilitiesData().instabuild();
+    return entity == null || !entity.abilitiesState().instabuild();
   }
 
   public boolean isPlaceable(SFItemStack item) {

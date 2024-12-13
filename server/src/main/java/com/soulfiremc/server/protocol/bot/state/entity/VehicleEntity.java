@@ -18,10 +18,38 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
+import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.state.Level;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.FloatEntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata;
 
 public class VehicleEntity extends Entity {
   public VehicleEntity(EntityType entityType, Level level) {
     super(entityType, level);
+  }
+
+  public float getDamage() {
+    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataType.FLOAT);
+  }
+
+  public void setDamage(float damage) {
+    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataType.FLOAT, FloatEntityMetadata::new, damage);
+  }
+
+  public int getHurtTime() {
+    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataType.INT);
+  }
+
+  public void setHurtTime(int hurtTime) {
+    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataType.INT, IntEntityMetadata::new, hurtTime);
+  }
+
+  public int getHurtDir() {
+    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataType.INT);
+  }
+
+  public void setHurtDir(int hurtDir) {
+    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataType.INT, IntEntityMetadata::new, hurtDir);
   }
 }

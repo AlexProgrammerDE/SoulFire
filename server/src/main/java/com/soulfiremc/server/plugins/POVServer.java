@@ -244,7 +244,7 @@ public class POVServer extends InternalPlugin {
           }
 
           @Override
-          public int getMinBuildHeight() {
+          public int getMinY() {
             return 0;
           }
         };
@@ -433,37 +433,60 @@ public class POVServer extends InternalPlugin {
         dataManager.currentLevel().dimensionType().id(),
         dataManager.currentLevel().worldKey(),
         dataManager.currentLevel().hashedSeed(),
-        dataManager.gameMode(),
-        dataManager.previousGameMode(),
+        dataManager.gameModeState().localPlayerMode(),
+        dataManager.gameModeState().previousLocalPlayerMode(),
         dataManager.currentLevel().debug(),
-        dataManager.currentLevel().flat(),
-        dataManager.lastDeathPos(),
-        dataManager.portalCooldown(),
+        dataManager.currentLevel().levelData().isFlat(),
+        dataManager.localPlayer().getLastDeathLocation().orElse(null),
+        dataManager.localPlayer().portalCooldown(),
         dataManager.currentLevel().seaLevel());
     clientSession.send(
       new ClientboundLoginPacket(
         dataManager.localPlayer().entityId(),
-        dataManager.loginData().hardcore(),
-        dataManager.loginData().worldNames(),
-        dataManager.loginData().maxPlayers(),
-        dataManager.serverViewDistance(),
+        dataManager.currentLevel().levelData().hardcore(),
+        dataManager.levelNames(),
+        dataManager.maxPlayers(),
+        dataManager.serverChunkRadius(),
         dataManager.serverSimulationDistance(),
-        dataManager.localPlayer().showReducedDebug(),
-        dataManager.enableRespawnScreen(),
-        dataManager.doLimitedCrafting(),
+        dataManager.localPlayer().isReducedDebugInfo(),
+        dataManager.localPlayer().shouldShowDeathScreen(),
+        dataManager.localPlayer().getDoLimitedCrafting(),
         spawnInfo,
-        dataManager.loginData().enforcesSecureChat()));
+        dataManager.serverEnforcesSecureChat()));
     clientSession.send(new ClientboundRespawnPacket(spawnInfo, false, false));
 
-    var difficultyData = dataManager.difficultyData();
-    if (difficultyData != null) {
-      clientSession.send(
-        new ClientboundChangeDifficultyPacket(
-          difficultyData.difficulty(),
-          difficultyData.locked()));
-    }
+    clientSession.send(
+      new ClientboundChangeDifficultyPacket(
+        dataManager.currentLevel().levelData().difficulty(),
+        dataManager.currentLevel().levelData().difficultyLocked()));
 
-    var abilitiesData = dataManager.localPlayer().abilitiesData();
+    clientSession.send(
+      new ClientboundSetDefaultSpawnPositionPacket(
+        dataManager.currentLevel().levelData().spawnPos(),
+        dataManager.currentLevel().levelData().spawnAngle()));
+
+    clientSession.send(
+      new ClientboundGameEventPacket(
+        dataManager.currentLevel().levelData().raining()
+          ? GameEvent.START_RAIN
+          : GameEvent.STOP_RAIN,
+        null));
+    clientSession.send(
+      new ClientboundGameEventPacket(
+        GameEvent.RAIN_STRENGTH,
+        new RainStrengthValue(
+          dataManager.currentLevel().rainLevel())));
+    clientSession.send(
+      new ClientboundGameEventPacket(
+        GameEvent.THUNDER_STRENGTH,
+        new ThunderStrengthValue(
+          dataManager.currentLevel().thunderLevel())));
+    clientSession.send(
+      new ClientboundGameEventPacket(
+        GameEvent.CHANGE_GAMEMODE, dataManager.gameModeState().localPlayerMode()));
+
+    // Should be after change CHANGE_GAMEMODE because setting GameMode overrides abilities
+    var abilitiesData = dataManager.localPlayer().abilitiesState();
     clientSession.send(
       new ClientboundPlayerAbilitiesPacket(
         abilitiesData.invulnerable(),
@@ -472,10 +495,6 @@ public class POVServer extends InternalPlugin {
         abilitiesData.instabuild(),
         abilitiesData.flySpeed(),
         abilitiesData.walkSpeed()));
-
-    clientSession.send(
-      new ClientboundGameEventPacket(
-        GameEvent.CHANGE_GAMEMODE, dataManager.gameMode()));
 
     var borderState = dataManager.borderState();
     if (borderState != null) {
@@ -489,42 +508,6 @@ public class POVServer extends InternalPlugin {
           borderState.newAbsoluteMaxSize(),
           borderState.warningBlocks(),
           borderState.warningTime()));
-    }
-
-    var defaultSpawnData = dataManager.defaultSpawnData();
-    if (defaultSpawnData != null) {
-      clientSession.send(
-        new ClientboundSetDefaultSpawnPositionPacket(
-          defaultSpawnData.position(),
-          defaultSpawnData.angle()));
-    }
-
-    if (dataManager.weatherState() != null) {
-      clientSession.send(
-        new ClientboundGameEventPacket(
-          dataManager.weatherState().raining()
-            ? GameEvent.START_RAIN
-            : GameEvent.STOP_RAIN,
-          null));
-      clientSession.send(
-        new ClientboundGameEventPacket(
-          GameEvent.RAIN_STRENGTH,
-          new RainStrengthValue(
-            dataManager.weatherState().rainStrength())));
-      clientSession.send(
-        new ClientboundGameEventPacket(
-          GameEvent.THUNDER_STRENGTH,
-          new ThunderStrengthValue(
-            dataManager.weatherState().thunderStrength())));
-    }
-
-    var healthData = dataManager.healthData();
-    if (healthData != null) {
-      clientSession.send(
-        new ClientboundSetHealthPacket(
-          healthData.health(),
-          healthData.food(),
-          healthData.saturation()));
     }
 
     var experienceData = dataManager.experienceData();
@@ -708,9 +691,14 @@ public class POVServer extends InternalPlugin {
         clientSession.send(
           new ClientboundEntityEventPacket(
             localPlayer.entityId(),
-            localPlayer.showReducedDebug()
+            localPlayer.isReducedDebugInfo()
               ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
               : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
+        clientSession.send(
+          new ClientboundSetHealthPacket(
+            localPlayer.getHealth(),
+            localPlayer.getFoodData().getFoodLevel(),
+            localPlayer.getFoodData().getSaturationLevel()));
       } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
         clientSession.send(
           new ClientboundAddExperienceOrbPacket(

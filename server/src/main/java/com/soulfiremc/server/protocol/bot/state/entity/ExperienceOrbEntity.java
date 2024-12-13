@@ -37,4 +37,9 @@ public class ExperienceOrbEntity extends Entity {
   public Vector3i getBlockPosBelowThatAffectsMyMovement() {
     return this.getOnPos(0.999999F);
   }
+
+  @Override
+  protected double getDefaultGravity() {
+    return 0.03;
+  }
 }

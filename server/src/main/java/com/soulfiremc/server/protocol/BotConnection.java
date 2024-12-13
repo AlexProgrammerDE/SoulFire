@@ -260,7 +260,7 @@ public final class BotConnection {
 
   public GameMode getEntityGameMode(UUID uuid) {
     if (uuid.equals(dataManager.localPlayer().uuid())) {
-      return dataManager.gameMode();
+      return dataManager.gameModeState().localPlayerMode();
     }
 
     var profile = dataManager.playerListState().entries().get(uuid);

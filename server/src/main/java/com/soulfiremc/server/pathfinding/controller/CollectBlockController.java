@@ -46,8 +46,8 @@ public class CollectBlockController {
     var level = clientEntity.level();
     var rootPosition = SFVec3i.fromInt(clientEntity.pos().toInt());
 
-    var minY = Math.max(level.getMinBuildHeight(), rootPosition.y - radius);
-    var maxY = Math.min(level.getMaxBuildHeight() - 1, rootPosition.y + radius);
+    var minY = Math.max(level.getMinY(), rootPosition.y - radius);
+    var maxY = Math.min(level.getMaxY(), rootPosition.y + radius);
     var list = new HashSet<SFVec3i>();
     for (var x = -radius; x <= radius; x++) {
       for (var z = -radius; z <= radius; z++) {

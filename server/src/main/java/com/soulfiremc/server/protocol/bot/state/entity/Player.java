@@ -22,18 +22,17 @@ import com.google.common.collect.Lists;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
-import com.soulfiremc.server.protocol.bot.model.AbilitiesData;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
-import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.jetbrains.annotations.Nullable;
@@ -42,11 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Getter
-@Setter
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class Player extends LivingEntity {
+  @Getter
   private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
-  private final AbilitiesData abilitiesData = new AbilitiesData();
+  @Getter
+  private final AbilitiesState abilitiesState = new AbilitiesState();
+  protected FoodData foodData = new FoodData();
   public static final float CROUCH_BB_HEIGHT = 1.5F;
   public static final float SWIMMING_BB_WIDTH = 0.6F;
   public static final float SWIMMING_BB_HEIGHT = 0.6F;
@@ -69,6 +70,7 @@ public abstract class Player extends LivingEntity {
   protected final float defaultFlySpeed = 0.02F;
   protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
   private boolean clientLoaded = false;
+  private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 
   public Player(Level level, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);
@@ -106,7 +108,7 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public void aiStep() {
-    if (this.abilitiesData().flying) {
+    if (this.abilitiesState().flying) {
       this.resetFallDistance();
     }
 
@@ -132,6 +134,14 @@ public abstract class Player extends LivingEntity {
     }
   }
 
+  public boolean isReducedDebugInfo() {
+    return this.reducedDebugInfo;
+  }
+
+  public void setReducedDebugInfo(boolean reducedDebugInfo) {
+    this.reducedDebugInfo = reducedDebugInfo;
+  }
+
   private void touch(Entity entity) {
     entity.playerTouch(this);
   }
@@ -147,7 +157,7 @@ public abstract class Player extends LivingEntity {
       }
     }
 
-    if (this.abilitiesData().flying) {
+    if (this.abilitiesState().flying) {
       var yDelta = this.getDeltaMovement().getY();
       super.travel(travelVector);
       var deltaMovement = this.getDeltaMovement();
@@ -168,7 +178,7 @@ public abstract class Player extends LivingEntity {
         mainPose = Pose.SWIMMING;
       } else if (this.isAutoSpinAttack()) {
         mainPose = Pose.SPIN_ATTACK;
-      } else if (this.isShiftKeyDown() && !this.abilitiesData.flying) {
+      } else if (this.isShiftKeyDown() && !this.abilitiesState.flying) {
         mainPose = Pose.SNEAKING;
       } else {
         mainPose = Pose.STANDING;
@@ -198,19 +208,19 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public boolean isSwimming() {
-    return !this.abilitiesData.flying && !this.isSpectator() && super.isSwimming();
+    return !this.abilitiesState.flying && !this.isSpectator() && super.isSwimming();
   }
 
   public abstract boolean isCreative();
 
   @Override
   public boolean isPushedByFluid() {
-    return !this.abilitiesData.flying;
+    return !this.abilitiesState.flying;
   }
 
   @Override
   protected float getBlockSpeedFactor() {
-    return !this.abilitiesData.flying && !this.isFallFlying() ? super.getBlockSpeedFactor() : 1.0F;
+    return !this.abilitiesState.flying && !this.isFallFlying() ? super.getBlockSpeedFactor() : 1.0F;
   }
 
   public boolean isLocalPlayer() {
@@ -223,12 +233,12 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public boolean canBeSeenAsEnemy() {
-    return !this.abilitiesData().invulnerable && super.canBeSeenAsEnemy();
+    return !this.abilitiesState().invulnerable && super.canBeSeenAsEnemy();
   }
 
   @Override
   public boolean onClimbable() {
-    return !this.abilitiesData().flying && super.onClimbable();
+    return !this.abilitiesState().flying && super.onClimbable();
   }
 
   public void onUpdateAbilities() {
@@ -245,7 +255,7 @@ public abstract class Player extends LivingEntity {
 
   @Override
   protected boolean canGlide() {
-    return !this.abilitiesData().flying && super.canGlide();
+    return !this.abilitiesState().flying && super.canGlide();
   }
 
   @Override
@@ -274,8 +284,8 @@ public abstract class Player extends LivingEntity {
 
   @Override
   protected float getFlyingSpeed() {
-    if (this.abilitiesData.flying) {
-      return this.isSprinting() ? this.abilitiesData.flySpeed() * 2.0F : this.abilitiesData.flySpeed();
+    if (this.abilitiesState.flying) {
+      return this.isSprinting() ? this.abilitiesState.flySpeed() * 2.0F : this.abilitiesState.flySpeed();
     } else {
       return this.isSprinting() ? 0.025999999F : defaultFlySpeed;
     }
@@ -284,7 +294,7 @@ public abstract class Player extends LivingEntity {
   @Override
   protected Vector3d maybeBackOffFromEdge(Vector3d vec, MoverType mover) {
     var maxUpStep = this.maxUpStep();
-    if (!this.abilitiesData.flying
+    if (!this.abilitiesState.flying
       && !(vec.getY() > 0.0)
       && (mover == MoverType.SELF || mover == MoverType.PLAYER)
       && this.isStayingOnGroundSurface()
@@ -359,13 +369,13 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public void makeStuckInBlock(Vector3d motionMultiplier) {
-    if (!this.abilitiesData.flying) {
+    if (!this.abilitiesState.flying) {
       super.makeStuckInBlock(motionMultiplier);
     }
   }
 
   public boolean canUseGameMasterBlocks() {
-    return this.abilitiesData().instabuild && this.permissionLevel() >= 2;
+    return this.abilitiesState().instabuild && this.permissionLevel() >= 2;
   }
 
   public int permissionLevel() {
@@ -391,5 +401,22 @@ public abstract class Player extends LivingEntity {
     if (!this.clientLoaded) {
       this.clientLoadedTimeoutTimer = 60;
     }
+  }
+
+  @Override
+  protected int getFireImmuneTicks() {
+    return 20;
+  }
+
+  public Optional<GlobalPos> getLastDeathLocation() {
+    return this.lastDeathLocation;
+  }
+
+  public void setLastDeathLocation(Optional<GlobalPos> lastDeathLocation) {
+    this.lastDeathLocation = lastDeathLocation;
+  }
+
+  public FoodData getFoodData() {
+    return this.foodData;
   }
 }

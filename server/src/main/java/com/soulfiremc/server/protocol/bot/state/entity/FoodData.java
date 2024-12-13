@@ -15,14 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.protocol.bot.model;
+package com.soulfiremc.server.protocol.bot.state.entity;
 
-import org.cloudburstmc.math.vector.Vector3i;
 
-/**
- * Represents the default spawn data. (Where the compass points to)
- *
- * @param position The position of the spawn
- * @param angle    The angle of the spawn position
- */
-public record DefaultSpawnData(Vector3i position, float angle) {}
+public class FoodData {
+  private int foodLevel = 20;
+  private float saturationLevel = 5.0F;
+  private float exhaustionLevel;
+
+  public int getFoodLevel() {
+    return this.foodLevel;
+  }
+
+  public void setFoodLevel(int foodLevel) {
+    this.foodLevel = foodLevel;
+  }
+
+  public boolean hasEnoughFood() {
+    return this.foodLevel >= 20;
+  }
+
+  public boolean needsFood() {
+    return this.foodLevel < 20;
+  }
+
+  public float getSaturationLevel() {
+    return this.saturationLevel;
+  }
+
+  public void setSaturation(float saturationLevel) {
+    this.saturationLevel = saturationLevel;
+  }
+}
+

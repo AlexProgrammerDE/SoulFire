@@ -30,7 +30,9 @@ import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
-import com.soulfiremc.server.protocol.bot.model.*;
+import com.soulfiremc.server.protocol.bot.model.ChunkKey;
+import com.soulfiremc.server.protocol.bot.model.ExperienceData;
+import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.state.*;
 import com.soulfiremc.server.protocol.bot.state.entity.EntityFactory;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
@@ -68,13 +70,12 @@ import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatType;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.LimitedCraftingValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RespawnScreenValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengthValue;
+import org.geysermc.mcprotocollib.protocol.data.game.setting.Difficulty;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundResourcePackPushPacket;
@@ -116,7 +117,6 @@ public final class SessionDataManager {
   private final Logger log;
   private final MinecraftCodecHelper codecHelper;
   private final BotConnection connection;
-  private final WeatherState weatherState = new WeatherState();
   private final PlayerListState playerListState = new PlayerListState();
   private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
@@ -126,31 +126,24 @@ public final class SessionDataManager {
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final TagsState tagsState = new TagsState();
+  private GameModeState gameModeState;
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private LocalPlayer localPlayer;
   private LevelLoadStatusManager levelLoadStatusManager;
   private @Nullable ServerPlayData serverPlayData;
   private BorderState borderState;
-  private HealthData healthData;
-  private GameMode gameMode = null;
-  private @Nullable GameMode previousGameMode = null;
   private GameProfile botProfile;
-  private LoginPacketData loginData;
-  private boolean enableRespawnScreen;
-  private boolean doLimitedCrafting;
   @Getter(value = AccessLevel.PRIVATE)
   private Level level;
   private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
-  private int serverViewDistance = -1;
-  private int serverSimulationDistance = -1;
-  private @Nullable GlobalPos lastDeathPos;
-  private int portalCooldown = -1;
-  private @Nullable DifficultyData difficultyData;
-  private @Nullable DefaultSpawnData defaultSpawnData;
+  private Key[] levelNames;
+  private int maxPlayers = 20;
+  private int serverChunkRadius = 3;
+  private int serverSimulationDistance = 3;
+  private boolean serverEnforcesSecureChat;
   private @Nullable ExperienceData experienceData;
   private @Nullable ChunkKey centerChunk;
-  private boolean isDead = false;
   private boolean joinedWorld = false;
   private String serverBrand;
 
@@ -244,44 +237,103 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onJoin(ClientboundLoginPacket packet) {
-    // Set data from the packet
-    loginData =
-      new LoginPacketData(packet.isHardcore(), packet.getWorldNames(), packet.getMaxPlayers(), packet.isEnforcesSecureChat());
+    gameModeState = new GameModeState();
 
-    enableRespawnScreen = packet.isEnableRespawnScreen();
-    doLimitedCrafting = packet.isDoLimitedCrafting();
-    serverViewDistance = packet.getViewDistance();
+    levelNames = packet.getWorldNames();
+    maxPlayers = packet.getMaxPlayers();
+    serverChunkRadius = packet.getViewDistance();
     serverSimulationDistance = packet.getSimulationDistance();
 
-    processSpawnInfo(packet.getCommonPlayerSpawnInfo());
+    var spawnInfo = packet.getCommonPlayerSpawnInfo();
+    var dimensionType = dimensionTypeRegistry.getById(spawnInfo.getDimension());
+
+    level = new Level(
+      tagsState,
+      entityTrackerState,
+      dimensionType,
+      spawnInfo.getWorldName(),
+      spawnInfo.getHashedSeed(),
+      spawnInfo.isDebug(),
+      spawnInfo.getSeaLevel(),
+      new Level.LevelData(Difficulty.NORMAL, packet.isHardcore(), packet.getCommonPlayerSpawnInfo().isFlat()));
 
     // Init client entity
-    localPlayer =
-      new LocalPlayer(connection, currentLevel(), botProfile);
-    localPlayer.entityId(packet.getEntityId());
-    localPlayer.showReducedDebug(packet.isReducedDebugInfo());
-    connection.inventoryManager().setContainer(0, localPlayer.inventory());
+    if (localPlayer == null) {
+      localPlayer = new LocalPlayer(connection, currentLevel(), botProfile);
+      localPlayer.setYRot(-180.0F);
+      connection.inventoryManager().setContainer(0, localPlayer.inventory());
+    }
 
+    localPlayer.resetPos();
+    localPlayer.entityId(packet.getEntityId());
     entityTrackerState.addEntity(localPlayer);
 
+    gameModeState.adjustPlayer(localPlayer);
     startWaitingForNewLevel(localPlayer, currentLevel());
+    localPlayer.setReducedDebugInfo(packet.isReducedDebugInfo());
+    localPlayer.setShowDeathScreen(packet.isEnableRespawnScreen());
+    localPlayer.setDoLimitedCrafting(packet.isDoLimitedCrafting());
+    localPlayer.setLastDeathLocation(Optional.ofNullable(spawnInfo.getLastDeathPos()));
+    localPlayer.setPortalCooldown(spawnInfo.getPortalCooldown());
+    gameModeState.setLocalMode(localPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
+
+    serverEnforcesSecureChat = packet.isEnforcesSecureChat();
   }
 
-  private void processSpawnInfo(PlayerSpawnInfo spawnInfo) {
-    level =
-      new Level(
+  @EventHandler
+  public void onRespawn(ClientboundRespawnPacket packet) {
+    var spawnInfo = packet.getCommonPlayerSpawnInfo();
+
+    // Only create a new level when we actually switch levels
+    if (!spawnInfo.getWorldName().equals(level.worldKey())) {
+      level = new Level(
         tagsState,
         entityTrackerState,
         dimensionTypeRegistry.getById(spawnInfo.getDimension()),
         spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
-        spawnInfo.isFlat(),
-        spawnInfo.getSeaLevel());
-    gameMode = spawnInfo.getGameMode();
-    previousGameMode = spawnInfo.getPreviousGamemode();
-    lastDeathPos = spawnInfo.getLastDeathPos();
-    portalCooldown = spawnInfo.getPortalCooldown();
+        spawnInfo.getSeaLevel(),
+        new Level.LevelData(this.level.levelData().difficulty(), this.level.levelData().hardcore(), spawnInfo.isFlat()));
+    }
+
+    var oldLocalPlayer = localPlayer;
+    var newLocalPlayer = packet.isKeepMetadata() ? new LocalPlayer(connection, currentLevel(), botProfile, localPlayer.isShiftKeyDown(), localPlayer.isSprinting())
+      : new LocalPlayer(connection, currentLevel(), botProfile);
+    connection.inventoryManager().setContainer(0, localPlayer.inventory());
+
+    this.startWaitingForNewLevel(newLocalPlayer, currentLevel());
+    localPlayer.entityId(oldLocalPlayer.entityId());
+
+    this.localPlayer = newLocalPlayer;
+    if (packet.isKeepMetadata()) {
+      newLocalPlayer.metadataState().assignValues(oldLocalPlayer.metadataState());
+
+      newLocalPlayer.setDeltaMovement(oldLocalPlayer.deltaMovement());
+      newLocalPlayer.setYRot(oldLocalPlayer.yRot());
+      newLocalPlayer.setXRot(oldLocalPlayer.xRot());
+    } else {
+      newLocalPlayer.resetPos();
+      newLocalPlayer.setYRot(-180.0F);
+    }
+
+    if (packet.isKeepAttributeModifiers()) {
+      newLocalPlayer.attributeState().assignAllValues(oldLocalPlayer.attributeState());
+    } else {
+      newLocalPlayer.attributeState().assignBaseValues(oldLocalPlayer.attributeState());
+    }
+
+    entityTrackerState.addEntity(localPlayer);
+
+    this.gameModeState.adjustPlayer(newLocalPlayer);
+    newLocalPlayer.setReducedDebugInfo(oldLocalPlayer.isReducedDebugInfo());
+    newLocalPlayer.setShowDeathScreen(oldLocalPlayer.shouldShowDeathScreen());
+    newLocalPlayer.setLastDeathLocation(Optional.ofNullable(spawnInfo.getLastDeathPos()));
+    newLocalPlayer.setPortalCooldown(spawnInfo.getPortalCooldown());
+
+    gameModeState.setLocalMode(newLocalPlayer, spawnInfo.getGameMode(), spawnInfo.getPreviousGamemode());
+
+    log.info("Respawned");
   }
 
   private void startWaitingForNewLevel(LocalPlayer player, Level level) {
@@ -373,18 +425,6 @@ public final class SessionDataManager {
   }
 
   @EventHandler
-  public void onRespawn(ClientboundRespawnPacket packet) {
-    processSpawnInfo(packet.getCommonPlayerSpawnInfo());
-
-    // We are now possibly in a new dimension
-    localPlayer.level(currentLevel());
-
-    this.startWaitingForNewLevel(localPlayer, currentLevel());
-
-    log.info("Respawned");
-  }
-
-  @EventHandler
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
     var state = entityTrackerState.getEntity(packet.getPlayerId());
 
@@ -393,9 +433,8 @@ public final class SessionDataManager {
       return;
     }
 
-    if (enableRespawnScreen) {
+    if (localPlayer.shouldShowDeathScreen()) {
       log.info("Died");
-      isDead = true;
     } else {
       log.info("Died, respawning due to game rule");
       connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
@@ -509,17 +548,18 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetViewDistance(ClientboundSetChunkCacheRadiusPacket packet) {
-    serverViewDistance = packet.getViewDistance();
+    serverChunkRadius = packet.getViewDistance();
   }
 
   @EventHandler
   public void onSetDifficulty(ClientboundChangeDifficultyPacket packet) {
-    difficultyData = new DifficultyData(packet.getDifficulty(), packet.isDifficultyLocked());
+    level.levelData().difficulty(packet.getDifficulty());
+    level.levelData().difficultyLocked(packet.isDifficultyLocked());
   }
 
   @EventHandler
   public void onAbilities(ClientboundPlayerAbilitiesPacket packet) {
-    var abilitiesData = localPlayer.abilitiesData();
+    var abilitiesData = localPlayer.abilitiesState();
     abilitiesData.flying = packet.isFlying();
     abilitiesData.instabuild = packet.isCreative();
     abilitiesData.invulnerable = packet.isInvincible();
@@ -535,18 +575,14 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onCompassTarget(ClientboundSetDefaultSpawnPositionPacket packet) {
-    defaultSpawnData = new DefaultSpawnData(packet.getPosition(), packet.getAngle());
+    level.levelData().setSpawn(packet.getPosition(), packet.getAngle());
   }
 
   @EventHandler
   public void onHealth(ClientboundSetHealthPacket packet) {
-    this.healthData = new HealthData(packet.getHealth(), packet.getFood(), packet.getSaturation());
-
-    if (healthData.health() < 1) {
-      this.isDead = true;
-    }
-
-    log.debug("Health updated: {}", healthData);
+    localPlayer.hurtTo(packet.getHealth());
+    localPlayer.getFoodData().setFoodLevel(packet.getFood());
+    localPlayer.getFoodData().setSaturation(packet.getSaturation());
   }
 
   @EventHandler
@@ -559,9 +595,7 @@ public final class SessionDataManager {
   public void onLevelTime(ClientboundSetTimePacket packet) {
     var level = currentLevel();
 
-    level.gameTime(packet.getGameTime());
-    level.dayTime(packet.getDayTime());
-    level.tickDayTime(packet.isTickDayTime());
+    level.setTimeFromServer(packet.getGameTime(), packet.getDayTime(), packet.isTickDayTime());
   }
 
   @EventHandler
@@ -677,12 +711,15 @@ public final class SessionDataManager {
   public void onGameEvent(ClientboundGameEventPacket packet) {
     SFHelpers.mustSupply(() -> switch (packet.getNotification()) {
       case INVALID_BED -> () -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
-      case START_RAIN -> () -> weatherState.raining(true);
-      case STOP_RAIN -> () -> weatherState.raining(false);
-      case CHANGE_GAMEMODE -> () -> {
-        previousGameMode = gameMode;
-        gameMode = (GameMode) packet.getValue();
+      case START_RAIN -> () -> {
+        level.levelData().raining(true);
+        level.setRainLevel(1.0F);
       };
+      case STOP_RAIN -> () -> {
+        level.levelData().raining(false);
+        level.setRainLevel(0.0F);
+      };
+      case CHANGE_GAMEMODE -> () -> gameModeState.setLocalMode(localPlayer, (GameMode) packet.getValue());
       case ENTER_CREDITS -> () -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
         connection.sendPacket(
@@ -690,12 +727,12 @@ public final class SessionDataManager {
       };
       case DEMO_MESSAGE -> () -> log.debug("Demo event: {}", packet.getValue());
       case ARROW_HIT_PLAYER -> () -> log.debug("Arrow hit player");
-      case RAIN_STRENGTH -> () -> weatherState.rainStrength(((RainStrengthValue) packet.getValue()).getStrength());
-      case THUNDER_STRENGTH -> () -> weatherState.thunderStrength(((ThunderStrengthValue) packet.getValue()).getStrength());
+      case RAIN_STRENGTH -> () -> level.setRainLevel(((RainStrengthValue) packet.getValue()).getStrength());
+      case THUNDER_STRENGTH -> () -> level.setThunderLevel(((ThunderStrengthValue) packet.getValue()).getStrength());
       case PUFFERFISH_STING_SOUND -> () -> log.debug("Pufferfish sting sound");
       case AFFECTED_BY_ELDER_GUARDIAN -> () -> log.debug("Affected by elder guardian");
-      case ENABLE_RESPAWN_SCREEN -> () -> enableRespawnScreen = packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN;
-      case LIMITED_CRAFTING -> () -> doLimitedCrafting = packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING;
+      case ENABLE_RESPAWN_SCREEN -> () -> localPlayer.setShowDeathScreen(packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN);
+      case LIMITED_CRAFTING -> () -> localPlayer.setDoLimitedCrafting(packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING);
       case LEVEL_CHUNKS_LOAD_START -> () -> {
         log.debug("Level chunks load start");
         if (levelLoadStatusManager != null) {
@@ -1181,10 +1218,6 @@ public final class SessionDataManager {
   }
 
   private void tickCooldowns() {
-    if (portalCooldown > 0) {
-      portalCooldown--;
-    }
-
     synchronized (itemCoolDowns) {
       var iterator = itemCoolDowns.object2IntEntrySet().iterator();
       while (iterator.hasNext()) {

@@ -83,6 +83,10 @@ public class EntityMetadataState {
     return namedMap;
   }
 
+  public void assignValues(EntityMetadataState other) {
+    this.metadataStore.putAll(other.metadataStore);
+  }
+
   public interface MetadataFactory<V, T extends MetadataType<V>> {
     EntityMetadata<V, ? extends MetadataType<V>> create(int id, T type, V value);
   }

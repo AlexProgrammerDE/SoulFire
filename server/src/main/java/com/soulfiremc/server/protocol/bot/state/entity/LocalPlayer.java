@@ -48,7 +48,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 public class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
   private final InputState input;
-  private boolean showReducedDebug;
   private int permissionLevel;
   private double lastX = 0;
   private double lastY = 0;
@@ -57,8 +56,8 @@ public class LocalPlayer extends AbstractClientPlayer {
   private float lastXRot = 0;
   private boolean lastOnGround = false;
   private boolean lastHorizontalCollision = false;
-  private boolean wasShiftKeyDown = false;
-  private boolean wasSprinting = false;
+  private boolean wasShiftKeyDown;
+  private boolean wasSprinting;
   private boolean noPhysics = false;
   protected int sprintTriggerTime;
   private boolean crouching;
@@ -66,12 +65,22 @@ public class LocalPlayer extends AbstractClientPlayer {
   private boolean wasFallFlying;
   private int autoJumpTime;
   private KeyPresses lastSentInput = KeyPresses.EMPTY;
+  private boolean showDeathScreen = true;
+  private boolean doLimitedCrafting = false;
+  private boolean flashOnSetHealth;
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
+    this(connection, level, gameProfile, false, false);
+  }
+
+  public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile, boolean wasShiftKeyDown, boolean wasSprinting) {
     super(connection, level, gameProfile);
     this.connection = connection;
     this.input = new InputState(connection.controlState());
     uuid(gameProfile.getId());
+
+    this.wasShiftKeyDown = wasShiftKeyDown;
+    this.wasSprinting = wasSprinting;
   }
 
   public static boolean isAlwaysFlying(GameMode gameMode) {
@@ -102,10 +111,12 @@ public class LocalPlayer extends AbstractClientPlayer {
       this.sprintTriggerTime--;
     }
 
+    this.processPortalCooldown();
+
     var jumping = this.input.keyPresses.jump();
     var sneaking = this.input.keyPresses.shift();
     var enoughImpulseToStartSprint = this.hasEnoughImpulseToStartSprinting();
-    var abilities = this.abilitiesData();
+    var abilities = this.abilitiesState();
     this.crouching = !abilities.flying
       && !this.isSwimming()
       && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SNEAKING)
@@ -118,10 +129,8 @@ public class LocalPlayer extends AbstractClientPlayer {
       this.sprintTriggerTime = 0;
     }
 
-    var hasAutoJumped = false;
     if (this.autoJumpTime > 0) {
       this.autoJumpTime--;
-      hasAutoJumped = true;
       this.input.makeJump();
     }
 
@@ -165,7 +174,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
     var flyingChanged = false;
     if (abilities.mayfly) {
-      if (isAlwaysFlying(this.connection.dataManager().gameMode())) {
+      if (isAlwaysFlying(this.connection.dataManager().gameModeState().localPlayerMode())) {
         if (!abilities.flying) {
           abilities.flying = true;
           flyingChanged = true;
@@ -207,15 +216,54 @@ public class LocalPlayer extends AbstractClientPlayer {
     }
 
     super.aiStep();
-    if (this.onGround() && abilities.flying && !isAlwaysFlying(this.connection.dataManager().gameMode())) {
+    if (this.onGround() && abilities.flying && !isAlwaysFlying(this.connection.dataManager().gameModeState().localPlayerMode())) {
       abilities.flying = false;
       this.onUpdateAbilities();
     }
   }
 
+  public void resetPos() {
+    this.setPose(Pose.STANDING);
+    if (this.level() != null) {
+      for (var y = this.y(); y > (double) this.level().getMinY() && y <= (double) this.level().getMaxY(); y++) {
+        this.setPos(this.x(), y, this.z());
+        if (this.level().noCollision(this.getBoundingBox())) {
+          break;
+        }
+      }
+
+      this.setDeltaMovement(Vector3d.ZERO);
+      this.setXRot(0.0F);
+    }
+
+    this.setHealth(this.getMaxHealth());
+    this.deathTime = 0;
+  }
+
+  public void hurtTo(float health) {
+    if (this.flashOnSetHealth) {
+      var newHealth = this.getHealth() - health;
+      if (newHealth <= 0.0F) {
+        this.setHealth(health);
+        if (newHealth < 0.0F) {
+          this.invulnerableTime = 10;
+        }
+      } else {
+        this.lastHurt = newHealth;
+        this.invulnerableTime = 20;
+        this.setHealth(health);
+        this.hurtDuration = 10;
+        this.hurtTime = this.hurtDuration;
+      }
+    } else {
+      this.setHealth(health);
+      this.flashOnSetHealth = true;
+    }
+  }
+
   @Override
   public boolean isSuppressingSlidingDownLadder() {
-    return !this.abilitiesData().flying && super.isSuppressingSlidingDownLadder();
+    return !this.abilitiesState().flying && super.isSuppressingSlidingDownLadder();
   }
 
   @Override
@@ -237,8 +285,24 @@ public class LocalPlayer extends AbstractClientPlayer {
       && !this.isFallFlying();
   }
 
+  public void setShowDeathScreen(boolean show) {
+    this.showDeathScreen = show;
+  }
+
+  public boolean shouldShowDeathScreen() {
+    return this.showDeathScreen;
+  }
+
+  public boolean getDoLimitedCrafting() {
+    return this.doLimitedCrafting;
+  }
+
+  public void setDoLimitedCrafting(boolean doLimitedCrafting) {
+    this.doLimitedCrafting = doLimitedCrafting;
+  }
+
   private boolean hasEnoughFoodToStartSprinting() {
-    return (float) this.connection.dataManager().healthData().food() > 6.0F || this.abilitiesData().mayfly;
+    return (float) this.foodData.getFoodLevel() > 6.0F || this.abilitiesState().mayfly;
   }
 
   private boolean hasEnoughImpulseToStartSprinting() {
@@ -328,11 +392,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   public void handleEntityEvent(EntityEvent event) {
     switch (event) {
-      case PLAYER_OP_PERMISSION_LEVEL_0 -> permissionLevel(0);
-      case PLAYER_OP_PERMISSION_LEVEL_1 -> permissionLevel(1);
-      case PLAYER_OP_PERMISSION_LEVEL_2 -> permissionLevel(2);
-      case PLAYER_OP_PERMISSION_LEVEL_3 -> permissionLevel(3);
-      case PLAYER_OP_PERMISSION_LEVEL_4 -> permissionLevel(4);
+      case PLAYER_OP_PERMISSION_LEVEL_0 -> permissionLevel = 0;
+      case PLAYER_OP_PERMISSION_LEVEL_1 -> permissionLevel = 1;
+      case PLAYER_OP_PERMISSION_LEVEL_2 -> permissionLevel = 2;
+      case PLAYER_OP_PERMISSION_LEVEL_3 -> permissionLevel = 3;
+      case PLAYER_OP_PERMISSION_LEVEL_4 -> permissionLevel = 4;
       default -> super.handleEntityEvent(event);
     }
   }
@@ -451,7 +515,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   @Override
   public void onUpdateAbilities() {
-    this.connection.sendPacket(this.abilitiesData().toPacket());
+    this.connection.sendPacket(this.abilitiesState().toPacket());
   }
 
   @Override
@@ -461,7 +525,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
   @Override
   public boolean isAffectedByFluids() {
-    return !this.abilitiesData().flying;
+    return !this.abilitiesState().flying;
   }
 
   @Override

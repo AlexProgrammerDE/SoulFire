@@ -67,6 +67,10 @@ public abstract class LivingEntity extends Entity {
   protected double lerpXRot;
   protected double lerpYHeadRot;
   protected int lerpHeadSteps;
+  public int hurtTime;
+  public int hurtDuration;
+  public int deathTime;
+  protected float lastHurt;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 
@@ -100,6 +104,14 @@ public abstract class LivingEntity extends Entity {
   @Override
   public void baseTick() {
     super.baseTick();
+
+    if (this.hurtTime > 0) {
+      this.hurtTime--;
+    }
+
+    if (this.invulnerableTime > 0) {
+      this.invulnerableTime--;
+    }
 
     this.effectState.tick();
   }
@@ -360,7 +372,7 @@ public abstract class LivingEntity extends Entity {
       frictionYDelta += (0.05 * (double) (levitationEffect.get().amplifier() + 1) - frictionDeltaMovement.getY()) * 0.2;
     } else if (this.level().isChunkPositionLoaded(blockPosBelow.getX(), blockPosBelow.getZ())) {
       frictionYDelta -= this.getEffectiveGravity();
-    } else if (this.y() > (double) this.level().getMinBuildHeight()) {
+    } else if (this.y() > (double) this.level().getMinY()) {
       frictionYDelta = -0.1;
     } else {
       frictionYDelta = 0.0;

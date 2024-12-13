@@ -60,9 +60,8 @@ public class AutoEat extends InternalPlugin {
         }
 
         var dataManager = connection.dataManager();
-
-        var healthData = dataManager.healthData();
-        if (healthData == null || healthData.food() >= 20) {
+        var localPlayer = dataManager.localPlayer();
+        if (localPlayer == null || localPlayer.getFoodData().hasEnoughFood()) {
           return;
         }
 

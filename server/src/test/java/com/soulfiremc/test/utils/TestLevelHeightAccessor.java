@@ -28,7 +28,7 @@ public class TestLevelHeightAccessor implements LevelHeightAccessor {
   }
 
   @Override
-  public int getMinBuildHeight() {
+  public int getMinY() {
     return 0;
   }
 }

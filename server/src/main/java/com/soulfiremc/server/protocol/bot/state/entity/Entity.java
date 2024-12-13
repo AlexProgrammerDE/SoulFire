@@ -61,6 +61,8 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @Slf4j
 @Getter
@@ -76,6 +78,7 @@ public class Entity {
   protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
+  public int invulnerableTime;
   protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
   private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
   protected final EntityType entityType;
@@ -121,6 +124,7 @@ public class Entity {
   private EntityDimensions dimensions;
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
+  private int portalCooldown;
   public float yRotO;
   public float xRotO;
   @Setter
@@ -128,6 +132,10 @@ public class Entity {
   protected Vector3d stuckSpeedMultiplier = Vector3d.ZERO;
   public boolean noPhysics;
   public boolean hasImpulse;
+  private final int remainingFireTicks = -this.getFireImmuneTicks();
+  private final ImmutableList<Entity> passengers = ImmutableList.of();
+  @Nullable
+  private Entity vehicle;
 
   public Entity(EntityType entityType, Level level) {
     this.metadataState = new EntityMetadataState(entityType);
@@ -777,7 +785,7 @@ public class Entity {
       this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, collideOffset);
       var onPos = this.getOnPosLegacy();
       var onBlockState = this.level().getBlockState(onPos);
-      if (this.isControlledByLocalInstance()) {
+      if (this.isControlledByLocalInstance() && !this.isControlledByClient()) {
         this.checkFallDamage(collideOffset.getY(), this.onGround(), onBlockState, onPos);
       }
 
@@ -1219,7 +1227,12 @@ public class Entity {
   }
 
   public boolean isControlledByLocalInstance() {
-    return this.isEffectiveAi();
+    return this.getControllingPassenger() instanceof Player player ? player.isLocalPlayer() : this.isEffectiveAi();
+  }
+
+  public boolean isControlledByClient() {
+    var passenger = this.getControllingPassenger();
+    return passenger != null && passenger.isControlledByClient();
   }
 
   public int getMaxAirSupply() {
@@ -1353,6 +1366,125 @@ public class Entity {
 
   public boolean isSpectator() {
     return false;
+  }
+
+  protected int getFireImmuneTicks() {
+    return 1;
+  }
+
+  @Nullable
+  public LivingEntity getControllingPassenger() {
+    return null;
+  }
+
+  @Nullable
+  public Entity getVehicle() {
+    return this.vehicle;
+  }
+
+  @Nullable
+  public Entity getControlledVehicle() {
+    return this.vehicle != null && this.vehicle.getControllingPassenger() == this ? this.vehicle : null;
+  }
+
+  public final boolean hasControllingPassenger() {
+    return this.getControllingPassenger() != null;
+  }
+
+  public boolean isOnFire() {
+    return !this.fireImmune() && (this.remainingFireTicks > 0 || this.getSharedFlag(FLAG_ONFIRE));
+  }
+
+  public boolean isPassenger() {
+    return this.getVehicle() != null;
+  }
+
+  public final List<Entity> getPassengers() {
+    return this.passengers;
+  }
+
+  @Nullable
+  public Entity getFirstPassenger() {
+    return this.passengers.isEmpty() ? null : this.passengers.get(0);
+  }
+
+  public boolean hasPassenger(Entity entity) {
+    return this.passengers.contains(entity);
+  }
+
+  public boolean hasPassenger(Predicate<Entity> predicate) {
+    for (var passenger : this.passengers) {
+      if (predicate.test(passenger)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private Stream<Entity> getIndirectPassengersStream() {
+    return this.passengers.stream().flatMap(Entity::getSelfAndPassengers);
+  }
+
+  public Stream<Entity> getSelfAndPassengers() {
+    return Stream.concat(Stream.of(this), this.getIndirectPassengersStream());
+  }
+
+  public Stream<Entity> getPassengersAndSelf() {
+    return Stream.concat(this.passengers.stream().flatMap(Entity::getPassengersAndSelf), Stream.of(this));
+  }
+
+  public Iterable<Entity> getIndirectPassengers() {
+    return () -> this.getIndirectPassengersStream().iterator();
+  }
+
+  public int countPlayerPassengers() {
+    return (int) this.getIndirectPassengersStream().filter(entity -> entity instanceof Player).count();
+  }
+
+  public boolean hasExactlyOnePlayerPassenger() {
+    return this.countPlayerPassengers() == 1;
+  }
+
+  public Entity getRootVehicle() {
+    var currentEntity = this;
+
+    while (currentEntity.isPassenger()) {
+      currentEntity = currentEntity.getVehicle();
+    }
+
+    return currentEntity;
+  }
+
+  public boolean isPassengerOfSameVehicle(Entity entity) {
+    return this.getRootVehicle() == entity.getRootVehicle();
+  }
+
+  public boolean hasIndirectPassenger(Entity entity) {
+    if (!entity.isPassenger()) {
+      return false;
+    } else {
+      var vehicle = entity.getVehicle();
+      return vehicle == this || this.hasIndirectPassenger(vehicle);
+    }
+  }
+
+  public int getPortalCooldown() {
+    return this.portalCooldown;
+  }
+
+  public void setPortalCooldown(int portalCooldown) {
+    this.portalCooldown = portalCooldown;
+  }
+
+  public boolean isOnPortalCooldown() {
+    return this.portalCooldown > 0;
+  }
+
+  protected void processPortalCooldown() {
+    if (this.isOnPortalCooldown()) {
+      this.portalCooldown--;
+    }
   }
 
   record Movement(Vector3d from, Vector3d to) {
