@@ -36,9 +36,6 @@ allprojects {
     maven("https://oss.sonatype.org/content/repositories/snapshots/") {
       name = "Sonatype Repository"
     }
-    maven("https://repository.apache.org/content/groups/snapshots/") {
-      name = "Apache Snapshot Repository"
-    }
     maven("https://repo.pistonmaster.net/releases") {
       name = "PistonDev Release Repository"
     }
