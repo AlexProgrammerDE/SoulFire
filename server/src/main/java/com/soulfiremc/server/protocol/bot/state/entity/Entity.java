@@ -85,7 +85,7 @@ public class Entity {
   protected final EntityMetadataState metadataState;
   protected float fallDistance;
   @Setter
-  protected UUID uuid;
+  protected UUID uuid = UUID.randomUUID();
   @Setter
   protected ObjectData data;
   @Setter
@@ -163,8 +163,8 @@ public class Entity {
     var z = packet.getZ();
     this.syncPacketPositionCodec(x, y, z);
     this.moveTo(x, y, z, packet.getYaw(), packet.getPitch());
-    uuid(packet.getUuid());
     entityId(packet.getEntityId());
+    uuid(packet.getUuid());
   }
 
   public EntityMovement toMovement() {
