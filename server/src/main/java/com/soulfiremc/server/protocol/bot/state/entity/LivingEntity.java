@@ -39,6 +39,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Getter
 public abstract class LivingEntity extends Entity {
@@ -212,18 +213,18 @@ public abstract class LivingEntity extends Entity {
     }
 
     if (this.jumping && this.isAffectedByFluids()) {
-      double g;
+      double fluidHeight;
       if (this.isInLava()) {
-        g = this.getFluidHeight(FluidTags.LAVA);
+        fluidHeight = this.getFluidHeight(FluidTags.LAVA);
       } else {
-        g = this.getFluidHeight(FluidTags.WATER);
+        fluidHeight = this.getFluidHeight(FluidTags.WATER);
       }
 
-      var bl = this.isInWater() && g > 0.0;
-      var h = this.getFluidJumpThreshold();
-      if (!bl || this.onGround() && !(g > h)) {
-        if (!this.isInLava() || this.onGround() && !(g > h)) {
-          if ((this.onGround() || bl && g <= h) && this.noJumpDelay == 0) {
+      var inWater = this.isInWater() && fluidHeight > 0.0;
+      var fluidJumpThreshold = this.getFluidJumpThreshold();
+      if (!inWater || this.onGround() && !(fluidHeight > fluidJumpThreshold)) {
+        if (!this.isInLava() || this.onGround() && !(fluidHeight > fluidJumpThreshold)) {
+          if ((this.onGround() || inWater && fluidHeight <= fluidJumpThreshold) && this.noJumpDelay == 0) {
             this.jumpFromGround();
             this.noJumpDelay = 10;
           }
@@ -283,14 +284,14 @@ public abstract class LivingEntity extends Entity {
     if (this.isInWater()) {
       var f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
       var g = 0.02F;
-      var h = (float) this.attributeValue(AttributeType.WATER_MOVEMENT_EFFICIENCY);
+      var waterMovementEfficiency = (float) this.attributeValue(AttributeType.WATER_MOVEMENT_EFFICIENCY);
       if (!this.onGround()) {
-        h *= 0.5F;
+        waterMovementEfficiency *= 0.5F;
       }
 
-      if (h > 0.0F) {
-        f += (0.54600006F - f) * h;
-        g += (this.getSpeed() - g) * h;
+      if (waterMovementEfficiency > 0.0F) {
+        f += (0.54600006F - f) * waterMovementEfficiency;
+        g += (this.getSpeed() - g) * waterMovementEfficiency;
       }
 
       if (this.effectState.hasEffect(EffectType.DOLPHINS_GRACE)) {
@@ -349,25 +350,25 @@ public abstract class LivingEntity extends Entity {
 
   private void travelInAir(Vector3d arg) {
     var blockPosBelow = this.getBlockPosBelowThatAffectsMyMovement();
-    var f = this.onGround() ? this.level().getBlockState(blockPosBelow).blockType().friction() : 1.0F;
-    var g = f * 0.91F;
-    var lv2 = this.handleRelativeFrictionAndCalculateMovement(arg, f);
-    var d = lv2.getY();
-    var lv3 = this.effectState.getEffect(EffectType.LEVITATION);
-    if (lv3.isPresent()) {
-      d += (0.05 * (double) (lv3.get().amplifier() + 1) - lv2.getY()) * 0.2;
+    var friction = this.onGround() ? this.level().getBlockState(blockPosBelow).blockType().friction() : 1.0F;
+    var momentum = friction * 0.91F;
+    var frictionDeltaMovement = this.handleRelativeFrictionAndCalculateMovement(arg, friction);
+    var frictionYDelta = frictionDeltaMovement.getY();
+    var levitationEffect = this.effectState.getEffect(EffectType.LEVITATION);
+    if (levitationEffect.isPresent()) {
+      frictionYDelta += (0.05 * (double) (levitationEffect.get().amplifier() + 1) - frictionDeltaMovement.getY()) * 0.2;
     } else if (this.level().isChunkPositionLoaded(blockPosBelow.getX(), blockPosBelow.getZ())) {
-      d -= this.getEffectiveGravity();
+      frictionYDelta -= this.getEffectiveGravity();
     } else if (this.y() > (double) this.level().getMinBuildHeight()) {
-      d = -0.1;
+      frictionYDelta = -0.1;
     } else {
-      d = 0.0;
+      frictionYDelta = 0.0;
     }
 
     if (this.shouldDiscardFriction()) {
-      this.setDeltaMovement(lv2.getX(), d, lv2.getZ());
+      this.setDeltaMovement(frictionDeltaMovement.getX(), frictionYDelta, frictionDeltaMovement.getZ());
     } else {
-      this.setDeltaMovement(lv2.getX() * (double) g, d * (double) 0.98F, lv2.getZ() * (double) g);
+      this.setDeltaMovement(frictionDeltaMovement.getX() * (double) momentum, frictionYDelta * (double) 0.98F, frictionDeltaMovement.getZ() * (double) momentum);
     }
   }
 
@@ -480,10 +481,6 @@ public abstract class LivingEntity extends Entity {
 
   public Optional<Vector3i> getSleepingPos() {
     return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataType.OPTIONAL_POSITION);
-  }
-
-  public boolean isSpectator() {
-    return false;
   }
 
   public boolean isSleeping() {
@@ -626,7 +623,11 @@ public abstract class LivingEntity extends Entity {
   protected void pushEntities() {
     this.level().getEntities(this.getBoundingBox())
       .stream()
-      .filter(e -> e instanceof Player)
+      .<Optional<Player>>map(e -> e instanceof Player player ? Optional.of(player) : Optional.empty())
+      .flatMap(Optional::stream)
+      .filter(Predicate.not(Entity::isSpectator))
+      .filter(Entity::isPushable)
+      .filter(Player::isLocalPlayer)
       .forEach(this::doPush);
   }
 

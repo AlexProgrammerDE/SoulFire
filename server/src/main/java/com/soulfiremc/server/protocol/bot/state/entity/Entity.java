@@ -1351,6 +1351,10 @@ public class Entity {
   public void playerTouch(Player player) {
   }
 
+  public boolean isSpectator() {
+    return false;
+  }
+
   record Movement(Vector3d from, Vector3d to) {
   }
 }
