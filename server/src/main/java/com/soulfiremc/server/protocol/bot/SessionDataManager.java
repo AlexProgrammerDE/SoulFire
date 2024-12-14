@@ -1178,7 +1178,7 @@ public final class SessionDataManager {
     } else if (reason.contains("Connection refused")) {
       log.error("Server is not reachable!", cause);
     } else {
-      log.error("Disconnected: %s".formatted(reason), cause);
+      log.error("Disconnected", new Exception(reason, cause));
     }
   }
 
@@ -1207,6 +1207,14 @@ public final class SessionDataManager {
     // Tick cooldowns
     tickCooldowns();
 
+    if (this.levelLoadStatusManager != null) {
+      this.levelLoadStatusManager.tick();
+      if (this.levelLoadStatusManager.levelReady() && !this.localPlayer.hasClientLoaded()) {
+        this.connection.sendPacket(ServerboundPlayerLoadedPacket.INSTANCE);
+        this.localPlayer.setClientLoaded(true);
+      }
+    }
+
     SoulFireAPI.postEvent(new BotPreEntityTickEvent(connection));
 
     // Tick entities
@@ -1226,14 +1234,6 @@ public final class SessionDataManager {
         } else {
           entry.setValue(ticks);
         }
-      }
-    }
-
-    if (this.levelLoadStatusManager != null) {
-      this.levelLoadStatusManager.tick();
-      if (this.levelLoadStatusManager.levelReady() && !this.localPlayer.hasClientLoaded()) {
-        this.connection.sendPacket(ServerboundPlayerLoadedPacket.INSTANCE);
-        this.localPlayer.setClientLoaded(true);
       }
     }
   }

@@ -17,13 +17,39 @@
  */
 package com.soulfiremc.server.user;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-public record Permission(String id, String description) {
-  public static final List<Permission> VALUES = new ArrayList<>();
+public sealed interface Permission permits Permission.Global, Permission.Instance {
+  static Global global(String id, String description) {
+    return new Global(id, description);
+  }
 
-  public Permission {
-    VALUES.add(this);
+  static Instance instance(String id, String description) {
+    return new Instance(id, description);
+  }
+
+  String id();
+
+  String description();
+
+  sealed interface Context permits GlobalContext, InstanceContext {
+  }
+
+  record Global(String id, String description) implements Permission {
+    public GlobalContext context() {
+      return new GlobalContext(id);
+    }
+  }
+
+  record Instance(String id, String description) implements Permission {
+    public InstanceContext context(UUID instanceId) {
+      return new InstanceContext(id, instanceId);
+    }
+  }
+
+  record GlobalContext(String id) implements Context {
+  }
+
+  record InstanceContext(String id, UUID instanceId) implements Context {
   }
 }

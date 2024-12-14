@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
+import "soulfire/config.proto";
 
 message InstanceConfig {
   repeated SettingsNamespace settings = 1;
@@ -57,6 +58,7 @@ message InstanceInfoResponse {
   string friendlyName = 1;
   InstanceConfig config = 2;
   InstanceState state = 3;
+  repeated PermissionMessage instancePermissions = 4;
 }
 
 message InstanceUpdateFriendlyNameRequest {

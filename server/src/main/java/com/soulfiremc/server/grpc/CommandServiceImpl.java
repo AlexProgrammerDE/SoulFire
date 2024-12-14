@@ -38,10 +38,11 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   @Override
   public void executeCommand(
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_EXECUTION);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_EXECUTION.context(instanceId));
 
     try {
-      ServerCommandManager.putInstanceIds(List.of(UUID.fromString(request.getInstanceId())));
+      ServerCommandManager.putInstanceIds(List.of(instanceId));
       var code = serverCommandManager.execute(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
@@ -56,9 +57,11 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   public void tabCompleteCommand(
     CommandCompletionRequest request,
     StreamObserver<CommandCompletionResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_COMPLETION);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_COMPLETION.context(instanceId));
 
     try {
+      ServerCommandManager.putInstanceIds(List.of(instanceId));
       var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(

@@ -27,17 +27,17 @@ import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.util.UUID;
 
-@Getter
 @Slf4j
 public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImplBase {
   @Override
   public void download(DownloadRequest request, StreamObserver<DownloadResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DOWNLOAD_URL);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DOWNLOAD_URL.context(instanceId));
 
     try {
       var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);

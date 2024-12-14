@@ -29,13 +29,13 @@ public interface ServerCommandSource extends CommandSource {
 
   String getUsername();
 
-  TriState getPermission(Permission permission);
+  TriState getPermission(Permission.Context permission);
 
-  default boolean hasPermission(Permission permission) {
+  default boolean hasPermission(Permission.Context permission) {
     return getPermission(permission).toBooleanOrElse(false);
   }
 
-  default void hasPermissionOrThrow(Permission permission) {
+  default void hasPermissionOrThrow(Permission.Context permission) {
     if (!hasPermission(permission)) {
       throw new StatusRuntimeException(
         Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+message ObjectStorageUploadRequest {
+  string instanceId = 1;
+  bytes data = 2;
+  string fileName = 3;
+}
+
+message ObjectStorageUploadResponse {
+}
+
+message ObjectStorageDownloadRequest {
+  string instanceId = 1;
+  string fileName = 2;
+}
+
+message ObjectStorageDownloadResponse {
+  bytes data = 1;
+}
+
+message ObjectStorageDeleteRequest {
+  string instanceId = 1;
+  string fileName = 2;
+}
+
+message ObjectStorageDeleteResponse {
+}
+
+message ObjectStorageListRequest {
+  string instanceId = 1;
+}
+
+message ObjectStorageListResponse {
+  repeated string fileNames = 1;
+}
+
+service ObjectStorageService {
+  rpc upload(ObjectStorageUploadRequest) returns (ObjectStorageUploadResponse);
+  rpc download(ObjectStorageDownloadRequest) returns (ObjectStorageDownloadResponse);
+  rpc delete(ObjectStorageDeleteRequest) returns (ObjectStorageDeleteResponse);
+  rpc list(ObjectStorageListRequest) returns (ObjectStorageListResponse);
+}

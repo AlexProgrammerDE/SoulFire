@@ -22,6 +22,7 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.user.Permission;
 import com.soulfiremc.server.user.Permissions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -30,16 +31,28 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImplBase {
   private final SoulFireServer soulFireServer;
 
+  private Collection<PermissionMessage> getInstancePermissions(UUID instanceId) {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    return Permissions.VALUES.stream().flatMap(p -> p instanceof Permission.Instance instance ? Stream.of(instance) : Stream.empty()).map(permission -> PermissionMessage.newBuilder()
+        .setId(permission.id())
+        .setDescription(permission.description())
+        .setGranted(user.hasPermission(permission.context(instanceId)))
+        .build())
+      .toList();
+  }
+
   @Override
   public void createInstance(InstanceCreateRequest request, StreamObserver<InstanceCreateResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CREATE_INSTANCES);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CREATE_INSTANCE.context());
 
     try {
       var id = soulFireServer.createInstance(request.getFriendlyName());
@@ -53,8 +66,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
   @Override
   public void deleteInstance(InstanceDeleteRequest request, StreamObserver<InstanceDeleteResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DELETE_INSTANCES);
     var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DELETE_INSTANCE.context(instanceId));
 
     try {
       var optionalDeletion = soulFireServer.deleteInstance(instanceId);
@@ -75,7 +88,10 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   public void listInstances(InstanceListRequest request, StreamObserver<InstanceListResponse> responseObserver) {
     try {
       responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(soulFireServer.instances().values().stream().map(InstanceManager::toProto).toList())
+        .addAllInstances(soulFireServer.instances().values().stream()
+          .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(Permissions.READ_INSTANCE.context(instance.id())))
+          .map(InstanceManager::toProto)
+          .toList())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -87,6 +103,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   @Override
   public void getInstanceInfo(InstanceInfoRequest request, StreamObserver<InstanceInfoResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.READ_INSTANCE.context(instanceId));
 
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
@@ -99,6 +116,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
         .setFriendlyName(instance.friendlyName())
         .setConfig(instance.settingsSource().source().toProto())
         .setState(instance.attackLifecycle().toProto())
+        .addAllInstancePermissions(getInstancePermissions(instanceId))
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -109,8 +127,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
   @Override
   public void updateInstanceFriendlyName(InstanceUpdateFriendlyNameRequest request, StreamObserver<InstanceUpdateFriendlyNameResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPDATE_INSTANCES);
     var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPDATE_INSTANCE.context(instanceId));
 
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
@@ -131,8 +149,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
   @Override
   public void updateInstanceConfig(InstanceUpdateConfigRequest request, StreamObserver<InstanceUpdateConfigResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPDATE_INSTANCES);
     var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPDATE_INSTANCE.context(instanceId));
 
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
@@ -153,8 +171,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
   @Override
   public void changeInstanceState(InstanceStateChangeRequest request, StreamObserver<InstanceStateChangeResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CHANGE_INSTANCE_STATE);
     var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CHANGE_INSTANCE_STATE.context(instanceId));
 
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);

@@ -50,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -410,6 +411,10 @@ public class InstanceManager {
     json.add("settings", settingsSource.source().serializeToTree());
 
     return json;
+  }
+
+  public Path getObjectStoragePath() {
+    return soulFireServer.baseDirectory().resolve("object-storage").resolve(id.toString());
   }
 
   @Override

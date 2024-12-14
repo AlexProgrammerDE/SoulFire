@@ -40,7 +40,7 @@ public class ServerConsoleCommandSource extends ClientConsoleCommandSource imple
   }
 
   @Override
-  public TriState getPermission(Permission permission) {
+  public TriState getPermission(Permission.Context permission) {
     return TriState.TRUE;
   }
 }

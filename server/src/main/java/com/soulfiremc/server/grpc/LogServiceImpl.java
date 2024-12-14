@@ -24,14 +24,12 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
 @Slf4j
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private static final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
@@ -55,7 +53,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS.context());
 
     try {
       responseObserver.onNext(PreviousLogResponse.newBuilder()
@@ -70,7 +68,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS.context());
 
     try {
       var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver);

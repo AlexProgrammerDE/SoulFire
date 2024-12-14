@@ -31,26 +31,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
 
-  private Collection<PermissionMessage> getPermissions() {
+  private Collection<PermissionMessage> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    var permissions = new ArrayList<PermissionMessage>();
-    for (var permission : Permission.VALUES) {
-      permissions.add(PermissionMessage.newBuilder()
+    return Permissions.VALUES.stream().flatMap(p -> p instanceof Permission.Global global ? Stream.of(global) : Stream.empty()).map(permission -> PermissionMessage.newBuilder()
         .setId(permission.id())
         .setDescription(permission.description())
-        .setGranted(user.hasPermission(permission))
-        .build());
-    }
-
-    return permissions;
+        .setGranted(user.hasPermission(permission.context()))
+        .build())
+      .toList();
   }
 
   private Collection<ServerPlugin> getPlugins() {
@@ -63,13 +59,13 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   @Override
   public void getClientData(
     ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SERVER_CONFIG);
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SERVER_CONFIG.context());
 
     try {
       responseObserver.onNext(
         ClientDataResponse.newBuilder()
           .setUsername(ServerRPCConstants.USER_CONTEXT_KEY.get().getUsername())
-          .addAllPermissions(getPermissions())
+          .addAllServerPermissions(getGlobalPermissions())
           .addAllPlugins(getPlugins())
           .addAllSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
           .addAllSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())

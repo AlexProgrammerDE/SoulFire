@@ -1069,7 +1069,7 @@ public class POVServer extends InternalPlugin {
     }
 
     @Override
-    public TriState getPermission(Permission permission) {
+    public TriState getPermission(Permission.Context permission) {
       return TriState.TRUE;
     }
 

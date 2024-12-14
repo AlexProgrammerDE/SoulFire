@@ -17,29 +17,40 @@
  */
 package com.soulfiremc.server.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Permissions {
-  public static final Permission COMMAND_EXECUTION =
-    new Permission("soulfire.command_execution", "Allows the client to execute commands");
-  public static final Permission COMMAND_COMPLETION =
-    new Permission("soulfire.command_completion", "Allows the client to tab complete commands");
-  public static final Permission CREATE_INSTANCES =
-    new Permission("soulfire.create_instances", "Allows the client to create an instance");
-  public static final Permission UPDATE_INSTANCES =
-    new Permission("soulfire.update_instances", "Allows the client to update an instance");
-  public static final Permission DELETE_INSTANCES =
-    new Permission("soulfire.delete_instances", "Allows the client to delete an instance");
-  public static final Permission CHANGE_INSTANCE_STATE =
-    new Permission("soulfire.change_instance_state", "Allows the client to change the state of an instance");
-  public static final Permission AUTHENTICATE_MC_ACCOUNT =
-    new Permission("soulfire.authenticate_mc_account", "Allows the client to authenticate or refresh a Minecraft account");
-  public static final Permission CHECK_PROXY =
-    new Permission("soulfire.check_proxy", "Allows the client to check if a proxy is valid");
-  public static final Permission SUBSCRIBE_LOGS =
-    new Permission("soulfire.subscribe_logs", "Allows the client to subscribe to logs");
-  public static final Permission SERVER_CONFIG =
-    new Permission("soulfire.server_config", "Allows the client to view server configuration");
-  public static final Permission DOWNLOAD_URL =
-    new Permission("soulfire.download_url", "Allows the client to download data through the server from arbitrary URLs");
+  public static final List<Permission> VALUES = new ArrayList<>();
+  public static final Permission.Instance COMMAND_EXECUTION =
+    register(Permission.instance("soulfire.command_execution", "Allows the client to execute commands"));
+  public static final Permission.Instance COMMAND_COMPLETION =
+    register(Permission.instance("soulfire.command_completion", "Allows the client to tab complete commands"));
+  public static final Permission.Global CREATE_INSTANCE =
+    register(Permission.global("soulfire.create_instance", "Allows the client to create an instance"));
+  public static final Permission.Instance READ_INSTANCE =
+    register(Permission.instance("soulfire.read_instance", "Allows the client to see an instance"));
+  public static final Permission.Instance UPDATE_INSTANCE =
+    register(Permission.instance("soulfire.update_instance", "Allows the client to update an instance"));
+  public static final Permission.Instance DELETE_INSTANCE =
+    register(Permission.instance("soulfire.delete_instance", "Allows the client to delete an instance"));
+  public static final Permission.Instance CHANGE_INSTANCE_STATE =
+    register(Permission.instance("soulfire.change_instance_state", "Allows the client to change the state of an instance"));
+  public static final Permission.Instance AUTHENTICATE_MC_ACCOUNT =
+    register(Permission.instance("soulfire.authenticate_mc_account", "Allows the client to authenticate or refresh a Minecraft account"));
+  public static final Permission.Instance CHECK_PROXY =
+    register(Permission.instance("soulfire.check_proxy", "Allows the client to check if a proxy is valid"));
+  public static final Permission.Global SUBSCRIBE_LOGS =
+    register(Permission.global("soulfire.subscribe_logs", "Allows the client to subscribe to logs"));
+  public static final Permission.Global SERVER_CONFIG =
+    register(Permission.global("soulfire.server_config", "Allows the client to view server configuration"));
+  public static final Permission.Instance DOWNLOAD_URL =
+    register(Permission.instance("soulfire.download_url", "Allows the client to download data through the server from arbitrary URLs"));
+
+  public static <T extends Permission> T register(T permission) {
+    VALUES.add(permission);
+    return permission;
+  }
 
   private Permissions() {
   }
