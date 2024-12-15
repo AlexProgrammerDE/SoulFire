@@ -22,6 +22,7 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
+import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.structs.Segment;
 import io.netty.buffer.ByteBuf;
@@ -234,16 +235,16 @@ public class BotControlAPI {
         continue;
       }
 
-      var distance =
-        Math.sqrt(
-          Math.pow(entity.x() - x, 2)
-            + Math.pow(entity.y() - y, 2)
-            + Math.pow(entity.z() - z, 2));
+      var distance = entity.pos().distance(x, y, z);
       if (distance > range) {
         continue;
       }
 
       if (onlyInteractable && !entity.entityType().attackable()) {
+        continue;
+      }
+
+      if (onlyInteractable && entity instanceof LivingEntity le && !le.canBeSeenAsEnemy()) {
         continue;
       }
 

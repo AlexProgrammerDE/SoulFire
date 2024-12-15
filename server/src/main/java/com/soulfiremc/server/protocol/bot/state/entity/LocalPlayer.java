@@ -539,4 +539,11 @@ public class LocalPlayer extends AbstractClientPlayer {
   public int permissionLevel() {
     return this.permissionLevel;
   }
+
+  public void onGameModeChanged(GameMode gameMode) {
+    if (gameMode == GameMode.SPECTATOR) {
+      var deltaMovement = this.getDeltaMovement();
+      this.setDeltaMovement(Vector3d.from(deltaMovement.getX(), 0.0, deltaMovement.getZ()));
+    }
+  }
 }

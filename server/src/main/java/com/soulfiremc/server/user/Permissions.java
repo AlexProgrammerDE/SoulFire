@@ -46,6 +46,14 @@ public class Permissions {
     register(Permission.global("soulfire.server_config", "Allows the client to view server configuration"));
   public static final Permission.Instance DOWNLOAD_URL =
     register(Permission.instance("soulfire.download_url", "Allows the client to download data through the server from arbitrary URLs"));
+  public static final Permission.Instance UPLOAD_OBJECT_STORAGE =
+    register(Permission.instance("soulfire.upload_object_storage", "Allows the client to upload data to object storage"));
+  public static final Permission.Instance DOWNLOAD_OBJECT_STORAGE =
+    register(Permission.instance("soulfire.download_object_storage", "Allows the client to download data from object storage"));
+  public static final Permission.Instance DELETE_OBJECT_STORAGE =
+    register(Permission.instance("soulfire.delete_object_storage", "Allows the client to delete data from object storage"));
+  public static final Permission.Instance LIST_OBJECT_STORAGE =
+    register(Permission.instance("soulfire.list_object_storage", "Allows the client to list data in object storage"));
 
   public static <T extends Permission> T register(T permission) {
     VALUES.add(permission);

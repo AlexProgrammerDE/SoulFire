@@ -17,13 +17,20 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.protobuf.ByteString;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.util.SFHelpers;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.nio.file.Files;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -32,21 +39,94 @@ public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectSto
 
   @Override
   public void upload(ObjectStorageUploadRequest request, StreamObserver<ObjectStorageUploadResponse> responseObserver) {
-    super.upload(request, responseObserver);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPLOAD_OBJECT_STORAGE.context(instanceId));
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+
+    try {
+      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      Files.write(filePath, request.getData().toByteArray());
+
+      responseObserver.onNext(ObjectStorageUploadResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error uploading object storage", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void download(ObjectStorageDownloadRequest request, StreamObserver<ObjectStorageDownloadResponse> responseObserver) {
-    super.download(request, responseObserver);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DOWNLOAD_OBJECT_STORAGE.context(instanceId));
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+
+    try {
+      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      var data = Files.readAllBytes(filePath);
+
+      responseObserver.onNext(ObjectStorageDownloadResponse.newBuilder().setData(ByteString.copyFrom(data)).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error downloading object storage", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void delete(ObjectStorageDeleteRequest request, StreamObserver<ObjectStorageDeleteResponse> responseObserver) {
-    super.delete(request, responseObserver);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DELETE_OBJECT_STORAGE.context(instanceId));
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+
+    try {
+      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      Files.delete(filePath);
+
+      responseObserver.onNext(ObjectStorageDeleteResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error deleting object storage", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void list(ObjectStorageListRequest request, StreamObserver<ObjectStorageListResponse> responseObserver) {
-    super.list(request, responseObserver);
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.LIST_OBJECT_STORAGE.context(instanceId));
+    var optionalInstance = soulFireServer.getInstance(instanceId);
+    if (optionalInstance.isEmpty()) {
+      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+    }
+
+    var instance = optionalInstance.get();
+
+    try {
+      responseObserver.onNext(ObjectStorageListResponse.newBuilder().addAllFileNames(
+        Files.list(instance.getObjectStoragePath())
+          .map(path -> path.getFileName().toString())
+          .toList()
+      ).build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error listing object storage", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 }

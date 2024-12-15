@@ -30,9 +30,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class SFHelpers {
+  public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
+  private static final Pattern RESERVED_WINDOWS_FILENAMES = Pattern.compile(".*\\.|(?:COM|CLOCK\\$|CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?", Pattern.CASE_INSENSITIVE);
+
   private SFHelpers() {}
 
   public static byte[][] split(byte[] data, byte separator) {
@@ -187,5 +191,19 @@ public class SFHelpers {
 
   public static void mustSupply(Supplier<Runnable> supplier) {
     supplier.get().run();
+  }
+
+  public static String sanitizeFileName(String name) {
+    for (var c : ILLEGAL_FILE_CHARACTERS) {
+      name = name.replace(c, '_');
+    }
+
+    name = name.replaceAll("[./\"]", "_");
+
+    if (RESERVED_WINDOWS_FILENAMES.matcher(name).matches()) {
+      name = "_" + name + "_";
+    }
+
+    return name;
   }
 }
