@@ -522,7 +522,13 @@ public final class SessionDataManager {
             entry.setKeySignature(update.getKeySignature());
             entry.setPublicKey(update.getPublicKey());
           };
-          case UPDATE_GAME_MODE -> () -> entry.setGameMode(update.getGameMode());
+          case UPDATE_GAME_MODE -> () -> {
+            if (entry.getGameMode() != update.getGameMode() && localPlayer != null && update.getProfileId().equals(localPlayer.uuid())) {
+              localPlayer.onGameModeChanged(update.getGameMode());
+            }
+
+            entry.setGameMode(update.getGameMode());
+          };
           case UPDATE_LISTED -> () -> entry.setListed(update.isListed());
           case UPDATE_LATENCY -> () -> entry.setLatency(update.getLatency());
           case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(update.getDisplayName());
