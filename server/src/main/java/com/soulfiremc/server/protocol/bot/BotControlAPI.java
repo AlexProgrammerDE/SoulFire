@@ -21,6 +21,7 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
+import com.soulfiremc.server.protocol.bot.state.entity.AbstractClientPlayer;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.util.mcstructs.AABB;
@@ -245,6 +246,10 @@ public class BotControlAPI {
       }
 
       if (onlyInteractable && entity instanceof LivingEntity le && !le.canBeSeenAsEnemy()) {
+        continue;
+      }
+
+      if (onlyInteractable && entity instanceof AbstractClientPlayer acp && (acp.isCreative() || acp.isSpectator())) {
         continue;
       }
 
