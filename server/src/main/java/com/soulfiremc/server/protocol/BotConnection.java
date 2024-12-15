@@ -41,11 +41,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
@@ -254,25 +253,12 @@ public final class BotConnection {
     session.send(packet);
   }
 
-  public GameMode getEntityGameMode(UUID uuid) {
-    if (uuid.equals(dataManager.localPlayer().uuid())) {
-      return dataManager.gameModeState().localPlayerMode();
-    }
-
+  public PlayerListEntry getEntityProfile(UUID uuid) {
     var profile = dataManager.playerListState().entries().get(uuid);
     if (profile == null) {
-      return GameMode.SURVIVAL;
+      throw new IllegalStateException("Profile not found for " + uuid);
     }
 
-    return profile.getGameMode();
-  }
-
-  public GameProfile getEntityProfile(UUID uuid) {
-    var profile = dataManager.playerListState().entries().get(uuid);
-    if (profile == null) {
-      return null;
-    }
-
-    return profile.getProfile();
+    return profile;
   }
 }

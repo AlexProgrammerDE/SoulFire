@@ -22,12 +22,14 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 
 @Getter
 @Setter
 public abstract class AbstractClientPlayer extends Player {
   private final BotConnection connection;
+  private PlayerListEntry playerListEntry;
 
   public AbstractClientPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     super(level, level.levelData().spawnPos(), level.levelData().spawnAngle(), gameProfile);
@@ -36,11 +38,19 @@ public abstract class AbstractClientPlayer extends Player {
 
   @Override
   public boolean isSpectator() {
-    return connection.getEntityGameMode(uuid) == GameMode.SPECTATOR;
+    return getPlayerListEntry().getGameMode() == GameMode.SPECTATOR;
   }
 
   @Override
   public boolean isCreative() {
-    return connection.getEntityGameMode(uuid) == GameMode.CREATIVE;
+    return getPlayerListEntry().getGameMode() == GameMode.CREATIVE;
+  }
+
+  private PlayerListEntry getPlayerListEntry() {
+    if (playerListEntry == null) {
+      playerListEntry = connection.getEntityProfile(uuid);
+    }
+
+    return playerListEntry;
   }
 }
