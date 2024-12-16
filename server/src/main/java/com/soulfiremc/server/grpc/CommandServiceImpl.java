@@ -19,7 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.ServerCommandManager;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -39,7 +39,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   public void executeCommand(
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_EXECUTION.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.COMMAND_EXECUTION, instanceId));
 
     try {
       ServerCommandManager.putInstanceIds(List.of(instanceId));
@@ -58,7 +58,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     CommandCompletionRequest request,
     StreamObserver<CommandCompletionResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.COMMAND_COMPLETION.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.COMMAND_COMPLETION, instanceId));
 
     try {
       ServerCommandManager.putInstanceIds(List.of(instanceId));

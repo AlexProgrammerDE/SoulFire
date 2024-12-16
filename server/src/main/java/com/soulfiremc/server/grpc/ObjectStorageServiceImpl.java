@@ -20,7 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.google.protobuf.ByteString;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -40,7 +40,7 @@ public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectSto
   @Override
   public void upload(ObjectStorageUploadRequest request, StreamObserver<ObjectStorageUploadResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.UPLOAD_OBJECT_STORAGE.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPLOAD_OBJECT_STORAGE, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -63,7 +63,7 @@ public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectSto
   @Override
   public void download(ObjectStorageDownloadRequest request, StreamObserver<ObjectStorageDownloadResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DOWNLOAD_OBJECT_STORAGE.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DOWNLOAD_OBJECT_STORAGE, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -86,7 +86,7 @@ public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectSto
   @Override
   public void delete(ObjectStorageDeleteRequest request, StreamObserver<ObjectStorageDeleteResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DELETE_OBJECT_STORAGE.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DELETE_OBJECT_STORAGE, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -109,7 +109,7 @@ public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectSto
   @Override
   public void list(ObjectStorageListRequest request, StreamObserver<ObjectStorageListResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.LIST_OBJECT_STORAGE.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.LIST_OBJECT_STORAGE, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));

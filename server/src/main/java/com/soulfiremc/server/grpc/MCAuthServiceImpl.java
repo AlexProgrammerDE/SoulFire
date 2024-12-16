@@ -22,7 +22,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.AccountSettings;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -42,7 +42,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   @Override
   public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
@@ -76,7 +76,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   @Override
   public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
@@ -112,7 +112,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   @Override
   public void refresh(RefreshRequest request, StreamObserver<RefreshResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.AUTHENTICATE_MC_ACCOUNT.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {

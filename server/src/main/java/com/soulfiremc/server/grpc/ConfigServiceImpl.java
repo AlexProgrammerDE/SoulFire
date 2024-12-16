@@ -22,8 +22,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.user.Permission;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -31,20 +30,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
 
-  private Collection<PermissionMessage> getGlobalPermissions() {
+  private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    return Permissions.VALUES.stream().flatMap(p -> p instanceof Permission.Global global ? Stream.of(global) : Stream.empty()).map(permission -> PermissionMessage.newBuilder()
-        .setId(permission.id())
-        .setDescription(permission.description())
-        .setGranted(user.hasPermission(permission.context()))
+    return Arrays.stream(GlobalPermission.values())
+      .map(permission -> GlobalPermissionState.newBuilder()
+        .setGlobalPermission(permission)
+        .setGranted(user.hasPermission(PermissionContext.global(permission)))
         .build())
       .toList();
   }
@@ -59,7 +58,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   @Override
   public void getClientData(
     ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SERVER_CONFIG.context());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SERVER_CONFIG));
 
     try {
       responseObserver.onNext(

@@ -120,10 +120,9 @@ message SettingsPage {
   string iconId = 6;
 }
 
-message PermissionMessage {
-  string id = 1;
-  string description = 2;
-  bool granted = 3;
+message GlobalPermissionState {
+  GlobalPermission globalPermission = 1;
+  bool granted = 2;
 }
 
 message ServerPlugin {
@@ -137,7 +136,7 @@ message ServerPlugin {
 
 message ClientDataResponse {
   string username = 1;
-  repeated PermissionMessage serverPermissions = 2;
+  repeated GlobalPermissionState serverPermissions = 2;
   repeated ServerPlugin plugins = 3;
   repeated SettingsPage settings = 5;
 }

@@ -19,7 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
@@ -50,7 +50,7 @@ public class DefaultAuthSystem implements AuthSystem {
     }
 
     @Override
-    public TriState getPermission(Permission.Context permission) {
+    public TriState getPermission(PermissionContext permission) {
       return TriState.TRUE;
     }
 

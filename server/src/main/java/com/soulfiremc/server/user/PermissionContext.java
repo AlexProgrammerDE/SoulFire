@@ -17,28 +17,23 @@
  */
 package com.soulfiremc.server.user;
 
-import com.soulfiremc.brigadier.CommandSource;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import net.kyori.adventure.util.TriState;
+import com.soulfiremc.grpc.generated.GlobalPermission;
+import com.soulfiremc.grpc.generated.InstancePermission;
 
 import java.util.UUID;
 
-public interface ServerCommandSource extends CommandSource {
-  UUID getUniqueId();
-
-  String getUsername();
-
-  TriState getPermission(PermissionContext permission);
-
-  default boolean hasPermission(PermissionContext permission) {
-    return getPermission(permission).toBooleanOrElse(false);
+public sealed interface PermissionContext permits PermissionContext.GlobalContext, PermissionContext.InstanceContext {
+  static GlobalContext global(GlobalPermission globalPermission) {
+    return new GlobalContext(globalPermission);
   }
 
-  default void hasPermissionOrThrow(PermissionContext permission) {
-    if (!hasPermission(permission)) {
-      throw new StatusRuntimeException(
-        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
-    }
+  static InstanceContext instance(InstancePermission instancePermission, UUID instanceId) {
+    return new InstanceContext(instancePermission, instanceId);
+  }
+
+  record GlobalContext(GlobalPermission globalPermission) implements PermissionContext {
+  }
+
+  record InstanceContext(InstancePermission instancePermission, UUID instanceId) implements PermissionContext {
   }
 }

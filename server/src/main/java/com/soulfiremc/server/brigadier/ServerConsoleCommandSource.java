@@ -18,7 +18,7 @@
 package com.soulfiremc.server.brigadier;
 
 import com.soulfiremc.brigadier.ClientConsoleCommandSource;
-import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
 import net.kyori.adventure.util.TriState;
 
@@ -40,7 +40,7 @@ public class ServerConsoleCommandSource extends ClientConsoleCommandSource imple
   }
 
   @Override
-  public TriState getPermission(Permission.Context permission) {
+  public TriState getPermission(PermissionContext permission) {
     return TriState.TRUE;
   }
 }

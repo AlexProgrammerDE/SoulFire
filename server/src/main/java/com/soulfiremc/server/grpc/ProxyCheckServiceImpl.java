@@ -18,14 +18,11 @@
 package com.soulfiremc.server.grpc;
 
 import com.google.common.base.Stopwatch;
-import com.soulfiremc.grpc.generated.ProxyCheckRequest;
-import com.soulfiremc.grpc.generated.ProxyCheckResponse;
-import com.soulfiremc.grpc.generated.ProxyCheckResponseSingle;
-import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.ProxySettings;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -52,7 +49,7 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
   public void check(
     ProxyCheckRequest request, StreamObserver<ProxyCheckResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.CHECK_PROXY.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.CHECK_PROXY, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));

@@ -18,11 +18,8 @@
 package com.soulfiremc.server.grpc;
 
 import com.google.protobuf.ByteString;
-import com.soulfiremc.grpc.generated.DownloadRequest;
-import com.soulfiremc.grpc.generated.DownloadResponse;
-import com.soulfiremc.grpc.generated.DownloadServiceGrpc;
-import com.soulfiremc.grpc.generated.HeaderPair;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -37,7 +34,7 @@ public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImpl
   @Override
   public void download(DownloadRequest request, StreamObserver<DownloadResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.DOWNLOAD_URL.context(instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DOWNLOAD_URL, instanceId));
 
     try {
       var proxy = RPCUtils.convertProxy(request::hasProxy, request::getProxy);

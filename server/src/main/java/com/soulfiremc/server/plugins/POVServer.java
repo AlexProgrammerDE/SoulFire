@@ -41,7 +41,7 @@ import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.user.Permission;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.DefaultTagsState;
 import com.soulfiremc.server.util.PortHelper;
@@ -1069,7 +1069,7 @@ public class POVServer extends InternalPlugin {
     }
 
     @Override
-    public TriState getPermission(Permission.Context permission) {
+    public TriState getPermission(PermissionContext permission) {
       return TriState.TRUE;
     }
 

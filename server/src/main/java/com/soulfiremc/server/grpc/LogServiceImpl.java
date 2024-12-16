@@ -18,7 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.user.Permissions;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.SFLogAppender;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -53,7 +53,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS.context());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SUBSCRIBE_LOGS));
 
     try {
       responseObserver.onNext(PreviousLogResponse.newBuilder()
@@ -68,7 +68,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(Permissions.SUBSCRIBE_LOGS.context());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SUBSCRIBE_LOGS));
 
     try {
       var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver);
