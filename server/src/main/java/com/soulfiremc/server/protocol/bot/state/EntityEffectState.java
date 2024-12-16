@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.EffectType;
-import com.soulfiremc.server.protocol.bot.model.EffectData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -30,7 +29,7 @@ import java.util.Optional;
 
 @Data
 public class EntityEffectState {
-  private final Map<EffectType, InternalEffectState> effects = new HashMap<>();
+  private final Map<EffectType, EffectState> effects = new HashMap<>();
 
   public void updateEffect(
     EffectType effect,
@@ -42,7 +41,7 @@ public class EntityEffectState {
     boolean blend) {
     effects.put(
       effect,
-      new InternalEffectState(amplifier, ambient, showParticles, showIcon, blend, duration));
+      new EffectState(effect, amplifier, ambient, showParticles, showIcon, blend, duration));
   }
 
   public void removeEffect(EffectType effect) {
@@ -53,26 +52,8 @@ public class EntityEffectState {
     return effects.containsKey(effect);
   }
 
-  public Optional<EffectData> getEffect(EffectType effect) {
-    var state = effects.get(effect);
-
-    if (state == null) {
-      return Optional.empty();
-    }
-
-    return Optional.of(
-      new EffectData(
-        effect,
-        state.amplifier(),
-        state.duration(),
-        state.ambient(),
-        state.showParticles(),
-        state.showIcon(),
-        state.blend()));
-  }
-
-  public int getEffectAmplifier(EffectType effect) {
-    return getEffect(effect).map(EffectData::amplifier).orElse(0);
+  public Optional<EffectState> getEffect(EffectType effect) {
+    return Optional.ofNullable(effects.get(effect));
   }
 
   public void tick() {
@@ -82,7 +63,8 @@ public class EntityEffectState {
   @Getter
   @Setter
   @AllArgsConstructor
-  public static class InternalEffectState {
+  public static class EffectState {
+    private final EffectType effect;
     private final int amplifier;
     private final boolean ambient;
     private final boolean showParticles;
