@@ -79,7 +79,7 @@ public class AutoTotem extends InternalPlugin {
           return;
         }
 
-        inventoryManager.connection().botControl().maybeRegister(() -> ControllingTask.staged(List.of(
+        inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
           new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
           new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(slot)),
           new ControllingTask.WaitDelayStage(() -> 50L),

@@ -52,7 +52,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is used to control the bot. The goal is to reduce friction for doing simple things.
@@ -62,63 +62,60 @@ import java.util.function.Supplier;
 public class BotControlAPI {
   private final BotConnection connection;
   private final SecureRandom secureRandom = new SecureRandom();
+  private final AtomicReference<ControllingTask> controllingTask = new AtomicReference<>();
   @Getter
   @Setter
   private int attackCooldownTicks = 0;
-  private ControllingTask controllingTask;
 
   public void tick() {
     if (attackCooldownTicks > 0) {
       attackCooldownTicks--;
     }
 
-    if (controllingTask != null) {
-      controllingTask.tick();
+    var localTask = this.controllingTask.get();
+    if (localTask != null) {
+      localTask.tick();
 
-      if (controllingTask.isDone()) {
-        controllingTask.stop();
-        controllingTask = null;
+      if (localTask.isDone()) {
+        localTask.stop();
+        this.controllingTask.set(null);
       }
     }
   }
 
   public boolean stopControllingTask() {
-    if (controllingTask != null) {
-      controllingTask.stop();
-      controllingTask = null;
+    return this.controllingTask.updateAndGet(
+      current -> {
+        if (current != null) {
+          current.stop();
+          return null;
+        }
 
-      return true;
-    }
-
-    return false;
-  }
-
-  public boolean acceptsTask() {
-    return controllingTask == null;
+        return null;
+      }) != null;
   }
 
   public boolean activelyControlled() {
-    return controllingTask != null;
+    return this.controllingTask.get() != null;
   }
 
   public void registerControllingTask(ControllingTask task) {
-    if (controllingTask != null) {
-      controllingTask.stop();
-    }
+    this.controllingTask.updateAndGet(
+      current -> {
+        if (current != null) {
+          current.stop();
+        }
 
-    controllingTask = task;
+        return task;
+      });
   }
 
   public void unregisterControllingTask(ControllingTask task) {
-    if (controllingTask == task) {
-      controllingTask = null;
-    }
+    this.controllingTask.compareAndSet(task, null);
   }
 
-  public void maybeRegister(Supplier<ControllingTask> taskSupplier) {
-    if (acceptsTask()) {
-      registerControllingTask(taskSupplier.get());
-    }
+  public void maybeRegister(ControllingTask task) {
+    this.controllingTask.compareAndSet(null, task);
   }
 
   public boolean toggleFlight() {
