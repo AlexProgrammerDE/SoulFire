@@ -18,8 +18,6 @@
 package com.soulfiremc.generator;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.FileUtil;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 
 public class Main implements ModInitializer {
   @Override
@@ -29,7 +27,5 @@ public class Main implements ModInitializer {
     // Player.class;
     // AbstractClientPlayer.class;
     // LocalPlayer.class;
-    ClientPacketListener;
-    FileUtil
   }
 }
