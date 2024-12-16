@@ -21,19 +21,20 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
 import com.soulfiremc.server.settings.property.MinMaxProperty;
 import com.soulfiremc.server.util.SFItemHelpers;
-import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.pf4j.Extension;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
@@ -75,30 +76,33 @@ public class AutoEat extends InternalPlugin {
         }
 
         var slot = edibleSlot.get();
-        if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
+        if (inventoryManager.lookingAtForeignContainer()) {
           return;
         }
 
-        try {
-          if (!playerInventory.isHeldItem(slot) && playerInventory.isHotbar(slot)) {
-            inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
-          } else if (playerInventory.isMainInventory(slot)) {
-            inventoryManager.openPlayerInventory();
-            inventoryManager.leftClickSlot(slot);
-            inventoryManager.leftClickSlot(playerInventory.getHeldItem());
-            if (inventoryManager.cursorItem() != null) {
-              inventoryManager.leftClickSlot(slot);
-            }
-
-            inventoryManager.closeInventory();
-          }
-
-          connection.botActionManager().useItemInHand(Hand.MAIN_HAND);
-
-          // Wait before eating again
-          TimeUtil.waitTime(2, TimeUnit.SECONDS);
-        } finally {
-          inventoryManager.unlockInventoryControl();
+        if (!playerInventory.isHeldItem(slot) && playerInventory.isHotbar(slot)) {
+          inventoryManager.connection().botControl().maybeRegister(() -> ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(() -> inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot))),
+            new ControllingTask.WaitDelayStage(() -> 50L),
+            new ControllingTask.RunnableStage(() -> connection.botActionManager().useItemInHand(Hand.MAIN_HAND))
+          )));
+        } else if (playerInventory.isMainInventory(slot)) {
+          inventoryManager.connection().botControl().maybeRegister(() -> ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
+            new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(slot)),
+            new ControllingTask.WaitDelayStage(() -> 50L),
+            new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(playerInventory.getHeldItem())),
+            new ControllingTask.WaitDelayStage(() -> 50L),
+            new ControllingTask.RunnableStage(() -> {
+              if (inventoryManager.cursorItem() != null) {
+                inventoryManager.leftClickSlot(slot);
+              }
+            }),
+            new ControllingTask.WaitDelayStage(() -> 50L),
+            new ControllingTask.RunnableStage(inventoryManager::closeInventory),
+            new ControllingTask.WaitDelayStage(() -> 50L),
+            new ControllingTask.RunnableStage(() -> connection.botActionManager().useItemInHand(Hand.MAIN_HAND))
+          )));
         }
       },
       settingsSource.getRandom(AutoEatSettings.DELAY).asLongSupplier(),

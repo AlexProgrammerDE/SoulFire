@@ -175,8 +175,8 @@ public final class BotConnection {
       for (var i = 0L; i < Math.min(ticks, 10); i++) {
         SoulFireAPI.postEvent(new BotPreTickEvent(this));
 
-        dataManager.tick();
         botControl.tick();
+        dataManager.tick();
 
         if (protocol.getOutboundState() == ProtocolState.GAME) {
           sendPacket(ServerboundClientTickEndPacket.INSTANCE);

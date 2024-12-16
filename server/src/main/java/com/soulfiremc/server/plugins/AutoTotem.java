@@ -22,17 +22,18 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
 import com.soulfiremc.server.settings.property.MinMaxProperty;
-import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
@@ -74,26 +75,24 @@ public class AutoTotem extends InternalPlugin {
         }
 
         var slot = totemSlot.get();
-        if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
+        if (inventoryManager.lookingAtForeignContainer()) {
           return;
         }
 
-        try {
-          inventoryManager.openPlayerInventory();
-          inventoryManager.leftClickSlot(slot);
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          inventoryManager.leftClickSlot(offhandSlot);
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-          if (inventoryManager.cursorItem() != null) {
-            inventoryManager.leftClickSlot(slot);
-            TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-          }
-
-          inventoryManager.closeInventory();
-        } finally {
-          inventoryManager.unlockInventoryControl();
-        }
+        inventoryManager.connection().botControl().maybeRegister(() -> ControllingTask.staged(List.of(
+          new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
+          new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(slot)),
+          new ControllingTask.WaitDelayStage(() -> 50L),
+          new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(offhandSlot)),
+          new ControllingTask.WaitDelayStage(() -> 50L),
+          new ControllingTask.RunnableStage(() -> {
+            if (inventoryManager.cursorItem() != null) {
+              inventoryManager.leftClickSlot(slot);
+            }
+          }),
+          new ControllingTask.WaitDelayStage(() -> 50L),
+          new ControllingTask.RunnableStage(inventoryManager::closeInventory)
+        )));
       },
       settingsSource.getRandom(AutoTotemSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);

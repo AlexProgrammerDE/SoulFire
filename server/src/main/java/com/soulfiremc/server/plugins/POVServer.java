@@ -996,7 +996,7 @@ public class POVServer extends InternalPlugin {
 
           // The client spams too many packets when being force-moved,
           // so we'll just ignore them
-          if (botConnection.controlState().isActivelyControlling()) {
+          if (botConnection.botControl().activelyControlled()) {
             return;
           }
 

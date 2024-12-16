@@ -34,36 +34,17 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 @RequiredArgsConstructor
 public class InventoryManager {
   private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
   private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
-  private final ReentrantLock inventoryControlLock = new ReentrantLock();
   @ToString.Exclude
   private final BotConnection connection;
   private Container currentContainer;
   private int lastStateId = 0;
   private SFItemStack cursorItem;
-
-  /**
-   * The inventory has a control lock to prevent multiple threads from moving items at the same
-   * time.
-   */
-  public void lockInventoryControl() {
-    inventoryControlLock.lock();
-  }
-
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean tryInventoryControl() {
-    return inventoryControlLock.tryLock();
-  }
-
-  public void unlockInventoryControl() {
-    inventoryControlLock.unlock();
-  }
 
   public Container getContainer(int containerId) {
     return containerData.get(containerId);
@@ -91,6 +72,11 @@ public class InventoryManager {
   }
 
   public void openPlayerInventory() {
+    if (currentContainer == playerInventory()) {
+      return;
+    }
+
+    closeInventory();
     currentContainer = playerInventory();
   }
 
@@ -108,11 +94,6 @@ public class InventoryManager {
   }
 
   private void leftClickSlot(int slot) {
-    if (!inventoryControlLock.isHeldByCurrentThread()) {
-      throw new IllegalStateException(
-        "You need to lock the inventoryControlLock before calling this method!");
-    }
-
     if (currentContainer == null) {
       throw new IllegalStateException("No container is open");
     }

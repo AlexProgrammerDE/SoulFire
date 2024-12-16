@@ -25,7 +25,6 @@ import lombok.ToString;
 @Getter
 @ToString
 public class ControlState {
-  private int activelyControlling;
   private boolean forward;
   private boolean backward;
   private boolean left;
@@ -34,18 +33,6 @@ public class ControlState {
   private boolean sneaking;
   private boolean sprinting;
   private boolean flying;
-
-  public void incrementActivelyControlling() {
-    activelyControlling++;
-  }
-
-  public void decrementActivelyControlling() {
-    activelyControlling--;
-  }
-
-  public boolean isActivelyControlling() {
-    return activelyControlling > 0;
-  }
 
   public void resetWasd() {
     forward = false;

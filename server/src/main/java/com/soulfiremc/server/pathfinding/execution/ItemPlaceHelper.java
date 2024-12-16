@@ -122,40 +122,32 @@ public class ItemPlaceHelper {
 
   private static boolean placeInHand(InventoryManager inventoryManager, PlayerInventoryContainer playerInventory,
                                      ContainerSlot slot) {
-    if (!inventoryManager.tryInventoryControl()) {
-      return false;
-    }
-
     if (inventoryManager.lookingAtForeignContainer()) {
       log.warn("Cannot place item in hand while looking at a foreign container");
       return false;
     }
 
-    try {
-      if (playerInventory.isHeldItem(slot)) {
-        return true;
-      } else if (playerInventory.isHotbar(slot)) {
-        inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
-        return true;
-      } else if (playerInventory.isMainInventory(slot)) {
-        inventoryManager.openPlayerInventory();
+    if (playerInventory.isHeldItem(slot)) {
+      return true;
+    } else if (playerInventory.isHotbar(slot)) {
+      inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
+      return true;
+    } else if (playerInventory.isMainInventory(slot)) {
+      inventoryManager.openPlayerInventory();
+      inventoryManager.leftClickSlot(slot);
+      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+      inventoryManager.leftClickSlot(playerInventory.getHeldItem());
+      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
+
+      if (inventoryManager.cursorItem() != null) {
         inventoryManager.leftClickSlot(slot);
         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-        inventoryManager.leftClickSlot(playerInventory.getHeldItem());
-        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-        if (inventoryManager.cursorItem() != null) {
-          inventoryManager.leftClickSlot(slot);
-          TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-        }
-
-        inventoryManager.closeInventory();
-        return true;
-      } else {
-        throw new IllegalStateException("Unexpected container slot type");
       }
-    } finally {
-      inventoryManager.unlockInventoryControl();
+
+      inventoryManager.closeInventory();
+      return true;
+    } else {
+      throw new IllegalStateException("Unexpected container slot type");
     }
   }
 }

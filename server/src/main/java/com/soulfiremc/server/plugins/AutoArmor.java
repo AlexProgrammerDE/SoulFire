@@ -22,19 +22,20 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.ArmorType;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
 import com.soulfiremc.server.settings.property.MinMaxProperty;
-import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
@@ -96,26 +97,24 @@ public class AutoArmor extends InternalPlugin {
       }
     }
 
-    if (!inventoryManager.tryInventoryControl() || inventoryManager.lookingAtForeignContainer()) {
+    if (inventoryManager.lookingAtForeignContainer()) {
       return;
     }
 
-    try {
-      inventoryManager.openPlayerInventory();
-      inventoryManager.leftClickSlot(bestItemSlot);
-      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-      inventoryManager.leftClickSlot(equipmentSlot);
-      TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-
-      if (inventoryManager.cursorItem() != null) {
-        inventoryManager.leftClickSlot(bestItemSlot);
-        TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-      }
-
-      inventoryManager.closeInventory();
-    } finally {
-      inventoryManager.unlockInventoryControl();
-    }
+    inventoryManager.connection().botControl().maybeRegister(() -> ControllingTask.staged(List.of(
+      new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
+      new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(bestItemSlot)),
+      new ControllingTask.WaitDelayStage(() -> 50L),
+      new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(equipmentSlot)),
+      new ControllingTask.WaitDelayStage(() -> 50L),
+      new ControllingTask.RunnableStage(() -> {
+        if (inventoryManager.cursorItem() != null) {
+          inventoryManager.leftClickSlot(bestItemSlot);
+        }
+      }),
+      new ControllingTask.WaitDelayStage(() -> 50L),
+      new ControllingTask.RunnableStage(inventoryManager::closeInventory)
+    )));
   }
 
   @EventHandler

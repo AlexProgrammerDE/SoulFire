@@ -52,6 +52,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
+import java.util.function.Supplier;
 
 /**
  * This class is used to control the bot. The goal is to reduce friction for doing simple things.
@@ -64,10 +65,59 @@ public class BotControlAPI {
   @Getter
   @Setter
   private int attackCooldownTicks = 0;
+  private ControllingTask controllingTask;
 
   public void tick() {
     if (attackCooldownTicks > 0) {
       attackCooldownTicks--;
+    }
+
+    if (controllingTask != null) {
+      controllingTask.tick();
+
+      if (controllingTask.isDone()) {
+        controllingTask.stop();
+        controllingTask = null;
+      }
+    }
+  }
+
+  public boolean stopControllingTask() {
+    if (controllingTask != null) {
+      controllingTask.stop();
+      controllingTask = null;
+
+      return true;
+    }
+
+    return false;
+  }
+
+  public boolean acceptsTask() {
+    return controllingTask == null;
+  }
+
+  public boolean activelyControlled() {
+    return controllingTask != null;
+  }
+
+  public void registerControllingTask(ControllingTask task) {
+    if (controllingTask != null) {
+      controllingTask.stop();
+    }
+
+    controllingTask = task;
+  }
+
+  public void unregisterControllingTask(ControllingTask task) {
+    if (controllingTask == task) {
+      controllingTask = null;
+    }
+  }
+
+  public void maybeRegister(Supplier<ControllingTask> taskSupplier) {
+    if (acceptsTask()) {
+      registerControllingTask(taskSupplier.get());
     }
   }
 

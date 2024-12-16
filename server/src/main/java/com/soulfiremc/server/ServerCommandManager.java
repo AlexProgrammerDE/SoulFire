@@ -30,8 +30,6 @@ import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.EventUtil;
-import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
@@ -49,6 +47,7 @@ import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.ServerCommandSource;
@@ -408,37 +407,20 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                       });
                   }))))));
     dispatcher.register(
-      literal("stop-path")
+      literal("stop-task")
         .executes(
           help(
-            "Makes selected bots stop pathfinding",
+            "Makes selected bots stop their current task",
             c ->
               forEveryBot(
                 c,
                 bot -> {
-                  var changed = EventUtil.runAndCountChanged(
-                    SoulFireAPI.getEventManager(),
-                    () ->
-                      SoulFireAPI.getEventManager()
-                        .unregisterAll(
-                          BotPreTickEvent.class,
-                          (clazz, o) -> {
-                            if (PathExecutor.class.isAssignableFrom(clazz)) {
-                              ((PathExecutor) o.orElseThrow()).cancel();
-                              return true;
-                            }
-
-                            return false;
-                          }));
-
-                  bot.controlState().resetAll();
-
-                  if (changed == 0) {
-                    c.getSource().sendWarn("No pathfinding was running!");
+                  if (bot.botControl().stopControllingTask()) {
+                    c.getSource().sendInfo("Stopped current task for " + bot.accountName());
                   } else {
-                    c.getSource()
-                      .sendInfo("Stopped pathfinding for " + bot.accountName());
+                    c.getSource().sendWarn("No task was running!");
                   }
+
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -455,11 +437,11 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                 return forEveryBot(
                   c,
                   bot -> {
-                    bot.dataManager()
+                    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> bot.dataManager()
                       .localPlayer()
                       .lookAt(
                         RotationOrigin.EYES,
-                        xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos()));
+                        xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos()))));
                     return Command.SINGLE_SUCCESS;
                   });
               }))));
@@ -474,10 +456,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.controlState();
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                        var controlState = bot.controlState();
 
-                      controlState.forward(!controlState.forward());
-                      controlState.backward(false);
+                        controlState.forward(!controlState.forward());
+                        controlState.backward(false);
+                      }));
                       return Command.SINGLE_SUCCESS;
                     }))))
         .then(
@@ -489,10 +473,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.controlState();
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                        var controlState = bot.controlState();
 
-                      controlState.backward(!controlState.backward());
-                      controlState.forward(false);
+                        controlState.backward(!controlState.backward());
+                        controlState.forward(false);
+                      }));
                       return Command.SINGLE_SUCCESS;
                     }))))
         .then(
@@ -504,10 +490,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.controlState();
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                        var controlState = bot.controlState();
 
-                      controlState.left(!controlState.left());
-                      controlState.right(false);
+                        controlState.left(!controlState.left());
+                        controlState.right(false);
+                      }));
                       return Command.SINGLE_SUCCESS;
                     }))))
         .then(
@@ -519,10 +507,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   forEveryBot(
                     c,
                     bot -> {
-                      var controlState = bot.controlState();
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                        var controlState = bot.controlState();
 
-                      controlState.right(!controlState.right());
-                      controlState.left(false);
+                        controlState.right(!controlState.right());
+                        controlState.left(false);
+                      }));
                       return Command.SINGLE_SUCCESS;
                     })))));
     dispatcher.register(
@@ -534,9 +524,11 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryBot(
                 c,
                 bot -> {
-                  var controlState = bot.controlState();
+                  bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                    var controlState = bot.controlState();
 
-                  controlState.jumping(!controlState.jumping());
+                    controlState.jumping(!controlState.jumping());
+                  }));
                   return Command.SINGLE_SUCCESS;
                 }))));
     dispatcher.register(
@@ -548,7 +540,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryBot(
                 c,
                 bot -> {
-                  bot.botControl().toggleSneak();
+                  bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+                    bot.botControl().toggleSneak()));
                   return Command.SINGLE_SUCCESS;
                 }))));
     dispatcher.register(
@@ -560,7 +553,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               forEveryBot(
                 c,
                 bot -> {
-                  bot.controlState().resetAll();
+                  bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+                    bot.controlState().resetAll()));
                   return Command.SINGLE_SUCCESS;
                 }))));
 
@@ -580,7 +574,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                     return forEveryBot(
                       c,
                       bot -> {
-                        bot.botActionManager().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().localPlayer().pos()).toInt(), face);
+                        bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+                          bot.botActionManager().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().localPlayer().pos()).toInt(), face)));
                         return Command.SINGLE_SUCCESS;
                       });
                   })))));

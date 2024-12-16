@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
-import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -27,6 +25,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
@@ -37,10 +36,9 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Slf4j
-public class PathExecutor implements Consumer<BotPreTickEvent> {
+public class PathExecutor implements ControllingTask {
   private static final int MAX_ERROR_DISTANCE = 20;
   private final Queue<WorldAction> worldActionQueue = new LinkedBlockingQueue<>();
   private final BotConnection connection;
@@ -49,7 +47,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   private int totalMovements;
   private int ticks = 0;
   private int movementNumber = 1;
-  private boolean registered = false;
 
   public PathExecutor(
     BotConnection connection,
@@ -109,7 +106,6 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
 
   public void submitForPathCalculation(boolean isInitial) {
     unregister();
-    connection.controlState().resetAll();
 
     connection.scheduler().schedule(() -> {
       try {
@@ -157,14 +153,10 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
   }
 
   @Override
-  public void accept(BotPreTickEvent event) {
-    var connection = event.connection();
-    if (connection != this.connection) {
-      return;
-    }
-
+  public void tick() {
     // This method should not be called if the path is cancelled
-    if (!registered || isDone()) {
+    if (isDone()) {
+      unregister();
       return;
     }
 
@@ -233,36 +225,26 @@ public class PathExecutor implements Consumer<BotPreTickEvent> {
     worldAction.tick(connection);
   }
 
-  public synchronized void register() {
-    if (isDone()) {
-      return;
-    }
-
-    if (registered) {
-      return;
-    }
-
-    registered = true;
-    connection.controlState().incrementActivelyControlling();
-    SoulFireAPI.registerListener(BotPreTickEvent.class, this);
-  }
-
-  public synchronized void unregister() {
-    if (!registered) {
-      return;
-    }
-
-    registered = false;
-    connection.controlState().decrementActivelyControlling();
-    SoulFireAPI.unregisterListener(BotPreTickEvent.class, this);
-  }
-
-  public void cancel() {
+  @Override
+  public void stop() {
     if (!isDone()) {
       pathCompletionFuture.cancel(true);
     }
 
     unregister();
+  }
+
+  public synchronized void register() {
+    if (isDone()) {
+      return;
+    }
+
+    connection.botControl().registerControllingTask(this);
+  }
+
+  public synchronized void unregister() {
+    connection.botControl().unregisterControllingTask(this);
+    connection.controlState().resetAll();
   }
 
   public void recalculatePath() {
