@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -253,12 +254,7 @@ public final class BotConnection {
     session.send(packet);
   }
 
-  public PlayerListEntry getEntityProfile(UUID uuid) {
-    var profile = dataManager.playerListState().entries().get(uuid);
-    if (profile == null) {
-      throw new IllegalStateException("Profile not found for " + uuid);
-    }
-
-    return profile;
+  public Optional<PlayerListEntry> getEntityProfile(UUID uuid) {
+    return Optional.ofNullable(dataManager.playerListState().entries().get(uuid));
   }
 }

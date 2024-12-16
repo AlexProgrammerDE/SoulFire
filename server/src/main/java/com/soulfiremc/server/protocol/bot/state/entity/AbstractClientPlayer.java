@@ -48,7 +48,7 @@ public abstract class AbstractClientPlayer extends Player {
 
   private PlayerListEntry getPlayerListEntry() {
     if (playerListEntry == null) {
-      playerListEntry = connection.getEntityProfile(uuid);
+      playerListEntry = connection.getEntityProfile(uuid).orElseThrow();
     }
 
     return playerListEntry;

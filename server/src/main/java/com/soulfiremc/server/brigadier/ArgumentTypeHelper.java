@@ -21,10 +21,10 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.UUIDHelper;
+
+import java.util.OptionalInt;
 
 public class ArgumentTypeHelper {
   private ArgumentTypeHelper() {
@@ -55,36 +55,27 @@ public class ArgumentTypeHelper {
   public record DoubleAxisData(boolean relative, double value) {
   }
 
-  public static int parseEntityId(BotConnection bot, String input) {
+  public static OptionalInt parseEntityId(BotConnection bot, String input) {
     var dataManager = bot.dataManager();
 
     var parsedUniqueId = UUIDHelper.tryParseUniqueId(input);
-    var entityId = -1;
     for (var entity : dataManager.entityTrackerState().getEntities()) {
-      if (entity.entityType() != EntityType.PLAYER) {
+      if (parsedUniqueId.isPresent() && entity.uuid().equals(parsedUniqueId.get())) {
+        return OptionalInt.of(entity.entityId());
+      }
+
+      var entityProfile = bot.getEntityProfile(entity.uuid());
+      if (entityProfile.isEmpty()) {
         continue;
       }
 
-      var connectedUsers = dataManager.playerListState();
-      var entry = connectedUsers.entries().get(entity.uuid());
-      if (entry != null
-        && ((parsedUniqueId.isPresent() && entry.getProfileId().equals(parsedUniqueId.get()))
-        || (entry.getProfile() != null && entry.getProfile().getName().equalsIgnoreCase(input)))
-      ) {
-        entityId = entity.entityId();
-        break;
+      var profile = entityProfile.get();
+      var gameProfile = profile.getProfile();
+      if (gameProfile != null && gameProfile.getName().equals(input)) {
+        return OptionalInt.of(entity.entityId());
       }
     }
 
-    if (entityId == -1) {
-      var parsedEntityId = SFHelpers.parseInt(input);
-      if (parsedEntityId.isEmpty()) {
-        return -1;
-      }
-
-      entityId = parsedEntityId.getAsInt();
-    }
-
-    return entityId;
+    return OptionalInt.empty();
   }
 }

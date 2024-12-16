@@ -25,7 +25,6 @@ import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SectionUtils;
 import com.soulfiremc.server.util.VectorHelper;
@@ -56,7 +55,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,21 +165,6 @@ public class Entity {
     uuid(packet.getUuid());
   }
 
-  public EntityMovement toMovement() {
-    return new EntityMovement(pos, deltaMovement, yRot, xRot);
-  }
-
-  public void setFrom(EntityMovement packetMovement, List<PositionElement> relatives) {
-    var entityMovement = EntityMovement.toAbsolute(toMovement(), packetMovement, relatives);
-    setPos(entityMovement.pos());
-    setDeltaMovement(entityMovement.deltaMovement());
-    setRot(entityMovement.yRot(), entityMovement.xRot());
-
-    var oldMovement = new EntityMovement(oldPosition(), Vector3d.ZERO, yRotO, xRotO);
-    var absoluteOldMovement = EntityMovement.toAbsolute(oldMovement, packetMovement, relatives);
-    setOldPosAndRot(absoluteOldMovement.pos(), absoluteOldMovement.yRot(), absoluteOldMovement.xRot());
-  }
-
   public void syncPacketPositionCodec(double x, double y, double z) {
     this.packetPositionCodec.base(Vector3d.from(x, y, z));
   }
@@ -198,6 +181,10 @@ public class Entity {
     this.reapplyPosition();
   }
 
+  public Vector3d getKnownMovement() {
+    return this.getDeltaMovement();
+  }
+
   public double x() {
     return pos.getX();
   }
@@ -208,6 +195,26 @@ public class Entity {
 
   public double z() {
     return pos.getZ();
+  }
+
+  public double lerpTargetX() {
+    return this.x();
+  }
+
+  public double lerpTargetY() {
+    return this.y();
+  }
+
+  public double lerpTargetZ() {
+    return this.z();
+  }
+
+  public float lerpTargetXRot() {
+    return this.xRot();
+  }
+
+  public float lerpTargetYRot() {
+    return this.yRot();
   }
 
   public EntityDimensions getDimensions(Pose pose) {

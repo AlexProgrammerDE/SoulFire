@@ -30,7 +30,7 @@ import java.util.UUID;
 public class EntityFactory {
   public static Entity createEntity(BotConnection connection, EntityType entityType, Level level, UUID uuid) {
     if (entityType.playerEntity()) {
-      return new RemotePlayer(connection, level, connection.getEntityProfile(uuid).getProfile());
+      return new RemotePlayer(connection, level, connection.getEntityProfile(uuid).orElseThrow().getProfile());
     } else if (entityType.livingEntity()) {
       // TODO: Implement entity inventories
       return new LivingEntity(entityType, level) {

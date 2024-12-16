@@ -33,10 +33,7 @@ import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.state.*;
-import com.soulfiremc.server.protocol.bot.state.entity.EntityFactory;
-import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
-import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
-import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
+import com.soulfiremc.server.protocol.bot.state.entity.*;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
@@ -70,6 +67,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.LimitedCraftingValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RespawnScreenValue;
@@ -150,6 +148,24 @@ public final class SessionDataManager {
     this.log = connection.logger();
     this.codecHelper = connection.session().getCodecHelper();
     this.connection = connection;
+  }
+
+  private static void setValuesFromPositionPacket(EntityMovement newMovement, List<PositionElement> set, Entity entity, boolean canLerp) {
+    var lv = EntityMovement.ofEntityUsingLerpTarget(entity);
+    var absolutePos = EntityMovement.calculateAbsolute(lv, newMovement, set);
+    var teleport = lv.pos().distanceSquared(absolutePos.pos()) > 4096.0;
+    if (canLerp && !teleport) {
+      entity.lerpTo(absolutePos.pos().getX(), absolutePos.pos().getY(), absolutePos.pos().getZ(), absolutePos.yRot(), absolutePos.xRot(), 3);
+      entity.setDeltaMovement(absolutePos.deltaMovement());
+    } else {
+      entity.setPos(absolutePos.pos());
+      entity.setDeltaMovement(absolutePos.deltaMovement());
+      entity.setYRot(absolutePos.yRot());
+      entity.setXRot(absolutePos.xRot());
+      var oldPos = new EntityMovement(entity.oldPosition(), Vector3d.ZERO, entity.yRotO, entity.xRotO);
+      var movedOldPos = EntityMovement.calculateAbsolute(oldPos, newMovement, set);
+      entity.setOldPosAndRot(movedOldPos.pos(), movedOldPos.yRot(), movedOldPos.xRot());
+    }
   }
 
   private static String toPlainText(Component component) {
@@ -364,12 +380,12 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPosition(ClientboundPlayerPositionPacket packet) {
-    localPlayer.setFrom(new EntityMovement(
+    setValuesFromPositionPacket(new EntityMovement(
       packet.getPosition(),
       packet.getDeltaMovement(),
       packet.getYRot(),
       packet.getXRot()
-    ), packet.getRelatives());
+    ), packet.getRelatives(), localPlayer, false);
 
     var position = localPlayer.blockPos();
     if (!joinedWorld) {
@@ -1092,12 +1108,16 @@ public final class SessionDataManager {
       return;
     }
 
-    state.setFrom(new EntityMovement(
+    var horizontalAbsolute = packet.getRelatives().contains(PositionElement.X)
+      || packet.getRelatives().contains(PositionElement.Y)
+      || packet.getRelatives().contains(PositionElement.Z);
+    var canLerp = !state.isControlledByLocalInstance() || horizontalAbsolute;
+    setValuesFromPositionPacket(new EntityMovement(
       packet.getPosition(),
       packet.getDeltaMovement(),
       packet.getYRot(),
       packet.getXRot()
-    ), packet.getRelatives());
+    ), packet.getRelatives(), state, canLerp);
     state.setOnGround(packet.isOnGround());
   }
 

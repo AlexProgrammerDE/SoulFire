@@ -191,6 +191,31 @@ public abstract class LivingEntity extends Entity {
     this.lerpSteps = steps;
   }
 
+  @Override
+  public double lerpTargetX() {
+    return this.lerpSteps > 0 ? this.lerpX : this.x();
+  }
+
+  @Override
+  public double lerpTargetY() {
+    return this.lerpSteps > 0 ? this.lerpY : this.y();
+  }
+
+  @Override
+  public double lerpTargetZ() {
+    return this.lerpSteps > 0 ? this.lerpZ : this.z();
+  }
+
+  @Override
+  public float lerpTargetXRot() {
+    return this.lerpSteps > 0 ? (float) this.lerpXRot : this.xRot();
+  }
+
+  @Override
+  public float lerpTargetYRot() {
+    return this.lerpSteps > 0 ? (float) this.lerpYRot : this.yRot();
+  }
+
   public void aiStep() {
     if (this.noJumpDelay > 0) {
       this.noJumpDelay--;

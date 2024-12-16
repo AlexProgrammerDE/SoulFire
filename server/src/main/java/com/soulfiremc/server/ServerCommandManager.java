@@ -221,12 +221,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   c,
                   bot -> {
                     var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                    if (entityId == -1) {
+                    if (entityId.isEmpty()) {
                       c.getSource().sendWarn("Invalid entity specified!");
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId);
+                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
                     if (entity == null) {
                       c.getSource().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
@@ -345,13 +345,13 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                     c,
                     bot -> {
                       var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                      if (entityId == -1) {
+                      if (entityId.isEmpty()) {
                         c.getSource().sendWarn("Invalid entity specified!");
                         return Command.SINGLE_SUCCESS;
                       }
 
                       bot.scheduler().schedule(() -> new FollowEntityController(
-                        entityId,
+                        entityId.getAsInt(),
                         maxRadius
                       ).start(bot));
 
@@ -406,6 +406,58 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                         return Command.SINGLE_SUCCESS;
                       });
                   }))))));
+    dispatcher.register(
+      literal("mimic")
+        .then(argument("entity", StringArgumentType.string())
+          .executes(
+            help(
+              "Makes selected bots mimic the movement of other entities",
+              c -> {
+                var entityName = StringArgumentType.getString(c, "entity");
+
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
+                    if (entityId.isEmpty()) {
+                      c.getSource().sendWarn("Invalid entity specified!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
+                    if (entity == null) {
+                      c.getSource().sendWarn("Entity not found!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    var offset = entity.pos().sub(bot.dataManager().localPlayer().pos());
+                    bot.botControl().registerControllingTask(new ControllingTask() {
+                      @Override
+                      public void tick() {
+                        bot.controlState().resetAll();
+
+                        var localPlayer = bot.dataManager().localPlayer();
+                        localPlayer.setYRot(entity.yRot());
+                        localPlayer.setXRot(entity.xRot());
+
+                        localPlayer.setPos(entity.pos().sub(offset));
+                        localPlayer.setDeltaMovement(entity.deltaMovement());
+                      }
+
+                      @Override
+                      public void stop() {
+                        bot.controlState().resetAll();
+                      }
+
+                      @Override
+                      public boolean isDone() {
+                        return false;
+                      }
+                    });
+
+                    return Command.SINGLE_SUCCESS;
+                  });
+              }))));
     dispatcher.register(
       literal("stop-task")
         .executes(
@@ -734,12 +786,12 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   c,
                   bot -> {
                     var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                    if (entityId == -1) {
+                    if (entityId.isEmpty()) {
                       c.getSource().sendWarn("Invalid entity specified!");
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId);
+                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
                     if (entity == null) {
                       c.getSource().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;

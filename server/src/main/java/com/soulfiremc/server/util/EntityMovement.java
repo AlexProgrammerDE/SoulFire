@@ -17,13 +17,22 @@
  */
 package com.soulfiremc.server.util;
 
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 
 import java.util.List;
 
 public record EntityMovement(Vector3d pos, Vector3d deltaMovement, float yRot, float xRot) {
-  public static EntityMovement toAbsolute(EntityMovement current, EntityMovement packet, List<PositionElement> relative) {
+  public static EntityMovement of(Entity arg) {
+    return new EntityMovement(arg.pos(), arg.getKnownMovement(), arg.yRot(), arg.xRot());
+  }
+
+  public static EntityMovement ofEntityUsingLerpTarget(Entity entity) {
+    return new EntityMovement(Vector3d.from(entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ()), entity.getKnownMovement(), entity.yRot(), entity.xRot());
+  }
+
+  public static EntityMovement calculateAbsolute(EntityMovement current, EntityMovement packet, List<PositionElement> relative) {
     var x = relative.contains(PositionElement.X) ? current.pos().getX() + packet.pos().getX() : packet.pos().getX();
     var y = relative.contains(PositionElement.Y) ? current.pos().getY() + packet.pos().getY() : packet.pos().getY();
     var z = relative.contains(PositionElement.Z) ? current.pos().getZ() + packet.pos().getZ() : packet.pos().getZ();
