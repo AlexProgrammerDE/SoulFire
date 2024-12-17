@@ -36,7 +36,6 @@ public enum MovementDirection {
   public static final MovementDirection[] VALUES = values();
 
   private final SFVec3i offsetVector;
-  private int diagonalArrayIndex;
 
   public SFVec3i offset(SFVec3i vector) {
     return vector.add(offsetVector);

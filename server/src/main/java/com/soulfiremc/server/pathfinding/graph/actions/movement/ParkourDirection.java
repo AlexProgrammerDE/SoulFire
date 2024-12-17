@@ -32,7 +32,6 @@ public enum ParkourDirection {
   public static final ParkourDirection[] VALUES = values();
   private final SFVec3i offsetVector;
 
-  @SuppressWarnings("DuplicatedCode")
   public SFVec3i offset(SFVec3i vector) {
     return vector.add(offsetVector);
   }

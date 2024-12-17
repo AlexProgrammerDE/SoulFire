@@ -36,7 +36,6 @@ public enum SkyDirection {
   private final Direction direction;
   private final BlockFace blockFace;
 
-  @SuppressWarnings("DuplicatedCode")
   public SFVec3i offset(SFVec3i vector) {
     return vector.add(offsetVector);
   }
