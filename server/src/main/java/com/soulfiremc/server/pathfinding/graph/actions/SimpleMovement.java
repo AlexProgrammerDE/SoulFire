@@ -205,14 +205,15 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return;
     }
 
+    var diagonalDirection = direction.toDiagonalDirection();
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
-      var corner = modifier.offsetIfJump(direction.toDiagonalDirection().side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
+      var corner = modifier.offsetIfJump(diagonalDirection.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
         blockSubscribers.subscribe(bodyOffset.offset(corner), new MovementDiagonalCollisionSubscription(
           side,
-          direction.diagonalArrayIndex(),
+          diagonalDirection.ordinal(),
           bodyOffset
         ));
       }
