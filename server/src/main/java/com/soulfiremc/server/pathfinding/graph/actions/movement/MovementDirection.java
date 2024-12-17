@@ -18,55 +18,28 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
 public enum MovementDirection {
-  NORTH,
-  SOUTH,
-  EAST,
-  WEST,
-  NORTH_EAST,
-  NORTH_WEST,
-  SOUTH_EAST,
-  SOUTH_WEST;
+  NORTH(new SFVec3i(0, 0, -1)),
+  SOUTH(new SFVec3i(0, 0, 1)),
+  EAST(new SFVec3i(1, 0, 0)),
+  WEST(new SFVec3i(-1, 0, 0)),
+  NORTH_EAST(new SFVec3i(1, 0, -1)),
+  NORTH_WEST(new SFVec3i(-1, 0, -1)),
+  SOUTH_EAST(new SFVec3i(1, 0, 1)),
+  SOUTH_WEST(new SFVec3i(-1, 0, 1));
 
   public static final MovementDirection[] VALUES = values();
-  public static final MovementDirection[] DIAGONALS = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
+  private final SFVec3i offsetVector;
   private int diagonalArrayIndex;
 
-  static {
-    for (var direction : VALUES) {
-      direction.diagonalArrayIndex = List.of(DIAGONALS).indexOf(direction);
-    }
-  }
-
-  public SkyDirection side(MovementSide side) {
-    return switch (this) {
-      case NORTH_EAST -> switch (side) {
-        case LEFT -> SkyDirection.NORTH;
-        case RIGHT -> SkyDirection.EAST;
-      };
-      case NORTH_WEST -> switch (side) {
-        case LEFT -> SkyDirection.NORTH;
-        case RIGHT -> SkyDirection.WEST;
-      };
-      case SOUTH_EAST -> switch (side) {
-        case LEFT -> SkyDirection.SOUTH;
-        case RIGHT -> SkyDirection.EAST;
-      };
-      case SOUTH_WEST -> switch (side) {
-        case LEFT -> SkyDirection.SOUTH;
-        case RIGHT -> SkyDirection.WEST;
-      };
-      default -> throw new IllegalStateException("Unexpected value: " + this);
-    };
+  public SFVec3i offset(SFVec3i vector) {
+    return vector.add(offsetVector);
   }
 
   public SkyDirection toSkyDirection() {
@@ -79,30 +52,17 @@ public enum MovementDirection {
     };
   }
 
-  public BlockFace toBlockFace() {
+  public DiagonalDirection toDiagonalDirection() {
     return switch (this) {
-      case NORTH -> BlockFace.NORTH;
-      case SOUTH -> BlockFace.SOUTH;
-      case EAST -> BlockFace.EAST;
-      case WEST -> BlockFace.WEST;
+      case NORTH_EAST -> DiagonalDirection.NORTH_EAST;
+      case NORTH_WEST -> DiagonalDirection.NORTH_WEST;
+      case SOUTH_EAST -> DiagonalDirection.SOUTH_EAST;
+      case SOUTH_WEST -> DiagonalDirection.SOUTH_WEST;
       default -> throw new IllegalStateException("Unexpected value: " + this);
     };
   }
 
-  public SFVec3i offset(SFVec3i vector) {
-    return switch (this) {
-      case NORTH -> vector.add(0, 0, -1);
-      case SOUTH -> vector.add(0, 0, 1);
-      case EAST -> vector.add(1, 0, 0);
-      case WEST -> vector.add(-1, 0, 0);
-      case NORTH_EAST -> vector.add(1, 0, -1);
-      case NORTH_WEST -> vector.add(-1, 0, -1);
-      case SOUTH_EAST -> vector.add(1, 0, 1);
-      case SOUTH_WEST -> vector.add(-1, 0, 1);
-    };
-  }
-
   public boolean isDiagonal() {
-    return diagonalArrayIndex != -1;
+    return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
   }
 }

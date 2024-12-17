@@ -18,35 +18,31 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
 
 @Getter
 @RequiredArgsConstructor
-public enum SkyDirection {
-  NORTH(new SFVec3i(0, 0, -1), Direction.NORTH, BlockFace.NORTH),
-  SOUTH(new SFVec3i(0, 0, 1), Direction.SOUTH, BlockFace.SOUTH),
-  EAST(new SFVec3i(1, 0, 0), Direction.EAST, BlockFace.EAST),
-  WEST(new SFVec3i(-1, 0, 0), Direction.WEST, BlockFace.WEST);
+public enum DiagonalDirection {
+  NORTH_EAST(new SFVec3i(1, 0, -1), SkyDirection.NORTH, SkyDirection.EAST),
+  NORTH_WEST(new SFVec3i(-1, 0, -1), SkyDirection.NORTH, SkyDirection.WEST),
+  SOUTH_EAST(new SFVec3i(1, 0, 1), SkyDirection.SOUTH, SkyDirection.EAST),
+  SOUTH_WEST(new SFVec3i(-1, 0, 1), SkyDirection.SOUTH, SkyDirection.WEST);
 
-  public static final SkyDirection[] VALUES = values();
+  public static final DiagonalDirection[] VALUES = values();
   private final SFVec3i offsetVector;
-  private final Direction direction;
-  private final BlockFace blockFace;
+  private final SkyDirection leftSide;
+  private final SkyDirection rightSide;
 
-  @SuppressWarnings("DuplicatedCode")
   public SFVec3i offset(SFVec3i vector) {
     return vector.add(offsetVector);
   }
 
-  public SkyDirection opposite() {
-    return switch (this) {
-      case NORTH -> SOUTH;
-      case SOUTH -> NORTH;
-      case EAST -> WEST;
-      case WEST -> EAST;
-    };
+  public SkyDirection side(MovementSide side) {
+    if (side == MovementSide.LEFT) {
+      return leftSide;
+    } else {
+      return rightSide;
+    }
   }
 }

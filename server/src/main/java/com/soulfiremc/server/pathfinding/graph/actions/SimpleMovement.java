@@ -139,7 +139,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       if (diagonal) {
         blockBreakSideHint = null; // We don't mine blocks in diagonals
       } else {
-        blockBreakSideHint = direction.toBlockFace();
+        blockBreakSideHint = direction.toSkyDirection().blockFace();
       }
 
       var blockIndex = blockIndexCounter++;
@@ -207,7 +207,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
-      var corner = modifier.offsetIfJump(direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
+      var corner = modifier.offsetIfJump(direction.toDiagonalDirection().side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
         blockSubscribers.subscribe(bodyOffset.offset(corner), new MovementDiagonalCollisionSubscription(
@@ -236,7 +236,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         blockSubscribers.subscribe(floorBlock.sub(0, 1, 0), new MovementAgainstPlaceSolidSubscription(BlockFace.TOP));
 
         for (var skyDirection : SkyDirection.VALUES) {
-          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().blockFace()));
         }
       }
       case JUMP_UP_BLOCK, FALL_1 -> { // 4 - no scaffolding
@@ -248,7 +248,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             continue;
           }
 
-          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().blockFace()));
         }
       }
       default -> throw new IllegalStateException("Unexpected value: " + modifier);

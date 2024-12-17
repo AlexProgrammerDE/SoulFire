@@ -20,7 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementDirection;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.DiagonalDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
@@ -31,9 +31,9 @@ public class DiagonalCollisionCalculator {
   private static final Vector3d START_POSITION = Vector3d.from(0.5, 0, 0.5);
   private static final Vector3d[] STEPS = new Vector3d[]{Vector3d.from(0.25, 0, 0.25), Vector3d.from(0.5, 0, 0.5), Vector3d.from(0.75, 0, 0.75)};
   private static final IDMap<BlockState, boolean[][][]> COLLISIONS = new IDMap<>(GlobalBlockPalette.INSTANCE.getBlockStates(), blockState -> {
-    var diagonalsArray = new boolean[MovementDirection.DIAGONALS.length][][];
+    var diagonalsArray = new boolean[DiagonalDirection.VALUES.length][][];
 
-    for (var diagonal : MovementDirection.DIAGONALS) {
+    for (var diagonal : DiagonalDirection.VALUES) {
       var baseOffset = diagonal.offset(SFVec3i.ZERO);
 
       var bodyPartArray = new boolean[BodyPart.VALUES.length][];
@@ -60,7 +60,7 @@ public class DiagonalCollisionCalculator {
         bodyPartArray[bodyPart.ordinal()] = sideArray;
       }
 
-      diagonalsArray[diagonal.diagonalArrayIndex()] = bodyPartArray;
+      diagonalsArray[diagonal.ordinal()] = bodyPartArray;
     }
 
     return diagonalsArray;

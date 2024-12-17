@@ -22,15 +22,20 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum BodyPart {
-  HEAD,
-  FEET;
+  HEAD {
+    @Override
+    public SFVec3i offset(SFVec3i position)  {
+      return position.add(0, 1, 0);
+    }
+  },
+  FEET {
+    @Override
+    public SFVec3i offset(SFVec3i position) {
+      return position;
+    }
+  };
 
   public static final BodyPart[] VALUES = values();
 
-  public SFVec3i offset(SFVec3i position) {
-    return switch (this) {
-      case HEAD -> position.add(0, 1, 0);
-      case FEET -> position;
-    };
-  }
+  public abstract SFVec3i offset(SFVec3i position);
 }

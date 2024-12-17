@@ -18,31 +18,22 @@
 package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum ParkourDirection {
-  NORTH,
-  SOUTH,
-  EAST,
-  WEST;
+  NORTH(new SFVec3i(0, 0, -1)),
+  SOUTH(new SFVec3i(0, 0, 1)),
+  EAST(new SFVec3i(1, 0, 0)),
+  WEST(new SFVec3i(-1, 0, 0));
 
   public static final ParkourDirection[] VALUES = values();
+  private final SFVec3i offsetVector;
 
   @SuppressWarnings("DuplicatedCode")
   public SFVec3i offset(SFVec3i vector) {
-    return switch (this) {
-      case NORTH -> vector.add(0, 0, -1);
-      case SOUTH -> vector.add(0, 0, 1);
-      case EAST -> vector.add(1, 0, 0);
-      case WEST -> vector.add(-1, 0, 0);
-    };
-  }
-
-  public SkyDirection toSkyDirection() {
-    return switch (this) {
-      case NORTH -> SkyDirection.NORTH;
-      case SOUTH -> SkyDirection.SOUTH;
-      case EAST -> SkyDirection.EAST;
-      case WEST -> SkyDirection.WEST;
-    };
+    return vector.add(offsetVector);
   }
 }
