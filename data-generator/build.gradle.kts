@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
   implementation("org.vineflower:vineflower:1.10.1")
-  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.26.2")
+  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.26.3")
 }
 
 unimined.minecraft {
