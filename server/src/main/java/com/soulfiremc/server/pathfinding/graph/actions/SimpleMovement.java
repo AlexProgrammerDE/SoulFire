@@ -124,11 +124,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       if (allowBlockActions) {
         blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
-          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FALLING_AND_FLUIDS));
 
         for (var skyDirection : SkyDirection.VALUES) {
           blockSubscribers.subscribe(skyDirection.offset(aboveHead),
-            new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+            new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FLUIDS));
         }
       }
     }
@@ -154,12 +154,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       if (allowBlockActions) {
         if (bodyOffset == BodyPart.HEAD) {
           blockSubscribers.subscribe(block.add(0, 1, 0),
-            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyType.FALLING_AND_FLUIDS));
         }
 
         for (var skyDirection : SkyDirection.VALUES) {
           blockSubscribers.subscribe(skyDirection.offset(block),
-            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyType.FLUIDS));
         }
       }
     }
@@ -177,7 +177,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         if (allowBlockActions) {
           for (var skyDirection : SkyDirection.VALUES) {
             blockSubscribers.subscribe(skyDirection.offset(fallFree),
-              new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+              new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyType.FLUIDS));
           }
         }
       }
@@ -371,7 +371,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements SimpleMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyType safetyType) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {

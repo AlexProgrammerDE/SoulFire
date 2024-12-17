@@ -25,7 +25,7 @@ import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
@@ -86,7 +86,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     for (var skyDirection : SkyDirection.VALUES) {
       blockSubscribers.subscribe(
         skyDirection.offset(targetToMineBlock),
-        new MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType.FLUIDS));
+        new MovementBreakSafetyCheckSubscription(BlockSafetyType.FLUIDS));
     }
   }
 
@@ -180,7 +180,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private record MovementBreakSafetyCheckSubscription(BlockSafetyData.BlockSafetyType safetyType) implements DownMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(BlockSafetyType safetyType) implements DownMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
