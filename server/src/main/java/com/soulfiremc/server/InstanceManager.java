@@ -300,7 +300,12 @@ public class InstanceManager {
             break;
           }
 
-          TimeUtil.acquireYielding(connectSemaphore);
+          try {
+            connectSemaphore.acquire();
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            break;
+          }
 
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(

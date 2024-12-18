@@ -18,9 +18,7 @@
 package com.soulfiremc.server.util;
 
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -65,40 +63,6 @@ public class TimeUtil {
         public boolean block() throws InterruptedException {
           Thread.sleep(1);
           return !condition.getAsBoolean();
-        }
-      });
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  public static void acquireYielding(Semaphore semaphore) {
-    try {
-      ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker() {
-        public boolean isReleasable() {
-          return semaphore.tryAcquire();
-        }
-
-        public boolean block() throws InterruptedException {
-          semaphore.acquire();
-          return true;
-        }
-      });
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  public static void lockYielding(Lock lock) {
-    try {
-      ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker() {
-        public boolean isReleasable() {
-          return lock.tryLock();
-        }
-
-        public boolean block() {
-          lock.lock();
-          return true;
         }
       });
     } catch (InterruptedException e) {

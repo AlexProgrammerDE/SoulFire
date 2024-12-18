@@ -23,8 +23,6 @@ import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.util.SectionUtils;
-import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.structs.NoopLock;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -49,8 +47,8 @@ public class ChunkHolder implements BlockAccessor {
 
   private ChunkHolder(ChunkHolder chunkHolder) {
     this.chunks.putAll(chunkHolder.chunks);
-    this.readLock = new NoopLock();
-    this.writeLock = new NoopLock();
+    this.readLock = null;
+    this.writeLock = null;
     this.levelHeightAccessor = chunkHolder.levelHeightAccessor;
   }
 
@@ -64,20 +62,30 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   private ChunkData getChunkFromSection(long sectionIndex) {
-    TimeUtil.lockYielding(readLock);
+    if (readLock != null) {
+      readLock.lock();
+    }
+
     try {
       return chunks.get(sectionIndex);
     } finally {
-      readLock.unlock();
+      if (readLock != null) {
+        readLock.unlock();
+      }
     }
   }
 
   public boolean isChunkSectionLoaded(int sectionX, int sectionZ) {
-    TimeUtil.lockYielding(readLock);
+    if (readLock != null) {
+      readLock.lock();
+    }
+
     try {
       return chunks.containsKey(ChunkKey.calculateKey(sectionX, sectionZ));
     } finally {
-      readLock.unlock();
+      if (readLock != null) {
+        readLock.unlock();
+      }
     }
   }
 
@@ -86,11 +94,16 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public void removeChunkSection(int sectionX, int sectionZ) {
-    TimeUtil.lockYielding(writeLock);
+    if (writeLock != null) {
+      writeLock.lock();
+    }
+
     try {
       chunks.remove(ChunkKey.calculateKey(sectionX, sectionZ));
     } finally {
-      writeLock.unlock();
+      if (writeLock != null) {
+        writeLock.unlock();
+      }
     }
   }
 
@@ -112,12 +125,17 @@ public class ChunkHolder implements BlockAccessor {
   }
 
   public ChunkData getOrCreateChunkSection(int sectionX, int sectionZ) {
-    TimeUtil.lockYielding(writeLock);
+    if (writeLock != null) {
+      writeLock.lock();
+    }
+
     try {
       return chunks.computeIfAbsent(
         ChunkKey.calculateKey(sectionX, sectionZ), (key) -> new ChunkData(levelHeightAccessor));
     } finally {
-      writeLock.unlock();
+      if (writeLock != null) {
+        writeLock.unlock();
+      }
     }
   }
 
