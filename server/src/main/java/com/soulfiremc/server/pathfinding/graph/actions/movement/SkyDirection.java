@@ -26,22 +26,18 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
 @Getter
 @RequiredArgsConstructor
 public enum SkyDirection {
-  NORTH(Direction.NORTH),
-  SOUTH(Direction.SOUTH),
-  EAST(Direction.EAST),
-  WEST(Direction.WEST);
+  NORTH(new SFVec3i(0, 0, -1), Direction.NORTH, BlockFace.NORTH),
+  SOUTH(new SFVec3i(0, 0, 1), Direction.SOUTH, BlockFace.SOUTH),
+  EAST(new SFVec3i(1, 0, 0), Direction.EAST, BlockFace.EAST),
+  WEST(new SFVec3i(-1, 0, 0), Direction.WEST, BlockFace.WEST);
 
   public static final SkyDirection[] VALUES = values();
+  private final SFVec3i offsetVector;
   private final Direction direction;
+  private final BlockFace blockFace;
 
-  @SuppressWarnings("DuplicatedCode")
   public SFVec3i offset(SFVec3i vector) {
-    return switch (this) {
-      case NORTH -> vector.add(0, 0, -1);
-      case SOUTH -> vector.add(0, 0, 1);
-      case EAST -> vector.add(1, 0, 0);
-      case WEST -> vector.add(-1, 0, 0);
-    };
+    return vector.add(offsetVector);
   }
 
   public SkyDirection opposite() {
@@ -50,33 +46,6 @@ public enum SkyDirection {
       case SOUTH -> NORTH;
       case EAST -> WEST;
       case WEST -> EAST;
-    };
-  }
-
-  public SkyDirection leftSide() {
-    return switch (this) {
-      case NORTH -> WEST;
-      case SOUTH -> EAST;
-      case EAST -> NORTH;
-      case WEST -> SOUTH;
-    };
-  }
-
-  public SkyDirection rightSide() {
-    return switch (this) {
-      case NORTH -> EAST;
-      case SOUTH -> WEST;
-      case EAST -> SOUTH;
-      case WEST -> NORTH;
-    };
-  }
-
-  public BlockFace toBlockFace() {
-    return switch (this) {
-      case NORTH -> BlockFace.NORTH;
-      case SOUTH -> BlockFace.SOUTH;
-      case EAST -> BlockFace.EAST;
-      case WEST -> BlockFace.WEST;
     };
   }
 }

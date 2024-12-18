@@ -27,7 +27,7 @@ import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyData;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
@@ -76,11 +76,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
       blockSubscribers.subscribe(aboveHead, new MovementFreeSubscription(aboveHeadBlockIndex, BlockFace.BOTTOM));
 
       blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
-        new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+        new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FALLING_AND_FLUIDS));
 
       for (var skyDirection : SkyDirection.VALUES) {
         blockSubscribers.subscribe(skyDirection.offset(aboveHead),
-          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FLUIDS));
       }
     }
 
@@ -208,7 +208,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements UpMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyType safetyType) implements UpMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {

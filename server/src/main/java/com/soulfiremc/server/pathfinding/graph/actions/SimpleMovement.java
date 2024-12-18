@@ -124,11 +124,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       if (allowBlockActions) {
         blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
-          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+          new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FALLING_AND_FLUIDS));
 
         for (var skyDirection : SkyDirection.VALUES) {
           blockSubscribers.subscribe(skyDirection.offset(aboveHead),
-            new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+            new MovementBreakSafetyCheckSubscription(aboveHeadBlockIndex, BlockSafetyType.FLUIDS));
         }
       }
     }
@@ -139,7 +139,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       if (diagonal) {
         blockBreakSideHint = null; // We don't mine blocks in diagonals
       } else {
-        blockBreakSideHint = direction.toBlockFace();
+        blockBreakSideHint = direction.toSkyDirection().blockFace();
       }
 
       var blockIndex = blockIndexCounter++;
@@ -154,12 +154,12 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       if (allowBlockActions) {
         if (bodyOffset == BodyPart.HEAD) {
           blockSubscribers.subscribe(block.add(0, 1, 0),
-            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FALLING_AND_FLUIDS));
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyType.FALLING_AND_FLUIDS));
         }
 
         for (var skyDirection : SkyDirection.VALUES) {
           blockSubscribers.subscribe(skyDirection.offset(block),
-            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+            new MovementBreakSafetyCheckSubscription(blockIndex, BlockSafetyType.FLUIDS));
         }
       }
     }
@@ -177,7 +177,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         if (allowBlockActions) {
           for (var skyDirection : SkyDirection.VALUES) {
             blockSubscribers.subscribe(skyDirection.offset(fallFree),
-              new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyData.BlockSafetyType.FLUIDS));
+              new MovementBreakSafetyCheckSubscription(fallOneBlockIndex, BlockSafetyType.FLUIDS));
           }
         }
       }
@@ -205,14 +205,15 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       return;
     }
 
+    var diagonalDirection = direction.toDiagonalDirection();
     for (var side : MovementSide.VALUES) {
       // If these blocks are solid, the bot moves slower because the bot is running around a corner
-      var corner = modifier.offsetIfJump(direction.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
+      var corner = modifier.offsetIfJump(diagonalDirection.side(side).offset(FEET_POSITION_RELATIVE_BLOCK));
       for (var bodyOffset : BodyPart.VALUES) {
         // Apply jump shift to target edge and offset for body part
         blockSubscribers.subscribe(bodyOffset.offset(corner), new MovementDiagonalCollisionSubscription(
           side,
-          direction.diagonalArrayIndex(),
+          diagonalDirection.ordinal(),
           bodyOffset
         ));
       }
@@ -236,7 +237,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         blockSubscribers.subscribe(floorBlock.sub(0, 1, 0), new MovementAgainstPlaceSolidSubscription(BlockFace.TOP));
 
         for (var skyDirection : SkyDirection.VALUES) {
-          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().blockFace()));
         }
       }
       case JUMP_UP_BLOCK, FALL_1 -> { // 4 - no scaffolding
@@ -248,7 +249,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
             continue;
           }
 
-          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().toBlockFace()));
+          blockSubscribers.subscribe(skyDirection.offset(floorBlock), new MovementAgainstPlaceSolidSubscription(skyDirection.opposite().blockFace()));
         }
       }
       default -> throw new IllegalStateException("Unexpected value: " + modifier);
@@ -370,7 +371,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
   }
 
-  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyData.BlockSafetyType safetyType) implements SimpleMovementSubscription {
+  private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyType safetyType) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
