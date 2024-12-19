@@ -78,7 +78,7 @@ public class BotControlAPI {
 
       if (localTask.isDone()) {
         localTask.stop();
-        this.controllingTask.set(null);
+        unregisterControllingTask(localTask);
       }
     }
   }
