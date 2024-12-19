@@ -28,7 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.test.utils.TestBlockAccessor;
+import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
@@ -69,7 +69,7 @@ public class PathfindingBenchmark {
       log.info("Parsing world data...");
 
       var maxY = 0;
-      var accessor = new TestBlockAccessor();
+      var accessor = new TestBlockAccessorBuilder();
       for (var x = 0; x < data.length; x++) {
         var xArray = data[x];
         for (var y = 0; y < xArray.length; y++) {
@@ -83,10 +83,12 @@ public class PathfindingBenchmark {
 
       log.info("Calculating world data...");
 
+      var builtAccessor = accessor.build();
+
       // Find the first safe block at 0 0
       var safeY = 0;
       for (var y = maxY; y >= 0; y--) {
-        if (accessor.getBlockState(0, y, 0).blockType() != BlockType.AIR) {
+        if (builtAccessor.getBlockState(0, y, 0).blockType() != BlockType.AIR) {
           safeY = y + 1;
           break;
         }
@@ -97,7 +99,7 @@ public class PathfindingBenchmark {
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(new TagsState(),
-        accessor,
+        builtAccessor,
         inventory,
         TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
 

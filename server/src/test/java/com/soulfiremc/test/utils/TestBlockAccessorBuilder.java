@@ -24,15 +24,15 @@ import com.soulfiremc.server.util.VectorHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
-public class TestBlockAccessor implements BlockAccessor {
+public class TestBlockAccessorBuilder {
   private final Long2ObjectMap<BlockState> blocks = new Long2ObjectOpenHashMap<>();
   private final BlockState defaultBlock;
 
-  public TestBlockAccessor() {
+  public TestBlockAccessorBuilder() {
     this(BlockState.forDefaultBlockType(BlockType.AIR));
   }
 
-  public TestBlockAccessor(BlockState defaultBlock) {
+  public TestBlockAccessorBuilder(BlockState defaultBlock) {
     this.defaultBlock = defaultBlock;
   }
 
@@ -40,8 +40,14 @@ public class TestBlockAccessor implements BlockAccessor {
     blocks.put(VectorHelper.asLong(x, y, z), BlockState.forDefaultBlockType(block));
   }
 
-  @Override
-  public BlockState getBlockState(int x, int y, int z) {
-    return blocks.getOrDefault(VectorHelper.asLong(x, y, z), defaultBlock);
+  public BlockAccessor build() {
+    return new TestBlockAccessor(blocks, defaultBlock);
+  }
+
+  private record TestBlockAccessor(Long2ObjectMap<BlockState> blocks, BlockState defaultBlock) implements BlockAccessor {
+    @Override
+    public BlockState getBlockState(int x, int y, int z) {
+      return blocks.getOrDefault(VectorHelper.asLong(x, y, z), defaultBlock);
+    }
   }
 }
