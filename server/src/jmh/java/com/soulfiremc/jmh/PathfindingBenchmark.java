@@ -111,6 +111,6 @@ public class PathfindingBenchmark {
 
   @Benchmark
   public void calculatePath() {
-    routeFinder.findRouteSync(initialState, true);
+    routeFinder.findRouteSync(initialState);
   }
 }

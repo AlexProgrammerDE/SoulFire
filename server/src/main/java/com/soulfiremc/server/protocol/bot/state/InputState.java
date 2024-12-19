@@ -18,7 +18,6 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector2d;
 
 @RequiredArgsConstructor
 public class InputState {
@@ -33,10 +32,6 @@ public class InputState {
     } else {
       return input ? 1.0F : -1.0F;
     }
-  }
-
-  public Vector2d getMoveVector() {
-    return Vector2d.from(this.leftImpulse, this.forwardImpulse);
   }
 
   public boolean hasForwardImpulse() {

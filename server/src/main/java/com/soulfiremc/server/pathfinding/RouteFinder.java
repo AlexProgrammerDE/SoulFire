@@ -77,11 +77,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   }
 
   public CompletableFuture<List<WorldAction>> findRouteFuture(NodeState from, boolean requiresRepositioning) {
-    return CompletableFuture.supplyAsync(() -> findRouteSync(from, requiresRepositioning));
+    return CompletableFuture.supplyAsync(() -> repositionIfNeeded(findRouteSync(from), from, requiresRepositioning));
   }
 
   @VisibleForTesting
-  public List<WorldAction> findRouteSync(NodeState from, boolean requiresRepositioning) {
+  public List<WorldAction> findRouteSync(NodeState from) {
     var stopwatch = Stopwatch.createStarted();
     var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Integer.getInteger("sf.pathfinding-expire", 180));
 
@@ -154,7 +154,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-        return repositionIfNeeded(reconstructPath(current), from, requiresRepositioning);
+        return reconstructPath(current);
       }
 
       try {
@@ -177,7 +177,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           throw new AlreadyClosestException();
         }
 
-        return addRecalculate(repositionIfNeeded(recalculateTrace, from, requiresRepositioning));
+        return addRecalculate(recalculateTrace);
       }
     }
 
