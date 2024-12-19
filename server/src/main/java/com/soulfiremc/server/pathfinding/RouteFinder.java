@@ -98,9 +98,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       var start =
         new MinecraftRouteNode(
           from,
-          requiresRepositioning
-            ? List.of(new MovementAction(from.blockPosition(), false))
-            : List.of(),
+          List.of(),
           0,
           startScore,
           startScore);
@@ -156,7 +154,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-        return reconstructPath(current);
+        return repositionIfNeeded(reconstructPath(current), from, requiresRepositioning);
       }
 
       try {
@@ -174,21 +172,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
         // This is the best node we found so far
         // We will add a recalculating action and return the best route
-        var recalculateTrace =
-          reconstructPath(
-            new MinecraftRouteNode(
-              bestNode.node(),
-              bestNode,
-              List.of(new RecalculatePathAction()),
-              bestNode.sourceCost(),
-              bestNode.targetCost(),
-              bestNode.totalRouteScore()));
-
-        if (recalculateTrace.size() == (requiresRepositioning ? 2 : 1)) {
+        var recalculateTrace = reconstructPath(bestNode);
+        if (recalculateTrace.isEmpty()) {
           throw new AlreadyClosestException();
         }
 
-        return recalculateTrace;
+        return addRecalculate(repositionIfNeeded(recalculateTrace, from, requiresRepositioning));
       }
     }
 
@@ -249,5 +238,24 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
         return v;
       });
+  }
+
+  private List<WorldAction> repositionIfNeeded(List<WorldAction> actions, NodeState from, boolean requiresRepositioning) {
+    if (!requiresRepositioning) {
+      return actions;
+    }
+
+    var repositionActions = new ArrayList<WorldAction>();
+    repositionActions.add(new MovementAction(from.blockPosition(), false));
+    repositionActions.addAll(actions);
+
+    return repositionActions;
+  }
+
+  private List<WorldAction> addRecalculate(List<WorldAction> actions) {
+    var repositionActions = new ArrayList<>(actions);
+    repositionActions.add(new RecalculatePathAction());
+
+    return repositionActions;
   }
 }
