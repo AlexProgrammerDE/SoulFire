@@ -74,11 +74,16 @@ public class BotControlAPI {
 
     var localTask = this.controllingTask.get();
     if (localTask != null) {
-      localTask.tick();
-
       if (localTask.isDone()) {
         localTask.stop();
         unregisterControllingTask(localTask);
+      } else {
+        localTask.tick();
+
+        if (localTask.isDone()) {
+          localTask.stop();
+          unregisterControllingTask(localTask);
+        }
       }
     }
   }
