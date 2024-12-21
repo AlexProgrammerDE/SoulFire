@@ -8,7 +8,7 @@ permissions:
 jobs:
   dependency-submission:
     if: github.repository_owner == 'AlexProgrammerDE'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
