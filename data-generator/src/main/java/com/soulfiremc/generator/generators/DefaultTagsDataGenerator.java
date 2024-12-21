@@ -24,8 +24,8 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.generator.util.MCHelper;
 import it.unimi.dsi.fastutil.ints.IntList;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.reflect.stream.RStream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagNetworkSerialization;
 
@@ -43,8 +43,6 @@ public class DefaultTagsDataGenerator implements IDataGenerator {
     return "data/default_tags.json.zip";
   }
 
-  @SuppressWarnings("unchecked")
-  @SneakyThrows
   @Override
   public byte[] generateDataJson() {
     var byteOutputStream = new ByteArrayOutputStream();
@@ -62,9 +60,7 @@ public class DefaultTagsDataGenerator implements IDataGenerator {
 
         var registryObj = new JsonObject();
 
-        var tagsField = TagNetworkSerialization.NetworkPayload.class.getDeclaredField("tags");
-        tagsField.setAccessible(true);
-        var tags = (Map<ResourceLocation, IntList>) tagsField.get(payload);
+        var tags = RStream.of(payload).fields().by("tags").<Map<ResourceLocation, IntList>>get();
         for (var tag : tags.entrySet()) {
           var tagObj = new JsonArray();
 

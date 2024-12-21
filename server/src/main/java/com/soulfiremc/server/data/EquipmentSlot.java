@@ -31,6 +31,8 @@ public enum EquipmentSlot {
   HEAD(Type.HUMANOID_ARMOR),
   BODY(Type.ANIMAL_ARMOR);
 
+  public static final EquipmentSlot[] VALUES = values();
+
   private final Type type;
 
   public static EquipmentSlot fromMCPl(org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot slot) {
@@ -43,6 +45,10 @@ public enum EquipmentSlot {
       case HELMET -> HEAD;
       case BODY -> BODY;
     };
+  }
+
+  public boolean isHumanoidArmor() {
+    return type == Type.HUMANOID_ARMOR;
   }
 
   public boolean isArmor() {

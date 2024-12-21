@@ -21,15 +21,42 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.soulfiremc.generator.mixin.BlockAccessor;
 import com.soulfiremc.generator.util.BlockSettingsAccessor;
-import lombok.SneakyThrows;
+import com.soulfiremc.generator.util.MCHelper;
+import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.reflect.stream.RStream;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.*;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+@Slf4j
 public class BlocksJsonGenerator implements IDataGenerator {
+  private static List<LootPoolEntryContainer> fromComposite(CompositeEntryBase compositeEntryBase) {
+    return RStream.of(compositeEntryBase).withSuper().fields().by("children").get();
+  }
+
+  private static void insertNested(LootPoolEntryContainer container, Set<ResourceLocation> drops) {
+    switch (container) {
+      case AlternativesEntry alternativesEntry -> {
+        for (var entry : fromComposite(alternativesEntry)) {
+          insertNested(entry, drops);
+        }
+      }
+      case DynamicLoot dynamicLoot -> log.debug("Dynamic loot entry found: {}", dynamicLoot);
+      case LootItem lootItem -> drops.add(RStream.of(lootItem).fields().by("item").<Holder<Item>>get().unwrapKey().orElseThrow().location());
+      default -> throw new IllegalStateException("Unexpected value: " + container);
+    }
+  }
+
   @SuppressWarnings("deprecation")
-  @SneakyThrows
   public static JsonObject generateBlock(Block block) {
     var blockDesc = new JsonObject();
 
@@ -71,16 +98,31 @@ public class BlocksJsonGenerator implements IDataGenerator {
       blockDesc.addProperty("blocksMotion", true);
     }
 
+    var lootTableLocation = block.getLootTable();
+    if (lootTableLocation.isPresent()) {
+      var lootTable = MCHelper.getServer().reloadableRegistries().getLootTable(lootTableLocation.get());
+      var drops = new LinkedHashSet<ResourceLocation>();
+      var pools = RStream.of(lootTable).fields().by("pools").<List<LootPool>>get();
+      for (var pool : pools) {
+        var entries = RStream.of(pool).fields().by("entries").<List<LootPoolEntryContainer>>get();
+        for (var entry : entries) {
+          insertNested(entry, drops);
+        }
+      }
+
+      var array = new JsonArray();
+      for (var entry : drops) {
+        array.add(entry.toString());
+      }
+
+      blockDesc.add("possibleDrops", array);
+    }
+
     if (defaultState.hasOffsetFunction()) {
       var offsetData = new JsonObject();
 
-      var horizontalOffsetMethod = BlockBehaviour.class.getDeclaredMethod("getMaxHorizontalOffset");
-      var verticalOffsetMethod = BlockBehaviour.class.getDeclaredMethod("getMaxVerticalOffset");
-      horizontalOffsetMethod.setAccessible(true);
-      verticalOffsetMethod.setAccessible(true);
-
-      offsetData.addProperty("maxHorizontalOffset", (float) horizontalOffsetMethod.invoke(block));
-      offsetData.addProperty("maxVerticalOffset", (float) verticalOffsetMethod.invoke(block));
+      offsetData.addProperty("maxHorizontalOffset", RStream.of(block).withSuper().methods().by("getMaxHorizontalOffset").<Float>invoke());
+      offsetData.addProperty("maxVerticalOffset", RStream.of(block).withSuper().methods().by("getMaxVerticalOffset").<Float>invoke());
 
       var blockSettings = ((BlockAccessor) block).properties();
       var offsetType = ((BlockSettingsAccessor) blockSettings).soulfire$getOffsetType();
