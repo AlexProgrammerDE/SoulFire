@@ -41,6 +41,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(GlobalPermission.values())
+      .filter(permission -> permission != GlobalPermission.UNRECOGNIZED)
       .map(permission -> GlobalPermissionState.newBuilder()
         .setGlobalPermission(permission)
         .setGranted(user.hasPermission(PermissionContext.global(permission)))

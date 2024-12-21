@@ -41,6 +41,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   private Collection<InstancePermissionState> getInstancePermissions(UUID instanceId) {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(InstancePermission.values())
+      .filter(permission -> permission != InstancePermission.UNRECOGNIZED)
       .map(permission -> InstancePermissionState.newBuilder()
         .setInstancePermission(permission)
         .setGranted(user.hasPermission(PermissionContext.instance(permission, instanceId)))
