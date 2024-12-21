@@ -19,7 +19,6 @@ package com.soulfiremc.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
@@ -397,14 +396,6 @@ public class InstanceManager {
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
     });
-  }
-
-  public InstanceListResponse.Instance toProto() {
-    return InstanceListResponse.Instance.newBuilder()
-      .setId(id.toString())
-      .setFriendlyName(friendlyName)
-      .setState(attackLifecycle.toProto())
-      .build();
   }
 
   public JsonElement toJson() {

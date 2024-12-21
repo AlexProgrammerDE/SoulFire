@@ -44,6 +44,7 @@ message InstanceListResponse {
     string id = 1;
     string friendlyName = 2;
     InstanceState state = 3;
+    repeated InstancePermissionState instancePermissions = 4;
   }
 
   repeated Instance instances = 1;

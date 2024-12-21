@@ -18,7 +18,6 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
@@ -89,7 +88,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onNext(InstanceListResponse.newBuilder()
         .addAllInstances(soulFireServer.instances().values().stream()
           .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
-          .map(InstanceManager::toProto)
+          .map(instance -> InstanceListResponse.Instance.newBuilder()
+            .setId(instance.id().toString())
+            .setFriendlyName(instance.friendlyName())
+            .setState(instance.attackLifecycle().toProto())
+            .addAllInstancePermissions(getInstancePermissions(instance.id()))
+            .build())
           .toList())
         .build());
       responseObserver.onCompleted();
