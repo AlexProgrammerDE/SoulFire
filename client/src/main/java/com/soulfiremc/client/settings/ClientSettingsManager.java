@@ -94,9 +94,8 @@ public class ClientSettingsManager {
     var settings = new HashMap<String, Map<String, JsonElement>>();
     providers.forEach((namespace, properties) -> {
       var namespaceMap = new HashMap<String, JsonElement>();
-      properties.forEach((key, provider) -> {
-        namespaceMap.put(key, provider.get());
-      });
+      properties.forEach((key, provider) ->
+        namespaceMap.put(key, provider.get()));
 
       settings.put(namespace, namespaceMap);
     });

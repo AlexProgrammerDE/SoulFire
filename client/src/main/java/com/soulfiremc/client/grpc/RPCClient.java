@@ -41,6 +41,7 @@ public class RPCClient {
   private final CommandServiceGrpc.CommandServiceStub commandStub;
   private final CommandServiceGrpc.CommandServiceBlockingStub commandStubBlocking;
   private final InstanceServiceGrpc.InstanceServiceStub instanceStub;
+  private final InstanceServiceGrpc.InstanceServiceBlockingStub instanceStubBlocking;
   private final ConfigServiceGrpc.ConfigServiceBlockingStub configStubBlocking;
   private final MCAuthServiceGrpc.MCAuthServiceBlockingStub mcAuthServiceBlocking;
   private final ProxyCheckServiceGrpc.ProxyCheckServiceBlockingStub proxyCheckServiceBlocking;
@@ -69,6 +70,7 @@ public class RPCClient {
     commandStub = clientBuilder.build(CommandServiceGrpc.CommandServiceStub.class);
     commandStubBlocking = clientBuilder.build(CommandServiceGrpc.CommandServiceBlockingStub.class);
     instanceStub = clientBuilder.build(InstanceServiceGrpc.InstanceServiceStub.class);
+    instanceStubBlocking = clientBuilder.build(InstanceServiceGrpc.InstanceServiceBlockingStub.class);
     configStubBlocking = clientBuilder.build(ConfigServiceGrpc.ConfigServiceBlockingStub.class);
     mcAuthServiceBlocking = clientBuilder.build(MCAuthServiceGrpc.MCAuthServiceBlockingStub.class);
     proxyCheckServiceBlocking =

@@ -26,7 +26,6 @@ import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.*;
-import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +46,7 @@ public class ClientCommandManager implements PlatformCommandManager<CommandSourc
   private final RPCClient rpcClient;
   private final ClientSettingsManager clientSettingsManager;
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @PostConstruct
   public void postConstruct() {
     dispatcher.register(
@@ -55,60 +55,31 @@ public class ClientCommandManager implements PlatformCommandManager<CommandSourc
           help(
             "Start a attack using the current settings",
             c -> {
-              rpcClient
-                .instanceStub()
+              var cliInstance = rpcClient.instanceStubBlocking()
+                .listInstances(InstanceListRequest.newBuilder().build())
+                .getInstancesList()
+                .stream()
+                .filter(instance -> instance.getFriendlyName().equals("cli-attack"))
+                .map(InstanceListResponse.Instance::getId)
+                .map(UUID::fromString)
+                .findFirst();
+
+              var cliInstanceId = cliInstance.orElseGet(() -> UUID.fromString(rpcClient.instanceStubBlocking()
                 .createInstance(
-                  InstanceCreateRequest.newBuilder().setFriendlyName("cli-attack").build(),
-                  new StreamObserver<>() {
-                    @Override
-                    public void onNext(InstanceCreateResponse value) {
-                      rpcClient
-                        .instanceStub().updateInstanceConfig(InstanceUpdateConfigRequest.newBuilder()
-                          .setId(value.getId())
-                          .setConfig(clientSettingsManager.exportSettingsProto(UUID.fromString(value.getId())))
-                          .build(), new StreamObserver<>() {
-                          @Override
-                          public void onNext(InstanceUpdateConfigResponse instanceUpdateResponse) {
-                            rpcClient
-                              .instanceStub().changeInstanceState(InstanceStateChangeRequest.newBuilder()
-                                .setId(value.getId())
-                                .setState(InstanceState.RUNNING)
-                                .build(), new StreamObserver<>() {
-                                @Override
-                                public void onNext(InstanceStateChangeResponse instanceStateChangeResponse) {
-                                  log.info("Attack started!");
-                                }
+                  InstanceCreateRequest.newBuilder().setFriendlyName("cli-attack").build())
+                .getId()));
 
-                                @Override
-                                public void onError(Throwable throwable) {
-                                  log.error("Error while starting attack!", throwable);
-                                }
+              rpcClient.instanceStubBlocking().updateInstanceConfig(InstanceUpdateConfigRequest.newBuilder()
+                .setId(cliInstanceId.toString())
+                .setConfig(clientSettingsManager.exportSettingsProto(cliInstanceId))
+                .build());
 
-                                @Override
-                                public void onCompleted() {
-                                }
-                              });
-                          }
+              rpcClient.instanceStubBlocking().changeInstanceState(InstanceStateChangeRequest.newBuilder()
+                .setId(cliInstanceId.toString())
+                .setState(InstanceState.RUNNING)
+                .build());
 
-                          @Override
-                          public void onError(Throwable throwable) {
-                            log.error("Error while updating instance!", throwable);
-                          }
-
-                          @Override
-                          public void onCompleted() {
-                          }
-                        });
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                      log.error("Error while creating instance!", t);
-                    }
-
-                    @Override
-                    public void onCompleted() {}
-                  });
+              log.info("Attack started");
 
               return Command.SINGLE_SUCCESS;
             })));
