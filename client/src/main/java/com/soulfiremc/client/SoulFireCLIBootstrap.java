@@ -42,6 +42,12 @@ public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
   @SuppressWarnings("unused")
   public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
+    if (args.length == 0) {
+      System.err.println("ERROR: No command line arguments provided, please run with --help to see available options (java -jar ReplaceMe.jar --help)");
+      System.exit(1);
+      return;
+    }
+
     new SoulFireCLIBootstrap().internalBootstrap(args, classLoaders);
   }
 

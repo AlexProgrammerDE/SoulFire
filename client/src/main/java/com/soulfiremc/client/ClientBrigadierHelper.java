@@ -18,13 +18,9 @@
 package com.soulfiremc.client;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.RedirectModifier;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
 import com.soulfiremc.brigadier.CommandSource;
-import com.soulfiremc.brigadier.RedirectHelpWrapper;
 
 public class ClientBrigadierHelper {
   private ClientBrigadierHelper() {}
@@ -33,21 +29,7 @@ public class ClientBrigadierHelper {
     return LiteralArgumentBuilder.literal(name);
   }
 
-  public static <T> RequiredArgumentBuilder<CommandSource, T> argument(
-    String name, ArgumentType<T> type) {
-    return RequiredArgumentBuilder.argument(name, type);
-  }
-
   public static Command<CommandSource> help(String help, Command<CommandSource> command) {
     return new CommandHelpWrapper<>(command, help, false);
-  }
-
-  public static RedirectModifier<CommandSource> helpRedirect(
-    String help, RedirectModifier<CommandSource> redirect) {
-    return new RedirectHelpWrapper<>(redirect, help, false);
-  }
-
-  public static Command<CommandSource> privateCommand(Command<CommandSource> command) {
-    return new CommandHelpWrapper<>(command, null, true);
   }
 }
