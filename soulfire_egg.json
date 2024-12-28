@@ -15,7 +15,7 @@
     "alexprogrammerde\/soulfire": "alexprogrammerde\/soulfire"
   },
   "file_denylist": [],
-  "startup": "cd /home/container && /bin/sh /soulfire/start.sh",
+  "startup": "/bin/sh /soulfire/start.sh",
   "config": {
     "files": "{}",
     "startup": "{\r\n    \"done\": \"Finished loading!\"\r\n}",
