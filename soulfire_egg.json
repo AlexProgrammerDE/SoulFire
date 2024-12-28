@@ -15,7 +15,7 @@
     "alexprogrammerde\/soulfire": "alexprogrammerde\/soulfire"
   },
   "file_denylist": [],
-  "startup": "/bin/sh /soulfire/start.sh",
+  "startup": "cd /home/container && /bin/sh /soulfire/start.sh",
   "config": {
     "files": "{}",
     "startup": "{\r\n    \"done\": \"Finished loading!\"\r\n}",
@@ -38,7 +38,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:15",
-      "sort": null,
       "field_type": "text"
     },
     {
@@ -49,7 +48,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:9999",
-      "sort": null,
       "field_type": "text"
     },
     {
@@ -60,7 +58,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:9999",
-      "sort": null,
       "field_type": "text"
     },
     {
