@@ -63,7 +63,7 @@ public class JwtServerInterceptor implements ServerInterceptor {
             Context.current()
               .withValue(
                 ServerRPCConstants.USER_CONTEXT_KEY,
-                user.orElseThrow()),
+                user.get()),
             serverCall,
             metadata,
             serverCallHandler

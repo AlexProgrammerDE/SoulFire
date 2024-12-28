@@ -33,9 +33,9 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.*;
 
-@Getter
 public class AuthSystem {
   private static final UUID ROOT_USER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+  @Getter
   private final SecretKey jwtSecretKey;
   private final Map<UUID, UserData> userDataMap = new HashMap<>();
 
@@ -76,7 +76,26 @@ public class AuthSystem {
     return Optional.ofNullable(userDataMap.get(uuid));
   }
 
-  public void setUserData(UserData userData) {
+  public List<UserData> getAllUserData() {
+    return new ArrayList<>(userDataMap.values());
+  }
+
+  public void createUserData(String name, Role role) {
+    if (userDataMap.values().stream().anyMatch(userData -> userData.name().equalsIgnoreCase(name))) {
+      throw new IllegalArgumentException("User with name " + name + " already exists");
+    }
+
+    setUserData(new UserData(
+      UUID.randomUUID(),
+      name,
+      role,
+      Instant.now(),
+      Instant.EPOCH,
+      Instant.now()
+    ));
+  }
+
+  private void setUserData(UserData userData) {
     userDataMap.put(userData.id(), userData);
   }
 
