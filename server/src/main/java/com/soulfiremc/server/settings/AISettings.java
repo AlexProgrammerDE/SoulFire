@@ -22,7 +22,10 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.ClientOptions;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.ImmutableIntProperty;
+import com.soulfiremc.server.settings.property.ImmutableStringProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,14 +74,6 @@ public class AISettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .stepValue(1)
-      .build();
-  public static final BooleanProperty VERBOSE =
-    ImmutableBooleanProperty.builder()
-      .namespace(NAMESPACE)
-      .key("verbose")
-      .uiName("Verbose")
-      .description("Enable verbose extra logging")
-      .defaultValue(false)
       .build();
 
   public static OpenAIClient create(SettingsSource source) {
