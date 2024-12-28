@@ -33,6 +33,7 @@ hs_err_pid*
 .idea/
 
 # Gradle
+.kotlin
 .gradle
 
 # Ignore Gradle GUI config
