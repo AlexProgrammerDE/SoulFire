@@ -17,40 +17,36 @@
  */
 package com.soulfiremc.server.settings;
 
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.ClientOptions;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
-import io.github.ollama4j.OllamaAPI;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Duration;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
-  public static final StringProperty API_ENDPOINT =
+  public static final StringProperty API_BASE_URL =
     ImmutableStringProperty.builder()
       .namespace(NAMESPACE)
-      .key("api-endpoint")
-      .uiName("API Endpoint")
-      .description("Ollama API server endpoint")
-      .defaultValue("http://127.0.0.1:11434")
+      .key("api-base-url")
+      .uiName("API Base URL")
+      .description("API server base URL, can also be changed to other providers")
+      .defaultValue(ClientOptions.PRODUCTION_URL)
       .build();
-  public static final StringProperty API_USERNAME =
+  public static final StringProperty API_KEY =
     ImmutableStringProperty.builder()
       .namespace(NAMESPACE)
-      .key("api-username")
-      .uiName("API Username (optional)")
-      .description("Ollama API server username (if required)")
-      .defaultValue("")
-      .build();
-  public static final StringProperty API_PASSWORD =
-    ImmutableStringProperty.builder()
-      .namespace(NAMESPACE)
-      .key("api-password")
-      .uiName("API Password (optional)")
-      .description("Ollama API server password (if required)")
+      .key("api-key")
+      .uiName("API Key")
+      .description("API key or none if using a custom provider")
       .defaultValue("")
       .secret(true)
       .build();
@@ -59,19 +55,22 @@ public class AISettings implements SettingsObject {
       .namespace(NAMESPACE)
       .key("api-request-timeout")
       .uiName("API Request Timeout")
-      .description("Ollama API request timeout (seconds)")
+      .description("API request timeout (seconds)")
       .defaultValue(60)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .stepValue(1)
       .build();
-  public static final BooleanProperty PULL_MODELS =
-    ImmutableBooleanProperty.builder()
+  public static final IntProperty MAX_RETRIES =
+    ImmutableIntProperty.builder()
       .namespace(NAMESPACE)
-      .key("pull-models")
-      .uiName("Pull Models")
-      .description("Whether to pull models if not found already installed")
-      .defaultValue(true)
+      .key("api-max-retries")
+      .uiName("API Max Retries")
+      .description("API request max retries")
+      .defaultValue(5)
+      .minValue(0)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
       .build();
   public static final BooleanProperty VERBOSE =
     ImmutableBooleanProperty.builder()
@@ -82,38 +81,12 @@ public class AISettings implements SettingsObject {
       .defaultValue(false)
       .build();
 
-  public static OllamaAPI create(SettingsSource source) {
-    var api = new OllamaAPI(source.get(AISettings.API_ENDPOINT));
-    api.setBasicAuth(
-      source.get(AISettings.API_USERNAME),
-      source.get(AISettings.API_PASSWORD));
-    api.setRequestTimeoutSeconds(source.get(AISettings.REQUEST_TIMEOUT));
-    api.setVerbose(source.get(AISettings.VERBOSE));
-
-    return api;
-  }
-
-  public static void pullIfNecessary(OllamaAPI api, String modelId, SettingsSource source) {
-    var pull = source.get(AISettings.PULL_MODELS);
-    if (!pull) {
-      return;
-    }
-
-    try {
-      log.debug("Checking if model {} is installed", modelId);
-      api.getModelDetails(modelId);
-    } catch (Exception e) {
-      if (e.getMessage().startsWith("404")) {
-        try {
-          log.info("Pulling model {}. This may take a while...", modelId);
-          api.pullModel(modelId);
-          log.info("Model {} pulled successfully", modelId);
-        } catch (Exception e2) {
-          throw new RuntimeException("Failed to pull model", e2);
-        }
-      } else {
-        throw new RuntimeException("Failed to get model details", e);
-      }
-    }
+  public static OpenAIClient create(SettingsSource source) {
+    return OpenAIOkHttpClient.builder()
+      .baseUrl(source.get(AISettings.API_BASE_URL))
+      .apiKey(source.get(AISettings.API_KEY))
+      .timeout(Duration.ofSeconds(source.get(AISettings.REQUEST_TIMEOUT)))
+      .maxRetries(source.get(AISettings.MAX_RETRIES))
+      .build();
   }
 }

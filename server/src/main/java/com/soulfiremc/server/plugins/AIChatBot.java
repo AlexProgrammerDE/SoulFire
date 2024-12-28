@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.openai.models.*;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -26,19 +27,18 @@ import com.soulfiremc.server.settings.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
-import io.github.ollama4j.models.chat.OllamaChatMessageRole;
-import io.github.ollama4j.models.chat.OllamaChatRequestBuilder;
-import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
+import java.util.ArrayList;
+
 @Slf4j
 @Extension
 public class AIChatBot extends InternalPlugin {
-  private static final MetadataKey<OllamaChatRequestBuilder> PLAYER_CONVERSATIONS = MetadataKey.of("ai_chat_bot", "conversations", OllamaChatRequestBuilder.class);
+  private static final MetadataKey<ChatCompletionCreateParams> PLAYER_CONVERSATIONS = MetadataKey.of("ai_chat_bot", "conversations", ChatCompletionCreateParams.class);
 
   public AIChatBot() {
     super(new PluginInfo(
@@ -66,26 +66,43 @@ public class AIChatBot extends InternalPlugin {
     try {
       var api = AISettings.create(settingsSource);
       var model = settingsSource.get(AIChatBotSettings.MODEL);
-      AISettings.pullIfNecessary(api, model, settingsSource);
 
-      var builder = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> OllamaChatRequestBuilder.getInstance(model)
-        .withMessage(OllamaChatMessageRole.SYSTEM, settingsSource.get(AIChatBotSettings.PROMPT))
-        .withOptions(new OptionsBuilder()
-          .setNumPredict(64) // 256 / 4 = 64
-          .build()));
-      var requestModel = builder.withMessage(OllamaChatMessageRole.USER, message)
+      var requestModel = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> ChatCompletionCreateParams.builder()
+          .model(model)
+          .maxTokens(64) // 256 / 4 = 64
+          .addMessage(ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(ChatCompletionSystemMessageParam.builder()
+            .role(ChatCompletionSystemMessageParam.Role.SYSTEM)
+            .content(ChatCompletionSystemMessageParam.Content.ofTextContent(settingsSource.get(AIChatBotSettings.PROMPT)))
+            .build()))
+          .build())
+        .toBuilder()
+        .addMessage(ChatCompletionMessageParam.ofChatCompletionUserMessageParam(ChatCompletionUserMessageParam.builder()
+          .role(ChatCompletionUserMessageParam.Role.USER)
+          .content(ChatCompletionUserMessageParam.Content.ofTextContent(message))
+          .build()
+        ))
         .build();
 
       log.debug("Chatting with AI: {}", requestModel);
-      var chatResult = api.chat(requestModel);
-      var chatHistory = chatResult.getChatHistory();
+      var chatResult = api.chat().completions().create(requestModel);
+      var response = chatResult.choices().stream().findFirst()
+        .flatMap(f -> f.message().content())
+        .orElse("No text response");
+
+      var chatHistory = new ArrayList<>(requestModel.messages());
+      chatHistory.add(ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(ChatCompletionAssistantMessageParam.builder()
+        .role(ChatCompletionAssistantMessageParam.Role.ASSISTANT)
+        .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(message))
+        .build()
+      ));
       if (chatHistory.size() > settingsSource.get(AIChatBotSettings.HISTORY_LENGTH)) {
         chatHistory.removeFirst();
       }
 
-      event.connection().metadata().set(PLAYER_CONVERSATIONS, builder.withMessages(chatHistory));
+      event.connection().metadata().set(PLAYER_CONVERSATIONS, requestModel.toBuilder()
+        .messages(chatHistory)
+        .build());
 
-      var response = chatResult.getResponse();
       if (response.isBlank()) {
         log.debug("AI response is empty");
         return;
