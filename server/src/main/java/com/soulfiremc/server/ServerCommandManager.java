@@ -956,7 +956,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           var image = mapDataState.toBufferedImage();
           var fileName = "map_%d_%d_%s.png".formatted(currentTime, mapId, bot.accountName());
           try {
-            var mapsDirectory = SFPathConstants.getMapsDirectory(soulFireServer.baseDirectory());
+            var mapsDirectory = SFPathConstants.getMapsDirectory(bot.instanceManager().getObjectStoragePath());
             Files.createDirectories(mapsDirectory);
             var file = mapsDirectory.resolve(fileName);
             ImageIO.write(image, "png", file.toFile());
