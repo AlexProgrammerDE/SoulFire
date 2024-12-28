@@ -71,11 +71,14 @@ public class InstanceManager {
   @Setter
   private String friendlyName;
   @Setter
+  private UUID ownerId;
+  @Setter
   private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
-  public InstanceManager(SoulFireServer soulFireServer, UUID id, String friendlyName, SettingsImpl settingsSource) {
+  public InstanceManager(SoulFireServer soulFireServer, UUID id, String friendlyName, SettingsImpl settingsSource, UUID ownerId) {
     this.id = id;
     this.friendlyName = friendlyName;
+    this.ownerId = ownerId;
     this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
@@ -88,10 +91,15 @@ public class InstanceManager {
   public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
     var id = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
     var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
+    var ownerId = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("ownerId"), UUID.class);
+    if (ownerId == null) {
+      ownerId = soulFireServer.authSystem().rootUserData().id();
+    }
+
     var state = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
     var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
 
-    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings);
+    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings, ownerId);
     if (settings.get(BotSettings.RESTORE_ON_REBOOT)) {
       instanceManager.switchToState(state);
     }
@@ -403,6 +411,7 @@ public class InstanceManager {
 
     json.addProperty("id", id.toString());
     json.addProperty("friendlyName", friendlyName);
+    json.addProperty("ownerId", ownerId.toString());
     json.addProperty("state", attackLifecycle.name());
     json.add("settings", settingsSource.source().serializeToTree());
 

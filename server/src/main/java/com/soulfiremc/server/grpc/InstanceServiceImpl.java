@@ -54,7 +54,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_INSTANCE));
 
     try {
-      var id = soulFireServer.createInstance(request.getFriendlyName());
+      var id = soulFireServer.createInstance(request.getFriendlyName(), ServerRPCConstants.USER_CONTEXT_KEY.get());
       responseObserver.onNext(InstanceCreateResponse.newBuilder().setId(id.toString()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

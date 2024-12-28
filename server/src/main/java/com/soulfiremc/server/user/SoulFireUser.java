@@ -17,24 +17,15 @@
  */
 package com.soulfiremc.server.user;
 
-import com.soulfiremc.brigadier.CommandSource;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import net.kyori.adventure.util.TriState;
+import java.util.UUID;
 
-public interface ServerCommandSource extends CommandSource {
-  TriState getPermission(PermissionContext permission);
+public interface SoulFireUser extends ServerCommandSource {
+  UUID getUniqueId();
 
-  default boolean hasPermission(PermissionContext permission) {
-    return getPermission(permission).toBooleanOrElse(false);
+  String getUsername();
+
+  @Override
+  default String identifier() {
+    return "soulfire-user-" + getUniqueId();
   }
-
-  default void hasPermissionOrThrow(PermissionContext permission) {
-    if (!hasPermission(permission)) {
-      throw new StatusRuntimeException(
-        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
-    }
-  }
-
-  String identifier();
 }

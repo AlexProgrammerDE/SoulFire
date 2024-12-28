@@ -19,7 +19,6 @@ package com.soulfiremc.test;
 
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.structs.SFLogAppender;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ public class LoadTest {
     SFLogAppender.INSTANCE.start();
 
     SoulFireAbstractBootstrap.injectMixins(null);
-    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), new DefaultPluginManager(), Instant.now(), new DefaultAuthSystem(), tempDir);
+    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), new DefaultPluginManager(), Instant.now(), tempDir);
 
     server.shutdownManager().shutdownSoftware(false);
     server.shutdownManager().awaitShutdown();

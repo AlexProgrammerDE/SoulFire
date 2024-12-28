@@ -36,13 +36,16 @@ import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.util.*;
+import com.soulfiremc.server.user.SoulFireUser;
+import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.SFUpdateChecker;
+import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
 import com.soulfiremc.server.viaversion.SFViaPlatform;
 import com.viaversion.viaversion.api.Via;
-import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -54,13 +57,11 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.pf4j.PluginManager;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,9 +93,9 @@ public class SoulFireServer {
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final RPCServer rpcServer;
+  private final AuthSystem authSystem;
   private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerSettingsRegistry instanceSettingsRegistry;
-  private final SecretKey jwtSecretKey;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final Path baseDirectory;
@@ -104,7 +105,6 @@ public class SoulFireServer {
     int port,
     PluginManager pluginManager,
     Instant startTime,
-    AuthSystem authSystem,
     Path baseDirectory) {
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
@@ -115,8 +115,8 @@ public class SoulFireServer {
 
     injector.register(ShutdownManager.class, shutdownManager);
 
-    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
-    this.rpcServer = new RPCServer(host, port, injector, jwtSecretKey, authSystem);
+    this.authSystem = new AuthSystem(this);
+    this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
     log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
@@ -253,22 +253,6 @@ public class SoulFireServer {
     }
   }
 
-  public String generateRemoteUserJWT() {
-    return generateJWT("remote-user");
-  }
-
-  public String generateIntegratedUserJWT() {
-    return generateJWT("integrated-user");
-  }
-
-  private String generateJWT(String subject) {
-    return Jwts.builder()
-      .subject(subject)
-      .issuedAt(Date.from(Instant.now()))
-      .signWith(jwtSecretKey, Jwts.SIG.HS256)
-      .compact();
-  }
-
   private void shutdownHook() {
     // Shut down RPC
     try {
@@ -284,8 +268,8 @@ public class SoulFireServer {
     scheduler.shutdown();
   }
 
-  public UUID createInstance(String friendlyName) {
-    var instanceManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY);
+  public UUID createInstance(String friendlyName, SoulFireUser owner) {
+    var instanceManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY, owner.getUniqueId());
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);

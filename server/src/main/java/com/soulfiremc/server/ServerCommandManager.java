@@ -34,7 +34,6 @@ import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.grpc.ServerRPCConstants;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
 import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
@@ -51,6 +50,7 @@ import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -91,16 +91,6 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
   @Getter
   private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
-
-  private static String getCurrentUsername() {
-    var currentUser = ServerRPCConstants.USER_CONTEXT_KEY.get();
-
-    if (currentUser == null) {
-      return "Console";
-    } else {
-      return currentUser.getUsername();
-    }
-  }
 
   public static void putInstanceIds(List<UUID> ids) {
     if (hasInstanceIds()) {
@@ -165,7 +155,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
               c.getSource()
                 .sendInfo(
                   "JWT (This gives full SF access, make sure you only give this to trusted users): {}",
-                  soulFireServer.generateRemoteUserJWT());
+                  soulFireServer.authSystem().generateJWT(soulFireServer.authSystem().rootUserData()));
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -175,7 +165,8 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
           help(
             "See who you are",
             c -> {
-              c.getSource().sendInfo("Username: {}", getCurrentUsername());
+              c.getSource().sendInfo("Your are: {}",
+                c.getSource() instanceof SoulFireUser user ? user.getUsername() : c.getSource().identifier());
 
               return Command.SINGLE_SUCCESS;
             })));

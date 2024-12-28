@@ -24,7 +24,6 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
-import com.soulfiremc.server.grpc.DefaultAuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CommandHistoryManager;
@@ -53,7 +52,7 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
     GenericTerminalConsole.setupStreams();
     var soulFire =
-      new SoulFireServer(host, port, pluginManager, START_TIME, new DefaultAuthSystem(), getBaseDirectory());
+      new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
     log.info("Tip: To generate a new access token, use the command: 'generate-token'");
 

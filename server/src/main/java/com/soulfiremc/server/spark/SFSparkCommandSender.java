@@ -18,7 +18,7 @@
 package com.soulfiremc.server.spark;
 
 import com.soulfiremc.brigadier.CommandSource;
-import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.user.SoulFireUser;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
 import org.slf4j.event.Level;
@@ -32,7 +32,7 @@ public class SFSparkCommandSender extends AbstractCommandSender<CommandSource> {
 
   @Override
   public String getName() {
-    if (delegate instanceof ServerCommandSource user) {
+    if (delegate instanceof SoulFireUser user) {
       return user.getUsername();
     }
 

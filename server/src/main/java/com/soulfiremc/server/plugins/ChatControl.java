@@ -22,16 +22,21 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.user.ServerCommandSource;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
+import org.slf4j.event.Level;
 
 import java.util.List;
 
@@ -68,13 +73,11 @@ public class ChatControl extends InternalPlugin {
     connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
 
     ServerCommandManager.putInstanceIds(List.of(connection.instanceManager().id()));
-    var code = connection.instanceManager()
+    connection.instanceManager()
       .soulFireServer()
       .injector()
       .getSingleton(ServerCommandManager.class)
-      .execute(command, ServerConsoleCommandSource.INSTANCE);
-
-    connection.botControl().sendMessage("Command \"%s\" executed! (Code: %d)".formatted(command, code));
+      .execute(command, new ChatControlCommandSource(connection));
   }
 
   @EventHandler
@@ -101,5 +104,22 @@ public class ChatControl extends InternalPlugin {
         .description("Word to put before a command to make the bot execute it")
         .defaultValue("$")
         .build();
+  }
+
+  public record ChatControlCommandSource(BotConnection connection) implements ServerCommandSource {
+    @Override
+    public TriState getPermission(PermissionContext permission) {
+      return TriState.TRUE;
+    }
+
+    @Override
+    public String identifier() {
+      return "chat-control";
+    }
+
+    @Override
+    public void sendMessage(Level level, Component message) {
+      connection.logger().atLevel(level).log("[ChatControl] {}", message);
+    }
   }
 }

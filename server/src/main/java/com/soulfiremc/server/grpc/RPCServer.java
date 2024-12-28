@@ -45,7 +45,6 @@ import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -64,17 +63,6 @@ public class RPCServer {
   private final Server prometheusServer;
 
   public RPCServer(
-    String host, int port, Injector injector, SecretKey jwtKey, AuthSystem authSystem) {
-    this(
-      jwtKey,
-      host,
-      port,
-      injector,
-      authSystem);
-  }
-
-  public RPCServer(
-    SecretKey jwtKey,
     String host,
     int port,
     Injector injector,
@@ -101,7 +89,7 @@ public class RPCServer {
     var grpcService =
       GrpcService.builder()
         .autoCompression(true)
-        .intercept(new JwtServerInterceptor(jwtKey, authSystem))
+        .intercept(new JwtServerInterceptor(authSystem))
         .addService(injector.getSingleton(LogServiceImpl.class))
         .addService(injector.getSingleton(ConfigServiceImpl.class))
         .addService(injector.getSingleton(CommandServiceImpl.class))

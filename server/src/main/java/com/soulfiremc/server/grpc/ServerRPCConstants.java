@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.user.SoulFireUser;
 import io.grpc.Context;
 
 public class ServerRPCConstants {
-  public static final Context.Key<ServerCommandSource> USER_CONTEXT_KEY = Context.key("user");
+  public static final Context.Key<SoulFireUser> USER_CONTEXT_KEY = Context.key("user");
 
   private ServerRPCConstants() {}
 }

@@ -22,25 +22,16 @@ import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
 import net.kyori.adventure.util.TriState;
 
-import java.util.UUID;
-
 public class ServerConsoleCommandSource extends ClientConsoleCommandSource implements ServerCommandSource {
   public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();
-  private static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-  private static final String CONSOLE_NAME = "CONSOLE";
-
-  @Override
-  public UUID getUniqueId() {
-    return CONSOLE_UUID;
-  }
-
-  @Override
-  public String getUsername() {
-    return CONSOLE_NAME;
-  }
 
   @Override
   public TriState getPermission(PermissionContext permission) {
     return TriState.TRUE;
+  }
+
+  @Override
+  public String identifier() {
+    return "console";
   }
 }

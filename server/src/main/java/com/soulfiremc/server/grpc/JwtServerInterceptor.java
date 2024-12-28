@@ -22,14 +22,12 @@ import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 import io.jsonwebtoken.*;
 
-import javax.crypto.SecretKey;
-
 public class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
   private final AuthSystem authSystem;
 
-  public JwtServerInterceptor(SecretKey jwtKey, AuthSystem authSystem) {
-    this.parser = Jwts.parser().verifyWith(jwtKey).build();
+  public JwtServerInterceptor(AuthSystem authSystem) {
+    this.parser = Jwts.parser().verifyWith(authSystem.jwtSecretKey()).build();
     this.authSystem = authSystem;
   }
 
@@ -56,14 +54,23 @@ public class JwtServerInterceptor implements ServerInterceptor {
         status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
       }
       if (claims != null) {
-        // set client id into current context
-        var ctx =
-          Context.current()
-            .withValue(
-              ServerRPCConstants.USER_CONTEXT_KEY,
-              authSystem.authenticate(
-                claims.getPayload().getSubject(), claims.getPayload().getIssuedAt()));
-        return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
+        var user = authSystem.authenticate(
+          claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
+
+        if (user.isPresent()) {
+          // set client id into current context
+          return Contexts.interceptCall(
+            Context.current()
+              .withValue(
+                ServerRPCConstants.USER_CONTEXT_KEY,
+                user.orElseThrow()),
+            serverCall,
+            metadata,
+            serverCallHandler
+          );
+        } else {
+          status = Status.UNAUTHENTICATED.withDescription("User not found");
+        }
       }
     }
 

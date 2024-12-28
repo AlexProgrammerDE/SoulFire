@@ -133,7 +133,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.pf4j.Extension;
 import org.slf4j.event.Level;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -1059,18 +1058,13 @@ public class POVServer extends InternalPlugin {
 
   private record PovServerUser(Session session, String username) implements ServerCommandSource {
     @Override
-    public UUID getUniqueId() {
-      return UUID.nameUUIDFromBytes("POVUser:%s".formatted(username).getBytes(StandardCharsets.UTF_8));
-    }
-
-    @Override
-    public String getUsername() {
-      return username;
-    }
-
-    @Override
     public TriState getPermission(PermissionContext permission) {
       return TriState.TRUE;
+    }
+
+    @Override
+    public String identifier() {
+      return "pov-server-user-" + username;
     }
 
     @Override
