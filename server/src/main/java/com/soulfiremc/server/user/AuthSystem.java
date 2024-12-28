@@ -38,26 +38,31 @@ import java.util.UUID;
 
 @Getter
 public class AuthSystem {
-  private static final UUID ROOT_USER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+  private static final String ROOT_USERNAME = "root";
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
+  private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer) {
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(soulFireServer.baseDirectory()));
     this.sessionFactory = soulFireServer.sessionFactory();
-
-    createRootUser();
+    this.rootUserId = createRootUser();
   }
 
-  private void createRootUser() {
-    sessionFactory.inSession((s) -> {
-      var currentRootUser = s.find(UserEntity.class, ROOT_USER_UUID);
+  private UUID createRootUser() {
+    return sessionFactory.fromTransaction((s) -> {
+      var currentRootUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
+        .setParameter("username", ROOT_USERNAME)
+        .uniqueResult();
       if (currentRootUser == null) {
         var rootUser = new UserEntity();
-        rootUser.id(ROOT_USER_UUID);
         rootUser.username("root");
         rootUser.role(UserEntity.Role.ADMIN);
-        s.merge(rootUser);
+        s.persist(rootUser);
+
+        return rootUser.id();
+      } else {
+        return currentRootUser.id();
       }
     });
   }
@@ -77,17 +82,17 @@ public class AuthSystem {
     }
 
     userEntity.lastLoginAt(Instant.now());
-    sessionFactory.inSession((s) -> s.merge(userEntity));
+    sessionFactory.inTransaction((s) -> s.merge(userEntity));
 
     return Optional.of(new SoulFireUserImpl(userEntity));
   }
 
   public UserEntity rootUserData() {
-    return getUserData(ROOT_USER_UUID).orElseThrow();
+    return getUserData(rootUserId).orElseThrow();
   }
 
   public Optional<UserEntity> getUserData(UUID uuid) {
-    return Optional.ofNullable(sessionFactory.fromSession(s -> s.find(UserEntity.class, uuid)));
+    return Optional.ofNullable(sessionFactory.fromTransaction(s -> s.find(UserEntity.class, uuid)));
   }
 
   public String generateJWT(UserEntity user) {
