@@ -38,7 +38,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:15",
-      "sort": null,
       "field_type": "text"
     },
     {
@@ -49,7 +48,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:9999",
-      "sort": null,
       "field_type": "text"
     },
     {
@@ -60,7 +58,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|string|max:9999",
-      "sort": null,
       "field_type": "text"
     }
   ]
