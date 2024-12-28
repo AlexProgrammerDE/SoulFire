@@ -62,6 +62,16 @@
       "rules": "required|string|max:9999",
       "sort": null,
       "field_type": "text"
+    },
+    {
+      "name": "JVM PWD",
+      "description": "Directory to run the SoulFIre dedicated server in.",
+      "env_variable": "SF_PWD",
+      "default_value": "/home/container",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|string|max:9999",
+      "field_type": "text"
     }
   ]
 }

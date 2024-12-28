@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -n "$SF_PWD" ]; then
+  cd $SF_PWD
+fi
+
 if [ -z "$SF_RAM" ]; then
   echo "SF_RAM is not set. Defaulting to 2G."
   SF_RAM="2G"
