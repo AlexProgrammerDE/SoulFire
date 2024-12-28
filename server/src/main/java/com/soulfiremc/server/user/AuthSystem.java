@@ -18,88 +18,79 @@
 package com.soulfiremc.server.user;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFPathConstants;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
-import lombok.With;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
+import org.hibernate.SessionFactory;
 import org.slf4j.event.Level;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
+@Getter
 public class AuthSystem {
   private static final UUID ROOT_USER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-  @Getter
+  private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
-  private final Map<UUID, UserData> userDataMap = new HashMap<>();
 
   public AuthSystem(SoulFireServer soulFireServer) {
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(soulFireServer.baseDirectory()));
-    setUserData(new UserData(
-      ROOT_USER_UUID,
-      "root",
-      Role.ADMIN,
-      Instant.EPOCH,
-      Instant.EPOCH,
-      Instant.EPOCH
-    ));
+    this.sessionFactory = soulFireServer.sessionFactory();
+
+    createRootUser();
+  }
+
+  private void createRootUser() {
+    sessionFactory.inSession((s) -> {
+      var currentRootUser = s.find(UserEntity.class, ROOT_USER_UUID);
+      if (currentRootUser == null) {
+        var rootUser = new UserEntity();
+        rootUser.id(ROOT_USER_UUID);
+        rootUser.username("root");
+        rootUser.role(UserEntity.Role.ADMIN);
+        s.merge(rootUser);
+      }
+    });
   }
 
   public Optional<SoulFireUser> authenticate(String subject, Instant issuedAt) {
     var uuid = UUID.fromString(subject);
-    var userData = userDataMap.get(uuid);
-    if (userData == null) {
+    var optionalUser = getUserData(uuid);
+    if (optionalUser.isEmpty()) {
       return Optional.empty();
     }
+
+    var userEntity = optionalUser.get();
 
     // Used to prevent old/stolen JWTs from being used
-    if (issuedAt.isBefore(userData.minIssuedAt())) {
+    if (issuedAt.isBefore(userEntity.minIssuedAt())) {
       return Optional.empty();
     }
 
-    setUserData(userData.withLastLoginAt(Instant.now()));
+    userEntity.lastLoginAt(Instant.now());
+    sessionFactory.inSession((s) -> s.merge(userEntity));
 
-    return Optional.of(new SoulFireUserImpl(userData));
+    return Optional.of(new SoulFireUserImpl(userEntity));
   }
 
-  public UserData rootUserData() {
+  public UserEntity rootUserData() {
     return getUserData(ROOT_USER_UUID).orElseThrow();
   }
 
-  public Optional<UserData> getUserData(UUID uuid) {
-    return Optional.ofNullable(userDataMap.get(uuid));
+  public Optional<UserEntity> getUserData(UUID uuid) {
+    return Optional.ofNullable(sessionFactory.fromSession(s -> s.find(UserEntity.class, uuid)));
   }
 
-  public List<UserData> getAllUserData() {
-    return new ArrayList<>(userDataMap.values());
-  }
-
-  public void createUserData(String name, Role role) {
-    if (userDataMap.values().stream().anyMatch(userData -> userData.name().equalsIgnoreCase(name))) {
-      throw new IllegalArgumentException("User with name " + name + " already exists");
-    }
-
-    setUserData(new UserData(
-      UUID.randomUUID(),
-      name,
-      role,
-      Instant.now(),
-      Instant.EPOCH,
-      Instant.now()
-    ));
-  }
-
-  private void setUserData(UserData userData) {
-    userDataMap.put(userData.id(), userData);
-  }
-
-  public String generateJWT(UserData user) {
+  public String generateJWT(UserEntity user) {
     return Jwts.builder()
       .subject(user.id().toString())
       .issuedAt(Date.from(Instant.now()))
@@ -107,12 +98,7 @@ public class AuthSystem {
       .compact();
   }
 
-  public enum Role {
-    ADMIN,
-    USER
-  }
-
-  private record SoulFireUserImpl(UserData userData) implements SoulFireUser {
+  private record SoulFireUserImpl(UserEntity userData) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
       return userData.id();
@@ -120,13 +106,13 @@ public class AuthSystem {
 
     @Override
     public String getUsername() {
-      return userData.name();
+      return userData.username();
     }
 
     @Override
     public TriState getPermission(PermissionContext permission) {
       // Admins have all permissions
-      if (userData.role() == Role.ADMIN) {
+      if (userData.role() == UserEntity.Role.ADMIN) {
         return TriState.TRUE;
       }
 
@@ -138,16 +124,5 @@ public class AuthSystem {
     public void sendMessage(Level level, Component message) {
       LogServiceImpl.sendMessage(userData.id(), ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
     }
-  }
-
-  @With
-  public record UserData(
-    UUID id,
-    String name,
-    Role role,
-    Instant createdAt,
-    Instant lastLoginAt,
-    Instant minIssuedAt
-  ) {
   }
 }

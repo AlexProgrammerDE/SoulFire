@@ -88,8 +88,10 @@ dependencies {
   api(libs.injector)
 
   // For database support
-  implementation(libs.hibernate.core)
-  implementation(libs.hibernate.validator)
+  api(libs.hibernate.core)
+  api(libs.hibernate.community.dialects)
+  api(libs.hibernate.validator)
+  api(libs.sqlite)
 
   testImplementation(libs.junit)
 }

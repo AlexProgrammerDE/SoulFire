@@ -18,6 +18,8 @@
 package com.soulfiremc.server.database;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,6 +27,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,11 +49,14 @@ public class UserEntity {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    @Column(nullable = false)
     private Instant lastLoginAt;
 
+    @CreationTimestamp
     @Column(nullable = false)
     private Instant minIssuedAt;
+
+    @Version
+    private long version;
 
     public enum Role {
         USER,

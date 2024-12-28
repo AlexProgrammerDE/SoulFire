@@ -29,6 +29,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.data.TranslationMapper;
+import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.*;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
@@ -55,6 +56,7 @@ import net.raphimc.vialoader.ViaLoader;
 import net.raphimc.vialoader.impl.platform.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.hibernate.SessionFactory;
 import org.pf4j.PluginManager;
 
 import java.io.IOException;
@@ -98,6 +100,7 @@ public class SoulFireServer {
   private final ServerSettingsRegistry instanceSettingsRegistry;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
+  private final SessionFactory sessionFactory;
   private final Path baseDirectory;
 
   public SoulFireServer(
@@ -115,6 +118,7 @@ public class SoulFireServer {
 
     injector.register(ShutdownManager.class, shutdownManager);
 
+    this.sessionFactory = DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite"));
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
 

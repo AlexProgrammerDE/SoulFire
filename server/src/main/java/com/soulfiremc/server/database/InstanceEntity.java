@@ -20,6 +20,8 @@ package com.soulfiremc.server.database;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,6 +29,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
 public class InstanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,4 +58,7 @@ public class InstanceEntity {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
+
+    @Version
+    private long version;
 }
