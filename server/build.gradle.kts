@@ -91,6 +91,8 @@ dependencies {
   api(libs.hibernate.core)
   api(libs.hibernate.community.dialects)
   api(libs.hibernate.validator)
+  api(libs.hibernate.hikaricp)
+  api(libs.hikaricp)
   api(libs.sqlite)
 
   testImplementation(libs.junit)

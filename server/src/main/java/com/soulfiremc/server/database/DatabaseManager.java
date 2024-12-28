@@ -32,8 +32,13 @@ public class DatabaseManager {
       configuration.setProperty("hibernate.dialect", "org.hibernate.community.dialect.SQLiteDialect");
       configuration.setProperty("hibernate.connection.driver_class", "org.sqlite.JDBC");
       configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:" + dbFile.toString());
-      configuration.setProperty("hibernate.show_sql", "true");
+      configuration.setProperty("hibernate.connection.pool_size", 10);
+      configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+      configuration.setProperty("hibernate.hikari.minimumIdle", 5);
+      configuration.setProperty("hibernate.hikari.maximumPoolSize", 20);
+      configuration.setProperty("hibernate.hikari.idleTimeout", 30000);
+      configuration.setProperty("hibernate.hikari.connectionTimeout", 30000);
 
       var metadataSources = new MetadataSources(new StandardServiceRegistryBuilder()
         .applySettings(configuration.getProperties())
