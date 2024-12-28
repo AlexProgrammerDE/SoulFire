@@ -62,46 +62,7 @@ public record SettingsImpl(
       .create();
 
   public static SettingsImpl deserialize(JsonElement json) {
-    var jsonObject = json.getAsJsonObject();
-    var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
-
-    var settingsJson = jsonObject.getAsJsonObject("settings");
-    for (var namespaceEntry : settingsJson.entrySet()) {
-      Map<String, JsonElement> namespaceProperties = new HashMap<>();
-      var namespaceJson = namespaceEntry.getValue().getAsJsonObject();
-
-      for (var entry : namespaceJson.entrySet()) {
-        try {
-          namespaceProperties.put(entry.getKey(), entry.getValue());
-        } catch (Exception e) {
-          log.error("Failed to deserialize setting: {} (skipping)", entry.getKey(), e);
-        }
-      }
-
-      settingsProperties.put(namespaceEntry.getKey(), namespaceProperties);
-    }
-
-    var accounts = new ArrayList<MinecraftAccount>();
-    var accountsJson = jsonObject.getAsJsonArray("accounts");
-    for (var accountElement : accountsJson) {
-      try {
-        accounts.add(PROFILE_GSON.fromJson(accountElement, MinecraftAccount.class));
-      } catch (Exception e) {
-        log.error("Failed to deserialize account (skipping)", e);
-      }
-    }
-
-    var proxies = new ArrayList<SFProxy>();
-    var proxiesJson = jsonObject.getAsJsonArray("proxies");
-    for (var proxyElement : proxiesJson) {
-      try {
-        proxies.add(PROFILE_GSON.fromJson(proxyElement, SFProxy.class));
-      } catch (Exception e) {
-        log.error("Failed to deserialize proxy (skipping)", e);
-      }
-    }
-
-    return new SettingsImpl(settingsProperties, accounts, proxies);
+    return PROFILE_GSON.fromJson(json, SettingsImpl.class);
   }
 
   @SneakyThrows

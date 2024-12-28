@@ -87,6 +87,10 @@ dependencies {
   // For class injection
   api(libs.injector)
 
+  // For database support
+  implementation(libs.hibernate.core)
+  implementation(libs.hibernate.validator)
+
   testImplementation(libs.junit)
 }
 
