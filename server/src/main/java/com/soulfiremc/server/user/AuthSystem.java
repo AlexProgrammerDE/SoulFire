@@ -69,22 +69,24 @@ public class AuthSystem {
 
   public Optional<SoulFireUser> authenticate(String subject, Instant issuedAt) {
     var uuid = UUID.fromString(subject);
-    var optionalUser = getUserData(uuid);
-    if (optionalUser.isEmpty()) {
-      return Optional.empty();
-    }
+    return sessionFactory.fromTransaction(s -> {
+      var optionalUser = getUserData(uuid);
+      if (optionalUser.isEmpty()) {
+        return Optional.empty();
+      }
 
-    var userEntity = optionalUser.get();
+      var userEntity = optionalUser.get();
 
-    // Used to prevent old/stolen JWTs from being used
-    if (issuedAt.isBefore(userEntity.minIssuedAt())) {
-      return Optional.empty();
-    }
+      // Used to prevent old/stolen JWTs from being used
+      if (issuedAt.isBefore(userEntity.minIssuedAt())) {
+        return Optional.empty();
+      }
 
-    userEntity.lastLoginAt(Instant.now());
-    sessionFactory.inTransaction((s) -> s.merge(userEntity));
+      userEntity.lastLoginAt(Instant.now());
+      s.merge(userEntity);
 
-    return Optional.of(new SoulFireUserImpl(userEntity));
+      return Optional.of(new SoulFireUserImpl(userEntity));
+    });
   }
 
   public UserEntity rootUserData() {
