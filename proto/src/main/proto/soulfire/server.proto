@@ -11,6 +11,13 @@ message ServerConfig {
   repeated SettingsNamespace settings = 1;
 }
 
+message ServerInfoRequest {
+}
+
+message ServerInfoResponse {
+  ServerConfig config = 1;
+}
+
 message ServerUpdateConfigRequest {
   ServerConfig config = 1;
 }
@@ -19,5 +26,6 @@ message ServerUpdateConfigResponse {
 }
 
 service ServerService {
+  rpc getServerInfo(ServerInfoRequest) returns (ServerInfoResponse);
   rpc updateServerConfig(ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse);
 }
