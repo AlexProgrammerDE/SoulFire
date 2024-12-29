@@ -19,6 +19,7 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.PropertyKey;
 import lombok.AllArgsConstructor;
@@ -32,20 +33,20 @@ import java.util.Optional;
 @Setter
 @AllArgsConstructor
 public class SettingsDelegate implements SettingsSource {
-  private SettingsImpl source;
+  private InstanceEntity source;
 
   @Override
   public List<MinecraftAccount> accounts() {
-    return source.accounts();
+    return source.settings().accounts();
   }
 
   @Override
   public List<SFProxy> proxies() {
-    return source.proxies();
+    return source.settings().proxies();
   }
 
   @Override
   public Optional<JsonElement> get(PropertyKey key) {
-    return source.get(key);
+    return source.settings().get(key);
   }
 }

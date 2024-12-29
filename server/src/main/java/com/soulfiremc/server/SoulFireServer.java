@@ -19,8 +19,6 @@ package com.soulfiremc.server;
 
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.SettingsPage;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -30,10 +28,11 @@ import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.database.DatabaseManager;
+import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.*;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
@@ -42,7 +41,6 @@ import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
 import com.soulfiremc.server.viaversion.SFViaPlatform;
@@ -60,7 +58,6 @@ import org.hibernate.SessionFactory;
 import org.pf4j.PluginManager;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -189,7 +186,7 @@ public class SoulFireServer {
     loadInstances();
 
     log.info("Starting scheduled tasks...");
-    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 500, TimeUnit.MILLISECONDS);
+    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 1, TimeUnit.SECONDS);
 
     var rpcServerStart =
       CompletableFuture.runAsync(
@@ -220,17 +217,11 @@ public class SoulFireServer {
   }
 
   private void loadInstances() {
-    var instancesFile = SFPathConstants.getStateDirectory(baseDirectory).resolve("instances.json");
-    if (!Files.exists(instancesFile)) {
-      return;
-    }
-
     try {
-      var instancesJson = Files.readString(instancesFile);
-      var instancesArray = GsonInstance.GSON.fromJson(instancesJson, JsonObject[].class);
-      for (var instanceData : instancesArray) {
+      for (var instanceData : sessionFactory.fromTransaction(s ->
+        s.createQuery("FROM InstanceEntity", InstanceEntity.class)).getResultList()) {
         try {
-          var instance = InstanceManager.fromJson(this, instanceData);
+          var instance = new InstanceManager(this, instanceData);
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
@@ -246,12 +237,16 @@ public class SoulFireServer {
   }
 
   private void saveInstances() {
-    var instancesFile = SFPathConstants.getStateDirectory(baseDirectory).resolve("instances.json");
     try {
-      var instancesJson =
-        GsonInstance.GSON.toJson(
-          instances.values().stream().map(InstanceManager::toJson).toArray(JsonElement[]::new));
-      SFHelpers.writeIfNeeded(instancesFile, instancesJson);
+      sessionFactory.inTransaction(s -> {
+        instances.values().stream()
+          .map(InstanceManager::instanceEntity)
+          .forEach(s::merge);
+
+        s.createMutationQuery("DELETE FROM InstanceEntity WHERE id NOT IN (:ids)")
+          .setParameterList("ids", instances.keySet())
+          .executeUpdate();
+      });
     } catch (Exception e) {
       log.error("Failed to save instances", e);
     }
@@ -270,10 +265,21 @@ public class SoulFireServer {
 
     // Shutdown scheduled tasks
     scheduler.shutdown();
+
+    // Shutdown database
+    sessionFactory.close();
   }
 
   public UUID createInstance(String friendlyName, SoulFireUser owner) {
-    var instanceManager = new InstanceManager(this, UUID.randomUUID(), friendlyName, SettingsImpl.EMPTY, owner.getUniqueId());
+    var instanceEntity = sessionFactory.fromTransaction(s -> {
+      var newInstanceEntity = new InstanceEntity();
+      newInstanceEntity.friendlyName(friendlyName);
+      newInstanceEntity.owner(s.find(UserEntity.class, owner.getUniqueId()));
+      s.persist(newInstanceEntity);
+
+      return newInstanceEntity;
+    });
+    var instanceManager = new InstanceManager(this, instanceEntity);
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);

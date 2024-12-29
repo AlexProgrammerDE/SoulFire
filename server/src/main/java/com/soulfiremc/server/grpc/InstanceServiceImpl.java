@@ -91,8 +91,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
           .map(instance -> InstanceListResponse.Instance.newBuilder()
             .setId(instance.id().toString())
-            .setFriendlyName(instance.friendlyName())
-            .setState(instance.attackLifecycle().toProto())
+            .setFriendlyName(instance.instanceEntity().friendlyName())
+            .setState(instance.instanceEntity().attackLifecycle().toProto())
             .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
           .toList())
@@ -117,9 +117,9 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
       var instance = optionalInstance.get();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
-        .setFriendlyName(instance.friendlyName())
-        .setConfig(instance.settingsSource().source().toProto())
-        .setState(instance.attackLifecycle().toProto())
+        .setFriendlyName(instance.instanceEntity().friendlyName())
+        .setConfig(instance.instanceEntity().settings().toProto())
+        .setState(instance.instanceEntity().attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
         .build());
       responseObserver.onCompleted();
@@ -141,7 +141,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.friendlyName(request.getFriendlyName());
+      instance.instanceEntity().friendlyName(request.getFriendlyName());
 
       responseObserver.onNext(InstanceUpdateFriendlyNameResponse.newBuilder().build());
       responseObserver.onCompleted();
@@ -163,7 +163,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.settingsSource().source(SettingsImpl.fromProto(request.getConfig()));
+      instance.instanceEntity().settings(SettingsImpl.fromProto(request.getConfig()));
 
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();

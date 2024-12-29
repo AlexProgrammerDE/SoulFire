@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
@@ -28,6 +26,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
@@ -37,14 +36,11 @@ import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.SettingsDelegate;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,43 +64,22 @@ public class InstanceManager {
   private final SoulFireScheduler scheduler;
   private final SettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
-  @Setter
-  private String friendlyName;
-  @Setter
-  private UUID ownerId;
-  @Setter
-  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
+  private final InstanceEntity instanceEntity;
 
-  public InstanceManager(SoulFireServer soulFireServer, UUID id, String friendlyName, SettingsImpl settingsSource, UUID ownerId) {
-    this.id = id;
-    this.friendlyName = friendlyName;
-    this.ownerId = ownerId;
+  public InstanceManager(SoulFireServer soulFireServer, InstanceEntity instanceEntity) {
+    this.id = instanceEntity.id();
     this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
-    this.settingsSource = new SettingsDelegate(settingsSource);
+    this.settingsSource = new SettingsDelegate(instanceEntity);
+    this.instanceEntity = instanceEntity;
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
-  }
 
-  public static InstanceManager fromJson(SoulFireServer soulFireServer, JsonElement json) {
-    var id = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("id"), UUID.class);
-    var friendlyName = json.getAsJsonObject().get("friendlyName").getAsString();
-    var ownerId = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("ownerId"), UUID.class);
-    if (ownerId == null) {
-      ownerId = soulFireServer.authSystem().rootUserData().id();
+    if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
+      switchToState(instanceEntity.attackLifecycle());
     }
-
-    var state = GsonInstance.GSON.fromJson(json.getAsJsonObject().get("state"), AttackLifecycle.class);
-    var settings = SettingsImpl.deserialize(json.getAsJsonObject().get("settings"));
-
-    var instanceManager = new InstanceManager(soulFireServer, id, friendlyName, settings, ownerId);
-    if (settings.get(BotSettings.RESTORE_ON_REBOOT)) {
-      instanceManager.switchToState(state);
-    }
-
-    return instanceManager;
   }
 
   private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
@@ -125,7 +100,7 @@ public class InstanceManager {
   }
 
   private void tick() {
-    if (attackLifecycle.isTicking()) {
+    if (instanceEntity.attackLifecycle().isTicking()) {
       SoulFireAPI.postEvent(new AttackTickEvent(this));
     }
   }
@@ -154,7 +129,7 @@ public class InstanceManager {
 
     if (refreshed > 0) {
       logger.info("Refreshed {} accounts", refreshed);
-      settingsSource.source(settingsSource.source().withAccounts(accounts));
+      instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
     }
   }
 
@@ -168,27 +143,27 @@ public class InstanceManager {
     var refreshedAccount = authService.refresh(account, null).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.set(accounts.indexOf(account), refreshedAccount);
-    settingsSource.source(settingsSource.source().withAccounts(accounts));
+    instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
 
     return refreshedAccount;
   }
 
   public CompletableFuture<?> switchToState(AttackLifecycle targetState) {
     return switch (targetState) {
-      case STARTING, RUNNING -> switch (attackLifecycle) {
+      case STARTING, RUNNING -> switch (instanceEntity.attackLifecycle()) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
-        case PAUSED -> scheduler.runAsync(() -> this.attackLifecycle = AttackLifecycle.RUNNING);
+        case PAUSED -> scheduler.runAsync(() -> this.instanceEntity.attackLifecycle(AttackLifecycle.RUNNING));
         case STOPPED -> scheduler.runAsync(this::start);
       };
-      case PAUSED -> switch (attackLifecycle) {
-        case STARTING, RUNNING -> scheduler.runAsync(() -> this.attackLifecycle = AttackLifecycle.PAUSED);
+      case PAUSED -> switch (instanceEntity.attackLifecycle()) {
+        case STARTING, RUNNING -> scheduler.runAsync(() -> this.instanceEntity.attackLifecycle(AttackLifecycle.PAUSED));
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> scheduler.runAsync(() -> {
           start();
-          this.attackLifecycle = AttackLifecycle.PAUSED;
+          this.instanceEntity.attackLifecycle(AttackLifecycle.PAUSED);
         });
       };
-      case STOPPING, STOPPED -> switch (attackLifecycle) {
+      case STOPPING, STOPPED -> switch (instanceEntity.attackLifecycle()) {
         case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
         case STOPPING, STOPPED -> CompletableFuture.completedFuture(null);
       };
@@ -196,13 +171,13 @@ public class InstanceManager {
   }
 
   private void start() {
-    if (!attackLifecycle.isFullyStopped()) {
+    if (!instanceEntity.attackLifecycle().isFullyStopped()) {
       throw new IllegalStateException("Another attack is still running");
     }
 
     SoulFireServer.setupLoggingAndVia(settingsSource);
 
-    this.attackLifecycle = AttackLifecycle.STARTING;
+    this.instanceEntity.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);
     logger.info("Preparing bot attack at {}", address);
@@ -317,11 +292,11 @@ public class InstanceManager {
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             () -> {
-              if (attackLifecycle.isStoppedOrStopping()) {
+              if (instanceEntity.attackLifecycle().isStoppedOrStopping()) {
                 return;
               }
 
-              TimeUtil.waitCondition(attackLifecycle::isPaused);
+              TimeUtil.waitCondition(() -> instanceEntity.attackLifecycle().isPaused());
 
               logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
@@ -341,8 +316,8 @@ public class InstanceManager {
             TimeUnit.MILLISECONDS);
         }
 
-        if (this.attackLifecycle == AttackLifecycle.STARTING) {
-          this.attackLifecycle = AttackLifecycle.RUNNING;
+        if (this.instanceEntity.attackLifecycle() == AttackLifecycle.STARTING) {
+          this.instanceEntity.attackLifecycle(AttackLifecycle.RUNNING);
         }
       });
   }
@@ -356,16 +331,16 @@ public class InstanceManager {
   }
 
   public CompletableFuture<?> stopAttackPermanently() {
-    if (attackLifecycle.isStoppedOrStopping()) {
+    if (instanceEntity.attackLifecycle().isStoppedOrStopping()) {
       return CompletableFuture.completedFuture(null);
     }
 
     logger.info("Stopping bot attack");
-    this.attackLifecycle = AttackLifecycle.STOPPING;
+    this.instanceEntity.attackLifecycle(AttackLifecycle.STOPPING);
 
     return this.stopAttackSession()
       .thenRun(() -> {
-        this.attackLifecycle = AttackLifecycle.STOPPED;
+        this.instanceEntity.attackLifecycle(AttackLifecycle.STOPPED);
         logger.info("Attack stopped");
       });
   }
@@ -404,18 +379,6 @@ public class InstanceManager {
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
     });
-  }
-
-  public JsonElement toJson() {
-    var json = new JsonObject();
-
-    json.addProperty("id", id.toString());
-    json.addProperty("friendlyName", friendlyName);
-    json.addProperty("ownerId", ownerId.toString());
-    json.addProperty("state", attackLifecycle.name());
-    json.add("settings", settingsSource.source().serializeToTree());
-
-    return json;
   }
 
   public Path getObjectStoragePath() {
