@@ -33,7 +33,7 @@ public class DatabaseManager {
       configuration.setProperty("hibernate.connection.driver_class", "org.sqlite.JDBC");
       configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:" + dbFile.toString());
       configuration.setProperty("hibernate.connection.pool_size", 1);
-      // configuration.setProperty("hibernate.show_sql", true);
+      configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");
       configuration.setProperty("hibernate.hikari.minimumIdle", 1);
       configuration.setProperty("hibernate.hikari.maximumPoolSize", 1);

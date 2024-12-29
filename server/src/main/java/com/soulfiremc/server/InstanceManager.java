@@ -67,6 +67,7 @@ public class InstanceManager {
   private final SettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
+  private AttackLifecycle localAttackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
@@ -81,7 +82,9 @@ public class InstanceManager {
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
-      switchToState(attackLifecycle());
+      switchToState(instanceEntity.attackLifecycle());
+    } else {
+      attackLifecycle(AttackLifecycle.STOPPED);
     }
   }
 
@@ -361,6 +364,7 @@ public class InstanceManager {
   }
 
   private void attackLifecycle(AttackLifecycle attackLifecycle) {
+    localAttackLifecycle = attackLifecycle;
     sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
 
@@ -371,7 +375,7 @@ public class InstanceManager {
   }
 
   private AttackLifecycle attackLifecycle() {
-    return sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).attackLifecycle());
+    return localAttackLifecycle;
   }
 
   public CompletableFuture<?> stopAttackSession() {
