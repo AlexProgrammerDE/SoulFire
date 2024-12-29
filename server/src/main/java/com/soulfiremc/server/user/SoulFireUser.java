@@ -17,12 +17,16 @@
  */
 package com.soulfiremc.server.user;
 
+import com.soulfiremc.server.database.UserEntity;
+
 import java.util.UUID;
 
 public interface SoulFireUser extends ServerCommandSource {
   UUID getUniqueId();
 
   String getUsername();
+
+  UserEntity.Role getRole();
 
   @Override
   default String identifier() {

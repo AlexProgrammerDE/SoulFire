@@ -137,6 +137,7 @@ message ServerPlugin {
 message ClientDataResponse {
   string id = 6;
   string username = 1;
+  UserRole role = 7;
   repeated GlobalPermissionState serverPermissions = 2;
   repeated ServerPlugin plugins = 3;
   repeated SettingsPage settings = 5;

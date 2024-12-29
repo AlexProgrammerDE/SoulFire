@@ -116,3 +116,8 @@ enum InstancePermission {
   DELETE_OBJECT_STORAGE = 11;
   LIST_OBJECT_STORAGE = 12;
 }
+
+enum UserRole {
+  ADMIN = 0;
+  USER = 1;
+}

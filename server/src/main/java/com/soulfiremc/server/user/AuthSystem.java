@@ -121,6 +121,10 @@ public class AuthSystem {
       return userData.username();
     }
 
+    public UserEntity.Role getRole() {
+      return userData.role();
+    }
+
     @Override
     public TriState getPermission(PermissionContext permission) {
       // Admins have all permissions

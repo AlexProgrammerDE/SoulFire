@@ -67,6 +67,10 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         ClientDataResponse.newBuilder()
           .setId(currentUSer.getUniqueId().toString())
           .setUsername(currentUSer.getUsername())
+          .setRole(switch (currentUSer.getRole()) {
+            case ADMIN -> UserRole.ADMIN;
+            case USER -> UserRole.USER;
+          })
           .addAllServerPermissions(getGlobalPermissions())
           .addAllPlugins(getPlugins())
           .addAllSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
