@@ -80,8 +80,12 @@ public class AuthSystem {
         return Optional.empty();
       }
 
-      userEntity.lastLoginAt(Instant.now());
-      s.merge(userEntity);
+      // Only update login if last login was more than 30 seconds ago
+      if (userEntity.lastLoginAt() == null
+        || userEntity.lastLoginAt().isBefore(Instant.now().minusSeconds(30))) {
+        userEntity.lastLoginAt(Instant.now());
+        s.merge(userEntity);
+      }
 
       return Optional.of(new SoulFireUserImpl(userEntity));
     });
