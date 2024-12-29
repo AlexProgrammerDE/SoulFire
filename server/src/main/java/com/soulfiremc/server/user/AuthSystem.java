@@ -62,6 +62,9 @@ public class AuthSystem {
 
         return rootUser.id();
       } else {
+        currentRootUser.role(UserEntity.Role.ADMIN);
+        s.merge(currentRootUser);
+
         return currentRootUser.id();
       }
     });
