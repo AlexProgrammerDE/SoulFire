@@ -70,12 +70,10 @@ public class AuthSystem {
   public Optional<SoulFireUser> authenticate(String subject, Instant issuedAt) {
     var uuid = UUID.fromString(subject);
     return sessionFactory.fromTransaction(s -> {
-      var optionalUser = getUserData(uuid);
-      if (optionalUser.isEmpty()) {
+      var userEntity = s.find(UserEntity.class, uuid);
+      if (userEntity == null) {
         return Optional.empty();
       }
-
-      var userEntity = optionalUser.get();
 
       // Used to prevent old/stolen JWTs from being used
       if (issuedAt.isBefore(userEntity.minIssuedAt())) {
