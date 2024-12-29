@@ -21,7 +21,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.settings.lib.SettingsImpl;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -168,7 +168,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
         }
 
-        instanceEntity.settings(SettingsImpl.fromProto(request.getConfig()));
+        instanceEntity.settings(InstanceSettingsImpl.fromProto(request.getConfig()));
 
         session.merge(instanceEntity);
       });

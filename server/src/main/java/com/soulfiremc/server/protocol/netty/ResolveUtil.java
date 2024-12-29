@@ -18,7 +18,7 @@
 package com.soulfiremc.server.protocol.netty;
 
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsSource;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.structs.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +53,7 @@ public class ResolveUtil {
   private ResolveUtil() {}
 
   public static Optional<ResolvedAddress> resolveAddress(
-    boolean isBedrock, SettingsSource settingsSource) {
+    boolean isBedrock, InstanceSettingsSource settingsSource) {
     var defaultPort = isBedrock ? MC_BEDROCK_DEFAULT_PORT : MC_JAVA_DEFAULT_PORT;
     var serverAddress =
       ServerAddress.fromStringDefaultPort(

@@ -47,11 +47,11 @@ import java.util.*;
 
 @With
 @Slf4j
-public record SettingsImpl(
+public record InstanceSettingsImpl(
   Map<String, Map<String, JsonElement>> settings,
   List<MinecraftAccount> accounts,
-  List<SFProxy> proxies) implements SettingsSource {
-  public static final SettingsImpl EMPTY = new SettingsImpl(Map.of(), List.of(), List.of());
+  List<SFProxy> proxies) implements InstanceSettingsSource {
+  public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of());
   private static final Gson PROFILE_GSON =
     new GsonBuilder()
       .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
@@ -61,12 +61,12 @@ public record SettingsImpl(
       .setPrettyPrinting()
       .create();
 
-  public static SettingsImpl deserialize(JsonElement json) {
-    return PROFILE_GSON.fromJson(json, SettingsImpl.class);
+  public static InstanceSettingsImpl deserialize(JsonElement json) {
+    return PROFILE_GSON.fromJson(json, InstanceSettingsImpl.class);
   }
 
   @SneakyThrows
-  public static SettingsImpl fromProto(InstanceConfig request) {
+  public static InstanceSettingsImpl fromProto(InstanceConfig request) {
     var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
 
     for (var namespace : request.getSettingsList()) {
@@ -89,7 +89,7 @@ public record SettingsImpl(
       proxies.add(SFProxy.fromProto(proxy));
     }
 
-    return new SettingsImpl(settingsProperties, accounts, proxies);
+    return new InstanceSettingsImpl(settingsProperties, accounts, proxies);
   }
 
   public JsonObject serializeToTree() {

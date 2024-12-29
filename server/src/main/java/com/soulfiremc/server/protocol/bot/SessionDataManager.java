@@ -37,7 +37,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.*;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
-import com.soulfiremc.server.settings.lib.SettingsSource;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.LevelLoadStatusManager;
@@ -110,7 +110,7 @@ import java.util.stream.Collectors;
 @Getter
 @ToString
 public final class SessionDataManager {
-  private final SettingsSource settingsSource;
+  private final InstanceSettingsSource settingsSource;
   private final Logger log;
   private final MinecraftCodecHelper codecHelper;
   private final BotConnection connection;

@@ -18,8 +18,6 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -31,11 +29,7 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
-public interface SettingsSource {
-  List<MinecraftAccount> accounts();
-
-  List<SFProxy> proxies();
-
+public sealed interface SettingsSource permits InstanceSettingsSource, ServerSettingsSource {
   default int get(IntProperty property) {
     return getAsType(property.propertyKey(), property.defaultValue(), Integer.class);
   }

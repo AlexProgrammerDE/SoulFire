@@ -35,7 +35,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.AccountSettings;
 import com.soulfiremc.server.settings.BotSettings;
 import com.soulfiremc.server.settings.ProxySettings;
-import com.soulfiremc.server.settings.lib.SettingsDelegate;
+import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
@@ -64,7 +64,7 @@ public class InstanceManager {
   private final UUID id;
   private final Logger logger;
   private final SoulFireScheduler scheduler;
-  private final SettingsDelegate settingsSource;
+  private final InstanceSettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
   private AttackLifecycle localAttackLifecycle = AttackLifecycle.STOPPED;
@@ -75,7 +75,7 @@ public class InstanceManager {
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
-    this.settingsSource = new SettingsDelegate(new CachedLazyObject<>(() ->
+    this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->
       sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);

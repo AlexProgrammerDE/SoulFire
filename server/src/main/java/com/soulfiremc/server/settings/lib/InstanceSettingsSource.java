@@ -17,36 +17,13 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.PropertyKey;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class SettingsDelegate implements SettingsSource {
-  private Supplier<SettingsImpl> source;
+public sealed interface InstanceSettingsSource extends SettingsSource permits InstanceSettingsDelegate, InstanceSettingsImpl {
+  List<MinecraftAccount> accounts();
 
-  @Override
-  public List<MinecraftAccount> accounts() {
-    return source.get().accounts();
-  }
-
-  @Override
-  public List<SFProxy> proxies() {
-    return source.get().proxies();
-  }
-
-  @Override
-  public Optional<JsonElement> get(PropertyKey key) {
-    return source.get().get(key);
-  }
+  List<SFProxy> proxies();
 }

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "soulfire/common.proto";
+
+enum UserRole {
+  ADMIN = 0;
+  USER = 1;
+}
+
+message UserCreateRequest {
+  string username = 1;
+  UserRole role = 2;
+}
+
+message UserCreateResponse {
+  string id = 1;
+}
+
+message UserDeleteRequest {
+  string id = 1;
+}
+
+message UserDeleteResponse {
+}
+
+message UserListRequest {
+}
+
+message UserListResponse {
+  message User {
+    string id = 1;
+    string username = 2;
+    UserRole role = 3;
+  }
+
+  repeated User users = 1;
+}
+
+message UserInfoRequest {
+  string id = 1;
+}
+
+message UserInfoResponse {
+  string username = 1;
+  UserRole role = 2;
+}
+
+service UserService {
+  rpc createUser(UserCreateRequest) returns (UserCreateResponse);
+  rpc deleteUser(UserDeleteRequest) returns (UserDeleteResponse);
+  rpc listUsers(UserListRequest) returns (UserListResponse);
+  rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
+}

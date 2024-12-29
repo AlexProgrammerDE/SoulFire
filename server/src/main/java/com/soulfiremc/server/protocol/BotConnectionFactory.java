@@ -24,7 +24,7 @@ import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.BotSettings;
-import com.soulfiremc.server.settings.lib.SettingsSource;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 public record BotConnectionFactory(
   InstanceManager instanceManager,
   ResolveUtil.ResolvedAddress resolvedAddress,
-  SettingsSource settingsSource,
+  InstanceSettingsSource settingsSource,
   Logger logger,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,

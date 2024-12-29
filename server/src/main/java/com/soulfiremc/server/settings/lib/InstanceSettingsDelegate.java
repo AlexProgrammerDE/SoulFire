@@ -15,23 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.database;
+package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
-import com.soulfiremc.server.util.structs.GsonInstance;
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.PropertyKey;
+import lombok.RequiredArgsConstructor;
 
-@Converter(autoApply = true)
-public class SettingsConverter implements AttributeConverter<InstanceSettingsImpl, String> {
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+@RequiredArgsConstructor
+public final class InstanceSettingsDelegate implements InstanceSettingsSource {
+  private final Supplier<InstanceSettingsSource> source;
+
   @Override
-  public String convertToDatabaseColumn(InstanceSettingsImpl attribute) {
-    return GsonInstance.GSON.toJson(attribute.serializeToTree());
+  public List<MinecraftAccount> accounts() {
+    return source.get().accounts();
   }
 
   @Override
-  public InstanceSettingsImpl convertToEntityAttribute(String dbData) {
-    return InstanceSettingsImpl.deserialize(GsonInstance.GSON.fromJson(dbData, JsonElement.class));
+  public List<SFProxy> proxies() {
+    return source.get().proxies();
+  }
+
+  @Override
+  public Optional<JsonElement> get(PropertyKey key) {
+    return source.get().get(key);
   }
 }

@@ -141,13 +141,6 @@ message ClientDataResponse {
   repeated SettingsPage settings = 5;
 }
 
-message ServerUpdateConfigRequest {
-  repeated SettingsNamespace settings = 1;
-}
-
-message ServerUpdateConfigResponse {
-}
-
 service ConfigService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
 }

@@ -26,9 +26,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
 @Getter
 @Setter
+@Entity
+@Table(name = "users")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

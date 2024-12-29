@@ -34,7 +34,7 @@ import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.lib.SettingsSource;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.TimeUtil;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
@@ -71,7 +71,7 @@ public final class BotConnection {
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
-  private final SettingsSource settingsSource;
+  private final InstanceSettingsSource settingsSource;
   private final Logger logger;
   private final MinecraftProtocol protocol;
   private final ViaClientSession session;
@@ -91,7 +91,7 @@ public final class BotConnection {
   public BotConnection(
     BotConnectionFactory factory,
     InstanceManager instanceManager,
-    SettingsSource settingsSource,
+    InstanceSettingsSource settingsSource,
     Logger logger,
     MinecraftProtocol protocol,
     ResolveUtil.ResolvedAddress resolvedAddress,

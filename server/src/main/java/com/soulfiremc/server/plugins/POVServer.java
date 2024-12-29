@@ -38,8 +38,8 @@ import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.BotSettings;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
@@ -172,7 +172,7 @@ public class POVServer extends InternalPlugin {
     return new GameProfile(UUID.randomUUID(), LegacyComponentSerializer.legacySection().serialize(text));
   }
 
-  private static void startPOVServer(SettingsSource settingsSource, int port, InstanceManager instanceManager) {
+  private static void startPOVServer(InstanceSettingsSource settingsSource, int port, InstanceManager instanceManager) {
     var faviconBytes = SFHelpers.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
@@ -803,7 +803,7 @@ public class POVServer extends InternalPlugin {
   @RequiredArgsConstructor
   private static class POVClientSessionAdapter extends SessionAdapter {
     private final InstanceManager instanceManager;
-    private final SettingsSource settingsSource;
+    private final InstanceSettingsSource settingsSource;
     private BotConnection botConnection;
     private boolean enableForwarding;
     private double lastX;

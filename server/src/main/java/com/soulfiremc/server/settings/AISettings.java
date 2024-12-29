@@ -20,8 +20,8 @@ package com.soulfiremc.server.settings;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.ClientOptions;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
@@ -76,7 +76,7 @@ public class AISettings implements SettingsObject {
       .stepValue(1)
       .build();
 
-  public static OpenAIClient create(SettingsSource source) {
+  public static OpenAIClient create(InstanceSettingsSource source) {
     return OpenAIOkHttpClient.builder()
       .baseUrl(source.get(AISettings.API_BASE_URL))
       .apiKey(source.get(AISettings.API_KEY))

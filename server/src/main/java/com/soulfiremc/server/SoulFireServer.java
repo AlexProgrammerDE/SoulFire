@@ -32,8 +32,8 @@ import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.*;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
-import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -202,12 +202,12 @@ public class SoulFireServer {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
-  public static void setupLoggingAndVia(SettingsSource settingsSource) {
+  public static void setupLoggingAndVia(InstanceSettingsSource settingsSource) {
     Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
     setupLogging(settingsSource);
   }
 
-  public static void setupLogging(SettingsSource settingsSource) {
+  public static void setupLogging(InstanceSettingsSource settingsSource) {
     Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "soulfire/common.proto";
+
+message ServerConfig {
+  repeated SettingsNamespace settings = 1;
+}
+
+message ServerUpdateConfigRequest {
+  ServerConfig config = 1;
+}
+
+message ServerUpdateConfigResponse {
+}
+
+service ServerService {
+  rpc updateServerConfig(ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse);
+}

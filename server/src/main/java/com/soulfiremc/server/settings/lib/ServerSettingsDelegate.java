@@ -15,23 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.database;
+package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
-import com.soulfiremc.server.util.structs.GsonInstance;
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import com.soulfiremc.server.settings.PropertyKey;
+import lombok.RequiredArgsConstructor;
 
-@Converter(autoApply = true)
-public class SettingsConverter implements AttributeConverter<InstanceSettingsImpl, String> {
-  @Override
-  public String convertToDatabaseColumn(InstanceSettingsImpl attribute) {
-    return GsonInstance.GSON.toJson(attribute.serializeToTree());
-  }
+import java.util.Optional;
+import java.util.function.Supplier;
+
+@RequiredArgsConstructor
+public final class ServerSettingsDelegate implements ServerSettingsSource {
+  private final Supplier<ServerSettingsSource> source;
 
   @Override
-  public InstanceSettingsImpl convertToEntityAttribute(String dbData) {
-    return InstanceSettingsImpl.deserialize(GsonInstance.GSON.fromJson(dbData, JsonElement.class));
+  public Optional<JsonElement> get(PropertyKey key) {
+    return source.get().get(key);
   }
 }
