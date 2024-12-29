@@ -59,12 +59,14 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   @Override
   public void getClientData(
     ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SERVER_CONFIG));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_CLIENT_DATA));
 
     try {
+      var currentUSer = ServerRPCConstants.USER_CONTEXT_KEY.get();
       responseObserver.onNext(
         ClientDataResponse.newBuilder()
-          .setUsername(ServerRPCConstants.USER_CONTEXT_KEY.get().getUsername())
+          .setId(currentUSer.getUniqueId().toString())
+          .setUsername(currentUSer.getUsername())
           .addAllServerPermissions(getGlobalPermissions())
           .addAllPlugins(getPlugins())
           .addAllSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
