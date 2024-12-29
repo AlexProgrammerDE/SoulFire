@@ -81,7 +81,7 @@ public class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
       responseObserver.onNext(ServerUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting server info", t);
+      log.error("Error updating server config", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
