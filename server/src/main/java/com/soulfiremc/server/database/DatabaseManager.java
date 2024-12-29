@@ -46,7 +46,8 @@ public class DatabaseManager {
       metadataSources.addPackage("com.soulfiremc.server.database");
       metadataSources.addAnnotatedClasses(
         UserEntity.class,
-        InstanceEntity.class
+        InstanceEntity.class,
+        ServerConfigEntity.class
       );
 
       return metadataSources.getMetadataBuilder()

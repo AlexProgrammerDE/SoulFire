@@ -24,7 +24,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public class SettingsConverter implements AttributeConverter<InstanceSettingsImpl, String> {
+public class InstanceSettingsConverter implements AttributeConverter<InstanceSettingsImpl, String> {
   @Override
   public String convertToDatabaseColumn(InstanceSettingsImpl attribute) {
     return GsonInstance.GSON.toJson(attribute.serializeToTree());

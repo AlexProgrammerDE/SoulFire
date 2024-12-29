@@ -48,7 +48,7 @@ public class InstanceEntity {
     @Column(nullable = false)
     private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
-    @Convert(converter = SettingsConverter.class)
+  @Convert(converter = InstanceSettingsConverter.class)
     @Column(nullable = false)
     private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
 

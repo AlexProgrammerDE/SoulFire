@@ -193,8 +193,6 @@ public class InstanceManager {
       throw new IllegalStateException("Another attack is still running");
     }
 
-    SoulFireServer.setupLoggingAndVia(settingsSource);
-
     this.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);

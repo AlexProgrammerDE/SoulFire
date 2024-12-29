@@ -23,7 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
-import com.soulfiremc.grpc.generated.InstanceConfig;
+import com.soulfiremc.grpc.generated.ServerConfig;
 import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.PropertyKey;
@@ -51,7 +51,7 @@ public record ServerSettingsImpl(
   }
 
   @SneakyThrows
-  public static ServerSettingsImpl fromProto(InstanceConfig request) {
+  public static ServerSettingsImpl fromProto(ServerConfig request) {
     var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
 
     for (var namespace : request.getSettingsList()) {
@@ -72,7 +72,7 @@ public record ServerSettingsImpl(
   }
 
   @SneakyThrows
-  public InstanceConfig toProto() {
+  public ServerConfig toProto() {
     var settingsProperties = new HashMap<String, Map<String, Value>>();
     for (var entry : this.settings.entrySet()) {
       var namespace = entry.getKey();
@@ -91,7 +91,7 @@ public record ServerSettingsImpl(
       settingsProperties.put(namespace, innerMap);
     }
 
-    return InstanceConfig.newBuilder()
+    return ServerConfig.newBuilder()
       .addAllSettings(settingsProperties.entrySet().stream().map(entry -> {
         var namespace = entry.getKey();
 

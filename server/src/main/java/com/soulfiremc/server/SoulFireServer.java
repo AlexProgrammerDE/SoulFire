@@ -29,10 +29,11 @@ import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.ServerConfigEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.*;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
@@ -41,6 +42,7 @@ import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SFUpdateChecker;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import com.soulfiremc.server.viaversion.SFVLLoaderImpl;
 import com.soulfiremc.server.viaversion.SFViaPlatform;
@@ -67,6 +69,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main class of the SoulFire server.
@@ -90,6 +93,7 @@ public class SoulFireServer {
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
+  private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
   private final ServerSettingsRegistry serverSettingsRegistry;
@@ -117,6 +121,16 @@ public class SoulFireServer {
     this.sessionFactory = DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite"));
     injector.register(SessionFactory.class, sessionFactory);
 
+    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
+      sessionFactory.fromTransaction(session -> {
+        var entity = session.find(ServerConfigEntity.class, 1);
+        if (entity == null) {
+          entity = new ServerConfigEntity();
+          session.persist(entity);
+        }
+
+        return entity.settings();
+      }), 1, TimeUnit.SECONDS));
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
@@ -155,6 +169,9 @@ public class SoulFireServer {
         }, scheduler);
 
     CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
+
+    // Via is ready, we can now set up all config stuff
+    setupLoggingAndVia();
 
     var newVersion = updateCheck.join();
     if (newVersion != null) {
@@ -202,12 +219,13 @@ public class SoulFireServer {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
-  public static void setupLoggingAndVia(InstanceSettingsSource settingsSource) {
-    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
-    setupLogging(settingsSource);
+  public void configUpdateHook() {
+    setupLoggingAndVia();
   }
 
-  public static void setupLogging(InstanceSettingsSource settingsSource) {
+  public void setupLoggingAndVia() {
+    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+
     Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
