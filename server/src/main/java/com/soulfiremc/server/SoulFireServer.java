@@ -219,7 +219,7 @@ public class SoulFireServer {
   private void loadInstances() {
     try {
       for (var instanceData : sessionFactory.fromTransaction(s ->
-        s.createQuery("FROM InstanceEntity", InstanceEntity.class)).getResultList()) {
+        s.createQuery("FROM InstanceEntity", InstanceEntity.class).getResultList())) {
         try {
           var instance = new InstanceManager(this, instanceData);
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
