@@ -20,6 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.settings.lib.SettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
@@ -27,6 +28,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import java.util.UUID;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImplBase {
   private final SoulFireServer soulFireServer;
+  private final SessionFactory sessionFactory;
 
   private Collection<InstancePermissionState> getInstancePermissions(UUID instanceId) {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
@@ -87,12 +90,12 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   public void listInstances(InstanceListRequest request, StreamObserver<InstanceListResponse> responseObserver) {
     try {
       responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(soulFireServer.instances().values().stream()
+        .addAllInstances(sessionFactory.fromTransaction(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
           .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
           .map(instance -> InstanceListResponse.Instance.newBuilder()
             .setId(instance.id().toString())
-            .setFriendlyName(instance.instanceEntity().friendlyName())
-            .setState(instance.instanceEntity().attackLifecycle().toProto())
+            .setFriendlyName(instance.friendlyName())
+            .setState(instance.attackLifecycle().toProto())
             .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
           .toList())
@@ -110,16 +113,15 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
+      var instanceEntity = sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
+      if (instanceEntity == null) {
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
-      var instance = optionalInstance.get();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
-        .setFriendlyName(instance.instanceEntity().friendlyName())
-        .setConfig(instance.instanceEntity().settings().toProto())
-        .setState(instance.instanceEntity().attackLifecycle().toProto())
+        .setFriendlyName(instanceEntity.friendlyName())
+        .setConfig(instanceEntity.settings().toProto())
+        .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
         .build());
       responseObserver.onCompleted();
@@ -135,13 +137,16 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE, instanceId));
 
     try {
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
-      }
+      sessionFactory.inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
 
-      var instance = optionalInstance.get();
-      instance.instanceEntity().friendlyName(request.getFriendlyName());
+        instanceEntity.friendlyName(request.getFriendlyName());
+
+        session.merge(instanceEntity);
+      });
 
       responseObserver.onNext(InstanceUpdateFriendlyNameResponse.newBuilder().build());
       responseObserver.onCompleted();
@@ -157,13 +162,16 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE, instanceId));
 
     try {
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
-      }
+      sessionFactory.inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
 
-      var instance = optionalInstance.get();
-      instance.instanceEntity().settings(SettingsImpl.fromProto(request.getConfig()));
+        instanceEntity.settings(SettingsImpl.fromProto(request.getConfig()));
+
+        session.merge(instanceEntity);
+      });
 
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();

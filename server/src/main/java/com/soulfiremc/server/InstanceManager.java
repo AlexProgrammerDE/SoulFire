@@ -38,10 +38,12 @@ import com.soulfiremc.server.settings.ProxySettings;
 import com.soulfiremc.server.settings.lib.SettingsDelegate;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,21 +66,22 @@ public class InstanceManager {
   private final SoulFireScheduler scheduler;
   private final SettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
-  private final InstanceEntity instanceEntity;
+  private final SessionFactory sessionFactory;
 
-  public InstanceManager(SoulFireServer soulFireServer, InstanceEntity instanceEntity) {
+  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
     this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.scheduler = new SoulFireScheduler(logger);
     this.soulFireServer = soulFireServer;
-    this.settingsSource = new SettingsDelegate(instanceEntity);
-    this.instanceEntity = instanceEntity;
+    this.sessionFactory = sessionFactory;
+    this.settingsSource = new SettingsDelegate(new CachedLazyObject<>(() ->
+      sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
-      switchToState(instanceEntity.attackLifecycle());
+      switchToState(attackLifecycle());
     }
   }
 
@@ -100,7 +103,7 @@ public class InstanceManager {
   }
 
   private void tick() {
-    if (instanceEntity.attackLifecycle().isTicking()) {
+    if (attackLifecycle().isTicking()) {
       SoulFireAPI.postEvent(new AttackTickEvent(this));
     }
   }
@@ -129,7 +132,13 @@ public class InstanceManager {
 
     if (refreshed > 0) {
       logger.info("Refreshed {} accounts", refreshed);
-      instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
+      sessionFactory.inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, id);
+
+        instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
+
+        session.merge(instanceEntity);
+      });
     }
   }
 
@@ -143,27 +152,33 @@ public class InstanceManager {
     var refreshedAccount = authService.refresh(account, null).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.set(accounts.indexOf(account), refreshedAccount);
-    instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
+    sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+
+      instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
+
+      session.merge(instanceEntity);
+    });
 
     return refreshedAccount;
   }
 
   public CompletableFuture<?> switchToState(AttackLifecycle targetState) {
     return switch (targetState) {
-      case STARTING, RUNNING -> switch (instanceEntity.attackLifecycle()) {
+      case STARTING, RUNNING -> switch (attackLifecycle()) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
-        case PAUSED -> scheduler.runAsync(() -> this.instanceEntity.attackLifecycle(AttackLifecycle.RUNNING));
+        case PAUSED -> scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.RUNNING));
         case STOPPED -> scheduler.runAsync(this::start);
       };
-      case PAUSED -> switch (instanceEntity.attackLifecycle()) {
-        case STARTING, RUNNING -> scheduler.runAsync(() -> this.instanceEntity.attackLifecycle(AttackLifecycle.PAUSED));
+      case PAUSED -> switch (attackLifecycle()) {
+        case STARTING, RUNNING -> scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED));
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> scheduler.runAsync(() -> {
           start();
-          this.instanceEntity.attackLifecycle(AttackLifecycle.PAUSED);
+          this.attackLifecycle(AttackLifecycle.PAUSED);
         });
       };
-      case STOPPING, STOPPED -> switch (instanceEntity.attackLifecycle()) {
+      case STOPPING, STOPPED -> switch (attackLifecycle()) {
         case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
         case STOPPING, STOPPED -> CompletableFuture.completedFuture(null);
       };
@@ -171,13 +186,13 @@ public class InstanceManager {
   }
 
   private void start() {
-    if (!instanceEntity.attackLifecycle().isFullyStopped()) {
+    if (!attackLifecycle().isFullyStopped()) {
       throw new IllegalStateException("Another attack is still running");
     }
 
     SoulFireServer.setupLoggingAndVia(settingsSource);
 
-    this.instanceEntity.attackLifecycle(AttackLifecycle.STARTING);
+    this.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);
     logger.info("Preparing bot attack at {}", address);
@@ -292,11 +307,11 @@ public class InstanceManager {
           logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             () -> {
-              if (instanceEntity.attackLifecycle().isStoppedOrStopping()) {
+              if (attackLifecycle().isStoppedOrStopping()) {
                 return;
               }
 
-              TimeUtil.waitCondition(() -> instanceEntity.attackLifecycle().isPaused());
+              TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
 
               logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
@@ -316,8 +331,8 @@ public class InstanceManager {
             TimeUnit.MILLISECONDS);
         }
 
-        if (this.instanceEntity.attackLifecycle() == AttackLifecycle.STARTING) {
-          this.instanceEntity.attackLifecycle(AttackLifecycle.RUNNING);
+        if (this.attackLifecycle() == AttackLifecycle.STARTING) {
+          this.attackLifecycle(AttackLifecycle.RUNNING);
         }
       });
   }
@@ -331,18 +346,32 @@ public class InstanceManager {
   }
 
   public CompletableFuture<?> stopAttackPermanently() {
-    if (instanceEntity.attackLifecycle().isStoppedOrStopping()) {
+    if (attackLifecycle().isStoppedOrStopping()) {
       return CompletableFuture.completedFuture(null);
     }
 
     logger.info("Stopping bot attack");
-    this.instanceEntity.attackLifecycle(AttackLifecycle.STOPPING);
+    this.attackLifecycle(AttackLifecycle.STOPPING);
 
     return this.stopAttackSession()
       .thenRun(() -> {
-        this.instanceEntity.attackLifecycle(AttackLifecycle.STOPPED);
+        this.attackLifecycle(AttackLifecycle.STOPPED);
         logger.info("Attack stopped");
       });
+  }
+
+  private void attackLifecycle(AttackLifecycle attackLifecycle) {
+    sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+
+      instanceEntity.attackLifecycle(attackLifecycle);
+
+      session.merge(instanceEntity);
+    });
+  }
+
+  private AttackLifecycle attackLifecycle() {
+    return sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).attackLifecycle());
   }
 
   public CompletableFuture<?> stopAttackSession() {

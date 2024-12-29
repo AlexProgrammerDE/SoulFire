@@ -67,7 +67,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The main class of the SoulFire server.
@@ -116,6 +115,8 @@ public class SoulFireServer {
     injector.register(ShutdownManager.class, shutdownManager);
 
     this.sessionFactory = DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite"));
+    injector.register(SessionFactory.class, sessionFactory);
+
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
@@ -185,9 +186,6 @@ public class SoulFireServer {
     log.info("Loading instances...");
     loadInstances();
 
-    log.info("Starting scheduled tasks...");
-    scheduler.scheduleWithFixedDelay(this::saveInstances, 0, 1, TimeUnit.SECONDS);
-
     var rpcServerStart =
       CompletableFuture.runAsync(
         () -> {
@@ -221,7 +219,7 @@ public class SoulFireServer {
       for (var instanceData : sessionFactory.fromTransaction(s ->
         s.createQuery("FROM InstanceEntity", InstanceEntity.class).getResultList())) {
         try {
-          var instance = new InstanceManager(this, instanceData);
+          var instance = new InstanceManager(this, sessionFactory, instanceData);
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
@@ -233,22 +231,6 @@ public class SoulFireServer {
       }
     } catch (Exception e) {
       log.error("Failed to load existing instances", e);
-    }
-  }
-
-  private void saveInstances() {
-    try {
-      sessionFactory.inTransaction(s -> {
-        instances.values().stream()
-          .map(InstanceManager::instanceEntity)
-          .forEach(s::merge);
-
-        s.createMutationQuery("DELETE FROM InstanceEntity WHERE id NOT IN (:ids)")
-          .setParameterList("ids", instances.keySet())
-          .executeUpdate();
-      });
-    } catch (Exception e) {
-      log.error("Failed to save instances", e);
     }
   }
 
@@ -279,7 +261,7 @@ public class SoulFireServer {
 
       return newInstanceEntity;
     });
-    var instanceManager = new InstanceManager(this, instanceEntity);
+    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity);
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);
@@ -296,6 +278,10 @@ public class SoulFireServer {
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
+    sessionFactory.inTransaction(s -> s.createMutationQuery("DELETE FROM InstanceEntity WHERE id = :id")
+      .setParameter("id", id)
+      .executeUpdate());
+
     return Optional.ofNullable(instances.remove(id)).map(InstanceManager::deleteInstance);
   }
 

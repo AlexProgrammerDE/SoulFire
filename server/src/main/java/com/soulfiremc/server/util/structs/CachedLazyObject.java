@@ -17,26 +17,25 @@
  */
 package com.soulfiremc.server.util.structs;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-@RequiredArgsConstructor
-public class CachedLazyObject<V> {
+public class CachedLazyObject<V> implements Supplier<V> {
   private final Supplier<V> supplier;
+  private final long cacheDuration;
   private V value;
-  private long time;
+  private long invalidAt;
 
-  public CachedLazyObject(Supplier<V> supplier, long time, TimeUnit unit) {
+  public CachedLazyObject(Supplier<V> supplier, long amount, TimeUnit unit) {
     this.supplier = supplier;
-    this.time = unit.toMillis(time);
+    this.cacheDuration = unit.toMillis(amount);
   }
 
+  @Override
   public V get() {
-    if (value == null || System.currentTimeMillis() - time > 0) {
+    if (value == null || System.currentTimeMillis() >= invalidAt) {
       value = supplier.get();
-      time = System.currentTimeMillis() + time;
+      invalidAt = System.currentTimeMillis() + cacheDuration;
     }
     return value;
   }
