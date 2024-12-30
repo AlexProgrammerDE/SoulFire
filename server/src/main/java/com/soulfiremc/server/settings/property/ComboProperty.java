@@ -42,14 +42,6 @@ public non-sealed abstract class ComboProperty implements Property {
     return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
   }
 
-  public abstract String key();
-
-  public abstract String uiName();
-
-  public abstract String description();
-
-  public abstract List<ComboOption> options();
-
   public static <T extends Enum<T>> String capitalizeEnum(T enumValue) {
     return String.join(
       " ",
@@ -57,6 +49,14 @@ public non-sealed abstract class ComboProperty implements Property {
         .map(ComboProperty::capitalizeString)
         .toArray(String[]::new));
   }
+
+  public abstract String key();
+
+  public abstract String uiName();
+
+  public abstract String description();
+
+  public abstract List<ComboOption> options();
 
   public abstract String defaultValue();
 

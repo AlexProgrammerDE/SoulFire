@@ -24,20 +24,20 @@ import org.cloudburstmc.math.vector.Vector3d;
 @Getter
 @Setter
 public class VecDeltaCodec {
-    private Vector3d base = Vector3d.ZERO;
+  private Vector3d base = Vector3d.ZERO;
 
-    public Vector3d decode(double x, double y, double z) {
-        if (x == 0L && y == 0L && z == 0L) {
-            return this.base;
-        } else {
-            var decodedX = x == 0L ? this.base.getX() : this.base.getX() + x;
-            var decodedY = y == 0L ? this.base.getY() : this.base.getY() + y;
-            var decodedZ = z == 0L ? this.base.getZ() : this.base.getZ() + z;
-            return Vector3d.from(decodedX, decodedY, decodedZ);
-        }
+  public Vector3d decode(double x, double y, double z) {
+    if (x == 0L && y == 0L && z == 0L) {
+      return this.base;
+    } else {
+      var decodedX = x == 0L ? this.base.getX() : this.base.getX() + x;
+      var decodedY = y == 0L ? this.base.getY() : this.base.getY() + y;
+      var decodedZ = z == 0L ? this.base.getZ() : this.base.getZ() + z;
+      return Vector3d.from(decodedX, decodedY, decodedZ);
     }
+  }
 
-    public Vector3d delta(Vector3d value) {
-        return value.sub(this.base);
-    }
+  public Vector3d delta(Vector3d value) {
+    return value.sub(this.base);
+  }
 }

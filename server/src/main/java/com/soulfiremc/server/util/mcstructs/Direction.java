@@ -39,6 +39,12 @@ public enum Direction {
   WEST(4, 5, 1, "west", Direction.AxisDirection.NEGATIVE, Direction.Axis.X, Vector3i.from(-1, 0, 0)),
   EAST(5, 4, 3, "east", Direction.AxisDirection.POSITIVE, Direction.Axis.X, Vector3i.from(1, 0, 0));
 
+  private static final Direction[] VALUES = values();
+  private static final Direction[] BY_3D_DATA = Arrays.stream(VALUES).sorted(Comparator.comparingInt(arg -> arg.data3d)).toArray(Direction[]::new);
+  private static final Direction[] BY_2D_DATA = Arrays.stream(VALUES)
+    .filter(arg -> arg.getAxis().isHorizontal())
+    .sorted(Comparator.comparingInt(arg -> arg.data2d))
+    .toArray(Direction[]::new);
   private final int data3d;
   private final int oppositeIndex;
   private final int data2d;
@@ -46,12 +52,6 @@ public enum Direction {
   private final Direction.Axis axis;
   private final Direction.AxisDirection axisDirection;
   private final Vector3i normal;
-  private static final Direction[] VALUES = values();
-  private static final Direction[] BY_3D_DATA = Arrays.stream(VALUES).sorted(Comparator.comparingInt(arg -> arg.data3d)).toArray(Direction[]::new);
-  private static final Direction[] BY_2D_DATA = Arrays.stream(VALUES)
-    .filter(arg -> arg.getAxis().isHorizontal())
-    .sorted(Comparator.comparingInt(arg -> arg.data2d))
-    .toArray(Direction[]::new);
 
   Direction(
     final int j, final int k, final int l, final String string2, final Direction.AxisDirection arg, final Direction.Axis arg2, final Vector3i arg3
@@ -81,6 +81,82 @@ public enum Direction {
       case EAST -> -90.0F;
       default -> throw new IllegalStateException("No y-Rot for vertical axis: " + arg);
     };
+  }
+
+  public static Direction from3DDataValue(int index) {
+    return BY_3D_DATA[MathHelper.abs(index % BY_3D_DATA.length)];
+  }
+
+  public static Direction from2DDataValue(int horizontalIndex) {
+    return BY_2D_DATA[MathHelper.abs(horizontalIndex % BY_2D_DATA.length)];
+  }
+
+  public static Direction fromYRot(double angle) {
+    return from2DDataValue(MathHelper.floor(angle / 90.0 + 0.5) & 3);
+  }
+
+  public static Direction fromAxisAndDirection(Direction.Axis axis, Direction.AxisDirection axisDirection) {
+    return switch (axis) {
+      case X -> axisDirection == Direction.AxisDirection.POSITIVE ? EAST : WEST;
+      case Y -> axisDirection == Direction.AxisDirection.POSITIVE ? UP : DOWN;
+      case Z -> axisDirection == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
+    };
+  }
+
+  public static Direction getApproximateNearest(double d, double e, double f) {
+    return getApproximateNearest((float) d, (float) e, (float) f);
+  }
+
+  public static Direction getApproximateNearest(float f, float g, float h) {
+    var lv = NORTH;
+    var i = Float.MIN_VALUE;
+
+    for (var lv2 : VALUES) {
+      var j = f * (float) lv2.normal.getX() + g * (float) lv2.normal.getY() + h * (float) lv2.normal.getZ();
+      if (j > i) {
+        i = j;
+        lv = lv2;
+      }
+    }
+
+    return lv;
+  }
+
+  public static Direction getApproximateNearest(Vector3d arg) {
+    return getApproximateNearest(arg.getX(), arg.getY(), arg.getZ());
+  }
+
+  @Nullable
+  @Contract("_,_,_,!null->!null;_,_,_,_->_")
+  public static Direction getNearest(int i, int j, int k, @Nullable Direction arg) {
+    var l = Math.abs(i);
+    var m = Math.abs(j);
+    var n = Math.abs(k);
+    if (l > n && l > m) {
+      return i < 0 ? WEST : EAST;
+    } else if (n > l && n > m) {
+      return k < 0 ? NORTH : SOUTH;
+    } else if (m > l && m > n) {
+      return j < 0 ? DOWN : UP;
+    } else {
+      return arg;
+    }
+  }
+
+  @Nullable
+  @Contract("_,!null->!null;_,_->_")
+  public static Direction getNearest(Vector3i arg, @Nullable Direction arg2) {
+    return getNearest(arg.getX(), arg.getY(), arg.getZ(), arg2);
+  }
+
+  public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {
+    for (var lv : VALUES) {
+      if (lv.getAxisDirection() == axisDirection && lv.getAxis() == axis) {
+        return lv;
+      }
+    }
+
+    throw new IllegalArgumentException("No such direction: " + axisDirection + " " + axis);
   }
 
   public int get3DDataValue() {
@@ -188,7 +264,7 @@ public enum Direction {
   }
 
   public Vector3f step() {
-    return Vector3f.from((float)this.getStepX(), (float)this.getStepY(), (float)this.getStepZ());
+    return Vector3f.from((float) this.getStepX(), (float) this.getStepY(), (float) this.getStepZ());
   }
 
   public String getName() {
@@ -199,93 +275,17 @@ public enum Direction {
     return this.axis;
   }
 
-  public static Direction from3DDataValue(int index) {
-    return BY_3D_DATA[MathHelper.abs(index % BY_3D_DATA.length)];
-  }
-
-  public static Direction from2DDataValue(int horizontalIndex) {
-    return BY_2D_DATA[MathHelper.abs(horizontalIndex % BY_2D_DATA.length)];
-  }
-
-  public static Direction fromYRot(double angle) {
-    return from2DDataValue(MathHelper.floor(angle / 90.0 + 0.5) & 3);
-  }
-
-  public static Direction fromAxisAndDirection(Direction.Axis axis, Direction.AxisDirection axisDirection) {
-    return switch (axis) {
-      case X -> axisDirection == Direction.AxisDirection.POSITIVE ? EAST : WEST;
-      case Y -> axisDirection == Direction.AxisDirection.POSITIVE ? UP : DOWN;
-      case Z -> axisDirection == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
-    };
-  }
-
   public float toYRot() {
-    return (float)((this.data2d & 3) * 90);
-  }
-
-  public static Direction getApproximateNearest(double d, double e, double f) {
-    return getApproximateNearest((float)d, (float)e, (float)f);
-  }
-
-  public static Direction getApproximateNearest(float f, float g, float h) {
-    var lv = NORTH;
-    var i = Float.MIN_VALUE;
-
-    for (var lv2 : VALUES) {
-      var j = f * (float) lv2.normal.getX() + g * (float) lv2.normal.getY() + h * (float) lv2.normal.getZ();
-      if (j > i) {
-        i = j;
-        lv = lv2;
-      }
-    }
-
-    return lv;
-  }
-
-  public static Direction getApproximateNearest(Vector3d arg) {
-    return getApproximateNearest(arg.getX(), arg.getY(), arg.getZ());
+    return (float) ((this.data2d & 3) * 90);
   }
 
   public Vector3i offset(Vector3i arg) {
     return arg.add(this.normal);
   }
 
-  @Nullable
-  @Contract("_,_,_,!null->!null;_,_,_,_->_")
-  public static Direction getNearest(int i, int j, int k, @Nullable Direction arg) {
-    var l = Math.abs(i);
-    var m = Math.abs(j);
-    var n = Math.abs(k);
-    if (l > n && l > m) {
-      return i < 0 ? WEST : EAST;
-    } else if (n > l && n > m) {
-      return k < 0 ? NORTH : SOUTH;
-    } else if (m > l && m > n) {
-      return j < 0 ? DOWN : UP;
-    } else {
-      return arg;
-    }
-  }
-
-  @Nullable
-  @Contract("_,!null->!null;_,_->_")
-  public static Direction getNearest(Vector3i arg, @Nullable Direction arg2) {
-    return getNearest(arg.getX(), arg.getY(), arg.getZ(), arg2);
-  }
-
   @Override
   public String toString() {
     return this.name;
-  }
-
-  public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {
-    for (var lv : VALUES) {
-      if (lv.getAxisDirection() == axisDirection && lv.getAxis() == axis) {
-        return lv;
-      }
-    }
-
-    throw new IllegalArgumentException("No such direction: " + axisDirection + " " + axis);
   }
 
   public Vector3i getUnitVector3i() {
@@ -296,7 +296,7 @@ public enum Direction {
     var g = degrees * (float) (Math.PI / 180.0);
     var h = -MathHelper.sin(g);
     var i = MathHelper.cos(g);
-    return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0F;
+    return (float) this.normal.getX() * h + (float) this.normal.getZ() * i > 0.0F;
   }
 
   public enum Axis implements Predicate<Direction> {

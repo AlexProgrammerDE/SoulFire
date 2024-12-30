@@ -25,6 +25,26 @@ import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 public class MathHelper {
+  private static final float[] SIN = SFHelpers.make(new float[65536], fs -> {
+    for (var ix = 0; ix < fs.length; ix++) {
+      fs[ix] = (float) Math.sin((double) ix * Math.PI * 2.0 / 65536.0);
+    }
+  });
+  private static final int[] MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{
+    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+  };
+  private static final double FRAC_BIAS = Double.longBitsToDouble(4805340802404319232L);
+  private static final double[] ASIN_TAB = new double[257];
+  private static final double[] COS_TAB = new double[257];
+
+  static {
+    for (var i = 0; i < 257; i++) {
+      var d = (double) i / 256.0;
+      var e = Math.asin(d);
+      COS_TAB[i] = Math.cos(e);
+      ASIN_TAB[i] = e;
+    }
+  }
   private MathHelper() {}
 
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
@@ -54,27 +74,6 @@ public class MathHelper {
    */
   public static int sumCapOverflow(IntStream stream) {
     return stream.reduce(0, MathHelper::sumCapOverflow);
-  }
-
-  private static final float[] SIN = SFHelpers.make(new float[65536], fs -> {
-    for (var ix = 0; ix < fs.length; ix++) {
-      fs[ix] = (float) Math.sin((double) ix * Math.PI * 2.0 / 65536.0);
-    }
-  });
-  private static final int[] MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{
-    0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-  };
-  private static final double FRAC_BIAS = Double.longBitsToDouble(4805340802404319232L);
-  private static final double[] ASIN_TAB = new double[257];
-  private static final double[] COS_TAB = new double[257];
-
-  static {
-    for (var i = 0; i < 257; i++) {
-      var d = (double) i / 256.0;
-      var e = Math.asin(d);
-      COS_TAB[i] = Math.cos(e);
-      ASIN_TAB[i] = e;
-    }
   }
 
   public static float sin(float value) {

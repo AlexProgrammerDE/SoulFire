@@ -48,6 +48,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 public class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
   private final InputState input;
+  protected int sprintTriggerTime;
   private int permissionLevel;
   private double lastX = 0;
   private double lastY = 0;
@@ -59,7 +60,6 @@ public class LocalPlayer extends AbstractClientPlayer {
   private boolean wasShiftKeyDown;
   private boolean wasSprinting;
   private boolean noPhysics = false;
-  protected int sprintTriggerTime;
   private boolean crouching;
   private int positionReminder = 0;
   private boolean wasFallFlying;

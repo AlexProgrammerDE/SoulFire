@@ -27,10 +27,6 @@ public class BlockHitResult extends HitResult {
   private final boolean inside;
   private final boolean worldBorderHit;
 
-  public static BlockHitResult miss(Vector3d location, Direction direction, Vector3i pos) {
-    return new BlockHitResult(true, location, direction, pos, false, false);
-  }
-
   public BlockHitResult(Vector3d arg, Direction arg2, Vector3i arg3, boolean bl) {
     this(false, arg, arg2, arg3, bl, false);
   }
@@ -46,6 +42,10 @@ public class BlockHitResult extends HitResult {
     this.blockPos = arg3;
     this.inside = bl2;
     this.worldBorderHit = bl3;
+  }
+
+  public static BlockHitResult miss(Vector3d location, Direction direction, Vector3i pos) {
+    return new BlockHitResult(true, location, direction, pos, false, false);
   }
 
   public BlockHitResult withDirection(Direction newFace) {

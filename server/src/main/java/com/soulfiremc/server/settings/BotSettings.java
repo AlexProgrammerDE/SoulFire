@@ -30,7 +30,6 @@ import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BotSettings implements SettingsObject {
-  private static final String NAMESPACE = "bot";
   public static final Function<String, ProtocolVersion> PROTOCOL_VERSION_PARSER =
     version -> {
       var split = version.split("\\|");
@@ -40,7 +39,7 @@ public class BotSettings implements SettingsObject {
 
       return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
     };
-
+  private static final String NAMESPACE = "bot";
   public static final StringProperty ADDRESS =
     ImmutableStringProperty.builder()
       .namespace(NAMESPACE)

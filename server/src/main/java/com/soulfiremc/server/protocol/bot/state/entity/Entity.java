@@ -66,21 +66,38 @@ import java.util.stream.Stream;
 @Getter
 public class Entity {
   protected static final int FLAG_ONFIRE = 0;
+  protected static final int FLAG_GLOWING = 6;
+  protected static final int FLAG_FALL_FLYING = 7;
   private static final int FLAG_SHIFT_KEY_DOWN = 1;
   private static final int FLAG_SPRINTING = 3;
   private static final int FLAG_SWIMMING = 4;
   private static final int FLAG_INVISIBLE = 5;
-  protected static final int FLAG_GLOWING = 6;
-  protected static final int FLAG_FALL_FLYING = 7;
   private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
-  public int invulnerableTime;
-  protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
-  private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
   protected final EntityType entityType;
   protected final EntityMetadataState metadataState;
+  private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
+  private final List<Entity.Movement> movementThisTick = new ArrayList<>();
+  private final Set<BlockState> blocksInside = new ReferenceArraySet<>();
+  private final LongSet visitedBlocks = new LongOpenHashSet();
+  private final int remainingFireTicks = -this.getFireImmuneTicks();
+  private final ImmutableList<Entity> passengers = ImmutableList.of();
+  public int invulnerableTime;
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public Optional<Vector3i> mainSupportingBlockPos = Optional.empty();
+  public double xo;
+  public double yo;
+  public double zo;
+  public double xOld;
+  public double yOld;
+  public double zOld;
+  public float yRotO;
+  public float xRotO;
+  public boolean noPhysics;
+  public boolean hasImpulse;
+  protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
   protected float fallDistance;
   @Setter
   protected UUID uuid = UUID.randomUUID();
@@ -92,46 +109,29 @@ public class Entity {
   protected Level level;
   protected BlockState inBlockState = null;
   protected boolean firstTick = true;
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  public Optional<Vector3i> mainSupportingBlockPos = Optional.empty();
-  private boolean onGroundNoBlocks = false;
-  private Vector3d pos;
   protected Vector3d deltaMovement = Vector3d.ZERO;
   protected float yRot;
   protected float xRot;
-  private final List<Entity.Movement> movementThisTick = new ArrayList<>();
-  private final Set<BlockState> blocksInside = new ReferenceArraySet<>();
-  private final LongSet visitedBlocks = new LongOpenHashSet();
-  public double xo;
-  public double yo;
-  public double zo;
-  public double xOld;
-  public double yOld;
   protected float headYRot;
   protected boolean onGround;
   protected boolean horizontalCollision;
   protected boolean verticalCollision;
   protected boolean verticalCollisionBelow;
   protected boolean minorHorizontalCollision;
-  public double zOld;
   protected boolean wasInPowderSnow;
   protected boolean wasTouchingWater;
   protected boolean wasEyeInWater;
+  @Setter
+  protected boolean isInPowderSnow;
+  protected Vector3d stuckSpeedMultiplier = Vector3d.ZERO;
+  private boolean onGroundNoBlocks = false;
+  private Vector3d pos;
   private Vector3i blockPosition;
   private ChunkKey chunkPosition;
   private EntityDimensions dimensions;
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
   private int portalCooldown;
-  public float yRotO;
-  public float xRotO;
-  @Setter
-  protected boolean isInPowderSnow;
-  protected Vector3d stuckSpeedMultiplier = Vector3d.ZERO;
-  public boolean noPhysics;
-  public boolean hasImpulse;
-  private final int remainingFireTicks = -this.getFireImmuneTicks();
-  private final ImmutableList<Entity> passengers = ImmutableList.of();
   @Nullable
   private Entity vehicle;
 
@@ -153,6 +153,229 @@ public class Entity {
 
     this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();
+  }
+
+  private static float[] collectCandidateStepUpHeights(AABB box, List<AABB> colliders, float deltaY, float maxUpStep) {
+    FloatSet floatSet = new FloatArraySet(4);
+
+    for (var collider : colliders) {
+      var doubleList = collider.getCoords(Direction.Axis.Y);
+      for (double coord : doubleList) {
+        var h = (float) (coord - box.minY);
+        if (!(h < 0.0F) && h != maxUpStep) {
+          if (h > deltaY) {
+            break;
+          }
+
+          floatSet.add(h);
+        }
+      }
+    }
+
+    var fs = floatSet.toFloatArray();
+    FloatArrays.unstableSort(fs);
+    return fs;
+  }
+
+  static Iterable<Vector3i> boxTraverseBlocks(Vector3d from, Vector3d to, AABB bb) {
+    var length = to.sub(from);
+    var iterable = betweenClosed(bb);
+    if (length.lengthSquared() < (double) MathHelper.square(0.99999F)) {
+      return iterable;
+    } else {
+      Set<Vector3i> set = new ObjectLinkedOpenHashSet<>();
+      var normalizedLength = length.normalize().mul(1.0E-7);
+      var offsetMin = bb.getMinPosition().add(normalizedLength);
+      var lv4 = bb.getMinPosition().sub(length).sub(normalizedLength);
+      addCollisionsAlongTravel(set, lv4, offsetMin, bb);
+
+      for (var pos : iterable) {
+        set.add(pos);
+      }
+
+      return set;
+    }
+  }
+
+  private static void addCollisionsAlongTravel(Set<Vector3i> set, Vector3d from, Vector3d to, AABB bb) {
+    var length = to.sub(from);
+    var startX = MathHelper.floor(from.getX());
+    var startY = MathHelper.floor(from.getY());
+    var startZ = MathHelper.floor(from.getZ());
+    var l = MathHelper.sign(length.getX());
+    var m = MathHelper.sign(length.getY());
+    var n = MathHelper.sign(length.getZ());
+    var d = l == 0 ? Double.MAX_VALUE : (double) l / length.getX();
+    var e = m == 0 ? Double.MAX_VALUE : (double) m / length.getY();
+    var f = n == 0 ? Double.MAX_VALUE : (double) n / length.getZ();
+    var g = d * (l > 0 ? 1.0 - MathHelper.frac(from.getX()) : MathHelper.frac(from.getX()));
+    var h = e * (m > 0 ? 1.0 - MathHelper.frac(from.getY()) : MathHelper.frac(from.getY()));
+    var o = f * (n > 0 ? 1.0 - MathHelper.frac(from.getZ()) : MathHelper.frac(from.getZ()));
+    var p = 0;
+
+    while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
+      if (g < h) {
+        if (g < o) {
+          startX += l;
+          g += d;
+        } else {
+          startZ += n;
+          o += f;
+        }
+      } else if (h < o) {
+        startY += m;
+        h += e;
+      } else {
+        startZ += n;
+        o += f;
+      }
+
+      if (p++ > 16) {
+        break;
+      }
+
+      var optional = AABB.clip(startX, startY, startZ, startX + 1, startY + 1, startZ + 1, from, to);
+      if (optional.isPresent()) {
+        var lv2 = optional.get();
+        var xClamp = MathHelper.clamp(lv2.getX(), (double) startX + 1.0E-5F, (double) startX + 1.0 - 1.0E-5F);
+        var yClamp = MathHelper.clamp(lv2.getY(), (double) startY + 1.0E-5F, (double) startY + 1.0 - 1.0E-5F);
+        var zClamp = MathHelper.clamp(lv2.getZ(), (double) startZ + 1.0E-5F, (double) startZ + 1.0 - 1.0E-5F);
+        var endX = MathHelper.floor(xClamp + bb.getXsize());
+        var endY = MathHelper.floor(yClamp + bb.getYsize());
+        var endZ = MathHelper.floor(zClamp + bb.getZsize());
+
+        for (var x = startX; x <= endX; x++) {
+          for (var y = startY; y <= endY; y++) {
+            for (var z = startZ; z <= endZ; z++) {
+              set.add(Vector3i.from(x, y, z));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static Iterable<Vector3i> betweenClosed(AABB arg) {
+    var lv = Vector3i.from(arg.minX, arg.minY, arg.minZ);
+    var lv2 = Vector3i.from(arg.maxX, arg.maxY, arg.maxZ);
+    return betweenClosed(lv, lv2);
+  }
+
+  public static Iterable<Vector3i> betweenClosed(Vector3i firstPos, Vector3i secondPos) {
+    return betweenClosed(
+      Math.min(firstPos.getX(), secondPos.getX()),
+      Math.min(firstPos.getY(), secondPos.getY()),
+      Math.min(firstPos.getZ(), secondPos.getZ()),
+      Math.max(firstPos.getX(), secondPos.getX()),
+      Math.max(firstPos.getY(), secondPos.getY()),
+      Math.max(firstPos.getZ(), secondPos.getZ())
+    );
+  }
+
+  public static Iterable<Vector3i> betweenClosed(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    var o = maxX - minX + 1;
+    var p = maxY - minY + 1;
+    var q = maxZ - minZ + 1;
+    var r = o * p * q;
+    return () -> new AbstractIterator<>() {
+      private int index;
+
+      protected Vector3i computeNext() {
+        if (this.index == r) {
+          return this.endOfData();
+        } else {
+          var i = this.index % o;
+          var j = this.index / o;
+          var k = j % p;
+          var l = j / p;
+          this.index++;
+          return Vector3i.from(minX + i, minY + k, minZ + l);
+        }
+      }
+    };
+  }
+
+  public static Vector3d collideBoundingBox(@Nullable Entity entity, Vector3d vec, AABB collisionBox, Level level, List<AABB> potentialHits) {
+    var list2 = collectColliders(entity, level, potentialHits, collisionBox.expandTowards(vec));
+    return collideWithShapes(vec, collisionBox, list2);
+  }
+
+  private static List<AABB> collectColliders(@Nullable Entity entity, Level level, List<AABB> collisions, AABB boundingBox) {
+    ImmutableList.Builder<AABB> builder = ImmutableList.builderWithExpectedSize(collisions.size() + 1);
+    if (!collisions.isEmpty()) {
+      builder.addAll(collisions);
+    }
+
+    // TODO: WorldBorder
+    // WorldBorder lv = level.getWorldBorder();
+    // boolean bl = entity != null && lv.isInsideCloseToBorder(entity, boundingBox);
+    // if (bl) {
+    //   builder.add(lv.getCollisionShape());
+    // }
+
+    builder.addAll(level.getBlockCollisionBoxes(boundingBox));
+    return builder.build();
+  }
+
+  public static double collide(Direction.Axis movementAxis, AABB collisionBox, Iterable<AABB> possibleHits, double desiredOffset) {
+    for (var hit : possibleHits) {
+      if (Math.abs(desiredOffset) < 1.0E-7) {
+        return 0.0;
+      }
+
+      desiredOffset = hit.collide(movementAxis, collisionBox, desiredOffset);
+    }
+
+    return desiredOffset;
+  }
+
+  private static Vector3d collideWithShapes(Vector3d deltaMovement, AABB entityBB, List<AABB> shapes) {
+    if (shapes.isEmpty()) {
+      return deltaMovement;
+    } else {
+      var x = deltaMovement.getX();
+      var y = deltaMovement.getY();
+      var z = deltaMovement.getZ();
+      if (y != 0.0) {
+        y = collide(Direction.Axis.Y, entityBB, shapes, y);
+        if (y != 0.0) {
+          entityBB = entityBB.move(0.0, y, 0.0);
+        }
+      }
+
+      var bl = Math.abs(x) < Math.abs(z);
+      if (bl && z != 0.0) {
+        z = collide(Direction.Axis.Z, entityBB, shapes, z);
+        if (z != 0.0) {
+          entityBB = entityBB.move(0.0, 0.0, z);
+        }
+      }
+
+      if (x != 0.0) {
+        x = collide(Direction.Axis.X, entityBB, shapes, x);
+        if (!bl && x != 0.0) {
+          entityBB = entityBB.move(x, 0.0, 0.0);
+        }
+      }
+
+      if (!bl && z != 0.0) {
+        z = collide(Direction.Axis.Z, entityBB, shapes, z);
+      }
+
+      return Vector3d.from(x, y, z);
+    }
+  }
+
+  protected static Vector3d getInputVector(Vector3d relative, float motionScale, float facing) {
+    var d = relative.lengthSquared();
+    if (d < 1.0E-7) {
+      return Vector3d.ZERO;
+    } else {
+      var scaledMotion = (d > 1.0 ? relative.normalize() : relative).mul((double) motionScale);
+      var h = MathHelper.sin(facing * (float) (Math.PI / 180.0));
+      var i = MathHelper.cos(facing * (float) (Math.PI / 180.0));
+      return Vector3d.from(scaledMotion.getX() * (double) i - scaledMotion.getZ() * (double) h, scaledMotion.getY(), scaledMotion.getZ() * (double) i + scaledMotion.getX() * (double) h);
+    }
   }
 
   public void fromAddEntityPacket(ClientboundAddEntityPacket packet) {
@@ -371,6 +594,10 @@ public class Entity {
     return deltaMovement;
   }
 
+  public void setDeltaMovement(Vector3d deltaMovement) {
+    this.deltaMovement = deltaMovement;
+  }
+
   protected boolean getSharedFlag(int flag) {
     return (this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE) & 1 << flag) != 0;
   }
@@ -443,146 +670,6 @@ public class Entity {
     return attributeState.getOrCreateAttribute(type).calculateValue();
   }
 
-  private static float[] collectCandidateStepUpHeights(AABB box, List<AABB> colliders, float deltaY, float maxUpStep) {
-    FloatSet floatSet = new FloatArraySet(4);
-
-    for (var collider : colliders) {
-      var doubleList = collider.getCoords(Direction.Axis.Y);
-      for (double coord : doubleList) {
-        var h = (float) (coord - box.minY);
-        if (!(h < 0.0F) && h != maxUpStep) {
-          if (h > deltaY) {
-            break;
-          }
-
-          floatSet.add(h);
-        }
-      }
-    }
-
-    var fs = floatSet.toFloatArray();
-    FloatArrays.unstableSort(fs);
-    return fs;
-  }
-
-  static Iterable<Vector3i> boxTraverseBlocks(Vector3d from, Vector3d to, AABB bb) {
-    var length = to.sub(from);
-    var iterable = betweenClosed(bb);
-    if (length.lengthSquared() < (double) MathHelper.square(0.99999F)) {
-      return iterable;
-    } else {
-      Set<Vector3i> set = new ObjectLinkedOpenHashSet<>();
-      var normalizedLength = length.normalize().mul(1.0E-7);
-      var offsetMin = bb.getMinPosition().add(normalizedLength);
-      var lv4 = bb.getMinPosition().sub(length).sub(normalizedLength);
-      addCollisionsAlongTravel(set, lv4, offsetMin, bb);
-
-      for (var pos : iterable) {
-        set.add(pos);
-      }
-
-      return set;
-    }
-  }
-
-  private static void addCollisionsAlongTravel(Set<Vector3i> set, Vector3d from, Vector3d to, AABB bb) {
-    var length = to.sub(from);
-    var startX = MathHelper.floor(from.getX());
-    var startY = MathHelper.floor(from.getY());
-    var startZ = MathHelper.floor(from.getZ());
-    var l = MathHelper.sign(length.getX());
-    var m = MathHelper.sign(length.getY());
-    var n = MathHelper.sign(length.getZ());
-    var d = l == 0 ? Double.MAX_VALUE : (double) l / length.getX();
-    var e = m == 0 ? Double.MAX_VALUE : (double) m / length.getY();
-    var f = n == 0 ? Double.MAX_VALUE : (double) n / length.getZ();
-    var g = d * (l > 0 ? 1.0 - MathHelper.frac(from.getX()) : MathHelper.frac(from.getX()));
-    var h = e * (m > 0 ? 1.0 - MathHelper.frac(from.getY()) : MathHelper.frac(from.getY()));
-    var o = f * (n > 0 ? 1.0 - MathHelper.frac(from.getZ()) : MathHelper.frac(from.getZ()));
-    var p = 0;
-
-    while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
-      if (g < h) {
-        if (g < o) {
-          startX += l;
-          g += d;
-        } else {
-          startZ += n;
-          o += f;
-        }
-      } else if (h < o) {
-        startY += m;
-        h += e;
-      } else {
-        startZ += n;
-        o += f;
-      }
-
-      if (p++ > 16) {
-        break;
-      }
-
-      var optional = AABB.clip(startX, startY, startZ, startX + 1, startY + 1, startZ + 1, from, to);
-      if (optional.isPresent()) {
-        var lv2 = optional.get();
-        var xClamp = MathHelper.clamp(lv2.getX(), (double) startX + 1.0E-5F, (double) startX + 1.0 - 1.0E-5F);
-        var yClamp = MathHelper.clamp(lv2.getY(), (double) startY + 1.0E-5F, (double) startY + 1.0 - 1.0E-5F);
-        var zClamp = MathHelper.clamp(lv2.getZ(), (double) startZ + 1.0E-5F, (double) startZ + 1.0 - 1.0E-5F);
-        var endX = MathHelper.floor(xClamp + bb.getXsize());
-        var endY = MathHelper.floor(yClamp + bb.getYsize());
-        var endZ = MathHelper.floor(zClamp + bb.getZsize());
-
-        for (var x = startX; x <= endX; x++) {
-          for (var y = startY; y <= endY; y++) {
-            for (var z = startZ; z <= endZ; z++) {
-              set.add(Vector3i.from(x, y, z));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  public static Iterable<Vector3i> betweenClosed(AABB arg) {
-    var lv = Vector3i.from(arg.minX, arg.minY, arg.minZ);
-    var lv2 = Vector3i.from(arg.maxX, arg.maxY, arg.maxZ);
-    return betweenClosed(lv, lv2);
-  }
-
-  public static Iterable<Vector3i> betweenClosed(Vector3i firstPos, Vector3i secondPos) {
-    return betweenClosed(
-      Math.min(firstPos.getX(), secondPos.getX()),
-      Math.min(firstPos.getY(), secondPos.getY()),
-      Math.min(firstPos.getZ(), secondPos.getZ()),
-      Math.max(firstPos.getX(), secondPos.getX()),
-      Math.max(firstPos.getY(), secondPos.getY()),
-      Math.max(firstPos.getZ(), secondPos.getZ())
-    );
-  }
-
-  public static Iterable<Vector3i> betweenClosed(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-    var o = maxX - minX + 1;
-    var p = maxY - minY + 1;
-    var q = maxZ - minZ + 1;
-    var r = o * p * q;
-    return () -> new AbstractIterator<>() {
-      private int index;
-
-      protected Vector3i computeNext() {
-        if (this.index == r) {
-          return this.endOfData();
-        } else {
-          var i = this.index % o;
-          var j = this.index / o;
-          var k = j % p;
-          var l = j / p;
-          this.index++;
-          return Vector3i.from(minX + i, minY + k, minZ + l);
-        }
-      }
-    };
-  }
-
   public final Vector3d calculateViewVector(float xRot, float yRot) {
     var h = xRot * (float) (Math.PI / 180.0);
     var i = -yRot * (float) (Math.PI / 180.0);
@@ -591,89 +678,6 @@ public class Entity {
     var l = MathHelper.cos(h);
     var m = MathHelper.sin(h);
     return Vector3d.from(k * l, -m, (double) (j * l));
-  }
-
-  public static Vector3d collideBoundingBox(@Nullable Entity entity, Vector3d vec, AABB collisionBox, Level level, List<AABB> potentialHits) {
-    var list2 = collectColliders(entity, level, potentialHits, collisionBox.expandTowards(vec));
-    return collideWithShapes(vec, collisionBox, list2);
-  }
-
-  private static List<AABB> collectColliders(@Nullable Entity entity, Level level, List<AABB> collisions, AABB boundingBox) {
-    ImmutableList.Builder<AABB> builder = ImmutableList.builderWithExpectedSize(collisions.size() + 1);
-    if (!collisions.isEmpty()) {
-      builder.addAll(collisions);
-    }
-
-    // TODO: WorldBorder
-    // WorldBorder lv = level.getWorldBorder();
-    // boolean bl = entity != null && lv.isInsideCloseToBorder(entity, boundingBox);
-    // if (bl) {
-    //   builder.add(lv.getCollisionShape());
-    // }
-
-    builder.addAll(level.getBlockCollisionBoxes(boundingBox));
-    return builder.build();
-  }
-
-  public static double collide(Direction.Axis movementAxis, AABB collisionBox, Iterable<AABB> possibleHits, double desiredOffset) {
-    for (var hit : possibleHits) {
-      if (Math.abs(desiredOffset) < 1.0E-7) {
-        return 0.0;
-      }
-
-      desiredOffset = hit.collide(movementAxis, collisionBox, desiredOffset);
-    }
-
-    return desiredOffset;
-  }
-
-  private static Vector3d collideWithShapes(Vector3d deltaMovement, AABB entityBB, List<AABB> shapes) {
-    if (shapes.isEmpty()) {
-      return deltaMovement;
-    } else {
-      var x = deltaMovement.getX();
-      var y = deltaMovement.getY();
-      var z = deltaMovement.getZ();
-      if (y != 0.0) {
-        y = collide(Direction.Axis.Y, entityBB, shapes, y);
-        if (y != 0.0) {
-          entityBB = entityBB.move(0.0, y, 0.0);
-        }
-      }
-
-      var bl = Math.abs(x) < Math.abs(z);
-      if (bl && z != 0.0) {
-        z = collide(Direction.Axis.Z, entityBB, shapes, z);
-        if (z != 0.0) {
-          entityBB = entityBB.move(0.0, 0.0, z);
-        }
-      }
-
-      if (x != 0.0) {
-        x = collide(Direction.Axis.X, entityBB, shapes, x);
-        if (!bl && x != 0.0) {
-          entityBB = entityBB.move(x, 0.0, 0.0);
-        }
-      }
-
-      if (!bl && z != 0.0) {
-        z = collide(Direction.Axis.Z, entityBB, shapes, z);
-      }
-
-      return Vector3d.from(x, y, z);
-    }
-  }
-
-  protected static Vector3d getInputVector(Vector3d relative, float motionScale, float facing) {
-    var d = relative.lengthSquared();
-    if (d < 1.0E-7) {
-      return Vector3d.ZERO;
-    } else {
-      var scaledMotion = (d > 1.0 ? relative.normalize() : relative).mul((double) motionScale);
-      var h = MathHelper.sin(facing * (float) (Math.PI / 180.0));
-      var i = MathHelper.cos(facing * (float) (Math.PI / 180.0));
-      return Vector3d.from(scaledMotion.getX() * (double) i - scaledMotion.getZ() * (double) h, scaledMotion.getY(), scaledMotion.getZ() * (double) i + scaledMotion.getX() * (double) h);
-    }
   }
 
   public final void setOldPosAndRot() {
@@ -942,10 +946,6 @@ public class Entity {
     } else {
       this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
     }
-  }
-
-  public void setDeltaMovement(Vector3d deltaMovement) {
-    this.deltaMovement = deltaMovement;
   }
 
   public boolean isNoGravity() {

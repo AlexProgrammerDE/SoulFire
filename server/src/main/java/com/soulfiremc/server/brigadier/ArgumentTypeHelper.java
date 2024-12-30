@@ -52,9 +52,6 @@ public class ArgumentTypeHelper {
     return new DoubleAxisData(false, reader.readDouble());
   }
 
-  public record DoubleAxisData(boolean relative, double value) {
-  }
-
   public static OptionalInt parseEntityId(BotConnection bot, String input) {
     var dataManager = bot.dataManager();
 
@@ -77,5 +74,8 @@ public class ArgumentTypeHelper {
     }
 
     return OptionalInt.empty();
+  }
+
+  public record DoubleAxisData(boolean relative, double value) {
   }
 }

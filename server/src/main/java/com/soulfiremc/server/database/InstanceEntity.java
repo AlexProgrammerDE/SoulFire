@@ -20,6 +20,7 @@ package com.soulfiremc.server.database;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,33 +34,34 @@ import java.util.UUID;
 @Entity
 @Table(name = "instances")
 public class InstanceEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(nullable = false, unique = true, length = 32)
-    private String friendlyName;
+  @NotBlank(message = "Friendly name cannot be blank")
+  @Column(nullable = false, unique = true, length = 32)
+  private String friendlyName;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private UserEntity owner;
+  @ManyToOne
+  @JoinColumn(nullable = false)
+  private UserEntity owner;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
   @Convert(converter = InstanceSettingsConverter.class)
-    @Column(nullable = false)
-    private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
+  @Column(nullable = false)
+  private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Instant updatedAt;
 
-    @Version
-    private long version;
+  @Version
+  private long version;
 }

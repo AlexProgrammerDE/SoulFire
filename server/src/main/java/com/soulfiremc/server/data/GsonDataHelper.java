@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class GsonDataHelper {
-  private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
   public static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
     new TypeAdapter<>() {
       @Override
@@ -47,7 +46,8 @@ public class GsonDataHelper {
         return Key.key(key);
       }
     };
-    private static final Function<Map<Class<?>, Object>, Gson> GSON_FACTORY = (typeAdapters) -> {
+  private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
+  private static final Function<Map<Class<?>, Object>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
       .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
       .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
@@ -88,7 +88,7 @@ public class GsonDataHelper {
     throw new RuntimeException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
   }
 
-    public static Gson createGson(Map<Class<?>, Object> typeAdapters) {
+  public static Gson createGson(Map<Class<?>, Object> typeAdapters) {
     return GSON_FACTORY.apply(typeAdapters);
   }
 }

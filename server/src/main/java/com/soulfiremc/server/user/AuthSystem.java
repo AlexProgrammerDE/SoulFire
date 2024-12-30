@@ -58,11 +58,13 @@ public class AuthSystem {
         var rootUser = new UserEntity();
         rootUser.username("root");
         rootUser.role(UserEntity.Role.ADMIN);
+        rootUser.email("root@soulfiremc.com");
         s.persist(rootUser);
 
         return rootUser.id();
       } else {
         currentRootUser.role(UserEntity.Role.ADMIN);
+        currentRootUser.email("root@soulfiremc.com");
         s.merge(currentRootUser);
 
         return currentRootUser.id();
@@ -121,6 +123,12 @@ public class AuthSystem {
       return userData.username();
     }
 
+    @Override
+    public String getEmail() {
+      return userData.email();
+    }
+
+    @Override
     public UserEntity.Role getRole() {
       return userData.role();
     }

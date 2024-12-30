@@ -291,8 +291,8 @@ public class SoulFireServer {
 
   public CompletableFuture<?> shutdownInstances() {
     return CompletableFuture.allOf(instances.values().stream()
-        .map(InstanceManager::shutdownHook)
-        .toArray(CompletableFuture[]::new));
+      .map(InstanceManager::shutdownHook)
+      .toArray(CompletableFuture[]::new));
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {

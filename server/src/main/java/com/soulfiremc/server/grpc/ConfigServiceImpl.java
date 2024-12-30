@@ -67,6 +67,7 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
         ClientDataResponse.newBuilder()
           .setId(currentUSer.getUniqueId().toString())
           .setUsername(currentUSer.getUsername())
+          .setEmail(currentUSer.getEmail())
           .setRole(switch (currentUSer.getRole()) {
             case ADMIN -> UserRole.ADMIN;
             case USER -> UserRole.USER;

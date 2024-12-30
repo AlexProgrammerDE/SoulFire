@@ -42,6 +42,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       sessionFactory.inTransaction(session -> {
         var userEntity = new UserEntity();
         userEntity.username(request.getUsername());
+        userEntity.email(request.getEmail());
         userEntity.role(switch (request.getRole()) {
           case ADMIN -> UserEntity.Role.ADMIN;
           case USER -> UserEntity.Role.USER;
@@ -92,6 +93,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         .addAllUsers(users.stream().map(user -> UserListResponse.User.newBuilder()
             .setId(user.id().toString())
             .setUsername(user.username())
+            .setEmail(user.email())
             .setRole(switch (user.role()) {
               case ADMIN -> UserRole.ADMIN;
               case USER -> UserRole.USER;
@@ -118,6 +120,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
       responseObserver.onNext(UserInfoResponse.newBuilder()
         .setUsername(user.username())
+        .setEmail(user.email())
         .setRole(switch (user.role()) {
           case ADMIN -> UserRole.ADMIN;
           case USER -> UserRole.USER;

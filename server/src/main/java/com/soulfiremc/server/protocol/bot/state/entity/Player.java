@@ -43,11 +43,6 @@ import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class Player extends LivingEntity {
-  @Getter
-  private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
-  @Getter
-  private final AbilitiesState abilitiesState = new AbilitiesState();
-  protected FoodData foodData = new FoodData();
   public static final float CROUCH_BB_HEIGHT = 1.5F;
   public static final float SWIMMING_BB_WIDTH = 0.6F;
   public static final float SWIMMING_BB_HEIGHT = 0.6F;
@@ -64,14 +59,19 @@ public abstract class Player extends LivingEntity {
     .put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(DEFAULT_EYE_HEIGHT))
     .build();
   public static final int CLIENT_LOADED_TIMEOUT_TIME = 60;
+  protected final GameProfile gameProfile;
+  protected final float defaultFlySpeed = 0.02F;
+  @Getter
+  private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
+  @Getter
+  private final AbilitiesState abilitiesState = new AbilitiesState();
   public int experienceLevel;
   public int totalExperience;
   public float experienceProgress;
-  protected final GameProfile gameProfile;
+  protected FoodData foodData = new FoodData();
   protected boolean wasUnderwater = false;
-  private boolean reducedDebugInfo;
-  protected final float defaultFlySpeed = 0.02F;
   protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
+  private boolean reducedDebugInfo;
   private boolean clientLoaded = false;
   private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 

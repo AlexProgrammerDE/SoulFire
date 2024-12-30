@@ -10,6 +10,7 @@ import "soulfire/common.proto";
 message UserCreateRequest {
   string username = 1;
   UserRole role = 2;
+  string email = 3;
 }
 
 message UserCreateResponse {
@@ -31,6 +32,7 @@ message UserListResponse {
     string id = 1;
     string username = 2;
     UserRole role = 3;
+    string email = 4;
   }
 
   repeated User users = 1;
@@ -43,6 +45,7 @@ message UserInfoRequest {
 message UserInfoResponse {
   string username = 1;
   UserRole role = 2;
+  string email = 3;
 }
 
 service UserService {

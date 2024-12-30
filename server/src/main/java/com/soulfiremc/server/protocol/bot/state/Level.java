@@ -47,12 +47,11 @@ public class Level implements LevelHeightAccessor {
   private final boolean debug;
   private final int seaLevel;
   private final LevelData levelData;
-
-  private boolean tickDayTime;
   protected float oRainLevel;
   protected float rainLevel;
   protected float oThunderLevel;
   protected float thunderLevel;
+  private boolean tickDayTime;
 
   public Level(
     TagsState tagsState,

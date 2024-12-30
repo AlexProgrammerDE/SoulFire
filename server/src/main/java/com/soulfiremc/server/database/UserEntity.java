@@ -18,6 +18,8 @@
 package com.soulfiremc.server.database;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,36 +33,42 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class UserEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(nullable = false, unique = true, length = 32)
-    private String username;
+  @NotBlank(message = "Username cannot be blank")
+  @Column(nullable = false, unique = true, length = 32)
+  private String username;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+  @NotBlank(message = "Email cannot be blank")
+  @Email(message = "Invalid email format")
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
 
-    private Instant lastLoginAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Instant updatedAt;
 
-    @CreationTimestamp
-    @Column(nullable = false)
-    private Instant minIssuedAt;
+  private Instant lastLoginAt;
 
-    @Version
-    private long version;
+  @CreationTimestamp
+  @Column(nullable = false)
+  private Instant minIssuedAt;
 
-    public enum Role {
-        USER,
-        ADMIN
-    }
+  @Version
+  private long version;
+
+  public enum Role {
+    USER,
+    ADMIN
+  }
 }

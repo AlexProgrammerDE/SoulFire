@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3d;
 
 @RequiredArgsConstructor
 public enum MovementModifier {

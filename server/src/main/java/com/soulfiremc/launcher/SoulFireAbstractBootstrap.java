@@ -105,6 +105,45 @@ public abstract class SoulFireAbstractBootstrap {
       });
   }
 
+  public static void injectMixins(@Nullable PluginManager pluginManager) {
+    var mixinPaths = new HashSet<String>();
+    Stream.concat(pluginManager == null ? Stream.empty() : pluginManager
+          .getExtensions(MixinExtension.class)
+          .stream(),
+        Stream.of(new SFDefaultMixinExtension()))
+      .forEach(
+        mixinExtension -> {
+          for (var mixinPath : mixinExtension.getMixinPaths()) {
+            if (mixinPaths.add(mixinPath)) {
+              log.info("Added mixin \"{}\"", mixinPath);
+            } else {
+              log.warn("Mixin path \"{}\" is already added!", mixinPath);
+            }
+          }
+        });
+
+    var classLoaders = new ArrayList<ClassLoader>();
+    classLoaders.add(SoulFireAbstractBootstrap.class.getClassLoader());
+    if (pluginManager != null) {
+      pluginManager
+        .getPlugins()
+        .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
+    }
+
+    var classProvider = new CustomClassProvider(classLoaders);
+    var transformerManager = new TransformerManager(classProvider);
+    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
+    mixinPaths.forEach(transformerManager::addTransformer);
+
+    try {
+      transformerManager.hookInstrumentation(Agents.getInstrumentation());
+      log.info("Used Runtime Agent to inject mixins");
+    } catch (IOException t) {
+      log.error("Failed to inject mixins", t);
+      throw new IllegalStateException("Failed to inject mixins", t);
+    }
+  }
+
   private void initPlugins(List<ClassLoader> classLoaders) {
     try {
       Files.createDirectories(pluginsDirectory);
@@ -166,45 +205,6 @@ public abstract class SoulFireAbstractBootstrap {
   public void injectMixinsAndRun(String[] args) {
     injectMixins(pluginManager);
     this.postMixinMain(args);
-  }
-
-  public static void injectMixins(@Nullable PluginManager pluginManager) {
-    var mixinPaths = new HashSet<String>();
-    Stream.concat(pluginManager == null ? Stream.empty() : pluginManager
-          .getExtensions(MixinExtension.class)
-          .stream(),
-        Stream.of(new SFDefaultMixinExtension()))
-      .forEach(
-        mixinExtension -> {
-          for (var mixinPath : mixinExtension.getMixinPaths()) {
-            if (mixinPaths.add(mixinPath)) {
-              log.info("Added mixin \"{}\"", mixinPath);
-            } else {
-              log.warn("Mixin path \"{}\" is already added!", mixinPath);
-            }
-          }
-        });
-
-    var classLoaders = new ArrayList<ClassLoader>();
-    classLoaders.add(SoulFireAbstractBootstrap.class.getClassLoader());
-    if (pluginManager != null) {
-      pluginManager
-        .getPlugins()
-        .forEach(pluginWrapper -> classLoaders.add(pluginWrapper.getPluginClassLoader()));
-    }
-
-    var classProvider = new CustomClassProvider(classLoaders);
-    var transformerManager = new TransformerManager(classProvider);
-    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-    mixinPaths.forEach(transformerManager::addTransformer);
-
-    try {
-      transformerManager.hookInstrumentation(Agents.getInstrumentation());
-      log.info("Used Runtime Agent to inject mixins");
-    } catch (IOException t) {
-      log.error("Failed to inject mixins", t);
-      throw new IllegalStateException("Failed to inject mixins", t);
-    }
   }
 
   protected abstract void postMixinMain(String[] args);

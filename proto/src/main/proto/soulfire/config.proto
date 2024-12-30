@@ -138,6 +138,7 @@ message ClientDataResponse {
   string id = 6;
   string username = 1;
   UserRole role = 7;
+  string email = 8;
   repeated GlobalPermissionState serverPermissions = 2;
   repeated ServerPlugin plugins = 3;
   repeated SettingsPage settings = 5;

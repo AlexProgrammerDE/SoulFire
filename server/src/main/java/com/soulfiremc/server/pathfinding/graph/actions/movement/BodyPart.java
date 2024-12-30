@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public enum BodyPart {
   HEAD {
     @Override
-    public SFVec3i offset(SFVec3i position)  {
+    public SFVec3i offset(SFVec3i position) {
       return position.add(0, 1, 0);
     }
   },

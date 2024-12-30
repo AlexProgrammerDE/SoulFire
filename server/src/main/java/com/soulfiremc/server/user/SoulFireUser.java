@@ -26,6 +26,8 @@ public interface SoulFireUser extends ServerCommandSource {
 
   String getUsername();
 
+  String getEmail();
+
   UserEntity.Role getRole();
 
   @Override

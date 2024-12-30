@@ -44,21 +44,22 @@ import java.util.stream.Stream;
 
 @Getter
 public abstract class LivingEntity extends Entity {
+  protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
   private static final Key SPEED_MODIFIER_POWDER_SNOW_ID = Key.key("powder_snow");
   private static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
   private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
-  protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
-  protected int fallFlyTicks;
-  protected float appliedScale = 1.0F;
+  private final boolean discardFriction = false;
   public float xxa;
   public float yya;
   public float zza;
+  public int hurtTime;
+  public int hurtDuration;
+  public int deathTime;
+  protected int fallFlyTicks;
+  protected float appliedScale = 1.0F;
   protected boolean jumping;
-  private int noJumpDelay;
-  private float speed;
-  private final boolean discardFriction = false;
   protected int lerpSteps;
   protected double lerpX;
   protected double lerpY;
@@ -67,10 +68,9 @@ public abstract class LivingEntity extends Entity {
   protected double lerpXRot;
   protected double lerpYHeadRot;
   protected int lerpHeadSteps;
-  public int hurtTime;
-  public int hurtDuration;
-  public int deathTime;
   protected float lastHurt;
+  private int noJumpDelay;
+  private float speed;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 
@@ -79,6 +79,15 @@ public abstract class LivingEntity extends Entity {
     this.setHealth(this.getMaxHealth());
     this.reapplyPosition();
     this.setYRot((float) (Math.random() * (float) (Math.PI * 2)));
+  }
+
+  public static boolean canGlideUsing(SFItemStack stack, EquipmentSlot slow) {
+    if (!stack.has(DataComponentType.GLIDER)) {
+      return false;
+    } else {
+      var equippable = stack.get(DataComponentType.EQUIPPABLE);
+      return equippable != null && slow == EquipmentSlot.fromMCPl(equippable.slot()) && !stack.nextDamageWillBreak();
+    }
   }
 
   @Override
@@ -129,15 +138,6 @@ public abstract class LivingEntity extends Entity {
       }
       case PLAYER_SWAP_SAME_ITEM -> this.swapHandItems();
       default -> super.handleEntityEvent(event);
-    }
-  }
-
-  public static boolean canGlideUsing(SFItemStack stack, EquipmentSlot slow) {
-    if (!stack.has(DataComponentType.GLIDER)) {
-      return false;
-    } else {
-      var equippable = stack.get(DataComponentType.EQUIPPABLE);
-      return equippable != null && slow == EquipmentSlot.fromMCPl(equippable.slot()) && !stack.nextDamageWillBreak();
     }
   }
 
