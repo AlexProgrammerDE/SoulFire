@@ -109,6 +109,8 @@ public class SoulFireServer {
     PluginManager pluginManager,
     Instant startTime,
     Path baseDirectory) {
+    log.info("Starting SoulFire v{}...", BuildData.VERSION);
+
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
     this.baseDirectory = baseDirectory;
@@ -133,8 +135,6 @@ public class SoulFireServer {
       }), 1, TimeUnit.SECONDS));
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
-
-    log.info("Starting SoulFire v{}...", BuildData.VERSION);
 
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
