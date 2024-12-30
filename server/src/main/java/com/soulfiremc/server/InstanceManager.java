@@ -365,6 +365,9 @@ public class InstanceManager {
     localAttackLifecycle = attackLifecycle;
     sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
+      if (instanceEntity == null) {
+        return;
+      }
 
       instanceEntity.attackLifecycle(attackLifecycle);
 
