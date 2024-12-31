@@ -23,6 +23,7 @@ import org.shredzone.acme4j.challenge.Challenge;
 import org.shredzone.acme4j.challenge.Dns01Challenge;
 import org.shredzone.acme4j.challenge.Http01Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
+import org.shredzone.acme4j.toolbox.AcmeUtils;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
 import java.io.IOException;
@@ -116,7 +117,6 @@ public class AcmeClient {
       try (var fr = Files.newBufferedReader(USER_KEY_FILE)) {
         return KeyPairUtils.readKeyPair(fr);
       }
-
     } else {
       // If there is none, create a new key pair and save it
       var userKeyPair = KeyPairUtils.createKeyPair();
@@ -141,10 +141,19 @@ public class AcmeClient {
     }
   }
 
-  private Account findOrRegisterAccount(Session session, KeyPair accountKey) throws AcmeException {
+  private Account findOrRegisterAccount(Session session, KeyPair accountKey) throws AcmeException, IOException {
     // Ask the user to accept the TOS, if server provides us with a link.
     var tos = session.getMetadata().getTermsOfService();
-    tos.ifPresent(uri -> scannerPromptYes("You agree to: %s".formatted(uri)));
+    if (tos.isPresent()) {
+      var tosUrl = tos.get();
+      var tosHash = AcmeUtils.hexEncode(AcmeUtils.sha256hash(tosUrl.toString()));
+      var tosFile = TLS_DIR.resolve("tos-%s.txt".formatted(tosHash));
+      if (!Files.exists(tosFile)) {
+        scannerPromptYes("You agree to: %s".formatted(tosUrl));
+        Files.writeString(tosFile, tosUrl.toString());
+      }
+    }
+
 
     var accountBuilder = new AccountBuilder()
       .agreeToTermsOfService()
@@ -197,7 +206,9 @@ public class AcmeClient {
     }
 
     log.info("Challenge has been completed. Remember to remove the validation resource.");
-    scannerPromptYes("Challenge has been completed.\nYou can remove the resource again now.");
+    scannerPromptYes("""
+      Challenge has been completed.
+      You can remove the resource again now.""");
   }
 
   @SuppressWarnings("HttpUrlsUsage")
