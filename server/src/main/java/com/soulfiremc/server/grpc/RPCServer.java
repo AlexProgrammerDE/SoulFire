@@ -18,10 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import ch.jalu.injector.Injector;
-import com.linecorp.armeria.common.HttpHeaderNames;
-import com.linecorp.armeria.common.HttpHeaders;
-import com.linecorp.armeria.common.HttpMethod;
-import com.linecorp.armeria.common.SessionProtocol;
+import com.linecorp.armeria.common.*;
 import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
 import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames;
@@ -47,6 +44,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 /**
  * The RPC server for the SoulFire server.
@@ -108,9 +107,27 @@ public class RPCServer {
         .enableUnframedRequests(true)
         .enableHealthCheckService(true)
         .build();
+
+    var serverBuilder = Server.builder();
+    var serverProtocols = new ArrayList<SessionProtocol>();
+    if (Boolean.getBoolean("sf.grpc.proxy-protocol")) {
+      serverProtocols.add(SessionProtocol.PROXY);
+    }
+
+    serverProtocols.add(SessionProtocol.HTTP);
+    if (Boolean.getBoolean("sf.grpc.tls.enabled")) {
+      serverProtocols.add(SessionProtocol.HTTPS);
+
+      serverBuilder.tls(TlsKeyPair.of(
+        Path.of(System.getProperty("sf.grpc.tls.key")).toFile(),
+        System.getProperty("sf.grpc.tls.key.password"),
+        Path.of(System.getProperty("sf.grpc.tls.cert")).toFile()
+      ));
+    }
+
     server =
-      Server.builder()
-        .port(new InetSocketAddress(host, port), SessionProtocol.HTTP)
+      serverBuilder
+        .port(new InetSocketAddress(host, port), serverProtocols)
         .meterRegistry(meterRegistry)
         .decorator(LoggingService.builder()
           .logWriter(LogWriter.builder()
