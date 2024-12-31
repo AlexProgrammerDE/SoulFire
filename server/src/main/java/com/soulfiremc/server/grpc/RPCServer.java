@@ -115,6 +115,8 @@ public class RPCServer {
     }
 
     serverProtocols.add(SessionProtocol.HTTP);
+
+    new AcmeClient().provisionAcmeCertIfNeeded();
     if (Boolean.getBoolean("sf.grpc.tls.enabled")) {
       serverProtocols.add(SessionProtocol.HTTPS);
 

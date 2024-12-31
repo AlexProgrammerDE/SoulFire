@@ -95,6 +95,9 @@ dependencies {
   api(libs.hikaricp)
   api(libs.sqlite)
 
+  // For tls cert provisioning
+  api(libs.acme4j)
+
   testImplementation(libs.junit)
 }
 

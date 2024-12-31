@@ -33,6 +33,7 @@ import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.Fields;
 import org.apache.logging.log4j.LogManager;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -41,6 +42,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.Security;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,6 +72,8 @@ public abstract class SoulFireAbstractBootstrap {
     if (System.getProperty("io.netty.leakDetection.level") == null) {
       ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
     }
+
+    Security.addProvider(new BouncyCastleProvider());
   }
 
   protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());

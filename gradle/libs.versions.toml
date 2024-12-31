@@ -97,6 +97,7 @@ hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0.CR1"
 hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.3.Final"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
 sqlite = "org.xerial:sqlite-jdbc:3.41.2.2"
+acme4j = "org.shredzone.acme4j:acme4j-client:3.4.0"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit = "org.junit.jupiter:junit-jupiter:5.11.4"
 
