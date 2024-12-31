@@ -58,6 +58,8 @@ public class AcmeClient {
   }
 
   private void fetchCertificate() throws IOException, AcmeException, InterruptedException {
+    Files.createDirectories(TLS_DIR);
+
     // Load the user key file. If there is no key file, create a new one.
     var userKeyPair = loadOrCreateUserKeyPair();
 
