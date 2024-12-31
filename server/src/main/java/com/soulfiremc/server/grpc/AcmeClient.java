@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.extern.slf4j.Slf4j;
 import org.shredzone.acme4j.*;
 import org.shredzone.acme4j.challenge.Challenge;
@@ -146,7 +147,7 @@ public class AcmeClient {
     var tos = session.getMetadata().getTermsOfService();
     if (tos.isPresent()) {
       var tosUrl = tos.get();
-      var tosHash = AcmeUtils.hexEncode(AcmeUtils.sha256hash(tosUrl.toString()));
+      var tosHash = AcmeUtils.hexEncode(SFHelpers.md5Hash(tosUrl.toString()));
       var tosFile = TLS_DIR.resolve("tos-%s.txt".formatted(tosHash));
       if (!Files.exists(tosFile)) {
         scannerPromptYes("You agree to: %s".formatted(tosUrl));
@@ -165,7 +166,7 @@ public class AcmeClient {
     }
 
     var account = accountBuilder.create(session);
-    log.info("Registered a new user, URL: {}", account.getLocation());
+    log.info("Logged into account, URL: {}", account.getLocation());
 
     return account;
   }

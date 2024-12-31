@@ -18,11 +18,14 @@
 package com.soulfiremc.server.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.shredzone.acme4j.exception.AcmeProtocolException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -205,5 +208,15 @@ public class SFHelpers {
     }
 
     return name;
+  }
+
+  public static byte[] md5Hash(String str) {
+    try {
+      var md = MessageDigest.getInstance("MD5");
+      md.update(str.getBytes(StandardCharsets.UTF_8));
+      return md.digest();
+    } catch (NoSuchAlgorithmException ex) {
+      throw new AcmeProtocolException("Could not compute hash", ex);
+    }
   }
 }
