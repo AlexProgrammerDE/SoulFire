@@ -97,7 +97,7 @@ public class CLIManager {
       rpcClient
         .configStubBlocking()
         .getClientData(ClientDataRequest.getDefaultInstance())
-        .getSettingsList()) {
+        .getInstanceSettingsList()) {
       for (var entry : page.getEntriesList()) {
         var propertyKey = new PropertyKey(page.getNamespace(), entry.getKey());
 
