@@ -19,6 +19,7 @@ package com.soulfiremc.server.database;
 
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
+import com.soulfiremc.server.util.SFHelpers;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -27,6 +28,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -34,6 +36,19 @@ import java.util.UUID;
 @Entity
 @Table(name = "instances")
 public class InstanceEntity {
+  public static final List<String> ICON_POOL = List.of(
+    "pickaxe",
+    "apple",
+    "shovel",
+    "sword",
+    "fish",
+    "citrus",
+    "popcorn",
+    "cookie",
+    "carrot",
+    "croissant"
+  );
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
@@ -41,6 +56,10 @@ public class InstanceEntity {
   @NotBlank(message = "Friendly name cannot be blank")
   @Column(nullable = false, unique = true, length = 32)
   private String friendlyName;
+
+  @NotBlank(message = "Icon cannot be blank")
+  @Column(nullable = false, length = 64)
+  private String icon;
 
   @ManyToOne
   @JoinColumn(nullable = false)
@@ -64,4 +83,8 @@ public class InstanceEntity {
 
   @Version
   private long version;
+
+  public static String randomInstanceIcon() {
+    return SFHelpers.getRandomEntry(ICON_POOL);
+  }
 }

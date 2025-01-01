@@ -23,6 +23,7 @@ import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -95,6 +96,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           .map(instance -> InstanceListResponse.Instance.newBuilder()
             .setId(instance.id().toString())
             .setFriendlyName(instance.friendlyName())
+            .setIcon(instance.icon())
             .setState(instance.attackLifecycle().toProto())
             .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
@@ -120,6 +122,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
 
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instanceEntity.friendlyName())
+        .setIcon(instanceEntity.icon())
         .setConfig(instanceEntity.settings().toProto())
         .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
@@ -132,7 +135,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   }
 
   @Override
-  public void updateInstanceFriendlyName(InstanceUpdateFriendlyNameRequest request, StreamObserver<InstanceUpdateFriendlyNameResponse> responseObserver) {
+  public void updateInstanceMeta(InstanceUpdateMetaRequest request, StreamObserver<InstanceUpdateMetaResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE, instanceId));
 
@@ -143,12 +146,16 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
         }
 
-        instanceEntity.friendlyName(request.getFriendlyName());
+        SFHelpers.mustSupply(() -> switch (request.getMetaCase()) {
+          case FRIENDLYNAME -> () -> instanceEntity.friendlyName(request.getFriendlyName());
+          case ICON -> () -> instanceEntity.icon(request.getIcon());
+          case META_NOT_SET -> throw new IllegalStateException("Unknown meta type");
+        });
 
         session.merge(instanceEntity);
       });
 
-      responseObserver.onNext(InstanceUpdateFriendlyNameResponse.newBuilder().build());
+      responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance state", t);

@@ -274,6 +274,7 @@ public class SoulFireServer {
     var instanceEntity = sessionFactory.fromTransaction(s -> {
       var newInstanceEntity = new InstanceEntity();
       newInstanceEntity.friendlyName(friendlyName);
+      newInstanceEntity.icon(InstanceEntity.randomInstanceIcon());
       newInstanceEntity.owner(s.find(UserEntity.class, owner.getUniqueId()));
       s.persist(newInstanceEntity);
 

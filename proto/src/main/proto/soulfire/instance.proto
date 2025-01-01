@@ -43,6 +43,7 @@ message InstanceListResponse {
   message Instance {
     string id = 1;
     string friendlyName = 2;
+    string icon = 5;
     InstanceState state = 3;
     repeated InstancePermissionState instancePermissions = 4;
   }
@@ -61,17 +62,21 @@ message InstanceInfoRequest {
 
 message InstanceInfoResponse {
   string friendlyName = 1;
+  string icon = 5;
   InstanceConfig config = 2;
   InstanceState state = 3;
   repeated InstancePermissionState instancePermissions = 4;
 }
 
-message InstanceUpdateFriendlyNameRequest {
+message InstanceUpdateMetaRequest {
   string id = 1;
-  string friendlyName = 2;
+  oneof meta {
+    string friendlyName = 2;
+    string icon = 3;
+  }
 }
 
-message InstanceUpdateFriendlyNameResponse {
+message InstanceUpdateMetaResponse {
 }
 
 message InstanceUpdateConfigRequest {
@@ -95,7 +100,7 @@ service InstanceService {
   rpc deleteInstance(InstanceDeleteRequest) returns (InstanceDeleteResponse);
   rpc listInstances(InstanceListRequest) returns (InstanceListResponse);
   rpc getInstanceInfo(InstanceInfoRequest) returns (InstanceInfoResponse);
-  rpc updateInstanceFriendlyName(InstanceUpdateFriendlyNameRequest) returns (InstanceUpdateFriendlyNameResponse);
+  rpc updateInstanceMeta(InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse);
   rpc updateInstanceConfig(InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse);
   rpc changeInstanceState(InstanceStateChangeRequest) returns (InstanceStateChangeResponse);
 }
