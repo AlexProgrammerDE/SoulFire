@@ -23,7 +23,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.BotSettings;
+import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;

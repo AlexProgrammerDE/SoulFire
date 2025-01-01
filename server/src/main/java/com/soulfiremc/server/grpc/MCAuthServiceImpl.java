@@ -21,7 +21,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.settings.AccountSettings;
+import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;

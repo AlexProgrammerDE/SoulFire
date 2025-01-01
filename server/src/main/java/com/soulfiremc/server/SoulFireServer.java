@@ -32,9 +32,14 @@ import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ServerConfigEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.RPCServer;
-import com.soulfiremc.server.settings.*;
+import com.soulfiremc.server.settings.instance.AISettings;
+import com.soulfiremc.server.settings.instance.AccountSettings;
+import com.soulfiremc.server.settings.instance.BotSettings;
+import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
+import com.soulfiremc.server.settings.server.DevSettings;
+import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -188,6 +193,7 @@ public class SoulFireServer {
         this,
         serverSettingsRegistry =
           new ServerSettingsRegistry(SettingsPage.Type.SERVER)
+            .addClass(ServerSettings.class, "Server Settings", "server")
             .addClass(DevSettings.class, "Dev Settings", "bug")));
     SoulFireAPI.postEvent(
       new InstanceSettingsRegistryInitEvent(

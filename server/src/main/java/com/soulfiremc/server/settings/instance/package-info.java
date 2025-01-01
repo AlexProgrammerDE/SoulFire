@@ -16,6 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 /**
- * Settings system for SoulFire.
+ * Built-in instance settings.
  */
-package com.soulfiremc.server.settings;
+package com.soulfiremc.server.settings.instance;

@@ -21,7 +21,7 @@ import com.google.common.base.Stopwatch;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.ProxySettings;
+import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
