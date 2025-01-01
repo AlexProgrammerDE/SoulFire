@@ -8,7 +8,7 @@ package soulfire.v1;
 import "soulfire/common.proto";
 
 message CredentialsAuthRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   AccountTypeCredentials service = 2;
   repeated string payload = 3;
 }
@@ -18,26 +18,26 @@ message CredentialsAuthResponse {
 }
 
 message DeviceCodeAuthRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   AccountTypeDeviceCode service = 2;
 }
 
 message DeviceCode {
-  string deviceCode = 1;
-  string userCode = 2;
-  string verificationUri = 3;
-  string directVerificationUri = 4;
+  string device_code = 1;
+  string user_code = 2;
+  string verification_uri = 3;
+  string direct_verification_uri = 4;
 }
 
 message DeviceCodeAuthResponse {
   oneof data {
     MinecraftAccountProto account = 1;
-    DeviceCode deviceCode = 2;
+    DeviceCode device_code = 2;
   }
 }
 
 message RefreshRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   MinecraftAccountProto account = 2;
 }
 

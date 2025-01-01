@@ -210,7 +210,7 @@ public class CLIManager {
 
             targetCommandSpec.addOption(optionSpec);
           }
-          case STRINGLIST -> {
+          case STRING_LIST -> {
             var stringListEntry = settingType.getStringList();
             var description = escapeFormatSpecifiers(stringListEntry.getDescription());
 
@@ -248,7 +248,7 @@ public class CLIManager {
 
             targetCommandSpec.addOption(optionSpec);
           }
-          case MINMAX -> {
+          case MIN_MAX -> {
             var minMaxEntry = settingType.getMinMax();
 
             var minRef = new AtomicInteger();

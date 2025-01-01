@@ -147,7 +147,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
         }
 
         SFHelpers.mustSupply(() -> switch (request.getMetaCase()) {
-          case FRIENDLYNAME -> () -> instanceEntity.friendlyName(request.getFriendlyName());
+          case FRIENDLY_NAME -> () -> instanceEntity.friendlyName(request.getFriendlyName());
           case ICON -> () -> instanceEntity.icon(request.getIcon());
           case META_NOT_SET -> throw new IllegalStateException("Unknown meta type");
         });

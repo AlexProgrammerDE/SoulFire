@@ -8,7 +8,7 @@ package soulfire.v1;
 import "soulfire/common.proto";
 
 message ProxyCheckRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   repeated ProxyProto proxy = 2;
 }
 
@@ -16,7 +16,7 @@ message ProxyCheckResponseSingle {
   ProxyProto proxy = 1;
   bool valid = 2;
   int32 latency = 3;
-  string realIp = 4;
+  string real_ip = 4;
 }
 
 message ProxyCheckResponse {

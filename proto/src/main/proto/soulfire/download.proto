@@ -13,7 +13,7 @@ message HeaderPair {
 }
 
 message DownloadRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   string uri = 2;
   repeated HeaderPair headers = 3;
   optional ProxyProto proxy = 4;
@@ -22,7 +22,7 @@ message DownloadRequest {
 message DownloadResponse {
   bytes data = 1;
   repeated HeaderPair headers = 2;
-  int32 statusCode = 3;
+  int32 status_code = 3;
 }
 
 service DownloadService {

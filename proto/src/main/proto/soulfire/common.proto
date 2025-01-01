@@ -45,37 +45,37 @@ message MinecraftAccountProto {
   }
 
   message OnlineSimpleJavaData {
-    string authToken = 1;
-    int64 tokenExpireAt = 2;
+    string auth_token = 1;
+    int64 token_expire_at = 2;
   }
 
   message OnlineChainJavaData {
-    string authToken = 1;
-    int64 tokenExpireAt = 2;
-    google.protobuf.Struct authChain = 3;
+    string auth_token = 1;
+    int64 token_expire_at = 2;
+    google.protobuf.Struct auth_chain = 3;
   }
 
   message OfflineJavaData {
   }
 
   message BedrockData {
-    string mojangJwt = 1;
-    string identityJwt = 2;
-    string publicKey = 3;
-    string privateKey = 4;
-    string deviceId = 5;
-    string playFabId = 6;
-    google.protobuf.Struct authChain = 7;
+    string mojang_jwt = 1;
+    string identity_jwt = 2;
+    string public_key = 3;
+    string private_key = 4;
+    string device_id = 5;
+    string play_fab_id = 6;
+    google.protobuf.Struct auth_chain = 7;
   }
 
   AccountTypeProto type = 1;
-  string profileId = 2;
-  string lastKnownName = 3;
-  oneof accountData {
-    OnlineSimpleJavaData onlineSimpleJavaData = 4;
-    OnlineChainJavaData onlineChainJavaData = 5;
-    OfflineJavaData offlineJavaData = 6;
-    BedrockData bedrockData = 7;
+  string profile_id = 2;
+  string last_known_name = 3;
+  oneof account_data {
+    OnlineSimpleJavaData online_simple_java_data = 4;
+    OnlineChainJavaData online_chain_java_data = 5;
+    OfflineJavaData offline_java_data = 6;
+    BedrockData bedrock_data = 7;
   }
 }
 

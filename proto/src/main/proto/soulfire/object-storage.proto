@@ -6,17 +6,17 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 message ObjectStorageUploadRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   bytes data = 2;
-  string fileName = 3;
+  string file_name = 3;
 }
 
 message ObjectStorageUploadResponse {
 }
 
 message ObjectStorageDownloadRequest {
-  string instanceId = 1;
-  string fileName = 2;
+  string instance_id = 1;
+  string file_name = 2;
 }
 
 message ObjectStorageDownloadResponse {
@@ -24,19 +24,19 @@ message ObjectStorageDownloadResponse {
 }
 
 message ObjectStorageDeleteRequest {
-  string instanceId = 1;
-  string fileName = 2;
+  string instance_id = 1;
+  string file_name = 2;
 }
 
 message ObjectStorageDeleteResponse {
 }
 
 message ObjectStorageListRequest {
-  string instanceId = 1;
+  string instance_id = 1;
 }
 
 message ObjectStorageListResponse {
-  repeated string fileNames = 1;
+  repeated string file_names = 1;
 }
 
 service ObjectStorageService {

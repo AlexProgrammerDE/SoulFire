@@ -11,7 +11,7 @@ message ClientDataRequest {
 }
 
 message StringSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   string def = 3;
   bool secret = 4;
@@ -20,7 +20,7 @@ message StringSetting {
 }
 
 message IntSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   int32 def = 3;
   int32 min = 4;
@@ -31,7 +31,7 @@ message IntSetting {
 }
 
 message DoubleSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   double def = 3;
   double min = 4;
@@ -42,7 +42,7 @@ message DoubleSetting {
 }
 
 message BoolSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   bool def = 3;
 }
@@ -51,11 +51,11 @@ message ComboOption {
   // Sent to server
   string id = 1;
   // Displayed to user
-  string displayName = 2;
+  string display_name = 2;
 }
 
 message ComboSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   // List of options
   repeated ComboOption options = 3;
@@ -63,24 +63,24 @@ message ComboSetting {
 }
 
 message StringListSetting {
-  string uiName = 1;
+  string ui_name = 1;
   string description = 2;
   repeated string def = 3;
 }
 
 message MinMaxSetting {
-  string minUiName = 1;
-  string maxUiName = 2;
-  string minDescription = 3;
-  string maxDescription = 4;
-  int32 minDef = 5;
-  int32 maxDef = 6;
+  string min_ui_name = 1;
+  string max_ui_name = 2;
+  string min_description = 3;
+  string max_description = 4;
+  int32 min_def = 5;
+  int32 max_def = 6;
   int32 min = 7;
   int32 max = 8;
   int32 step = 9;
   optional string format = 10;
-  string minPlaceholder = 11;
-  string maxPlaceholder = 12;
+  string min_placeholder = 11;
+  string max_placeholder = 12;
 }
 
 // A single setting type with optional default value
@@ -91,8 +91,8 @@ message SettingType {
     DoubleSetting double = 3;
     BoolSetting bool = 4;
     ComboSetting combo = 5;
-    StringListSetting stringList = 6;
-    MinMaxSetting minMax = 7;
+    StringListSetting string_list = 6;
+    MinMaxSetting min_max = 7;
   }
 }
 
@@ -110,18 +110,18 @@ message SettingsPage {
   }
 
   Type type = 1;
-  optional string owningPlugin = 2;
+  optional string owning_plugin = 2;
   // The name of the page for these settings
-  string pageName = 3;
+  string page_name = 3;
   // What namespace the settings of this page represent
   string namespace = 4;
   repeated SettingEntry entries = 5;
   // https://lucide.dev icon id for this page (Usually rendered left of the page name)
-  string iconId = 6;
+  string icon_id = 6;
 }
 
 message GlobalPermissionState {
-  GlobalPermission globalPermission = 1;
+  GlobalPermission global_permission = 1;
   bool granted = 2;
 }
 
@@ -139,7 +139,7 @@ message ClientDataResponse {
   string username = 1;
   UserRole role = 7;
   string email = 8;
-  repeated GlobalPermissionState serverPermissions = 2;
+  repeated GlobalPermissionState server_permissions = 2;
   repeated ServerPlugin plugins = 3;
   repeated SettingsPage settings = 5;
 }

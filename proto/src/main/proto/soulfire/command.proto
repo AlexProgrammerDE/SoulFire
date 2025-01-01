@@ -6,7 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 message CommandRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   string command = 2;
 }
 
@@ -15,7 +15,7 @@ message CommandResponse {
 }
 
 message CommandCompletionRequest {
-  string instanceId = 1;
+  string instance_id = 1;
   string command = 2;
 }
 

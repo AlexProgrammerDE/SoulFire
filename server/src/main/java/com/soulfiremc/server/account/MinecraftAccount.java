@@ -44,10 +44,10 @@ public record MinecraftAccount(
       UUID.fromString(account.getProfileId()),
       account.getLastKnownName(),
       switch (account.getAccountDataCase()) {
-        case ONLINESIMPLEJAVADATA -> OnlineSimpleJavaData.fromProto(account.getOnlineSimpleJavaData());
-        case ONLINECHAINJAVADATA -> OnlineChainJavaData.fromProto(account.getOnlineChainJavaData());
-        case OFFLINEJAVADATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
-        case BEDROCKDATA -> BedrockData.fromProto(account.getBedrockData());
+        case ONLINE_SIMPLE_JAVA_DATA -> OnlineSimpleJavaData.fromProto(account.getOnlineSimpleJavaData());
+        case ONLINE_CHAIN_JAVA_DATA -> OnlineChainJavaData.fromProto(account.getOnlineChainJavaData());
+        case OFFLINE_JAVA_DATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
+        case BEDROCK_DATA -> BedrockData.fromProto(account.getBedrockData());
         case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
       });
   }
