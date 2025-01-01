@@ -34,7 +34,6 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class ServerSettingsRegistry {
-  private final SettingsPage.Type type;
   private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
 
   private static IntSetting createIntSetting(IntProperty property) {
@@ -241,7 +240,6 @@ public class ServerSettingsRegistry {
       }
 
       var settingsPageBuilder = SettingsPage.newBuilder()
-        .setType(type)
         .setPageName(namespaceRegistry.pageName)
         .setNamespace(namespaceEntry.getKey())
         .addAllEntries(entries)

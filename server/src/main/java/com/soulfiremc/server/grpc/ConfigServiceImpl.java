@@ -74,8 +74,8 @@ public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
           })
           .addAllServerPermissions(getGlobalPermissions())
           .addAllPlugins(getPlugins())
-          .addAllSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
-          .addAllSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
+          .addAllServerSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
+          .addAllInstanceSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

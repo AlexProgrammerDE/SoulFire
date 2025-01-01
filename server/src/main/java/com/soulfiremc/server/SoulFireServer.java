@@ -20,7 +20,6 @@ package com.soulfiremc.server;
 import ch.jalu.injector.Injector;
 import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.grpc.generated.SettingsPage;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -192,14 +191,14 @@ public class SoulFireServer {
       new ServerSettingsRegistryInitEvent(
         this,
         serverSettingsRegistry =
-          new ServerSettingsRegistry(SettingsPage.Type.SERVER)
+          new ServerSettingsRegistry()
             .addClass(ServerSettings.class, "Server Settings", "server")
             .addClass(DevSettings.class, "Dev Settings", "bug")));
     SoulFireAPI.postEvent(
       new InstanceSettingsRegistryInitEvent(
         this,
         instanceSettingsRegistry =
-          new ServerSettingsRegistry(SettingsPage.Type.INSTANCE)
+          new ServerSettingsRegistry()
             // Needs Via loaded to have all protocol versions
             .addClass(BotSettings.class, "Bot Settings", "bot")
             .addClass(AccountSettings.class, "Account Settings", "users")

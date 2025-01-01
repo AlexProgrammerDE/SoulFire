@@ -104,12 +104,6 @@ message SettingEntry {
 }
 
 message SettingsPage {
-  enum Type {
-    SERVER = 0;
-    INSTANCE = 1;
-  }
-
-  Type type = 1;
   optional string owning_plugin = 2;
   // The name of the page for these settings
   string page_name = 3;
@@ -141,7 +135,8 @@ message ClientDataResponse {
   string email = 8;
   repeated GlobalPermissionState server_permissions = 2;
   repeated ServerPlugin plugins = 3;
-  repeated SettingsPage settings = 5;
+  repeated SettingsPage server_settings = 9;
+  repeated SettingsPage instance_settings = 10;
 }
 
 service ConfigService {
