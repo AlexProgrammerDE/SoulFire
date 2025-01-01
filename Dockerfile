@@ -1,10 +1,10 @@
-FROM eclipse-temurin:21-jdk-alpine AS soulfire-builder
+FROM eclipse-temurin:21-jdk AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
 
 # Install git
-RUN apk add --update git
+RUN apt-get update && apt-get install -y git
 
 # Build soulfire
 WORKDIR /soulfire
