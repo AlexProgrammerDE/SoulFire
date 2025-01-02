@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.viaversion;
 
+import com.viaversion.viaaprilfools.api.AprilFoolsProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
