@@ -20,11 +20,11 @@ package com.soulfiremc.server.settings.instance;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
+import com.viaversion.vialoader.util.ProtocolVersionList;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.raphimc.vialoader.util.ProtocolVersionList;
 
 import java.util.function.Function;
 

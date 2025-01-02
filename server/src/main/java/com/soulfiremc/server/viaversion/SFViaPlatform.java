@@ -18,7 +18,7 @@
 package com.soulfiremc.server.viaversion;
 
 import com.soulfiremc.builddata.BuildData;
-import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaVersionPlatformImpl;
 
 import java.nio.file.Path;
 

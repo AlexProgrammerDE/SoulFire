@@ -18,12 +18,12 @@
 package com.soulfiremc.server.viaversion.providers;
 
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
-import net.raphimc.vialoader.netty.VLPipeline;
 
 import javax.crypto.SecretKey;
 import java.util.Objects;
