@@ -2,12 +2,12 @@
 log4j = "2.24.3"
 grpc = "1.69.0"
 protobuf = "4.29.2"
-via-version = "5.2.0"
-via-backwards = "5.2.0"
-via-rewind = "4.0.4"
-via-legacy = "3.0.6"
-via-aprilfools = "3.0.4"
-via-loader = "3.0.4"
+via-version = "5.2.1"
+via-backwards = "5.2.1"
+via-rewind = "4.0.5"
+via-legacy = "3.0.7"
+via-aprilfools = "4.0.0"
+via-loader = "4.0.0"
 via-bedrock = "0.0.14-SNAPSHOT"
 mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.18.0"
@@ -52,8 +52,8 @@ via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
 via-rewind = { module = "com.viaversion:viarewind-common", version.ref = "via-rewind" }
 via-legacy = { module = "net.raphimc:ViaLegacy", version.ref = "via-legacy" }
-via-aprilfools = { module = "net.raphimc:viaaprilfools-common", version.ref = "via-aprilfools" }
-via-loader = { module = "net.raphimc:ViaLoader", version.ref = "via-loader" }
+via-aprilfools = { module = "com.viaversion:viaaprilfools-common", version.ref = "via-aprilfools" }
+via-loader = { module = "com.viaversion:vialoader", version.ref = "via-loader" }
 via-bedrock = { module = "net.raphimc:ViaBedrock", version.ref = "via-bedrock" }
 snakeyaml = "org.yaml:snakeyaml:2.3"
 kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyori" }
@@ -90,14 +90,14 @@ armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.8.0"
+openai = "com.openai:openai-java:0.8.1"
 immutables = "org.immutables:value:2.10.1 "
-hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta3"
-hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta3"
-hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0.CR1"
-hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.3.Final"
+hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0-SNAPSHOT"
+hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0-SNAPSHOT"
+hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0-SNAPSHOT"
+hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.4.Final"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
-sqlite = "org.xerial:sqlite-jdbc:3.41.2.2"
+sqlite = "org.xerial:sqlite-jdbc:3.47.1.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.4.0"
 graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }

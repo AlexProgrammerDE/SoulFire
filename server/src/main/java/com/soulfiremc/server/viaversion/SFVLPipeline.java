@@ -18,10 +18,10 @@
 package com.soulfiremc.server.viaversion;
 
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.viaversion.vialoader.netty.VLPipeline;
+import com.viaversion.vialoader.netty.ViaCodec;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandler;
-import net.raphimc.vialoader.netty.VLPipeline;
-import net.raphimc.vialoader.netty.ViaCodec;
 
 public class SFVLPipeline extends VLPipeline {
   public SFVLPipeline(UserConnection user) {
