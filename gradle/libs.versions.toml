@@ -14,6 +14,7 @@ kyori = "4.18.0"
 reactor = "1.2.1"
 classtransform = "1.14.0"
 armeria = "1.31.3"
+graalvm-polyglot = "24.1.1"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
@@ -98,6 +99,13 @@ hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.3.Final"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
 sqlite = "org.xerial:sqlite-jdbc:3.41.2.2"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.4.0"
+graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-ruby = { module = "org.graalvm.polyglot:ruby", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-java = { module = "org.graalvm.polyglot:java", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-wasm = { module = "org.graalvm.polyglot:wasm", version.ref = "graalvm-polyglot" }
+graalvm-polyglot-llvm = { module = "org.graalvm.polyglot:llvm", version.ref = "graalvm-polyglot" }
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit = "org.junit.jupiter:junit-jupiter:5.11.4"
 
@@ -110,3 +118,5 @@ kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
+hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-validator", "hibernate-hikaricp"]
+graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-ruby", "graalvm-polyglot-python", "graalvm-polyglot-java", "graalvm-polyglot-wasm", "graalvm-polyglot-llvm"]

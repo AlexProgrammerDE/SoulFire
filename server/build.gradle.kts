@@ -88,12 +88,12 @@ dependencies {
   api(libs.injector)
 
   // For database support
-  api(libs.hibernate.core)
-  api(libs.hibernate.community.dialects)
-  api(libs.hibernate.validator)
-  api(libs.hibernate.hikaricp)
+  api(libs.bundles.hibernate)
   api(libs.hikaricp)
   api(libs.sqlite)
+
+  // FOr script support
+  api(libs.bundles.graalvm.polyglot)
 
   // For tls cert provisioning
   api(libs.acme4j)
