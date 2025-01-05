@@ -57,6 +57,4 @@ public class DatabaseManager {
       throw new IllegalStateException(ex);
     }
   }
-
-
 }
