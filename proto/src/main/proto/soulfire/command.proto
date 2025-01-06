@@ -5,9 +5,19 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
-message CommandRequest {
+message GlobalCommandScope {
+}
+
+message InstanceCommandScope {
   string instance_id = 1;
-  string command = 2;
+}
+
+message CommandRequest {
+  oneof scope {
+    GlobalCommandScope global = 1;
+    InstanceCommandScope instance = 2;
+  }
+  string command = 3;
 }
 
 message CommandResponse {
@@ -15,8 +25,11 @@ message CommandResponse {
 }
 
 message CommandCompletionRequest {
-  string instance_id = 1;
-  string command = 2;
+  oneof scope {
+    GlobalCommandScope global = 1;
+    InstanceCommandScope instance = 2;
+  }
+  string command = 3;
 }
 
 message CommandCompletionResponse {

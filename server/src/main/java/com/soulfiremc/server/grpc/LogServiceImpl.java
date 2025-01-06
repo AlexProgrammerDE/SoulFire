@@ -19,6 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.SFLogAppender;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -42,7 +43,9 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   public void broadcastMessage(SFLogAppender.SFLogEvent message) {
     for (var sender : subscribers.values()) {
-      sender.sendMessage(message.id(), message.message());
+      if (sender.eventPredicate().test(message)) {
+        sender.sendMessage(message.id(), message.message());
+      }
     }
   }
 
@@ -55,12 +58,30 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SUBSCRIBE_LOGS));
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
+      case INSTANCE -> () -> {
+        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
+      };
+      case SCOPE_NOT_SET -> () -> {
+        throw new IllegalArgumentException("Scope not set");
+      };
+    });
 
     try {
+      EventPredicate predicate = switch (request.getScopeCase()) {
+        case GLOBAL -> event -> true;
+        case INSTANCE -> {
+          var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+          yield event -> instanceId.equals(event.instanceId());
+        }
+        case SCOPE_NOT_SET -> event -> false;
+      };
       responseObserver.onNext(PreviousLogResponse.newBuilder()
         .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
           .stream()
+          .filter(predicate::test)
           .map(event -> LogString.newBuilder()
             .setId(event.id())
             .setMessage(event.message())
@@ -76,10 +97,27 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.SUBSCRIBE_LOGS));
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
+      case INSTANCE -> () -> {
+        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
+      };
+      case SCOPE_NOT_SET -> () -> {
+        throw new IllegalArgumentException("Scope not set");
+      };
+    });
 
     try {
-      var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver);
+      EventPredicate predicate = switch (request.getScopeCase()) {
+        case GLOBAL -> event -> true;
+        case INSTANCE -> {
+          var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+          yield event -> instanceId.equals(event.instanceId());
+        }
+        case SCOPE_NOT_SET -> event -> false;
+      };
+      var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver, predicate);
       subscribers.put(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(), sender);
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
@@ -87,7 +125,12 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     }
   }
 
-  private record ConnectionMessageSender(ServerCallStreamObserver<LogResponse> responseObserver) {
+  @FunctionalInterface
+  public interface EventPredicate {
+    boolean test(SFLogAppender.SFLogEvent event);
+  }
+
+  private record ConnectionMessageSender(ServerCallStreamObserver<LogResponse> responseObserver, EventPredicate eventPredicate) {
     public void sendMessage(String id, String message) {
       if (responseObserver.isCancelled()) {
         return;

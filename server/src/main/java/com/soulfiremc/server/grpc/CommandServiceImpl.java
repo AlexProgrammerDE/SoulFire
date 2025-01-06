@@ -20,6 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -38,11 +39,20 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   @Override
   public void executeCommand(
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.COMMAND_EXECUTION, instanceId));
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
+      case INSTANCE -> () -> {
+        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
+
+        ServerCommandManager.putInstanceIds(List.of(instanceId));
+      };
+      case SCOPE_NOT_SET -> () -> {
+        throw new IllegalArgumentException("Scope not set");
+      };
+    });
 
     try {
-      ServerCommandManager.putInstanceIds(List.of(instanceId));
       var code = serverCommandManager.execute(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
@@ -57,11 +67,20 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   public void tabCompleteCommand(
     CommandCompletionRequest request,
     StreamObserver<CommandCompletionResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.COMMAND_COMPLETION, instanceId));
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_COMPLETION));
+      case INSTANCE -> () -> {
+        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
+
+        ServerCommandManager.putInstanceIds(List.of(instanceId));
+      };
+      case SCOPE_NOT_SET -> () -> {
+        throw new IllegalArgumentException("Scope not set");
+      };
+    });
 
     try {
-      ServerCommandManager.putInstanceIds(List.of(instanceId));
       var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(
