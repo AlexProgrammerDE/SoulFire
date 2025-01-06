@@ -26,25 +26,27 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
-  private static final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
+  private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
-  static {
-    SFLogAppender.INSTANCE.logConsumers().add(LogServiceImpl::broadcastMessage);
+  @Inject
+  public LogServiceImpl() {
+    SFLogAppender.INSTANCE.logConsumers().add(this::broadcastMessage);
   }
 
-  public static void broadcastMessage(String message) {
+  public void broadcastMessage(SFLogAppender.SFLogEvent message) {
     for (var sender : subscribers.values()) {
-      sender.sendMessage(message);
+      sender.sendMessage(message.message());
     }
   }
 
-  public static void sendMessage(UUID uuid, String message) {
+  public void sendMessage(UUID uuid, String message) {
     var sender = subscribers.get(uuid);
     if (sender != null) {
       sender.sendMessage(message);
@@ -57,7 +59,10 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
     try {
       responseObserver.onNext(PreviousLogResponse.newBuilder()
-        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount()))
+        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
+          .stream()
+          .map(SFLogAppender.SFLogEvent::message)
+          .toList())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

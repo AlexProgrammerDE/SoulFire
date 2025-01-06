@@ -39,11 +39,13 @@ import java.util.UUID;
 @Getter
 public class AuthSystem {
   private static final String ROOT_USERNAME = "root";
+  private final LogServiceImpl logService;
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
   private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer) {
+    this.logService = soulFireServer.injector().getSingleton(LogServiceImpl.class);
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(soulFireServer.baseDirectory()));
     this.sessionFactory = soulFireServer.sessionFactory();
     this.rootUserId = createRootUser();
@@ -92,7 +94,7 @@ public class AuthSystem {
         s.merge(userEntity);
       }
 
-      return Optional.of(new SoulFireUserImpl(userEntity));
+      return Optional.of(new SoulFireUserImpl(logService, userEntity));
     });
   }
 
@@ -112,7 +114,7 @@ public class AuthSystem {
       .compact();
   }
 
-  private record SoulFireUserImpl(UserEntity userData) implements SoulFireUser {
+  private record SoulFireUserImpl(LogServiceImpl logService, UserEntity userData) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
       return userData.id();
@@ -146,7 +148,7 @@ public class AuthSystem {
 
     @Override
     public void sendMessage(Level level, Component message) {
-      LogServiceImpl.sendMessage(userData.id(), ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
+      logService.sendMessage(userData.id(), ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
     }
   }
 }

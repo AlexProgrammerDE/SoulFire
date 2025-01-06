@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util.structs;
 
+import com.soulfiremc.server.util.UUIDHelper;
 import lombok.Getter;
 import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
 import org.apache.logging.log4j.LogManager;
@@ -26,10 +27,12 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.NullConfiguration;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternMatch;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -53,8 +56,8 @@ public class SFLogAppender extends AbstractAppender {
     false,
     new NullConfiguration()
   );
-  private final List<Consumer<String>> logConsumers = new CopyOnWriteArrayList<>();
-  private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
+  private final List<Consumer<SFLogEvent>> logConsumers = new CopyOnWriteArrayList<>();
+  private final QueueWithMaxSize<SFLogEvent> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
   private SFLogAppender() {
     super("SFLogAppender", null, null, false, Property.EMPTY_ARRAY);
@@ -74,11 +77,18 @@ public class SFLogAppender extends AbstractAppender {
       return;
     }
 
+    var sfLogEvent = new SFLogEvent(formatted,
+      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
+      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_CONNECTION_ID)),
+      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)));
     for (var consumer : logConsumers) {
-      consumer.accept(formatted);
+      consumer.accept(sfLogEvent);
     }
 
-    logs.add(formatted);
+    logs.add(sfLogEvent);
+  }
+
+  public record SFLogEvent(String message, @Nullable UUID instanceId, @Nullable UUID botConnectionId, @Nullable UUID botAccountId) {
   }
 
   public static class QueueWithMaxSize<E> {

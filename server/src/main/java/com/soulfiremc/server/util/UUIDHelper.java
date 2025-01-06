@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +26,10 @@ public class UUIDHelper {
   private UUIDHelper() {}
 
   public static Optional<UUID> tryParseUniqueId(String str) {
+    if (str == null || str.isBlank()) {
+      return Optional.empty();
+    }
+
     try {
       return Optional.of(UUID.fromString(str));
     } catch (IllegalArgumentException ignored) {
@@ -51,5 +57,9 @@ public class UUIDHelper {
 
   public static String convertToNoDashes(UUID uuid) {
     return uuid.toString().replace("-", "");
+  }
+
+  public static @Nullable UUID tryParseUniqueIdOrNull(@Nullable String str) {
+    return tryParseUniqueId(str).orElse(null);
   }
 }
