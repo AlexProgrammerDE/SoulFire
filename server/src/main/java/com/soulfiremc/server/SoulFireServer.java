@@ -85,6 +85,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 public class SoulFireServer {
+  public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
   public static final ComponentFlattener FLATTENER =
     ComponentFlattener.basic().toBuilder()
       .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
@@ -94,7 +95,15 @@ public class SoulFireServer {
 
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
-  private final SoulFireScheduler scheduler = new SoulFireScheduler(log);
+  private final SoulFireScheduler.RunnableWrapper runnableWrapper = runnable -> () -> {
+    CURRENT.set(this);
+    try {
+      runnable.run();
+    } finally {
+      CURRENT.remove();
+    }
+  };
+  private final SoulFireScheduler scheduler = new SoulFireScheduler(log, runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final ServerSettingsDelegate settingsSource;

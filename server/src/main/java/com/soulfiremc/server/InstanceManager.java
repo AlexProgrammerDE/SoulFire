@@ -39,6 +39,7 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
+import com.soulfiremc.server.util.structs.SFLogAppender;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
@@ -46,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -59,6 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Getter
 public class InstanceManager {
+  public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final UUID id;
@@ -67,12 +70,21 @@ public class InstanceManager {
   private final InstanceSettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
+  private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private AttackLifecycle localAttackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
     this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
-    this.scheduler = new SoulFireScheduler(logger);
+    this.runnableWrapper = soulFireServer.runnableWrapper().with(runnable -> () -> {
+      CURRENT.set(this);
+      try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, id.toString())) {
+        runnable.run();
+      } finally {
+        CURRENT.remove();
+      }
+    });
+    this.scheduler = new SoulFireScheduler(logger, runnableWrapper);
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->

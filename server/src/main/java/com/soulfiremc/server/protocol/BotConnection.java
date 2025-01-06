@@ -36,6 +36,7 @@ import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.structs.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
@@ -84,6 +85,7 @@ public final class BotConnection {
   private final SFSessionService sessionService;
   private final SessionDataManager dataManager;
   private final BotControlAPI botControl;
+  private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
   private boolean explicitlyShutdown = false;
   private boolean running = true;
@@ -104,19 +106,22 @@ public final class BotConnection {
     this.instanceManager = instanceManager;
     this.settingsSource = settingsSource;
     this.logger = logger;
-    this.scheduler = new SoulFireScheduler(logger, runnable -> () -> {
+    this.minecraftAccount = minecraftAccount;
+    this.accountProfileId = minecraftAccount.profileId();
+    this.accountName = minecraftAccount.lastKnownName();
+    this.runnableWrapper = instanceManager.runnableWrapper().with(runnable -> () -> {
       CURRENT.set(this);
-      try {
+      try (
+        var ignored1 = MDC.putCloseable(SFLogAppender.SF_BOT_CONNECTION_ID, this.connectionId.toString());
+        var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString())) {
         runnable.run();
       } finally {
         CURRENT.remove();
       }
     });
+    this.scheduler = new SoulFireScheduler(logger, runnableWrapper);
     this.protocol = protocol;
     this.resolvedAddress = resolvedAddress;
-    this.minecraftAccount = minecraftAccount;
-    this.accountProfileId = minecraftAccount.profileId();
-    this.accountName = minecraftAccount.lastKnownName();
     this.targetState = targetState;
     this.protocolVersion = protocolVersion;
     this.sessionService =
@@ -150,10 +155,6 @@ public final class BotConnection {
     if (!running) {
       return;
     }
-
-    MDC.put("connectionId", connectionId.toString());
-    MDC.put("botName", accountName);
-    MDC.put("botUuid", accountProfileId.toString());
 
     if (session.isDisconnected()) {
       wasDisconnected();

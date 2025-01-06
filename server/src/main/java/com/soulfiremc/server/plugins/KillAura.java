@@ -80,22 +80,17 @@ public class KillAura extends InternalPlugin {
     }
 
     var bestVisiblePoint = control.getEntityVisiblePoint(target);
-    var distance = bestVisiblePoint != null ?
-      bestVisiblePoint.distance(bot.dataManager().localPlayer().eyePosition())
-      : target.eyePosition().distance(bot.dataManager().localPlayer().eyePosition());
+    if (bestVisiblePoint == null) {
+      bestVisiblePoint = target.originPosition(RotationOrigin.EYES);
+    }
+
+    var distance = bestVisiblePoint.distance(bot.dataManager().localPlayer().eyePosition());
 
     if (distance > lookRange) {
       return;
     }
 
-    if (bestVisiblePoint != null) {
-      bot.dataManager().localPlayer().lookAt(RotationOrigin.EYES, bestVisiblePoint);
-    } else {
-      bot.dataManager()
-        .localPlayer()
-        .lookAt(RotationOrigin.EYES, target.originPosition(RotationOrigin.EYES));
-    }
-
+    bot.dataManager().localPlayer().lookAt(RotationOrigin.EYES, bestVisiblePoint);
     bot.metadata().set(ATTACK_ENTITY, new AttackEntity(target, distance));
   }
 

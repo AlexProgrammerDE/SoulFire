@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.concurrent.*;
-import java.util.function.Function;
 import java.util.function.LongSupplier;
 
 /**
@@ -40,16 +39,12 @@ public class SoulFireScheduler implements Executor {
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final Logger logger;
-  private final Function<Runnable, Runnable> runnableWrapper;
+  private final RunnableWrapper runnableWrapper;
   @Setter
   private boolean blockNewTasks = false;
   private boolean isShutdown = false;
 
-  public SoulFireScheduler(Logger logger) {
-    this(logger, r -> r);
-  }
-
-  public SoulFireScheduler(Logger logger, Function<Runnable, Runnable> runnableWrapper) {
+  public SoulFireScheduler(Logger logger, RunnableWrapper runnableWrapper) {
     this.logger = logger;
     this.runnableWrapper = runnableWrapper;
 
@@ -137,7 +132,7 @@ public class SoulFireScheduler implements Executor {
       }
 
       try {
-        runnableWrapper.apply(command).run();
+        runnableWrapper.wrap(command).run();
       } catch (Exception e) {
         logger.error("Error in async executor", e);
         throw new CompletionException(e);
@@ -151,7 +146,7 @@ public class SoulFireScheduler implements Executor {
     }
 
     try {
-      runnableWrapper.apply(command).run();
+      runnableWrapper.wrap(command).run();
     } catch (Throwable t) {
       logger.error("Error in executor", t);
     }
@@ -174,6 +169,15 @@ public class SoulFireScheduler implements Executor {
 
     public boolean isReady() {
       return System.currentTimeMillis() >= time;
+    }
+  }
+
+  @FunctionalInterface
+  public interface RunnableWrapper {
+    Runnable wrap(Runnable runnable);
+
+    default RunnableWrapper with(RunnableWrapper child) {
+      return runnable -> child.wrap(wrap(runnable));
     }
   }
 }

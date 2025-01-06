@@ -38,6 +38,9 @@ import java.util.function.Consumer;
 
 @Getter
 public class SFLogAppender extends AbstractAppender {
+  public static final String SF_INSTANCE_ID = "sf-instance-id";
+  public static final String SF_BOT_CONNECTION_ID = "sf-bot-connection-id";
+  public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
   public static final SFLogAppender INSTANCE = new SFLogAppender();
 
   private static final LoggerNamePatternSelector selector = LoggerNamePatternSelector.createSelector(
@@ -54,7 +57,7 @@ public class SFLogAppender extends AbstractAppender {
   private final QueueWithMaxSize<String> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
 
   private SFLogAppender() {
-    super("LogPanelAppender", null, null, false, Property.EMPTY_ARRAY);
+    super("SFLogAppender", null, null, false, Property.EMPTY_ARRAY);
 
     ((Logger) LogManager.getRootLogger()).addAppender(this);
   }
