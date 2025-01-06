@@ -42,14 +42,14 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   public void broadcastMessage(SFLogAppender.SFLogEvent message) {
     for (var sender : subscribers.values()) {
-      sender.sendMessage(message.message());
+      sender.sendMessage(message.id(), message.message());
     }
   }
 
   public void sendMessage(UUID uuid, String message) {
     var sender = subscribers.get(uuid);
     if (sender != null) {
-      sender.sendMessage(message);
+      sender.sendMessage(UUID.randomUUID().toString(), message);
     }
   }
 
@@ -61,7 +61,10 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       responseObserver.onNext(PreviousLogResponse.newBuilder()
         .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
           .stream()
-          .map(SFLogAppender.SFLogEvent::message)
+          .map(event -> LogString.newBuilder()
+            .setId(event.id())
+            .setMessage(event.message())
+            .build())
           .toList())
         .build());
       responseObserver.onCompleted();
@@ -85,12 +88,16 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   }
 
   private record ConnectionMessageSender(ServerCallStreamObserver<LogResponse> responseObserver) {
-    public void sendMessage(String message) {
+    public void sendMessage(String id, String message) {
       if (responseObserver.isCancelled()) {
         return;
       }
 
-      responseObserver.onNext(LogResponse.newBuilder().setMessage(message).build());
+      responseObserver.onNext(LogResponse.newBuilder()
+        .setMessage(LogString.newBuilder()
+          .setId(id)
+          .setMessage(message))
+        .build());
     }
   }
 }

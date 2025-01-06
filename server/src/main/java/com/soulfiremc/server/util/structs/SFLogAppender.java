@@ -35,12 +35,14 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 @Getter
 public class SFLogAppender extends AbstractAppender {
+  private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   public static final String SF_INSTANCE_ID = "sf-instance-id";
   public static final String SF_BOT_CONNECTION_ID = "sf-bot-connection-id";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
@@ -77,7 +79,9 @@ public class SFLogAppender extends AbstractAppender {
       return;
     }
 
-    var sfLogEvent = new SFLogEvent(formatted,
+    var sfLogEvent = new SFLogEvent(
+      event.getTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
+      formatted,
       UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
       UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_CONNECTION_ID)),
       UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)));
@@ -88,7 +92,7 @@ public class SFLogAppender extends AbstractAppender {
     logs.add(sfLogEvent);
   }
 
-  public record SFLogEvent(String message, @Nullable UUID instanceId, @Nullable UUID botConnectionId, @Nullable UUID botAccountId) {
+  public record SFLogEvent(String id, String message, @Nullable UUID instanceId, @Nullable UUID botConnectionId, @Nullable UUID botAccountId) {
   }
 
   public static class QueueWithMaxSize<E> {
