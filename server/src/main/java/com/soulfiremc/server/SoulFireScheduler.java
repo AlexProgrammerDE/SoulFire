@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.*;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 /**
  * Lightweight scheduler for async tasks.
@@ -125,7 +126,11 @@ public class SoulFireScheduler implements Executor {
     return CompletableFuture.runAsync(wrapFuture(command), this);
   }
 
-  public Runnable wrapFuture(Runnable command) {
+  public <T> CompletableFuture<T> supplyAsync(Supplier<T> command) {
+    return CompletableFuture.supplyAsync(wrapFuture(command), this);
+  }
+
+  private Runnable wrapFuture(Runnable command) {
     return () -> {
       if (blockNewTasks) {
         return;
@@ -133,6 +138,21 @@ public class SoulFireScheduler implements Executor {
 
       try {
         runnableWrapper.wrap(command).run();
+      } catch (Exception e) {
+        logger.error("Error in async executor", e);
+        throw new CompletionException(e);
+      }
+    };
+  }
+
+  private <T> Supplier<T> wrapFuture(Supplier<T> command) {
+    return () -> {
+      if (blockNewTasks) {
+        return null;
+      }
+
+      try {
+        return command.get();
       } catch (Exception e) {
         logger.error("Error in async executor", e);
         throw new CompletionException(e);

@@ -24,6 +24,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -34,7 +35,7 @@ import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -64,36 +65,38 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
         case AWS -> AWS_URL;
       };
 
-      var responses = new ArrayList<ProxyCheckResponseSingle>();
-      for (var proxy : request.getProxyList().stream().map(SFProxy::fromProto).toList()) {
-        var client = ReactorHttpHelper.createReactorClient(proxy, false);
-        var stopWatch = Stopwatch.createStarted();
-        var response =
-          client
-            .get()
-            .uri(url.toString())
-            .responseSingle(
-              (r, b) -> {
-                if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
-                  return b.asString();
-                }
+      var results = SFHelpers.maxFutures(settings.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> instance.scheduler().supplyAsync(() -> {
+          var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
+          var stopWatch = Stopwatch.createStarted();
+          var response =
+            client
+              .get()
+              .uri(url.toString())
+              .responseSingle(
+                (r, b) -> {
+                  if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
+                    return b.asString();
+                  }
 
-                return Mono.empty();
-              })
-            .blockOptional();
+                  return Mono.empty();
+                })
+              .blockOptional();
 
-        var single =
-          ProxyCheckResponseSingle.newBuilder()
-            .setProxy(proxy.toProto())
-            .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-            .setValid(response.isPresent());
+          var single =
+            ProxyCheckResponseSingle.newBuilder()
+              .setProxy(payload)
+              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+              .setValid(response.isPresent());
 
-        response.ifPresent(single::setRealIp);
+          response.ifPresent(single::setRealIp);
 
-        responses.add(single.build());
-      }
+          return single.build();
+        }))
+        .stream()
+        .filter(Objects::nonNull)
+        .toList();
 
-      responseObserver.onNext(ProxyCheckResponse.newBuilder().addAllResponse(responses).build());
+      responseObserver.onNext(ProxyCheckResponse.newBuilder().addAllResponse(results).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error checking proxy", t);

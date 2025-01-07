@@ -53,6 +53,17 @@ public class ProxySettings implements SettingsObject {
       .defaultValue(ProxyCheckService.IPIFY.name())
       .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), Enum::name))
       .build();
+  public static final IntProperty PROXY_CHECK_CONCURRENCY =
+    ImmutableIntProperty.builder()
+      .namespace(NAMESPACE)
+      .key("proxy-check-concurrency")
+      .uiName("Proxy check concurrency")
+      .description("Amount of proxies to check at the same time")
+      .defaultValue(10)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .stepValue(1)
+      .build();
 
   public enum ProxyCheckService {
     IPIFY,
