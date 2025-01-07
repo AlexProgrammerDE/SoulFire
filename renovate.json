@@ -15,6 +15,9 @@
         "digest"
       ],
       "automerge": true
+    },
+    {
+      "allowedVersions": "!/\\-SNAPSHOT$/"
     }
   ]
 }
