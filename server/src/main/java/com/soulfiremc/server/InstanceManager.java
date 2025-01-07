@@ -367,10 +367,10 @@ public class InstanceManager {
     this.attackLifecycle(AttackLifecycle.STOPPING);
 
     return this.stopAttackSession()
-      .thenRun(() -> {
+      .thenRunAsync(() -> {
         this.attackLifecycle(AttackLifecycle.STOPPED);
         logger.info("Attack stopped");
-      });
+      }, scheduler);
   }
 
   private void attackLifecycle(AttackLifecycle attackLifecycle) {
