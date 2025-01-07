@@ -265,7 +265,7 @@ public class InstanceManager {
 
     // Prepare an event loop group for the attack
     var attackEventLoopGroup =
-      SFNettyHelper.createEventLoopGroup("Attack-%s".formatted(id));
+      SFNettyHelper.createEventLoopGroup("Attack-%s".formatted(id), runnableWrapper);
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);

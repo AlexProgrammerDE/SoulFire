@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.SFHelpers;
 import io.netty.channel.ChannelPipeline;
@@ -29,13 +30,13 @@ import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 public class SFNettyHelper {
   private SFNettyHelper() {}
 
-  public static EventLoopGroup createEventLoopGroup(String name) {
+  public static EventLoopGroup createEventLoopGroup(String name, SoulFireScheduler.RunnableWrapper runnableWrapper) {
     var group =
       TransportHelper.TRANSPORT_TYPE.eventLoopGroupFactory().apply(
         r ->
-          Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(r));
+          Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(runnableWrapper.wrap(r)));
 
-    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
+    Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(group::shutdownGracefully));
 
     return group;
   }
