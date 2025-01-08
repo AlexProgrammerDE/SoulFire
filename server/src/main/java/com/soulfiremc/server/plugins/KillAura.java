@@ -22,7 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
@@ -37,8 +37,6 @@ import org.pf4j.Extension;
 @Slf4j
 @Extension
 public class KillAura extends InternalPlugin {
-  private static final MetadataKey<AttackEntity> ATTACK_ENTITY = MetadataKey.of("kill_aura", "attack_entity", AttackEntity.class);
-
   public KillAura() {
     super(new PluginInfo(
       "kill-aura",
@@ -58,6 +56,9 @@ public class KillAura extends InternalPlugin {
     }
 
     var control = bot.botControl();
+    if (control.activelyControlled()) {
+      return;
+    }
 
     var whitelistedUser = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USER);
 
@@ -90,8 +91,8 @@ public class KillAura extends InternalPlugin {
       return;
     }
 
+    control.registerControllingTask(ControllingTask.manual(new KillAuraMarker(target, distance)));
     bot.dataManager().localPlayer().lookAt(RotationOrigin.EYES, bestVisiblePoint);
-    bot.metadata().set(ATTACK_ENTITY, new AttackEntity(target, distance));
   }
 
   @EventHandler
@@ -102,16 +103,16 @@ public class KillAura extends InternalPlugin {
       return;
     }
 
-    var attackEntity = bot.metadata().getAndRemove(ATTACK_ENTITY);
-    if (attackEntity == null) {
+    var marker = control.getMarkerAndUnregister(KillAuraMarker.class);
+    if (marker == null) {
       return;
     }
 
     var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
     var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
-    var swing = attackEntity.distance() <= swingRange;
-    if (attackEntity.distance() <= hitRange) {
-      control.attack(attackEntity.attackEntity(), swing);
+    var swing = marker.distance() <= swingRange;
+    if (marker.distance() <= hitRange) {
+      control.attack(marker.attackEntity(), swing);
     } else if (swing) {
       control.swingArm();
     }
@@ -211,5 +212,6 @@ public class KillAura extends InternalPlugin {
         .build();
   }
 
-  private record AttackEntity(Entity attackEntity, double distance) {}
+  private record KillAuraMarker(Entity attackEntity, double distance) implements ControllingTask.ManualTaskMarker {
+  }
 }

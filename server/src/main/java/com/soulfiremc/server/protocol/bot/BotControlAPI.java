@@ -123,6 +123,17 @@ public class BotControlAPI {
     this.controllingTask.compareAndSet(null, task);
   }
 
+  public <M extends ControllingTask.ManualTaskMarker> M getMarkerAndUnregister(Class<M> clazz) {
+    var task = this.controllingTask.get();
+    if (task instanceof ControllingTask.ManualControllingTask manual
+      && clazz.isInstance(manual.marker())) {
+      unregisterControllingTask(task);
+      return clazz.cast(manual.marker());
+    }
+
+    return null;
+  }
+
   public boolean toggleFlight() {
     var dataManager = connection.dataManager();
     var abilitiesData = dataManager.localPlayer().abilitiesState();
