@@ -17,24 +17,11 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.server.util.structs.SFContextClassLoader;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
-import java.nio.file.Path;
-
-public abstract class SoulFireAbstractLauncher {
-  public void run(String[] args) {
-    var contextClassLoader = new SFContextClassLoader(getLibrariesDirectory());
-    try {
-      contextClassLoader
-        .loadClass(getBootstrapClassName())
-        .getDeclaredMethod("bootstrap", String[].class)
-        .invoke(null, (Object) args);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected abstract String getBootstrapClassName();
-
-  protected abstract Path getLibrariesDirectory();
+public class SoulFireClassloaderConstants {
+  public static List<ClassLoader> POOLED_CLASSLOADERS;
+  public static AtomicReference<BiFunction<String, byte[], byte[]>> CLASS_TRANSFORMER;
 }

@@ -21,6 +21,8 @@ import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.structs.SFLogAppender;
+import lombok.SneakyThrows;
+import net.lenni0451.reflect.Agents;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pf4j.DefaultPluginManager;
@@ -33,12 +35,14 @@ public class LoadTest {
   public Path tempDir;
 
   @Test
+  @SneakyThrows
   public void testLoad() {
     System.setProperty("sf.unit.test", "true");
 
     SFLogAppender.INSTANCE.start();
 
-    SoulFireAbstractBootstrap.injectMixins(null);
+    var instrumentation = Agents.getInstrumentation();
+    SoulFireAbstractBootstrap.injectMixins(null, transformer -> transformer.hookInstrumentation(instrumentation));
     var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), new DefaultPluginManager(), Instant.now(), tempDir);
 
     server.shutdownManager().shutdownSoftware(false);

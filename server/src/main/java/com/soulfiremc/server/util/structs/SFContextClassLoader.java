@@ -28,6 +28,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 public class SFContextClassLoader extends ClassLoader {
   // Prevent infinite loop when plugins are looking for classes inside this class loader
@@ -35,9 +37,19 @@ public class SFContextClassLoader extends ClassLoader {
   @Getter
   private final List<ClassLoader> childClassLoaders = new ArrayList<>();
   private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
+  private final AtomicReference<BiFunction<String, byte[], byte[]>> classTransformer = new AtomicReference<>((name, bytes) -> bytes);
 
   public SFContextClassLoader(Path libDir) {
     super(createLibClassLoader(libDir));
+    Thread.currentThread().setContextClassLoader(this);
+
+    try {
+      var clazz = loadClass("com.soulfiremc.launcher.SoulFireClassloaderConstants", true);
+      clazz.getField("POOLED_CLASSLOADERS").set(null, childClassLoaders);
+      clazz.getField("CLASS_TRANSFORMER").set(null, classTransformer);
+    } catch (ReflectiveOperationException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   private static ClassLoader createLibClassLoader(Path libDir) {
@@ -130,7 +142,7 @@ public class SFContextClassLoader extends ClassLoader {
         return null;
       }
 
-      return inputStream.readAllBytes();
+      return classTransformer.get().apply(className, inputStream.readAllBytes());
     } catch (IOException ignored) {
       return null;
     }
