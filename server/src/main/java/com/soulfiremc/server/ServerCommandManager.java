@@ -28,6 +28,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
 import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
+import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
@@ -463,6 +464,45 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
                   } else {
                     c.getSource().sendWarn("No task was running!");
                   }
+
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("start-attack")
+        .executes(
+          help(
+            "Makes selected instances start an attack",
+            c ->
+              forEveryAttack(
+                c,
+                attack -> {
+                  attack.switchToState(AttackLifecycle.RUNNING);
+
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("pause-attack")
+        .executes(
+          help(
+            "Makes selected instances pause their",
+            c ->
+              forEveryAttack(
+                c,
+                attack -> {
+                  attack.switchToState(AttackLifecycle.PAUSED);
+
+                  return Command.SINGLE_SUCCESS;
+                }))));
+    dispatcher.register(
+      literal("stop-attack")
+        .executes(
+          help(
+            "Makes selected instances stop their attack",
+            c ->
+              forEveryAttack(
+                c,
+                attack -> {
+                  attack.switchToState(AttackLifecycle.STOPPED);
 
                   return Command.SINGLE_SUCCESS;
                 }))));

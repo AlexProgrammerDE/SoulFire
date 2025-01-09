@@ -27,10 +27,7 @@ import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
-import com.soulfiremc.grpc.generated.ClientDataRequest;
-import com.soulfiremc.grpc.generated.ComboOption;
-import com.soulfiremc.grpc.generated.DoubleSetting;
-import com.soulfiremc.grpc.generated.IntSetting;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CommandHistoryManager;
@@ -40,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginManager;
 import picocli.CommandLine;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +54,7 @@ public class CLIManager {
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager;
   private final ClientSettingsManager clientSettingsManager;
+  private UUID cliInstanceId;
 
   public CLIManager(RPCClient rpcClient, PluginManager pluginManager) {
     injector.register(CLIManager.class, this);
@@ -74,6 +73,20 @@ public class CLIManager {
   }
 
   public void initCLI(String[] args) {
+    var cliInstance = rpcClient.instanceStubBlocking()
+      .listInstances(InstanceListRequest.newBuilder().build())
+      .getInstancesList()
+      .stream()
+      .filter(instance -> instance.getFriendlyName().equals("cli-attack"))
+      .map(InstanceListResponse.Instance::getId)
+      .map(UUID::fromString)
+      .findFirst();
+
+    cliInstanceId = cliInstance.orElseGet(() -> UUID.fromString(rpcClient.instanceStubBlocking()
+      .createInstance(
+        InstanceCreateRequest.newBuilder().setFriendlyName("cli-attack").build())
+      .getId()));
+
     var soulFireCommand = new SFCommandDefinition(this);
     var commandLine = new CommandLine(soulFireCommand);
     soulFireCommand.commandLine(commandLine);
