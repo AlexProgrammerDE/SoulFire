@@ -1,7 +1,7 @@
 [versions]
 log4j = "2.24.3"
 grpc = "1.69.0"
-protobuf = "4.29.2"
+protobuf = "4.29.3"
 via-version = "5.2.1"
 via-backwards = "5.2.1"
 via-rewind = "4.0.5"
