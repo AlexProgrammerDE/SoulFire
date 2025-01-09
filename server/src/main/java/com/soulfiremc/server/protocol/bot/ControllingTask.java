@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -29,6 +30,10 @@ public interface ControllingTask {
 
   static ControllingTask staged(List<Stage> stages) {
     return new StagedTask(stages);
+  }
+
+  static ManualControllingTask manual(ManualTaskMarker taskMarker) {
+    return new ManualControllingTask(taskMarker);
   }
 
   void tick();
@@ -70,6 +75,9 @@ public interface ControllingTask {
 
   record WaitDelayStage(LongSupplier delaySupplier) implements Stage {}
 
+  interface ManualTaskMarker {
+  }
+
   @RequiredArgsConstructor
   class StagedTask implements ControllingTask {
     private final List<Stage> stages;
@@ -104,6 +112,27 @@ public interface ControllingTask {
       } else {
         currentStage++;
       }
+    }
+
+    @Override
+    public void stop() {
+      done = true;
+    }
+
+    @Override
+    public boolean isDone() {
+      return done;
+    }
+  }
+
+  @RequiredArgsConstructor
+  class ManualControllingTask implements ControllingTask {
+    @Getter
+    private final ManualTaskMarker marker;
+    private boolean done = false;
+
+    @Override
+    public void tick() {
     }
 
     @Override
