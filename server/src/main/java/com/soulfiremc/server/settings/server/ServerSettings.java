@@ -52,4 +52,36 @@ public class ServerSettings implements SettingsObject {
       .maxValue(Integer.MAX_VALUE)
       .stepValue(1)
       .build();
+  public static final BooleanProperty ALLOW_REGISTRATION =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-registration")
+      .uiName("Allow registration")
+      .description("Allow anyone to register an account.")
+      .defaultValue(false)
+      .build();
+  public static final BooleanProperty ALLOW_CREATING_INSTANCES =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-creating-instances")
+      .uiName("Allow creating instances")
+      .description("Allow (non-admin) users to create instances.")
+      .defaultValue(true)
+      .build();
+  public static final BooleanProperty ALLOW_DELETING_INSTANCES =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-deleting-instances")
+      .uiName("Allow deleting instances")
+      .description("Allow the owner of an instance to delete it.")
+      .defaultValue(true)
+      .build();
+  public static final BooleanProperty ALLOW_CHANGING_INSTANCE_META =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-changing-instance-meta")
+      .uiName("Allow changing instance meta")
+      .description("Allow the owner of an instance to change meta like instance name and icon.")
+      .defaultValue(true)
+      .build();
 }

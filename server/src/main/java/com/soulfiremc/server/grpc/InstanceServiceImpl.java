@@ -137,7 +137,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   @Override
   public void updateInstanceMeta(InstanceUpdateMetaRequest request, StreamObserver<InstanceUpdateMetaResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE, instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
       sessionFactory.inTransaction(session -> {
@@ -166,7 +166,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   @Override
   public void updateInstanceConfig(InstanceUpdateConfigRequest request, StreamObserver<InstanceUpdateConfigResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE, instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
       sessionFactory.inTransaction(session -> {
