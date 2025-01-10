@@ -128,15 +128,19 @@ public class SFCommandDefinition implements Callable<Integer> {
       .build());
 
     if (start) {
-      cliManager.clientCommandManager().execute("start-attack", null);
+      cliManager.clientCommandManager().execute("start-attack");
     } else {
       log.info(
         "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
 
-    new GenericTerminalConsole<>(cliManager.shutdownManager(), null,
-      cliManager.clientCommandManager(), cliManager.commandHistoryManager())
-      .start();
+    var commandManager = cliManager.clientCommandManager();
+    new GenericTerminalConsole(
+      cliManager.shutdownManager(),
+      commandManager::execute,
+      commandManager::complete,
+      cliManager.commandHistoryManager()
+    ).start();
 
     cliManager.shutdownManager().awaitShutdown();
 

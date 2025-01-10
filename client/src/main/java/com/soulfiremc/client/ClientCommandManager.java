@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.client;
 
-import com.soulfiremc.brigadier.CommandSource;
-import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
@@ -32,12 +30,11 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientCommandManager implements PlatformCommandManager<CommandSource> {
+public class ClientCommandManager {
   private final RPCClient rpcClient;
   private final CLIManager cliManager;
 
-  @Override
-  public int execute(String command, CommandSource source) {
+  public int execute(String command) {
     log.debug("Executing command {} on server", command);
     return rpcClient
       .commandStubBlocking()
@@ -50,8 +47,7 @@ public class ClientCommandManager implements PlatformCommandManager<CommandSourc
       .getCode();
   }
 
-  @Override
-  public List<String> getCompletionSuggestions(String command, CommandSource source) {
+  public List<String> complete(String command) {
     log.debug("Getting completion suggestions for command {} on server", command);
     return rpcClient
       .commandStubBlocking()

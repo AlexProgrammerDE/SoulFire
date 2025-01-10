@@ -81,7 +81,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     });
 
     try {
-      var suggestions = serverCommandManager.getCompletionSuggestions(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
+      var suggestions = serverCommandManager.complete(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
 
       responseObserver.onNext(
         CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());

@@ -56,12 +56,13 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
     log.info("Tip: To generate a new access token, use the command: 'generate-token'");
 
-    new GenericTerminalConsole<>(
+    var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
+    new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      ServerConsoleCommandSource.INSTANCE,
-      soulFire.injector().getSingleton(ServerCommandManager.class),
-      new CommandHistoryManager(SFPathConstants.WORKING_DIRECTORY))
-      .start();
+      command -> commandManager.execute(command, ServerConsoleCommandSource.INSTANCE),
+      command -> commandManager.complete(command, ServerConsoleCommandSource.INSTANCE),
+      new CommandHistoryManager(SFPathConstants.WORKING_DIRECTORY)
+    ).start();
 
     soulFire.shutdownManager().awaitShutdown();
   }

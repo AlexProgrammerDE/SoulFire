@@ -26,7 +26,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
-import com.soulfiremc.brigadier.PlatformCommandManager;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.InternalPlugin;
@@ -84,7 +83,7 @@ import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
  * Holds and configures all server-side text commands of SoulFire itself.
  */
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ServerCommandManager implements PlatformCommandManager<ServerCommandSource> {
+public class ServerCommandManager {
   private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
     ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
   private static final String INSTANCE_IDS_KEY = "instance_ids";
@@ -1112,7 +1111,6 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
       });
   }
 
-  @Override
   public int execute(String command, ServerCommandSource source) {
     command = command.strip();
 
@@ -1126,8 +1124,7 @@ public class ServerCommandManager implements PlatformCommandManager<ServerComman
     }
   }
 
-  @Override
-  public List<String> getCompletionSuggestions(String command, ServerCommandSource source) {
+  public List<String> complete(String command, ServerCommandSource source) {
     try {
       return dispatcher
         .getCompletionSuggestions(dispatcher.parse(command, source))
