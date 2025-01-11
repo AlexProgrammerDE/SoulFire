@@ -29,7 +29,6 @@ import com.soulfiremc.server.util.SFPathConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
-import java.util.List;
 
 @Slf4j
 public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
@@ -38,8 +37,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
   }
 
   @SuppressWarnings("unused")
-  public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
-    new SoulFireDedicatedBootstrap().internalBootstrap(args, classLoaders);
+  public static void bootstrap(String[] args) {
+    new SoulFireDedicatedBootstrap().internalBootstrap(args);
   }
 
   @Override
