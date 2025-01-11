@@ -84,6 +84,10 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
         .completer(
           (reader, parsedLine, list) -> {
             for (var suggestion : commandCompleter.complete(parsedLine.line(), parsedLine.cursor())) {
+              if (suggestion.suggestion().isEmpty()) {
+                continue;
+              }
+
               list.add(toCandidate(suggestion));
             }
           }));
