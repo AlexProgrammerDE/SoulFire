@@ -99,7 +99,7 @@ hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.4.Final"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
 sqlite = "org.xerial:sqlite-jdbc:3.47.2.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.4.0"
-kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:1.9.25"
+kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.1.0"
 graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-ruby = { module = "org.graalvm.polyglot:ruby", version.ref = "graalvm-polyglot" }
