@@ -39,7 +39,7 @@ task("runSFDedicated", JavaExec::class) {
   )
 
   if (System.getProperty("idea.active") != null) {
-    argsMutable += "-Dnet.kyori.ansi.colorLevel=indexed16"
+    argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
   }
 
   jvmArgs = argsMutable
