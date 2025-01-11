@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
@@ -27,6 +26,7 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
 import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -64,7 +64,7 @@ public class AutoRespawn extends InternalPlugin {
       }
 
       var message =
-        SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
+        SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
       connection
         .logger()
         .info(

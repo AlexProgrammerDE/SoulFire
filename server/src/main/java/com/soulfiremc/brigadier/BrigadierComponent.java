@@ -15,24 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util.structs;
+package com.soulfiremc.brigadier;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.mojang.brigadier.Message;
+import com.soulfiremc.server.util.SoulFireAdventure;
+import net.kyori.adventure.text.Component;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-public final class ExpiringSet {
-  private ExpiringSet() {}
-
-  /**
-   * An expiring set using Caffeine caches
-   *
-   * @param <E> the element type
-   * @return a new expiring set
-   */
-  public static <E> Set<E> newExpiringSet(long duration, TimeUnit unit) {
-    return Collections.newSetFromMap(Caffeine.newBuilder().expireAfterWrite(duration, unit).<E, Boolean>build().asMap());
+public record BrigadierComponent(Component component) implements Message {
+  @Override
+  public String getString() {
+    return SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(component);
   }
 }

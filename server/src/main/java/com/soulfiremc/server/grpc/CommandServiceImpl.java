@@ -81,10 +81,22 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     });
 
     try {
-      var suggestions = serverCommandManager.complete(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
+      var suggestions = serverCommandManager.complete(request.getCommand(), request.getCursor(), ServerRPCConstants.USER_CONTEXT_KEY.get())
+        .stream()
+        .map(completion -> {
+          var builder = CommandCompletion.newBuilder()
+            .setSuggestion(completion.suggestion());
+          if (completion.tooltip() != null) {
+            builder.setTooltip(completion.tooltip());
+          }
+          return builder.build();
+        })
+        .toList();
 
       responseObserver.onNext(
-        CommandCompletionResponse.newBuilder().addAllSuggestions(suggestions).build());
+        CommandCompletionResponse.newBuilder()
+          .addAllSuggestions(suggestions)
+          .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error tab completing", t);

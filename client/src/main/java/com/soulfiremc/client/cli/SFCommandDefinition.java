@@ -22,6 +22,7 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
+import com.soulfiremc.server.util.SFPathConstants;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -139,7 +140,7 @@ public class SFCommandDefinition implements Callable<Integer> {
       cliManager.shutdownManager(),
       commandManager::execute,
       commandManager::complete,
-      cliManager.commandHistoryManager()
+      SFPathConstants.CLIENT_DATA_DIRECTORY
     ).start();
 
     cliManager.shutdownManager().awaitShutdown();

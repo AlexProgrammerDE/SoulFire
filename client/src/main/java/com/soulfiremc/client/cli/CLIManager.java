@@ -29,8 +29,6 @@ import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.settings.PropertyKey;
-import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.CommandHistoryManager;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +46,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CLIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
-  private final CommandHistoryManager commandHistoryManager = new CommandHistoryManager(SFPathConstants.CLIENT_DATA_DIRECTORY);
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();

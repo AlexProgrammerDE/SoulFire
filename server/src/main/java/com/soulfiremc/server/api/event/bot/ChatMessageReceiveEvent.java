@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.api.event.bot;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -32,6 +32,6 @@ import net.kyori.adventure.text.Component;
 public record ChatMessageReceiveEvent(BotConnection connection, long timestamp, Component message)
   implements SoulFireBotEvent {
   public String parseToPlainText() {
-    return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(message);
+    return SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(message);
   }
 }

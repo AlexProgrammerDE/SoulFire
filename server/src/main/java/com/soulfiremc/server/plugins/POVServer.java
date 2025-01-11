@@ -19,7 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.ServerCommandManager;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
@@ -43,10 +42,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
-import com.soulfiremc.server.util.DefaultTagsState;
-import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.*;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -1012,7 +1008,7 @@ public class POVServer extends InternalPlugin {
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-      log.info("POV -> C Disconnected: %s".formatted(SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
+      log.info("POV -> C Disconnected: %s".formatted(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
     }
   }
 

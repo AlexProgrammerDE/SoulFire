@@ -30,10 +30,16 @@ message CommandCompletionRequest {
     InstanceCommandScope instance = 2;
   }
   string command = 3;
+  int32 cursor = 4;
+}
+
+message CommandCompletion {
+  string suggestion = 1;
+  optional string tooltip = 2;
 }
 
 message CommandCompletionResponse {
-  repeated string suggestions = 1;
+  repeated CommandCompletion suggestions = 1;
 }
 
 service CommandService {

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
@@ -40,6 +39,7 @@ import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.EntityMovement;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.mcstructs.LevelLoadStatusManager;
 import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
@@ -166,10 +166,6 @@ public final class SessionDataManager {
       var movedOldPos = EntityMovement.calculateAbsolute(oldPos, newMovement, set);
       entity.setOldPosAndRot(movedOldPos.pos(), movedOldPos.yRot(), movedOldPos.xRot());
     }
-  }
-
-  private static String toPlainText(Component component) {
-    return SoulFireServer.PLAIN_MESSAGE_SERIALIZER.serialize(component);
   }
 
   private static List<String> readChannels(ClientboundCustomPayloadPacket packet) {
@@ -1177,7 +1173,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onLoginDisconnectPacket(ClientboundLoginDisconnectPacket packet) {
-    var plainMessage = toPlainText(packet.getReason());
+    var plainMessage = SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getReason());
     log.error("Login failed with reason \"{}\"", plainMessage);
 
     handleTips(plainMessage);
@@ -1185,14 +1181,14 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onDisconnectPacket(ClientboundDisconnectPacket packet) {
-    var plainMessage = toPlainText(packet.getReason());
+    var plainMessage = SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(packet.getReason());
     log.info("Disconnected with reason \"{}\"", plainMessage);
 
     handleTips(plainMessage);
   }
 
   public void onDisconnectEvent(DisconnectedEvent event) {
-    var reason = toPlainText(event.getReason());
+    var reason = SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason());
     var cause = event.getCause();
     if (cause == null) { // Packet wise disconnects have no cause
       log.info("Disconnected: {}", reason);

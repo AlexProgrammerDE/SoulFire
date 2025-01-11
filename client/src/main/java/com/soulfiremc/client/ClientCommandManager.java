@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client;
 
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
@@ -47,7 +48,7 @@ public class ClientCommandManager {
       .getCode();
   }
 
-  public List<String> complete(String command) {
+  public List<GenericTerminalConsole.Completion> complete(String command, int cursor) {
     log.debug("Getting completion suggestions for command {} on server", command);
     return rpcClient
       .commandStubBlocking()
@@ -56,7 +57,14 @@ public class ClientCommandManager {
           .setInstanceId(cliManager.cliInstanceId().toString())
           .build())
         .setCommand(command)
+        .setCursor(cursor)
         .build())
-      .getSuggestionsList();
+      .getSuggestionsList()
+      .stream()
+      .map(suggestion -> new GenericTerminalConsole.Completion(
+        suggestion.getSuggestion(),
+        suggestion.hasTooltip() ? suggestion.getTooltip() : null
+      ))
+      .toList();
   }
 }

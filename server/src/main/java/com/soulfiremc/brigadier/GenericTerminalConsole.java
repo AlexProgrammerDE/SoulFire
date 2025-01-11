@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.brigadier;
 
-import com.mojang.brigadier.Command;
-import com.soulfiremc.server.util.structs.CommandHistoryManager;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
@@ -26,10 +24,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.impl.history.DefaultHistory;
+
+import java.nio.file.Path;
 
 @RequiredArgsConstructor
 public class GenericTerminalConsole extends SimpleTerminalConsole {
@@ -37,7 +37,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   private final ShutdownManager shutdownManager;
   private final CommandExecutor commandExecutor;
   private final CommandCompleter commandCompleter;
-  private final CommandHistoryManager commandHistoryManager;
+  private final Path historyDirectory;
 
   /**
    * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
@@ -52,12 +52,17 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
     return !shutdownManager.shutdown();
   }
 
-  @Override
-  protected void runCommand(String command) {
-    var result = commandExecutor.execute(command);
-    if (result == Command.SINGLE_SUCCESS) {
-      commandHistoryManager.newCommandHistoryEntry(command);
-    }
+  private static Candidate toCandidate(Completion completion) {
+    var suggestionText = completion.suggestion();
+    return new Candidate(
+      suggestionText,
+      suggestionText,
+      null,
+      completion.tooltip(),
+      null,
+      null,
+      false
+    );
   }
 
   @Override
@@ -66,23 +71,22 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   }
 
   @Override
-  protected LineReader buildReader(LineReaderBuilder builder) {
-    var history = new DefaultHistory();
-    for (var command : commandHistoryManager.getCommandHistory()) {
-      history.add(command.getKey(), command.getValue());
-    }
+  protected void runCommand(String command) {
+    commandExecutor.execute(command);
+  }
 
+  @Override
+  protected LineReader buildReader(LineReaderBuilder builder) {
     return super.buildReader(
       builder
         .appName("SoulFire")
+        .variable(LineReader.HISTORY_FILE, historyDirectory.resolve(".console_history"))
         .completer(
           (reader, parsedLine, list) -> {
-            for (var suggestion :
-              commandCompleter.complete(parsedLine.line())) {
-              list.add(new Candidate(suggestion));
+            for (var suggestion : commandCompleter.complete(parsedLine.line(), parsedLine.cursor())) {
+              list.add(toCandidate(suggestion));
             }
-          })
-        .history(history));
+          }));
   }
 
   public interface CommandExecutor {
@@ -90,6 +94,9 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   }
 
   public interface CommandCompleter {
-    Iterable<String> complete(String line);
+    Iterable<Completion> complete(String line, int cursor);
+  }
+
+  public record Completion(String suggestion, @Nullable String tooltip) {
   }
 }

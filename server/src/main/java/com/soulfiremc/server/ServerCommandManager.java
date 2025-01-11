@@ -23,9 +23,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
+import com.soulfiremc.brigadier.BrigadierComponent;
 import com.soulfiremc.brigadier.CommandHelpWrapper;
+import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.brigadier.RedirectHelpWrapper;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.InternalPlugin;
@@ -52,6 +53,7 @@ import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.vialoader.util.ProtocolVersionList;
@@ -59,6 +61,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.io.FileUtils;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector2d;
@@ -1124,14 +1127,22 @@ public class ServerCommandManager {
     }
   }
 
-  public List<String> complete(String command, ServerCommandSource source) {
+  public List<GenericTerminalConsole.Completion> complete(String command, int cursor, ServerCommandSource source) {
     try {
       return dispatcher
-        .getCompletionSuggestions(dispatcher.parse(command, source))
+        .getCompletionSuggestions(dispatcher.parse(command, source), cursor)
         .join()
         .getList()
         .stream()
-        .map(Suggestion::getText)
+        .map(suggestion -> {
+          var tooltipComponent = switch (suggestion.getTooltip()) {
+            case null -> null;
+            case BrigadierComponent brigadierComponent -> brigadierComponent.component();
+            default -> Component.text(suggestion.getTooltip().getString());
+          };
+          return new GenericTerminalConsole.Completion(suggestion.getText(),
+            SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serializeOrNull(tooltipComponent));
+        })
         .toList();
     } finally {
       clearContext();

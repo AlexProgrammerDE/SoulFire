@@ -21,11 +21,11 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -175,7 +175,7 @@ public class AuthSystem {
 
     @Override
     public void sendMessage(Level level, Component message) {
-      logService.sendMessage(userData.id(), ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
+      logService.sendMessage(userData.id(), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
     }
 
     private boolean isOwnerOfInstance(UUID instanceId) {

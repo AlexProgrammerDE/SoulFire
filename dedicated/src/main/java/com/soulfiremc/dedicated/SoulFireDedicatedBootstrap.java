@@ -26,7 +26,6 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.CommandHistoryManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
@@ -60,8 +59,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
       command -> commandManager.execute(command, ServerConsoleCommandSource.INSTANCE),
-      command -> commandManager.complete(command, ServerConsoleCommandSource.INSTANCE),
-      new CommandHistoryManager(SFPathConstants.WORKING_DIRECTORY)
+      (command, cursor) -> commandManager.complete(command, cursor, ServerConsoleCommandSource.INSTANCE),
+      SFPathConstants.WORKING_DIRECTORY
     ).start();
 
     soulFire.shutdownManager().awaitShutdown();

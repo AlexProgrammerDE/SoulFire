@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.brigadier;
 
-import com.soulfiremc.server.plugins.ChatMessageLogger;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class ServerConsoleCommandSource implements ServerCommandSource {
 
   @Override
   public void sendMessage(Level level, Component message) {
-    log.atLevel(level).setMessage("{}").addArgument(() -> ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message)).log();
+    log.atLevel(level).setMessage("{}").addArgument(() -> SoulFireAdventure.ANSI_SERIALIZER.serialize(message)).log();
   }
 
   @Override
