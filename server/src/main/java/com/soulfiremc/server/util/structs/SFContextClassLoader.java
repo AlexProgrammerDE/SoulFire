@@ -123,7 +123,7 @@ public class SFContextClassLoader extends ClassLoader {
   }
 
   private byte[] getClassBytes(ClassLoader classLoader, String className) {
-    var classPath = className.replace('.', '/') + ".class";
+    var classPath = className.replace('.', '/').concat(".class");
 
     try (var inputStream = classLoader.getResourceAsStream(classPath)) {
       if (inputStream == null) {
