@@ -21,17 +21,23 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.CodeSigner;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
-public class SFContextClassLoader extends ClassLoader {
+public class SFContextClassLoader extends URLClassLoader {
   // Prevent infinite loop when plugins are looking for classes inside this class loader
   private static final ThreadLocal<Boolean> PREVENT_LOOP = ThreadLocal.withInitial(() -> false);
   @Getter
@@ -40,7 +46,7 @@ public class SFContextClassLoader extends ClassLoader {
 
   @SneakyThrows
   public SFContextClassLoader(Path libDir) {
-    super(createLibClassLoader(libDir));
+    super(createLibClassLoader(libDir), ClassLoader.getSystemClassLoader());
     Thread.currentThread().setContextClassLoader(this);
 
     var constantsClass = loadClass("com.soulfiremc.launcher.SoulFireClassloaderConstants");
@@ -48,7 +54,11 @@ public class SFContextClassLoader extends ClassLoader {
     pluginUrlsField.set(null, (Consumer<ClassLoader>) childClassLoaders::add);
   }
 
-  private static ClassLoader createLibClassLoader(Path libDir) {
+  private static String nameToPath(String name) {
+    return name.replace('.', '/').concat(".class");
+  }
+
+  private static URL[] createLibClassLoader(Path libDir) {
     var urls = new ArrayList<URL>();
     var dependencyListInput = ClassLoader.getSystemClassLoader().getResourceAsStream("META-INF/dependency-list.txt");
     if (dependencyListInput != null) {
@@ -71,7 +81,7 @@ public class SFContextClassLoader extends ClassLoader {
       }
     }
 
-    return new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+    return urls.toArray(new URL[0]);
   }
 
   @Override
@@ -89,8 +99,8 @@ public class SFContextClassLoader extends ClassLoader {
         // In the next step, we pretend we own the classes
         // of either the parent or the child classloaders
         if (c == null) {
-          var parentClassData = getClassBytes(this.getParent(), name);
-          if (parentClassData == null) {
+          c = loadParentClass(name);
+          if (c == null) {
             if (PREVENT_LOOP.get()) {
               // This classloader -> plugin classloader -> delegates back to this classloader -> tries to get it from the plugin classloader again
               // We don't want to loop infinitely
@@ -116,8 +126,6 @@ public class SFContextClassLoader extends ClassLoader {
               PREVENT_LOOP.set(false);
             }
           }
-
-          c = defineClass(name, parentClassData, 0, parentClassData.length);
         }
       }
 
@@ -130,10 +138,101 @@ public class SFContextClassLoader extends ClassLoader {
     }
   }
 
-  private byte[] getClassBytes(ClassLoader classLoader, String className) {
-    var classPath = className.replace('.', '/').concat(".class");
+  private Class<?> loadParentClass(String name) {
+    try {
+      var classBytes = this.getClassBytes(name);
+      if (classBytes == null) {
+        return null;
+      }
 
-    try (var inputStream = classLoader.getResourceAsStream(classPath)) {
+      var connection = this.getClassConnection(name);
+      var url = connection == null ? null : connection.getURL();
+
+      CodeSigner[] codeSigner = null;
+      Manifest manifest = null;
+      if (connection instanceof JarURLConnection jarConnection) {
+        var jarFile = jarConnection.getJarFile();
+        url = jarConnection.getJarFileURL();
+
+        if (jarFile != null && jarFile.getManifest() != null) {
+          manifest = jarFile.getManifest();
+          var entry = jarFile.getJarEntry(nameToPath(name) + ".class");
+          if (entry != null) {
+            codeSigner = entry.getCodeSigners();
+          }
+        }
+      }
+
+      var i = name.lastIndexOf('.');
+      if (i != -1) {
+        var pkgName = name.substring(0, i);
+        // Check if package already loaded.
+        if (getAndVerifyPackage(pkgName, manifest, url) == null) {
+          try {
+            if (manifest != null) {
+              definePackage(pkgName, manifest, url);
+            } else {
+              definePackage(pkgName, null, null, null, null, null, null, null);
+            }
+          } catch (IllegalArgumentException iae) {
+            // parallel-capable class loaders: re-verify in case of a
+            // race condition
+            if (getAndVerifyPackage(pkgName, manifest, url) == null) {
+              // Should never happen
+              throw new AssertionError("Cannot find package " +
+                pkgName);
+            }
+          }
+        }
+      }
+
+      CodeSource codeSource = null;
+      if (connection != null) codeSource = new CodeSource(url, codeSigner);
+      return this.defineClass(name, classBytes, 0, classBytes.length, codeSource);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @SuppressWarnings("deprecation")
+  private URLConnection getClassConnection(String className) throws IOException {
+    var url = this.findResource(nameToPath(className));
+    if (url != null) {
+      if ("jar".equalsIgnoreCase(url.getProtocol()) && url.getRef() == null) {
+        //Append the '#runtime' ref to make sure the opened jarfile handles multi release jars correctly
+        url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile() + "#runtime");
+      }
+      return url.openConnection();
+    }
+    return null;
+  }
+
+  private Package getAndVerifyPackage(String pkgName,
+                                      Manifest man, URL url) {
+    var pkg = getDefinedPackage(pkgName);
+    if (pkg != null) {
+      // Package found, so check package sealing.
+      if (pkg.isSealed()) {
+        // Verify that code source URL is the same.
+        if (!pkg.isSealed(url)) {
+          throw new SecurityException(
+            "sealing violation: package " + pkgName + " is sealed");
+        }
+      } else {
+        // Make sure we are not attempting to seal the package
+        // at this code source URL.
+        if ((man != null) && isSealed(pkgName, man)) {
+          throw new SecurityException(
+            "sealing violation: can't seal package " + pkgName +
+              ": already loaded");
+        }
+      }
+    }
+    return pkg;
+  }
+
+  private byte[] getClassBytes(String className) {
+    try (var inputStream = this.getResourceAsStream(nameToPath(className))) {
       if (inputStream == null) {
         return null;
       }
@@ -142,5 +241,17 @@ public class SFContextClassLoader extends ClassLoader {
     } catch (IOException ignored) {
       return null;
     }
+  }
+
+  private boolean isSealed(final String path, final Manifest manifest) {
+    var attributes = manifest.getAttributes(path);
+    String sealed = null;
+    if (attributes != null) sealed = attributes.getValue(Attributes.Name.SEALED);
+
+    if (sealed == null) {
+      attributes = manifest.getMainAttributes();
+      if (attributes != null) sealed = attributes.getValue(Attributes.Name.SEALED);
+    }
+    return "true".equalsIgnoreCase(sealed);
   }
 }
