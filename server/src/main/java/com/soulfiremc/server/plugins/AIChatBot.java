@@ -63,6 +63,11 @@ public class AIChatBot extends InternalPlugin {
       return;
     }
 
+    if (message.contains(settingsSource.get(AIChatBotSettings.KEYWORD).concat(" reset"))) {
+      event.connection().metadata().remove(PLAYER_CONVERSATIONS);
+      return;
+    }
+
     try {
       var api = AISettings.create(settingsSource);
       var model = settingsSource.get(AIChatBotSettings.MODEL);
