@@ -254,4 +254,14 @@ public class SFContextClassLoader extends URLClassLoader {
     }
     return "true".equalsIgnoreCase(sealed);
   }
+
+  @Override
+  public URL findResource(String name) {
+    var thisLoaderResource = super.findResource(name);
+    if (thisLoaderResource != null) {
+      return thisLoaderResource;
+    }
+
+    return this.getParent().getResource(name);
+  }
 }
