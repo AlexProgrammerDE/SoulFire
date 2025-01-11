@@ -196,7 +196,7 @@ public class SFContextClassLoader extends URLClassLoader {
 
   @SuppressWarnings("deprecation")
   private URLConnection getClassConnection(String className) throws IOException {
-    var url = this.findResource(nameToPath(className));
+    var url = this.getResource(nameToPath(className));
     if (url != null) {
       if ("jar".equalsIgnoreCase(url.getProtocol()) && url.getRef() == null) {
         //Append the '#runtime' ref to make sure the opened jarfile handles multi release jars correctly
