@@ -73,7 +73,6 @@ public class SFLogAppender extends AbstractAppender {
   @Override
   public void append(LogEvent event) {
     if (event.getContextData().containsKey(SF_SKIP_PUBLISHING)) {
-      System.out.println("Skipping publishing");
       return;
     }
 
