@@ -156,7 +156,7 @@ public class SFContextClassLoader extends URLClassLoader {
 
         if (jarFile != null && jarFile.getManifest() != null) {
           manifest = jarFile.getManifest();
-          var entry = jarFile.getJarEntry(nameToPath(name) + ".class");
+          var entry = jarFile.getJarEntry(nameToPath(name));
           if (entry != null) {
             codeSigner = entry.getCodeSigners();
           }
