@@ -70,6 +70,7 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.tcp.TcpServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -95,6 +96,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengt
 import org.geysermc.mcprotocollib.protocol.data.status.PlayerInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.ServerStatusInfo;
 import org.geysermc.mcprotocollib.protocol.data.status.VersionInfo;
+import org.geysermc.mcprotocollib.protocol.data.status.handler.ServerInfoBuilder;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundPingPacket;
@@ -169,192 +171,17 @@ public class POVServer extends InternalPlugin {
   }
 
   private static void startPOVServer(InstanceSettingsSource settingsSource, int port, InstanceManager instanceManager) {
-    var faviconBytes = SFHelpers.getResourceAsBytes("assets/pov_favicon.png");
     var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);
-    server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, session -> new ServerStatusInfo(
-      Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
-        .color(NamedTextColor.GREEN)
-        .decorate(TextDecoration.BOLD),
-      new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
-        getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
-        getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
-        getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
-      )),
-      new VersionInfo(
-        MinecraftCodec.CODEC.getMinecraftVersion(),
-        MinecraftCodec.CODEC.getProtocolVersion()),
-      faviconBytes,
-      false));
+    server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new POVServerInfoHandler(
+      instanceManager,
+      settingsSource,
+      SFHelpers.getResourceAsBytes("assets/pov_favicon.png")
+    ));
+    server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new POVServerLoginHandler());
 
-    server.setGlobalFlag(
-      MinecraftConstants.SERVER_LOGIN_HANDLER_KEY,
-      session -> {
-        session.send(
-          new ClientboundLoginPacket(
-            0,
-            false,
-            new Key[]{Key.key("minecraft:the_end")},
-            1,
-            0,
-            0,
-            false,
-            false,
-            false,
-            new PlayerSpawnInfo(
-              2,
-              Key.key("minecraft:the_end"),
-              100,
-              GameMode.SPECTATOR,
-              GameMode.SPECTATOR,
-              false,
-              false,
-              null,
-              0,
-              0),
-            false));
-
-        session.send(
-          new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
-
-        // this packet is also required to let our player spawn, but the location itself
-        // doesn't matter
-        session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
-
-        // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
-        // request packet spam,
-        // so send it after calling ConnectedEvent which adds the PacketHandler as listener
-        session.send(new ClientboundPlayerPositionPacket(0, Vector3d.ZERO, Vector3d.ZERO, 0, 0, List.of()));
-
-        // this packet is required since 1.20.3
-        session.send(
-          new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
-
-        // End dimension height
-        var heightAccessor = new LevelHeightAccessor() {
-          @Override
-          public int getHeight() {
-            return 256;
-          }
-
-          @Override
-          public int getMinY() {
-            return 0;
-          }
-        };
-        var sectionCount = heightAccessor.getSectionsCount();
-        var buf = Unpooled.buffer();
-        for (var i = 0; i < sectionCount; i++) {
-          var chunk = DataPalette.createForChunk();
-          chunk.set(0, 0, 0, 0);
-          var biome = DataPalette.createForBiome();
-          biome.set(0, 0, 0, 0);
-          SFProtocolHelper.writeChunkSection(
-            buf,
-            new ChunkSection(0, chunk, biome),
-            (MinecraftCodecHelper) session.getCodecHelper());
-        }
-
-        var chunkBytes = new byte[buf.readableBytes()];
-        buf.readBytes(chunkBytes);
-
-        var lightMask = new BitSet();
-        lightMask.set(0, sectionCount + 2);
-        var skyUpdateList = new ArrayList<byte[]>();
-        for (var i = 0; i < sectionCount + 2; i++) {
-          skyUpdateList.add(FULL_LIGHT); // sky light
-        }
-
-        var lightUpdateData =
-          new LightUpdateData(
-            lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
-
-        session.send(
-          new ClientboundLevelChunkWithLightPacket(
-            0,
-            0,
-            chunkBytes,
-            NbtMap.EMPTY,
-            new BlockEntityInfo[0],
-            lightUpdateData));
-
-        var brandBuffer = Unpooled.buffer();
-        session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
-
-        var brandBytes = new byte[brandBuffer.readableBytes()];
-        brandBuffer.readBytes(brandBytes);
-
-        session.send(
-          new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, brandBytes));
-
-        var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
-        log.info("Account connected: {}", profile.getName());
-
-        Component msg =
-          Component.text("Hello, ")
-            .color(NamedTextColor.GREEN)
-            .append(
-              Component.text(profile.getName())
-                .color(NamedTextColor.AQUA)
-                .decorate(TextDecoration.UNDERLINED))
-            .append(
-              Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
-                .color(NamedTextColor.GREEN));
-
-        session.send(new ClientboundSystemChatPacket(msg, false));
-      });
-
-    server.addListener(
-      new ServerAdapter() {
-        @Override
-        public void serverBound(ServerBoundEvent event) {
-          var server = event.getServer();
-          log.info("Started POV server on 0.0.0.0:{} for attack {}", port, instanceManager.id());
-
-          instanceManager.metadata().set(TCP_SERVER, server);
-        }
-
-        @Override
-        public void serverClosing(ServerClosingEvent event) {
-          log.info("POV server closing");
-        }
-
-        @Override
-        public void serverClosed(ServerClosedEvent event) {
-          log.info("POV server closed");
-        }
-
-        @Override
-        public void sessionAdded(SessionAddedEvent event) {
-          event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
-          event.getSession().addListener(new SessionAdapter() {
-            private boolean fixedOnce;
-
-            @Override
-            public void packetSending(PacketSendingEvent event) {
-              if (fixedOnce) {
-                return;
-              }
-
-              if (event.getPacket() instanceof ClientboundFinishConfigurationPacket) {
-                fixedOnce = true;
-
-                event.setCancelled(true);
-                var tagsPacket = new ClientboundUpdateTagsPacket();
-                tagsPacket.getTags().putAll(DefaultTagsState.TAGS_STATE.exportTags());
-                event.getSession().send(tagsPacket);
-                event.getSession().send(new ClientboundFinishConfigurationPacket());
-              }
-            }
-          });
-        }
-
-        @Override
-        public void sessionRemoved(SessionRemovedEvent event) {
-          log.info("POV session removed");
-        }
-      });
+    server.addListener(new POVServerAdapter(port, instanceManager, settingsSource));
 
     server.bind();
   }
@@ -796,6 +623,200 @@ public class POVServer extends InternalPlugin {
     currentInstance.close();
   }
 
+  private record POVServerInfoHandler(InstanceManager instanceManager, InstanceSettingsSource settingsSource, byte[] faviconBytes) implements ServerInfoBuilder {
+    @Override
+    public ServerStatusInfo buildInfo(Session session) {
+      return
+        new ServerStatusInfo(
+          Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
+            .color(NamedTextColor.GREEN)
+            .decorate(TextDecoration.BOLD),
+          new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
+            getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
+            getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
+            getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
+          )),
+          new VersionInfo(
+            MinecraftCodec.CODEC.getMinecraftVersion(),
+            MinecraftCodec.CODEC.getProtocolVersion()),
+          faviconBytes,
+          false);
+    }
+  }
+
+  private record POVServerLoginHandler() implements ServerLoginHandler {
+    @Override
+    public void loggedIn(Session session) {
+      session.send(
+        new ClientboundLoginPacket(
+          0,
+          false,
+          new Key[]{Key.key("minecraft:the_end")},
+          1,
+          0,
+          0,
+          false,
+          false,
+          false,
+          new PlayerSpawnInfo(
+            2,
+            Key.key("minecraft:the_end"),
+            100,
+            GameMode.SPECTATOR,
+            GameMode.SPECTATOR,
+            false,
+            false,
+            null,
+            0,
+            0),
+          false));
+
+      session.send(
+        new ClientboundPlayerAbilitiesPacket(false, false, true, false, 0.05f, 0.1f));
+
+      // this packet is also required to let our player spawn, but the location itself
+      // doesn't matter
+      session.send(new ClientboundSetDefaultSpawnPositionPacket(Vector3i.ZERO, 0));
+
+      // we have to listen to the teleport confirm on the PacketHandler to prevent respawn
+      // request packet spam,
+      // so send it after calling ConnectedEvent which adds the PacketHandler as listener
+      session.send(new ClientboundPlayerPositionPacket(0, Vector3d.ZERO, Vector3d.ZERO, 0, 0, List.of()));
+
+      // this packet is required since 1.20.3
+      session.send(
+        new ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null));
+
+      // End dimension height
+      var heightAccessor = new LevelHeightAccessor() {
+        @Override
+        public int getHeight() {
+          return 256;
+        }
+
+        @Override
+        public int getMinY() {
+          return 0;
+        }
+      };
+      var sectionCount = heightAccessor.getSectionsCount();
+      var buf = Unpooled.buffer();
+      for (var i = 0; i < sectionCount; i++) {
+        var chunk = DataPalette.createForChunk();
+        chunk.set(0, 0, 0, 0);
+        var biome = DataPalette.createForBiome();
+        biome.set(0, 0, 0, 0);
+        SFProtocolHelper.writeChunkSection(
+          buf,
+          new ChunkSection(0, chunk, biome),
+          (MinecraftCodecHelper) session.getCodecHelper());
+      }
+
+      var chunkBytes = new byte[buf.readableBytes()];
+      buf.readBytes(chunkBytes);
+
+      var lightMask = new BitSet();
+      lightMask.set(0, sectionCount + 2);
+      var skyUpdateList = new ArrayList<byte[]>();
+      for (var i = 0; i < sectionCount + 2; i++) {
+        skyUpdateList.add(FULL_LIGHT); // sky light
+      }
+
+      var lightUpdateData =
+        new LightUpdateData(
+          lightMask, new BitSet(), new BitSet(), lightMask, skyUpdateList, List.of());
+
+      session.send(
+        new ClientboundLevelChunkWithLightPacket(
+          0,
+          0,
+          chunkBytes,
+          NbtMap.EMPTY,
+          new BlockEntityInfo[0],
+          lightUpdateData));
+
+      var brandBuffer = Unpooled.buffer();
+      session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
+
+      var brandBytes = new byte[brandBuffer.readableBytes()];
+      brandBuffer.readBytes(brandBytes);
+
+      session.send(
+        new ClientboundCustomPayloadPacket(SFProtocolConstants.BRAND_PAYLOAD_KEY, brandBytes));
+
+      var profile = session.getFlag(MinecraftConstants.PROFILE_KEY);
+      log.info("Account connected: {}", profile.getName());
+
+      Component msg =
+        Component.text("Hello, ")
+          .color(NamedTextColor.GREEN)
+          .append(
+            Component.text(profile.getName())
+              .color(NamedTextColor.AQUA)
+              .decorate(TextDecoration.UNDERLINED))
+          .append(
+            Component.text("! To connect to the POV of a bot, please send the bot name as a chat message.")
+              .color(NamedTextColor.GREEN));
+
+      session.send(new ClientboundSystemChatPacket(msg, false));
+    }
+  }
+
+  @RequiredArgsConstructor
+  private static class POVServerAdapter extends ServerAdapter {
+    private final int port;
+    private final InstanceManager instanceManager;
+    private final InstanceSettingsSource settingsSource;
+
+    @Override
+    public void serverBound(ServerBoundEvent event) {
+      var server = event.getServer();
+      log.info("Started POV server on 0.0.0.0:{} for attack {}", port, instanceManager.id());
+
+      instanceManager.metadata().set(TCP_SERVER, server);
+    }
+
+    @Override
+    public void serverClosing(ServerClosingEvent event) {
+      log.info("POV server closing");
+    }
+
+    @Override
+    public void serverClosed(ServerClosedEvent event) {
+      log.info("POV server closed");
+    }
+
+    @Override
+    public void sessionAdded(SessionAddedEvent event) {
+      event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
+      event.getSession().addListener(new SessionAdapter() {
+        private boolean fixedOnce;
+
+        @Override
+        public void packetSending(PacketSendingEvent event) {
+          if (fixedOnce) {
+            return;
+          }
+
+          if (event.getPacket() instanceof ClientboundFinishConfigurationPacket) {
+            fixedOnce = true;
+
+            event.setCancelled(true);
+            var tagsPacket = new ClientboundUpdateTagsPacket();
+            tagsPacket.getTags().putAll(DefaultTagsState.TAGS_STATE.exportTags());
+            event.getSession().send(tagsPacket);
+            event.getSession().send(new ClientboundFinishConfigurationPacket());
+          }
+        }
+      });
+    }
+
+    @Override
+    public void sessionRemoved(SessionRemovedEvent event) {
+      log.info("POV session removed");
+    }
+  }
+
   @RequiredArgsConstructor
   private static class POVClientSessionAdapter extends SessionAdapter {
     private final InstanceManager instanceManager;
@@ -908,30 +929,27 @@ public class POVServer extends InternalPlugin {
                   }
                 }
               });
-          Thread.ofPlatform()
-            .name("SyncTask")
-            .start(
-              () -> {
-                syncBotAndUser(botConnection, clientSession);
+          botConnection.scheduler().schedule(() -> {
+            syncBotAndUser(botConnection, clientSession);
 
-                // Give the client a few moments to process the packets
-                TimeUtil.waitTime(2, TimeUnit.SECONDS);
+            // Give the client a few moments to process the packets
+            TimeUtil.waitTime(2, TimeUnit.SECONDS);
 
-                enableForwarding = true;
+            enableForwarding = true;
 
-                clientSession.send(
-                  new ClientboundSystemChatPacket(
-                    Component.text("Connected to bot ")
-                      .color(NamedTextColor.GREEN)
-                      .append(
-                        Component.text(
-                            botConnection.accountName())
-                          .color(NamedTextColor.AQUA)
-                          .decorate(TextDecoration.UNDERLINED))
-                      .append(Component.text("!"))
-                      .color(NamedTextColor.GREEN),
-                    false));
-              });
+            clientSession.send(
+              new ClientboundSystemChatPacket(
+                Component.text("Connected to bot ")
+                  .color(NamedTextColor.GREEN)
+                  .append(
+                    Component.text(
+                        botConnection.accountName())
+                      .color(NamedTextColor.AQUA)
+                      .decorate(TextDecoration.UNDERLINED))
+                  .append(Component.text("!"))
+                  .color(NamedTextColor.GREEN),
+                false));
+          });
         }
       } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
         // For data consistence, ensure all packets sent from client -> server are
@@ -1008,7 +1026,9 @@ public class POVServer extends InternalPlugin {
 
     @Override
     public void disconnected(DisconnectedEvent event) {
-      log.info("POV -> C Disconnected: %s".formatted(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason())), event.getCause());
+      log.atInfo()
+        .setCause(event.getCause())
+        .log("POV -> C Disconnected: {}", SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()));
     }
   }
 
