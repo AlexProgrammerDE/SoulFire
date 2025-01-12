@@ -25,11 +25,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.jetbrains.annotations.Nullable;
-import org.jline.reader.Candidate;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.*;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class GenericTerminalConsole extends SimpleTerminalConsole {
@@ -81,16 +80,7 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
       builder
         .appName("SoulFire")
         .variable(LineReader.HISTORY_FILE, historyDirectory.resolve(".console_history"))
-        .completer(
-          (reader, parsedLine, list) -> {
-            for (var suggestion : commandCompleter.complete(parsedLine.line(), parsedLine.cursor())) {
-              if (suggestion.suggestion().isEmpty()) {
-                continue;
-              }
-
-              list.add(toCandidate(suggestion));
-            }
-          }));
+        .completer(new TerminalCompleter(commandCompleter)));
   }
 
   public interface CommandExecutor {
@@ -102,5 +92,18 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
   }
 
   public record Completion(String suggestion, @Nullable String tooltip) {
+  }
+
+  private record TerminalCompleter(CommandCompleter commandCompleter) implements Completer {
+    @Override
+    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+      for (var suggestion : commandCompleter.complete(line.line(), line.cursor())) {
+        if (suggestion.suggestion().isEmpty()) {
+          continue;
+        }
+
+        candidates.add(toCandidate(suggestion));
+      }
+    }
   }
 }
