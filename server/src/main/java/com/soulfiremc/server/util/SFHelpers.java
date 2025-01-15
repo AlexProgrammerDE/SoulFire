@@ -127,7 +127,7 @@ public class SFHelpers {
 
   public static <E> E getRandomEntry(List<E> list) {
     if (list.isEmpty()) {
-      return null;
+      throw new IllegalArgumentException("List must not be empty");
     }
 
     return list.get(ThreadLocalRandom.current().nextInt(list.size()));
