@@ -169,7 +169,11 @@ public class InstanceManager {
     }
 
     logger.info("Account {} is expired or outdated, refreshing before connecting", account.lastKnownName());
-    var refreshedAccount = authService.refresh(account, null).join();
+    var refreshedAccount = authService.refresh(
+      account,
+      settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
+    ).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.set(accounts.indexOf(account), refreshedAccount);
     sessionFactory.inTransaction(session -> {
