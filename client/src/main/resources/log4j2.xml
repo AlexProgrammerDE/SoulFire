@@ -29,6 +29,11 @@
                         pattern="%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%n%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"/>
         </LoggerNamePatternSelector>
       </PatternLayout>
+      <Filters>
+        <ContextMapFilter operator="AND" onMatch="DENY" onMismatch="ACCEPT">
+          <KeyValuePair key="sf-skip-local-appenders" value="true"/>
+        </ContextMapFilter>
+      </Filters>
     </TerminalConsole>
   </Appenders>
 

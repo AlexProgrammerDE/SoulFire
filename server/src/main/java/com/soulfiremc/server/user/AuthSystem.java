@@ -18,11 +18,14 @@
 package com.soulfiremc.server.user;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
-import com.soulfiremc.server.plugins.ChatMessageLogger;
+import com.soulfiremc.server.settings.lib.ServerSettingsSource;
+import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -41,6 +44,7 @@ public class AuthSystem {
   private static final String ROOT_USERNAME = "root";
   private final LogServiceImpl logService;
   private final SessionFactory sessionFactory;
+  private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
   private final UUID rootUserId;
 
@@ -48,6 +52,7 @@ public class AuthSystem {
     this.logService = soulFireServer.injector().getSingleton(LogServiceImpl.class);
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(soulFireServer.baseDirectory()));
     this.sessionFactory = soulFireServer.sessionFactory();
+    this.settingsSource = soulFireServer.settingsSource();
     this.rootUserId = createRootUser();
   }
 
@@ -94,7 +99,7 @@ public class AuthSystem {
         s.merge(userEntity);
       }
 
-      return Optional.of(new SoulFireUserImpl(logService, userEntity));
+      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource));
     });
   }
 
@@ -114,7 +119,7 @@ public class AuthSystem {
       .compact();
   }
 
-  private record SoulFireUserImpl(LogServiceImpl logService, UserEntity userData) implements SoulFireUser {
+  private record SoulFireUserImpl(LogServiceImpl logService, UserEntity userData, SessionFactory sessionFactory, ServerSettingsSource settingsSource) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
       return userData.id();
@@ -138,17 +143,53 @@ public class AuthSystem {
     @Override
     public TriState getPermission(PermissionContext permission) {
       // Admins have all permissions
-      if (userData.role() == UserEntity.Role.ADMIN) {
+      if (isAdmin()) {
         return TriState.TRUE;
       }
 
-      // TODO: Implement permission system
-      return TriState.FALSE;
+      // Permissions for normal users
+      return switch (permission) {
+        case PermissionContext.GlobalContext global -> switch (global.globalPermission()) {
+          case GLOBAL_COMMAND_COMPLETION, GLOBAL_COMMAND_EXECUTION,
+               DELETE_USER, UPDATE_USER, READ_USER,
+               CREATE_USER, UPDATE_SERVER_CONFIG, READ_SERVER_CONFIG,
+               GLOBAL_SUBSCRIBE_LOGS -> TriState.FALSE;
+          case CREATE_INSTANCE -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_CREATING_INSTANCES));
+          case READ_CLIENT_DATA -> TriState.TRUE;
+          case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + global.globalPermission());
+        };
+        case PermissionContext.InstanceContext instance -> switch (instance.instancePermission()) {
+          case DELETE_INSTANCE -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
+            && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
+          case UPDATE_INSTANCE_META -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
+            && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
+          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, LIST_OBJECT_STORAGE,
+               DELETE_OBJECT_STORAGE, DOWNLOAD_OBJECT_STORAGE, UPLOAD_OBJECT_STORAGE,
+               DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
+               CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
+               READ_INSTANCE, INSTANCE_COMMAND_COMPLETION -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
+          case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
+        };
+      };
     }
 
     @Override
     public void sendMessage(Level level, Component message) {
-      logService.sendMessage(userData.id(), ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message));
+      logService.sendMessage(userData.id(), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
+    }
+
+    private boolean isOwnerOfInstance(UUID instanceId) {
+      return sessionFactory.fromTransaction(s -> {
+        var instanceEntity = s.createQuery("FROM InstanceEntity WHERE id = :id AND owner = :owner", InstanceEntity.class)
+          .setParameter("id", instanceId)
+          .setParameter("owner", userData)
+          .uniqueResult();
+        return instanceEntity != null;
+      });
+    }
+
+    private boolean isAdmin() {
+      return userData.role() == UserEntity.Role.ADMIN;
     }
   }
 }

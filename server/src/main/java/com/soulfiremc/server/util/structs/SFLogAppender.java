@@ -28,6 +28,7 @@ import org.apache.logging.log4j.core.config.NullConfiguration;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternMatch;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +47,11 @@ public class SFLogAppender extends AbstractAppender {
   public static final String SF_INSTANCE_ID = "sf-instance-id";
   public static final String SF_BOT_CONNECTION_ID = "sf-bot-connection-id";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
+  public static final String SF_SKIP_PUBLISHING = "sf-skip-publishing";
+  public static final String SF_SKIP_LOCAL_APPENDERS = "sf-skip-local-appenders";
   public static final SFLogAppender INSTANCE = new SFLogAppender();
 
-  private static final LoggerNamePatternSelector selector = LoggerNamePatternSelector.createSelector(
+  private static final LoggerNamePatternSelector SELECTOR = LoggerNamePatternSelector.createSelector(
     "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[]{
       new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
@@ -69,8 +72,12 @@ public class SFLogAppender extends AbstractAppender {
 
   @Override
   public void append(LogEvent event) {
+    if (event.getContextData().containsKey(SF_SKIP_PUBLISHING)) {
+      return;
+    }
+
     var formattedBuilder = new StringBuilder();
-    for (var formatter : selector.getFormatters(event)) {
+    for (var formatter : SELECTOR.getFormatters(event)) {
       formatter.format(event, formattedBuilder);
     }
 
@@ -79,20 +86,37 @@ public class SFLogAppender extends AbstractAppender {
       return;
     }
 
-    var sfLogEvent = new SFLogEvent(
-      event.getTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
-      formatted,
-      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
-      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_CONNECTION_ID)),
-      UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)));
+    publishLogEvent(SFLogEvent.fromEvent(event, formatted));
+  }
+
+  public void publishLogEvent(SFLogEvent event) {
     for (var consumer : logConsumers) {
-      consumer.accept(sfLogEvent);
+      consumer.accept(event);
     }
 
-    logs.add(sfLogEvent);
+    logs.add(event);
   }
 
   public record SFLogEvent(String id, String message, @Nullable UUID instanceId, @Nullable UUID botConnectionId, @Nullable UUID botAccountId) {
+    public static SFLogEvent fromEvent(LogEvent event, String formatted) {
+      return new SFLogEvent(
+        event.getTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
+        formatted,
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_CONNECTION_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID))
+      );
+    }
+
+    public static SFLogEvent fromMessage(String message) {
+      return new SFLogEvent(
+        System.currentTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
+        message,
+        UUIDHelper.tryParseUniqueIdOrNull(MDC.get(SF_INSTANCE_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(MDC.get(SF_BOT_CONNECTION_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(MDC.get(SF_BOT_ACCOUNT_ID))
+      );
+    }
   }
 
   public static class QueueWithMaxSize<E> {

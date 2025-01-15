@@ -46,7 +46,6 @@ import java.security.Security;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Stream;
@@ -148,7 +147,7 @@ public abstract class SoulFireAbstractBootstrap {
     }
   }
 
-  private void initPlugins(List<ClassLoader> classLoaders) {
+  private void initPlugins() {
     try {
       Files.createDirectories(pluginsDirectory);
     } catch (IOException e) {
@@ -163,12 +162,12 @@ public abstract class SoulFireAbstractBootstrap {
     pluginManager.startPlugins();
 
     for (var plugin : pluginManager.getPlugins()) {
-      classLoaders.add(plugin.getPluginClassLoader());
+      SoulFireClassloaderConstants.CHILD_CLASSLOADER_CONSUMER.accept(plugin.getPluginClassLoader());
     }
   }
 
   @SneakyThrows
-  protected void internalBootstrap(String[] args, List<ClassLoader> classLoaders) {
+  protected void internalBootstrap(String[] args) {
     try {
       var forkJoinPoolFactory = new CustomThreadFactory();
       // Ensure the ForkJoinPool uses our custom thread factory
@@ -183,7 +182,7 @@ public abstract class SoulFireAbstractBootstrap {
 
       injectExceptionHandler();
 
-      initPlugins(classLoaders);
+      initPlugins();
 
       injectMixinsAndRun(args);
     } catch (Throwable t) {

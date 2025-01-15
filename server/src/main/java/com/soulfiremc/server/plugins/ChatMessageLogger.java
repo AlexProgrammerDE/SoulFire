@@ -19,7 +19,6 @@ package com.soulfiremc.server.plugins;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -30,13 +29,13 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.util.SoulFireAdventure;
+import com.soulfiremc.server.util.structs.SFLogAppender;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
-import net.kyori.ansi.ColorLevel;
+import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
-import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
@@ -44,16 +43,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Extension
 public class ChatMessageLogger extends InternalPlugin {
-  public static final ANSIComponentSerializer ANSI_MESSAGE_SERIALIZER =
-    ANSIComponentSerializer.builder()
-      .flattener(SoulFireServer.FLATTENER)
-      .colorLevel(
-        switch (AnsiConsole.out().getColors()) {
-          case Colors16 -> ColorLevel.INDEXED_16;
-          case Colors256 -> ColorLevel.INDEXED_256;
-          case TrueColor -> ColorLevel.TRUE_COLOR;
-        })
-      .build();
   private static final Cache<String, Integer> CHAT_MESSAGES = Caffeine.newBuilder()
     .expireAfterWrite(5, TimeUnit.SECONDS)
     .build();
@@ -76,22 +65,26 @@ public class ChatMessageLogger extends InternalPlugin {
       return;
     }
 
-    var message = event.message();
-
-    var ansiMessage = ANSI_MESSAGE_SERIALIZER.serialize(message);
-
     // usage of synchronized method so that the chatMessages set is not modified while being
     // iterated
-    logChatMessage(settingsSource, ansiMessage);
+    logChatMessage(settingsSource, event.message());
   }
 
-  private static synchronized void logChatMessage(InstanceSettingsSource settingsSource, String message) {
-    var deduplicateAmount = settingsSource.get(ChatMessageSettings.DEDUPLICATE_AMOUNT);
-    var messageCount = CHAT_MESSAGES.get(message, (key) -> 0);
+  private static synchronized void logChatMessage(InstanceSettingsSource settingsSource, Component message) {
+    var ansiMessage = SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message);
 
+    var deduplicateAmount = settingsSource.get(ChatMessageSettings.DEDUPLICATE_AMOUNT);
+    var messageCount = CHAT_MESSAGES.get(ansiMessage, (key) -> 0);
     if (messageCount < deduplicateAmount) {
-      log.info(message);
-      CHAT_MESSAGES.put(message, messageCount + 1);
+      // Print to remote console (always true color)
+      log.atInfo()
+        .addKeyValue(SFLogAppender.SF_SKIP_LOCAL_APPENDERS, "true")
+        .log("{}", ansiMessage);
+      // Print to local console
+      log.atInfo()
+        .addKeyValue(SFLogAppender.SF_SKIP_PUBLISHING, "true")
+        .log("{}", SoulFireAdventure.ANSI_SERIALIZER.serialize(message));
+      CHAT_MESSAGES.put(ansiMessage, messageCount + 1);
     }
   }
 
@@ -123,4 +116,6 @@ public class ChatMessageLogger extends InternalPlugin {
         .stepValue(1)
         .build();
   }
+
+  private record ChatMessageState(Cache<String, Integer> chatMessages) {}
 }

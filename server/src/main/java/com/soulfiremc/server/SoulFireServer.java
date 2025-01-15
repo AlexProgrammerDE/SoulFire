@@ -25,7 +25,6 @@ import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
-import com.soulfiremc.server.data.TranslationMapper;
 import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ServerConfigEntity;
@@ -55,9 +54,6 @@ import com.viaversion.vialoader.impl.platform.*;
 import com.viaversion.viaversion.api.Via;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.SessionFactory;
@@ -86,12 +82,6 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class SoulFireServer {
   public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
-  public static final ComponentFlattener FLATTENER =
-    ComponentFlattener.basic().toBuilder()
-      .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
-      .build();
-  public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
-    PlainTextComponentSerializer.builder().flattener(FLATTENER).build();
 
   private final Injector injector =
     new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();

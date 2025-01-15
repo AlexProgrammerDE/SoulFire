@@ -17,8 +17,13 @@
  */
 package com.soulfiremc.brigadier;
 
-public interface PlatformCommandManager<S extends CommandSource> {
-  int execute(String command, S source);
+import com.mojang.brigadier.Message;
+import com.soulfiremc.server.util.SoulFireAdventure;
+import net.kyori.adventure.text.Component;
 
-  Iterable<String> getCompletionSuggestions(String line, S source);
+public record BrigadierComponent(Component component) implements Message {
+  @Override
+  public String getString() {
+    return SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(component);
+  }
 }

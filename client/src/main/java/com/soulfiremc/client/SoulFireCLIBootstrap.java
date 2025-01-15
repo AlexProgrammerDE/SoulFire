@@ -29,7 +29,6 @@ import com.soulfiremc.server.util.structs.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -40,14 +39,14 @@ public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
   }
 
   @SuppressWarnings("unused")
-  public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
+  public static void bootstrap(String[] args) {
     if (args.length == 0) {
       System.err.println("ERROR: No command line arguments provided, please run with --help to see available options (java -jar ReplaceMe.jar --help)");
       System.exit(1);
       return;
     }
 
-    new SoulFireCLIBootstrap().internalBootstrap(args, classLoaders);
+    new SoulFireCLIBootstrap().internalBootstrap(args);
   }
 
   @Override

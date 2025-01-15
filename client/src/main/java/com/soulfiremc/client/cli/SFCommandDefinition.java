@@ -17,11 +17,12 @@
  */
 package com.soulfiremc.client.cli;
 
-import com.soulfiremc.brigadier.ClientConsoleCommandSource;
 import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
+import com.soulfiremc.server.util.SFPathConstants;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -82,6 +83,7 @@ public class SFCommandDefinition implements Callable<Integer> {
     hidden = true)
   private boolean generateFlags;
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Override
   public Integer call() {
     if (generateFlags) {
@@ -121,16 +123,25 @@ public class SFCommandDefinition implements Callable<Integer> {
 
     cliManager.clientSettingsManager().commandDefinition(this);
 
+    cliManager.rpcClient().instanceStubBlocking().updateInstanceConfig(InstanceUpdateConfigRequest.newBuilder()
+      .setId(cliManager.cliInstanceId().toString())
+      .setConfig(cliManager.clientSettingsManager().exportSettingsProto(cliManager.cliInstanceId()))
+      .build());
+
     if (start) {
-      cliManager.clientCommandManager().execute("start-attack", new ClientConsoleCommandSource());
+      cliManager.clientCommandManager().execute("start-attack");
     } else {
       log.info(
         "SoulFire is ready to go! Type 'start-attack' to start the attack! (Use --start to start automatically)");
     }
 
-    new GenericTerminalConsole<>(cliManager.shutdownManager(), ClientConsoleCommandSource.INSTANCE,
-      cliManager.clientCommandManager(), cliManager.commandHistoryManager())
-      .start();
+    var commandManager = cliManager.clientCommandManager();
+    new GenericTerminalConsole(
+      cliManager.shutdownManager(),
+      commandManager::execute,
+      commandManager::complete,
+      SFPathConstants.CLIENT_DATA_DIRECTORY
+    ).start();
 
     cliManager.shutdownManager().awaitShutdown();
 

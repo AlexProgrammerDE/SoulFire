@@ -93,7 +93,7 @@ dependencies {
   api(libs.sqlite)
 
   // FOr script support
-  api(libs.bundles.graalvm.polyglot)
+  // api(libs.bundles.graalvm.polyglot)
 
   // For tls cert provisioning
   api(libs.acme4j)

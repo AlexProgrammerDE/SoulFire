@@ -24,8 +24,8 @@ task("runSFDedicated", JavaExec::class) {
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
 
-  jvmArgs = listOf(
-    "-Xmx18G",
+  val argsMutable = mutableListOf(
+    "-Xmx2G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseZGC",
@@ -37,6 +37,12 @@ task("runSFDedicated", JavaExec::class) {
     "-XX:+UseCriticalJavaThreadPriority",
     "-Dsf.flags.v1=true"
   )
+
+  if (System.getProperty("idea.active") != null) {
+    argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
+  }
+
+  jvmArgs = argsMutable
 
   standardInput = System.`in`
 

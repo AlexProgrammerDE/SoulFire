@@ -24,7 +24,7 @@ task("runSFCLI", JavaExec::class) {
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
 
-  jvmArgs = listOf(
+  val argsMutable = mutableListOf(
     "-Xmx2G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
@@ -37,6 +37,12 @@ task("runSFCLI", JavaExec::class) {
     "-XX:+UseCriticalJavaThreadPriority",
     "-Dsf.flags.v1=true"
   )
+
+  if (System.getProperty("idea.active") != null) {
+    argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
+  }
+
+  jvmArgs = argsMutable
 
   standardInput = System.`in`
 
@@ -53,7 +59,7 @@ task("printSFCliFlags", JavaExec::class) {
     "--generate-flags"
   )
 
-  jvmArgs = listOf(
+  val argsMutable = mutableListOf(
     "-Xmx2G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
@@ -66,6 +72,12 @@ task("printSFCliFlags", JavaExec::class) {
     "-XX:+UseCriticalJavaThreadPriority",
     "-Dsf.flags.v1=true"
   )
+
+  if (System.getProperty("idea.active") != null) {
+    argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
+  }
+
+  jvmArgs = argsMutable
 
   standardInput = System.`in`
 

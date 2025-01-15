@@ -26,11 +26,9 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.CommandHistoryManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
-import java.util.List;
 
 @Slf4j
 public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
@@ -39,8 +37,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
   }
 
   @SuppressWarnings("unused")
-  public static void bootstrap(String[] args, List<ClassLoader> classLoaders) {
-    new SoulFireDedicatedBootstrap().internalBootstrap(args, classLoaders);
+  public static void bootstrap(String[] args) {
+    new SoulFireDedicatedBootstrap().internalBootstrap(args);
   }
 
   @Override
@@ -56,12 +54,13 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
 
     log.info("Tip: To generate a new access token, use the command: 'generate-token'");
 
-    new GenericTerminalConsole<>(
+    var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
+    new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      ServerConsoleCommandSource.INSTANCE,
-      soulFire.injector().getSingleton(ServerCommandManager.class),
-      new CommandHistoryManager(SFPathConstants.WORKING_DIRECTORY))
-      .start();
+      command -> commandManager.execute(command, ServerConsoleCommandSource.INSTANCE),
+      (command, cursor) -> commandManager.complete(command, cursor, ServerConsoleCommandSource.INSTANCE),
+      SFPathConstants.WORKING_DIRECTORY
+    ).start();
 
     soulFire.shutdownManager().awaitShutdown();
   }

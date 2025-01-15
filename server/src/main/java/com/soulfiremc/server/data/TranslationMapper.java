@@ -18,8 +18,8 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ public class TranslationMapper implements Function<TranslatableComponent, String
     var args =
       component.arguments().stream()
         .map(TranslationArgumentLike::asComponent)
-        .map(SoulFireServer.PLAIN_MESSAGE_SERIALIZER::serialize)
+        .map(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER::serialize)
         .toArray(String[]::new);
     return String.format(translation, (Object[]) args);
   }

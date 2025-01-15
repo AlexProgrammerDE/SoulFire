@@ -15,20 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.brigadier;
+package com.soulfiremc.launcher;
 
-import com.soulfiremc.server.plugins.ChatMessageLogger;
-import net.kyori.adventure.text.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
+import java.util.function.Consumer;
 
-public class ClientConsoleCommandSource implements CommandSource {
-  public static final ClientConsoleCommandSource INSTANCE = new ClientConsoleCommandSource();
-  private static final Logger log = LoggerFactory.getLogger("Console");
-
-  @Override
-  public void sendMessage(Level level, Component message) {
-    log.atLevel(level).setMessage("{}").addArgument(() -> ChatMessageLogger.ANSI_MESSAGE_SERIALIZER.serialize(message)).log();
-  }
+public class SoulFireClassloaderConstants {
+  public static Consumer<ClassLoader> CHILD_CLASSLOADER_CONSUMER;
 }

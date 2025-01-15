@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.brigadier;
 
-import com.mojang.brigadier.Command;
-import com.soulfiremc.server.util.structs.CommandHistoryManager;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
@@ -26,18 +24,19 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
-import org.jline.reader.Candidate;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.impl.history.DefaultHistory;
+import org.jetbrains.annotations.Nullable;
+import org.jline.reader.*;
+
+import java.nio.file.Path;
+import java.util.List;
 
 @RequiredArgsConstructor
-public class GenericTerminalConsole<S extends CommandSource> extends SimpleTerminalConsole {
+public class GenericTerminalConsole extends SimpleTerminalConsole {
   private static final Logger logger = LogManager.getLogger("SoulFireConsole");
   private final ShutdownManager shutdownManager;
-  private final S commandSource;
-  private final PlatformCommandManager<S> commandManager;
-  private final CommandHistoryManager commandHistoryManager;
+  private final CommandExecutor commandExecutor;
+  private final CommandCompleter commandCompleter;
+  private final Path historyDirectory;
 
   /**
    * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
@@ -52,12 +51,17 @@ public class GenericTerminalConsole<S extends CommandSource> extends SimpleTermi
     return !shutdownManager.shutdown();
   }
 
-  @Override
-  protected void runCommand(String command) {
-    var result = commandManager.execute(command, commandSource);
-    if (result == Command.SINGLE_SUCCESS) {
-      commandHistoryManager.newCommandHistoryEntry(command);
-    }
+  private static Candidate toCandidate(Completion completion) {
+    var suggestionText = completion.suggestion();
+    return new Candidate(
+      suggestionText,
+      suggestionText,
+      null,
+      completion.tooltip(),
+      null,
+      null,
+      false
+    );
   }
 
   @Override
@@ -66,22 +70,40 @@ public class GenericTerminalConsole<S extends CommandSource> extends SimpleTermi
   }
 
   @Override
-  protected LineReader buildReader(LineReaderBuilder builder) {
-    var history = new DefaultHistory();
-    for (var command : commandHistoryManager.getCommandHistory()) {
-      history.add(command.getKey(), command.getValue());
-    }
+  protected void runCommand(String command) {
+    commandExecutor.execute(command);
+  }
 
+  @Override
+  protected LineReader buildReader(LineReaderBuilder builder) {
     return super.buildReader(
       builder
         .appName("SoulFire")
-        .completer(
-          (reader, parsedLine, list) -> {
-            for (var suggestion :
-              commandManager.getCompletionSuggestions(parsedLine.line(), commandSource)) {
-              list.add(new Candidate(suggestion));
-            }
-          })
-        .history(history));
+        .variable(LineReader.HISTORY_FILE, historyDirectory.resolve(".console_history"))
+        .completer(new TerminalCompleter(commandCompleter)));
+  }
+
+  public interface CommandExecutor {
+    int execute(String command);
+  }
+
+  public interface CommandCompleter {
+    Iterable<Completion> complete(String line, int cursor);
+  }
+
+  public record Completion(String suggestion, @Nullable String tooltip) {
+  }
+
+  private record TerminalCompleter(CommandCompleter commandCompleter) implements Completer {
+    @Override
+    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+      for (var suggestion : commandCompleter.complete(line.line(), line.cursor())) {
+        if (suggestion.suggestion().isEmpty()) {
+          continue;
+        }
+
+        candidates.add(toCandidate(suggestion));
+      }
+    }
   }
 }
