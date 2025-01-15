@@ -41,14 +41,14 @@ public class AccountSettings implements SettingsObject {
       .description("Should the accounts order be random when connecting bots?")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty USE_PROXIES_FOR_ACCOUNT_IMPORT =
+  public static final BooleanProperty USE_PROXIES_FOR_ACCOUNT_AUTH =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)
-      .key("use-proxies-for-account-import")
-      .uiName("Use proxies for account import")
+      .key("use-proxies-for-account-auth")
+      .uiName("Use proxies for account auth")
       .description("""
-        Should the imported proxies be used to import accounts? (Contact Microsoft login, input credentials, etc.)
-        Otherwise the SF server will import accounts directly.""")
+        Should the imported proxies be used to authenticate accounts? (Contact Microsoft login, input credentials, etc.)
+        Otherwise the SF server will authenticate accounts directly.""")
       .defaultValue(false)
       .build();
   public static final IntProperty ACCOUNT_IMPORT_CONCURRENCY =

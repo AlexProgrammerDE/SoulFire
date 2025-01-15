@@ -126,6 +126,10 @@ public class SFHelpers {
   }
 
   public static <E> E getRandomEntry(List<E> list) {
+    if (list.isEmpty()) {
+      return null;
+    }
+
     return list.get(ThreadLocalRandom.current().nextInt(list.size()));
   }
 
