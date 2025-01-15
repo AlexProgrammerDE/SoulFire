@@ -930,7 +930,15 @@ public class POVServer extends InternalPlugin {
                 }
               });
           botConnection.scheduler().schedule(() -> {
-            syncBotAndUser(botConnection, clientSession);
+            try {
+              syncBotAndUser(botConnection, clientSession);
+            } catch (Throwable t) {
+              log.error("Failed to sync bot and user", t);
+              clientSession.send(new ClientboundSystemChatPacket(
+                Component.text("Error while syncing you with the bot! Report this error to SoulFire developers.")
+                  .color(NamedTextColor.RED),
+                false));
+            }
 
             // Give the client a few moments to process the packets
             TimeUtil.waitTime(2, TimeUnit.SECONDS);
