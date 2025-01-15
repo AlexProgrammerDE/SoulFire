@@ -151,6 +151,7 @@ public abstract class LivingEntity extends Entity {
     this.syncPacketPositionCodec(x, y, z);
     this.entityId(packet.getEntityId());
     this.uuid(packet.getUuid());
+    this.data(packet.getData());
     this.absMoveTo(x, y, z, yRot, xRot);
     this.setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
