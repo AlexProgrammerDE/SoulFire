@@ -55,7 +55,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var service = MCAuthService.convertService(request.getService());
       var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-          service.createDataAndLogin(payload, settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
+          service.createDataAndLogin(payload, settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
             .thenApply(MinecraftAccount::toProto)
             .exceptionally(t -> {
               log.error("Error authenticating account", t);
@@ -97,7 +97,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
                 .build()
             ).build()
           ),
-        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -125,7 +125,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
       var account = MCAuthService.convertService(request.getAccount().getType()).refresh(receivedAccount,
-        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_IMPORT) ? SFHelpers.getRandomEntry(settings.proxies()) : null).join();
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

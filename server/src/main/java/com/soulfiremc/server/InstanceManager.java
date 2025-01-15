@@ -37,6 +37,7 @@ import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.SFLogAppender;
@@ -138,7 +139,11 @@ public class InstanceManager {
           logger.info("Refreshing expired accounts");
         }
 
-        accounts.add(authService.refresh(account, null).join());
+        accounts.add(authService.refresh(
+          account,
+          settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+            ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
+        ).join());
         refreshed++;
       } else {
         accounts.add(account);
@@ -164,7 +169,11 @@ public class InstanceManager {
     }
 
     logger.info("Account {} is expired or outdated, refreshing before connecting", account.lastKnownName());
-    var refreshedAccount = authService.refresh(account, null).join();
+    var refreshedAccount = authService.refresh(
+      account,
+      settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
+    ).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.set(accounts.indexOf(account), refreshedAccount);
     sessionFactory.inTransaction(session -> {
