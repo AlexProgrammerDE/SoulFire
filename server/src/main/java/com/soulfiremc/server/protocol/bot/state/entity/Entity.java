@@ -386,6 +386,7 @@ public class Entity {
     this.moveTo(x, y, z, packet.getYaw(), packet.getPitch());
     entityId(packet.getEntityId());
     uuid(packet.getUuid());
+    data(packet.getData());
   }
 
   public void syncPacketPositionCodec(double x, double y, double z) {

@@ -34,7 +34,7 @@ import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
-import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
@@ -487,11 +487,11 @@ public class POVServer extends InternalPlugin {
     }
 
     for (var entity : dataManager.entityTrackerState().getEntities()) {
-      if (entity instanceof LocalPlayer localPlayer) {
+      if (entity instanceof Player player) {
         clientSession.send(
           new ClientboundEntityEventPacket(
-            localPlayer.entityId(),
-            switch (localPlayer.permissionLevel()) {
+            player.entityId(),
+            switch (player.permissionLevel()) {
               case 0 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_0;
               case 1 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_1;
               case 2 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_2;
@@ -499,24 +499,24 @@ public class POVServer extends InternalPlugin {
               case 4 -> EntityEvent.PLAYER_OP_PERMISSION_LEVEL_4;
               default -> throw new IllegalStateException(
                 "Unexpected value: "
-                  + localPlayer.permissionLevel());
+                  + player.permissionLevel());
             }));
         clientSession.send(
           new ClientboundSetExperiencePacket(
-            localPlayer.experienceProgress,
-            localPlayer.experienceLevel,
-            localPlayer.totalExperience));
+            player.experienceProgress,
+            player.experienceLevel,
+            player.totalExperience));
         clientSession.send(
           new ClientboundEntityEventPacket(
-            localPlayer.entityId(),
-            localPlayer.isReducedDebugInfo()
+            player.entityId(),
+            player.isReducedDebugInfo()
               ? EntityEvent.PLAYER_ENABLE_REDUCED_DEBUG
               : EntityEvent.PLAYER_DISABLE_REDUCED_DEBUG));
         clientSession.send(
           new ClientboundSetHealthPacket(
-            localPlayer.getHealth(),
-            localPlayer.getFoodData().getFoodLevel(),
-            localPlayer.getFoodData().getSaturationLevel()));
+            player.getHealth(),
+            player.getFoodData().getFoodLevel(),
+            player.getFoodData().getSaturationLevel()));
       } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
         clientSession.send(
           new ClientboundAddExperienceOrbPacket(
