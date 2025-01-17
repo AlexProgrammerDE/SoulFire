@@ -138,9 +138,10 @@ public class SoulFireScheduler implements Executor {
 
       try {
         runnableWrapper.wrap(command).run();
-      } catch (Exception e) {
-        logger.error("Error in async executor", e);
-        throw new CompletionException(e);
+      } catch (Throwable t) {
+        runnableWrapper.wrap(() ->
+          logger.error("Error in async executor", t)).run();
+        throw new CompletionException(t);
       }
     };
   }
@@ -153,9 +154,10 @@ public class SoulFireScheduler implements Executor {
 
       try {
         return command.get();
-      } catch (Exception e) {
-        logger.error("Error in async executor", e);
-        throw new CompletionException(e);
+      } catch (Throwable t) {
+        runnableWrapper.wrap(() ->
+          logger.error("Error in async executor", t)).run();
+        throw new CompletionException(t);
       }
     };
   }
@@ -168,7 +170,8 @@ public class SoulFireScheduler implements Executor {
     try {
       runnableWrapper.wrap(command).run();
     } catch (Throwable t) {
-      logger.error("Error in executor", t);
+      runnableWrapper.wrap(() ->
+        logger.error("Error in async executor", t)).run();
     }
   }
 
