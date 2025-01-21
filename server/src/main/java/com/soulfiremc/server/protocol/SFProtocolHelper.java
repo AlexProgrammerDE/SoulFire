@@ -18,7 +18,7 @@
 package com.soulfiremc.server.protocol;
 
 import io.netty.buffer.ByteBuf;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.palette.PaletteType;
 
@@ -27,19 +27,18 @@ import java.io.IOException;
 public class SFProtocolHelper {
   private SFProtocolHelper() {}
 
-  public static void writeChunkSection(
-    ByteBuf buf, ChunkSection chunkSection, MinecraftCodecHelper codecHelper) {
+  public static void writeChunkSection(ByteBuf buf, ChunkSection chunkSection) {
     buf.writeShort(chunkSection.getBlockCount());
 
-    codecHelper.writeDataPalette(buf, chunkSection.getChunkData());
-    codecHelper.writeDataPalette(buf, chunkSection.getBiomeData());
+    MinecraftTypes.writeDataPalette(buf, chunkSection.getChunkData());
+    MinecraftTypes.writeDataPalette(buf, chunkSection.getBiomeData());
   }
 
-  public static ChunkSection readChunkSection(ByteBuf buf, MinecraftCodecHelper codecHelper) throws IOException {
+  public static ChunkSection readChunkSection(ByteBuf buf) throws IOException {
     int blockCount = buf.readShort();
 
-    var chunkPalette = codecHelper.readDataPalette(buf, PaletteType.CHUNK);
-    var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
+    var chunkPalette = MinecraftTypes.readDataPalette(buf, PaletteType.CHUNK);
+    var biomePalette = MinecraftTypes.readDataPalette(buf, PaletteType.BIOME);
     return new ChunkSection(blockCount, chunkPalette, biomePalette);
   }
 }

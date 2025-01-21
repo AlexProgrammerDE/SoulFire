@@ -32,6 +32,7 @@ import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 import org.pf4j.Extension;
@@ -60,10 +61,7 @@ public class ClientBrand extends InternalPlugin {
       }
 
       var buf = Unpooled.buffer();
-      connection
-        .session()
-        .getCodecHelper()
-        .writeString(buf, settingsSource.get(ClientBrandSettings.CLIENT_BRAND));
+      MinecraftTypes.writeString(buf, settingsSource.get(ClientBrandSettings.CLIENT_BRAND));
 
       connection
         .session()

@@ -42,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.auth.GameProfile;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
@@ -73,11 +73,10 @@ public class ForwardingBypass extends InternalPlugin {
     ));
   }
 
-  public static void writePlayerKey(
-    ByteBuf buf, MinecraftCodecHelper codecHelper, IdentifiedKey playerKey) {
+  public static void writePlayerKey(ByteBuf buf, IdentifiedKey playerKey) {
     buf.writeLong(playerKey.expiryTemporal().toEpochMilli());
-    codecHelper.writeByteArray(buf, playerKey.getSignedPublicKey().getEncoded());
-    codecHelper.writeByteArray(buf, playerKey.getSignature());
+    MinecraftTypes.writeByteArray(buf, playerKey.getSignedPublicKey().getEncoded());
+    MinecraftTypes.writeByteArray(buf, playerKey.getSignature());
   }
 
   private static int findForwardingVersion(int requested, BotConnection player) {
@@ -115,11 +114,10 @@ public class ForwardingBypass extends InternalPlugin {
     try {
       var actualVersion = findForwardingVersion(requestedVersion, player);
 
-      var codecHelper = player.session().getCodecHelper();
-      codecHelper.writeVarInt(forwarded, actualVersion);
-      codecHelper.writeString(forwarded, address);
-      codecHelper.writeUUID(forwarded, player.accountProfileId());
-      codecHelper.writeString(forwarded, player.accountName());
+      MinecraftTypes.writeVarInt(forwarded, actualVersion);
+      MinecraftTypes.writeString(forwarded, address);
+      MinecraftTypes.writeUUID(forwarded, player.accountProfileId());
+      MinecraftTypes.writeString(forwarded, player.accountName());
 
       // This serves as additional redundancy. The key normally is stored in the
       // login start to the server, but some setups require this.
@@ -127,7 +125,7 @@ public class ForwardingBypass extends InternalPlugin {
         && actualVersion < VelocityConstants.MODERN_LAZY_SESSION) {
         var key = player.identifiedKey();
         assert key != null;
-        writePlayerKey(forwarded, codecHelper, key);
+        writePlayerKey(forwarded, key);
 
         // Provide the signer UUID since the UUID may differ from the
         // assigned UUID. Doing that breaks the signatures anyway but the server
@@ -135,7 +133,7 @@ public class ForwardingBypass extends InternalPlugin {
         if (actualVersion >= VelocityConstants.MODERN_FORWARDING_WITH_KEY_V2) {
           if (key.getSignatureHolder() != null) {
             forwarded.writeBoolean(true);
-            codecHelper.writeUUID(forwarded, key.getSignatureHolder());
+            MinecraftTypes.writeUUID(forwarded, key.getSignatureHolder());
           } else {
             // Should only not be provided if the player was connected
             // as offline-mode and the signer UUID was not backfilled

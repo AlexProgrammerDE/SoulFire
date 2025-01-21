@@ -47,7 +47,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
@@ -145,9 +145,8 @@ public class Entity {
     this.chunkPosition = ChunkKey.ZERO;
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
-    var helper = new MinecraftCodecHelper();
-    helper.readVarInt(buf);
-    for (var metadata : helper.readEntityMetadata(buf)) {
+    MinecraftTypes.readVarInt(buf);
+    for (var metadata : MinecraftTypes.readEntityMetadata(buf)) {
       metadataState.setMetadata(metadata);
     }
 

@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIntentionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
@@ -129,9 +130,8 @@ public class ModLoaderSupport extends InternalPlugin {
     switch (discriminator) {
       case 0 -> { // ServerHello
         var fmlProtocolVersion = buffer.readByte();
-        var helper = botConnection.session().getCodecHelper();
         if (fmlProtocolVersion > 1) {
-          var dimension = helper.readVarInt(buffer);
+          var dimension = MinecraftTypes.readVarInt(buffer);
           log.debug("FML dimension override: {}", dimension);
         }
 
@@ -177,13 +177,12 @@ public class ModLoaderSupport extends InternalPlugin {
   }
 
   private void sendFMLModList(BotConnection botConnection, List<Mod> mods) {
-    var helper = botConnection.session().getCodecHelper();
     var buffer = Unpooled.buffer();
     buffer.writeByte(2);
-    helper.writeVarInt(buffer, mods.size());
+    MinecraftTypes.writeVarInt(buffer, mods.size());
     for (var mod : mods) {
-      helper.writeString(buffer, mod.modId);
-      helper.writeString(buffer, mod.version);
+      MinecraftTypes.writeString(buffer, mod.modId);
+      MinecraftTypes.writeString(buffer, mod.version);
     }
 
     botConnection.botControl().sendPluginMessage(FML_HS_KEY, buffer);
@@ -203,17 +202,16 @@ public class ModLoaderSupport extends InternalPlugin {
       return;
     }
 
-    var helper = botConnection.session().getCodecHelper();
     var buffer = Unpooled.wrappedBuffer(data);
 
-    var innerChannelKey = helper.readResourceLocation(buffer);
+    var innerChannelKey = MinecraftTypes.readResourceLocation(buffer);
     if (!innerChannelKey.equals(FML2_HANDSHAKE_KEY)) {
       return;
     }
 
-    var length = helper.readVarInt(buffer);
+    var length = MinecraftTypes.readVarInt(buffer);
     var innerBuffer = buffer.readBytes(length);
-    var packetId = helper.readVarInt(innerBuffer);
+    var packetId = MinecraftTypes.readVarInt(innerBuffer);
     var packetContentBuffer = innerBuffer.readBytes(innerBuffer.readableBytes());
     switch (packetId) {
       case 1 -> {
@@ -227,14 +225,13 @@ public class ModLoaderSupport extends InternalPlugin {
 
   private void sendFML2HandshakeResponse(
     BotConnection botConnection, int packetId, byte[] packetContent) {
-    var helper = botConnection.session().getCodecHelper();
     var innerBuffer = Unpooled.buffer();
-    helper.writeVarInt(innerBuffer, packetId);
+    MinecraftTypes.writeVarInt(innerBuffer, packetId);
     innerBuffer.writeBytes(packetContent);
 
     var buffer = Unpooled.buffer();
-    helper.writeString(buffer, FML2_HANDSHAKE_KEY.toString());
-    helper.writeVarInt(buffer, innerBuffer.readableBytes());
+    MinecraftTypes.writeString(buffer, FML2_HANDSHAKE_KEY.toString());
+    MinecraftTypes.writeVarInt(buffer, innerBuffer.readableBytes());
     buffer.writeBytes(innerBuffer);
 
     botConnection.botControl().sendPluginMessage(FML2_LOGIN_WRAPPER_KEY, buffer);

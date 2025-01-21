@@ -20,6 +20,7 @@ package com.soulfiremc.server.proxy;
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import lombok.NonNull;
+import org.geysermc.mcprotocollib.network.ProxyInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
@@ -77,5 +78,13 @@ public record SFProxy(
     }
 
     return builder.build();
+  }
+
+  public ProxyInfo toMCPLProxy() {
+    return new ProxyInfo(
+      type.toMCPLType(),
+      address,
+      username,
+      password);
   }
 }

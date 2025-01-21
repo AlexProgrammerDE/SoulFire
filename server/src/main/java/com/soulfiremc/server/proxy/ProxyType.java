@@ -19,6 +19,7 @@ package com.soulfiremc.server.proxy;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.mcprotocollib.network.ProxyInfo;
 
 @Getter
 @RequiredArgsConstructor
@@ -28,4 +29,12 @@ public enum ProxyType {
   SOCKS5(true);
 
   private final boolean udpSupport;
+
+  public ProxyInfo.Type toMCPLType() {
+    return switch (this) {
+      case HTTP -> ProxyInfo.Type.HTTP;
+      case SOCKS4 -> ProxyInfo.Type.SOCKS4;
+      case SOCKS5 -> ProxyInfo.Type.SOCKS5;
+    };
+  }
 }

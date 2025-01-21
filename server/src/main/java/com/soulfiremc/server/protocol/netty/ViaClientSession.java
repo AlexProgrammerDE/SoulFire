@@ -31,37 +31,32 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.handler.codec.haproxy.*;
-import io.netty.handler.flow.FlowControlHandler;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
-import org.geysermc.mcprotocollib.network.codec.PacketCodecHelper;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
+import org.geysermc.mcprotocollib.network.helper.NettyHelper;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
+import org.geysermc.mcprotocollib.network.netty.AutoReadFlowControlHandler;
+import org.geysermc.mcprotocollib.network.netty.MinecraftChannelInitializer;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
-import org.geysermc.mcprotocollib.network.tcp.*;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.network.session.ClientNetworkSession;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ViaClientSession extends TcpSession {
+public class ViaClientSession extends ClientNetworkSession {
   public static final String SIZER_NAME = "sizer";
   public static final String COMPRESSION_NAME = "compression";
   public static final String ENCRYPTION_NAME = "encryption";
@@ -69,11 +64,7 @@ public class ViaClientSession extends TcpSession {
 
   @Getter
   private final Logger logger;
-  private final SocketAddress targetAddress;
-  private final String bindAddress;
-  private final int bindPort;
   private final SFProxy proxy;
-  private final PacketCodecHelper codecHelper;
   @Getter
   private final EventLoopGroup eventLoopGroup;
   @Getter
@@ -99,13 +90,9 @@ public class ViaClientSession extends TcpSession {
     EventLoopGroup eventLoopGroup,
     BotConnection botConnection,
     Queue<Runnable> packetTickQueue) {
-    super(null, -1, protocol, packetTickQueue::add);
+    super(targetAddress, protocol, packetTickQueue::add, null, proxy == null ? null : proxy.toMCPLProxy());
     this.logger = logger;
-    this.targetAddress = targetAddress;
-    this.bindAddress = "0.0.0.0";
-    this.bindPort = 0;
     this.proxy = proxy;
-    this.codecHelper = protocol.createHelper();
     this.eventLoopGroup = eventLoopGroup;
     this.botConnection = botConnection;
     this.packetTickQueue = packetTickQueue;
@@ -116,26 +103,30 @@ public class ViaClientSession extends TcpSession {
   }
 
   @Override
-  public void connect(boolean wait) {
-    if (this.disconnected) {
-      throw new IllegalStateException("Session has already been disconnected.");
-    }
+  protected EventLoopGroup getEventLoopGroup() {
+    return eventLoopGroup;
+  }
 
+  @Override
+  protected ChannelFactory<? extends Channel> getChannelFactory() {
     var version = botConnection.protocolVersion();
     var isBedrock = SFVersionConstants.isBedrock(version);
-    var bootstrap = new Bootstrap();
 
-    bootstrap.group(eventLoopGroup);
     if (isBedrock) {
       if (proxy != null && !proxy.type().udpSupport()) {
         throw new IllegalStateException("Proxy must support UDP! (Only SOCKS5 is supported)");
       }
 
-      bootstrap.channelFactory(
-        RakChannelFactory.client(TransportHelper.TRANSPORT_TYPE.datagramChannelClass()));
+      return RakChannelFactory.client(TransportHelper.TRANSPORT_TYPE.datagramChannelClass());
     } else {
-      bootstrap.channel(TransportHelper.TRANSPORT_TYPE.socketChannelClass());
+      return TransportHelper.TRANSPORT_TYPE.socketChannelFactory();
     }
+  }
+
+  @Override
+  protected void setOptions(Bootstrap bootstrap) {
+    var version = botConnection.protocolVersion();
+    var isBedrock = SFVersionConstants.isBedrock(version);
 
     bootstrap
       .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getFlag(BuiltinFlags.CLIENT_CONNECT_TIMEOUT, 30) * 1000)
@@ -156,104 +147,60 @@ public class ViaClientSession extends TcpSession {
         bootstrap.option(ChannelOption.TCP_FASTOPEN_CONNECT, true);
       }
     }
-
-    bootstrap.handler(
-      new ChannelInitializer<>() {
-        @Override
-        public void initChannel(@NotNull Channel channel) {
-          var protocol = getPacketProtocol();
-          protocol.newClientSession(ViaClientSession.this, false);
-
-          var pipeline = channel.pipeline();
-
-          if (proxy != null) {
-            SFNettyHelper.addProxy(pipeline, proxy);
-          }
-
-          initializeHAProxySupport(channel);
-
-          // This monitors the traffic
-          var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
-          pipeline.addLast("traffic", trafficHandler);
-          setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
-
-          pipeline.addLast("read-timeout", new ReadTimeoutHandler(getFlag(BuiltinFlags.READ_TIMEOUT, 30)));
-          pipeline.addLast("write-timeout", new WriteTimeoutHandler(getFlag(BuiltinFlags.WRITE_TIMEOUT, 0)));
-
-          // This does the extra magic
-          var userConnection = new UserConnectionImpl(channel, true);
-          new ProtocolPipelineImpl(userConnection);
-
-          userConnection.put(new StorableSession(ViaClientSession.this));
-
-          if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
-            var bedrockData = (BedrockData) botConnection.minecraftAccount().accountData();
-            userConnection.put(
-              new AuthChainData(
-                bedrockData.mojangJwt(),
-                bedrockData.identityJwt(),
-                bedrockData.publicKey(),
-                bedrockData.privateKey(),
-                bedrockData.deviceId(),
-                bedrockData.playFabId()));
-          }
-
-          setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
-
-          pipeline.addLast(ENCRYPTION_NAME, new TcpPacketEncryptor());
-          pipeline.addLast(SIZER_NAME, new TcpPacketSizer(protocol.getPacketHeader(), getCodecHelper()));
-          pipeline.addLast(COMPRESSION_NAME, new TcpPacketCompression(getCodecHelper()));
-          pipeline.addLast(CODEC_NAME, new TcpPacketCodec(ViaClientSession.this, true));
-          pipeline.addLast("flush-handler", new FlushHandler());
-          pipeline.addLast("manager", ViaClientSession.this);
-
-          pipeline.addLast(new SFVLPipeline(userConnection));
-          if (isBedrock) {
-            pipeline.remove(COMPRESSION_NAME);
-            pipeline.remove(ENCRYPTION_NAME);
-          }
-
-          pipeline.addBefore(CODEC_NAME, "flow-control", new FlowControlHandler());
-          pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-flow-control", new FlowControlHandler());
-        }
-      });
-
-    bootstrap.remoteAddress(targetAddress);
-    bootstrap.localAddress(bindAddress, bindPort);
-
-    var handleFuture = new CompletableFuture<Void>();
-    bootstrap.connect().addListener((futureListener) -> {
-      if (!futureListener.isSuccess()) {
-        exceptionCaught(null, futureListener.cause());
-      }
-
-      handleFuture.complete(null);
-    });
-
-    if (wait) {
-      handleFuture.join();
-    }
   }
 
   @Override
-  public MinecraftCodecHelper getCodecHelper() {
-    return (MinecraftCodecHelper) this.codecHelper;
-  }
+  protected ChannelHandler getChannelHandler() {
+    var version = botConnection.protocolVersion();
+    var isBedrock = SFVersionConstants.isBedrock(version);
 
-  private void initializeHAProxySupport(Channel channel) {
-    var clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
-    if (clientAddress == null) {
-      return;
-    }
+    return new MinecraftChannelInitializer<ClientNetworkSession>((channel) -> {
+      var protocol = this.getPacketProtocol();
+      protocol.newClientSession(this);
+      return this;
+    }, true) {
+      public void initChannel(@NonNull Channel channel) throws Exception {
+        var pipeline = channel.pipeline();
 
-    channel.pipeline().addLast("proxy-protocol-encoder", HAProxyMessageEncoder.INSTANCE);
-    var proxiedProtocol = clientAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
-    var remoteAddress = (InetSocketAddress) channel.remoteAddress();
-    channel.writeAndFlush(new HAProxyMessage(
-      HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, proxiedProtocol,
-      clientAddress.getAddress().getHostAddress(), remoteAddress.getAddress().getHostAddress(),
-      clientAddress.getPort(), remoteAddress.getPort()
-    )).addListener(future -> channel.pipeline().remove("proxy-protocol-encoder"));
+        // This monitors the traffic
+        var trafficHandler = new GlobalTrafficShapingHandler(channel.eventLoop(), 0, 0, 1000);
+        pipeline.addLast("traffic", trafficHandler);
+        setFlag(SFProtocolConstants.TRAFFIC_HANDLER, trafficHandler);
+
+        NettyHelper.addProxy(ViaClientSession.this.getProxy(), pipeline);
+        NettyHelper.initializeHAProxySupport(ViaClientSession.this, channel);
+
+        super.initChannel(channel);
+
+        // This does the extra magic
+        var userConnection = new UserConnectionImpl(channel, true);
+        new ProtocolPipelineImpl(userConnection);
+
+        userConnection.put(new StorableSession(ViaClientSession.this));
+
+        if (isBedrock && botConnection.minecraftAccount().isPremiumBedrock()) {
+          var bedrockData = (BedrockData) botConnection.minecraftAccount().accountData();
+          userConnection.put(
+            new AuthChainData(
+              bedrockData.mojangJwt(),
+              bedrockData.identityJwt(),
+              bedrockData.publicKey(),
+              bedrockData.privateKey(),
+              bedrockData.deviceId(),
+              bedrockData.playFabId()));
+        }
+
+        setFlag(SFProtocolConstants.VIA_USER_CONNECTION, userConnection);
+
+        pipeline.addLast(new SFVLPipeline(userConnection));
+        if (isBedrock) {
+          pipeline.remove(COMPRESSION_NAME);
+          pipeline.remove(ENCRYPTION_NAME);
+        }
+
+        pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-flow-control", new AutoReadFlowControlHandler());
+      }
+    };
   }
 
   @Override

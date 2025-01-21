@@ -59,7 +59,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.UnexpectedEncryptionException;
 import org.geysermc.mcprotocollib.protocol.data.game.*;
 import org.geysermc.mcprotocollib.protocol.data.game.chat.ChatType;
@@ -112,7 +112,6 @@ import java.util.stream.Collectors;
 public final class SessionDataManager {
   private final InstanceSettingsSource settingsSource;
   private final Logger log;
-  private final MinecraftCodecHelper codecHelper;
   private final BotConnection connection;
   private final PlayerListState playerListState = new PlayerListState();
   private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
@@ -146,7 +145,6 @@ public final class SessionDataManager {
   public SessionDataManager(BotConnection connection) {
     this.settingsSource = connection.settingsSource();
     this.log = connection.logger();
-    this.codecHelper = connection.session().getCodecHelper();
     this.connection = connection;
   }
 
@@ -463,7 +461,7 @@ public final class SessionDataManager {
     var channelKey = packet.getChannel();
     log.debug("Received plugin message on channel {}", channelKey);
     if (channelKey.equals(SFProtocolConstants.BRAND_PAYLOAD_KEY)) {
-      serverBrand = codecHelper.readString(Unpooled.wrappedBuffer(packet.getData()));
+      serverBrand = MinecraftTypes.readString(Unpooled.wrappedBuffer(packet.getData()));
       log.debug("Received server brand \"{}\"", serverBrand);
     } else if (channelKey.equals(SFProtocolConstants.REGISTER_KEY)) {
       log.debug(
@@ -774,7 +772,7 @@ public final class SessionDataManager {
 
     try {
       for (var i = 0; i < chunkData.getSectionCount(); i++) {
-        chunkData.setSection(i, SFProtocolHelper.readChunkSection(buf, codecHelper));
+        chunkData.setSection(i, SFProtocolHelper.readChunkSection(buf));
       }
     } catch (IOException e) {
       log.error("Failed to read chunk section", e);
@@ -796,7 +794,7 @@ public final class SessionDataManager {
       var buf = Unpooled.wrappedBuffer(biomeData.getBuffer());
       for (var i = 0; chunkData.getSectionCount() > i; i++) {
         var section = chunkData.getSection(i);
-        var biomePalette = codecHelper.readDataPalette(buf, PaletteType.BIOME);
+        var biomePalette = MinecraftTypes.readDataPalette(buf, PaletteType.BIOME);
         chunkData.setSection(
           i, new ChunkSection(section.getBlockCount(), section.getChunkData(), biomePalette));
       }

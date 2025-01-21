@@ -67,12 +67,12 @@ import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.network.tcp.TcpServer;
+import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntryAction;
@@ -131,6 +131,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.pf4j.Extension;
 import org.slf4j.event.Level;
 
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -171,7 +172,7 @@ public class POVServer extends InternalPlugin {
   }
 
   private static void startPOVServer(InstanceSettingsSource settingsSource, int port, InstanceManager instanceManager) {
-    var server = new TcpServer("0.0.0.0", port, MinecraftProtocol::new);
+    var server = new NetworkServer(new InetSocketAddress(port), MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new POVServerInfoHandler(
@@ -418,10 +419,7 @@ public class POVServer extends InternalPlugin {
       var buf = Unpooled.buffer();
 
       for (var i = 0; i < chunk.getSectionCount(); i++) {
-        SFProtocolHelper.writeChunkSection(
-          buf,
-          chunk.getSection(i),
-          dataManager.codecHelper());
+        SFProtocolHelper.writeChunkSection(buf, chunk.getSection(i));
       }
 
       var chunkBytes = new byte[buf.readableBytes()];
@@ -706,10 +704,7 @@ public class POVServer extends InternalPlugin {
         chunk.set(0, 0, 0, 0);
         var biome = DataPalette.createForBiome();
         biome.set(0, 0, 0, 0);
-        SFProtocolHelper.writeChunkSection(
-          buf,
-          new ChunkSection(0, chunk, biome),
-          (MinecraftCodecHelper) session.getCodecHelper());
+        SFProtocolHelper.writeChunkSection(buf, new ChunkSection(0, chunk, biome));
       }
 
       var chunkBytes = new byte[buf.readableBytes()];
@@ -736,7 +731,7 @@ public class POVServer extends InternalPlugin {
           lightUpdateData));
 
       var brandBuffer = Unpooled.buffer();
-      session.getCodecHelper().writeString(brandBuffer, "SoulFire POV");
+      MinecraftTypes.writeString(brandBuffer, "SoulFire POV");
 
       var brandBytes = new byte[brandBuffer.readableBytes()];
       brandBuffer.readBytes(brandBytes);
