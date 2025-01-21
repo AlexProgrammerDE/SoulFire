@@ -175,7 +175,8 @@ public class InstanceManager {
         ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
     ).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
-    accounts.set(accounts.indexOf(account), refreshedAccount);
+    accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
+      && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
     sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
 
