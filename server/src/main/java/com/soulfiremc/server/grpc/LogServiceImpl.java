@@ -50,10 +50,10 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   }
 
   public void sendMessage(UUID uuid, String message) {
-    var sender = subscribers.get(uuid);
-    if (sender != null) {
-      sender.sendMessage(UUID.randomUUID().toString(), message);
-    }
+    var messageId = UUID.randomUUID();
+    subscribers.values().stream()
+      .filter(sender -> sender.userId().equals(uuid))
+      .forEach(sender -> sender.sendMessage(messageId.toString(), message));
   }
 
   @Override
@@ -117,8 +117,12 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         }
         case SCOPE_NOT_SET -> event -> false;
       };
-      var sender = new ConnectionMessageSender((ServerCallStreamObserver<LogResponse>) responseObserver, predicate);
-      subscribers.put(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(), sender);
+      new ConnectionMessageSender(
+        subscribers,
+        ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(),
+        (ServerCallStreamObserver<LogResponse>) responseObserver,
+        predicate
+      );
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
@@ -130,7 +134,18 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     boolean test(SFLogAppender.SFLogEvent event);
   }
 
-  private record ConnectionMessageSender(ServerCallStreamObserver<LogResponse> responseObserver, EventPredicate eventPredicate) {
+  private record ConnectionMessageSender(Map<UUID, ConnectionMessageSender> subscribers,
+                                         UUID userId,
+                                         ServerCallStreamObserver<LogResponse> responseObserver,
+                                         EventPredicate eventPredicate) {
+    public ConnectionMessageSender {
+      var responseId = UUID.randomUUID();
+      subscribers.put(responseId, this);
+
+      responseObserver.setOnCancelHandler(() -> subscribers.remove(responseId));
+      responseObserver.setOnCloseHandler(() -> subscribers.remove(responseId));
+    }
+
     public void sendMessage(String id, String message) {
       if (responseObserver.isCancelled()) {
         return;
