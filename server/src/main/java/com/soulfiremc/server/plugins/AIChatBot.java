@@ -74,7 +74,7 @@ public class AIChatBot extends InternalPlugin {
 
       var requestModel = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> ChatCompletionCreateParams.builder()
           .model(model)
-          .maxTokens(64) // 256 / 4 = 64
+          .maxCompletionTokens(64) // 256 / 4 = 64
           .addMessage(ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(ChatCompletionSystemMessageParam.builder()
             .role(ChatCompletionSystemMessageParam.Role.SYSTEM)
             .content(ChatCompletionSystemMessageParam.Content.ofTextContent(settingsSource.get(AIChatBotSettings.PROMPT)))
