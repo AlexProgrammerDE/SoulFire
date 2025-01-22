@@ -60,25 +60,26 @@ public class SFContextClassLoader extends URLClassLoader {
 
   private static URL[] createLibClassLoader(Path libDir) {
     var urls = new ArrayList<URL>();
-    var dependencyListInput = ClassLoader.getSystemClassLoader().getResourceAsStream("META-INF/dependency-list.txt");
-    if (dependencyListInput != null) {
-      try {
-        Files.createDirectories(libDir);
-        for (var fileName : new String(dependencyListInput.readAllBytes(), StandardCharsets.UTF_8).split("\n")) {
-          var libFile = libDir.resolve(fileName);
-          try (var libInput = Objects.requireNonNull(
-            ClassLoader.getSystemClassLoader().getResourceAsStream(
-              "META-INF/lib/" + fileName
-            ),
-            "File not found: " + fileName
-          )) {
-            Files.write(libFile, libInput.readAllBytes());
-            urls.add(libFile.toUri().toURL());
-          }
-        }
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+    try (var dependencyListInput = ClassLoader.getSystemClassLoader().getResourceAsStream("META-INF/dependency-list.txt")) {
+      if (dependencyListInput == null) {
+        return new URL[0];
       }
+
+      Files.createDirectories(libDir);
+      for (var fileName : new String(dependencyListInput.readAllBytes(), StandardCharsets.UTF_8).split("\n")) {
+        var libFile = libDir.resolve(fileName);
+        try (var libInput = Objects.requireNonNull(
+          ClassLoader.getSystemClassLoader().getResourceAsStream(
+            "META-INF/lib/" + fileName
+          ),
+          "File not found: " + fileName
+        )) {
+          Files.write(libFile, libInput.readAllBytes());
+          urls.add(libFile.toUri().toURL());
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
     return urls.toArray(new URL[0]);
