@@ -26,6 +26,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 public final class MSBedrockCredentialsAuthService
   implements MCAuthService<String, MSBedrockCredentialsAuthService.MSBedrockCredentialsAuthData> {
@@ -34,7 +35,7 @@ public final class MSBedrockCredentialsAuthService
   private MSBedrockCredentialsAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       try {
@@ -65,7 +66,7 @@ public final class MSBedrockCredentialsAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());

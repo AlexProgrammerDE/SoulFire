@@ -21,6 +21,7 @@ import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public final class OfflineAuthService
   implements MCAuthService<String, OfflineAuthService.OfflineAuthData> {
@@ -37,7 +38,7 @@ public final class OfflineAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(OfflineAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(OfflineAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.completedFuture(createAccount(data.username()));
   }
 
@@ -47,7 +48,7 @@ public final class OfflineAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.completedFuture(account);
   }
 

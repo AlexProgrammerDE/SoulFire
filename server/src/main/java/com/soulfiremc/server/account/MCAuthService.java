@@ -24,6 +24,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public sealed interface MCAuthService<I, T>
@@ -72,15 +73,15 @@ public sealed interface MCAuthService<I, T>
     };
   }
 
-  CompletableFuture<MinecraftAccount> login(T data, SFProxy proxyData);
+  CompletableFuture<MinecraftAccount> login(T data, SFProxy proxyData, Executor executor);
 
   T createData(I data);
 
-  default CompletableFuture<MinecraftAccount> createDataAndLogin(I data, SFProxy proxyData) {
-    return login(createData(data), proxyData);
+  default CompletableFuture<MinecraftAccount> createDataAndLogin(I data, SFProxy proxyData, Executor executor) {
+    return login(createData(data), proxyData, executor);
   }
 
-  CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData);
+  CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor);
 
   boolean isExpired(MinecraftAccount account);
 

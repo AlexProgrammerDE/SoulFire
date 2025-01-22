@@ -30,6 +30,7 @@ import reactor.netty.ByteBufFlux;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public final class TheAlteningAuthService
   implements MCAuthService<String, TheAlteningAuthService.TheAlteningAuthData> {
@@ -44,7 +45,7 @@ public final class TheAlteningAuthService
   private TheAlteningAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, SFProxy proxyData, Executor executor) {
     var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
     return ReactorHttpHelper.createReactorClient(proxyData, true)
       .post()
@@ -75,7 +76,7 @@ public final class TheAlteningAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     // TODO: Figure out The Altening refreshing
     return CompletableFuture.completedFuture(account);
   }

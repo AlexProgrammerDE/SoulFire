@@ -25,6 +25,7 @@ import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public final class MSJavaDeviceCodeAuthService
@@ -34,7 +35,7 @@ public final class MSJavaDeviceCodeAuthService
   private MSJavaDeviceCodeAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaDeviceCodeAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
       try {
@@ -53,7 +54,7 @@ public final class MSJavaDeviceCodeAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());

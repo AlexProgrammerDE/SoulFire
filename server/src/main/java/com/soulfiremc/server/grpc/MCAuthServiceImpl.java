@@ -55,7 +55,11 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     try {
       var service = MCAuthService.convertService(request.getService());
       var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-          service.createDataAndLogin(payload, settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
+          service.createDataAndLogin(
+              payload,
+              settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+              instance.scheduler()
+            )
             .thenApply(MinecraftAccount::toProto)
             .exceptionally(t -> {
               log.error("Error authenticating account", t);
@@ -86,7 +90,8 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     var instance = optionalInstance.get();
     var settings = instance.settingsSource();
 
-    MCAuthService.convertService(request.getService()).createDataAndLogin(deviceCode ->
+    MCAuthService.convertService(request.getService()).createDataAndLogin(
+        deviceCode ->
           responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
             .setDeviceCode(
               DeviceCode.newBuilder()
@@ -97,7 +102,9 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
                 .build()
             ).build()
           ),
-        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null)
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+        instance.scheduler()
+      )
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -124,8 +131,11 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
 
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
-      var account = MCAuthService.convertService(request.getAccount().getType()).refresh(receivedAccount,
-        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null).join();
+      var account = MCAuthService.convertService(request.getAccount().getType()).refresh(
+        receivedAccount,
+        settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+        instance.scheduler()
+      ).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();

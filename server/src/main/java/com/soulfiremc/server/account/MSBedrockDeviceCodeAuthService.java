@@ -25,6 +25,7 @@ import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public final class MSBedrockDeviceCodeAuthService
@@ -34,7 +35,7 @@ public final class MSBedrockDeviceCodeAuthService
   private MSBedrockDeviceCodeAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSBedrockDeviceCodeAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSBedrockDeviceCodeAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
       try {
@@ -53,7 +54,7 @@ public final class MSBedrockDeviceCodeAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
       var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());

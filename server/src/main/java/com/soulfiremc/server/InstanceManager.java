@@ -142,7 +142,8 @@ public class InstanceManager {
         accounts.add(authService.refresh(
           account,
           settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-            ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
+            ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
+          scheduler
         ).join());
         refreshed++;
       } else {
@@ -172,7 +173,8 @@ public class InstanceManager {
     var refreshedAccount = authService.refresh(
       account,
       settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null
+        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
+      scheduler
     ).join();
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())

@@ -26,6 +26,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 public final class MSJavaCredentialsAuthService
   implements MCAuthService<String, MSJavaCredentialsAuthService.MSJavaCredentialsAuthData> {
@@ -34,7 +35,7 @@ public final class MSJavaCredentialsAuthService
   private MSJavaCredentialsAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaCredentialsAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaCredentialsAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
@@ -65,7 +66,7 @@ public final class MSJavaCredentialsAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());

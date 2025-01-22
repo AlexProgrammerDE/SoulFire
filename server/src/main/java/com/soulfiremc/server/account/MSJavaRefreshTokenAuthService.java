@@ -25,6 +25,7 @@ import net.raphimc.minecraftauth.step.msa.StepMsaToken;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 public final class MSJavaRefreshTokenAuthService
   implements MCAuthService<String, MSJavaRefreshTokenAuthService.MSJavaRefreshTokenAuthData> {
@@ -33,7 +34,7 @@ public final class MSJavaRefreshTokenAuthService
   private MSJavaRefreshTokenAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
@@ -52,7 +53,7 @@ public final class MSJavaRefreshTokenAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
