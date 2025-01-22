@@ -164,11 +164,11 @@ public class InstanceManager {
 
   private MinecraftAccount refreshAccount(MinecraftAccount account) {
     var authService = MCAuthService.convertService(account.authType());
-    if (!authService.isExpiredOrOutdated(account)) {
+    if (!authService.isExpired(account)) {
       return account;
     }
 
-    logger.info("Account {} is expired or outdated, refreshing before connecting", account.lastKnownName());
+    logger.info("Account {} is expired, refreshing before connecting", account.lastKnownName());
     var refreshedAccount = authService.refresh(
       account,
       settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
