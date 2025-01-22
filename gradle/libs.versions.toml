@@ -14,7 +14,7 @@ kyori = "4.18.0"
 reactor = "1.2.2"
 classtransform = "1.14.0"
 armeria = "1.31.3"
-graalvm-polyglot = "24.1.1"
+graalvm-polyglot = "24.1.2"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
@@ -90,12 +90,12 @@ armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.11.8"
+openai = "com.openai:openai-java:0.12.0"
 immutables = "org.immutables:value:2.10.1 "
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta3"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta3"
 hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0.CR1"
-hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.4.Final"
+hibernate-hikaricp = "org.hibernate:hibernate-hikaricp:6.6.5.Final"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
 sqlite = "org.xerial:sqlite-jdbc:3.48.0.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.4.0"
