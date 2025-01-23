@@ -76,13 +76,11 @@ public class AIChatBot extends InternalPlugin {
           .model(model)
           .maxCompletionTokens(64) // 256 / 4 = 64
           .addMessage(ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(ChatCompletionSystemMessageParam.builder()
-            .role(ChatCompletionSystemMessageParam.Role.SYSTEM)
             .content(ChatCompletionSystemMessageParam.Content.ofTextContent(settingsSource.get(AIChatBotSettings.PROMPT)))
             .build()))
           .build())
         .toBuilder()
         .addMessage(ChatCompletionMessageParam.ofChatCompletionUserMessageParam(ChatCompletionUserMessageParam.builder()
-          .role(ChatCompletionUserMessageParam.Role.USER)
           .content(ChatCompletionUserMessageParam.Content.ofTextContent(message))
           .build()
         ))
@@ -96,7 +94,6 @@ public class AIChatBot extends InternalPlugin {
 
       var chatHistory = new ArrayList<>(requestModel.messages());
       chatHistory.add(ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(ChatCompletionAssistantMessageParam.builder()
-        .role(ChatCompletionAssistantMessageParam.Role.ASSISTANT)
         .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(message))
         .build()
       ));

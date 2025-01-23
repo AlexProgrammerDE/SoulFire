@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
+import java.time.Instant;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -126,6 +127,30 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
           case USER -> UserRole.USER;
         })
         .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting user info", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void invalidateSessions(InvalidateSessionsRequest request, StreamObserver<InvalidateSessionsResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.INVALIDATE_SESSIONS));
+
+    try {
+      sessionFactory.inTransaction(session -> {
+        var user = session.find(UserEntity.class, request.getId());
+        if (user == null) {
+          throw new IllegalArgumentException("User not found: " + request.getId());
+        }
+
+        user.minIssuedAt(Instant.now());
+
+        session.merge(user);
+      });
+
+      responseObserver.onNext(InvalidateSessionsResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting user info", t);

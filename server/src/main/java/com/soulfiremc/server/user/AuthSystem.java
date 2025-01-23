@@ -153,7 +153,7 @@ public class AuthSystem {
           case GLOBAL_COMMAND_COMPLETION, GLOBAL_COMMAND_EXECUTION,
                DELETE_USER, UPDATE_USER, READ_USER,
                CREATE_USER, UPDATE_SERVER_CONFIG, READ_SERVER_CONFIG,
-               GLOBAL_SUBSCRIBE_LOGS -> TriState.FALSE;
+               GLOBAL_SUBSCRIBE_LOGS, INVALIDATE_SESSIONS -> TriState.FALSE;
           case CREATE_INSTANCE -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_CREATING_INSTANCES));
           case READ_CLIENT_DATA -> TriState.TRUE;
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + global.globalPermission());

@@ -48,9 +48,18 @@ message UserInfoResponse {
   string email = 3;
 }
 
+// Invalidate all sessions for a user, effectively logging them out of all devices.
+message InvalidateSessionsRequest {
+  string id = 1;
+}
+
+message InvalidateSessionsResponse {
+}
+
 service UserService {
   rpc createUser(UserCreateRequest) returns (UserCreateResponse);
   rpc deleteUser(UserDeleteRequest) returns (UserDeleteResponse);
   rpc listUsers(UserListRequest) returns (UserListResponse);
   rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
+  rpc invalidateSessions(InvalidateSessionsRequest) returns (InvalidateSessionsResponse);
 }
