@@ -158,10 +158,6 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   private interface UpMovementSubscription extends MinecraftGraph.MovementSubscription<UpMovement> {
-    @Override
-    default UpMovement castAction(GraphAction action) {
-      return (UpMovement) action;
-    }
   }
 
   private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements UpMovementSubscription {

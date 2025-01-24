@@ -106,10 +106,6 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   private interface ParkourMovementSubscription extends MinecraftGraph.MovementSubscription<ParkourMovement> {
-    @Override
-    default ParkourMovement castAction(GraphAction action) {
-      return (ParkourMovement) action;
-    }
   }
 
   private record MovementFreeSubscription() implements ParkourMovementSubscription {

@@ -194,6 +194,7 @@ public record MinecraftGraph(TagsState tagsState,
       BlockState blockState,
       SFVec3i absoluteKey);
 
+    @SuppressWarnings("unchecked")
     default SubscriptionSingleResult processBlockUnsafe(
       MinecraftGraph graph,
       SFVec3i key,
@@ -201,10 +202,8 @@ public record MinecraftGraph(TagsState tagsState,
       LazyBoolean isFree,
       BlockState blockState,
       SFVec3i absolutePositionBlock) {
-      return processBlock(graph, key, castAction(action), isFree, blockState, absolutePositionBlock);
+      return processBlock(graph, key, (M) action, isFree, blockState, absolutePositionBlock);
     }
-
-    M castAction(GraphAction action);
   }
 
   private record WrappedActionSubscription(int actionIndex, MovementSubscription<?> subscription) {}

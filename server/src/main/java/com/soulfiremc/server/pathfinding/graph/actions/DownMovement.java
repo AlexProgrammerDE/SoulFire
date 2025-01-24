@@ -131,10 +131,6 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   private interface DownMovementSubscription extends MinecraftGraph.MovementSubscription<DownMovement> {
-    @Override
-    default DownMovement castAction(GraphAction action) {
-      return (DownMovement) action;
-    }
   }
 
   private record MovementFreeSubscription(BlockFace blockBreakSideHint) implements DownMovementSubscription {

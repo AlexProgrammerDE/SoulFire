@@ -331,10 +331,6 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   private interface SimpleMovementSubscription extends MinecraftGraph.MovementSubscription<SimpleMovement> {
-    @Override
-    default SimpleMovement castAction(GraphAction action) {
-      return (SimpleMovement) action;
-    }
   }
 
   private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
