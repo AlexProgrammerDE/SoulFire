@@ -44,3 +44,9 @@ java {
   withJavadocJar()
   withSourcesJar()
 }
+
+afterEvaluate {
+  tasks.withType<Zip> {
+    isZip64 = true
+  }
+}

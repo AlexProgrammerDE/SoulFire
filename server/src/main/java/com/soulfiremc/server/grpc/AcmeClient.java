@@ -226,7 +226,7 @@ public class AcmeClient {
     log.info("The file must not contain any leading or trailing whitespaces or line breaks!");
     log.info("If you're ready, dismiss the dialog...");
 
-    String message = """
+    var message = """
       Please create a file in your web server's base directory.
 
       http://%s/.well-known/acme-challenge/%s
@@ -250,7 +250,7 @@ public class AcmeClient {
     log.info("{} IN TXT {}", Dns01Challenge.toRRName(auth.getIdentifier()), challenge.getDigest());
     log.info("If you're ready, dismiss the dialog...");
 
-    String message = """
+    var message = """
       Please create a TXT record:
 
       %s IN TXT %s""".formatted(Dns01Challenge.toRRName(auth.getIdentifier()), challenge.getDigest());
