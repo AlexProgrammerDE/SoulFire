@@ -7,7 +7,7 @@ afterEvaluate {
     spotless {
       java {
         trimTrailingWhitespace()
-        indentWithSpaces(2)
+        leadingTabsToSpaces(2)
         endWithNewline()
 
         importOrder("", "javax|java", "\\#")
