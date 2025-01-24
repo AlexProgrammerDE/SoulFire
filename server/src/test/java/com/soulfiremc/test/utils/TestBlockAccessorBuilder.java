@@ -19,14 +19,14 @@ package com.soulfiremc.test.utils;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Map;
 
 public class TestBlockAccessorBuilder {
-  private final Map<Vector3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
+  private final Map<SFVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
   private final BlockState defaultBlock;
   private int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
   private int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
@@ -40,7 +40,7 @@ public class TestBlockAccessorBuilder {
   }
 
   public void setBlockAt(int x, int y, int z, BlockType block) {
-    blocks.put(Vector3i.from(x, y, z), BlockState.forDefaultBlockType(block));
+    blocks.put(SFVec3i.from(x, y, z), BlockState.forDefaultBlockType(block));
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
     minZ = Math.min(minZ, z);
@@ -50,14 +50,14 @@ public class TestBlockAccessorBuilder {
   }
 
   public BlockAccessor build() {
-    int sizeX = maxX - minX + 1;
-    int sizeY = maxY - minY + 1;
-    int sizeZ = maxZ - minZ + 1;
-    BlockState[][][] arrayBlocks = new BlockState[sizeX][sizeY][sizeZ];
+    var sizeX = maxX - minX + 1;
+    var sizeY = maxY - minY + 1;
+    var sizeZ = maxZ - minZ + 1;
+    var arrayBlocks = new BlockState[sizeX][sizeY][sizeZ];
 
-    for (Map.Entry<Vector3i, BlockState> entry : blocks.entrySet()) {
-      Vector3i pos = entry.getKey();
-      arrayBlocks[pos.getX() - minX][pos.getY() - minY][pos.getZ() - minZ] = entry.getValue();
+    for (var entry : blocks.entrySet()) {
+      var pos = entry.getKey();
+      arrayBlocks[pos.x - minX][pos.y - minY][pos.z - minZ] = entry.getValue();
     }
 
     return new TestBlockAccessor(arrayBlocks, defaultBlock, -minX, -minY, -minZ);
@@ -66,14 +66,14 @@ public class TestBlockAccessorBuilder {
   private record TestBlockAccessor(BlockState[][][] blocks, BlockState defaultBlock, int offsetX, int offsetY, int offsetZ) implements BlockAccessor {
     @Override
     public BlockState getBlockState(int x, int y, int z) {
-      int adjX = x + offsetX;
-      int adjY = y + offsetY;
-      int adjZ = z + offsetZ;
+      var adjX = x + offsetX;
+      var adjY = y + offsetY;
+      var adjZ = z + offsetZ;
       if (adjX < 0 || adjX >= blocks.length || adjY < 0 || adjY >= blocks[0].length || adjZ < 0 || adjZ >= blocks[0][0].length) {
         return defaultBlock;
       }
 
-      BlockState value = blocks[adjX][adjY][adjZ];
+      var value = blocks[adjX][adjY][adjZ];
       return value != null ? value : defaultBlock;
     }
   }
