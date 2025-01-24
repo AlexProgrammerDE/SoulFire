@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.data;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -24,11 +26,13 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class GsonDataHelper {
@@ -46,7 +50,15 @@ public class GsonDataHelper {
         return Key.key(key);
       }
     };
-  private static final Map<String, JsonArray> LOADED_DATA = new HashMap<>();
+  private static final LoadingCache<String, JsonArray> LOADED_DATA = Caffeine.newBuilder()
+    .expireAfterAccess(Duration.ofSeconds(1))
+    .build(file -> {
+      try {
+        return GsonInstance.GSON.fromJson(SFHelpers.getResourceAsString(file), JsonArray.class);
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to load data file " + file, e);
+      }
+    });
   private static final Function<Map<Class<?>, Object>, Gson> GSON_FACTORY = (typeAdapters) -> {
     var builder = new GsonBuilder()
       .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
@@ -66,19 +78,7 @@ public class GsonDataHelper {
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz,
                                Map<Class<?>, Object> typeAdapters) {
     var gson = createGson(typeAdapters);
-    var array =
-      LOADED_DATA.computeIfAbsent(
-        dataFile,
-        file -> {
-          var data = new JsonArray();
-          try {
-            data =
-              gson.fromJson(SFHelpers.getResourceAsString(file), JsonArray.class);
-          } catch (Exception e) {
-            throw new RuntimeException("Failed to load data file " + file, e);
-          }
-          return data;
-        });
+    var array = Objects.requireNonNull(LOADED_DATA.get(dataFile));
     for (var element : array) {
       if (element.getAsJsonObject().get("key").getAsString().equals(dataKey)) {
         return gson.fromJson(element, clazz);
