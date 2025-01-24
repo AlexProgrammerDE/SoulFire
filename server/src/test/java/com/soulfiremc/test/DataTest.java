@@ -28,11 +28,11 @@ public class DataTest {
   public void checkBlockStateTypeCorrect() {
     var airBlockState = BlockState.forDefaultBlockType(BlockType.AIR);
 
-    assertEquals(airBlockState.blockType(), BlockType.AIR);
-    assertNotEquals(airBlockState.blockType(), BlockType.DIRT);
+    assertEquals(BlockType.AIR, airBlockState.blockType());
+    assertNotEquals(BlockType.DIRT, airBlockState.blockType());
 
-    assertSame(airBlockState.blockType(), BlockType.AIR);
-    assertNotSame(airBlockState.blockType(), BlockType.DIRT);
+    assertSame(BlockType.AIR, airBlockState.blockType());
+    assertNotSame(BlockType.DIRT, airBlockState.blockType());
   }
 
   @Test
@@ -43,7 +43,7 @@ public class DataTest {
     assertNotEquals(airBlockState.collisionShape(), dirtBlockState.collisionShape());
     assertNotSame(airBlockState.collisionShape(), dirtBlockState.collisionShape());
 
-    assertEquals(airBlockState.collisionShape().blockShapes().size(), 0);
-    assertEquals(dirtBlockState.collisionShape().blockShapes().size(), 1);
+    assertEquals(0, airBlockState.collisionShape().blockShapes().size());
+    assertEquals(1, dirtBlockState.collisionShape().blockShapes().size());
   }
 }

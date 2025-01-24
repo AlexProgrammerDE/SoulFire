@@ -43,10 +43,10 @@ public class TestBlockAccessorBuilder {
     var targetState = BlockState.forDefaultBlockType(block);
     if (targetState == defaultBlock) {
       blocks.remove(SFVec3i.from(x, y, z));
-      return;
+    } else {
+      blocks.put(SFVec3i.from(x, y, z), targetState);
     }
 
-    blocks.put(SFVec3i.from(x, y, z), targetState);
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);
     minZ = Math.min(minZ, z);
