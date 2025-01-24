@@ -24,9 +24,10 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.actions.movement.ParkourDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
@@ -151,6 +152,22 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       }
 
       return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+    }
+  }
+
+  @Getter
+  @RequiredArgsConstructor
+  public enum ParkourDirection {
+    NORTH(new SFVec3i(0, 0, -1)),
+    SOUTH(new SFVec3i(0, 0, 1)),
+    EAST(new SFVec3i(1, 0, 0)),
+    WEST(new SFVec3i(-1, 0, 0));
+
+    public static final ParkourDirection[] VALUES = values();
+    private final SFVec3i offsetVector;
+
+    public SFVec3i offset(SFVec3i vector) {
+      return vector.add(offsetVector);
     }
   }
 }
