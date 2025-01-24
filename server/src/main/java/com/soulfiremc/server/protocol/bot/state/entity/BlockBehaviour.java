@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.block.BlockProperties;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -64,9 +65,9 @@ public class BlockBehaviour {
   public static void onInsideBubbleColumn(Vector3i pos, BlockState state, Entity entity) {
     var upBlockState = entity.level().getBlockState(pos.up());
     if (upBlockState.blockType().air()) {
-      entity.onAboveBubbleCol(state.properties().getBoolean("drag"));
+      entity.onAboveBubbleCol(state.properties().get(BlockProperties.DRAG));
     } else {
-      entity.onInsideBubbleColumn(state.properties().getBoolean("drag"));
+      entity.onInsideBubbleColumn(state.properties().get(BlockProperties.DRAG));
     }
   }
 

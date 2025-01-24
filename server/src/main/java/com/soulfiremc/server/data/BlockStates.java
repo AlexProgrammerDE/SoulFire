@@ -37,10 +37,10 @@ public record BlockStates(BlockState defaultState, List<BlockState> possibleStat
       var fluidState = GsonDataHelper.createGson(Map.of(
         FluidType.class,
         BlockType.CUSTOM_FLUID_TYPE,
-        BlockStateProperties.class,
-        BlockStateProperties.BLOCK_STATE_PROPERTIES
+        BlockPropertiesHolder.class,
+        BlockPropertiesHolder.BLOCK_STATE_PROPERTIES
       )).fromJson(stateObject.get("fluidState"), FluidState.class);
-      var properties = new BlockStateProperties(stateObject.getAsJsonObject("properties"));
+      var properties = new BlockPropertiesHolder(stateObject.getAsJsonObject("properties"));
 
       var blockState = new BlockState(stateId, defaultStateValue, fluidState, properties, blockType, key, i);
 

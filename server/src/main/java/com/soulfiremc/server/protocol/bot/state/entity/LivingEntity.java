@@ -18,6 +18,7 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.*;
+import com.soulfiremc.server.data.block.BlockProperties;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
@@ -723,11 +724,12 @@ public abstract class LivingEntity extends Entity {
   }
 
   private boolean trapdoorUsableAsLadder(Vector3i pos, BlockState state) {
-    if (!state.properties().getBoolean("open")) {
+    if (!state.properties().get(BlockProperties.OPEN)) {
       return false;
     } else {
       var downState = this.level().getBlockState(pos.down());
-      return downState.blockType() == BlockType.LADDER && downState.properties().getString("facing").equals(state.properties().getString("facing"));
+      return downState.blockType() == BlockType.LADDER
+        && downState.properties().get(BlockProperties.FACING).equals(state.properties().get(BlockProperties.FACING));
     }
   }
 

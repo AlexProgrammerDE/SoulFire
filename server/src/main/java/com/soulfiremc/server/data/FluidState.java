@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.data;
 
+import com.soulfiremc.server.data.block.BlockProperties;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.Direction;
@@ -29,7 +30,7 @@ public record FluidState(
   float ownHeight,
   boolean source,
   boolean empty,
-  BlockStateProperties properties
+  BlockPropertiesHolder properties
 ) {
   private boolean hasSameAbove(Level level, Vector3i blockPos) {
     return type.equals(level.getBlockState(blockPos.add(0, 1, 0)).fluidState().type());
@@ -85,7 +86,7 @@ public record FluidState(
     }
 
     var flowVector = Vector3d.from(xFlow, 0.0, zFlow);
-    if (properties.getBoolean("falling")) {
+    if (properties.get(BlockProperties.FALLING)) {
       for (var direction : Direction.Plane.HORIZONTAL) {
         currentBlock = direction.offset(blockPos);
         if (this.isSolidFace(level, currentBlock, direction) || this.isSolidFace(level, currentBlock.add(0, 1, 0), direction)) {

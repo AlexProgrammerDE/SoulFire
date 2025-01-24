@@ -29,14 +29,14 @@ public record BlockState(
   BlockType blockType,
   boolean defaultState,
   FluidState fluidState,
-  BlockStateProperties properties,
+  BlockPropertiesHolder properties,
   BlockShapeGroup collisionShape,
   BlockShapeGroup supportShape) implements IDValue {
   public BlockState(
     int id,
     boolean defaultState,
     FluidState fluidState,
-    BlockStateProperties properties,
+    BlockPropertiesHolder properties,
     BlockType blockType,
     Key key,
     int stateIndex) {

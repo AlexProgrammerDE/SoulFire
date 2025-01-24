@@ -38,6 +38,7 @@ public class DataGenerators {
       new BlockShapesDataGenerator.BlockStatesGenerator(),
       new BlocksJsonGenerator(),
       new BlocksJavaGenerator(),
+      new BlockPropertiesJavaGenerator(),
       new FluidsJsonGenerator(),
       new FluidsJavaGenerator(),
       new EffectsJsonGenerator(),
