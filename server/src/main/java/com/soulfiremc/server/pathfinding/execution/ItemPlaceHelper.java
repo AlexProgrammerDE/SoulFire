@@ -34,7 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class ItemPlaceHelper {
+public final class ItemPlaceHelper {
+  private ItemPlaceHelper() {
+  }
+
   public static boolean placeBestBlockInHand(BotConnection connection) {
     var inventoryManager = connection.inventoryManager();
     var playerInventory = inventoryManager.playerInventory();

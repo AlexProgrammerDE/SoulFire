@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-public class BuildSchematicController {
+public final class BuildSchematicController {
   private final Map<Vector3i, BlockType> absoluteBlocks;
 
   public BuildSchematicController(Map<Vector3i, BlockType> relativeBlocks, Vector3i base) {

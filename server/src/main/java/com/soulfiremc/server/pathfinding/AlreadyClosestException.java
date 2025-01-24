@@ -19,7 +19,7 @@ package com.soulfiremc.server.pathfinding;
 
 import java.io.Serial;
 
-public class AlreadyClosestException extends RuntimeException {
+public final class AlreadyClosestException extends RuntimeException {
   @Serial
   private static final long serialVersionUID = 1L;
 

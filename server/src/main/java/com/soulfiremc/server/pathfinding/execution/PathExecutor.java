@@ -38,7 +38,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class PathExecutor implements ControllingTask {
+public final class PathExecutor implements ControllingTask {
   private static final int MAX_ERROR_DISTANCE = 20;
   private final Queue<WorldAction> worldActionQueue = new LinkedBlockingQueue<>();
   private final BotConnection connection;

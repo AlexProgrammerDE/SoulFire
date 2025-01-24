@@ -28,7 +28,7 @@ import java.util.List;
 @Getter
 @ToString
 @AllArgsConstructor
-public class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
+public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
   /**
    * The world state of this node.
    */

@@ -28,7 +28,7 @@ import org.cloudburstmc.math.vector.Vector3i;
  * use this class.
  */
 @RequiredArgsConstructor
-public class SFVec3i {
+public final class SFVec3i {
   public static final SFVec3i ZERO = new SFVec3i(0, 0, 0);
 
   public final int x;

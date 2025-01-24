@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ExcavateAreaController {
+public final class ExcavateAreaController {
   private final Set<SFVec3i> blocksToMine;
 
   public static Set<SFVec3i> getRectangleFromTo(SFVec3i from, SFVec3i to) {

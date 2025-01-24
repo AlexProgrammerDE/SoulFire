@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CollectBlockController {
+public final class CollectBlockController {
   private final Predicate<BlockType> blockTypeChecker;
   private final int requestedAmount;
   private final int maxRadius;

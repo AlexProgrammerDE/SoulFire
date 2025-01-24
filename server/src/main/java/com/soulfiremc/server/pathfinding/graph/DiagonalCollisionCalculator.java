@@ -27,7 +27,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.IDMap;
 import org.cloudburstmc.math.vector.Vector3d;
 
-public class DiagonalCollisionCalculator {
+public final class DiagonalCollisionCalculator {
   private static final Vector3d START_POSITION = Vector3d.from(0.5, 0, 0.5);
   private static final Vector3d[] STEPS = new Vector3d[]{Vector3d.from(0.25, 0, 0.25), Vector3d.from(0.5, 0, 0.5), Vector3d.from(0.75, 0, 0.75)};
   private static final IDMap<BlockState, boolean[][][]> COLLISIONS = new IDMap<>(GlobalBlockPalette.INSTANCE.getBlockStates(), blockState -> {

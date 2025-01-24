@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
-public class ProjectedInventory {
+public final class ProjectedInventory {
   @Getter
   @ToString.Include
   private final int usableBlockItems;

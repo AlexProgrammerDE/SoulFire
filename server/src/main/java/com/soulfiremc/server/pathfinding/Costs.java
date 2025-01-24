@@ -38,7 +38,7 @@ import java.util.OptionalInt;
  * using the distance in blocks. The cost of breaking a block is calculated using the time it takes
  * in ticks to break a block and then converted to a relative heuristic.
  */
-public class Costs {
+public final class Costs {
   /**
    * The distance in blocks between two points that are directly next to each other.
    */

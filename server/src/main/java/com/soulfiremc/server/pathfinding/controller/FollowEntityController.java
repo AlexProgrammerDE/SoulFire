@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class FollowEntityController {
+public final class FollowEntityController {
   private final int entityId;
   private final int maxRadius;
 

@@ -19,7 +19,7 @@ package com.soulfiremc.server.pathfinding;
 
 import java.io.Serial;
 
-public class NoRouteFoundException extends RuntimeException {
+public final class NoRouteFoundException extends RuntimeException {
   @Serial
   private static final long serialVersionUID = 1L;
 
