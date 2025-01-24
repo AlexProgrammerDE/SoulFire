@@ -23,7 +23,6 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
-import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
@@ -42,7 +41,7 @@ public class PathConstraint {
   private static final int MAX_CLOSE_TO_ENEMY_PENALTY = Integer.getInteger("sf.pathfinding-max-close-to-enemy-penalty", 50);
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
-  private final CachedLazyObject<List<Entity>> entities = new CachedLazyObject<>(this::getEntitiesExpensive, 10, TimeUnit.SECONDS);
+  private final CachedLazyObject<List<EntityRangeData>> unfriendlyEntities = new CachedLazyObject<>(this::getUnfriendlyEntitiesExpensive, 10, TimeUnit.SECONDS);
 
   public PathConstraint(BotConnection botConnection) {
     this(botConnection.dataManager().localPlayer(), botConnection.dataManager().currentLevel());
@@ -95,13 +94,11 @@ public class PathConstraint {
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
     if (!DO_NOT_AVOID_HARMFUL_ENTITIES) {
       var addedPenalty = 0D;
-      for (var entity : entities.get()) {
-        if (!entity.entityType().friendly()) {
-          var followRange = entity.entityType().defaultFollowRange();
-          var distance = instruction.node().blockPosition().distance(SFVec3i.fromInt(entity.blockPosition()));
-          if (distance <= followRange) {
-            addedPenalty += MAX_CLOSE_TO_ENEMY_PENALTY * (followRange - distance) / followRange;
-          }
+      for (var entity : unfriendlyEntities.get()) {
+        var followRange = entity.followRange;
+        var distance = instruction.node().blockPosition().distance(entity.entityPosition);
+        if (distance <= followRange) {
+          addedPenalty += MAX_CLOSE_TO_ENEMY_PENALTY * (followRange - distance) / followRange;
         }
       }
 
@@ -113,11 +110,22 @@ public class PathConstraint {
     return instruction;
   }
 
-  private List<Entity> getEntitiesExpensive() {
+  private List<EntityRangeData> getUnfriendlyEntitiesExpensive() {
     if (entity == null) {
       return List.of();
     }
 
-    return entity.level().getEntities();
+    return entity.level().getEntities()
+      .stream()
+      .filter(e -> e != entity)
+      .filter(e -> !entity.entityType().friendly())
+      .filter(e -> e.entityType().defaultFollowRange() > 0)
+      .map(e -> new EntityRangeData(
+        e.entityType().defaultFollowRange(),
+        SFVec3i.fromInt(e.blockPosition())
+      ))
+      .toList();
   }
+
+  private record EntityRangeData(double followRange, SFVec3i entityPosition) {}
 }
