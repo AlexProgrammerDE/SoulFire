@@ -68,31 +68,29 @@ public class PathfindingBenchmark {
 
       log.info("Parsing world data...");
 
-      var maxY = 0;
+      log.info("X: {}, Y: {}, Z: {}", data.length, data[0].length, data[0][0].length);
+
+      // Find the first safe block at 0 0
+      var safeY = Integer.MIN_VALUE;
       var accessor = new TestBlockAccessorBuilder();
       for (var x = 0; x < data.length; x++) {
-        var xArray = data[x];
-        for (var y = 0; y < xArray.length; y++) {
-          var yArray = xArray[y];
-          for (var z = 0; z < yArray.length; z++) {
-            accessor.setBlockAt(x, y, z, BlockType.REGISTRY.getByKey(blockDefinitions[yArray[z]]));
-            maxY = Math.max(maxY, y);
+        for (var y = 0; y < data[0].length; y++) {
+          for (var z = 0; z < data[0][0].length; z++) {
+            var blockType = BlockType.REGISTRY.getByKey(blockDefinitions[data[x][y][z]]);
+            if (blockType.air()) {
+              continue;
+            }
+
+            // Insert blocks
+            accessor.setBlockAt(x, y, z, blockType);
+            if (x == 0 && z == 0) {
+              safeY = Math.max(safeY, y + 1);
+            }
           }
         }
       }
 
-      log.info("Calculating world data...");
-
       var builtAccessor = accessor.build();
-
-      // Find the first safe block at 0 0
-      var safeY = 0;
-      for (var y = maxY; y >= 0; y--) {
-        if (builtAccessor.getBlockState(0, y, 0).blockType() != BlockType.AIR) {
-          safeY = y + 1;
-          break;
-        }
-      }
 
       var inventory = ProjectedInventory.forUnitTest(List.of(), TestPathConstraint.INSTANCE);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
