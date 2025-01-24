@@ -23,6 +23,7 @@ import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.util.structs.LazyBoolean;
@@ -111,14 +112,19 @@ public record MinecraftGraph(TagsState tagsState,
     return !pathConstraint.canBreakBlockType(blockType);
   }
 
-  public void insertActions(NodeState node, Consumer<GraphInstructions> callback) {
+  public void insertActions(NodeState node, ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
-    calculateActions(node, generateTemplateActions(), callback);
+    calculateActions(node, generateTemplateActions(fromDirection), callback);
   }
 
-  private GraphAction[] generateTemplateActions() {
+  private GraphAction[] generateTemplateActions(ActionDirection fromDirection) {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
+      var action = ACTIONS_TEMPLATE[i];
+      if (fromDirection != null && action.actionDirection.opposite() == fromDirection) {
+        continue;
+      }
+
       actions[i] = ACTIONS_TEMPLATE[i].copy();
     }
 
@@ -135,7 +141,10 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   private void processSubscription(
-    NodeState node, GraphAction[] actions, Consumer<GraphInstructions> callback, int i) {
+    NodeState node,
+    GraphAction[] actions,
+    Consumer<GraphInstructions> callback,
+    int i) {
     var key = SUBSCRIPTION_KEYS[i];
     var value = SUBSCRIPTION_VALUES[i];
 

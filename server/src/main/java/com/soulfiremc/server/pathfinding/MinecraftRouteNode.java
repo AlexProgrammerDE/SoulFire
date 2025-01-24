@@ -19,9 +19,11 @@ package com.soulfiremc.server.pathfinding;
 
 import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -37,7 +39,12 @@ public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> 
   /**
    * The currently best known node to this node.
    */
-  private MinecraftRouteNode parent;
+  private @Nullable MinecraftRouteNode parent;
+
+  /**
+   * The direction from the parent to this node.
+   */
+  private @Nullable ActionDirection parentToNodeDirection;
 
   /**
    * The actions from the previous node to this node that were used to get to this node.
@@ -65,6 +72,7 @@ public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> 
     this(
       node,
       null,
+      null,
       actions,
       sourceCost,
       targetCost,
@@ -82,10 +90,13 @@ public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> 
     return DoubleMath.fuzzyCompare(this.targetCost, other.targetCost, 0.0001);
   }
 
-  public void setBetterParent(MinecraftRouteNode parent, List<WorldAction> actions,
+  public void setBetterParent(MinecraftRouteNode parent,
+                              ActionDirection moveDirection,
+                              List<WorldAction> actions,
                               double sourceCost, double targetCost,
                               double totalRouteScore) {
     this.parent = parent;
+    this.parentToNodeDirection = moveDirection;
     this.actions = actions;
     this.sourceCost = sourceCost;
     this.targetCost = targetCost;

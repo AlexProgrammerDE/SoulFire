@@ -158,8 +158,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       try {
-        graph.insertActions(current.node(), instructions ->
-          handleInstructions(openSet, routeIndex, current, instructions));
+        graph.insertActions(
+          current.node(),
+          current.parentToNodeDirection(),
+          instructions -> handleInstructions(openSet, routeIndex, current, instructions)
+        );
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
@@ -210,6 +213,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             new MinecraftRouteNode(
               instructionNode,
               current,
+              instructions.moveDirection(),
               worldActions,
               newSourceCost,
               newTargetCost,
@@ -226,6 +230,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         if (newSourceCost < v.sourceCost()) {
           v.setBetterParent(
             current,
+            instructions.moveDirection(),
             worldActions,
             newSourceCost,
             newTargetCost,

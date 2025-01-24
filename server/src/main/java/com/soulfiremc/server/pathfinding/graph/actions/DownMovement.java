@@ -25,6 +25,7 @@ import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
@@ -46,6 +47,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   private int closestObstructingBlock = Integer.MIN_VALUE;
 
   private DownMovement(SubscriptionConsumer blockSubscribers) {
+    super(ActionDirection.DOWN);
     this.targetToMineBlock = FEET_POSITION_RELATIVE_BLOCK.sub(0, 1, 0);
 
     this.registerSafetyCheckBlocks(blockSubscribers);
@@ -112,6 +114,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     return Collections.singletonList(new GraphInstructions(
       new NodeState(absoluteTargetFeetBlock, node.usableBlockItems() + (breakCost.willDropUsableBlockItem() ? 1 : 0)),
+      actionDirection,
       cost,
       List.of(new BlockBreakAction(breakCost))));
   }

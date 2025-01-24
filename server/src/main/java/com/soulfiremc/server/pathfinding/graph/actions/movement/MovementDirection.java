@@ -23,14 +23,14 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum MovementDirection {
-  NORTH(new SFVec3i(0, 0, -1), SkyDirection.NORTH, null),
-  SOUTH(new SFVec3i(0, 0, 1), SkyDirection.SOUTH, null),
-  EAST(new SFVec3i(1, 0, 0), SkyDirection.EAST, null),
-  WEST(new SFVec3i(-1, 0, 0), SkyDirection.WEST, null),
-  NORTH_EAST(new SFVec3i(1, 0, -1), null, DiagonalDirection.NORTH_EAST),
-  NORTH_WEST(new SFVec3i(-1, 0, -1), null, DiagonalDirection.NORTH_WEST),
-  SOUTH_EAST(new SFVec3i(1, 0, 1), null, DiagonalDirection.SOUTH_EAST),
-  SOUTH_WEST(new SFVec3i(-1, 0, 1), null, DiagonalDirection.SOUTH_WEST);
+  NORTH(new SFVec3i(0, 0, -1), SkyDirection.NORTH, null, ActionDirection.NORTH),
+  SOUTH(new SFVec3i(0, 0, 1), SkyDirection.SOUTH, null, ActionDirection.SOUTH),
+  EAST(new SFVec3i(1, 0, 0), SkyDirection.EAST, null, ActionDirection.EAST),
+  WEST(new SFVec3i(-1, 0, 0), SkyDirection.WEST, null, ActionDirection.WEST),
+  NORTH_EAST(new SFVec3i(1, 0, -1), null, DiagonalDirection.NORTH_EAST, ActionDirection.NORTH_EAST),
+  NORTH_WEST(new SFVec3i(-1, 0, -1), null, DiagonalDirection.NORTH_WEST, ActionDirection.NORTH_WEST),
+  SOUTH_EAST(new SFVec3i(1, 0, 1), null, DiagonalDirection.SOUTH_EAST, ActionDirection.SOUTH_EAST),
+  SOUTH_WEST(new SFVec3i(-1, 0, 1), null, DiagonalDirection.SOUTH_WEST, ActionDirection.SOUTH_WEST);
 
   public static final MovementDirection[] VALUES = values();
 
@@ -49,6 +49,8 @@ public enum MovementDirection {
   private final SFVec3i offsetVector;
   private final SkyDirection skyDirection;
   private final DiagonalDirection diagonalDirection;
+  @Getter
+  private final ActionDirection actionDirection;
   @Getter
   private MovementDirection opposite;
 

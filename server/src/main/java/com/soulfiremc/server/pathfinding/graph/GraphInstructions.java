@@ -19,10 +19,11 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import lombok.With;
 
 import java.util.List;
 
 @With
 public record GraphInstructions(
-  NodeState node, double actionCost, List<WorldAction> actions) {}
+  NodeState node, ActionDirection moveDirection, double actionCost, List<WorldAction> actions) {}

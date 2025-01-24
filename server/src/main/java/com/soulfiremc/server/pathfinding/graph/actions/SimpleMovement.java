@@ -64,6 +64,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private boolean requiresAgainstBlock = false;
 
   private SimpleMovement(MovementDirection direction, MovementModifier modifier, SubscriptionConsumer blockSubscribers) {
+    super(modifier == MovementModifier.NORMAL ? direction.actionDirection() : ActionDirection.SPECIAL);
     this.direction = direction;
     this.modifier = modifier;
     this.diagonal = direction.isDiagonal();
@@ -307,7 +308,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems), cost, actions));
+      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems),
+      actionDirection,
+      cost,
+      actions
+    ));
   }
 
   @Override

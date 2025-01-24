@@ -20,6 +20,8 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -28,8 +30,10 @@ import java.util.List;
  * A calculated action that the bot can take on a graph world representation.
  */
 @Setter
+@RequiredArgsConstructor
 public abstract sealed class GraphAction
   permits DownMovement, ParkourMovement, SimpleMovement, UpMovement {
+  public final ActionDirection actionDirection;
   private int subscriptionCounter;
 
   public boolean decrementAndIsDone() {

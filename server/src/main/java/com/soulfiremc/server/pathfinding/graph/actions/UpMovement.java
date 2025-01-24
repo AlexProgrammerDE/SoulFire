@@ -27,6 +27,7 @@ import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
@@ -51,6 +52,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   private boolean[] noNeedToBreak;
 
   private UpMovement(SubscriptionConsumer blockSubscribers) {
+    super(ActionDirection.UP);
     this.targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK.add(0, 1, 0);
 
     var arraySize = this.registerRequiredFreeBlocks(blockSubscribers);
@@ -134,7 +136,11 @@ public final class UpMovement extends GraphAction implements Cloneable {
           node.blockPosition().sub(0, 1, 0), BlockFace.TOP)));
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems), cost, actions));
+      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems),
+      actionDirection,
+      cost,
+      actions
+    ));
   }
 
   @Override

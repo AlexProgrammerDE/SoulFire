@@ -24,6 +24,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
+import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.LazyBoolean;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   private final SFVec3i targetFeetBlock;
 
   private ParkourMovement(ParkourDirection direction, SubscriptionConsumer blockSubscribers) {
+    super(direction.actionDirection);
     this.direction = direction;
     this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
 
@@ -88,8 +90,10 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
     return Collections.singletonList(new GraphInstructions(
       new NodeState(absoluteTargetFeetBlock, node.usableBlockItems()),
+      actionDirection,
       Costs.ONE_GAP_JUMP,
-      List.of(new GapJumpAction(absoluteTargetFeetBlock))));
+      List.of(new GapJumpAction(absoluteTargetFeetBlock))
+    ));
   }
 
   @Override
@@ -158,13 +162,14 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   @Getter
   @RequiredArgsConstructor
   public enum ParkourDirection {
-    NORTH(new SFVec3i(0, 0, -1)),
-    SOUTH(new SFVec3i(0, 0, 1)),
-    EAST(new SFVec3i(1, 0, 0)),
-    WEST(new SFVec3i(-1, 0, 0));
+    NORTH(new SFVec3i(0, 0, -1), ActionDirection.NORTH),
+    SOUTH(new SFVec3i(0, 0, 1), ActionDirection.SOUTH),
+    EAST(new SFVec3i(1, 0, 0), ActionDirection.EAST),
+    WEST(new SFVec3i(-1, 0, 0), ActionDirection.WEST);
 
     public static final ParkourDirection[] VALUES = values();
     private final SFVec3i offsetVector;
+    private final ActionDirection actionDirection;
 
     public SFVec3i offset(SFVec3i vector) {
       return vector.add(offsetVector);
