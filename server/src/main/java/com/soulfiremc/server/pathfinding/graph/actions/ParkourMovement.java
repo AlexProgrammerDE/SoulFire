@@ -25,7 +25,6 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
-import com.soulfiremc.server.util.structs.LazyBoolean;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -117,9 +116,9 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     private static final MovementFreeSubscription INSTANCE = new MovementFreeSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (isFree.get()) {
+      if (SFBlockHelpers.isBlockFree(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
@@ -131,7 +130,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     private static final ParkourUnsafeToStandOnSubscription INSTANCE = new ParkourUnsafeToStandOnSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // We only want to jump over dangerous blocks/gaps
       // So either a non-full-block like water or lava or magma
@@ -148,7 +147,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Block is safe to walk on, no need to check for more
       if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {

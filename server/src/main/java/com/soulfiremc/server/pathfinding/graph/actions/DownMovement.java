@@ -29,7 +29,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.util.SFBlockHelpers;
-import com.soulfiremc.server.util.structs.LazyBoolean;
 
 import java.util.Collections;
 import java.util.List;
@@ -138,7 +137,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
   private record MovementFreeSubscription(BlockFace blockBreakSideHint) implements DownMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       if (graph.disallowedToBreakBlock(absoluteKey)
         || graph.disallowedToBreakBlockType(blockState.blockType())) {
@@ -161,7 +160,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     private static final DownSafetyCheckSubscription INSTANCE = new DownSafetyCheckSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       var yLevel = key.y;
 
@@ -181,7 +180,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
   private record MovementBreakSafetyCheckSubscription(BlockSafetyType safetyType) implements DownMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       var unsafe = safetyType.isUnsafeBlock(blockState);
 
@@ -200,7 +199,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     private static final ObstructingFallCheckSubscription INSTANCE = new ObstructingFallCheckSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       var yLevel = key.y;
 
@@ -214,7 +213,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      if (isFree.get()) {
+      if (SFBlockHelpers.isBlockFree(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 

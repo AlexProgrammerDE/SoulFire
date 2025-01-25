@@ -31,7 +31,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
-import com.soulfiremc.server.util.structs.LazyBoolean;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -162,9 +162,9 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
   private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements UpMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (isFree.get()) {
+      if (SFBlockHelpers.isBlockFree(blockState)) {
         upMovement.noNeedToBreak[blockArrayIndex] = true;
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
@@ -193,7 +193,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Towering requires placing a block at old feet position
       if (graph.disallowedToPlaceBlock(absoluteKey)) {
@@ -206,7 +206,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
 
   private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyType safetyType) implements UpMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // There is no need to break this block, so there is no need for safety checks
       if (upMovement.noNeedToBreak[blockArrayIndex]) {

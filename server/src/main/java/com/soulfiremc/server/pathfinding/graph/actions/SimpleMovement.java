@@ -31,7 +31,6 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
 import com.soulfiremc.server.protocol.bot.BotActionManager;
 import com.soulfiremc.server.util.SFBlockHelpers;
-import com.soulfiremc.server.util.structs.LazyBoolean;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -334,9 +333,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (isFree.get()) {
+      if (SFBlockHelpers.isBlockFree(blockState)) {
         if (simpleMovement.allowBlockActions) {
           simpleMovement.noNeedToBreak[blockArrayIndex] = true;
         }
@@ -368,7 +367,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   private record MovementBreakSafetyCheckSubscription(int blockArrayIndex, BlockSafetyType safetyType) implements SimpleMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // There is no need to break this block, so there is no need for safety checks
       if (simpleMovement.noNeedToBreak[blockArrayIndex]) {
@@ -407,7 +406,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     private static final MovementSolidSubscription INSTANCE = new MovementSolidSubscription();
 
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Block is safe to walk on, no need to check for more
       if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
@@ -433,9 +432,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   private record MovementDiagonalCollisionSubscription(MovementSide side, int diagonalArrayIndex, BodyPart bodyPart) implements SimpleMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (SFBlockHelpers.isHurtOnTouchSide(blockState)) {
+      if (SFBlockHelpers.isHurtOnTouchSide(blockState)
+        || SFBlockHelpers.affectsTouchMovementSpeed(blockState.blockType())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       } else if (graph.pathConstraint().collidesWithAtEdge(new DiagonalCollisionCalculator.CollisionData(blockState, diagonalArrayIndex, bodyPart, side))) {
@@ -458,7 +458,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   private record MovementAgainstPlaceSolidSubscription(BlockFace againstFace) implements SimpleMovementSubscription {
     @Override
-    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement, LazyBoolean isFree,
+    public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // We already found one, no need to check for more
       if (simpleMovement.blockPlaceAgainstData != null) {

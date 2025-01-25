@@ -30,6 +30,22 @@ public class SFBlockHelpers {
     return state.collisionShape().isFullBlock();
   }
 
+  public static boolean isBlockFree(BlockState blockState) {
+    return blockState.collisionShape().hasNoCollisions()
+      && blockState.fluidState().type() == FluidType.EMPTY
+      && !blockState.blockType().blocksMotion()
+      && !affectsTouchMovementSpeed(blockState.blockType());
+  }
+
+  public static boolean affectsTouchMovementSpeed(BlockType blockType) {
+    return blockType == BlockType.COBWEB
+      || blockType == BlockType.POWDER_SNOW
+      || blockType == BlockType.SOUL_SAND
+      || blockType == BlockType.SOUL_SOIL
+      || blockType == BlockType.HONEY_BLOCK
+      || blockType == BlockType.SLIME_BLOCK;
+  }
+
   public static boolean isHurtOnTouchFluid(FluidType fluidType) {
     return fluidType == FluidType.LAVA
       || fluidType == FluidType.FLOWING_LAVA;

@@ -19,13 +19,11 @@ package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
-import com.soulfiremc.server.data.FluidType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
-import com.soulfiremc.server.util.structs.LazyBoolean;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,10 +89,6 @@ public record MinecraftGraph(TagsState tagsState,
     }
   }
 
-  public static boolean isBlockFree(BlockState blockState) {
-    return blockState.collisionShape().hasNoCollisions() && blockState.fluidState().type() == FluidType.EMPTY;
-  }
-
   public boolean doUsableBlocksDecreaseWhenPlaced() {
     return pathConstraint.doUsableBlocksDecreaseWhenPlaced();
   }
@@ -151,7 +145,6 @@ public record MinecraftGraph(TagsState tagsState,
     SFVec3i absolutePositionBlock = null;
 
     // We cache only this, but not solid because solid will only occur a single time
-    LazyBoolean isFree = null;
     for (var subscriber : value) {
       var action = actions[subscriber.actionIndex];
       if (action == null) {
@@ -168,12 +161,7 @@ public record MinecraftGraph(TagsState tagsState,
         }
       }
 
-      if (isFree == null) {
-        var finalBlockState = blockState;
-        isFree = new LazyBoolean(() -> isBlockFree(finalBlockState));
-      }
-
-      switch (subscriber.subscription.processBlockUnsafe(this, key, action, isFree, blockState, absolutePositionBlock)) {
+      switch (subscriber.subscription.processBlockUnsafe(this, key, action, blockState, absolutePositionBlock)) {
         case CONTINUE -> {
           if (!action.decrementAndIsDone()) {
             continue;
@@ -198,7 +186,6 @@ public record MinecraftGraph(TagsState tagsState,
       MinecraftGraph graph,
       SFVec3i key,
       M action,
-      LazyBoolean isFree,
       BlockState blockState,
       SFVec3i absoluteKey);
 
@@ -207,10 +194,9 @@ public record MinecraftGraph(TagsState tagsState,
       MinecraftGraph graph,
       SFVec3i key,
       GraphAction action,
-      LazyBoolean isFree,
       BlockState blockState,
       SFVec3i absolutePositionBlock) {
-      return processBlock(graph, key, (M) action, isFree, blockState, absolutePositionBlock);
+      return processBlock(graph, key, (M) action, blockState, absolutePositionBlock);
     }
   }
 
