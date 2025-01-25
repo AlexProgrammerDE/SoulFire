@@ -42,6 +42,9 @@ public class SFBlockHelpers {
       || blockType == BlockType.WITHER_ROSE
       || blockType == BlockType.FIRE
       || blockType == BlockType.SOUL_FIRE
+      // Not hurt, but definitely slows you down
+      || blockType == BlockType.COBWEB
+      || blockType == BlockType.POWDER_SNOW
       || isHurtOnTouchFluid(blockState.fluidState().type());
   }
 
