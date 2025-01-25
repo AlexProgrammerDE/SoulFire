@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.util.structs;
 
-import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -40,9 +39,7 @@ import java.util.jar.Manifest;
 public class SFContextClassLoader extends URLClassLoader {
   // Prevent infinite loop when plugins are looking for classes inside this class loader
   private static final ThreadLocal<Boolean> PREVENT_LOOP = ThreadLocal.withInitial(() -> false);
-  @Getter
   private final List<ClassLoader> childClassLoaders = new ArrayList<>();
-  private final ClassLoader platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
 
   @SneakyThrows
   public SFContextClassLoader(Path libDir) {
@@ -52,6 +49,10 @@ public class SFContextClassLoader extends URLClassLoader {
     var constantsClass = loadClass("com.soulfiremc.launcher.SoulFireClassloaderConstants");
     var pluginUrlsField = constantsClass.getField("CHILD_CLASSLOADER_CONSUMER");
     pluginUrlsField.set(null, (Consumer<ClassLoader>) childClassLoaders::add);
+  }
+
+  private static ClassLoader getParentClassLoader() {
+    return ClassLoader.getSystemClassLoader().getParent();
   }
 
   private static String nameToPath(String name) {
@@ -93,7 +94,7 @@ public class SFContextClassLoader extends URLClassLoader {
       var c = findLoadedClass(name);
       if (c == null) {
         try {
-          c = platformClassLoader.loadClass(name);
+          c = getPlatformClassLoader().loadClass(name);
         } catch (ClassNotFoundException ignored) {
           // Ignore
         }
