@@ -75,13 +75,13 @@ public class AIChatBot extends InternalPlugin {
       var requestModel = event.connection().metadata().getOrSet(PLAYER_CONVERSATIONS, () -> ChatCompletionCreateParams.builder()
           .model(model)
           .maxCompletionTokens(64) // 256 / 4 = 64
-          .addMessage(ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(ChatCompletionSystemMessageParam.builder()
-            .content(ChatCompletionSystemMessageParam.Content.ofTextContent(settingsSource.get(AIChatBotSettings.PROMPT)))
+          .addMessage(ChatCompletionMessageParam.ofSystem(ChatCompletionSystemMessageParam.builder()
+            .content(ChatCompletionSystemMessageParam.Content.ofText(settingsSource.get(AIChatBotSettings.PROMPT)))
             .build()))
           .build())
         .toBuilder()
-        .addMessage(ChatCompletionMessageParam.ofChatCompletionUserMessageParam(ChatCompletionUserMessageParam.builder()
-          .content(ChatCompletionUserMessageParam.Content.ofTextContent(message))
+        .addMessage(ChatCompletionMessageParam.ofUser(ChatCompletionUserMessageParam.builder()
+          .content(ChatCompletionUserMessageParam.Content.ofText(message))
           .build()
         ))
         .build();
@@ -93,8 +93,8 @@ public class AIChatBot extends InternalPlugin {
         .orElse("No text response");
 
       var chatHistory = new ArrayList<>(requestModel.messages());
-      chatHistory.add(ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(ChatCompletionAssistantMessageParam.builder()
-        .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(message))
+      chatHistory.add(ChatCompletionMessageParam.ofAssistant(ChatCompletionAssistantMessageParam.builder()
+        .content(ChatCompletionAssistantMessageParam.Content.ofText(message))
         .build()
       ));
       if (chatHistory.size() > settingsSource.get(AIChatBotSettings.HISTORY_LENGTH)) {

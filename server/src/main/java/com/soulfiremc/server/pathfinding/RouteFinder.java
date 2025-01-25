@@ -26,6 +26,8 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +88,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Integer.getInteger("sf.pathfinding-expire", 180));
 
     // Store block positions and the best route to them
+    var blockItemsIndex = new Long2IntOpenHashMap();
     var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
 
     // Store block positions that we need to look at
@@ -161,7 +164,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         graph.insertActions(
           current.node(),
           current.parentToNodeDirection(),
-          instructions -> handleInstructions(openSet, routeIndex, current, instructions)
+          instructions -> handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions)
         );
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.node());
@@ -191,11 +194,26 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
   private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
                                   Map<NodeState, MinecraftRouteNode> routeIndex,
+                                  Long2IntMap blockItemsIndex,
                                   MinecraftRouteNode current,
                                   GraphInstructions instructions) {
+    var instructionNode = instructions.node();
+
+    // Pre-check if we can reach this node with the current amount of items
+    // We don't want to consider nodes again where we have even less usable items
+    var bestUsableItems = blockItemsIndex.compute(instructionNode.blockPosition().asMinecraftLong(), (k, v) -> {
+      if (v == null || instructionNode.usableBlockItems() > v) {
+        return instructionNode.usableBlockItems();
+      }
+
+      return v;
+    });
+    if (bestUsableItems > instructionNode.usableBlockItems()) {
+      return;
+    }
+
     var actionCost = instructions.actionCost();
     var worldActions = instructions.actions();
-    var instructionNode = instructions.node();
 
     // Calculate new distance from start to this connection,
     // Get distance from the current element
