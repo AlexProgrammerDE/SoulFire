@@ -91,7 +91,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
-    var instructionCache = new Long2ObjectLRUCache<GraphInstructions[]>(1_000_000);
+    var instructionCache = new Long2ObjectLRUCache<GraphInstructions[]>(50_000);
     var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
 
     // Store block positions that we need to look at
