@@ -20,7 +20,6 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.data.FluidType;
-import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
@@ -112,7 +111,7 @@ public record MinecraftGraph(TagsState tagsState,
     return !pathConstraint.canBreakBlockType(blockType);
   }
 
-  public void insertActions(NodeState node, ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
+  public void insertActions(SFVec3i node, ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
     calculateActions(node, generateTemplateActions(fromDirection), callback);
   }
@@ -132,7 +131,7 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   private void calculateActions(
-    NodeState node,
+    SFVec3i node,
     GraphAction[] actions,
     Consumer<GraphInstructions> callback) {
     for (var i = 0; i < SUBSCRIPTION_KEYS.length; i++) {
@@ -141,7 +140,7 @@ public record MinecraftGraph(TagsState tagsState,
   }
 
   private void processSubscription(
-    NodeState node,
+    SFVec3i node,
     GraphAction[] actions,
     Consumer<GraphInstructions> callback,
     int i) {
@@ -161,7 +160,7 @@ public record MinecraftGraph(TagsState tagsState,
 
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
-        absolutePositionBlock = node.blockPosition().add(key);
+        absolutePositionBlock = node.add(key);
         blockState = blockAccessor.getBlockState(absolutePositionBlock);
 
         if (pathConstraint.isOutOfLevel(blockState, absolutePositionBlock)) {

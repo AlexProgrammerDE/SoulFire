@@ -1,3 +1,5 @@
+import me.champeau.jmh.JMHTask
+
 plugins {
   `sf-project-conventions`
   alias(libs.plugins.jmh)
@@ -104,6 +106,9 @@ dependencies {
 tasks {
   withType<Checkstyle> {
     exclude("**/com/soulfiremc/server/data**")
+  }
+  withType<JMHTask> {
+    outputs.upToDateWhen { false }
   }
 }
 

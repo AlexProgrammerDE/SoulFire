@@ -37,6 +37,8 @@ public final class SFVec3i {
   public final int z;
   private int hashCode;
   private boolean hashCodeSet;
+  private long minecraftLong;
+  private boolean minecraftLongSet;
 
   public static SFVec3i fromDouble(Vector3d vec) {
     return fromInt(vec.toInt());
@@ -68,6 +70,10 @@ public final class SFVec3i {
     return this.x == other.x && this.y == other.y && this.z == other.z;
   }
 
+  public boolean minecraftEquals(SFVec3i vec) {
+    return asMinecraftLong() == vec.asMinecraftLong();
+  }
+
   @Override
   public int hashCode() {
     if (!hashCodeSet) {
@@ -79,7 +85,12 @@ public final class SFVec3i {
   }
 
   public long asMinecraftLong() {
-    return VectorHelper.asLong(x, y, z);
+    if (!minecraftLongSet) {
+      minecraftLong = VectorHelper.asLong(x, y, z);
+      minecraftLongSet = true;
+    }
+
+    return minecraftLong;
   }
 
   public SFVec3i add(int x, int y, int z) {

@@ -28,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +90,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
+    var instructionCache = new Long2ObjectOpenHashMap<GraphInstructions[]>();
     var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
 
     // Store block positions that we need to look at
@@ -161,11 +163,27 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       try {
-        graph.insertActions(
-          current.node(),
-          current.parentToNodeDirection(),
-          instructions -> handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions)
-        );
+        instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (k, v) -> {
+          if (v == null) {
+            var list = new ArrayList<GraphInstructions>();
+            graph.insertActions(
+              current.node().blockPosition(),
+              current.parentToNodeDirection(),
+              instructions -> {
+                list.add(instructions);
+                handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
+              }
+            );
+
+            return list.toArray(GraphInstructions[]::new);
+          }
+
+          for (var instructions : v) {
+            handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
+          }
+
+          return v;
+        });
       } catch (OutOfLevelException e) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
@@ -197,7 +215,14 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                                   Long2IntMap blockItemsIndex,
                                   MinecraftRouteNode current,
                                   GraphInstructions instructions) {
-    var instructionNode = instructions.node();
+    var newBlocks = current.node().usableBlockItems() + instructions.deltaUsableBlockItems();
+
+    // If we don't have enough items to reach this node, we can skip it
+    if (newBlocks < 0) {
+      return;
+    }
+
+    var instructionNode = new NodeState(instructions.blockPosition(), newBlocks);
 
     // Pre-check if we can reach this node with the current amount of items
     // We don't want to consider nodes again where we have even less usable items
@@ -238,6 +263,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
               newTotalRouteScore);
 
           log.debug("Found a new node: {}", instructionNode);
+
 
           openSet.enqueue(node);
 

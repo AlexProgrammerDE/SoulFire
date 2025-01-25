@@ -96,7 +96,7 @@ public class PathConstraint {
       var addedPenalty = 0D;
       for (var entity : unfriendlyEntities.get()) {
         var followRange = entity.followRange;
-        var distance = instruction.node().blockPosition().distance(entity.entityPosition);
+        var distance = instruction.blockPosition().distance(entity.entityPosition);
         if (distance <= followRange) {
           addedPenalty += MAX_CLOSE_TO_ENEMY_PENALTY * (followRange - distance) / followRange;
         }

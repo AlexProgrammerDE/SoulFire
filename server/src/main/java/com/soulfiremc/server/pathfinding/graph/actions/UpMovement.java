@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
-import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
@@ -94,7 +93,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node) {
     var actions = new ArrayList<WorldAction>();
     var cost = Costs.JUMP_UP_BLOCK;
 
@@ -112,31 +111,26 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
     }
 
-    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
-    var afterBreakUsableBlockItems = node.usableBlockItems() + usableBlockItemsDiff;
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     // We need a block to place below us
-    if (afterBreakUsableBlockItems < 1) {
-      // Not enough blocks to place below us
-      return Collections.emptyList();
-    } else {
       if (graph.doUsableBlocksDecreaseWhenPlaced()) {
         // After the place we'll have one less usable block item
-        afterBreakUsableBlockItems--;
+        usableBlockItemsDiff--;
       }
 
       cost += Costs.PLACE_BLOCK_PENALTY;
-    }
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(
       new JumpAndPlaceBelowAction(
-        node.blockPosition(),
+        node,
         new BotActionManager.BlockPlaceAgainstData(
-          node.blockPosition().sub(0, 1, 0), BlockFace.TOP)));
+          node.sub(0, 1, 0), BlockFace.TOP)));
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems),
+      absoluteTargetFeetBlock,
+      usableBlockItemsDiff,
       actionDirection,
       cost,
       actions

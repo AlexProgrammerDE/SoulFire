@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.pathfinding.NodeState;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
@@ -41,7 +41,7 @@ public abstract sealed class GraphAction
     return --subscriptionCounter == 0;
   }
 
-  public abstract List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node);
+  public abstract List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node);
 
   public abstract GraphAction copy();
 }

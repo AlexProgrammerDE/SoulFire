@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.pathfinding;
 
-import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import lombok.AllArgsConstructor;
@@ -82,7 +81,7 @@ public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> 
 
   @Override
   public int compareTo(MinecraftRouteNode other) {
-    return DoubleMath.fuzzyCompare(this.totalRouteScore, other.totalRouteScore, 0.0001);
+    return Double.compare(this.totalRouteScore, other.totalRouteScore);
   }
 
   public void setBetterParent(MinecraftRouteNode parent,

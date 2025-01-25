@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
-import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.GapJumpAction;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
@@ -85,11 +84,12 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
-    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node) {
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, node.usableBlockItems()),
+      absoluteTargetFeetBlock,
+      0,
       actionDirection,
       Costs.ONE_GAP_JUMP,
       List.of(new GapJumpAction(absoluteTargetFeetBlock))

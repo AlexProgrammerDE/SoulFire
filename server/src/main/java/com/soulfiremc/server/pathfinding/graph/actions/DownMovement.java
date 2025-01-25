@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
-import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -93,7 +92,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node) {
     if (closestBlockToFallOn == Integer.MIN_VALUE || closestObstructingBlock > closestBlockToFallOn) {
       return Collections.emptyList();
     }
@@ -110,10 +109,11 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     cost += breakCost.miningCost();
 
-    var absoluteTargetFeetBlock = node.blockPosition().add(0, closestBlockToFallOn + 1, 0);
+    var absoluteTargetFeetBlock = node.add(0, closestBlockToFallOn + 1, 0);
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, node.usableBlockItems() + (breakCost.willDropUsableBlockItem() ? 1 : 0)),
+      absoluteTargetFeetBlock,
+      breakCost.willDropUsableBlockItem() ? 1 : 0,
       actionDirection,
       cost,
       List.of(new BlockBreakAction(breakCost))));

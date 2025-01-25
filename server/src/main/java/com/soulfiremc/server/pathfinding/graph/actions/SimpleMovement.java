@@ -19,7 +19,6 @@ package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.Costs;
-import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
@@ -258,7 +257,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   }
 
   @Override
-  public List<GraphInstructions> getInstructions(MinecraftGraph graph, NodeState node) {
+  public List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node) {
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
       return Collections.emptyList();
     }
@@ -285,21 +284,15 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
     }
 
-    var absoluteTargetFeetBlock = node.blockPosition().add(targetFeetBlock);
-    var afterBreakUsableBlockItems = node.usableBlockItems() + usableBlockItemsDiff;
+    var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     if (requiresAgainstBlock) {
-      if (afterBreakUsableBlockItems < 1) {
-        // Not enough blocks to place below us
-        return Collections.emptyList();
-      } else {
-        if (graph.doUsableBlocksDecreaseWhenPlaced()) {
-          // After the place we'll have one less usable block item
-          afterBreakUsableBlockItems--;
-        }
-
-        cost += Costs.PLACE_BLOCK_PENALTY;
+      if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+        // After the place we'll have one less usable block item
+        usableBlockItemsDiff--;
       }
+
+      cost += Costs.PLACE_BLOCK_PENALTY;
 
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));
@@ -308,7 +301,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
 
     return Collections.singletonList(new GraphInstructions(
-      new NodeState(absoluteTargetFeetBlock, afterBreakUsableBlockItems),
+      absoluteTargetFeetBlock,
+      usableBlockItemsDiff,
       actionDirection,
       cost,
       actions
