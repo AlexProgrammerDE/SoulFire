@@ -23,35 +23,85 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ActionDirection {
-  NORTH,
-  SOUTH,
-  EAST,
-  WEST,
-  NORTH_EAST,
-  NORTH_WEST,
-  SOUTH_EAST,
-  SOUTH_WEST,
-  UP,
-  DOWN,
+  NORTH {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == SOUTH;
+    }
+  },
+  SOUTH {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == NORTH;
+    }
+  },
+  EAST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == WEST;
+    }
+  },
+  WEST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == EAST;
+    }
+  },
+  NORTH_EAST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == SOUTH_WEST || direction == SOUTH || direction == WEST;
+    }
+  },
+  NORTH_WEST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == SOUTH_EAST || direction == SOUTH || direction == EAST;
+    }
+  },
+  SOUTH_EAST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == NORTH_WEST || direction == NORTH || direction == WEST;
+    }
+  },
+  SOUTH_WEST {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == NORTH_EAST || direction == NORTH || direction == EAST;
+    }
+  },
+  UP {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == DOWN;
+    }
+  },
+  DOWN {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return direction == UP;
+    }
+  },
   // Jumps, diagonal jumps, falls, diagonal falls, etc.
   // For those it's sometimes smart to fall down and then go in reverse direction, but lower/higher
-  SPECIAL;
+  SPECIAL {
+    @Override
+    public boolean isOpposite(ActionDirection direction) {
+      return false;
+    }
+  };
 
   public static final ActionDirection[] VALUES = values();
 
-  static {
-    NORTH.opposite = SOUTH;
-    SOUTH.opposite = NORTH;
-    EAST.opposite = WEST;
-    WEST.opposite = EAST;
-    NORTH_EAST.opposite = SOUTH_WEST;
-    NORTH_WEST.opposite = SOUTH_EAST;
-    SOUTH_EAST.opposite = NORTH_WEST;
-    SOUTH_WEST.opposite = NORTH_EAST;
-    UP.opposite = DOWN;
-    DOWN.opposite = UP;
-    SPECIAL.opposite = null;
-  }
-
-  private ActionDirection opposite;
+  /**
+   * Checks if the given direction is the opposite of this direction.
+   * This also includes that the opposite of UP is DOWN and vice versa.
+   * It also includes diagonals, so NORTH_EAST is the opposite of SOUTH_WEST,
+   * but also the opposite of SOUTH and WEST.
+   *
+   * @param direction The direction to check
+   * @return If the given direction is the opposite of this direction
+   */
+  public abstract boolean isOpposite(ActionDirection direction);
 }

@@ -121,7 +121,7 @@ public record MinecraftGraph(TagsState tagsState,
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
       var action = ACTIONS_TEMPLATE[i];
-      if (fromDirection != null && action.actionDirection.opposite() == fromDirection) {
+      if (fromDirection != null && action.actionDirection.isOpposite(fromDirection)) {
         continue;
       }
 
