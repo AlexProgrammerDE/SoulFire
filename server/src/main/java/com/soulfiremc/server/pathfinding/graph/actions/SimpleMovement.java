@@ -421,7 +421,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Stairs blocks are pretty much identical to full blocks
-      if (SFBlockHelpers.isStairsBlockToStandOn(graph.tagsState(), blockState)) {
+      if (graph.inventory().isStairsBlockToStandOn(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 

@@ -18,7 +18,6 @@
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.*;
-import com.soulfiremc.server.protocol.bot.state.TagsState;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class SFBlockHelpers {
@@ -54,10 +53,6 @@ public class SFBlockHelpers {
 
   public static boolean isSafeBlockToStandOn(BlockState state) {
     return isTopFullBlock(state.collisionShape()) && !isHurtWhenStoodOn(state);
-  }
-
-  public static boolean isStairsBlockToStandOn(TagsState tagsState, BlockState state) {
-    return tagsState.is(state.blockType(), BlockTags.STAIRS) && !isHurtWhenStoodOn(state);
   }
 
   public static boolean isTopFullBlock(BlockShapeGroup shapeGroup) {
