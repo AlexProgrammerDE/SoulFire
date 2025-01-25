@@ -82,12 +82,7 @@ public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> 
 
   @Override
   public int compareTo(MinecraftRouteNode other) {
-    var totalRouteComparison = DoubleMath.fuzzyCompare(this.totalRouteScore, other.totalRouteScore, 0.0001);
-    if (totalRouteComparison != 0) {
-      return totalRouteComparison;
-    }
-
-    return DoubleMath.fuzzyCompare(this.targetCost, other.targetCost, 0.0001);
+    return DoubleMath.fuzzyCompare(this.totalRouteScore, other.totalRouteScore, 0.0001);
   }
 
   public void setBetterParent(MinecraftRouteNode parent,

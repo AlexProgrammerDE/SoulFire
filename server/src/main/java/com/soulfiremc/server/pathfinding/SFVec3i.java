@@ -18,6 +18,7 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.util.MathHelper;
+import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -75,6 +76,10 @@ public final class SFVec3i {
     }
 
     return hashCode;
+  }
+
+  public long asMinecraftLong() {
+    return VectorHelper.asLong(x, y, z);
   }
 
   public SFVec3i add(int x, int y, int z) {
