@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
+import org.geysermc.mcprotocollib.network.NetworkConstants;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.helper.NettyHelper;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
@@ -57,11 +58,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ViaClientSession extends ClientNetworkSession {
-  public static final String SIZER_NAME = "sizer";
-  public static final String COMPRESSION_NAME = "compression";
-  public static final String ENCRYPTION_NAME = "encryption";
-  public static final String CODEC_NAME = "codec";
-
   @Getter
   private final Logger logger;
   private final SFProxy proxy;
@@ -194,11 +190,11 @@ public class ViaClientSession extends ClientNetworkSession {
 
         pipeline.addLast(new SFVLPipeline(userConnection));
         if (isBedrock) {
-          pipeline.remove(COMPRESSION_NAME);
-          pipeline.remove(ENCRYPTION_NAME);
+          pipeline.remove(NetworkConstants.COMPRESSION_NAME);
+          pipeline.remove(NetworkConstants.ENCRYPTION_NAME);
         }
 
-        pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-flow-control", new AutoReadFlowControlHandler());
+        pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-" + NetworkConstants.FLOW_CONTROL_NAME, new AutoReadFlowControlHandler());
       }
     };
   }

@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
+import org.geysermc.mcprotocollib.network.NetworkConstants;
 
 import javax.crypto.SecretKey;
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override
   public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
     var channel = Objects.requireNonNull(user.getChannel());
-    if (channel.pipeline().names().contains(ViaClientSession.COMPRESSION_NAME)) {
+    if (channel.pipeline().names().contains(NetworkConstants.COMPRESSION_NAME)) {
       throw new IllegalStateException("Compression already enabled");
     }
 
@@ -40,8 +40,8 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
       channel
         .pipeline()
         .addBefore(
-          ViaClientSession.SIZER_NAME,
-          ViaClientSession.COMPRESSION_NAME,
+          NetworkConstants.SIZER_NAME,
+          NetworkConstants.COMPRESSION_NAME,
           new CompressionCodec(protocolCompression));
     } catch (Throwable e) {
       throw new RuntimeException(e);
@@ -51,7 +51,7 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override
   public void enableEncryption(UserConnection user, SecretKey key) {
     var channel = Objects.requireNonNull(user.getChannel());
-    if (channel.pipeline().names().contains(ViaClientSession.ENCRYPTION_NAME)) {
+    if (channel.pipeline().names().contains(NetworkConstants.ENCRYPTION_NAME)) {
       throw new IllegalStateException("Encryption already enabled");
     }
 
@@ -60,7 +60,7 @@ public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
         .pipeline()
         .addAfter(
           VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME,
-          ViaClientSession.ENCRYPTION_NAME,
+          NetworkConstants.ENCRYPTION_NAME,
           new AesEncryptionCodec(key));
     } catch (Throwable e) {
       throw new RuntimeException(e);

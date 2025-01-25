@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.viaversion;
 
-import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.vialoader.netty.ViaCodec;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandler;
+import org.geysermc.mcprotocollib.network.NetworkConstants;
 
 public class SFVLPipeline extends VLPipeline {
   public SFVLPipeline(UserConnection user) {
@@ -35,16 +35,16 @@ public class SFVLPipeline extends VLPipeline {
 
   @Override
   protected String compressionCodecName() {
-    return ViaClientSession.COMPRESSION_NAME;
+    return NetworkConstants.COMPRESSION_NAME;
   }
 
   @Override
   protected String packetCodecName() {
-    return ViaClientSession.CODEC_NAME;
+    return NetworkConstants.CODEC_NAME;
   }
 
   @Override
   protected String lengthCodecName() {
-    return ViaClientSession.SIZER_NAME;
+    return NetworkConstants.SIZER_NAME;
   }
 }
