@@ -146,7 +146,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
-      var cacheableMiningCost = graph.inventory().getMiningCosts(graph.tagsState(), blockState);
+      var cacheableMiningCost = graph.inventory().getMiningCosts(blockState);
       // We can mine this block, lets add costs and continue
       downMovement.breakCost = new MovementMiningCost(
         absoluteKey,

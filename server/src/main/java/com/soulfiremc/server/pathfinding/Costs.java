@@ -102,7 +102,7 @@ public final class Costs {
 
   private Costs() {}
 
-  public static BlockMiningCosts calculateBlockBreakCost(
+  public static @Nullable BlockMiningCosts calculateBlockBreakCost(
     TagsState tagsState,
     @Nullable LocalPlayer entity,
     ProjectedInventory inventory,
@@ -120,8 +120,7 @@ public final class Costs {
     }
 
     if (lowestMiningTicks == Integer.MAX_VALUE) {
-      // We would expect there is at least a cost to break a block without a tool
-      throw new IllegalStateException("No way found to break block!");
+      return null;
     }
 
     return new BlockMiningCosts(

@@ -25,6 +25,7 @@ import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
+import com.soulfiremc.server.util.IDMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -33,8 +34,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 /**
  * An immutable representation of a player inventory. This takes an inventory and projects places/breaks
@@ -49,22 +49,20 @@ public final class ProjectedInventory {
   @Getter
   @ToString.Include
   private final SFItemStack[] usableToolsAndNull;
-  private final Map<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
-  private final LocalPlayer entity;
+  private final IDMap<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
+  public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
         .filter(item -> item != null && item.getAmount() > 0)
         .toList(),
       entity,
+      tagsState,
       pathConstraint);
   }
 
-  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, PathConstraint pathConstraint) {
-    this.entity = entity;
-
+  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndNull = new HashSet<SFItemStack>();
 
@@ -81,16 +79,16 @@ public final class ProjectedInventory {
 
     this.usableBlockItems = blockItems;
     this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
-    this.sharedMiningCosts = new ConcurrentHashMap<>();
+    this.sharedMiningCosts = new IDMap<>(BlockType.REGISTRY.values(),
+      blockType -> Costs.calculateBlockBreakCost(tagsState, entity, this, blockType));
   }
 
   @VisibleForTesting
-  public static ProjectedInventory forUnitTest(List<SFItemStack> items, PathConstraint pathConstraint) {
-    return new ProjectedInventory(items, null, pathConstraint);
+  public static ProjectedInventory forUnitTest(List<SFItemStack> items, TagsState tagsState, PathConstraint pathConstraint) {
+    return new ProjectedInventory(items, null, tagsState, pathConstraint);
   }
 
-  public Costs.BlockMiningCosts getMiningCosts(TagsState tagsState, BlockState blockState) {
-    return sharedMiningCosts.computeIfAbsent(
-      blockState.blockType(), type -> Costs.calculateBlockBreakCost(tagsState, entity, this, type));
+  public Costs.BlockMiningCosts getMiningCosts(BlockState blockState) {
+    return Objects.requireNonNull(sharedMiningCosts.get(blockState.blockType()), "BlockType not destructible");
   }
 }
