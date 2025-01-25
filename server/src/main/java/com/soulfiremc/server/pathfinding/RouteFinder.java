@@ -27,9 +27,9 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
 import com.soulfiremc.server.util.structs.IntReference;
+import com.soulfiremc.server.util.structs.Long2ObjectLRUCache;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +91,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
-    var instructionCache = new Long2ObjectOpenHashMap<GraphInstructions[]>();
+    var instructionCache = new Long2ObjectLRUCache<GraphInstructions[]>(1_000_000);
     var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
 
     // Store block positions that we need to look at
@@ -181,6 +181,10 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           }
 
           for (var instructions : v) {
+            if (instructions == null) {
+              break;
+            }
+
             handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
           }
 
