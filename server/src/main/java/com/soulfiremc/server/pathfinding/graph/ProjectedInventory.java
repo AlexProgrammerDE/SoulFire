@@ -26,8 +26,9 @@ import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
-import com.soulfiremc.server.util.IDMap;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.structs.IDBooleanMap;
+import com.soulfiremc.server.util.structs.IDMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -52,7 +53,7 @@ public final class ProjectedInventory {
   @ToString.Include
   private final SFItemStack[] usableToolsAndNull;
   private final IDMap<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
-  private final IDMap<BlockState, Boolean> stairsBlockToStandOn;
+  private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
   public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     this(
@@ -84,7 +85,7 @@ public final class ProjectedInventory {
     this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
     this.sharedMiningCosts = new IDMap<>(BlockType.REGISTRY.values(),
       blockType -> Costs.calculateBlockBreakCost(tagsState, entity, this, blockType));
-    this.stairsBlockToStandOn = new IDMap<>(BlockType.REGISTRY.values()
+    this.stairsBlockToStandOn = new IDBooleanMap<>(BlockType.REGISTRY.values()
       .stream()
       .flatMap(blockType -> blockType.statesData().possibleStates().stream())
       .toList(),

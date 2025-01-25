@@ -26,6 +26,7 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
+import com.soulfiremc.server.util.structs.IntReference;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -165,17 +166,18 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       try {
         instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (k, v) -> {
           if (v == null) {
-            var list = new ArrayList<GraphInstructions>();
+            var counter = new IntReference();
+            var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
             graph.insertActions(
               current.node().blockPosition(),
               current.parentToNodeDirection(),
               instructions -> {
-                list.add(instructions);
+                list[counter.value++] = instructions;
                 handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
               }
             );
 
-            return list.toArray(GraphInstructions[]::new);
+            return list;
           }
 
           for (var instructions : v) {

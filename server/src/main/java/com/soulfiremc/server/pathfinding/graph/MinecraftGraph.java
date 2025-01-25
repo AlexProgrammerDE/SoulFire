@@ -53,6 +53,7 @@ public record MinecraftGraph(TagsState tagsState,
                              ProjectedInventory inventory,
                              PathConstraint pathConstraint) {
   private static final GraphAction[] ACTIONS_TEMPLATE;
+  public static final int ACTIONS_SIZE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
 
@@ -75,6 +76,7 @@ public record MinecraftGraph(TagsState tagsState,
     UpMovement.registerUpMovements(actionAdder, blockSubscribersConsumer);
 
     ACTIONS_TEMPLATE = actions.toArray(new GraphAction[0]);
+    ACTIONS_SIZE = ACTIONS_TEMPLATE.length;
     SUBSCRIPTION_KEYS = new SFVec3i[blockSubscribers.size()];
     SUBSCRIPTION_VALUES = new WrappedActionSubscription[blockSubscribers.size()][];
 

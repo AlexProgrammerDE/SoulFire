@@ -24,7 +24,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.DiagonalDirectio
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.protocol.bot.block.GlobalBlockPalette;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
-import com.soulfiremc.server.util.IDMap;
+import com.soulfiremc.server.util.structs.IDMap;
 import org.cloudburstmc.math.vector.Vector3d;
 
 public final class DiagonalCollisionCalculator {

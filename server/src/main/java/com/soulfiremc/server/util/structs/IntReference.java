@@ -15,26 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.util.structs;
 
-import com.soulfiremc.server.data.IDValue;
-
-import java.util.Collection;
-import java.util.function.Function;
-
-public class IDMap<K extends IDValue, V> {
-  private final Object[] values;
-
-  public IDMap(Collection<K> collection, Function<K, V> valueFunction) {
-    values = new Object[collection.size()];
-
-    for (var key : collection) {
-      values[key.id()] = valueFunction.apply(key);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public V get(K key) {
-    return (V) values[key.id()];
-  }
+public class IntReference {
+  public int value;
 }
