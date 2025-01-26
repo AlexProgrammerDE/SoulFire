@@ -25,6 +25,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -178,7 +179,7 @@ public class POVServer extends InternalPlugin {
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new POVServerInfoHandler(
       instanceManager,
       settingsSource,
-      SFHelpers.getResourceAsBytes("assets/pov_favicon.png")
+      SFHelpers.getResourceAsBytes("icons/pov_favicon.png")
     ));
     server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new POVServerLoginHandler());
 
@@ -624,9 +625,19 @@ public class POVServer extends InternalPlugin {
   private record POVServerInfoHandler(InstanceManager instanceManager, InstanceSettingsSource settingsSource, byte[] faviconBytes) implements ServerInfoBuilder {
     @Override
     public ServerStatusInfo buildInfo(Session session) {
+      var friendlyName = instanceManager.sessionFactory().fromTransaction(s -> {
+        var instance = s.find(InstanceEntity.class, instanceManager.id());
+
+        if (instance == null) {
+          return "Unknown";
+        } else {
+          return instance.friendlyName();
+        }
+      });
+
       return
         new ServerStatusInfo(
-          Component.text("Attack POV server for attack %s!".formatted(instanceManager.id()))
+          Component.text("Attack POV server for instance %s!".formatted(friendlyName))
             .color(NamedTextColor.GREEN)
             .decorate(TextDecoration.BOLD),
           new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
