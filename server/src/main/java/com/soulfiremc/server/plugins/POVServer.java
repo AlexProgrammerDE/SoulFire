@@ -797,7 +797,7 @@ public class POVServer extends InternalPlugin {
 
     @Override
     public void sessionAdded(SessionAddedEvent event) {
-      event.getSession().addListener(new POVClientSessionAdapter(instanceManager, settingsSource));
+      event.getSession().addListener(new C2POVAdapter(instanceManager, settingsSource));
       event.getSession().addListener(new SessionAdapter() {
         private boolean fixedOnce;
 
@@ -827,7 +827,7 @@ public class POVServer extends InternalPlugin {
   }
 
   @RequiredArgsConstructor
-  private static class POVClientSessionAdapter extends SessionAdapter {
+  private static class C2POVAdapter extends SessionAdapter {
     private final InstanceManager instanceManager;
     private final InstanceSettingsSource settingsSource;
     private BotConnection botConnection;
@@ -865,108 +865,8 @@ public class POVServer extends InternalPlugin {
           }
 
           botConnection = first.get();
-          botConnection
-            .session()
-            .addListener(
-              new SessionAdapter() {
-                @Override
-                public void packetReceived(Session botSession, Packet packet) {
-                  if (!enableForwarding
-                    || NOT_SYNCED.contains(packet.getClass())) {
-                    return;
-                  }
-
-                  if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-                    // To avoid signature issues since the signature is for the bot, not the connected user
-                    clientSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
-                      botConnection.dataManager().getComponentForPlayerChat(chatPacket),
-                      chatPacket.getName(),
-                      chatPacket.getTargetName()
-                    )), false));
-                    return;
-                  }
-
-                  // MC Server of the bot -> MC Client
-                  clientSession.send(packet);
-                }
-
-                @Override
-                public void packetSent(Session botSession, Packet packet) {
-                  if (!enableForwarding
-                    || NOT_SYNCED.contains(packet.getClass())) {
-                    return;
-                  }
-
-                  var clientEntity =
-                    botConnection.dataManager().localPlayer();
-                  // Bot -> MC Client
-                  switch (packet) {
-                    case ServerboundMovePlayerPosRotPacket posRot -> {
-                      clientSession.send(
-                        new ClientboundMoveEntityPosRotPacket(
-                          clientEntity.entityId(),
-                          (posRot.getX() * 32 - lastX * 32) * 128,
-                          (posRot.getY() * 32 - lastY * 32) * 128,
-                          (posRot.getZ() * 32 - lastZ * 32) * 128,
-                          posRot.getYaw(),
-                          posRot.getPitch(),
-                          clientEntity.onGround()));
-                      lastX = posRot.getX();
-                      lastY = posRot.getY();
-                      lastZ = posRot.getZ();
-                    }
-                    case ServerboundMovePlayerPosPacket pos -> {
-                      clientSession.send(
-                        new ClientboundMoveEntityPosPacket(
-                          clientEntity.entityId(),
-                          (pos.getX() * 32 - lastX * 32) * 128,
-                          (pos.getY() * 32 - lastY * 32) * 128,
-                          (pos.getZ() * 32 - lastZ * 32) * 128,
-                          clientEntity.onGround()));
-                      lastX = pos.getX();
-                      lastY = pos.getY();
-                      lastZ = pos.getZ();
-                    }
-                    case ServerboundMovePlayerRotPacket rot -> clientSession.send(
-                      new ClientboundMoveEntityRotPacket(
-                        clientEntity.entityId(),
-                        rot.getYaw(),
-                        rot.getPitch(),
-                        clientEntity.onGround()));
-                    default -> {
-                    }
-                  }
-                }
-              });
-          botConnection.scheduler().schedule(() -> {
-            try {
-              syncBotAndUser(botConnection, clientSession);
-            } catch (Throwable t) {
-              log.error("Failed to sync bot and user", t);
-              clientSession.send(new ClientboundSystemChatPacket(
-                Component.text("Error while syncing you with the bot! Report this error to SoulFire developers.")
-                  .color(NamedTextColor.RED),
-                false));
-            }
-
-            // Give the client a few moments to process the packets
-            TimeUtil.waitTime(2, TimeUnit.SECONDS);
-
-            enableForwarding = true;
-
-            clientSession.send(
-              new ClientboundSystemChatPacket(
-                Component.text("Connected to bot ")
-                  .color(NamedTextColor.GREEN)
-                  .append(
-                    Component.text(
-                        botConnection.accountName())
-                      .color(NamedTextColor.AQUA)
-                      .decorate(TextDecoration.UNDERLINED))
-                  .append(Component.text("!"))
-                  .color(NamedTextColor.GREEN),
-                false));
-          });
+          botConnection.session().addListener(new B2SAdapter(clientSession));
+          botConnection.scheduler().schedule(() -> executeSync(clientSession));
         }
       } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
         // For data consistence, ensure all packets sent from client -> server are
@@ -1046,6 +946,110 @@ public class POVServer extends InternalPlugin {
       log.atInfo()
         .setCause(event.getCause())
         .log("POV -> C Disconnected: {}", SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()));
+    }
+
+    private void executeSync(Session clientSession) {
+      try {
+        syncBotAndUser(botConnection, clientSession);
+      } catch (Throwable t) {
+        log.error("Failed to sync bot and user", t);
+        clientSession.send(new ClientboundSystemChatPacket(
+          Component.text("Error while syncing you with the bot! Report this error to SoulFire developers.")
+            .color(NamedTextColor.RED),
+          false));
+      }
+
+      // Give the client a few moments to process the packets
+      TimeUtil.waitTime(2, TimeUnit.SECONDS);
+
+      enableForwarding = true;
+
+      clientSession.send(
+        new ClientboundSystemChatPacket(
+          Component.text("Connected to bot ")
+            .color(NamedTextColor.GREEN)
+            .append(
+              Component.text(
+                  botConnection.accountName())
+                .color(NamedTextColor.AQUA)
+                .decorate(TextDecoration.UNDERLINED))
+            .append(Component.text("!"))
+            .color(NamedTextColor.GREEN),
+          false));
+    }
+
+    @RequiredArgsConstructor
+    private class B2SAdapter extends SessionAdapter {
+      private final Session clientSession;
+
+      @Override
+      public void packetReceived(Session botSession, Packet packet) {
+        if (!enableForwarding
+          || NOT_SYNCED.contains(packet.getClass())) {
+          return;
+        }
+
+        if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+          // To avoid signature issues since the signature is for the bot, not the connected user
+          clientSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
+            botConnection.dataManager().getComponentForPlayerChat(chatPacket),
+            chatPacket.getName(),
+            chatPacket.getTargetName()
+          )), false));
+          return;
+        }
+
+        // MC Server of the bot -> MC Client
+        clientSession.send(packet);
+      }
+
+      @Override
+      public void packetSent(Session botSession, Packet packet) {
+        if (!enableForwarding
+          || NOT_SYNCED.contains(packet.getClass())) {
+          return;
+        }
+
+        var clientEntity =
+          botConnection.dataManager().localPlayer();
+        // Bot -> MC Client
+        switch (packet) {
+          case ServerboundMovePlayerPosRotPacket posRot -> {
+            clientSession.send(
+              new ClientboundMoveEntityPosRotPacket(
+                clientEntity.entityId(),
+                (posRot.getX() * 32 - lastX * 32) * 128,
+                (posRot.getY() * 32 - lastY * 32) * 128,
+                (posRot.getZ() * 32 - lastZ * 32) * 128,
+                posRot.getYaw(),
+                posRot.getPitch(),
+                clientEntity.onGround()));
+            lastX = posRot.getX();
+            lastY = posRot.getY();
+            lastZ = posRot.getZ();
+          }
+          case ServerboundMovePlayerPosPacket pos -> {
+            clientSession.send(
+              new ClientboundMoveEntityPosPacket(
+                clientEntity.entityId(),
+                (pos.getX() * 32 - lastX * 32) * 128,
+                (pos.getY() * 32 - lastY * 32) * 128,
+                (pos.getZ() * 32 - lastZ * 32) * 128,
+                clientEntity.onGround()));
+            lastX = pos.getX();
+            lastY = pos.getY();
+            lastZ = pos.getZ();
+          }
+          case ServerboundMovePlayerRotPacket rot -> clientSession.send(
+            new ClientboundMoveEntityRotPacket(
+              clientEntity.entityId(),
+              rot.getYaw(),
+              rot.getPitch(),
+              clientEntity.onGround()));
+          default -> {
+          }
+        }
+      }
     }
   }
 
