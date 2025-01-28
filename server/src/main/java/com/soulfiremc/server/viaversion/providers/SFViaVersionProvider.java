@@ -17,19 +17,36 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
+import com.soulfiremc.server.protocol.netty.ViaClientSession;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.soulfiremc.server.viaversion.StorableSession;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.protocol.version.VersionProvider;
+import com.viaversion.viaversion.api.protocol.version.VersionType;
+import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 
 import java.util.Objects;
 
-public class SFViaVersionProvider implements VersionProvider {
+public class SFViaVersionProvider extends BaseVersionProvider {
+  @Override
+  public ProtocolVersion getClientProtocol(UserConnection connection) {
+    final var clientProtocol = connection.getProtocolInfo().protocolVersion();
+    if (!clientProtocol.isKnown() && ProtocolVersion.isRegistered(VersionType.SPECIAL, clientProtocol.getOriginalVersion())) {
+      return ProtocolVersion.getProtocol(VersionType.SPECIAL, clientProtocol.getOriginalVersion());
+    } else {
+      return super.getClientProtocol(connection);
+    }
+  }
+
   @Override
   public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
-    return Objects.requireNonNull(connection.get(StorableSession.class), "Session provider is null")
-      .session()
-      .botConnection()
-      .protocolVersion();
+    if (connection.isClientSide()) {
+      var session = (ViaClientSession) Objects.requireNonNull(connection.get(StorableSession.class), "Session provider is null")
+        .session();
+
+      return session.botConnection().protocolVersion();
+    } else {
+      return SFVersionConstants.CURRENT_PROTOCOL_VERSION;
+    }
   }
 }

@@ -37,6 +37,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
+import com.soulfiremc.server.protocol.netty.ViaServer;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -68,7 +69,6 @@ import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.ServerLoginHandler;
@@ -173,7 +173,7 @@ public class POVServer extends InternalPlugin {
   }
 
   private static void startPOVServer(InstanceSettingsSource settingsSource, int port, InstanceManager instanceManager) {
-    var server = new NetworkServer(new InetSocketAddress(port), MinecraftProtocol::new);
+    var server = new ViaServer(new InetSocketAddress(port), MinecraftProtocol::new);
 
     server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new POVServerInfoHandler(
