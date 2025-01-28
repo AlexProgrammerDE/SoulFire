@@ -365,7 +365,9 @@ public class POVServer extends InternalPlugin {
           PlayerListEntryAction.UPDATE_GAME_MODE,
           PlayerListEntryAction.UPDATE_LISTED,
           PlayerListEntryAction.UPDATE_LATENCY,
-          PlayerListEntryAction.UPDATE_DISPLAY_NAME),
+          PlayerListEntryAction.UPDATE_DISPLAY_NAME,
+          PlayerListEntryAction.UPDATE_HAT,
+          PlayerListEntryAction.UPDATE_LIST_ORDER),
         dataManager.playerListState().entries().values().stream()
           .map(
             entry -> {
