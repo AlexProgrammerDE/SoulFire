@@ -355,7 +355,7 @@ public class POVServer extends InternalPlugin {
           dataManager.playerListState().footer()));
     }
 
-    var currentId =
+    var originalClientId =
       clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getId();
     clientSession.send(
       new ClientboundPlayerInfoUpdatePacket(
@@ -380,13 +380,13 @@ public class POVServer extends InternalPlugin {
                 } else {
                   newGameProfile =
                     new GameProfile(
-                      currentId, entry.getProfile().getName());
+                      originalClientId, entry.getProfile().getName());
                   newGameProfile.setProperties(
                     entry.getProfile().getProperties());
                 }
 
                 return new PlayerListEntry(
-                  currentId,
+                  originalClientId,
                   newGameProfile,
                   entry.isListed(),
                   entry.getLatency(),

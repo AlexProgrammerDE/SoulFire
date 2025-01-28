@@ -18,6 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
@@ -29,10 +30,12 @@ import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
+  private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
 
   @Override
@@ -66,14 +69,16 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.DELETE_USER));
 
     try {
-      sessionFactory.inTransaction(session -> {
-        var userEntity = session.find(UserEntity.class, request.getId());
-        if (userEntity == null) {
-          throw new IllegalArgumentException("User not found: " + request.getId());
-        }
+      var uuid = UUID.fromString(request.getId());
+      if (uuid.equals(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId())) {
+        throw new IllegalArgumentException("Cannot delete self");
+      } else if (uuid.equals(soulFireServer.authSystem().rootUserId())) {
+        throw new IllegalArgumentException("Cannot delete root user");
+      }
 
-        session.remove(userEntity);
-      });
+      sessionFactory.inTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
+        .setParameter("id", uuid)
+        .executeUpdate());
 
       responseObserver.onNext(UserDeleteResponse.newBuilder().build());
       responseObserver.onCompleted();

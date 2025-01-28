@@ -17,17 +17,23 @@
  */
 package com.soulfiremc.server.brigadier;
 
+import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SoulFireAdventure;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-public class ServerConsoleCommandSource implements ServerCommandSource {
-  public static final ServerConsoleCommandSource INSTANCE = new ServerConsoleCommandSource();
+import java.util.UUID;
+
+@RequiredArgsConstructor
+public class ServerConsoleCommandSource implements SoulFireUser {
+  private final AuthSystem authSystem;
   private static final Logger log = LoggerFactory.getLogger("Console");
 
   @Override
@@ -41,7 +47,22 @@ public class ServerConsoleCommandSource implements ServerCommandSource {
   }
 
   @Override
-  public String identifier() {
-    return "console";
+  public UUID getUniqueId() {
+    return authSystem.rootUserId();
+  }
+
+  @Override
+  public String getUsername() {
+    return authSystem.rootUserData().username();
+  }
+
+  @Override
+  public String getEmail() {
+    return authSystem.rootUserData().email();
+  }
+
+  @Override
+  public UserEntity.Role getRole() {
+    return authSystem.rootUserData().role();
   }
 }
