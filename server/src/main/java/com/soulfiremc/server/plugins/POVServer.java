@@ -832,9 +832,7 @@ public class POVServer extends InternalPlugin {
     private final InstanceSettingsSource settingsSource;
     private BotConnection botConnection;
     private boolean enableForwarding;
-    private double lastX;
-    private double lastY;
-    private double lastZ;
+    private Vector3d lastPosition;
 
     @Override
     public void packetSent(Session clientSession, Packet packet) {
@@ -875,18 +873,14 @@ public class POVServer extends InternalPlugin {
           var clientEntity = botConnection.dataManager().localPlayer();
           switch (packet) {
             case ServerboundMovePlayerPosRotPacket posRot -> {
-              lastX = posRot.getX();
-              lastY = posRot.getY();
-              lastZ = posRot.getZ();
+              lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
 
               clientEntity.setPos(posRot.getX(), posRot.getY(), posRot.getZ());
               clientEntity.setYRot(posRot.getYaw());
               clientEntity.setXRot(posRot.getPitch());
             }
             case ServerboundMovePlayerPosPacket pos -> {
-              lastX = pos.getX();
-              lastY = pos.getY();
-              lastZ = pos.getZ();
+              lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
 
               clientEntity.setPos(pos.getX(), pos.getY(), pos.getZ());
             }
@@ -962,6 +956,7 @@ public class POVServer extends InternalPlugin {
       // Give the client a few moments to process the packets
       TimeUtil.waitTime(2, TimeUnit.SECONDS);
 
+      lastPosition = botConnection.dataManager().localPlayer().pos();
       enableForwarding = true;
 
       clientSession.send(
@@ -1015,30 +1010,26 @@ public class POVServer extends InternalPlugin {
         // Bot -> MC Client
         switch (packet) {
           case ServerboundMovePlayerPosRotPacket posRot -> {
+            lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
             clientSession.send(
               new ClientboundMoveEntityPosRotPacket(
                 clientEntity.entityId(),
-                (posRot.getX() * 32 - lastX * 32) * 128,
-                (posRot.getY() * 32 - lastY * 32) * 128,
-                (posRot.getZ() * 32 - lastZ * 32) * 128,
+                (posRot.getX() * 32 - lastPosition.getX() * 32) * 128,
+                (posRot.getY() * 32 - lastPosition.getY() * 32) * 128,
+                (posRot.getZ() * 32 - lastPosition.getZ() * 32) * 128,
                 posRot.getYaw(),
                 posRot.getPitch(),
                 clientEntity.onGround()));
-            lastX = posRot.getX();
-            lastY = posRot.getY();
-            lastZ = posRot.getZ();
           }
           case ServerboundMovePlayerPosPacket pos -> {
+            lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
             clientSession.send(
               new ClientboundMoveEntityPosPacket(
                 clientEntity.entityId(),
-                (pos.getX() * 32 - lastX * 32) * 128,
-                (pos.getY() * 32 - lastY * 32) * 128,
-                (pos.getZ() * 32 - lastZ * 32) * 128,
+                (pos.getX() * 32 - lastPosition.getX() * 32) * 128,
+                (pos.getY() * 32 - lastPosition.getY() * 32) * 128,
+                (pos.getZ() * 32 - lastPosition.getZ() * 32) * 128,
                 clientEntity.onGround()));
-            lastX = pos.getX();
-            lastY = pos.getY();
-            lastZ = pos.getZ();
           }
           case ServerboundMovePlayerRotPacket rot -> clientSession.send(
             new ClientboundMoveEntityRotPacket(
