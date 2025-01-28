@@ -489,6 +489,32 @@ public class POVServer extends InternalPlugin {
     }
 
     for (var entity : dataManager.entityTrackerState().getEntities()) {
+      if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
+        clientSession.send(
+          new ClientboundAddExperienceOrbPacket(
+            entity.entityId(),
+            entity.x(),
+            entity.y(),
+            entity.z(),
+            experienceOrbEntity.expValue()));
+      } else if (entity instanceof Entity rawEntity && rawEntity.entityId() != dataManager.localPlayer().entityId()) {
+        clientSession.send(
+          new ClientboundAddEntityPacket(
+            entity.entityId(),
+            entity.uuid(),
+            EntityType.from(entity.entityType().id()),
+            rawEntity.data(),
+            entity.x(),
+            entity.y(),
+            entity.z(),
+            entity.yRot(),
+            entity.headYRot(),
+            entity.xRot(),
+            entity.deltaMovement().getX(),
+            entity.deltaMovement().getY(),
+            entity.deltaMovement().getZ()));
+      }
+
       if (entity instanceof Player player) {
         clientSession.send(
           new ClientboundEntityEventPacket(
@@ -519,30 +545,6 @@ public class POVServer extends InternalPlugin {
             player.getHealth(),
             player.getFoodData().getFoodLevel(),
             player.getFoodData().getSaturationLevel()));
-      } else if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
-        clientSession.send(
-          new ClientboundAddExperienceOrbPacket(
-            entity.entityId(),
-            entity.x(),
-            entity.y(),
-            entity.z(),
-            experienceOrbEntity.expValue()));
-      } else if (entity instanceof Entity rawEntity) {
-        clientSession.send(
-          new ClientboundAddEntityPacket(
-            entity.entityId(),
-            entity.uuid(),
-            EntityType.from(entity.entityType().id()),
-            rawEntity.data(),
-            entity.x(),
-            entity.y(),
-            entity.z(),
-            entity.yRot(),
-            entity.headYRot(),
-            entity.xRot(),
-            entity.deltaMovement().getX(),
-            entity.deltaMovement().getY(),
-            entity.deltaMovement().getZ()));
       }
 
       for (var effect : entity.effectState().effects().entrySet()) {
