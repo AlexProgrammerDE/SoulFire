@@ -30,6 +30,6 @@ public class SFViaCompressionProvider extends CompressionProvider {
   public void handlePlayCompression(UserConnection user, int threshold) {
     Objects.requireNonNull(user.get(StorableSession.class))
       .session()
-      .setCompression(new CompressionConfig(threshold, new ZlibCompression(), true));
+      .setCompression(threshold < 0 ? null : new CompressionConfig(threshold, new ZlibCompression(), true));
   }
 }
