@@ -133,6 +133,7 @@ import org.pf4j.Extension;
 import org.slf4j.event.Level;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -188,7 +189,8 @@ public class POVServer extends InternalPlugin {
     server.bind();
   }
 
-  private static <T> T awaitReceived(Session session, Class<T> clazz) {
+  @SuppressWarnings("SameParameterValue")
+  private static <T> CompletableFuture<T> awaitReceived(Session session, Class<T> clazz) {
     var future = new CompletableFuture<T>();
 
     session.addListener(
@@ -201,16 +203,17 @@ public class POVServer extends InternalPlugin {
         }
       });
 
-    return future.orTimeout(30, TimeUnit.SECONDS).join();
+    return future.orTimeout(30, TimeUnit.SECONDS);
   }
 
   private static void syncBotAndUser(BotConnection botConnection, Session clientSession) {
     Objects.requireNonNull(botConnection);
+    var protocol = (MinecraftProtocol) clientSession.getPacketProtocol();
     var dataManager = botConnection.dataManager();
 
     clientSession.send(new ClientboundStartConfigurationPacket());
-    clientSession.switchOutboundState(() -> ((MinecraftProtocol) clientSession.getPacketProtocol()).setOutboundState(ProtocolState.CONFIGURATION));
-    awaitReceived(clientSession, ServerboundConfigurationAcknowledgedPacket.class);
+    clientSession.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+    TimeUtil.waitCondition(() -> protocol.getInboundState() != ProtocolState.CONFIGURATION, Duration.ofSeconds(30));
 
     if (dataManager.serverEnabledFeatures() != null) {
       clientSession.send(
@@ -218,11 +221,11 @@ public class POVServer extends InternalPlugin {
           dataManager.serverEnabledFeatures()));
     }
 
+    var clientPacks = awaitReceived(clientSession, ServerboundSelectKnownPacks.class);
     if (dataManager.serverKnownPacks() != null) {
       clientSession.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
     }
 
-    var clientPacks = awaitReceived(clientSession, ServerboundSelectKnownPacks.class);
     for (var entry : dataManager.resolvedRegistryData().entrySet()) {
       var registryKey = entry.getKey();
 
@@ -230,7 +233,7 @@ public class POVServer extends InternalPlugin {
       for (var value : entry.getValue()) {
         var holderKey = value.getId();
         var serverHolderData = value.getData();
-        var packData = BuiltInKnownPackRegistry.INSTANCE.findDataOptionally(registryKey, holderKey, clientPacks.getKnownPacks());
+        var packData = BuiltInKnownPackRegistry.INSTANCE.findDataOptionally(registryKey, holderKey, clientPacks.join().getKnownPacks());
 
         RegistryEntry entryToSend;
         if (packData.isPresent() && packData.get().equals(serverHolderData)) {
@@ -250,7 +253,7 @@ public class POVServer extends InternalPlugin {
     clientSession.send(tagsPacket);
 
     clientSession.send(new ClientboundFinishConfigurationPacket());
-    awaitReceived(clientSession, ServerboundFinishConfigurationPacket.class);
+    TimeUtil.waitCondition(() -> protocol.getInboundState() != ProtocolState.GAME, Duration.ofSeconds(30));
 
     var spawnInfo =
       new PlayerSpawnInfo(

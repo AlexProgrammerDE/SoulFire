@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server.util;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.time.Duration;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -54,10 +57,15 @@ public class TimeUtil {
   }
 
   public static void waitCondition(BooleanSupplier condition) {
+    waitCondition(condition, null);
+  }
+
+  public static void waitCondition(BooleanSupplier condition, @Nullable Duration timeout) {
+    var startTime = System.nanoTime();
     try {
       ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker() {
         public boolean isReleasable() {
-          return !condition.getAsBoolean();
+          return !condition.getAsBoolean() || (timeout != null && System.nanoTime() - startTime >= timeout.toNanos());
         }
 
         public boolean block() throws InterruptedException {
