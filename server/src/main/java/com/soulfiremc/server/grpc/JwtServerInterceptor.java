@@ -17,10 +17,13 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 import io.jsonwebtoken.*;
+
+import java.util.Objects;
 
 public class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
@@ -36,40 +39,42 @@ public class JwtServerInterceptor implements ServerInterceptor {
     ServerCall<ReqT, RespT> serverCall,
     Metadata metadata,
     ServerCallHandler<ReqT, RespT> serverCallHandler) {
-    var value = metadata.get(RPCConstants.AUTHORIZATION_METADATA_KEY);
 
     var status = Status.OK;
-    if (value == null) {
-      status = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
-    } else if (!value.startsWith(RPCConstants.BEARER_TYPE)) {
-      status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
-    } else {
-      Jws<Claims> claims = null;
-      // remove authorization type prefix
-      var token = value.substring(RPCConstants.BEARER_TYPE.length()).strip();
-      try {
-        // verify token signature and parse claims
-        claims = parser.parseSignedClaims(token);
-      } catch (JwtException e) {
-        status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
-      }
-      if (claims != null) {
-        var user = authSystem.authenticate(
-          claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
+    if (!Objects.equals(serverCall.getMethodDescriptor().getServiceName(), LoginServiceGrpc.SERVICE_NAME)) {
+      var value = metadata.get(RPCConstants.AUTHORIZATION_METADATA_KEY);
+      if (value == null) {
+        status = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
+      } else if (!value.startsWith(RPCConstants.BEARER_TYPE)) {
+        status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
+      } else {
+        Jws<Claims> claims = null;
+        // remove authorization type prefix
+        var token = value.substring(RPCConstants.BEARER_TYPE.length()).strip();
+        try {
+          // verify token signature and parse claims
+          claims = parser.parseSignedClaims(token);
+        } catch (JwtException e) {
+          status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
+        }
+        if (claims != null) {
+          var user = authSystem.authenticate(
+            claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
 
-        if (user.isPresent()) {
-          // set client id into current context
-          return Contexts.interceptCall(
-            Context.current()
-              .withValue(
-                ServerRPCConstants.USER_CONTEXT_KEY,
-                user.get()),
-            serverCall,
-            metadata,
-            serverCallHandler
-          );
-        } else {
-          status = Status.UNAUTHENTICATED.withDescription("User not found");
+          if (user.isPresent()) {
+            // set client id into current context
+            return Contexts.interceptCall(
+              Context.current()
+                .withValue(
+                  ServerRPCConstants.USER_CONTEXT_KEY,
+                  user.get()),
+              serverCall,
+              metadata,
+              serverCallHandler
+            );
+          } else {
+            status = Status.UNAUTHENTICATED.withDescription("User not found");
+          }
         }
       }
     }
