@@ -153,12 +153,16 @@ public class ServerCommandManager {
       literal("generate-token")
         .executes(
           help(
-            "Generate a JWT for other clients to connect to the server",
+            "Generate an auth JWT for the current user",
             c -> {
-              c.getSource()
-                .sendInfo(
-                  "JWT (This gives full SF access, make sure you only give this to trusted users): {}",
-                  soulFireServer.authSystem().generateJWT(soulFireServer.authSystem().rootUserData()));
+              if (!(c.getSource() instanceof SoulFireUser user)) {
+                return Command.SINGLE_SUCCESS;
+              }
+
+              var authSystem = soulFireServer.authSystem();
+              user.sendInfo(
+                "JWT (This gives full access to your user, make sure you only give this to trusted users): {}",
+                authSystem.generateJWT(authSystem.getUserData(user.getUniqueId()).orElseThrow()));
 
               return Command.SINGLE_SUCCESS;
             })));
