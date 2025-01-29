@@ -104,9 +104,6 @@ graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-ruby = { module = "org.graalvm.polyglot:ruby", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
-graalvm-polyglot-java = { module = "org.graalvm.polyglot:java", version.ref = "graalvm-polyglot" }
-graalvm-polyglot-wasm = { module = "org.graalvm.polyglot:wasm", version.ref = "graalvm-polyglot" }
-graalvm-polyglot-llvm = { module = "org.graalvm.polyglot:llvm", version.ref = "graalvm-polyglot" }
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit = "org.junit.jupiter:junit-jupiter:5.11.4"
 
@@ -120,4 +117,4 @@ ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
 hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-validator", "hibernate-hikaricp"]
-graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-ruby", "graalvm-polyglot-python", "graalvm-polyglot-java", "graalvm-polyglot-wasm", "graalvm-polyglot-llvm"]
+graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-ruby", "graalvm-polyglot-python"]
