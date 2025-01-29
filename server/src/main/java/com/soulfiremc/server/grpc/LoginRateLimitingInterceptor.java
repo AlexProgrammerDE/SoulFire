@@ -23,6 +23,7 @@ import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -40,12 +41,11 @@ public class LoginRateLimitingInterceptor implements ServerInterceptor {
 
     var status = Status.OK;
     if (Objects.equals(serverCall.getMethodDescriptor().getServiceName(), LoginServiceGrpc.SERVICE_NAME)) {
-      var value = serverCall.getAttributes().get(Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
-      if (value == null) {
+      var remoteAddr = metadata.get(Metadata.Key.of("origin", Metadata.ASCII_STRING_MARSHALLER));
+      if (remoteAddr == null) {
         status = Status.UNAUTHENTICATED.withDescription("No remote address");
       } else {
-        var remoteAddr = value.toString();
-        var key = UUID.nameUUIDFromBytes(remoteAddr.getBytes());
+        var key = UUID.nameUUIDFromBytes(remoteAddr.getBytes(StandardCharsets.UTF_8));
         var count = callCache.getIfPresent(key);
         if (count == null) {
           callCache.put(key, 1);
