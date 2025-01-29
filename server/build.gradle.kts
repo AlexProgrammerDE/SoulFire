@@ -94,8 +94,8 @@ dependencies {
   api(libs.hikaricp)
   api(libs.sqlite)
 
-  // FOr script support
-  // api(libs.bundles.graalvm.polyglot)
+  // For script support
+  api(libs.bundles.graalvm.polyglot)
 
   // For tls cert provisioning
   api(libs.acme4j)
