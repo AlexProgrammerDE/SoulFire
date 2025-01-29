@@ -89,6 +89,7 @@ public class RPCServer {
       GrpcService.builder()
         .autoCompression(true)
         .intercept(new JwtServerInterceptor(authSystem))
+        .intercept(new LoginRateLimitingInterceptor())
         .addService(injector.getSingleton(LogServiceImpl.class))
         .addService(injector.getSingleton(ConfigServiceImpl.class))
         .addService(injector.getSingleton(CommandServiceImpl.class))
@@ -99,6 +100,7 @@ public class RPCServer {
         .addService(injector.getSingleton(ObjectStorageServiceImpl.class))
         .addService(injector.getSingleton(ServerServiceImpl.class))
         .addService(injector.getSingleton(UserServiceImpl.class))
+        .addService(injector.getSingleton(LoginServiceImpl.class))
         // Allow collecting info about callable methods.
         .addService(ProtoReflectionServiceV1.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)
