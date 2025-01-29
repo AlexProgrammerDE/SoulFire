@@ -49,11 +49,11 @@ public class LoginRateLimitingInterceptor implements ServerInterceptor {
         var count = callCache.getIfPresent(key);
         if (count == null) {
           callCache.put(key, 1);
-        } else {
+        } else if (count < RPCConstants.LOGIN_RATE_LIMIT) {
           callCache.put(key, count + 1);
         }
 
-        if (count != null && count > RPCConstants.LOGIN_RATE_LIMIT) {
+        if (count != null && count >= RPCConstants.LOGIN_RATE_LIMIT) {
           status = Status.RESOURCE_EXHAUSTED.withDescription("Too many login attempts");
         } else {
           return Contexts.interceptCall(
