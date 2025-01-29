@@ -52,7 +52,7 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var soulFire =
       new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
-    log.info("Tip: To generate a new access token, use the command: 'generate-token'");
+    log.info("Tip: The default user is called 'root', you can log into it using the client");
 
     var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
     var commandSource = new ServerConsoleCommandSource(soulFire.authSystem());
