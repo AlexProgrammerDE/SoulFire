@@ -28,6 +28,7 @@ import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SoulFireAdventure;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import org.hibernate.SessionFactory;
@@ -40,7 +41,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Getter
+@Slf4j
 public class AuthSystem {
+  private static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
   private static final String ROOT_USERNAME = "root";
   private final LogServiceImpl logService;
   private final SessionFactory sessionFactory;
@@ -65,14 +68,19 @@ public class AuthSystem {
         var rootUser = new UserEntity();
         rootUser.username("root");
         rootUser.role(UserEntity.Role.ADMIN);
-        rootUser.email("root@soulfiremc.com");
+        rootUser.email(ROOT_DEFAULT_EMAIL);
         s.persist(rootUser);
+
+        log.warn("The root user e-mail is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
 
         return rootUser.id();
       } else {
         currentRootUser.role(UserEntity.Role.ADMIN);
-        currentRootUser.email("root@soulfiremc.com");
         s.merge(currentRootUser);
+
+        if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.email())) {
+          log.warn("The root user e-mail is currently set to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
+        }
 
         return currentRootUser.id();
       }

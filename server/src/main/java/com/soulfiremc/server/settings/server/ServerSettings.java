@@ -18,48 +18,14 @@
 package com.soulfiremc.server.settings.server;
 
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ServerSettings implements SettingsObject {
   private static final String NAMESPACE = "server";
-  public static final StringProperty PUBLIC_ADDRESS =
-    ImmutableStringProperty.builder()
-      .namespace(NAMESPACE)
-      .key("public-address")
-      .uiName("Public address")
-      .description("The address clients on the internet use to connect to this SoulFire instance.\nUsed for links in E-Mails.")
-      .defaultValue("http://127.0.0.1:38765")
-      .build();
-  public static final BooleanProperty HAVE_I_BEEN_PWNED_CHECK =
-    ImmutableBooleanProperty.builder()
-      .namespace(NAMESPACE)
-      .key("have-i-been-pwned-check")
-      .uiName("Have I Been Pwned check")
-      .description("Check if passwords are strong using the secure haveibeenpwned.com API")
-      .defaultValue(true)
-      .build();
-  public static final IntProperty HAVE_I_BEEN_PWNED_LIMIT =
-    ImmutableIntProperty.builder()
-      .namespace(NAMESPACE)
-      .key("have-i-been-pwned-limit")
-      .uiName("Have I Been Pwned limit")
-      .description("If the password is used more than this number of times, it is considered unsafe.")
-      .defaultValue(0)
-      .minValue(0)
-      .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
-      .build();
-  public static final BooleanProperty ALLOW_REGISTRATION =
-    ImmutableBooleanProperty.builder()
-      .namespace(NAMESPACE)
-      .key("allow-registration")
-      .uiName("Allow registration")
-      .description("Allow anyone to register an account.")
-      .defaultValue(false)
-      .build();
   public static final BooleanProperty ALLOW_CREATING_INSTANCES =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)

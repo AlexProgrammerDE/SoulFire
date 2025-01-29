@@ -35,6 +35,7 @@ import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.CollectBlockController;
 import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
@@ -167,6 +168,28 @@ public class ServerCommandManager {
 
               return Command.SINGLE_SUCCESS;
             })));
+    dispatcher.register(
+      literal("set-email")
+        .then(argument("email", StringArgumentType.greedyString())
+          .executes(
+            help(
+              "Set the email of the current user",
+              c -> {
+                if (!(c.getSource() instanceof SoulFireUser user)) {
+                  c.getSource().sendInfo("Only SoulFire users can set their email.");
+                  return Command.SINGLE_SUCCESS;
+                }
+
+                var email = StringArgumentType.getString(c, "email");
+                soulFireServer.sessionFactory().inTransaction(s -> {
+                  var userData = s.find(UserEntity.class, user.getUniqueId());
+                  userData.email(email);
+                  s.merge(userData);
+                });
+                c.getSource().sendInfo("Email of user {} set to {}", user.getUsername(), email);
+
+                return Command.SINGLE_SUCCESS;
+              }))));
     dispatcher.register(
       literal("whoami")
         .executes(
