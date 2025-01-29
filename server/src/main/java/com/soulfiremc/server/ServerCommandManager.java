@@ -156,6 +156,7 @@ public class ServerCommandManager {
             "Generate an auth JWT for the current user",
             c -> {
               if (!(c.getSource() instanceof SoulFireUser user)) {
+                c.getSource().sendInfo("Only SoulFire users can generate tokens.");
                 return Command.SINGLE_SUCCESS;
               }
 
