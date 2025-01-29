@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The RPC server for the SoulFire server.
@@ -88,8 +89,10 @@ public class RPCServer {
     var grpcService =
       GrpcService.builder()
         .autoCompression(true)
-        .intercept(new JwtServerInterceptor(authSystem))
-        .intercept(new LoginRateLimitingInterceptor())
+        .intercept(List.of(
+          new LoginRateLimitingInterceptor(),
+          new JwtServerInterceptor(authSystem)
+        ))
         .addService(injector.getSingleton(LogServiceImpl.class))
         .addService(injector.getSingleton(ConfigServiceImpl.class))
         .addService(injector.getSingleton(CommandServiceImpl.class))

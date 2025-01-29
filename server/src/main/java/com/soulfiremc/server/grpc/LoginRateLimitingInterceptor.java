@@ -55,13 +55,27 @@ public class LoginRateLimitingInterceptor implements ServerInterceptor {
 
         if (count != null && count > RPCConstants.LOGIN_RATE_LIMIT) {
           status = Status.RESOURCE_EXHAUSTED.withDescription("Too many login attempts");
+        } else {
+          return Contexts.interceptCall(
+            Context.current(),
+            serverCall,
+            metadata,
+            serverCallHandler
+          );
         }
       }
-    }
 
-    serverCall.close(status, new Metadata());
-    return new ServerCall.Listener<>() {
-      // noop
-    };
+      serverCall.close(status, new Metadata());
+      return new ServerCall.Listener<>() {
+        // noop
+      };
+    } else {
+      return Contexts.interceptCall(
+        Context.current(),
+        serverCall,
+        metadata,
+        serverCallHandler
+      );
+    }
   }
 }
