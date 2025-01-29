@@ -62,7 +62,9 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
       // To prevent people checking if an email is registered,
       // we always return a flow token, even if the email is not registered
       if (user != null) {
+        var emailCode = generateSixDigitCode();
         authFlows.put(authFlowToken, new EmailFlowStage(user.id(), generateSixDigitCode()));
+        soulFireServer.emailSender().sendLoginCode(user.email(), user.username(), emailCode);
       }
 
       responseObserver.onNext(NextAuthFlowResponse.newBuilder()

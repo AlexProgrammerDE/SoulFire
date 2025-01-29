@@ -40,6 +40,8 @@ import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.AuthSystem;
+import com.soulfiremc.server.user.ConsoleEmailSender;
+import com.soulfiremc.server.user.EmailSender;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
@@ -96,6 +98,7 @@ public class SoulFireServer {
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log, runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
+  private final EmailSender emailSender;
   private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
@@ -136,6 +139,7 @@ public class SoulFireServer {
 
         return entity.settings();
       }), 1, TimeUnit.SECONDS));
+    this.emailSender = ConsoleEmailSender.INSTANCE;
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
