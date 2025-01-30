@@ -30,6 +30,6 @@ public record ConsoleEmailSender() implements EmailSender {
 
   @Override
   public void sendLoginCode(String recipient, String username, String code) {
-    log.info("Email: {} Username: {} Code: {}", recipient, username, code);
+    log.info("Email: {} - Username: {} - Code: {}", recipient, username, code);
   }
 }
