@@ -19,10 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.soulfiremc.grpc.generated.EmailCodeRequest;
-import com.soulfiremc.grpc.generated.LoginRequest;
-import com.soulfiremc.grpc.generated.LoginServiceGrpc;
-import com.soulfiremc.grpc.generated.NextAuthFlowResponse;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import io.grpc.Status;
@@ -63,7 +60,7 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
       // we always return a flow token, even if the email is not registered
       if (user != null) {
         var emailCode = generateSixDigitCode();
-        authFlows.put(authFlowToken, new EmailFlowStage(user.id(), emailCode));
+        authFlows.put(authFlowToken, new EmailFlowStage(user.id(), request.getEmail(), emailCode));
         soulFireServer.emailSender().sendLoginCode(user.email(), user.username(), emailCode);
       }
 
@@ -85,7 +82,7 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
       var flowStage = authFlows.getIfPresent(authFlowToken);
       // Not present also returns invalid code
       // This way we prevent bruteforce attacks
-      if (!(flowStage instanceof EmailFlowStage(var userId, var code))
+      if (!(flowStage instanceof EmailFlowStage(var userId, var ignored, var code))
         || !code.equals(request.getCode())) {
         responseObserver.onNext(NextAuthFlowResponse.newBuilder()
           .setAuthFlowToken(authFlowToken.toString())
@@ -111,9 +108,28 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
     }
   }
 
+  @Override
+  public void emailResend(EmailResendRequest request, StreamObserver<EmailResendResponse> responseObserver) {
+    try {
+      var authFlowToken = UUID.fromString(request.getAuthFlowToken());
+      var flowStage = authFlows.getIfPresent(authFlowToken);
+      if (flowStage instanceof EmailFlowStage(var userId, var email, var code)) {
+        soulFireServer.emailSender().sendLoginCode(email, soulFireServer.authSystem().getUserData(userId).orElseThrow().username(), code);
+      }
+
+      responseObserver.onNext(EmailResendResponse.newBuilder()
+        .setAuthFlowToken(authFlowToken.toString())
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error resending email code", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
   private interface FlowStage {
   }
 
-  private record EmailFlowStage(UUID userId, String code) implements FlowStage {
+  private record EmailFlowStage(UUID userId, String email, String code) implements FlowStage {
   }
 }
