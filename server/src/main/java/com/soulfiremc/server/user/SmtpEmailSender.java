@@ -89,6 +89,8 @@ public record SmtpEmailSender(SoulFireServer soulFireServer) implements EmailSen
       message.setContent(multipart);
 
       Transport.send(message);
+
+      log.info("Email sent to {}", recipient);
     } catch (MessagingException e) {
       log.error("Failed to send email", e);
     }
