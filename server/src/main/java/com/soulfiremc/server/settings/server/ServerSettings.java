@@ -21,6 +21,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ServerSettings implements SettingsObject {
@@ -120,14 +121,30 @@ public class ServerSettings implements SettingsObject {
       .defaultValue("soulfire@gmail.com")
       .build();
 
+  @RequiredArgsConstructor
   public enum EmailType {
-    CONSOLE,
-    SMTP
+    CONSOLE("Console"),
+    SMTP("SMTP");
+
+    private final String uiName;
+
+    @Override
+    public String toString() {
+      return uiName;
+    }
   }
 
+  @RequiredArgsConstructor
   public enum SmtpType {
-    STARTTLS,
-    SSL_TLS,
-    NONE
+    STARTTLS("STARTTLS"),
+    SSL_TLS("SSL/TLS"),
+    NONE("None");
+
+    private final String uiName;
+
+    @Override
+    public String toString() {
+      return uiName;
+    }
   }
 }
