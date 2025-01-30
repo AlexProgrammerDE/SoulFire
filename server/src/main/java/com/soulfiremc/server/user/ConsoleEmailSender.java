@@ -29,6 +29,6 @@ public record ConsoleEmailSender() implements EmailSender {
 
   @Override
   public void sendLoginCode(String email, String username, String code) {
-    log.info("Email: {}\nUsername: {}\nCode: {}", email, username, code);
+    log.info("Email: {} Username: {} Code: {}", email, username, code);
   }
 }
