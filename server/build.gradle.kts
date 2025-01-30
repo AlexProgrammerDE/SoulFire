@@ -97,6 +97,9 @@ dependencies {
   // For script support
   api(libs.bundles.graalvm.polyglot)
 
+  // For mail support
+  api(libs.angus)
+
   // For tls cert provisioning
   api(libs.acme4j)
 
