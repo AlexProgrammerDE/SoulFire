@@ -19,7 +19,7 @@ graalvm-polyglot = "24.1.2"
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
 protobuf = "com.google.protobuf:0.9.4"
-jmh = "me.champeau.jmh:0.7.2"
+jmh = "me.champeau.jmh:0.7.3"
 license-report = "com.github.jk1.dependency-license-report:2.9"
 
 [libraries]
