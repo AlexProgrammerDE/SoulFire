@@ -19,16 +19,17 @@ package com.soulfiremc.server.user;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
+
 @Slf4j
 public record ConsoleEmailSender() implements EmailSender {
-  public static final ConsoleEmailSender INSTANCE = new ConsoleEmailSender();
-
+  @Inject
   public ConsoleEmailSender {
     log.info("Using console email sender");
   }
 
   @Override
-  public void sendLoginCode(String email, String username, String code) {
-    log.info("Email: {} Username: {} Code: {}", email, username, code);
+  public void sendLoginCode(String recipient, String username, String code) {
+    log.info("Email: {} Username: {} Code: {}", recipient, username, code);
   }
 }

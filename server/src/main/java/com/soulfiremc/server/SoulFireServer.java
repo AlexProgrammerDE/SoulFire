@@ -39,10 +39,7 @@ import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
-import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.user.ConsoleEmailSender;
-import com.soulfiremc.server.user.EmailSender;
-import com.soulfiremc.server.user.SoulFireUser;
+import com.soulfiremc.server.user.*;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SFUpdateChecker;
@@ -98,7 +95,6 @@ public class SoulFireServer {
   private final SoulFireScheduler scheduler = new SoulFireScheduler(log, runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
-  private final EmailSender emailSender;
   private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
@@ -139,7 +135,6 @@ public class SoulFireServer {
 
         return entity.settings();
       }), 1, TimeUnit.SECONDS));
-    this.emailSender = ConsoleEmailSender.INSTANCE;
     this.authSystem = new AuthSystem(this);
     this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
@@ -225,6 +220,13 @@ public class SoulFireServer {
 
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
+  }
+
+  public EmailSender emailSender() {
+    return switch (settingsSource.get(ServerSettings.EMAIL_TYPE, ServerSettings.EmailType.class)) {
+      case CONSOLE -> injector.getSingleton(ConsoleEmailSender.class);
+      case SMTP -> injector.getSingleton(SmtpEmailSender.class);
+    };
   }
 
   public void configUpdateHook() {

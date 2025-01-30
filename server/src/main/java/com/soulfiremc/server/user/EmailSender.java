@@ -18,5 +18,5 @@
 package com.soulfiremc.server.user;
 
 public interface EmailSender {
-  void sendLoginCode(String email, String username, String code);
+  void sendLoginCode(String recipient, String username, String code);
 }
