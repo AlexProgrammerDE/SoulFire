@@ -38,16 +38,7 @@ message EmailCodeRequest {
   string code = 2;
 }
 
-message EmailResendRequest {
-  string auth_flow_token = 1;
-}
-
-message EmailResendResponse {
-  string auth_flow_token = 1;
-}
-
 service LoginService {
   rpc login(LoginRequest) returns (NextAuthFlowResponse);
   rpc emailCode(EmailCodeRequest) returns (NextAuthFlowResponse);
-  rpc emailResend(EmailResendRequest) returns (EmailResendResponse);
 }
