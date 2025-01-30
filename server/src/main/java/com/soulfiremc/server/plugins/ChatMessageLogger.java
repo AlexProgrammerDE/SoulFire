@@ -19,11 +19,12 @@ package com.soulfiremc.server.plugins;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -38,14 +39,13 @@ import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Extension
 public class ChatMessageLogger extends InternalPlugin {
-  private static final Cache<String, Integer> CHAT_MESSAGES = Caffeine.newBuilder()
-    .expireAfterWrite(5, TimeUnit.SECONDS)
-    .build();
+  private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_message_logger", "chat_messages", Cache.class);
 
   public ChatMessageLogger() {
     super(new PluginInfo(
@@ -67,14 +67,17 @@ public class ChatMessageLogger extends InternalPlugin {
 
     // usage of synchronized method so that the chatMessages set is not modified while being
     // iterated
-    logChatMessage(settingsSource, event.message());
+    logChatMessage(event.connection().instanceManager(), event.message());
   }
 
-  private static synchronized void logChatMessage(InstanceSettingsSource settingsSource, Component message) {
+  private static synchronized void logChatMessage(InstanceManager instanceManager, Component message) {
+    var chatMessage = instanceManager.metadata().getOrSet(CHAT_MESSAGES, () -> Caffeine.newBuilder()
+      .expireAfterWrite(5, TimeUnit.SECONDS)
+      .build());
     var ansiMessage = SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message);
 
-    var deduplicateAmount = settingsSource.get(ChatMessageSettings.DEDUPLICATE_AMOUNT);
-    var messageCount = CHAT_MESSAGES.get(ansiMessage, (key) -> 0);
+    var deduplicateAmount = instanceManager.settingsSource().get(ChatMessageSettings.DEDUPLICATE_AMOUNT);
+    int messageCount = Objects.requireNonNull(chatMessage.get(ansiMessage, (key) -> 0));
     if (messageCount < deduplicateAmount) {
       // Print to remote console (always true color)
       log.atInfo()
@@ -84,7 +87,7 @@ public class ChatMessageLogger extends InternalPlugin {
       log.atInfo()
         .addKeyValue(SFLogAppender.SF_SKIP_PUBLISHING, "true")
         .log("{}", SoulFireAdventure.ANSI_SERIALIZER.serialize(message));
-      CHAT_MESSAGES.put(ansiMessage, messageCount + 1);
+      chatMessage.put(ansiMessage, messageCount + 1);
     }
   }
 
@@ -116,6 +119,4 @@ public class ChatMessageLogger extends InternalPlugin {
         .stepValue(1)
         .build();
   }
-
-  private record ChatMessageState(Cache<String, Integer> chatMessages) {}
 }
