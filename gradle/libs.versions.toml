@@ -35,7 +35,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-jline = "org.jline:jline-terminal-jansi:3.28.0"
+jline = "org.jline:jline-terminal-jansi:3.29.0"
 jansi = "org.fusesource.jansi:jansi:2.4.1"
 ansi4j-core-api = "com.github.PavelKastornyy.ansi4j:ansi4j-core-api:ansi4j-1.1.0"
 ansi4j-core-impl = "com.github.PavelKastornyy.ansi4j:ansi4j-core-impl:ansi4j-1.1.0"
@@ -63,7 +63,7 @@ commons-validator = "commons-validator:commons-validator:1.9.0"
 commons-io = "commons-io:commons-io:2.18.0"
 oshi = "com.github.oshi:oshi-core:6.6.6"
 guava = "com.google.guava:guava:33.4.0-jre"
-gson = "com.google.code.gson:gson:2.12.0"
+gson = "com.google.code.gson:gson:2.12.1"
 pf4j = "org.pf4j:pf4j:3.13.0"
 fastutil = "it.unimi.dsi:fastutil:8.5.15"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.0"
@@ -90,7 +90,7 @@ armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.18.1"
+openai = "com.openai:openai-java:0.19.0"
 immutables = "org.immutables:value:2.10.1 "
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta3"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta3"
