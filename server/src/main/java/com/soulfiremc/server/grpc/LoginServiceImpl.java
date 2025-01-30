@@ -63,7 +63,7 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
       // we always return a flow token, even if the email is not registered
       if (user != null) {
         var emailCode = generateSixDigitCode();
-        authFlows.put(authFlowToken, new EmailFlowStage(user.id(), generateSixDigitCode()));
+        authFlows.put(authFlowToken, new EmailFlowStage(user.id(), emailCode));
         soulFireServer.emailSender().sendLoginCode(user.email(), user.username(), emailCode);
       }
 
@@ -85,8 +85,10 @@ public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
       var flowStage = authFlows.getIfPresent(authFlowToken);
       // Not present also returns invalid code
       // This way we prevent bruteforce attacks
+      System.out.println("FlowStage: " + flowStage);
       if (!(flowStage instanceof EmailFlowStage(var userId, var code))
         || !code.equals(request.getCode())) {
+        System.out.println("Invalid code" + request.getCode());
         responseObserver.onNext(NextAuthFlowResponse.newBuilder()
           .setAuthFlowToken(authFlowToken.toString())
           .setFailure(NextAuthFlowResponse.Failure.newBuilder()
