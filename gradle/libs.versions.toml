@@ -90,7 +90,7 @@ armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.19.0"
+openai = "com.openai:openai-java:0.20.0"
 immutables = "org.immutables:value:2.10.1 "
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta3"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta3"
