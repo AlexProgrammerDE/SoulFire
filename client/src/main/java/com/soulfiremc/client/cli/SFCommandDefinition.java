@@ -106,7 +106,12 @@ public class SFCommandDefinition implements Callable<Integer> {
                 ? ""
                 : "`%s`"
                 .formatted(option.defaultValueString())
-                .replace("|", "\\|");
+                .replace("|", "\\|")
+                .replace("\n", " ");
+            if (defaultValue.length() > 50) {
+              defaultValue = defaultValue.substring(0, 50) + "...`";
+            }
+
             var description =
               option.description() == null
                 ? ""
