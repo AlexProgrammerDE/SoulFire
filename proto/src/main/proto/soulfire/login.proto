@@ -6,12 +6,11 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 message LoginRequest {
-  string username = 1;
+  string email = 1;
 }
 
 message NextAuthFlowResponse {
   message EmailCode {
-    uint32 digits = 1;
   }
 
   message Success {
@@ -19,10 +18,14 @@ message NextAuthFlowResponse {
   }
 
   message Failure {
-    string message = 1;
+    enum Reason {
+      INVALID_CODE = 0;
+    }
+
+    Reason reason = 1;
   }
 
-  string authFlowToken = 1;
+  string auth_flow_token = 1;
   oneof next {
     EmailCode email_code = 2;
     Success success = 3;
@@ -31,7 +34,8 @@ message NextAuthFlowResponse {
 }
 
 message EmailCodeRequest {
-  repeated uint32 code = 1;
+  string auth_flow_token = 1;
+  string code = 2;
 }
 
 service LoginService {

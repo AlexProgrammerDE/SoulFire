@@ -15,18 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.user;
 
-import io.grpc.Metadata;
-
-import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
-
-public class RPCConstants {
-  public static final int LOGIN_RATE_LIMIT = 20;
-  public static final String BEARER_TYPE = "Bearer";
-
-  public static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY =
-    Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
-
-  private RPCConstants() {}
+public interface EmailSender {
+  void sendLoginCode(String recipient, String username, String code);
 }

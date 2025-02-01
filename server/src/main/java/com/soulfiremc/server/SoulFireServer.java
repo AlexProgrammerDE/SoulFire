@@ -39,8 +39,7 @@ import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
-import com.soulfiremc.server.user.AuthSystem;
-import com.soulfiremc.server.user.SoulFireUser;
+import com.soulfiremc.server.user.*;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SFUpdateChecker;
@@ -221,6 +220,13 @@ public class SoulFireServer {
 
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
+  }
+
+  public EmailSender emailSender() {
+    return switch (settingsSource.get(ServerSettings.EMAIL_TYPE, ServerSettings.EmailType.class)) {
+      case CONSOLE -> injector.getSingleton(ConsoleEmailSender.class);
+      case SMTP -> injector.getSingleton(SmtpEmailSender.class);
+    };
   }
 
   public void configUpdateHook() {

@@ -24,6 +24,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
+import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,9 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var soulFire =
       new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
-    log.info("Tip: The default user is called 'root', you can log into it using the client");
+    if (soulFire.authSystem().rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
+      log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);
+    }
 
     var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
     var commandSource = new ServerConsoleCommandSource(soulFire.authSystem());
