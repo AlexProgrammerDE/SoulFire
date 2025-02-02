@@ -901,14 +901,15 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-    var entityState = EntityFactory.createEntity(
-      connection,
-      EntityType.REGISTRY.getById(packet.getType().ordinal()),
-      currentLevel(),
-      packet.getUuid());
-    entityState.fromAddEntityPacket(packet);
-
-    entityTrackerState.addEntity(entityState);
+    EntityFactory.createEntity(
+        connection,
+        EntityType.REGISTRY.getById(packet.getType().ordinal()),
+        currentLevel(),
+        packet.getUuid())
+      .ifPresent(entityState -> {
+        entityState.fromAddEntityPacket(packet);
+        entityTrackerState.addEntity(entityState);
+      });
   }
 
   @EventHandler
