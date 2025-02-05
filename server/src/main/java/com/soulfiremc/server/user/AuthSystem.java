@@ -71,7 +71,7 @@ public class AuthSystem {
         rootUser.email(ROOT_DEFAULT_EMAIL);
         s.persist(rootUser);
 
-        log.warn("The root user e-mail is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
+        log.warn("The root user email is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
 
         return rootUser.id();
       } else {
@@ -79,7 +79,7 @@ public class AuthSystem {
         s.merge(currentRootUser);
 
         if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.email())) {
-          log.warn("The root user e-mail is currently set to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
+          log.warn("The root user email is currently set to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
         }
 
         return currentRootUser.id();
