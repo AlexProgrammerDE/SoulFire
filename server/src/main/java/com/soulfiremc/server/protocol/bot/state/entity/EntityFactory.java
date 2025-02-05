@@ -28,12 +28,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class EntityFactory {
-  public static Entity createEntity(BotConnection connection, EntityType entityType, Level level, UUID uuid) {
-    if (entityType.playerEntity()) {
-      return new RemotePlayer(connection, level, connection.getEntityProfile(uuid).orElseThrow().getProfile());
+  public static Optional<Entity> createEntity(BotConnection connection, EntityType entityType, Level level, UUID uuid) {
+    if (entityType == EntityType.PLAYER) {
+      return connection.getEntityProfile(uuid).map(
+        playerListEntry -> new RemotePlayer(connection, level, playerListEntry.getProfile()));
     } else if (entityType.livingEntity()) {
       // TODO: Implement entity inventories
-      return new LivingEntity(entityType, level) {
+      return Optional.of(new LivingEntity(entityType, level) {
         @Override
         public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
           return Optional.empty();
@@ -42,17 +43,17 @@ public class EntityFactory {
         @Override
         public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
         }
-      };
+      });
     } else if (entityType.boatEntity()) {
-      return new AbstractBoat(entityType, level);
+      return Optional.of(new AbstractBoat(entityType, level));
     } else if (entityType.minecartEntity()) {
-      return new AbstractMinecart(entityType, level);
+      return Optional.of(new AbstractMinecart(entityType, level));
     } else if (entityType.windChargeEntity()) {
-      return new AbstractWindCharge(entityType, level);
+      return Optional.of(new AbstractWindCharge(entityType, level));
     } else if (entityType.shulkerEntity()) {
-      return new Shulker(entityType, level);
+      return Optional.of(new Shulker(entityType, level));
     } else {
-      return new Entity(entityType, level);
+      return Optional.of(new Entity(entityType, level));
     }
   }
 }

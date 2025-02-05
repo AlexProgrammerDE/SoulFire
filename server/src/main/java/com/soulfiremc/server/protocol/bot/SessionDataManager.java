@@ -521,29 +521,41 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPlayerListUpdate(ClientboundPlayerInfoUpdatePacket packet) {
-    for (var update : packet.getEntries()) {
-      var entry = playerListState.entries().computeIfAbsent(update.getProfileId(), k -> update);
+    if (packet.getActions().contains(PlayerListEntryAction.ADD_PLAYER)) {
+      for (var entry : packet.getEntries()) {
+        playerListState.entries().putIfAbsent(entry.getProfileId(), entry);
+      }
+    }
+
+    for (var newEntry : packet.getEntries()) {
+      var entry = playerListState.entries().get(newEntry.getProfileId());
+      if (entry == null) {
+        continue;
+      }
+
       for (var action : packet.getActions()) {
         SFHelpers.mustSupply(() -> switch (action) {
-          case ADD_PLAYER -> () -> entry.setProfile(update.getProfile());
+          case ADD_PLAYER -> () -> {
+            // Don't handle, just like vanilla
+          };
           case INITIALIZE_CHAT -> () -> {
-            entry.setSessionId(update.getSessionId());
-            entry.setExpiresAt(update.getExpiresAt());
-            entry.setKeySignature(update.getKeySignature());
-            entry.setPublicKey(update.getPublicKey());
+            entry.setSessionId(newEntry.getSessionId());
+            entry.setExpiresAt(newEntry.getExpiresAt());
+            entry.setKeySignature(newEntry.getKeySignature());
+            entry.setPublicKey(newEntry.getPublicKey());
           };
           case UPDATE_GAME_MODE -> () -> {
-            if (entry.getGameMode() != update.getGameMode() && localPlayer != null && update.getProfileId().equals(localPlayer.uuid())) {
-              localPlayer.onGameModeChanged(update.getGameMode());
+            if (entry.getGameMode() != newEntry.getGameMode() && localPlayer != null && newEntry.getProfileId().equals(localPlayer.uuid())) {
+              localPlayer.onGameModeChanged(newEntry.getGameMode());
             }
 
-            entry.setGameMode(update.getGameMode());
+            entry.setGameMode(newEntry.getGameMode());
           };
-          case UPDATE_LISTED -> () -> entry.setListed(update.isListed());
-          case UPDATE_LATENCY -> () -> entry.setLatency(update.getLatency());
-          case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(update.getDisplayName());
-          case UPDATE_HAT -> () -> entry.setShowHat(update.isShowHat());
-          case UPDATE_LIST_ORDER -> () -> entry.setListOrder(update.getListOrder());
+          case UPDATE_LISTED -> () -> entry.setListed(newEntry.isListed());
+          case UPDATE_LATENCY -> () -> entry.setLatency(newEntry.getLatency());
+          case UPDATE_DISPLAY_NAME -> () -> entry.setDisplayName(newEntry.getDisplayName());
+          case UPDATE_HAT -> () -> entry.setShowHat(newEntry.isShowHat());
+          case UPDATE_LIST_ORDER -> () -> entry.setListOrder(newEntry.getListOrder());
         });
       }
     }
@@ -889,14 +901,15 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
-    var entityState = EntityFactory.createEntity(
-      connection,
-      EntityType.REGISTRY.getById(packet.getType().ordinal()),
-      currentLevel(),
-      packet.getUuid());
-    entityState.fromAddEntityPacket(packet);
-
-    entityTrackerState.addEntity(entityState);
+    EntityFactory.createEntity(
+        connection,
+        EntityType.REGISTRY.getById(packet.getType().ordinal()),
+        currentLevel(),
+        packet.getUuid())
+      .ifPresent(entityState -> {
+        entityState.fromAddEntityPacket(packet);
+        entityTrackerState.addEntity(entityState);
+      });
   }
 
   @EventHandler
