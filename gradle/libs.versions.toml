@@ -7,8 +7,8 @@ via-backwards = "5.2.2-SNAPSHOT"
 via-rewind = "4.0.6-SNAPSHOT"
 via-legacy = "3.0.8-SNAPSHOT"
 via-aprilfools = "4.0.1-SNAPSHOT"
-via-loader = "4.0.1-SNAPSHOT"
 via-bedrock = "0.0.14-SNAPSHOT"
+via-loader = "4.0.1-SNAPSHOT"
 mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.18.0"
 reactor = "1.2.2"
@@ -53,8 +53,8 @@ via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "
 via-rewind = { module = "com.viaversion:viarewind-common", version.ref = "via-rewind" }
 via-legacy = { module = "net.raphimc:ViaLegacy", version.ref = "via-legacy" }
 via-aprilfools = { module = "com.viaversion:viaaprilfools-common", version.ref = "via-aprilfools" }
-via-loader = { module = "com.viaversion:vialoader", version.ref = "via-loader" }
 via-bedrock = { module = "net.raphimc:ViaBedrock", version.ref = "via-bedrock" }
+via-loader = { module = "com.viaversion:vialoader", version.ref = "via-loader" }
 snakeyaml = "org.yaml:snakeyaml:2.3"
 kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyori" }
 kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "kyori" }
