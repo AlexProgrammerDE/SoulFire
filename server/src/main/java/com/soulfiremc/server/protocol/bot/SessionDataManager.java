@@ -26,7 +26,6 @@ import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
-import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
@@ -100,7 +99,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.*;
@@ -782,12 +780,8 @@ public final class SessionDataManager {
 
     var chunkData = level.chunks().getOrCreateChunkSection(packet.getX(), packet.getZ());
 
-    try {
-      for (var i = 0; i < chunkData.getSectionCount(); i++) {
-        chunkData.setSection(i, SFProtocolHelper.readChunkSection(buf));
-      }
-    } catch (IOException e) {
-      log.error("Failed to read chunk section", e);
+    for (var i = 0; i < chunkData.getSectionCount(); i++) {
+      chunkData.setSection(i, MinecraftTypes.readChunkSection(buf));
     }
   }
 

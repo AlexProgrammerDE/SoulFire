@@ -29,7 +29,6 @@ import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
-import com.soulfiremc.server.protocol.SFProtocolHelper;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
@@ -438,7 +437,7 @@ public class POVServer extends InternalPlugin {
       var buf = Unpooled.buffer();
 
       for (var i = 0; i < chunk.getSectionCount(); i++) {
-        SFProtocolHelper.writeChunkSection(buf, chunk.getSection(i));
+        MinecraftTypes.writeChunkSection(buf, chunk.getSection(i));
       }
 
       var chunkBytes = new byte[buf.readableBytes()];
@@ -735,7 +734,7 @@ public class POVServer extends InternalPlugin {
         chunk.set(0, 0, 0, 0);
         var biome = DataPalette.createForBiome();
         biome.set(0, 0, 0, 0);
-        SFProtocolHelper.writeChunkSection(buf, new ChunkSection(0, chunk, biome));
+        MinecraftTypes.writeChunkSection(buf, new ChunkSection(0, chunk, biome));
       }
 
       var chunkBytes = new byte[buf.readableBytes()];
