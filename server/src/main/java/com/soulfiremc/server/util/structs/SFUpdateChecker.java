@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util;
+package com.soulfiremc.server.util.structs;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.util.structs.GsonInstance;
+import com.soulfiremc.server.util.ReactorHttpHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;

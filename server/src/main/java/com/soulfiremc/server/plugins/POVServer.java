@@ -44,7 +44,11 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.ServerCommandSource;
-import com.soulfiremc.server.util.*;
+import com.soulfiremc.server.util.PortHelper;
+import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SoulFireAdventure;
+import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.structs.DefaultTagsState;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -91,6 +95,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.level.LightUpdateData;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
+import org.geysermc.mcprotocollib.protocol.data.game.level.map.MapData;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.RainStrengthValue;
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.ThunderStrengthValue;
@@ -117,10 +122,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundLevelChunkWithLightPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetChunkCacheCenterPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundSetDefaultSpawnPositionPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
@@ -342,10 +344,21 @@ public class POVServer extends InternalPlugin {
       new ClientboundPlayerPositionPacket(
         Integer.MIN_VALUE,
         dataManager.localPlayer().pos(),
-        Vector3d.ZERO,
+        dataManager.localPlayer().deltaMovement(),
         dataManager.localPlayer().yRot(),
         dataManager.localPlayer().xRot(),
         List.of()));
+
+    // Send maps
+    for (var entry : dataManager.mapDataStates().int2ObjectEntrySet()) {
+      clientSession.send(
+        new ClientboundMapItemDataPacket(
+          entry.getIntKey(),
+          entry.getValue().scale(),
+          entry.getValue().locked(),
+          entry.getValue().icons(),
+          new MapData(128, 128, 0, 0, entry.getValue().colorData())));
+    }
 
     if (dataManager.playerListState().header() != null
       && dataManager.playerListState().footer() != null) {

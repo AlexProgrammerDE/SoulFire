@@ -27,7 +27,7 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
-import com.soulfiremc.server.util.DefaultTagsState;
+import com.soulfiremc.server.util.structs.DefaultTagsState;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import org.junit.jupiter.api.Test;
