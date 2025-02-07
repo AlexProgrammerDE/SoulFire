@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.goals;
 
+import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
@@ -33,7 +34,16 @@ public record PosGoal(SFVec3i goal) implements GoalScorer {
 
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return blockPosition.distance(goal);
+    var score = Math.sqrt(Math.pow(blockPosition.x - goal.x, 2) + Math.pow(blockPosition.z - goal.z, 2));
+    var yDiff = blockPosition.y - goal.y;
+    var yAbsolute = Math.abs(yDiff);
+    if (yDiff > 0) {
+      score += yAbsolute * Costs.JUMP_UP_BLOCK;
+    } else if (yDiff < 0) {
+      score += yAbsolute * Costs.FALL_1;
+    }
+
+    return score;
   }
 
   @Override

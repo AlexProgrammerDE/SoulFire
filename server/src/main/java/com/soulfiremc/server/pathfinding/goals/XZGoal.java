@@ -21,23 +21,17 @@ import com.soulfiremc.server.pathfinding.MinecraftRouteNode;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import org.cloudburstmc.math.vector.Vector2i;
 
 import java.util.List;
 
-public record XZGoal(Vector2i goal) implements GoalScorer {
-  public XZGoal(int x, int z) {
-    this(Vector2i.from(x, z));
-  }
-
+public record XZGoal(int x, int z) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {
-    return Vector2i.from(blockPosition.x, blockPosition.z)
-      .distance(goal);
+    return Math.sqrt(Math.pow(blockPosition.x - x, 2) + Math.pow(blockPosition.z - z, 2));
   }
 
   @Override
   public boolean isFinished(MinecraftRouteNode current) {
-    return Vector2i.from(current.node().blockPosition().x, current.node().blockPosition().z).equals(goal);
+    return current.node().blockPosition().x == x && current.node().blockPosition().z == z;
   }
 }
