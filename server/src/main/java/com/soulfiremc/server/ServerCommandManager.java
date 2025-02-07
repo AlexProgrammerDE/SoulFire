@@ -306,10 +306,13 @@ public class ServerCommandManager {
                 "Makes selected bots walk to the xz coordinates",
                 c -> {
                   var xz = c.getArgument("xz", DynamicXZArgumentType.XZLocationMapper.class);
-                  return executePathfinding(c, bot -> new XZGoal(xz.getAbsoluteLocation(Vector2d.from(
-                    bot.dataManager().localPlayer().x(),
-                    bot.dataManager().localPlayer().z()
-                  )).toInt()));
+                  return executePathfinding(c, bot -> {
+                    var xzGoal = xz.getAbsoluteLocation(Vector2d.from(
+                      bot.dataManager().localPlayer().x(),
+                      bot.dataManager().localPlayer().z()
+                    )).toInt();
+                    return new XZGoal(xzGoal.getX(), xzGoal.getY());
+                  });
                 })))
         .then(
           argument("xyz", new DynamicXYZArgumentType())
