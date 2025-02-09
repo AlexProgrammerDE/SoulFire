@@ -41,6 +41,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
@@ -89,6 +90,8 @@ public final class BotConnection {
   private final Object shutdownLock = new Object();
   private boolean explicitlyShutdown = false;
   private boolean running = true;
+  @Setter
+  private boolean pause = false;
 
   public BotConnection(
     BotConnectionFactory factory,
@@ -161,12 +164,10 @@ public final class BotConnection {
       return;
     }
 
-    var tickTimer = dataManager.tickTimer();
-    var ticks = tickTimer.advanceTime(System.currentTimeMillis());
-    tick(ticks);
+    runTick();
   }
 
-  public void tick(int ticks) {
+  public void runTick() {
     try {
       session.tick(); // Ensure all packets are handled before ticking
 
@@ -174,7 +175,9 @@ public final class BotConnection {
         preTickHooks.poll().run();
       }
 
-      for (var i = 0L; i < Math.min(ticks, 10); i++) {
+      var tickTimer = dataManager.tickTimer();
+      var ticks = tickTimer.advanceTime(System.nanoTime() / 1000000L, true);
+      for (var i = 0; i < Math.min(10, ticks); i++) {
         SoulFireAPI.postEvent(new BotPreTickEvent(this));
 
         botControl.tick();
@@ -186,6 +189,9 @@ public final class BotConnection {
 
         SoulFireAPI.postEvent(new BotPostTickEvent(this));
       }
+
+      tickTimer.updatePauseState(this.pause);
+      tickTimer.updateFrozenState(!dataManager.isLevelRunningNormally());
     } catch (Throwable t) {
       logger.error("Error while ticking bot!", t);
     }

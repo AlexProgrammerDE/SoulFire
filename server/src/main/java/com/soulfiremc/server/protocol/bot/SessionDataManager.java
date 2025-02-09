@@ -1221,6 +1221,10 @@ public final class SessionDataManager {
     return Objects.requireNonNull(level, "Current level is not set");
   }
 
+  public boolean isLevelRunningNormally() {
+    return this.level == null || this.level.tickRateManager().runsNormally();
+  }
+
   public void tick() {
     if (this.level != null) {
       this.level.tickRateManager().tick();
