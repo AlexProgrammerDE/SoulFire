@@ -56,11 +56,3 @@ body:
       placeholder: "1.0.0"
     validations:
       required: true
-  - type: input
-    id: java
-    attributes:
-      label: Java Version
-      description: "Often servers say the java version at startup. You can also execute `java -version` in your machine terminal."
-      placeholder: "openjdk version 17.0.5 2022-10-18"
-    validations:
-      required: true
