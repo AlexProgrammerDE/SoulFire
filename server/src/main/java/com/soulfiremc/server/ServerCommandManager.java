@@ -999,6 +999,24 @@ public class ServerCommandManager {
                   return Collections.singleton(c.getSource());
                 }),
               false)));
+    dispatcher.register(
+      literal("repeat")
+        .then(
+          argument("amount", IntegerArgumentType.integer(1))
+            .fork(
+              dispatcher.getRoot(),
+              helpRedirect(
+                "Repeat the command for the specified amount of times",
+                c -> {
+                  var amount = IntegerArgumentType.getInteger(c, "amount");
+                  var list = new ArrayList<ServerCommandSource>();
+                  for (var i = 0; i < amount; i++) {
+                    list.add(c.getSource());
+                  }
+
+                  return list;
+                })
+            )));
 
     SoulFireAPI.postEvent(new CommandManagerInitEvent(soulFireServer, this));
   }
