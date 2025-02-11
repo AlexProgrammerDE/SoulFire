@@ -178,16 +178,7 @@ public final class BotConnection {
       var tickTimer = dataManager.tickTimer();
       var ticks = tickTimer.advanceTime(System.nanoTime() / 1000000L, true);
       for (var i = 0; i < Math.min(10, ticks); i++) {
-        SoulFireAPI.postEvent(new BotPreTickEvent(this));
-
-        botControl.tick();
-        dataManager.tick();
-
-        if (protocol.getOutboundState() == ProtocolState.GAME) {
-          sendPacket(ServerboundClientTickEndPacket.INSTANCE);
-        }
-
-        SoulFireAPI.postEvent(new BotPostTickEvent(this));
+        this.tick();
       }
 
       tickTimer.updatePauseState(this.pause);
@@ -195,6 +186,19 @@ public final class BotConnection {
     } catch (Throwable t) {
       logger.error("Error while ticking bot!", t);
     }
+  }
+
+  public void tick() {
+    SoulFireAPI.postEvent(new BotPreTickEvent(this));
+
+    botControl.tick();
+    dataManager.tick();
+
+    if (protocol.getOutboundState() == ProtocolState.GAME) {
+      sendPacket(ServerboundClientTickEndPacket.INSTANCE);
+    }
+
+    SoulFireAPI.postEvent(new BotPostTickEvent(this));
   }
 
   public GlobalTrafficShapingHandler trafficHandler() {
