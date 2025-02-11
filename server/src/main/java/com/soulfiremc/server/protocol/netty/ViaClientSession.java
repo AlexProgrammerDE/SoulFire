@@ -283,4 +283,11 @@ public class ViaClientSession extends ClientNetworkSession {
 
     logger.debug("Exception caught in Netty session.", cause);
   }
+
+  public void flush() {
+    var channel = getChannel();
+    if (channel != null) {
+      channel.flush();
+    }
+  }
 }

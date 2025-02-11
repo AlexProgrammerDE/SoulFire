@@ -56,7 +56,7 @@ public class ArgumentTypeHelper {
     var dataManager = bot.dataManager();
 
     var parsedUniqueId = UUIDHelper.tryParseUniqueId(input);
-    for (var entity : dataManager.entityTrackerState().getEntities()) {
+    for (var entity : dataManager.currentLevel().getEntities()) {
       if (parsedUniqueId.isPresent() && entity.uuid().equals(parsedUniqueId.get())) {
         return OptionalInt.of(entity.entityId());
       }

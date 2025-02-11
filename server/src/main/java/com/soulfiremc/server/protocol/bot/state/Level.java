@@ -17,8 +17,12 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
+import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.data.BlockState;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.util.MathHelper;
@@ -32,13 +36,15 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.setting.Difficulty;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Getter
 public class Level implements LevelHeightAccessor {
   private final TickRateManager tickRateManager = new TickRateManager();
-  private final EntityTrackerState entityTracker;
+  private final EntityTrackerState entityTracker = new EntityTrackerState();
+  private final BotConnection connection;
   private final TagsState tagsState;
   private final ChunkHolder chunks;
   private final DimensionType dimensionType;
@@ -47,6 +53,8 @@ public class Level implements LevelHeightAccessor {
   private final boolean debug;
   private final int seaLevel;
   private final LevelData levelData;
+  @Setter
+  private BorderState borderState;
   protected float oRainLevel;
   protected float rainLevel;
   protected float oThunderLevel;
@@ -54,16 +62,16 @@ public class Level implements LevelHeightAccessor {
   private boolean tickDayTime;
 
   public Level(
+      BotConnection connection,
     TagsState tagsState,
-    EntityTrackerState entityTracker,
     DimensionType dimensionType,
     Key worldKey,
     long hashedSeed,
     boolean debug,
     int seaLevel,
     LevelData levelData) {
+    this.connection = connection;
     this.tagsState = tagsState;
-    this.entityTracker = entityTracker;
     this.dimensionType = dimensionType;
     this.worldKey = worldKey;
     this.hashedSeed = hashedSeed;
@@ -84,9 +92,23 @@ public class Level implements LevelHeightAccessor {
   }
 
   public void tick() {
+    // Tick border changes
+    if (borderState != null) {
+      borderState.tick();
+    }
+
     if (this.tickRateManager().runsNormally()) {
       this.tickTime();
     }
+  }
+
+  public void tickEntities() {
+    SoulFireAPI.postEvent(new BotPreEntityTickEvent(connection));
+
+    // Tick entities
+    entityTracker.tick();
+
+    SoulFireAPI.postEvent(new BotPostEntityTickEvent(connection));
   }
 
   private void tickTime() {
@@ -175,14 +197,11 @@ public class Level implements LevelHeightAccessor {
     return chunks.getBlockState(x, y, z);
   }
 
-  public List<Entity> getEntities() {
-    return entityTracker.getEntities()
-      .stream()
-      .filter(e -> e.level() == this)
-      .toList();
+  public Collection<Entity> getEntities() {
+    return entityTracker.getEntities();
   }
 
-  public List<Entity> getEntities(AABB bounds) {
+  public Collection<Entity> getEntities(AABB bounds) {
     return getEntities()
       .stream()
       .filter(e -> e.getBoundingBox().intersects(bounds))

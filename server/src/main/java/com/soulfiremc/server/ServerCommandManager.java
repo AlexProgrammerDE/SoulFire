@@ -248,7 +248,7 @@ public class ServerCommandManager {
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
+                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
                       c.getSource().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
@@ -449,7 +449,7 @@ public class ServerCommandManager {
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
+                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
                       c.getSource().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
@@ -855,7 +855,7 @@ public class ServerCommandManager {
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var entity = bot.dataManager().entityTrackerState().getEntity(entityId.getAsInt());
+                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
                       c.getSource().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;

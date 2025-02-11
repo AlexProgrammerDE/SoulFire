@@ -19,8 +19,6 @@ package com.soulfiremc.server.protocol.bot;
 
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
-import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
-import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.BotConnection;
@@ -45,9 +43,6 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMaps;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
@@ -112,13 +107,11 @@ public final class SessionDataManager {
   private final Logger log;
   private final BotConnection connection;
   private final PlayerListState playerListState = new PlayerListState();
-  private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
   private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
-  private final EntityTrackerState entityTrackerState = new EntityTrackerState();
   private final TagsState tagsState = new TagsState();
   private GameModeState gameModeState;
   private Key[] serverEnabledFeatures;
@@ -126,7 +119,6 @@ public final class SessionDataManager {
   private LocalPlayer localPlayer;
   private LevelLoadStatusManager levelLoadStatusManager;
   private @Nullable ServerPlayData serverPlayData;
-  private BorderState borderState;
   private GameProfile botProfile;
   @Getter(value = AccessLevel.PRIVATE)
   private Level level;
@@ -254,8 +246,8 @@ public final class SessionDataManager {
     var dimensionType = dimensionTypeRegistry.getById(spawnInfo.getDimension());
 
     level = new Level(
+      connection,
       tagsState,
-      entityTrackerState,
       dimensionType,
       spawnInfo.getWorldName(),
       spawnInfo.getHashedSeed(),
@@ -272,7 +264,7 @@ public final class SessionDataManager {
 
     localPlayer.resetPos();
     localPlayer.entityId(packet.getEntityId());
-    entityTrackerState.addEntity(localPlayer);
+    level.entityTracker().addEntity(localPlayer);
 
     this.gameModeState.adjustPlayer(localPlayer);
 
@@ -296,8 +288,8 @@ public final class SessionDataManager {
     // Only create a new level when we actually switch levels
     if (!spawnInfo.getWorldName().equals(level.worldKey())) {
       level = new Level(
+        connection,
         tagsState,
-        entityTrackerState,
         dimensionTypeRegistry.getById(spawnInfo.getDimension()),
         spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),
@@ -333,7 +325,7 @@ public final class SessionDataManager {
       newLocalPlayer.attributeState().assignBaseValues(oldLocalPlayer.attributeState());
     }
 
-    entityTrackerState.addEntity(newLocalPlayer);
+    level.entityTracker().addEntity(newLocalPlayer);
 
     this.gameModeState.adjustPlayer(newLocalPlayer);
 
@@ -426,7 +418,7 @@ public final class SessionDataManager {
   public void onLookAt(ClientboundPlayerLookAtPacket packet) {
     var targetPosition = Vector3d.from(packet.getX(), packet.getY(), packet.getZ());
     if (packet.getTargetEntityOrigin() != null) {
-      var entity = entityTrackerState.getEntity(packet.getTargetEntityId());
+      var entity = level.entityTracker().getEntity(packet.getTargetEntityId());
       if (entity != null) {
         targetPosition = entity.originPosition(packet.getTargetEntityOrigin());
       }
@@ -437,7 +429,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onDeath(ClientboundPlayerCombatKillPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getPlayerId());
+    var state = level.entityTracker().getEntity(packet.getPlayerId());
     if (state == localPlayer) {
       if (localPlayer.shouldShowDeathScreen()) {
         log.info("Died");
@@ -685,7 +677,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetEquipment(ClientboundSetEquipmentPacket packet) {
-    var entity = entityTrackerState.getEntity(packet.getEntityId());
+    var entity = currentLevel().entityTracker().getEntity(packet.getEntityId());
     if (entity == null) {
       log.debug("Received equipment update for unknown entity {}", packet.getEntityId());
       return;
@@ -725,9 +717,9 @@ public final class SessionDataManager {
   @EventHandler
   public void onCooldown(ClientboundCooldownPacket packet) {
     if (packet.getCooldownTicks() == 0) {
-      itemCoolDowns.removeInt(packet.getCooldownGroup());
+      localPlayer.itemCoolDowns().removeInt(packet.getCooldownGroup());
     } else {
-      itemCoolDowns.put(packet.getCooldownGroup(), packet.getCooldownTicks());
+      localPlayer.itemCoolDowns().put(packet.getCooldownGroup(), packet.getCooldownTicks());
     }
   }
 
@@ -852,7 +844,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onBorderInit(ClientboundInitializeBorderPacket packet) {
-    borderState =
+    var level = currentLevel();
+    level.borderState(
       new BorderState(
         packet.getNewCenterX(),
         packet.getNewCenterZ(),
@@ -861,40 +854,47 @@ public final class SessionDataManager {
         packet.getLerpTime(),
         packet.getNewAbsoluteMaxSize(),
         packet.getWarningBlocks(),
-        packet.getWarningTime());
+        packet.getWarningTime())
+    );
   }
 
   @EventHandler
   public void onBorderCenter(ClientboundSetBorderCenterPacket packet) {
-    borderState.centerX(packet.getNewCenterX());
-    borderState.centerZ(packet.getNewCenterZ());
+    var level = currentLevel();
+    level.borderState().centerX(packet.getNewCenterX());
+    level.borderState().centerZ(packet.getNewCenterZ());
   }
 
   @EventHandler
   public void onBorderLerpSize(ClientboundSetBorderLerpSizePacket packet) {
-    borderState.oldSize(packet.getOldSize());
-    borderState.newSize(packet.getNewSize());
-    borderState.lerpTime(packet.getLerpTime());
+    var level = currentLevel();
+    level.borderState().oldSize(packet.getOldSize());
+    level.borderState().newSize(packet.getNewSize());
+    level.borderState().lerpTime(packet.getLerpTime());
   }
 
   @EventHandler
   public void onBorderSize(ClientboundSetBorderSizePacket packet) {
-    borderState.oldSize(borderState.newSize());
-    borderState.newSize(packet.getSize());
+    var level = currentLevel();
+    level.borderState().oldSize(level.borderState().newSize());
+    level.borderState().newSize(packet.getSize());
   }
 
   @EventHandler
   public void onBorderWarningTime(ClientboundSetBorderWarningDelayPacket packet) {
-    borderState.warningTime(packet.getWarningDelay());
+    var level = currentLevel();
+    level.borderState().warningTime(packet.getWarningDelay());
   }
 
   @EventHandler
   public void onBorderWarningBlocks(ClientboundSetBorderWarningDistancePacket packet) {
-    borderState.warningBlocks(packet.getWarningBlocks());
+    var level = currentLevel();
+    level.borderState().warningBlocks(packet.getWarningBlocks());
   }
 
   @EventHandler
   public void onEntitySpawn(ClientboundAddEntityPacket packet) {
+    var level = currentLevel();
     EntityFactory.createEntity(
         connection,
         EntityType.REGISTRY.getById(packet.getType().ordinal()),
@@ -902,17 +902,18 @@ public final class SessionDataManager {
         packet.getUuid())
       .ifPresent(entityState -> {
         entityState.fromAddEntityPacket(packet);
-        entityTrackerState.addEntity(entityState);
+        level.entityTracker().addEntity(entityState);
       });
   }
 
   @EventHandler
   public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
+    var level = currentLevel();
     var x = packet.getX();
     var y = packet.getY();
     var z = packet.getZ();
     var orb =
-      new ExperienceOrbEntity(currentLevel(), packet.getExp());
+      new ExperienceOrbEntity(level, packet.getExp());
     orb.setPos(x, y, z);
     orb.syncPacketPositionCodec(x, y, z);
     orb.setYRot(0.0F);
@@ -920,19 +921,21 @@ public final class SessionDataManager {
     orb.entityId(packet.getEntityId());
     orb.setPos(packet.getX(), packet.getY(), packet.getZ());
 
-    entityTrackerState.addEntity(orb);
+    level.entityTracker().addEntity(orb);
   }
 
   @EventHandler
   public void onEntityRemove(ClientboundRemoveEntitiesPacket packet) {
+    var level = currentLevel();
     for (var entityId : packet.getEntityIds()) {
-      entityTrackerState.removeEntity(entityId);
+      level.entityTracker().removeEntity(entityId);
     }
   }
 
   @EventHandler
   public void onEntityMetadata(ClientboundSetEntityDataPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity metadata packet for unknown entity {}", packet.getEntityId());
@@ -946,7 +949,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityAttributes(ClientboundUpdateAttributesPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity attributes packet for unknown entity {}", packet.getEntityId());
@@ -976,7 +980,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityEvent(ClientboundEntityEventPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity event packet for unknown entity {}", packet.getEntityId());
@@ -988,7 +993,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onUpdateEffect(ClientboundUpdateMobEffectPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received update effect packet for unknown entity {}", packet.getEntityId());
@@ -1009,7 +1015,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onRemoveEffect(ClientboundRemoveMobEffectPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received remove effect packet for unknown entity {}", packet.getEntityId());
@@ -1021,7 +1028,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityMotion(ClientboundSetEntityMotionPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity motion packet for unknown entity {}", packet.getEntityId());
@@ -1033,7 +1041,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityPos(ClientboundMoveEntityPosPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity position packet for unknown entity {}", packet.getEntityId());
@@ -1053,7 +1062,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityRot(ClientboundMoveEntityRotPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity rotation packet for unknown entity {}", packet.getEntityId());
@@ -1068,7 +1078,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityRot(ClientboundRotateHeadPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug("Received entity head rotation packet for unknown entity {}", packet.getEntityId());
@@ -1080,7 +1091,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityPosRot(ClientboundMoveEntityPosRotPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getEntityId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getEntityId());
 
     if (state == null) {
       log.debug(
@@ -1102,7 +1114,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityTeleport(ClientboundTeleportEntityPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getId());
 
     if (state == null) {
       log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
@@ -1124,7 +1137,8 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onEntityPositionSync(ClientboundEntityPositionSyncPacket packet) {
-    var state = entityTrackerState.getEntity(packet.getId());
+    var level = currentLevel();
+    var state = level.entityTracker().getEntity(packet.getId());
 
     if (state == null) {
       log.debug("Received entity teleport packet for unknown entity {}", packet.getId());
@@ -1230,14 +1244,6 @@ public final class SessionDataManager {
       this.level.tickRateManager().tick();
     }
 
-    // Tick border changes
-    if (borderState != null) {
-      borderState.tick();
-    }
-
-    // Tick cooldowns
-    tickCooldowns();
-
     if (this.levelLoadStatusManager != null) {
       this.levelLoadStatusManager.tick();
       if (this.levelLoadStatusManager.levelReady() && !this.localPlayer.hasClientLoaded()) {
@@ -1246,26 +1252,11 @@ public final class SessionDataManager {
       }
     }
 
-    SoulFireAPI.postEvent(new BotPreEntityTickEvent(connection));
+    this.connection.session().flush();
 
-    // Tick entities
-    entityTrackerState.tick();
-
-    SoulFireAPI.postEvent(new BotPostEntityTickEvent(connection));
-  }
-
-  private void tickCooldowns() {
-    synchronized (itemCoolDowns) {
-      var iterator = itemCoolDowns.object2IntEntrySet().iterator();
-      while (iterator.hasNext()) {
-        var entry = iterator.next();
-        var ticks = entry.getIntValue() - 1;
-        if (ticks <= 0) {
-          iterator.remove();
-        } else {
-          entry.setValue(ticks);
-        }
-      }
+    if (this.level != null) {
+      this.level.tickEntities();
+      this.level.tick();
     }
   }
 }

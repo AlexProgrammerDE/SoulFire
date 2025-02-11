@@ -324,7 +324,7 @@ public class POVServer extends InternalPlugin {
         abilitiesData.flySpeed(),
         abilitiesData.walkSpeed()));
 
-    var borderState = dataManager.borderState();
+    var borderState = dataManager.currentLevel().borderState();
     if (borderState != null) {
       clientSession.send(
         new ClientboundInitializeBorderPacket(
@@ -502,7 +502,7 @@ public class POVServer extends InternalPlugin {
       }
     }
 
-    for (var entity : dataManager.entityTrackerState().getEntities()) {
+    for (var entity : dataManager.currentLevel().getEntities()) {
       if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
         clientSession.send(
           new ClientboundAddExperienceOrbPacket(

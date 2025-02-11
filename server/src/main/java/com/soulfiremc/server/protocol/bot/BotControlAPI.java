@@ -294,7 +294,7 @@ public class BotControlAPI {
     Entity closest = null;
     var closestDistance = Double.MAX_VALUE;
 
-    for (var entity : dataManager.entityTrackerState().getEntities()) {
+    for (var entity : dataManager.currentLevel().getEntities()) {
       if (entity.entityId() == dataManager.localPlayer().entityId()) {
         continue;
       }

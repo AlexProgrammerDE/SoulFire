@@ -27,7 +27,11 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.MoverType;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
@@ -65,6 +69,8 @@ public abstract class Player extends LivingEntity {
   private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
   @Getter
   private final AbilitiesState abilitiesState = new AbilitiesState();
+  @Getter
+  private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
   public int experienceLevel;
   public int totalExperience;
   public float experienceProgress;
@@ -98,6 +104,7 @@ public abstract class Player extends LivingEntity {
       this.setPos(x, this.y(), z);
     }
 
+    tickCooldowns();
     this.updatePlayerPose();
   }
 
@@ -422,5 +429,20 @@ public abstract class Player extends LivingEntity {
 
   public FoodData getFoodData() {
     return this.foodData;
+  }
+
+  private void tickCooldowns() {
+    synchronized (itemCoolDowns) {
+      var iterator = itemCoolDowns.object2IntEntrySet().iterator();
+      while (iterator.hasNext()) {
+        var entry = iterator.next();
+        var ticks = entry.getIntValue() - 1;
+        if (ticks <= 0) {
+          iterator.remove();
+        } else {
+          entry.setValue(ticks);
+        }
+      }
+    }
   }
 }
