@@ -23,8 +23,8 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.command.CommandSourceStack;
+import com.soulfiremc.server.command.ConsoleCommandSource;
 import com.soulfiremc.server.command.ServerCommandManager;
-import com.soulfiremc.server.command.ServerConsoleCommandSource;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
@@ -59,7 +59,7 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     }
 
     var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
-    var commandSource = new ServerConsoleCommandSource(soulFire.authSystem());
+    var commandSource = new ConsoleCommandSource(soulFire.authSystem());
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
       command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(commandSource)),

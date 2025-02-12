@@ -17,8 +17,12 @@
  */
 package com.soulfiremc.server.command;
 
+import com.soulfiremc.server.user.PermissionContext;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.util.TriState;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -49,4 +53,19 @@ public interface CommandSource {
   }
 
   void sendMessage(Level level, Component message);
+
+  TriState getPermission(PermissionContext permission);
+
+  default boolean hasPermission(PermissionContext permission) {
+    return getPermission(permission).toBooleanOrElse(false);
+  }
+
+  default void hasPermissionOrThrow(PermissionContext permission) {
+    if (!hasPermission(permission)) {
+      throw new StatusRuntimeException(
+        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
+    }
+  }
+
+  String identifier();
 }

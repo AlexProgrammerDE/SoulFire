@@ -21,6 +21,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.protocol.BotConnection;
@@ -30,7 +31,6 @@ import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.user.ServerCommandSource;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -106,7 +106,7 @@ public class ChatControl extends InternalPlugin {
         .build();
   }
 
-  public record ChatControlCommandSource(BotConnection connection) implements ServerCommandSource {
+  public record ChatControlCommandSource(BotConnection connection) implements CommandSource {
     @Override
     public TriState getPermission(PermissionContext permission) {
       return TriState.TRUE;

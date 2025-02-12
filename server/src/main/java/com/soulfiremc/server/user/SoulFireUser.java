@@ -17,11 +17,12 @@
  */
 package com.soulfiremc.server.user;
 
+import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.database.UserEntity;
 
 import java.util.UUID;
 
-public interface SoulFireUser extends ServerCommandSource {
+public interface SoulFireUser extends CommandSource {
   UUID getUniqueId();
 
   String getUsername();

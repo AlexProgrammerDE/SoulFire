@@ -24,6 +24,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.InstanceEntity;
@@ -43,7 +44,6 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SoulFireAdventure;
@@ -1100,7 +1100,7 @@ public class POVServer extends InternalPlugin {
         .build();
   }
 
-  private record PovServerUser(Session session, String username) implements ServerCommandSource {
+  private record PovServerUser(Session session, String username) implements CommandSource {
     @Override
     public TriState getPermission(PermissionContext permission) {
       return TriState.TRUE;
