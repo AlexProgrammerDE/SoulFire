@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -49,7 +49,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
         user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
 
-        yield CommandSourceStack.ofInstance(user, List.of(instanceId));
+        yield CommandSourceStack.ofInstance(user, Set.of(instanceId));
       }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };
@@ -79,7 +79,7 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
         user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
 
-        yield CommandSourceStack.ofInstance(user, List.of(instanceId));
+        yield CommandSourceStack.ofInstance(user, Set.of(instanceId));
       }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };

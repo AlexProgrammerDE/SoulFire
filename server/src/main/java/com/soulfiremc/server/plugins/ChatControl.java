@@ -39,7 +39,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 import org.slf4j.event.Level;
 
-import java.util.List;
+import java.util.Set;
 
 @Extension
 public class ChatControl extends InternalPlugin {
@@ -77,7 +77,7 @@ public class ChatControl extends InternalPlugin {
       .soulFireServer()
       .injector()
       .getSingleton(ServerCommandManager.class)
-      .execute(command, CommandSourceStack.ofInstance(new ChatControlCommandSource(connection), List.of(connection.instanceManager().id())));
+      .execute(command, CommandSourceStack.ofInstance(new ChatControlCommandSource(connection), Set.of(connection.instanceManager().id())));
   }
 
   @EventHandler

@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
@@ -920,7 +921,7 @@ public class ServerCommandManager {
                       .stream()
                       .filter(bot -> botNames.contains(bot.accountName()))
                       .map(BotConnection::accountProfileId)
-                      .toList());
+                      .collect(Collectors.toSet()));
                 }
               )
             )));
@@ -945,7 +946,7 @@ public class ServerCommandManager {
                       .stream()
                       .filter(instance -> instanceNames.contains(instance.friendlyNameCache().get()))
                       .map(InstanceManager::id)
-                      .toList());
+                      .collect(Collectors.toSet()));
                 }
               ))));
     dispatcher.register(

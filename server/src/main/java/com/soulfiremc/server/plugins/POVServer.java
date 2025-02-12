@@ -913,7 +913,7 @@ public class POVServer extends InternalPlugin {
                     .soulFireServer()
                     .injector()
                     .getSingleton(ServerCommandManager.class)
-                    .execute(command, CommandSourceStack.ofInstance(source, List.of(instanceManager.id())));
+                    .execute(command, CommandSourceStack.ofInstance(source, Set.of(instanceManager.id())));
 
                   log.info("Command \"{}\" executed! (Code: {})", command, code);
                   return;

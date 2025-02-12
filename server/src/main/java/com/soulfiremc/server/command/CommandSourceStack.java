@@ -19,26 +19,26 @@ package com.soulfiremc.server.command;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public record CommandSourceStack(
   CommandSource source,
   @Nullable
-  List<UUID> instanceIds,
+  Set<UUID> instanceIds,
   @Nullable
-  List<UUID> botIds
+  Set<UUID> botIds
 ) {
   public static CommandSourceStack ofUnrestricted(CommandSource source) {
     return new CommandSourceStack(source, null, null);
   }
 
-  public static CommandSourceStack ofInstance(CommandSource source, List<UUID> instanceIds) {
+  public static CommandSourceStack ofInstance(CommandSource source, Set<UUID> instanceIds) {
     return new CommandSourceStack(source, instanceIds, null);
   }
 
-  public CommandSourceStack withInstanceIds(List<UUID> instanceIds) {
+  public CommandSourceStack withInstanceIds(Set<UUID> instanceIds) {
     if (Objects.equals(this.instanceIds, instanceIds)) {
       return this;
     }
@@ -50,7 +50,7 @@ public record CommandSourceStack(
     return new CommandSourceStack(source, instanceIds, botIds);
   }
 
-  public CommandSourceStack withBotIds(List<UUID> botIds) {
+  public CommandSourceStack withBotIds(Set<UUID> botIds) {
     if (Objects.equals(this.botIds, botIds)) {
       return this;
     }
