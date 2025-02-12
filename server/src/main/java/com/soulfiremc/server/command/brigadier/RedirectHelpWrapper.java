@@ -20,16 +20,17 @@ package com.soulfiremc.server.command.brigadier;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.soulfiremc.server.command.CommandSource;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import java.util.Collection;
 
-public record RedirectHelpWrapper<S extends CommandSource>(
-  RedirectModifier<S> command, String help, boolean privateCommand)
-  implements RedirectModifier<S> {
+public record RedirectHelpWrapper(
+  RedirectModifier<CommandSourceStack> command,
+  String help,
+  boolean privateCommand
+) implements RedirectModifier<CommandSourceStack> {
   @Override
-  public Collection<S> apply(CommandContext<S> context)
-    throws CommandSyntaxException {
+  public Collection<CommandSourceStack> apply(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return command.apply(context);
   }
 }

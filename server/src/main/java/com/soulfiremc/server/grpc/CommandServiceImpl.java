@@ -18,9 +18,9 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -39,21 +39,23 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   @Override
   public void executeCommand(
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
-      case INSTANCE -> () -> {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    var stack = switch (request.getScopeCase()) {
+      case GLOBAL -> {
+        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
+        yield CommandSourceStack.ofUnrestricted(user);
+      }
+      case INSTANCE -> {
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
+        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
 
-        ServerCommandManager.putInstanceIds(List.of(instanceId));
-      };
-      case SCOPE_NOT_SET -> () -> {
-        throw new IllegalArgumentException("Scope not set");
-      };
-    });
+        yield CommandSourceStack.ofInstance(user, List.of(instanceId));
+      }
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    };
 
     try {
-      var code = serverCommandManager.execute(request.getCommand(), ServerRPCConstants.USER_CONTEXT_KEY.get());
+      var code = serverCommandManager.execute(request.getCommand(), stack);
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
       responseObserver.onCompleted();
@@ -67,21 +69,23 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
   public void tabCompleteCommand(
     CommandCompletionRequest request,
     StreamObserver<CommandCompletionResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_COMPLETION));
-      case INSTANCE -> () -> {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    var stack = switch (request.getScopeCase()) {
+      case GLOBAL -> {
+        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_COMPLETION));
+        yield CommandSourceStack.ofUnrestricted(user);
+      }
+      case INSTANCE -> {
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
+        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
 
-        ServerCommandManager.putInstanceIds(List.of(instanceId));
-      };
-      case SCOPE_NOT_SET -> () -> {
-        throw new IllegalArgumentException("Scope not set");
-      };
-    });
+        yield CommandSourceStack.ofInstance(user, List.of(instanceId));
+      }
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    };
 
     try {
-      var suggestions = serverCommandManager.complete(request.getCommand(), request.getCursor(), ServerRPCConstants.USER_CONTEXT_KEY.get())
+      var suggestions = serverCommandManager.complete(request.getCommand(), request.getCursor(), stack)
         .stream()
         .map(completion -> {
           var builder = CommandCompletion.newBuilder()

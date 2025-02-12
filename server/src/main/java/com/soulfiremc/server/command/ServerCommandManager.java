@@ -50,7 +50,6 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
 import com.soulfiremc.server.spark.SFSparkPlugin;
-import com.soulfiremc.server.user.ServerCommandSource;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.SoulFireAdventure;
@@ -58,7 +57,6 @@ import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import com.viaversion.vialoader.util.ProtocolVersionList;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -77,7 +75,6 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.command.brigadier.ServerBrigadierHelper.*;
@@ -87,49 +84,9 @@ import static com.soulfiremc.server.command.brigadier.ServerBrigadierHelper.*;
  */
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ServerCommandManager {
-  private static final ThreadLocal<Map<String, String>> COMMAND_CONTEXT =
-    ThreadLocal.withInitial(Object2ObjectOpenHashMap::new);
-  private static final String INSTANCE_IDS_KEY = "instance_ids";
-  private static final String BOT_NAMES_KEY = "bot_names";
   @Getter
-  private final CommandDispatcher<ServerCommandSource> dispatcher = new CommandDispatcher<>();
+  private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;
-
-  public static void putInstanceIds(List<UUID> ids) {
-    if (hasInstanceIds()) {
-      throw new IllegalStateException("Instance ids already set!");
-    }
-
-    COMMAND_CONTEXT.get().put(INSTANCE_IDS_KEY, ids.stream().map(UUID::toString).collect(Collectors.joining(",")));
-  }
-
-  public static void putBotNames(List<String> names) {
-    if (hasBotNames()) {
-      throw new IllegalStateException("Bot names already set!");
-    }
-
-    COMMAND_CONTEXT.get().put(BOT_NAMES_KEY, String.join(",", names));
-  }
-
-  public static boolean hasBotNames() {
-    return COMMAND_CONTEXT.get().containsKey(BOT_NAMES_KEY);
-  }
-
-  public static boolean hasInstanceIds() {
-    return COMMAND_CONTEXT.get().containsKey(INSTANCE_IDS_KEY);
-  }
-
-  public static List<String> getBotNames() {
-    return List.of(COMMAND_CONTEXT.get().get(BOT_NAMES_KEY).split(","));
-  }
-
-  public static List<UUID> getInstanceIds() {
-    return Arrays.stream(COMMAND_CONTEXT.get().get(INSTANCE_IDS_KEY).split(",")).map(UUID::fromString).toList();
-  }
-
-  public static void clearContext() {
-    COMMAND_CONTEXT.get().clear();
-  }
 
   @PostConstruct
   public void postConstruct() {
@@ -140,9 +97,9 @@ public class ServerCommandManager {
           help(
             "Prints a list of all available commands",
             c -> {
-              c.getSource().sendInfo("Available commands:");
+              c.getSource().source().sendInfo("Available commands:");
               for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
-                c.getSource().sendInfo("{} -> {}", command.command(), command.help());
+                c.getSource().source().sendInfo("{} -> {}", command.command(), command.help());
               }
 
               return Command.SINGLE_SUCCESS;
@@ -155,8 +112,8 @@ public class ServerCommandManager {
           help(
             "Generate an auth JWT for the current user",
             c -> {
-              if (!(c.getSource() instanceof SoulFireUser user)) {
-                c.getSource().sendInfo("Only SoulFire users can generate tokens.");
+              if (!(c.getSource().source() instanceof SoulFireUser user)) {
+                c.getSource().source().sendInfo("Only SoulFire users can generate tokens.");
                 return Command.SINGLE_SUCCESS;
               }
 
@@ -174,8 +131,8 @@ public class ServerCommandManager {
             help(
               "Set the email of the current user",
               c -> {
-                if (!(c.getSource() instanceof SoulFireUser user)) {
-                  c.getSource().sendInfo("Only SoulFire users can set their email.");
+                if (!(c.getSource().source() instanceof SoulFireUser user)) {
+                  c.getSource().source().sendInfo("Only SoulFire users can set their email.");
                   return Command.SINGLE_SUCCESS;
                 }
 
@@ -185,7 +142,7 @@ public class ServerCommandManager {
                   userData.email(email);
                   s.merge(userData);
                 });
-                c.getSource().sendInfo("Email of user {} set to {}", user.getUsername(), email);
+                c.getSource().source().sendInfo("Email of user {} set to {}", user.getUsername(), email);
 
                 return Command.SINGLE_SUCCESS;
               }))));
@@ -195,8 +152,8 @@ public class ServerCommandManager {
           help(
             "See who you are",
             c -> {
-              c.getSource().sendInfo("Your are: {}",
-                c.getSource() instanceof SoulFireUser user ? user.getUsername() : c.getSource().identifier());
+              c.getSource().source().sendInfo("Your are: {}",
+                c.getSource().source() instanceof SoulFireUser user ? user.getUsername() : c.getSource().source().identifier());
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -208,14 +165,14 @@ public class ServerCommandManager {
             c -> {
               var extensions = SoulFireAPI.getServerExtensions();
               if (extensions.isEmpty()) {
-                c.getSource().sendWarn("No plugins found!");
+                c.getSource().source().sendWarn("No plugins found!");
                 return Command.SINGLE_SUCCESS;
               }
 
               extensions.forEach(
                 plugin -> {
                   var pluginInfo = plugin.pluginInfo();
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Plugin: {} | Version: {} | Description: {} | Author: {} | License: {}",
                       pluginInfo.id(),
@@ -243,13 +200,13 @@ public class ServerCommandManager {
                   bot -> {
                     var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
                     if (entityId.isEmpty()) {
-                      c.getSource().sendWarn("Invalid entity specified!");
+                      c.getSource().source().sendWarn("Invalid entity specified!");
                       return Command.SINGLE_SUCCESS;
                     }
 
                     var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
-                      c.getSource().sendWarn("Entity not found!");
+                      c.getSource().source().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
                     }
 
@@ -370,7 +327,7 @@ public class ServerCommandManager {
                     bot -> {
                       var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
                       if (entityId.isEmpty()) {
-                        c.getSource().sendWarn("Invalid entity specified!");
+                        c.getSource().source().sendWarn("Invalid entity specified!");
                         return Command.SINGLE_SUCCESS;
                       }
 
@@ -444,13 +401,13 @@ public class ServerCommandManager {
                   bot -> {
                     var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
                     if (entityId.isEmpty()) {
-                      c.getSource().sendWarn("Invalid entity specified!");
+                      c.getSource().source().sendWarn("Invalid entity specified!");
                       return Command.SINGLE_SUCCESS;
                     }
 
                     var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
-                      c.getSource().sendWarn("Entity not found!");
+                      c.getSource().source().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
                     }
 
@@ -492,9 +449,9 @@ public class ServerCommandManager {
                 c,
                 bot -> {
                   if (bot.botControl().stopControllingTask()) {
-                    c.getSource().sendInfo("Stopped current task for " + bot.accountName());
+                    c.getSource().source().sendInfo("Stopped current task for " + bot.accountName());
                   } else {
-                    c.getSource().sendWarn("No task was running!");
+                    c.getSource().source().sendWarn("No task was running!");
                   }
 
                   return Command.SINGLE_SUCCESS;
@@ -719,14 +676,14 @@ public class ServerCommandManager {
               c -> {
                 var command = StringArgumentType.getString(c, "command");
                 SFSparkPlugin.INSTANCE.platform()
-                  .executeCommand(new SFSparkCommandSender(c.getSource()), command.split(ARGUMENT_SEPARATOR));
+                  .executeCommand(new SFSparkCommandSender(c.getSource().source()), command.split(ARGUMENT_SEPARATOR));
                 return Command.SINGLE_SUCCESS;
               })))
         .executes(
           help(
             "Get spark help",
             c -> {
-              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource()), new String[]{});
+              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource().source()), new String[]{});
               return Command.SINGLE_SUCCESS;
             })));
 
@@ -747,7 +704,7 @@ public class ServerCommandManager {
                     }
                   }
 
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       online.size() + " bots online: " + String.join(", ", online));
                   return Command.SINGLE_SUCCESS;
@@ -783,7 +740,7 @@ public class ServerCommandManager {
               forEveryAttackEnsureHasBots(
                 c,
                 instanceManager -> {
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Total bots: {}", instanceManager.botConnections().size());
                   long readTraffic = 0;
@@ -801,11 +758,11 @@ public class ServerCommandManager {
                       trafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
                   }
 
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Total read traffic: {}",
                       FileUtils.byteCountToDisplaySize(readTraffic));
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Total write traffic: {}",
                       FileUtils.byteCountToDisplaySize(writeTraffic));
@@ -825,11 +782,11 @@ public class ServerCommandManager {
                       trafficShapingHandler.trafficCounter().lastWriteThroughput();
                   }
 
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Current read traffic: {}/s",
                       FileUtils.byteCountToDisplaySize(currentReadTraffic));
-                  c.getSource()
+                  c.getSource().source()
                     .sendInfo(
                       "Current write traffic: {}/s",
                       FileUtils.byteCountToDisplaySize(currentWriteTraffic));
@@ -850,17 +807,17 @@ public class ServerCommandManager {
                   bot -> {
                     var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
                     if (entityId.isEmpty()) {
-                      c.getSource().sendWarn("Invalid entity specified!");
+                      c.getSource().source().sendWarn("Invalid entity specified!");
                       return Command.SINGLE_SUCCESS;
                     }
 
                     var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
                     if (entity == null) {
-                      c.getSource().sendWarn("Entity not found!");
+                      c.getSource().source().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    c.getSource().sendInfo("Metadata for entity {}: {}", entityId, entity.metadataState().toNamedMap());
+                    c.getSource().source().sendInfo("Metadata for entity {}: {}", entityId, entity.metadataState().toNamedMap());
 
                     return Command.SINGLE_SUCCESS;
                   });
@@ -905,7 +862,7 @@ public class ServerCommandManager {
                       "| `%s`%s | `%s` | `%s` |\n".formatted(version.getName(), SFVersionConstants.CURRENT_PROTOCOL_VERSION == version
                         ? " (native)" : "", versionId, type));
                   });
-              c.getSource().sendInfo(builder.toString());
+              c.getSource().source().sendInfo(builder.toString());
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -918,7 +875,7 @@ public class ServerCommandManager {
               for (var command : getAllUsage(dispatcher.getRoot(), c.getSource())) {
                 builder.append("| `%s{:bash}` | %s |\n".formatted(command.command(), command.help()));
               }
-              c.getSource().sendInfo(builder.toString());
+              c.getSource().source().sendInfo(builder.toString());
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -936,7 +893,7 @@ public class ServerCommandManager {
                 var pluginInfo = plugin.pluginInfo();
                 builder.append("| `%s` | %s | %s | %s |\n".formatted(pluginInfo.id(), pluginInfo.description(), pluginInfo.author(), pluginInfo.license()));
               }
-              c.getSource().sendInfo(builder.toString());
+              c.getSource().source().sendInfo(builder.toString());
 
               return Command.SINGLE_SUCCESS;
             })));
@@ -963,10 +920,9 @@ public class ServerCommandManager {
               dispatcher.getRoot(),
               helpRedirect(
                 "Instead of running a command for selected bots, run it for a specific list of bots. Use a comma to separate the names",
-                c -> {
-                  putBotNames(List.of(StringArgumentType.getString(c, "bot_names").split(",")));
-                  return Collections.singleton(c.getSource());
-                }),
+                c -> Collections.singleton(c.getSource()
+                  .withBotNames(List.of(StringArgumentType.getString(c, "bot_names").split(","))))
+              ),
               false)));
     dispatcher.register(
       literal("attack")
@@ -989,14 +945,12 @@ public class ServerCommandManager {
               dispatcher.getRoot(),
               helpRedirect(
                 "Instead of running a command for selected attacks, run it for a specific list of attacks. Use a comma to separate the ids",
-                c -> {
-                  putInstanceIds(Arrays.stream(StringArgumentType.getString(c, "attack_ids").split(","))
+                c -> Collections.singleton(c.getSource()
+                  .withInstanceIds(Arrays.stream(StringArgumentType.getString(c, "attack_ids").split(","))
                     .map(UUIDHelper::tryParseUniqueId)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .toList());
-                  return Collections.singleton(c.getSource());
-                }),
+                    .toList()))),
               false)));
     dispatcher.register(
       literal("repeat")
@@ -1008,7 +962,7 @@ public class ServerCommandManager {
                 "Repeat the command for the specified amount of times",
                 c -> {
                   var amount = IntegerArgumentType.getInteger(c, "amount");
-                  var list = new ArrayList<ServerCommandSource>();
+                  var list = new ArrayList<CommandSourceStack>();
                   for (var i = 0; i < amount; i++) {
                     list.add(c.getSource());
                   }
@@ -1021,7 +975,7 @@ public class ServerCommandManager {
   }
 
   private int exportMap(
-    CommandContext<ServerCommandSource> context, Function<BotConnection, IntSet> idProvider) {
+    CommandContext<CommandSourceStack> context, Function<BotConnection, IntSet> idProvider) {
     // Inside here to capture a time for the file name
     var currentTime = System.currentTimeMillis();
     return forEveryBot(
@@ -1030,7 +984,7 @@ public class ServerCommandManager {
         for (var mapId : idProvider.apply(bot).toIntArray()) {
           var mapDataState = bot.dataManager().mapDataStates().get(mapId);
           if (mapDataState == null) {
-            context.getSource().sendInfo("Map not found!");
+            context.getSource().source().sendInfo("Map not found!");
             return Command.SINGLE_SUCCESS;
           }
 
@@ -1041,9 +995,9 @@ public class ServerCommandManager {
             Files.createDirectories(mapsDirectory);
             var file = mapsDirectory.resolve(fileName);
             ImageIO.write(image, "png", file.toFile());
-            context.getSource().sendInfo("Exported map to {}", file);
+            context.getSource().source().sendInfo("Exported map to {}", file);
           } catch (IOException e) {
-            context.getSource().sendError("Failed to export map!", e);
+            context.getSource().source().sendError("Failed to export map!", e);
           }
         }
 
@@ -1052,17 +1006,17 @@ public class ServerCommandManager {
   }
 
   public int forEveryAttack(
-    CommandContext<ServerCommandSource> context, ToIntFunction<InstanceManager> consumer) {
+    CommandContext<CommandSourceStack> context, ToIntFunction<InstanceManager> consumer) {
     return forEveryAttack(context, consumer, true);
   }
 
   private int forEveryAttack(
-    CommandContext<ServerCommandSource> context,
+    CommandContext<CommandSourceStack> context,
     ToIntFunction<InstanceManager> consumer,
     boolean printMessages) {
     if (soulFireServer.instances().isEmpty()) {
       if (printMessages) {
-        context.getSource().sendWarn("No attacks found!");
+        context.getSource().source().sendWarn("No attacks found!");
       }
 
       return 2;
@@ -1070,7 +1024,7 @@ public class ServerCommandManager {
 
     var resultCode = Command.SINGLE_SUCCESS;
     for (var instanceManager : soulFireServer.instances().values()) {
-      if (hasInstanceIds() && getInstanceIds()
+      if (context.getSource().instanceIds() != null && context.getSource().instanceIds()
         .stream()
         .noneMatch(instanceManager.id()::equals)) {
         continue;
@@ -1079,6 +1033,7 @@ public class ServerCommandManager {
       if (printMessages) {
         context
           .getSource()
+          .source()
           .sendInfo("--- Running command for attack " + instanceManager.id() + " ---");
       }
 
@@ -1092,12 +1047,12 @@ public class ServerCommandManager {
   }
 
   public int forEveryAttackEnsureHasBots(
-    CommandContext<ServerCommandSource> context, ToIntFunction<InstanceManager> consumer) {
+    CommandContext<CommandSourceStack> context, ToIntFunction<InstanceManager> consumer) {
     return forEveryAttackEnsureHasBots(context, consumer, true);
   }
 
   private int forEveryAttackEnsureHasBots(
-    CommandContext<ServerCommandSource> context,
+    CommandContext<CommandSourceStack> context,
     ToIntFunction<InstanceManager> consumer,
     boolean printMessages) {
     return forEveryAttack(
@@ -1105,7 +1060,7 @@ public class ServerCommandManager {
       instanceManager -> {
         if (instanceManager.botConnections().isEmpty()) {
           if (printMessages) {
-            context.getSource().sendWarn("No bots found in attack " + instanceManager.id() + "!");
+            context.getSource().source().sendWarn("No bots found in attack " + instanceManager.id() + "!");
           }
           return 3;
         }
@@ -1116,12 +1071,12 @@ public class ServerCommandManager {
   }
 
   public int forEveryBot(
-    CommandContext<ServerCommandSource> context, ToIntFunction<BotConnection> consumer) {
+    CommandContext<CommandSourceStack> context, ToIntFunction<BotConnection> consumer) {
     return forEveryBot(context, consumer, true);
   }
 
   private int forEveryBot(
-    CommandContext<ServerCommandSource> context,
+    CommandContext<CommandSourceStack> context,
     ToIntFunction<BotConnection> consumer,
     boolean printMessages) {
     return forEveryAttackEnsureHasBots(
@@ -1129,7 +1084,7 @@ public class ServerCommandManager {
       instanceManager -> {
         var resultCode = Command.SINGLE_SUCCESS;
         for (var bot : instanceManager.botConnections().values()) {
-          if (hasBotNames() && getBotNames()
+          if (context.getSource().botNames() != null && context.getSource().botNames()
             .stream()
             .noneMatch(bot.accountName()::equals)) {
             continue;
@@ -1138,6 +1093,7 @@ public class ServerCommandManager {
           if (printMessages) {
             context
               .getSource()
+              .source()
               .sendInfo("--- Running command for bot " + bot.accountName() + " ---");
           }
 
@@ -1152,7 +1108,7 @@ public class ServerCommandManager {
       printMessages);
   }
 
-  public int executePathfinding(CommandContext<ServerCommandSource> context,
+  public int executePathfinding(CommandContext<CommandSourceStack> context,
                                 Function<BotConnection, GoalScorer> goalScorerFactory) {
     return forEveryBot(
       context,
@@ -1162,51 +1118,45 @@ public class ServerCommandManager {
       });
   }
 
-  public int execute(String command, ServerCommandSource source) {
+  public int execute(String command, CommandSourceStack source) {
     command = command.strip();
 
     try {
       return dispatcher.execute(command, source);
     } catch (CommandSyntaxException e) {
-      source.sendWarn(e.getMessage());
+      source.source().sendWarn(e.getMessage());
       return Command.SINGLE_SUCCESS;
-    } finally {
-      clearContext();
     }
   }
 
-  public List<GenericTerminalConsole.Completion> complete(String command, int cursor, ServerCommandSource source) {
-    try {
-      return dispatcher
-        .getCompletionSuggestions(dispatcher.parse(command, source), cursor)
-        .join()
-        .getList()
-        .stream()
-        .map(suggestion -> {
-          var tooltipComponent = switch (suggestion.getTooltip()) {
-            case null -> null;
-            case BrigadierComponent brigadierComponent -> brigadierComponent.component();
-            default -> Component.text(suggestion.getTooltip().getString());
-          };
-          return new GenericTerminalConsole.Completion(suggestion.getText(),
-            SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serializeOrNull(tooltipComponent));
-        })
-        .toList();
-    } finally {
-      clearContext();
-    }
+  public List<GenericTerminalConsole.Completion> complete(String command, int cursor, CommandSourceStack source) {
+    return dispatcher
+      .getCompletionSuggestions(dispatcher.parse(command, source), cursor)
+      .join()
+      .getList()
+      .stream()
+      .map(suggestion -> {
+        var tooltipComponent = switch (suggestion.getTooltip()) {
+          case null -> null;
+          case BrigadierComponent brigadierComponent -> brigadierComponent.component();
+          default -> Component.text(suggestion.getTooltip().getString());
+        };
+        return new GenericTerminalConsole.Completion(suggestion.getText(),
+          SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serializeOrNull(tooltipComponent));
+      })
+      .toList();
   }
 
   private HelpData[] getAllUsage(
-    final CommandNode<ServerCommandSource> node, final ServerCommandSource source) {
+    final CommandNode<CommandSourceStack> node, final CommandSourceStack source) {
     final var result = new ArrayList<HelpData>();
     getAllUsage(node, source, result, "");
     return result.toArray(new HelpData[0]);
   }
 
   private void getAllUsage(
-    final CommandNode<ServerCommandSource> node,
-    final ServerCommandSource source,
+    final CommandNode<CommandSourceStack> node,
+    final CommandSourceStack source,
     final ArrayList<HelpData> result,
     final String prefix) {
     if (!node.canUse(source)) {
@@ -1214,14 +1164,14 @@ public class ServerCommandManager {
     }
 
     if (node.getCommand() != null) {
-      var helpWrapper = (CommandHelpWrapper<?>) node.getCommand();
+      var helpWrapper = (CommandHelpWrapper) node.getCommand();
       if (!helpWrapper.privateCommand()) {
         result.add(new HelpData(prefix, helpWrapper.help()));
       }
     }
 
     if (node.getRedirect() != null) {
-      var redirectHelpWrapper = (RedirectHelpWrapper<?>) node.getRedirectModifier();
+      var redirectHelpWrapper = (RedirectHelpWrapper) node.getRedirectModifier();
       if (!redirectHelpWrapper.privateCommand()) {
         final var redirect =
           node.getRedirect() == dispatcher.getRoot()

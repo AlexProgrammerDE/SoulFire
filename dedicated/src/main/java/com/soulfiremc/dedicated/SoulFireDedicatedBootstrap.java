@@ -22,6 +22,7 @@ import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.command.ServerConsoleCommandSource;
 import com.soulfiremc.server.user.AuthSystem;
@@ -61,8 +62,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var commandSource = new ServerConsoleCommandSource(soulFire.authSystem());
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      command -> commandManager.execute(command, commandSource),
-      (command, cursor) -> commandManager.complete(command, cursor, commandSource),
+      command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(commandSource)),
+      (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(commandSource)),
       SFPathConstants.WORKING_DIRECTORY
     ).start();
 

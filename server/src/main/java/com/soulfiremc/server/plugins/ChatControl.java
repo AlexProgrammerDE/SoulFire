@@ -21,6 +21,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -72,12 +73,11 @@ public class ChatControl extends InternalPlugin {
     var command = plainMessage.substring(prefix.length());
     connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
 
-    ServerCommandManager.putInstanceIds(List.of(connection.instanceManager().id()));
     connection.instanceManager()
       .soulFireServer()
       .injector()
       .getSingleton(ServerCommandManager.class)
-      .execute(command, new ChatControlCommandSource(connection));
+      .execute(command, CommandSourceStack.ofInstance(new ChatControlCommandSource(connection), List.of(connection.instanceManager().id())));
   }
 
   @EventHandler

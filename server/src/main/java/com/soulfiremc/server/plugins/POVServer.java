@@ -24,6 +24,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
@@ -918,12 +919,11 @@ public class POVServer extends InternalPlugin {
                   var command = message.substring(prefix.length());
                   var source = new PovServerUser(clientSession, clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getName());
 
-                  ServerCommandManager.putInstanceIds(List.of(instanceManager.id()));
                   var code = instanceManager
                     .soulFireServer()
                     .injector()
                     .getSingleton(ServerCommandManager.class)
-                    .execute(command, source);
+                    .execute(command, CommandSourceStack.ofInstance(source, List.of(instanceManager.id())));
 
                   log.info("Command \"{}\" executed! (Code: {})", command, code);
                   return;

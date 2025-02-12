@@ -22,30 +22,30 @@ import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.soulfiremc.server.user.ServerCommandSource;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 public class ServerBrigadierHelper {
   private ServerBrigadierHelper() {}
 
-  public static LiteralArgumentBuilder<ServerCommandSource> literal(String name) {
+  public static LiteralArgumentBuilder<CommandSourceStack> literal(String name) {
     return LiteralArgumentBuilder.literal(name);
   }
 
-  public static <T> RequiredArgumentBuilder<ServerCommandSource, T> argument(
+  public static <T> RequiredArgumentBuilder<CommandSourceStack, T> argument(
     String name, ArgumentType<T> type) {
     return RequiredArgumentBuilder.argument(name, type);
   }
 
-  public static Command<ServerCommandSource> help(String help, Command<ServerCommandSource> command) {
-    return new CommandHelpWrapper<>(command, help, false);
+  public static Command<CommandSourceStack> help(String help, Command<CommandSourceStack> command) {
+    return new CommandHelpWrapper(command, help, false);
   }
 
-  public static RedirectModifier<ServerCommandSource> helpRedirect(
-    String help, RedirectModifier<ServerCommandSource> redirect) {
-    return new RedirectHelpWrapper<>(redirect, help, false);
+  public static RedirectModifier<CommandSourceStack> helpRedirect(
+    String help, RedirectModifier<CommandSourceStack> redirect) {
+    return new RedirectHelpWrapper(redirect, help, false);
   }
 
-  public static Command<ServerCommandSource> privateCommand(Command<ServerCommandSource> command) {
-    return new CommandHelpWrapper<>(command, null, true);
+  public static Command<CommandSourceStack> privateCommand(Command<CommandSourceStack> command) {
+    return new CommandHelpWrapper(command, null, true);
   }
 }
