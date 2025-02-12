@@ -15,42 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command.brigadier;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3d;
 
 import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class DynamicXYZArgumentType implements ArgumentType<DynamicXYZArgumentType.XYZLocationMapper> {
+public class DynamicYArgumentType implements ArgumentType<DynamicYArgumentType.YLocationMapper> {
   @Override
-  public XYZLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
-    var x = ArgumentTypeHelper.readAxis(stringReader);
-    ArgumentTypeHelper.mustReadSpace(stringReader);
+  public YLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
     var y = ArgumentTypeHelper.readAxis(stringReader);
-    ArgumentTypeHelper.mustReadSpace(stringReader);
-    var z = ArgumentTypeHelper.readAxis(stringReader);
 
-    return baseLocation -> {
-      var xValue = x.relative() ? baseLocation.getX() + x.value() : x.value();
-      var yValue = y.relative() ? baseLocation.getY() + y.value() : y.value();
-      var zValue = z.relative() ? baseLocation.getZ() + z.value() : z.value();
-
-      return Vector3d.from(xValue, yValue, zValue);
-    };
+    return baseLocation -> y.relative() ? baseLocation + y.value() : y.value();
   }
 
   @Override
   public Collection<String> getExamples() {
-    return List.of("~ ~ ~", "~ ~1 ~", "1 2 3", "~ ~ ~-1", "~ ~ ~0");
+    return List.of("~", "~1", "1", "~-1", "~0");
   }
 
-  public interface XYZLocationMapper {
-    Vector3d getAbsoluteLocation(Vector3d baseLocation);
+  public interface YLocationMapper {
+    double getAbsoluteLocation(double baseLocation);
   }
 }

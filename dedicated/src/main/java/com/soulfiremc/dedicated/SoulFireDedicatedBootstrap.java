@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.dedicated;
 
-import com.soulfiremc.brigadier.GenericTerminalConsole;
+import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
-import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.brigadier.ServerConsoleCommandSource;
+import com.soulfiremc.server.command.ServerCommandManager;
+import com.soulfiremc.server.command.ServerConsoleCommandSource;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;

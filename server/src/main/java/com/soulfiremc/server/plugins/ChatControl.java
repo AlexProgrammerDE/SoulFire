@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;

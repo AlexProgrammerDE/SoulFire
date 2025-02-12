@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.brigadier;
+package com.soulfiremc.server.command.brigadier;
 
 import com.mojang.brigadier.Message;
 import com.soulfiremc.server.util.SoulFireAdventure;

@@ -18,13 +18,13 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.ServerCommandManager;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;

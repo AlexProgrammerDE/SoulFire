@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command;
 
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.AuthSystem;

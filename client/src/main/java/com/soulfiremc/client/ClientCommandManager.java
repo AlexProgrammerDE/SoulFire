@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.client;
 
-import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
+import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandRequest;
 import com.soulfiremc.grpc.generated.InstanceCommandScope;

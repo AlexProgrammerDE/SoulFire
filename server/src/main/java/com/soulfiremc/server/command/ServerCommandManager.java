@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server;
+package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -24,15 +24,14 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import com.soulfiremc.brigadier.BrigadierComponent;
-import com.soulfiremc.brigadier.CommandHelpWrapper;
-import com.soulfiremc.brigadier.GenericTerminalConsole;
-import com.soulfiremc.brigadier.RedirectHelpWrapper;
+import com.soulfiremc.console.GenericTerminalConsole;
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
-import com.soulfiremc.server.brigadier.*;
+import com.soulfiremc.server.command.brigadier.*;
 import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.database.UserEntity;
@@ -81,7 +80,7 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static com.soulfiremc.server.brigadier.ServerBrigadierHelper.*;
+import static com.soulfiremc.server.command.brigadier.ServerBrigadierHelper.*;
 
 /**
  * Holds and configures all server-side text commands of SoulFire itself.

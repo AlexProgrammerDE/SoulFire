@@ -15,20 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.brigadier;
-
-import com.mojang.brigadier.RedirectModifier;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import java.util.Collection;
-
-public record RedirectHelpWrapper<S extends CommandSource>(
-  RedirectModifier<S> command, String help, boolean privateCommand)
-  implements RedirectModifier<S> {
-  @Override
-  public Collection<S> apply(CommandContext<S> context)
-    throws CommandSyntaxException {
-    return command.apply(context);
-  }
-}
+/**
+ * Brigadier helpers.
+ */
+package com.soulfiremc.server.command.brigadier;

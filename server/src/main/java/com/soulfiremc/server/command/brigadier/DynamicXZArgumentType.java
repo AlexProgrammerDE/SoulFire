@@ -15,31 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command.brigadier;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector2d;
 
 import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class DynamicYArgumentType implements ArgumentType<DynamicYArgumentType.YLocationMapper> {
+public class DynamicXZArgumentType implements ArgumentType<DynamicXZArgumentType.XZLocationMapper> {
   @Override
-  public YLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
-    var y = ArgumentTypeHelper.readAxis(stringReader);
+  public XZLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
+    var x = ArgumentTypeHelper.readAxis(stringReader);
+    ArgumentTypeHelper.mustReadSpace(stringReader);
+    var z = ArgumentTypeHelper.readAxis(stringReader);
 
-    return baseLocation -> y.relative() ? baseLocation + y.value() : y.value();
+    return baseLocation -> {
+      var xValue = x.relative() ? baseLocation.getX() + x.value() : x.value();
+      var zValue = z.relative() ? baseLocation.getY() + z.value() : z.value();
+
+      return Vector2d.from(xValue, zValue);
+    };
   }
 
   @Override
   public Collection<String> getExamples() {
-    return List.of("~", "~1", "1", "~-1", "~0");
+    return List.of("~ ~", "~ ~1", "1 2", "~ ~-1", "~ ~0");
   }
 
-  public interface YLocationMapper {
-    double getAbsoluteLocation(double baseLocation);
+  public interface XZLocationMapper {
+    Vector2d getAbsoluteLocation(Vector2d baseLocation);
   }
 }

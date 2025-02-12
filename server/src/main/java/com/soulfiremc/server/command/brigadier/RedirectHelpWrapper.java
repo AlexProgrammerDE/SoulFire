@@ -15,9 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command.brigadier;
 
-import com.soulfiremc.server.data.BlockType;
+import com.mojang.brigadier.RedirectModifier;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.server.command.CommandSource;
 
-public interface BlockTagResolvable extends TagResolvable<BlockType> {
+import java.util.Collection;
+
+public record RedirectHelpWrapper<S extends CommandSource>(
+  RedirectModifier<S> command, String help, boolean privateCommand)
+  implements RedirectModifier<S> {
+  @Override
+  public Collection<S> apply(CommandContext<S> context)
+    throws CommandSyntaxException {
+    return command.apply(context);
+  }
 }

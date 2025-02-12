@@ -15,7 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Brigadier helpers for only the server.
- */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command.brigadier;
+
+import com.soulfiremc.server.protocol.bot.state.TagsState;
+
+import java.util.function.Predicate;
+
+public interface TagResolvable<T> {
+  Predicate<T> resolve(TagsState tagsState);
+}

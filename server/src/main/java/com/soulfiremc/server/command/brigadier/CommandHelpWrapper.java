@@ -15,12 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.brigadier;
+package com.soulfiremc.server.command.brigadier;
 
-import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.server.command.CommandSource;
 
-import java.util.function.Predicate;
-
-public interface TagResolvable<T> {
-  Predicate<T> resolve(TagsState tagsState);
+public record CommandHelpWrapper<S extends CommandSource>(
+  Command<S> command, String help, boolean privateCommand)
+  implements Command<S> {
+  @Override
+  public int run(CommandContext<S> context) throws CommandSyntaxException {
+    return command.run(context);
+  }
 }

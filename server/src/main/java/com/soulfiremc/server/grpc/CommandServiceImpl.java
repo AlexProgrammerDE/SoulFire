@@ -18,7 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.ServerCommandManager;
+import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;

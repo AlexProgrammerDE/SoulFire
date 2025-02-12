@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.spark;
 
-import com.soulfiremc.brigadier.CommandSource;
+import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.user.SoulFireUser;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;

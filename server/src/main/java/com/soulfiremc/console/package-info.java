@@ -15,17 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.brigadier;
-
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-public record CommandHelpWrapper<S extends CommandSource>(
-  Command<S> command, String help, boolean privateCommand)
-  implements Command<S> {
-  @Override
-  public int run(CommandContext<S> context) throws CommandSyntaxException {
-    return command.run(context);
-  }
-}
+/**
+ * Console helpers for client and server.
+ */
+package com.soulfiremc.console;

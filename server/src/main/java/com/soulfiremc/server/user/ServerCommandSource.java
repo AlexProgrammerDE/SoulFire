@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.user;
 
-import com.soulfiremc.brigadier.CommandSource;
+import com.soulfiremc.server.command.CommandSource;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import net.kyori.adventure.util.TriState;

@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.client.cli;
 
-import com.soulfiremc.brigadier.GenericTerminalConsole;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
