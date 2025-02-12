@@ -27,6 +27,7 @@ import com.google.gson.JsonPrimitive;
 import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
+import com.soulfiremc.client.settings.PropertyKey;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.Getter;
