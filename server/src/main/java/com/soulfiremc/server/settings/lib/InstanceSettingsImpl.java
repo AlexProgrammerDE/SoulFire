@@ -27,7 +27,7 @@ import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.PropertyKey;
+import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.SneakyThrows;
@@ -138,9 +138,9 @@ public record InstanceSettingsImpl(
   }
 
   @Override
-  public Optional<JsonElement> get(PropertyKey key) {
-    return Optional.ofNullable(settings.get(key.namespace()))
-      .flatMap(map -> Optional.ofNullable(map.get(key.key())));
+  public Optional<JsonElement> get(Property property) {
+    return Optional.ofNullable(settings.get(property.namespace()))
+      .flatMap(map -> Optional.ofNullable(map.get(property.key())));
   }
 
   private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {

@@ -17,14 +17,8 @@
  */
 package com.soulfiremc.server.settings.property;
 
-import com.soulfiremc.server.settings.PropertyKey;
-
 public sealed interface Property permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
   String namespace();
 
   String key();
-
-  default PropertyKey propertyKey() {
-    return new PropertyKey(namespace(), key());
-  }
 }

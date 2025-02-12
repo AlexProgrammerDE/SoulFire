@@ -190,18 +190,18 @@ public class SoulFireServer {
         this,
         serverSettingsRegistry =
           new ServerSettingsRegistry()
-            .addClass(ServerSettings.class, "Server Settings", "server")
-            .addClass(DevSettings.class, "Dev Settings", "bug")));
+            .addInternalPage(ServerSettings.class, "Server Settings", "server")
+            .addInternalPage(DevSettings.class, "Dev Settings", "bug")));
     SoulFireAPI.postEvent(
       new InstanceSettingsRegistryInitEvent(
         this,
         instanceSettingsRegistry =
           new ServerSettingsRegistry()
             // Needs Via loaded to have all protocol versions
-            .addClass(BotSettings.class, "Bot Settings", "bot")
-            .addClass(AccountSettings.class, "Account Settings", "users")
-            .addClass(ProxySettings.class, "Proxy Settings", "waypoints")
-            .addClass(AISettings.class, "AI Settings", "sparkles")));
+            .addInternalPage(BotSettings.class, "Bot Settings", "bot")
+            .addInternalPage(AccountSettings.class, "Account Settings", "users")
+            .addInternalPage(ProxySettings.class, "Proxy Settings", "waypoints")
+            .addInternalPage(AISettings.class, "AI Settings", "sparkles")));
 
     log.info("Loading instances...");
     loadInstances();

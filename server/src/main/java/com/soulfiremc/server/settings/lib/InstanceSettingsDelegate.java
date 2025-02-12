@@ -20,7 +20,7 @@ package com.soulfiremc.server.settings.lib;
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.PropertyKey;
+import com.soulfiremc.server.settings.property.Property;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public final class InstanceSettingsDelegate implements InstanceSettingsSource {
   }
 
   @Override
-  public Optional<JsonElement> get(PropertyKey key) {
-    return source.get().get(key);
+  public Optional<JsonElement> get(Property property) {
+    return source.get().get(property);
   }
 }

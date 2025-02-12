@@ -100,8 +100,8 @@ public class ServerSettingsRegistry {
    */
   @This
   @ApiStatus.Internal
-  public ServerSettingsRegistry addClass(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
-    return addClassInternal(clazz, pageName, null, iconId);
+  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
+    return addPage(clazz, pageName, null, iconId, null);
   }
 
   /**
@@ -116,14 +116,14 @@ public class ServerSettingsRegistry {
    * @return The registry
    */
   @This
-  public ServerSettingsRegistry addClass(
-    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId) {
-    return addClassInternal(clazz, pageName, owningPlugin, iconId);
+  public ServerSettingsRegistry addPluginPage(
+    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty enabledProperty) {
+    return addPage(clazz, pageName, owningPlugin, iconId, enabledProperty.key());
   }
 
   @This
-  private ServerSettingsRegistry addClassInternal(
-    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId) {
+  private ServerSettingsRegistry addPage(
+    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable String enabledProperty) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
         && Modifier.isFinal(field.getModifiers())
@@ -139,7 +139,7 @@ public class ServerSettingsRegistry {
 
           var registry = namespaceMap.computeIfAbsent(property.namespace(), k -> {
             var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
-            return new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId);
+            return new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId, enabledProperty);
           });
 
           registry.properties.add(property);
@@ -260,5 +260,5 @@ public class ServerSettingsRegistry {
       .setKey(property.key());
   }
 
-  private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties, String iconId) {}
+  private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties, String iconId, @Nullable String enabledProperty) {}
 }

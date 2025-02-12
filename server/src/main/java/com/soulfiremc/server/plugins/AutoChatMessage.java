@@ -64,7 +64,7 @@ public class AutoChatMessage extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoChatMessageSettings.class, "Auto Chat Message", this, "message-circle-code");
+    event.settingsRegistry().addPluginPage(AutoChatMessageSettings.class, "Auto Chat Message", this, "message-circle-code", AutoChatMessageSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -100,7 +100,7 @@ public class ClientSettings extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientSettingsSettings.class, "Client Settings", this, "settings-2");
+    event.settingsRegistry().addPluginPage(ClientSettingsSettings.class, "Client Settings", this, "settings-2", ClientSettingsSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

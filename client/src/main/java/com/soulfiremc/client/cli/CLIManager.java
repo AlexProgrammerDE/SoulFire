@@ -28,7 +28,6 @@ import com.soulfiremc.client.ClientCommandManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.client.settings.ClientSettingsManager;
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

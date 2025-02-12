@@ -82,7 +82,7 @@ public class ChatControl extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatControlSettings.class, "Chat Control", this, "joystick");
+    event.settingsRegistry().addPluginPage(ChatControlSettings.class, "Chat Control", this, "joystick", ChatControlSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

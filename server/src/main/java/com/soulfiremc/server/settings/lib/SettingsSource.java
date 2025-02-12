@@ -18,7 +18,6 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -31,23 +30,23 @@ import java.util.function.LongSupplier;
 
 public sealed interface SettingsSource permits InstanceSettingsSource, ServerSettingsSource {
   default int get(IntProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Integer.class);
+    return getAsType(property, property.defaultValue(), Integer.class);
   }
 
   default double get(DoubleProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Double.class);
+    return getAsType(property, property.defaultValue(), Double.class);
   }
 
   default boolean get(BooleanProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), Boolean.class);
+    return getAsType(property, property.defaultValue(), Boolean.class);
   }
 
   default String get(StringProperty property) {
-    return getAsType(property.propertyKey(), property.defaultValue(), String.class);
+    return getAsType(property, property.defaultValue(), String.class);
   }
 
   default <T> T get(ComboProperty property, Function<String, T> converter) {
-    return converter.apply(getAsType(property.propertyKey(), property.defaultValue(), String.class));
+    return converter.apply(getAsType(property, property.defaultValue(), String.class));
   }
 
   default <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
@@ -55,11 +54,11 @@ public sealed interface SettingsSource permits InstanceSettingsSource, ServerSet
   }
 
   default List<String> get(StringListProperty property) {
-    return List.of(getAsType(property.propertyKey(), property.defaultValue().toArray(new String[0]), String[].class));
+    return List.of(getAsType(property, property.defaultValue().toArray(new String[0]), String[].class));
   }
 
   default MinMaxProperty.DataLayout get(MinMaxProperty property) {
-    return getAsType(property.propertyKey(), property.defaultDataLayout(), MinMaxProperty.DataLayout.class);
+    return getAsType(property, property.defaultDataLayout(), MinMaxProperty.DataLayout.class);
   }
 
   default CustomIntSupplier getRandom(MinMaxProperty property) {
@@ -69,11 +68,11 @@ public sealed interface SettingsSource permits InstanceSettingsSource, ServerSet
     };
   }
 
-  default <T> T getAsType(PropertyKey key, T defaultValue, Class<T> clazz) {
-    return get(key).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
+  default <T> T getAsType(Property property, T defaultValue, Class<T> clazz) {
+    return get(property).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
   }
 
-  Optional<JsonElement> get(PropertyKey key);
+  Optional<JsonElement> get(Property property);
 
   interface CustomIntSupplier extends IntSupplier {
     default LongSupplier asLongSupplier() {

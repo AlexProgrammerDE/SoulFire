@@ -69,7 +69,7 @@ public class ServerListBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ServerListBypassSettings.class, "Server List Bypass", this, "network");
+    event.settingsRegistry().addPluginPage(ServerListBypassSettings.class, "Server List Bypass", this, "network", ServerListBypassSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

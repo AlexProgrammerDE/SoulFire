@@ -26,10 +26,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.IdentifiedKey;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.ComboProperty;
-import com.soulfiremc.server.settings.property.ImmutableComboProperty;
-import com.soulfiremc.server.settings.property.ImmutableStringProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.VelocityConstants;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -161,7 +158,7 @@ public class ForwardingBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone");
+    event.settingsRegistry().addPluginPage(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone", ForwardingBypassSettings.ENABLED);
   }
 
   @EventHandler
@@ -174,6 +171,10 @@ public class ForwardingBypass extends InternalPlugin {
     var settingsSource = connection.settingsSource();
     var hostname = handshake.getHostname();
     var uuid = connection.accountProfileId();
+
+    if (!settingsSource.get(ForwardingBypassSettings.ENABLED)) {
+      return;
+    }
 
     switch (settingsSource.get(
       ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)) {
@@ -207,6 +208,10 @@ public class ForwardingBypass extends InternalPlugin {
 
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(ForwardingBypassSettings.ENABLED)) {
+      return;
+    }
+
     if (settingsSource.get(
       ForwardingBypassSettings.FORWARDING_MODE, ForwardingBypassSettings.ForwardingMode.class)
       != ForwardingBypassSettings.ForwardingMode.MODERN) {
@@ -286,13 +291,21 @@ public class ForwardingBypass extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "forwarding-bypass";
+    public static final BooleanProperty ENABLED =
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable forwarding bypass")
+        .description("Enable the forwarding bypass")
+        .defaultValue(false)
+        .build();
     public static final ComboProperty FORWARDING_MODE =
       ImmutableComboProperty.builder()
         .namespace(NAMESPACE)
         .key("forwarding-mode")
         .uiName("Forwarding mode")
         .description("What type of forwarding to use")
-        .defaultValue(ForwardingMode.NONE.name())
+        .defaultValue(ForwardingMode.LEGACY.name())
         .addOptions(ComboProperty.optionsFromEnum(ForwardingMode.values(), ForwardingMode::toString))
         .build();
     public static final StringProperty SECRET =
@@ -307,7 +320,6 @@ public class ForwardingBypass extends InternalPlugin {
 
     @RequiredArgsConstructor
     enum ForwardingMode {
-      NONE("None"),
       LEGACY("Legacy"),
       BUNGEE_GUARD("BungeeGuard"),
       MODERN("Modern"),

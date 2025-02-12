@@ -137,7 +137,7 @@ public class AutoArmor extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoArmorSettings.class, "Auto Armor", this, "shield");
+    event.settingsRegistry().addPluginPage(AutoArmorSettings.class, "Auto Armor", this, "shield", AutoArmorSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

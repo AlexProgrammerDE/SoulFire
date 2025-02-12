@@ -111,7 +111,7 @@ public class AutoEat extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoEatSettings.class, "Auto Eat", this, "drumstick");
+    event.settingsRegistry().addPluginPage(AutoEatSettings.class, "Auto Eat", this, "drumstick", AutoEatSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -125,7 +125,7 @@ public class KillAura extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(KillAuraSettings.class, "Kill Aura", this, "skull");
+    event.settingsRegistry().addPluginPage(KillAuraSettings.class, "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

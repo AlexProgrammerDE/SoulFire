@@ -80,7 +80,7 @@ public class AntiAFK extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AntiAFKSettings.class, "Anti AFK", this, "activity");
+    event.settingsRegistry().addPluginPage(AntiAFKSettings.class, "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

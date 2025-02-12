@@ -24,7 +24,9 @@ import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableComboProperty;
 import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
@@ -79,7 +81,7 @@ public class ModLoaderSupport extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ModLoaderSettings.class, "Mod Loader Support", this, "package");
+    event.settingsRegistry().addPluginPage(ModLoaderSettings.class, "Mod Loader Support", this, "package", ModLoaderSettings.ENABLED);
   }
 
   @EventHandler
@@ -93,7 +95,7 @@ public class ModLoaderSupport extends InternalPlugin {
     var hostname = handshake.getHostname();
 
     switch (settingsSource.get(
-      ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)) {
+      ModLoaderSettings.MOD_LOADER_MODE, ModLoaderSettings.ModLoaderMode.class)) {
       case FML -> event.packet(handshake.withHostname(createFMLAddress(hostname)));
       case FML2 -> event.packet(handshake.withHostname(createFML2Address(hostname)));
     }
@@ -106,13 +108,13 @@ public class ModLoaderSupport extends InternalPlugin {
 
     if (event.packet() instanceof ClientboundCustomPayloadPacket pluginMessage) {
       var channelKey = pluginMessage.getChannel();
-      if (settingsSource.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+      if (settingsSource.get(ModLoaderSettings.MOD_LOADER_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML) {
         handleFMLPluginMessage(event.connection(), channelKey, pluginMessage.getData());
       }
     } else if (event.packet() instanceof ClientboundCustomQueryPacket loginPluginMessage) {
       var channelKey = loginPluginMessage.getChannel();
-      if (settingsSource.get(ModLoaderSettings.FORGE_MODE, ModLoaderSettings.ModLoaderMode.class)
+      if (settingsSource.get(ModLoaderSettings.MOD_LOADER_MODE, ModLoaderSettings.ModLoaderMode.class)
         == ModLoaderSettings.ModLoaderMode.FML2) {
         handleFML2PluginMessage(event.connection(), channelKey, loginPluginMessage.getData());
       }
@@ -240,19 +242,26 @@ public class ModLoaderSupport extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ModLoaderSettings implements SettingsObject {
     private static final String NAMESPACE = "mod-loader";
-    public static final ComboProperty FORGE_MODE =
+    public static final BooleanProperty ENABLED =
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("enabled")
+        .uiName("Enable mod loader support")
+        .description("Enable the mod loader support")
+        .defaultValue(false)
+        .build();
+    public static final ComboProperty MOD_LOADER_MODE =
       ImmutableComboProperty.builder()
         .namespace(NAMESPACE)
         .key("mod-loader-mode")
         .uiName("Mod Loader mode")
         .description("What mod loader to use")
-        .defaultValue(ModLoaderMode.NONE.name())
+        .defaultValue(ModLoaderMode.FML2.name())
         .addOptions(ComboProperty.optionsFromEnum(ModLoaderMode.values(), ModLoaderMode::toString))
         .build();
 
     @RequiredArgsConstructor
     enum ModLoaderMode {
-      NONE("None"),
       FML("FML (Forge 1.7-1.12)"),
       FML2("FML2 (Forge 1.13+)");
 

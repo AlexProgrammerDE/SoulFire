@@ -614,7 +614,7 @@ public class POVServer extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(POVServerSettings.class, "POV Server", this, "view");
+    event.settingsRegistry().addPluginPage(POVServerSettings.class, "POV Server", this, "view", POVServerSettings.ENABLED);
   }
 
   @EventHandler

@@ -49,7 +49,7 @@ public class AutoReconnect extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw");
+    event.settingsRegistry().addPluginPage(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
   }
 
   @EventHandler

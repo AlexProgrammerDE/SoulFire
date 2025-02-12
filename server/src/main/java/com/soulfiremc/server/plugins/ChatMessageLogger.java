@@ -93,7 +93,7 @@ public class ChatMessageLogger extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ChatMessageSettings.class, "Chat Message Logger", this, "logs");
+    event.settingsRegistry().addPluginPage(ChatMessageSettings.class, "Chat Message Logger", this, "logs", ChatMessageSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

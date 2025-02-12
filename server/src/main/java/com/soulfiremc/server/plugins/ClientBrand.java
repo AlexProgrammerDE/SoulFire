@@ -71,7 +71,7 @@ public class ClientBrand extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(ClientBrandSettings.class, "Client Brand", this, "fingerprint");
+    event.settingsRegistry().addPluginPage(ClientBrandSettings.class, "Client Brand", this, "fingerprint", ClientBrandSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

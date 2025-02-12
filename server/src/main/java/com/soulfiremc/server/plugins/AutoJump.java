@@ -74,7 +74,7 @@ public class AutoJump extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoJumpSettings.class, "Auto Jump", this, "footprints");
+    event.settingsRegistry().addPluginPage(AutoJumpSettings.class, "Auto Jump", this, "footprints", AutoJumpSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

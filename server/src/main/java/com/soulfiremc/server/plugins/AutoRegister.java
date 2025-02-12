@@ -76,7 +76,7 @@ public class AutoRegister extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRegisterSettings.class, "Auto Register", this, "key-round");
+    event.settingsRegistry().addPluginPage(AutoRegisterSettings.class, "Auto Register", this, "key-round", AutoRegisterSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -100,7 +100,7 @@ public class AutoTotem extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoTotemSettings.class, "Auto Totem", this, "cross");
+    event.settingsRegistry().addPluginPage(AutoTotemSettings.class, "Auto Totem", this, "cross", AutoTotemSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

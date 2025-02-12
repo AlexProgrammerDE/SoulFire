@@ -85,7 +85,7 @@ public class AutoRespawn extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addClass(AutoRespawnSettings.class, "Auto Respawn", this, "repeat");
+    event.settingsRegistry().addPluginPage(AutoRespawnSettings.class, "Auto Respawn", this, "repeat", AutoRespawnSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

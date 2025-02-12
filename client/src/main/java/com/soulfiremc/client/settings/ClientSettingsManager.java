@@ -27,7 +27,6 @@ import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.settings.PropertyKey;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
