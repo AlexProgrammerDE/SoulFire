@@ -71,7 +71,10 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -916,14 +919,14 @@ public class ServerCommandManager {
 
                 return b.buildFuture();
               })
-            .forward(
+            .redirect(
               dispatcher.getRoot(),
-              helpRedirect(
+              helpSingleRedirect(
                 "Instead of running a command for selected bots, run it for a specific list of bots. Use a comma to separate the names",
-                c -> Collections.singleton(c.getSource()
-                  .withBotNames(List.of(StringArgumentType.getString(c, "bot_names").split(","))))
-              ),
-              false)));
+                c -> c.getSource()
+                  .withBotNames(List.of(StringArgumentType.getString(c, "bot_names").split(",")))
+              )
+            )));
     dispatcher.register(
       literal("attack")
         .then(
@@ -941,17 +944,17 @@ public class ServerCommandManager {
 
                 return b.buildFuture();
               })
-            .forward(
+            .redirect(
               dispatcher.getRoot(),
-              helpRedirect(
+              helpSingleRedirect(
                 "Instead of running a command for selected attacks, run it for a specific list of attacks. Use a comma to separate the ids",
-                c -> Collections.singleton(c.getSource()
+                c -> c.getSource()
                   .withInstanceIds(Arrays.stream(StringArgumentType.getString(c, "attack_ids").split(","))
                     .map(UUIDHelper::tryParseUniqueId)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .toList()))),
-              false)));
+                    .toList()))
+            )));
     dispatcher.register(
       literal("repeat")
         .then(
@@ -1164,14 +1167,14 @@ public class ServerCommandManager {
     }
 
     if (node.getCommand() != null) {
-      var helpWrapper = (CommandHelpWrapper) node.getCommand();
+      var helpWrapper = (ServerBrigadierHelper.HelpCarrier) node.getCommand();
       if (!helpWrapper.privateCommand()) {
         result.add(new HelpData(prefix, helpWrapper.help()));
       }
     }
 
     if (node.getRedirect() != null) {
-      var redirectHelpWrapper = (RedirectHelpWrapper) node.getRedirectModifier();
+      var redirectHelpWrapper = (ServerBrigadierHelper.HelpCarrier) node.getRedirectModifier();
       if (!redirectHelpWrapper.privateCommand()) {
         final var redirect =
           node.getRedirect() == dispatcher.getRoot()
