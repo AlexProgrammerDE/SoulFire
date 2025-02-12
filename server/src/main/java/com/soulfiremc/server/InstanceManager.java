@@ -72,6 +72,7 @@ public class InstanceManager {
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
+  private final CachedLazyObject<String> friendlyNameCache;
   private AttackLifecycle localAttackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
@@ -90,6 +91,16 @@ public class InstanceManager {
     this.sessionFactory = sessionFactory;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->
       sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
+    this.friendlyNameCache = new CachedLazyObject<>(() ->
+      sessionFactory.fromTransaction(session -> {
+        var instance = session.find(InstanceEntity.class, id);
+
+        if (instance == null) {
+          return "Unknown";
+        } else {
+          return instance.friendlyName();
+        }
+      }), 1, TimeUnit.SECONDS);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);

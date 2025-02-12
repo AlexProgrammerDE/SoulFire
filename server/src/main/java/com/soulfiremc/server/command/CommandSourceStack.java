@@ -27,7 +27,7 @@ public record CommandSourceStack(
   @Nullable
   List<UUID> instanceIds,
   @Nullable
-  List<String> botNames
+  List<UUID> botIds
 ) {
   public static CommandSourceStack ofUnrestricted(CommandSource source) {
     return new CommandSourceStack(source, null, null);
@@ -42,14 +42,14 @@ public record CommandSourceStack(
       throw new IllegalStateException("Instance IDs already set");
     }
 
-    return new CommandSourceStack(source, instanceIds, botNames);
+    return new CommandSourceStack(source, instanceIds, botIds);
   }
 
-  public CommandSourceStack withBotNames(List<String> botNames) {
-    if (this.botNames != null) {
+  public CommandSourceStack withBotIds(List<UUID> botIds) {
+    if (this.botIds != null) {
       throw new IllegalStateException("Bot names already set");
     }
 
-    return new CommandSourceStack(source, instanceIds, botNames);
+    return new CommandSourceStack(source, instanceIds, botIds);
   }
 }

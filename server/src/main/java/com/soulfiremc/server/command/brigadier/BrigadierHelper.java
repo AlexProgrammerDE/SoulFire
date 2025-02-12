@@ -18,6 +18,7 @@
 package com.soulfiremc.server.command.brigadier;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.SingleRedirectModifier;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -26,11 +27,12 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.soulfiremc.server.command.CommandSourceStack;
+import net.kyori.adventure.text.Component;
 
 import java.util.Collection;
 
-public class ServerBrigadierHelper {
-  private ServerBrigadierHelper() {}
+public class BrigadierHelper {
+  private BrigadierHelper() {}
 
   public static LiteralArgumentBuilder<CommandSourceStack> literal(String name) {
     return LiteralArgumentBuilder.literal(name);
@@ -94,5 +96,13 @@ public class ServerBrigadierHelper {
     public Collection<CommandSourceStack> apply(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       return command.apply(context);
     }
+  }
+
+  public static Component toComponent(Message message) {
+    return switch (message) {
+      case null -> null;
+      case BrigadierComponent brigadierComponent -> brigadierComponent.component();
+      default -> Component.text(message.getString());
+    };
   }
 }

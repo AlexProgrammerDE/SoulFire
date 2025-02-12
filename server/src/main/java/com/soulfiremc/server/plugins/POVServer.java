@@ -27,7 +27,6 @@ import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
-import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -645,16 +644,7 @@ public class POVServer extends InternalPlugin {
   private record POVServerInfoHandler(InstanceManager instanceManager, InstanceSettingsSource settingsSource, byte[] faviconBytes) implements ServerInfoBuilder {
     @Override
     public ServerStatusInfo buildInfo(Session session) {
-      var friendlyName = instanceManager.sessionFactory().fromTransaction(s -> {
-        var instance = s.find(InstanceEntity.class, instanceManager.id());
-
-        if (instance == null) {
-          return "Unknown";
-        } else {
-          return instance.friendlyName();
-        }
-      });
-
+      var friendlyName = instanceManager.friendlyNameCache().get();
       return
         new ServerStatusInfo(
           Component.text("Attack POV server for instance %s!".formatted(friendlyName))
