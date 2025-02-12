@@ -68,7 +68,7 @@ public class ArgumentTypeHelper {
 
       var profile = entityProfile.get();
       var gameProfile = profile.getProfile();
-      if (gameProfile != null && gameProfile.getName().equals(input)) {
+      if (gameProfile != null && gameProfile.getName().equalsIgnoreCase(input)) {
         return OptionalInt.of(entity.entityId());
       }
     }
