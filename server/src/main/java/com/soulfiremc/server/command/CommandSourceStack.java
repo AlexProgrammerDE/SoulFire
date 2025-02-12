@@ -20,6 +20,7 @@ package com.soulfiremc.server.command;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public record CommandSourceStack(
@@ -38,6 +39,10 @@ public record CommandSourceStack(
   }
 
   public CommandSourceStack withInstanceIds(List<UUID> instanceIds) {
+    if (Objects.equals(this.instanceIds, instanceIds)) {
+      return this;
+    }
+
     if (this.instanceIds != null) {
       throw new IllegalStateException("Instance IDs already set");
     }
@@ -46,6 +51,10 @@ public record CommandSourceStack(
   }
 
   public CommandSourceStack withBotIds(List<UUID> botIds) {
+    if (Objects.equals(this.botIds, botIds)) {
+      return this;
+    }
+
     if (this.botIds != null) {
       throw new IllegalStateException("Bot names already set");
     }
