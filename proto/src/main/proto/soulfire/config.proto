@@ -112,6 +112,8 @@ message SettingsPage {
   repeated SettingEntry entries = 5;
   // https://lucide.dev icon id for this page (Usually rendered left of the page name)
   string icon_id = 6;
+  // Key which makes this plugin "enabled" or "disabled"
+  optional string enabled_key = 7;
 }
 
 message GlobalPermissionState {

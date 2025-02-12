@@ -249,6 +249,10 @@ public class ServerSettingsRegistry {
         settingsPageBuilder.setOwningPlugin(namespaceRegistry.owningPlugin.id());
       }
 
+      if (namespaceRegistry.enabledProperty != null) {
+        settingsPageBuilder.setEnabledKey(namespaceRegistry.enabledProperty);
+      }
+
       list.add(settingsPageBuilder.build());
     }
 
