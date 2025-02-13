@@ -73,11 +73,10 @@ public class ChatControl extends InternalPlugin {
     var command = plainMessage.substring(prefix.length());
     connection.logger().info("[ChatControl] Executing command: \"{}\"", command);
 
-    connection.instanceManager()
-      .soulFireServer()
-      .injector()
+    var soulFire = connection.instanceManager().soulFireServer();
+    soulFire.injector()
       .getSingleton(ServerCommandManager.class)
-      .execute(command, CommandSourceStack.ofInstance(new ChatControlCommandSource(connection), Set.of(connection.instanceManager().id())));
+      .execute(command, CommandSourceStack.ofInstance(soulFire, new ChatControlCommandSource(connection), Set.of(connection.instanceManager().id())));
   }
 
   @EventHandler

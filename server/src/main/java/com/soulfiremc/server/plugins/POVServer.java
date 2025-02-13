@@ -909,11 +909,10 @@ public class POVServer extends InternalPlugin {
                   var command = message.substring(prefix.length());
                   var source = new PovServerUser(clientSession, clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getName());
 
-                  var code = instanceManager
-                    .soulFireServer()
-                    .injector()
+                  var soulFire = instanceManager.soulFireServer();
+                  var code = soulFire.injector()
                     .getSingleton(ServerCommandManager.class)
-                    .execute(command, CommandSourceStack.ofInstance(source, Set.of(instanceManager.id())));
+                    .execute(command, CommandSourceStack.ofInstance(soulFire, source, Set.of(instanceManager.id())));
 
                   log.info("Command \"{}\" executed! (Code: {})", command, code);
                   return;

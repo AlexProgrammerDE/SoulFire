@@ -62,8 +62,8 @@ public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
     var commandSource = new ConsoleCommandSource(soulFire.authSystem());
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(commandSource)),
-      (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(commandSource)),
+      command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
+      (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
       SFPathConstants.WORKING_DIRECTORY
     ).start();
 

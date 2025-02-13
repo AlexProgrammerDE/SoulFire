@@ -18,6 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.user.PermissionContext;
@@ -34,6 +35,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
+  private final SoulFireServer soulFire;
   private final ServerCommandManager serverCommandManager;
 
   @Override
@@ -43,13 +45,13 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     var stack = switch (request.getScopeCase()) {
       case GLOBAL -> {
         user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
-        yield CommandSourceStack.ofUnrestricted(user);
+        yield CommandSourceStack.ofUnrestricted(soulFire, user);
       }
       case INSTANCE -> {
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
         user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
 
-        yield CommandSourceStack.ofInstance(user, Set.of(instanceId));
+        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
       }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };
@@ -73,13 +75,13 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     var stack = switch (request.getScopeCase()) {
       case GLOBAL -> {
         user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_COMPLETION));
-        yield CommandSourceStack.ofUnrestricted(user);
+        yield CommandSourceStack.ofUnrestricted(soulFire, user);
       }
       case INSTANCE -> {
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
         user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
 
-        yield CommandSourceStack.ofInstance(user, Set.of(instanceId));
+        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
       }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.command;
 
+import com.soulfiremc.server.SoulFireServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -24,18 +25,19 @@ import java.util.Set;
 import java.util.UUID;
 
 public record CommandSourceStack(
+  SoulFireServer soulFire,
   CommandSource source,
   @Nullable
   Set<UUID> instanceIds,
   @Nullable
   Set<UUID> botIds
 ) {
-  public static CommandSourceStack ofUnrestricted(CommandSource source) {
-    return new CommandSourceStack(source, null, null);
+  public static CommandSourceStack ofUnrestricted(SoulFireServer soulFire, CommandSource source) {
+    return new CommandSourceStack(soulFire, source, null, null);
   }
 
-  public static CommandSourceStack ofInstance(CommandSource source, Set<UUID> instanceIds) {
-    return new CommandSourceStack(source, instanceIds, null);
+  public static CommandSourceStack ofInstance(SoulFireServer soulFire, CommandSource source, Set<UUID> instanceIds) {
+    return new CommandSourceStack(soulFire, source, instanceIds, null);
   }
 
   public CommandSourceStack withInstanceIds(Set<UUID> instanceIds) {
@@ -47,7 +49,7 @@ public record CommandSourceStack(
       throw new IllegalStateException("Instance IDs already set");
     }
 
-    return new CommandSourceStack(source, instanceIds, botIds);
+    return new CommandSourceStack(soulFire, source, instanceIds, botIds);
   }
 
   public CommandSourceStack withBotIds(Set<UUID> botIds) {
@@ -59,6 +61,6 @@ public record CommandSourceStack(
       throw new IllegalStateException("Bot names already set");
     }
 
-    return new CommandSourceStack(source, instanceIds, botIds);
+    return new CommandSourceStack(soulFire, source, instanceIds, botIds);
   }
 }
