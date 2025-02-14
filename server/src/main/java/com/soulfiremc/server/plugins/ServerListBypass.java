@@ -41,7 +41,7 @@ public class ServerListBypass extends InternalPlugin {
     super(new PluginInfo(
       "server-list-bypass",
       "1.0.0",
-      "Bypasses server list anti-bots",
+      "Pings the server list before connecting. (Bypasses anti-bots like EpicGuard)",
       "AlexProgrammerDE",
       "GPL-3.0",
       "https://soulfiremc.com"
@@ -80,7 +80,7 @@ public class ServerListBypass extends InternalPlugin {
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Server List Bypass")
-        .description("Whether to ping the server list before connecting. (Bypasses anti-bots like EpicGuard)")
+        .description("Whether to ping the server list before connecting.")
         .defaultValue(false)
         .build();
     public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
