@@ -44,12 +44,12 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Extension
-public class ChatMessageLogger extends InternalPlugin {
-  private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_message_logger", "chat_messages", Cache.class);
+public class ChatLogger extends InternalPlugin {
+  private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_logger", "chat_messages", Cache.class);
 
-  public ChatMessageLogger() {
+  public ChatLogger() {
     super(new PluginInfo(
-      "chat-message-logger",
+      "chat-logger",
       "1.0.0",
       "Logs all received chat messages to the terminal\nIncludes deduplication to prevent spamming the same message too often",
       "AlexProgrammerDE",
@@ -61,7 +61,7 @@ public class ChatMessageLogger extends InternalPlugin {
   @EventHandler
   public static void onMessage(ChatMessageReceiveEvent event) {
     var settingsSource = event.connection().settingsSource();
-    if (!settingsSource.get(ChatMessageSettings.ENABLED)) {
+    if (!settingsSource.get(ChatLoggerSettings.ENABLED)) {
       return;
     }
 
@@ -76,7 +76,7 @@ public class ChatMessageLogger extends InternalPlugin {
       .build());
     var ansiMessage = SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message);
 
-    var deduplicateAmount = instanceManager.settingsSource().get(ChatMessageSettings.DEDUPLICATE_AMOUNT);
+    var deduplicateAmount = instanceManager.settingsSource().get(ChatLoggerSettings.DEDUPLICATE_AMOUNT);
     int messageCount = Objects.requireNonNull(chatMessage.get(ansiMessage, (key) -> 0));
     if (messageCount < deduplicateAmount) {
       // Print to remote console (always true color)
@@ -93,12 +93,12 @@ public class ChatMessageLogger extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(ChatMessageSettings.class, "Chat Message Logger", this, "logs", ChatMessageSettings.ENABLED);
+    event.settingsRegistry().addPluginPage(ChatLoggerSettings.class, "Chat Logger", this, "logs", ChatLoggerSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  private static class ChatMessageSettings implements SettingsObject {
-    private static final String NAMESPACE = "chat-message-logger";
+  private static class ChatLoggerSettings implements SettingsObject {
+    private static final String NAMESPACE = "chat-logger";
     public static final BooleanProperty ENABLED =
       ImmutableBooleanProperty.builder()
         .namespace(NAMESPACE)
