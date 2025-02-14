@@ -1,6 +1,6 @@
 plugins {
   base
-  id("io.freefair.javadocs")
+  id("io.freefair.javadoc-utf-8")
   id("io.freefair.aggregate-javadoc")
 }
 

@@ -5,7 +5,7 @@ plugins {
   id("sf-formatting-conventions")
   id("io.freefair.lombok")
   id("net.kyori.indra.git")
-  id("io.freefair.javadocs")
+  id("io.freefair.javadoc-utf-8")
 }
 
 tasks {
@@ -32,8 +32,11 @@ tasks {
     useJUnitPlatform()
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
   }
-  jar {
+  withType<Jar> {
     from(rootProject.file("LICENSE"))
+  }
+  delombok {
+    sourcepath.setFrom(sourcepath.plus(compileJava.get().options.generatedSourceOutputDirectory))
   }
 }
 
