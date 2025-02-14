@@ -21,32 +21,76 @@ import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.mcstructs.AABB;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.InteractAction;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerAction;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerActionPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundUseItemOnPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundUseItemPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * Manages mostly block and interaction related stuff that requires to keep track of sequence
- * numbers.
- */
+@Getter
 @Slf4j
-@Data
-@RequiredArgsConstructor
-public class BotActionManager {
-  @ToString.Exclude
+public class MultiPlayerGameMode {
   private final BotConnection connection;
+  private final SessionDataManager dataManager;
+  private GameMode localPlayerMode = GameMode.SURVIVAL;
+  private GameMode previousLocalPlayerMode;
+  private int carriedIndex;
   private int sequenceNumber = 0;
+
+  public MultiPlayerGameMode(BotConnection connection, SessionDataManager dataManager) {
+    this.connection = connection;
+    this.dataManager = dataManager;
+  }
+
+  public void adjustPlayer(Player player) {
+    player.abilitiesState().updatePlayerAbilities(localPlayerMode);
+  }
+
+  public void setLocalMode(LocalPlayer player, GameMode localPlayerMode, @Nullable GameMode previousLocalPlayerMode) {
+    this.localPlayerMode = localPlayerMode;
+    this.previousLocalPlayerMode = previousLocalPlayerMode;
+    player.abilitiesState().updatePlayerAbilities(localPlayerMode);
+  }
+
+  public void setLocalMode(LocalPlayer player, GameMode type) {
+    if (type != this.localPlayerMode) {
+      this.previousLocalPlayerMode = this.localPlayerMode;
+    }
+
+    this.localPlayerMode = type;
+    player.abilitiesState().updatePlayerAbilities(localPlayerMode);
+  }
+
+  public void tick() {
+    this.ensureHasSentCarriedItem();
+  }
+
+  public void attack(Player player, Entity targetEntity) {
+    this.ensureHasSentCarriedItem();
+    this.connection.sendPacket(new ServerboundInteractPacket(targetEntity.entityId(), InteractAction.ATTACK, player.isShiftKeyDown()));
+    if (this.localPlayerMode != GameMode.SPECTATOR) {
+      player.attack(targetEntity);
+      player.resetAttackStrengthTicker();
+    }
+  }
+
+  private void ensureHasSentCarriedItem() {
+    var i = this.dataManager.localPlayer().inventory().selected;
+    if (i != this.carriedIndex) {
+      this.carriedIndex = i;
+      this.connection.sendPacket(new ServerboundSetCarriedItemPacket(this.carriedIndex));
+    }
+  }
 
   public void incrementSequenceNumber() {
     sequenceNumber++;

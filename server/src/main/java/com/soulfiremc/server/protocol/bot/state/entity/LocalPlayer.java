@@ -36,6 +36,7 @@ import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
@@ -244,6 +245,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 
     this.setHealth(this.getMaxHealth());
     this.deathTime = 0;
+  }
+
+  public void swing(Hand hand) {
+    this.connection.sendPacket(new ServerboundSwingPacket(hand));
   }
 
   public void hurtTo(float health) {

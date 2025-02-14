@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.soulfiremc.server.data.*;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -27,6 +28,7 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.MoverType;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -39,6 +41,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -80,6 +83,10 @@ public abstract class Player extends LivingEntity {
   private boolean reducedDebugInfo;
   private boolean clientLoaded = false;
   private Optional<GlobalPos> lastDeathLocation = Optional.empty();
+  protected int autoSpinAttackTicks;
+  protected float autoSpinAttackDmg;
+  @Nullable
+  protected ItemStack autoSpinAttackItemStack;
 
   public Player(Level level, Vector3i spawnBlockPos, float spawnYRot, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);
@@ -103,6 +110,8 @@ public abstract class Player extends LivingEntity {
     if (x != this.x() || z != this.z()) {
       this.setPos(x, this.y(), z);
     }
+
+    this.attackStrengthTicker++;
 
     tickCooldowns();
     this.updatePlayerPose();
@@ -176,6 +185,23 @@ public abstract class Player extends LivingEntity {
     } else {
       super.travel(travelVector);
     }
+  }
+
+  public float getCurrentItemAttackStrengthDelay() {
+    return (float) (1.0 / this.attributeValue(AttributeType.ATTACK_SPEED) * 20.0);
+  }
+
+  public float getAttackStrengthScale(float adjustTicks) {
+    // https://github.com/ViaVersion/ViaFabricPlus/blob/44c391a92414d85fb725ad61af69d844f5bf266c/src/main/java/com/viaversion/viafabricplus/injection/mixin/features/interaction/attack_cooldown/MixinPlayerEntity.java
+    if (BotConnection.CURRENT.get().protocolVersion().olderThanOrEqualTo(ProtocolVersion.v1_8)) {
+      return 1F;
+    }
+
+    return MathHelper.clamp(((float) this.attackStrengthTicker + adjustTicks) / this.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
+  }
+
+  public void resetAttackStrengthTicker() {
+    this.attackStrengthTicker = 0;
   }
 
   protected void updatePlayerPose() {
@@ -441,6 +467,50 @@ public abstract class Player extends LivingEntity {
           iterator.remove();
         } else {
           entry.setValue(ticks);
+        }
+      }
+    }
+  }
+
+  public void startAutoSpinAttack(int ticks, float damage, ItemStack itemStack) {
+    this.autoSpinAttackTicks = ticks;
+    this.autoSpinAttackDmg = damage;
+    this.autoSpinAttackItemStack = itemStack;
+  }
+
+  public void attack(Entity target) {
+    if (target.isAttackable()) {
+      if (!target.skipAttackInteraction(this)) {
+        var f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float) this.attributeValue(AttributeType.ATTACK_DAMAGE);
+        var strengthScale = this.getAttackStrengthScale(0.5F);
+        f *= 0.2F + strengthScale * strengthScale * 0.8F;
+        this.resetAttackStrengthTicker();
+
+        if (f > 0.0F) {
+          var highStrength = strengthScale > 0.9F;
+          var extraKnockback = this.isSprinting() && highStrength;
+
+          if (target.hurtClient()) {
+            var knockback = this.getKnockback() + (extraKnockback ? 1.0F : 0.0F);
+            if (knockback > 0.0F) {
+              if (target instanceof LivingEntity lv6) {
+                lv6.knockback(
+                  knockback * 0.5F,
+                  MathHelper.sin(this.yRot() * (float) (Math.PI / 180.0)),
+                  -MathHelper.cos(this.yRot() * (float) (Math.PI / 180.0))
+                );
+              } else {
+                target.push(
+                  -MathHelper.sin(this.yRot() * (float) (Math.PI / 180.0)) * knockback * 0.5F,
+                  0.1,
+                  MathHelper.cos(this.yRot() * (float) (Math.PI / 180.0)) * knockback * 0.5F
+                );
+              }
+
+              this.setDeltaMovement(this.getDeltaMovement().mul(0.6, 1.0, 0.6));
+              this.setSprinting(false);
+            }
+          }
         }
       }
     }

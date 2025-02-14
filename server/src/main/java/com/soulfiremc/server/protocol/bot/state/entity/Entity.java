@@ -1477,6 +1477,14 @@ public class Entity {
     }
   }
 
+  public boolean isAttackable() {
+    return true; // TODO: Implement
+  }
+
+  public boolean skipAttackInteraction(Entity entity) {
+    return false; // TODO: Implement
+  }
+
   public int getPortalCooldown() {
     return this.portalCooldown;
   }
@@ -1493,6 +1501,10 @@ public class Entity {
     if (this.isOnPortalCooldown()) {
       this.portalCooldown--;
     }
+  }
+
+  public boolean hurtClient() {
+    return false; // TODO: Implement
   }
 
   record Movement(Vector3d from, Vector3d to) {

@@ -113,7 +113,7 @@ public final class SessionDataManager {
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final TagsState tagsState = new TagsState();
-  private GameModeState gameModeState;
+  private MultiPlayerGameMode gameModeState;
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
   private LocalPlayer localPlayer;
@@ -235,7 +235,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onJoin(ClientboundLoginPacket packet) {
-    gameModeState = new GameModeState();
+    gameModeState = new MultiPlayerGameMode(connection, this);
 
     levelNames = packet.getWorldNames();
     maxPlayers = packet.getMaxPlayers();
@@ -1242,6 +1242,10 @@ public final class SessionDataManager {
   public void tick() {
     if (this.level != null) {
       this.level.tickRateManager().tick();
+    }
+
+    if (this.level != null) {
+      this.gameModeState.tick();
     }
 
     if (this.levelLoadStatusManager != null) {

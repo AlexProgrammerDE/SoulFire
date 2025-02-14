@@ -32,6 +32,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.pf4j.Extension;
 
 @Slf4j
@@ -56,6 +57,7 @@ public class KillAura extends InternalPlugin {
     }
 
     var control = bot.botControl();
+    var localPlayer = bot.dataManager().localPlayer();
     if (control.activelyControlled()) {
       return;
     }
@@ -85,21 +87,22 @@ public class KillAura extends InternalPlugin {
       bestVisiblePoint = target.originPosition(RotationOrigin.EYES);
     }
 
-    var distance = bestVisiblePoint.distance(bot.dataManager().localPlayer().eyePosition());
+    var distance = bestVisiblePoint.distance(localPlayer.eyePosition());
 
     if (distance > lookRange) {
       return;
     }
 
     control.registerControllingTask(ControllingTask.manual(new KillAuraMarker(target, distance)));
-    bot.dataManager().localPlayer().lookAt(RotationOrigin.EYES, bestVisiblePoint);
+    localPlayer.lookAt(RotationOrigin.EYES, bestVisiblePoint);
   }
 
   @EventHandler
   public static void onPostEntityTick(BotPostEntityTickEvent event) {
     var bot = event.connection();
+    var localPlayer = bot.dataManager().localPlayer();
     var control = bot.botControl();
-    if (control.attackCooldownTicks() > 0) {
+    if (localPlayer.getAttackStrengthScale(0) != 1F) {
       return;
     }
 
@@ -112,14 +115,15 @@ public class KillAura extends InternalPlugin {
     var swingRange = bot.settingsSource().get(KillAuraSettings.SWING_RANGE);
     var swing = marker.distance() <= swingRange;
     if (marker.distance() <= hitRange) {
-      control.attack(marker.attackEntity(), swing);
+      bot.dataManager().gameModeState().attack(localPlayer, marker.attackEntity());
+      localPlayer.swing(Hand.MAIN_HAND);
     } else if (swing) {
-      control.swingArm();
+      localPlayer.swing(Hand.MAIN_HAND);
     }
 
-    if (bot.protocolVersion().olderThan(ProtocolVersion.v1_9)
+    if (bot.protocolVersion().olderThanOrEqualTo(ProtocolVersion.v1_8)
       || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-      control.attackCooldownTicks(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
+      localPlayer.attackStrengthTicker(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
     }
   }
 

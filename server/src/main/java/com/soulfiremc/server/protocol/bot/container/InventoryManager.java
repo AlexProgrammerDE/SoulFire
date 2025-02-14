@@ -86,7 +86,6 @@ public class InventoryManager {
 
   public void changeHeldItem(int slot) {
     playerInventory().selected = slot;
-    sendHeldItemChange();
   }
 
   public void leftClickSlot(ContainerSlot slot) {

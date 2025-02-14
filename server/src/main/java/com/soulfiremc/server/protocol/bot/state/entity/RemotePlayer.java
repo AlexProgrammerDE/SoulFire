@@ -68,4 +68,9 @@ public class RemotePlayer extends AbstractClientPlayer {
     super.fromAddEntityPacket(packet);
     this.setOldPosAndRot();
   }
+
+  @Override
+  public boolean hurtClient() {
+    return true;
+  }
 }

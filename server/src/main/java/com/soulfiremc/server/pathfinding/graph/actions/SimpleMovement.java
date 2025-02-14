@@ -29,7 +29,7 @@ import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
-import com.soulfiremc.server.protocol.bot.BotActionManager;
+import com.soulfiremc.server.protocol.bot.MultiPlayerGameMode;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +55,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   // Mutable
   private MovementSide blockedSide;
   // Mutable
-  private BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
+  private MultiPlayerGameMode.BlockPlaceAgainstData blockPlaceAgainstData;
   // Mutable
   private double cost;
   // Mutable
@@ -471,7 +471,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Fixup the position to be the block we are placing against instead of relative
-      simpleMovement.blockPlaceAgainstData = new BotActionManager.BlockPlaceAgainstData(absoluteKey, againstFace);
+      simpleMovement.blockPlaceAgainstData = new MultiPlayerGameMode.BlockPlaceAgainstData(absoluteKey, againstFace);
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
   }

@@ -19,7 +19,7 @@ package com.soulfiremc.server.pathfinding.execution;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.BotActionManager;
+import com.soulfiremc.server.protocol.bot.MultiPlayerGameMode;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 public final class BlockPlaceAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
-  private final BotActionManager.BlockPlaceAgainstData blockPlaceAgainstData;
+  private final MultiPlayerGameMode.BlockPlaceAgainstData blockPlaceAgainstData;
   private boolean putOnHotbar = false;
   private boolean finishedPlacing = false;
 
@@ -63,7 +63,7 @@ public final class BlockPlaceAction implements WorldAction {
       return;
     }
 
-    connection.botActionManager().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
+    connection.dataManager().gameModeState().placeBlock(Hand.MAIN_HAND, blockPlaceAgainstData);
     finishedPlacing = true;
   }
 

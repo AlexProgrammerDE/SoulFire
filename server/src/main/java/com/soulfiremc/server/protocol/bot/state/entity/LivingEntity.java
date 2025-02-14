@@ -25,6 +25,7 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -72,6 +73,8 @@ public abstract class LivingEntity extends Entity {
   protected float lastHurt;
   private int noJumpDelay;
   private float speed;
+  @Setter
+  protected int attackStrengthTicker;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 
@@ -779,5 +782,25 @@ public abstract class LivingEntity extends Entity {
 
   public boolean canBeSeenByAnyone() {
     return !this.isSpectator() && this.isAlive();
+  }
+
+  protected float getKnockback() {
+    return (float) this.attributeValue(AttributeType.ATTACK_KNOCKBACK);
+  }
+
+  public void knockback(double strength, double x, double z) {
+    strength *= 1.0 - this.attributeValue(AttributeType.KNOCKBACK_RESISTANCE);
+    if (!(strength <= 0.0)) {
+      this.hasImpulse = true;
+      var lv = this.getDeltaMovement();
+
+      while (x * x + z * z < 1.0E-5F) {
+        x = (Math.random() - Math.random()) * 0.01;
+        z = (Math.random() - Math.random()) * 0.01;
+      }
+
+      var lv2 = Vector3d.from(x, 0.0, z).normalize().mul(strength);
+      this.setDeltaMovement(lv.getX() / 2.0 - lv2.getX(), this.onGround() ? Math.min(0.4, lv.getY() / 2.0 + strength) : lv.getY(), lv.getZ() / 2.0 - lv2.getZ());
+    }
   }
 }

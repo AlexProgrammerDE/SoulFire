@@ -101,7 +101,7 @@ public final class BlockBreakAction implements WorldAction {
             connection.inventoryManager().playerInventory().getHeldItem().item(),
             optionalBlockType)
           .ticks();
-      connection.botActionManager()
+      connection.dataManager().gameModeState()
         .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
 
       // We instamine or are in creative mode
@@ -114,11 +114,11 @@ public final class BlockBreakAction implements WorldAction {
         dataManager.currentLevel().setBlock(blockPosition.toVector3i(), BlockState.forDefaultBlockType(BlockType.AIR));
       }
     } else if (--remainingTicks == 0) {
-      connection.botActionManager()
+      connection.dataManager().gameModeState()
         .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
       finishedDigging = true;
     } else {
-      connection.botActionManager().sendBreakBlockAnimation();
+      connection.dataManager().gameModeState().sendBreakBlockAnimation();
     }
   }
 

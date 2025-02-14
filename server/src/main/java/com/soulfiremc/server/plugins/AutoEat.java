@@ -84,7 +84,7 @@ public class AutoEat extends InternalPlugin {
           inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
             new ControllingTask.RunnableStage(() -> inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot))),
             new ControllingTask.WaitDelayStage(() -> 50L),
-            new ControllingTask.RunnableStage(() -> connection.botActionManager().useItemInHand(Hand.MAIN_HAND))
+            new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
           )));
         } else if (playerInventory.isMainInventory(slot)) {
           inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
@@ -101,7 +101,7 @@ public class AutoEat extends InternalPlugin {
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(inventoryManager::closeInventory),
             new ControllingTask.WaitDelayStage(() -> 50L),
-            new ControllingTask.RunnableStage(() -> connection.botActionManager().useItemInHand(Hand.MAIN_HAND))
+            new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
           )));
         }
       },

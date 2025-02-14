@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
-import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -28,23 +27,16 @@ import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.structs.Segment;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.player.InteractAction;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatCommandPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundInteractPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerAbilitiesPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundSwingPacket;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -63,15 +55,8 @@ public class BotControlAPI {
   private final BotConnection connection;
   private final SecureRandom secureRandom = new SecureRandom();
   private final AtomicReference<ControllingTask> controllingTask = new AtomicReference<>();
-  @Getter
-  @Setter
-  private int attackCooldownTicks = 0;
 
   public void tick() {
-    if (attackCooldownTicks > 0) {
-      attackCooldownTicks--;
-    }
-
     var localTask = this.controllingTask.get();
     if (localTask != null) {
       if (localTask.isDone()) {
@@ -259,23 +244,6 @@ public class BotControlAPI {
     return null;
   }
 
-  public void attack(@NonNull Entity entity, boolean swingArm) {
-    if (!entity.entityType().attackable()) {
-      log.error("Entity {} can't be attacked!", entity.entityId());
-      return;
-    }
-
-    var packet =
-      new ServerboundInteractPacket(
-        entity.entityId(), InteractAction.ATTACK, connection.controlState().sneaking());
-    connection.sendPacket(packet);
-    if (swingArm) {
-      swingArm();
-    }
-
-    attackCooldownTicks = (int) getHitItemCooldownTicks();
-  }
-
   public Entity getClosestEntity(
     double range,
     String whitelistedUser,
@@ -376,19 +344,5 @@ public class BotControlAPI {
     var segment = new Segment(eye, vec);
     var boxes = level.getBlockCollisionBoxes(new AABB(eye, vec));
     return !segment.intersects(boxes);
-  }
-
-  public void swingArm() {
-    var swingPacket = new ServerboundSwingPacket(Hand.MAIN_HAND);
-    connection.sendPacket(swingPacket);
-  }
-
-  public float getHitItemCooldownTicks() {
-    connection.inventoryManager().applyItemAttributes();
-
-    return (float)
-      (1.0
-        / connection.dataManager().localPlayer().attributeValue(AttributeType.ATTACK_SPEED)
-        * 20.0);
   }
 }

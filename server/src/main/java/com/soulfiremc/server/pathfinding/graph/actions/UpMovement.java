@@ -30,7 +30,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BlockSafetyType;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.SkyDirection;
-import com.soulfiremc.server.protocol.bot.BotActionManager;
+import com.soulfiremc.server.protocol.bot.MultiPlayerGameMode;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.extern.slf4j.Slf4j;
 
@@ -125,7 +125,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     actions.add(
       new JumpAndPlaceBelowAction(
         node,
-        new BotActionManager.BlockPlaceAgainstData(
+        new MultiPlayerGameMode.BlockPlaceAgainstData(
           node.sub(0, 1, 0), BlockFace.TOP)));
 
     return Collections.singletonList(new GraphInstructions(
