@@ -44,7 +44,7 @@ public final class MSJavaRefreshTokenAuthService
       } catch (Exception e) {
         throw new CompletionException(e);
       }
-    });
+    }, executor);
   }
 
   @Override
@@ -64,7 +64,7 @@ public final class MSJavaRefreshTokenAuthService
       } catch (Exception e) {
         throw new CompletionException(e);
       }
-    });
+    }, executor);
   }
 
   @Override

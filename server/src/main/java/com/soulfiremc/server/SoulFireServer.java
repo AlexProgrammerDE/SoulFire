@@ -207,7 +207,7 @@ public class SoulFireServer {
     loadInstances();
 
     var rpcServerStart =
-      CompletableFuture.runAsync(
+      scheduler.runAsync(
         () -> {
           try {
             rpcServer.start();

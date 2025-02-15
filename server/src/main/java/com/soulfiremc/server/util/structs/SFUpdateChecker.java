@@ -42,14 +42,14 @@ public class SFUpdateChecker {
   }
 
   public static CompletableFuture<SFUpdateChecker> getInstance(SoulFireServer server) {
-    return CompletableFuture.supplyAsync(
+    return server.scheduler().supplyAsync(
       () -> {
         if (instance == null) {
           instance = new SFUpdateChecker();
         }
 
         return instance;
-      }, server.scheduler());
+      });
   }
 
   private static String checkForUpdates() {

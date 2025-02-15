@@ -45,7 +45,7 @@ public final class MSBedrockCredentialsAuthService
       } catch (Exception e) {
         throw new CompletionException(e);
       }
-    });
+    }, executor);
   }
 
   @Override
@@ -77,7 +77,7 @@ public final class MSBedrockCredentialsAuthService
       } catch (Exception e) {
         throw new CompletionException(e);
       }
-    });
+    }, executor);
   }
 
   @Override
