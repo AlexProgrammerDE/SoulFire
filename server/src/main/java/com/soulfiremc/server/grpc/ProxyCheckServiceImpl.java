@@ -36,7 +36,6 @@ import reactor.core.publisher.Mono;
 import javax.inject.Inject;
 import java.net.URL;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -67,39 +66,52 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
       };
 
       var results = SFHelpers.maxFutures(settings.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
-          var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
-          var stopWatch = Stopwatch.createStarted();
-          return client
-            .get()
-            .uri(url.toString())
-            .responseSingle(
-              (r, b) -> {
-                if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
-                  return b.asString();
-                }
+        var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
+        var stopWatch = Stopwatch.createStarted();
+        return client
+          .get()
+          .uri(url.toString())
+          .responseSingle(
+            (r, b) -> {
+              if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
+                return b.asString();
+              }
 
-                return Mono.empty();
-              })
-            .timeout(Duration.ofSeconds(15))
-            .onErrorResume(t -> Mono.empty())
-            .map(response -> ProxyCheckResponseSingle.newBuilder()
-              .setProxy(payload)
-              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-              .setValid(true)
-              .setRealIp(response)
+              return Mono.empty();
+            })
+          .timeout(Duration.ofSeconds(15))
+          .onErrorResume(t -> Mono.empty())
+          .map(response -> ProxyCheckResponseSingle.newBuilder()
+            .setProxy(payload)
+            .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+            .setValid(true)
+            .setRealIp(response)
+            .build())
+          .switchIfEmpty(Mono.fromSupplier(() -> ProxyCheckResponseSingle.newBuilder()
+            .setProxy(payload)
+            .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+            .setValid(false)
+            .build()))
+          .toFuture();
+      }, result -> {
+        if (result.getValid()) {
+          responseObserver.onNext(ProxyCheckResponse.newBuilder()
+            .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
               .build())
-            .switchIfEmpty(Mono.fromSupplier(() -> ProxyCheckResponseSingle.newBuilder()
-              .setProxy(payload)
-              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-              .setValid(false)
-              .build()))
-            .toFuture();
-        })
-        .stream()
-        .filter(Objects::nonNull)
-        .toList();
+            .build());
+        } else {
+          responseObserver.onNext(ProxyCheckResponse.newBuilder()
+            .setOneFailure(ProxyCheckOneFailure.newBuilder()
+              .build())
+            .build());
+        }
+      });
 
-      responseObserver.onNext(ProxyCheckResponse.newBuilder().addAllResponse(results).build());
+      responseObserver.onNext(ProxyCheckResponse.newBuilder()
+        .setFullList(ProxyCheckFullList.newBuilder()
+          .addAllResponse(results)
+          .build())
+        .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error checking proxy", t);

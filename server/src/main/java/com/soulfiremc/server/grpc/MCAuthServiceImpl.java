@@ -64,12 +64,28 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
             .exceptionally(t -> {
               log.error("Error authenticating account", t);
               return null;
-            }))
+            }), result -> {
+          if (result == null) {
+            responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+              .setOneFailure(CredentialsAuthOneFailure.newBuilder()
+                .build())
+              .build());
+          } else {
+            responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+              .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                .build())
+              .build());
+          }
+        })
         .stream()
         .filter(Objects::nonNull)
         .toList();
 
-      responseObserver.onNext(CredentialsAuthResponse.newBuilder().addAllAccount(results).build());
+      responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+        .setFullList(CredentialsAuthFullList.newBuilder()
+          .addAllAccount(results)
+          .build())
+        .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error authenticating account", t);

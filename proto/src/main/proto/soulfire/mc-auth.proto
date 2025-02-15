@@ -13,8 +13,25 @@ message CredentialsAuthRequest {
   repeated string payload = 3;
 }
 
-message CredentialsAuthResponse {
+// Full response of all accounts that were authenticated
+message CredentialsAuthFullList {
   repeated MinecraftAccountProto account = 1;
+}
+
+// Used when an account is successfully authenticated
+message CredentialsAuthOneSuccess {
+}
+
+// Used when an account is not successfully authenticated
+message CredentialsAuthOneFailure {
+}
+
+message CredentialsAuthResponse {
+  oneof data {
+    CredentialsAuthFullList full_list = 1;
+    CredentialsAuthOneSuccess one_success = 2;
+    CredentialsAuthOneFailure one_failure = 3;
+  }
 }
 
 message DeviceCodeAuthRequest {
@@ -46,7 +63,7 @@ message RefreshResponse {
 }
 
 service MCAuthService {
-  rpc loginCredentials(CredentialsAuthRequest) returns (CredentialsAuthResponse);
+  rpc loginCredentials(CredentialsAuthRequest) returns (stream CredentialsAuthResponse);
   rpc loginDeviceCode(DeviceCodeAuthRequest) returns (stream DeviceCodeAuthResponse);
   rpc refresh(RefreshRequest) returns (RefreshResponse);
 }

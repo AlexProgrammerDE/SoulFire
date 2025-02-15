@@ -92,13 +92,14 @@ public class SFHelpers {
     }
   }
 
-  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture) {
+  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture, Consumer<T> onProgress) {
     final var sourceIter = source.iterator();
     final var futures = new ArrayList<CompletableFuture<Void>>(maxFutures);
     final var result = new ArrayList<T>(source.size());
     while (sourceIter.hasNext()) {
       while (futures.size() < maxFutures && sourceIter.hasNext()) {
         futures.add(toFuture.apply(sourceIter.next()).thenAccept(r -> {
+          onProgress.accept(r);
           synchronized (result) {
             result.add(r);
           }
