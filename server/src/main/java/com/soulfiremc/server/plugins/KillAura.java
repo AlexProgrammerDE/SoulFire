@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -38,6 +39,8 @@ import org.pf4j.Extension;
 @Slf4j
 @Extension
 public class KillAura extends InternalPlugin {
+  private static final MetadataKey<Integer> COOLDOWN = MetadataKey.of("kill_aura", "cooldown", Integer.class);
+
   public KillAura() {
     super(new PluginInfo(
       "kill-aura",
@@ -106,6 +109,12 @@ public class KillAura extends InternalPlugin {
       return;
     }
 
+    int cooldownTicks = bot.metadata().getOrDefault(COOLDOWN, 0);
+    if (cooldownTicks > 0) {
+      bot.metadata().set(COOLDOWN, cooldownTicks - 1);
+      return;
+    }
+
     var marker = control.getMarkerAndUnregister(KillAuraMarker.class);
     if (marker == null) {
       return;
@@ -121,9 +130,10 @@ public class KillAura extends InternalPlugin {
       localPlayer.swing(Hand.MAIN_HAND);
     }
 
+    // Custom attack delay for specific scenarios
     if (bot.protocolVersion().olderThanOrEqualTo(ProtocolVersion.v1_8)
       || bot.settingsSource().get(KillAuraSettings.IGNORE_COOLDOWN)) {
-      localPlayer.attackStrengthTicker(bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
+      bot.metadata().set(COOLDOWN, bot.settingsSource().getRandom(KillAuraSettings.ATTACK_DELAY_TICKS).getAsInt());
     }
   }
 
