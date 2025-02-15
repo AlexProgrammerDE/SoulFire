@@ -24,10 +24,12 @@ import com.soulfiremc.client.cli.SFCommandDefinition;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
+import com.soulfiremc.grpc.generated.CredentialsAuthResponse;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -155,7 +157,12 @@ public class ClientSettingsManager {
           .setService(AccountTypeCredentials.valueOf(authType.name()))
           .addAllPayload(accounts);
 
-      return rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()).getAccountList()
+      return SFHelpers.awaitResultPredicate(
+          rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()),
+          CredentialsAuthResponse::hasFullList)
+        .orElseThrow()
+        .getFullList()
+        .getAccountList()
         .stream()
         .map(MinecraftAccount::fromProto)
         .toList();
