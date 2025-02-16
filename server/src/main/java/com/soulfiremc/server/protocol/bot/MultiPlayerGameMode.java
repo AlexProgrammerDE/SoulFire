@@ -97,7 +97,8 @@ public class MultiPlayerGameMode {
   }
 
   public void useItemInHand(Hand hand) {
-    incrementSequenceNumber();
+    this.ensureHasSentCarriedItem();
+    this.incrementSequenceNumber();
     var dataManager = connection.dataManager();
     connection.sendPacket(new ServerboundUseItemPacket(hand, sequenceNumber, dataManager.localPlayer().yRot(), dataManager.localPlayer().xRot()));
   }
@@ -107,7 +108,8 @@ public class MultiPlayerGameMode {
   }
 
   public void placeBlock(Hand hand, Vector3i againstBlock, BlockFace againstFace) {
-    incrementSequenceNumber();
+    this.ensureHasSentCarriedItem();
+    this.incrementSequenceNumber();
     var dataManager = connection.dataManager();
     var clientEntity = dataManager.localPlayer();
     var level = dataManager.currentLevel();
@@ -152,14 +154,16 @@ public class MultiPlayerGameMode {
   }
 
   public void sendStartBreakBlock(Vector3i blockPos, Direction direction) {
-    incrementSequenceNumber();
+    this.ensureHasSentCarriedItem();
+    this.incrementSequenceNumber();
     connection.sendPacket(
       new ServerboundPlayerActionPacket(
         PlayerAction.START_DIGGING, blockPos, direction, sequenceNumber));
   }
 
   public void sendEndBreakBlock(Vector3i blockPos, Direction direction) {
-    incrementSequenceNumber();
+    this.ensureHasSentCarriedItem();
+    this.incrementSequenceNumber();
     connection.sendPacket(
       new ServerboundPlayerActionPacket(
         PlayerAction.FINISH_DIGGING, blockPos, direction, sequenceNumber));
