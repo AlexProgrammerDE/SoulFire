@@ -47,6 +47,10 @@ public class MathHelper {
   }
   private MathHelper() {}
 
+  public static boolean haveSameSign(double a, double b) {
+    return a * b >= 0;
+  }
+
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
   }

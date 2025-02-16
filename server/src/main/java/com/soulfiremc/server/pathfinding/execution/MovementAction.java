@@ -89,9 +89,14 @@ public final class MovementAction implements WorldAction {
 
     connection.controlState().forward(true);
 
+    var deltaMovement = clientEntity.deltaMovement();
+    var lookAngle = clientEntity.getLookAngle();
     var botPosition = clientEntity.pos();
     if (targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
-      && shouldJump()) {
+      && shouldJump()
+      && MathHelper.haveSameSign(deltaMovement.getX(), lookAngle.getX())
+      && MathHelper.haveSameSign(deltaMovement.getZ(), lookAngle.getZ())
+    ) {
       connection.controlState().jumping(true);
     }
   }

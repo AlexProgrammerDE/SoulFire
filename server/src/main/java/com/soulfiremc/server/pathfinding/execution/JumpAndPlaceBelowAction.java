@@ -63,7 +63,10 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
       return;
     }
 
-    if (clientEntity.y() < blockPlacePosition.y + 1) {
+    var deltaMovement = clientEntity.deltaMovement();
+    if (clientEntity.y() < blockPlacePosition.y + 1
+      && deltaMovement.getX() == 0
+      && deltaMovement.getZ() == 0) {
       // Make sure we are so high that we can place the block
       connection.controlState().jumping(true);
       return;
