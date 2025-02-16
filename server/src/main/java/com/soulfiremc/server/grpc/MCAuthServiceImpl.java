@@ -26,6 +26,7 @@ import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,8 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   @Override
-  public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> responseObserver) {
+  public void loginCredentials(CredentialsAuthRequest request, StreamObserver<CredentialsAuthResponse> casted) {
+    var responseObserver = (ServerCallStreamObserver<CredentialsAuthResponse>) casted;
     var instanceId = UUID.fromString(request.getInstanceId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
@@ -53,40 +55,50 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     var settings = instance.settingsSource();
 
     try {
-      var service = MCAuthService.convertService(request.getService());
-      var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-          service.createDataAndLogin(
-              payload,
-              settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
-              instance.scheduler()
-            )
-            .thenApply(MinecraftAccount::toProto)
-            .exceptionally(t -> {
-              log.error("Error authenticating account", t);
-              return null;
-            }), result -> {
-          if (result == null) {
-            responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-              .setOneFailure(CredentialsAuthOneFailure.newBuilder()
-                .build())
-              .build());
-          } else {
-            responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-              .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
-                .build())
-              .build());
-          }
-        })
-        .stream()
-        .filter(Objects::nonNull)
-        .toList();
+      instance.scheduler().runAsync(() -> {
+        var service = MCAuthService.convertService(request.getService());
+        var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
+            service.createDataAndLogin(
+                payload,
+                settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+                instance.scheduler()
+              )
+              .thenApply(MinecraftAccount::toProto)
+              .exceptionally(t -> {
+                log.error("Error authenticating account", t);
+                return null;
+              }), result -> {
+            if (responseObserver.isCancelled()) {
+              return;
+            }
 
-      responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-        .setFullList(CredentialsAuthFullList.newBuilder()
-          .addAllAccount(results)
-          .build())
-        .build());
-      responseObserver.onCompleted();
+            if (result == null) {
+              responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                .setOneFailure(CredentialsAuthOneFailure.newBuilder()
+                  .build())
+                .build());
+            } else {
+              responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                  .build())
+                .build());
+            }
+          })
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+        if (responseObserver.isCancelled()) {
+          return;
+        }
+
+        responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+          .setFullList(CredentialsAuthFullList.newBuilder()
+            .addAllAccount(results)
+            .build())
+          .build());
+        responseObserver.onCompleted();
+      });
     } catch (Throwable t) {
       log.error("Error authenticating account", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
