@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
+import com.soulfiremc.server.util.structs.CancellationCollector;
 import lombok.extern.slf4j.Slf4j;
 import org.shredzone.acme4j.exception.AcmeProtocolException;
 
@@ -89,12 +90,17 @@ public class SFHelpers {
     }
   }
 
-  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture, Consumer<T> onProgress) {
+  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture, Consumer<T> onProgress, CancellationCollector cancellationCollector) {
     final var sourceIter = source.iterator();
     final var futures = new ArrayList<CompletableFuture<Void>>(maxFutures);
     final var result = new ArrayList<T>(source.size());
     while (sourceIter.hasNext()) {
       while (futures.size() < maxFutures && sourceIter.hasNext()) {
+        // Abort if cancelled
+        if (cancellationCollector.cancelled()) {
+          return List.of();
+        }
+
         futures.add(toFuture.apply(sourceIter.next()).thenAccept(r -> {
           onProgress.accept(r);
           synchronized (result) {

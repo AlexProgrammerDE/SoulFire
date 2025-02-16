@@ -25,6 +25,7 @@ import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -61,6 +62,7 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
     var instance = optionalInstance.get();
     var settings = instance.settingsSource();
 
+    var cancellationCollector = new CancellationCollector(responseObserver);
     try {
       var url = switch (settings.get(ProxySettings.PROXY_CHECK_SERVICE, ProxySettings.ProxyCheckService.class)) {
         case IPIFY -> IPIFY_URL;
@@ -69,50 +71,51 @@ public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServi
 
       instance.scheduler().runAsync(() -> {
         var results = SFHelpers.maxFutures(settings.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
-          var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
-          var stopWatch = Stopwatch.createStarted();
-          return client
-            .get()
-            .uri(url.toString())
-            .responseSingle(
-              (r, b) -> {
-                if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
-                  return b.asString();
-                }
+            var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
+            var stopWatch = Stopwatch.createStarted();
+            return cancellationCollector.add(client
+              .get()
+              .uri(url.toString())
+              .responseSingle(
+                (r, b) -> {
+                  if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
+                    return b.asString();
+                  }
 
-                return Mono.empty();
-              })
-            .timeout(Duration.ofSeconds(15))
-            .onErrorResume(t -> Mono.empty())
-            .map(response -> ProxyCheckResponseSingle.newBuilder()
-              .setProxy(payload)
-              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-              .setValid(true)
-              .setRealIp(response)
-              .build())
-            .switchIfEmpty(Mono.fromSupplier(() -> ProxyCheckResponseSingle.newBuilder()
-              .setProxy(payload)
-              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-              .setValid(false)
-              .build()))
-            .toFuture();
-        }, result -> {
-          if (responseObserver.isCancelled()) {
-            return;
-          }
+                  return Mono.empty();
+                })
+              .timeout(Duration.ofSeconds(15))
+              .onErrorResume(t -> Mono.empty())
+              .map(response -> ProxyCheckResponseSingle.newBuilder()
+                .setProxy(payload)
+                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                .setValid(true)
+                .setRealIp(response)
+                .build())
+              .switchIfEmpty(Mono.fromSupplier(() -> ProxyCheckResponseSingle.newBuilder()
+                .setProxy(payload)
+                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                .setValid(false)
+                .build()))
+              .toFuture());
+          }, result -> {
+            if (responseObserver.isCancelled()) {
+              return;
+            }
 
-          if (result.getValid()) {
-            responseObserver.onNext(ProxyCheckResponse.newBuilder()
-              .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
-                .build())
-              .build());
-          } else {
-            responseObserver.onNext(ProxyCheckResponse.newBuilder()
-              .setOneFailure(ProxyCheckOneFailure.newBuilder()
-                .build())
-              .build());
-          }
-        });
+            if (result.getValid()) {
+              responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
+                  .build())
+                .build());
+            } else {
+              responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                .setOneFailure(ProxyCheckOneFailure.newBuilder()
+                  .build())
+                .build());
+            }
+          },
+          cancellationCollector);
 
         if (responseObserver.isCancelled()) {
           return;

@@ -24,6 +24,7 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -54,36 +55,38 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     var instance = optionalInstance.get();
     var settings = instance.settingsSource();
 
+    var cancellationCollector = new CancellationCollector(responseObserver);
     try {
       instance.scheduler().runAsync(() -> {
         var service = MCAuthService.convertService(request.getService());
         var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-            service.createDataAndLogin(
-                payload,
-                settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
-                instance.scheduler()
-              )
-              .thenApply(MinecraftAccount::toProto)
-              .exceptionally(t -> {
-                log.error("Error authenticating account", t);
-                return null;
-              }), result -> {
-            if (responseObserver.isCancelled()) {
-              return;
-            }
+              cancellationCollector.add(service.createDataAndLogin(
+                  payload,
+                  settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+                  instance.scheduler()
+                ))
+                .thenApply(MinecraftAccount::toProto)
+                .exceptionally(t -> {
+                  log.error("Error authenticating account", t);
+                  return null;
+                }), result -> {
+              if (responseObserver.isCancelled()) {
+                return;
+              }
 
-            if (result == null) {
-              responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                .setOneFailure(CredentialsAuthOneFailure.newBuilder()
-                  .build())
-                .build());
-            } else {
-              responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
-                  .build())
-                .build());
-            }
-          })
+              if (result == null) {
+                responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                  .setOneFailure(CredentialsAuthOneFailure.newBuilder()
+                    .build())
+                  .build());
+              } else {
+                responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                  .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                    .build())
+                  .build());
+              }
+            },
+            cancellationCollector)
           .stream()
           .filter(Objects::nonNull)
           .toList();
@@ -118,7 +121,9 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     var instance = optionalInstance.get();
     var settings = instance.settingsSource();
 
-    MCAuthService.convertService(request.getService()).createDataAndLogin(
+    var cancellationCollector = new CancellationCollector(responseObserver);
+    var service = MCAuthService.convertService(request.getService());
+    cancellationCollector.add(service.createDataAndLogin(
         deviceCode ->
           responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
             .setDeviceCode(
@@ -132,7 +137,7 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
           ),
         settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
         instance.scheduler()
-      )
+      ))
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -157,13 +162,15 @@ public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
     var instance = optionalInstance.get();
     var settings = instance.settingsSource();
 
+    var cancellationCollector = new CancellationCollector(responseObserver);
     try {
       var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
-      var account = MCAuthService.convertService(request.getAccount().getType()).refresh(
+      var service = MCAuthService.convertService(request.getAccount().getType());
+      var account = cancellationCollector.add(service.refresh(
         receivedAccount,
         settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
         instance.scheduler()
-      ).join();
+      )).join();
 
       responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
       responseObserver.onCompleted();
