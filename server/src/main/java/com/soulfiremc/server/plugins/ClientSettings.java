@@ -59,26 +59,18 @@ public class ClientSettings extends InternalPlugin {
       }
 
       var skinParts = new ArrayList<SkinPart>();
-      if (settingsSource.get(ClientSettingsSettings.CAPE_ENABLED)) {
-        skinParts.add(SkinPart.CAPE);
-      }
-      if (settingsSource.get(ClientSettingsSettings.JACKET_ENABLED)) {
-        skinParts.add(SkinPart.JACKET);
-      }
-      if (settingsSource.get(ClientSettingsSettings.LEFT_SLEEVE_ENABLED)) {
-        skinParts.add(SkinPart.LEFT_SLEEVE);
-      }
-      if (settingsSource.get(ClientSettingsSettings.RIGHT_SLEEVE_ENABLED)) {
-        skinParts.add(SkinPart.RIGHT_SLEEVE);
-      }
-      if (settingsSource.get(ClientSettingsSettings.LEFT_PANTS_LEG_ENABLED)) {
-        skinParts.add(SkinPart.LEFT_PANTS_LEG);
-      }
-      if (settingsSource.get(ClientSettingsSettings.RIGHT_PANTS_LEG_ENABLED)) {
-        skinParts.add(SkinPart.RIGHT_PANTS_LEG);
-      }
-      if (settingsSource.get(ClientSettingsSettings.HAT_ENABLED)) {
-        skinParts.add(SkinPart.HAT);
+      for (var part : SkinPart.values()) {
+        if (switch (part) {
+          case CAPE -> settingsSource.get(ClientSettingsSettings.CAPE_ENABLED);
+          case JACKET -> settingsSource.get(ClientSettingsSettings.JACKET_ENABLED);
+          case LEFT_SLEEVE -> settingsSource.get(ClientSettingsSettings.LEFT_SLEEVE_ENABLED);
+          case RIGHT_SLEEVE -> settingsSource.get(ClientSettingsSettings.RIGHT_SLEEVE_ENABLED);
+          case LEFT_PANTS_LEG -> settingsSource.get(ClientSettingsSettings.LEFT_PANTS_LEG_ENABLED);
+          case RIGHT_PANTS_LEG -> settingsSource.get(ClientSettingsSettings.RIGHT_PANTS_LEG_ENABLED);
+          case HAT -> settingsSource.get(ClientSettingsSettings.HAT_ENABLED);
+        }) {
+          skinParts.add(part);
+        }
       }
 
       event
