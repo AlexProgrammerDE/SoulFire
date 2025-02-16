@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.BlockShapeGroup;
 import com.soulfiremc.server.data.BlockState;
+import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
@@ -34,6 +35,10 @@ public class VectorHelper {
   private static final int Y_OFFSET = 0;
 
   private VectorHelper() {}
+
+  public static Vector2d toVector2dXZ(Vector3d vector) {
+    return Vector2d.from(vector.getX(), vector.getZ());
+  }
 
   public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
     return topMiddleOfBlock(vector, blockState.collisionShape());

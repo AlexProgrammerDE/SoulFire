@@ -574,6 +574,11 @@ public abstract class LivingEntity extends Entity {
     return this.attributeValue(AttributeType.GRAVITY);
   }
 
+  // Custom SF method
+  public double getEntityBaseGravity() {
+    return this.getDefaultGravity();
+  }
+
   protected double getEffectiveGravity() {
     var bl = this.getDeltaMovement().getY() <= 0.0;
     return bl && this.effectState().hasEffect(EffectType.SLOW_FALLING) ? Math.min(this.getGravity(), 0.01) : this.getGravity();

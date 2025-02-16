@@ -17,12 +17,14 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cloudburstmc.math.vector.Vector2d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
@@ -89,13 +91,14 @@ public final class MovementAction implements WorldAction {
 
     connection.controlState().forward(true);
 
-    var deltaMovement = clientEntity.deltaMovement();
-    var lookAngle = clientEntity.getLookAngle();
+    var deltaMovementY = clientEntity.deltaMovement().getY();
+    var deltaMovementXZ = VectorHelper.toVector2dXZ(clientEntity.deltaMovement());
+    var lookAngleXZ = VectorHelper.toVector2dXZ(clientEntity.getLookAngle());
     var botPosition = clientEntity.pos();
     if (targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
       && shouldJump()
-      && MathHelper.haveSameSign(deltaMovement.getX(), lookAngle.getX())
-      && MathHelper.haveSameSign(deltaMovement.getZ(), lookAngle.getZ())
+      && DoubleMath.fuzzyEquals(deltaMovementY, -clientEntity.getEntityBaseGravity(), 0.1)
+      && (deltaMovementXZ.equals(Vector2d.ZERO) || deltaMovementXZ.normalize().dot(lookAngleXZ.normalize()) > 0.8)
     ) {
       connection.controlState().jumping(true);
     }
