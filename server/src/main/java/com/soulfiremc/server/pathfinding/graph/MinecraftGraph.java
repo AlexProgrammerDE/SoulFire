@@ -52,8 +52,8 @@ public record MinecraftGraph(TagsState tagsState,
                              BlockAccessor blockAccessor,
                              ProjectedInventory inventory,
                              PathConstraint pathConstraint) {
-  private static final GraphAction[] ACTIONS_TEMPLATE;
   public static final int ACTIONS_SIZE;
+  private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
   private static final WrappedActionSubscription[][] SUBSCRIPTION_VALUES;
 

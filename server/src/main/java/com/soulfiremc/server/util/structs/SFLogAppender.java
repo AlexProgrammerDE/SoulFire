@@ -43,14 +43,13 @@ import java.util.function.Consumer;
 
 @Getter
 public class SFLogAppender extends AbstractAppender {
-  private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   public static final String SF_INSTANCE_ID = "sf-instance-id";
   public static final String SF_BOT_CONNECTION_ID = "sf-bot-connection-id";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
   public static final String SF_SKIP_PUBLISHING = "sf-skip-publishing";
   public static final String SF_SKIP_LOCAL_APPENDERS = "sf-skip-local-appenders";
   public static final SFLogAppender INSTANCE = new SFLogAppender();
-
+  private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   private static final LoggerNamePatternSelector SELECTOR = LoggerNamePatternSelector.createSelector(
     "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[]{

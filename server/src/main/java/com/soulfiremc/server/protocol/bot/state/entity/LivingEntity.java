@@ -71,10 +71,10 @@ public abstract class LivingEntity extends Entity {
   protected double lerpYHeadRot;
   protected int lerpHeadSteps;
   protected float lastHurt;
-  private int noJumpDelay;
-  private float speed;
   @Setter
   protected int attackStrengthTicker;
+  private int noJumpDelay;
+  private float speed;
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<Vector3i> lastClimbablePos = Optional.empty();
 

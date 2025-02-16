@@ -80,13 +80,13 @@ public abstract class Player extends LivingEntity {
   protected FoodData foodData = new FoodData();
   protected boolean wasUnderwater = false;
   protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
-  private boolean reducedDebugInfo;
-  private boolean clientLoaded = false;
-  private Optional<GlobalPos> lastDeathLocation = Optional.empty();
   protected int autoSpinAttackTicks;
   protected float autoSpinAttackDmg;
   @Nullable
   protected ItemStack autoSpinAttackItemStack;
+  private boolean reducedDebugInfo;
+  private boolean clientLoaded = false;
+  private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 
   public Player(Level level, Vector3i spawnBlockPos, float spawnYRot, GameProfile gameProfile) {
     super(EntityType.PLAYER, level);

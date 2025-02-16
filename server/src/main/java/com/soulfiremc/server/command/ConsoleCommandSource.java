@@ -33,8 +33,8 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ConsoleCommandSource implements SoulFireUser {
-  private final AuthSystem authSystem;
   private static final Logger log = LoggerFactory.getLogger("Console");
+  private final AuthSystem authSystem;
 
   @Override
   public void sendMessage(Level level, Component message) {

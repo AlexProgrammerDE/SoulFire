@@ -114,12 +114,12 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     // We need a block to place below us
-      if (graph.doUsableBlocksDecreaseWhenPlaced()) {
-        // After the place we'll have one less usable block item
-        usableBlockItemsDiff--;
-      }
+    if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+      // After the place we'll have one less usable block item
+      usableBlockItemsDiff--;
+    }
 
-      cost += Costs.PLACE_BLOCK_PENALTY;
+    cost += Costs.PLACE_BLOCK_PENALTY;
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(

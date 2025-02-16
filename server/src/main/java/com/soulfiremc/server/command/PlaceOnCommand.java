@@ -45,7 +45,7 @@ public class PlaceOnCommand {
                       c,
                       bot -> {
                         bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-                            bot.dataManager().gameModeState().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().localPlayer().pos()).toInt(), face)));
+                          bot.dataManager().gameModeState().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().localPlayer().pos()).toInt(), face)));
                         return Command.SINGLE_SUCCESS;
                       });
                   })))));

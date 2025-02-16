@@ -46,11 +46,6 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
     System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());
   }
 
-  @Override
-  protected boolean isRunning() {
-    return !shutdownManager.shutdown();
-  }
-
   private static Candidate toCandidate(Completion completion) {
     var suggestionText = completion.suggestion();
     return new Candidate(
@@ -62,6 +57,11 @@ public class GenericTerminalConsole extends SimpleTerminalConsole {
       null,
       false
     );
+  }
+
+  @Override
+  protected boolean isRunning() {
+    return !shutdownManager.shutdown();
   }
 
   @Override

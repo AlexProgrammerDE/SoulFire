@@ -20,14 +20,14 @@ package com.soulfiremc.server.util.structs;
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
 
 public class TickTimer {
+  private final float msPerTick;
+  private final FloatUnaryOperator targetMsptProvider;
   private float deltaTicks;
   private float deltaTickResidual;
   private float realtimeDeltaTicks;
   private float pausedDeltaTickResidual;
   private long lastMs;
   private long lastUiMs;
-  private final float msPerTick;
-  private final FloatUnaryOperator targetMsptProvider;
   private boolean paused;
   private boolean frozen;
 

@@ -46,109 +46,109 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 public class WalkCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-        literal("walk")
-            .then(argument("entity", StringArgumentType.string())
+      literal("walk")
+        .then(argument("entity", StringArgumentType.string())
+          .executes(
+            help(
+              "Makes selected bots walk to a entity",
+              c -> {
+                var entityName = StringArgumentType.getString(c, "entity");
+
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
+                    if (entityId.isEmpty()) {
+                      c.getSource().source().sendWarn("Invalid entity specified!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
+                    if (entity == null) {
+                      c.getSource().source().sendWarn("Entity not found!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    PathExecutor.executePathfinding(
+                      bot,
+                      new PosGoal(SFVec3i.fromDouble(entity.pos())),
+                      new PathConstraint(bot)
+                    );
+
+                    return Command.SINGLE_SUCCESS;
+                  });
+              })))
+        .then(
+          literal("radius")
+            .then(
+              argument("radius", IntegerArgumentType.integer())
                 .executes(
-                    help(
-                        "Makes selected bots walk to a entity",
-                        c -> {
-                          var entityName = StringArgumentType.getString(c, "entity");
+                  help(
+                    "Makes selected bots walk to a random xz position within the radius",
+                    c -> {
+                      var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                          return forEveryBot(
-                              c,
-                              bot -> {
-                                var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                                if (entityId.isEmpty()) {
-                                  c.getSource().source().sendWarn("Invalid entity specified!");
-                                  return Command.SINGLE_SUCCESS;
-                                }
+                      return executePathfinding(c, bot -> {
+                        var random = ThreadLocalRandom.current();
+                        var pos = bot.dataManager().localPlayer().pos();
+                        var x =
+                          random.nextInt(
+                            pos.getFloorX() - radius,
+                            pos.getFloorX() + radius);
+                        var z =
+                          random.nextInt(
+                            pos.getFloorZ() - radius,
+                            pos.getFloorZ() + radius);
 
-                                var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
-                                if (entity == null) {
-                                  c.getSource().source().sendWarn("Entity not found!");
-                                  return Command.SINGLE_SUCCESS;
-                                }
-
-                                PathExecutor.executePathfinding(
-                                    bot,
-                                    new PosGoal(SFVec3i.fromDouble(entity.pos())),
-                                    new PathConstraint(bot)
-                                );
-
-                                return Command.SINGLE_SUCCESS;
-                              });
-                        })))
-            .then(
-                literal("radius")
-                    .then(
-                        argument("radius", IntegerArgumentType.integer())
-                            .executes(
-                                help(
-                                    "Makes selected bots walk to a random xz position within the radius",
-                                    c -> {
-                                      var radius = IntegerArgumentType.getInteger(c, "radius");
-
-                                      return executePathfinding(c, bot -> {
-                                        var random = ThreadLocalRandom.current();
-                                        var pos = bot.dataManager().localPlayer().pos();
-                                        var x =
-                                            random.nextInt(
-                                                pos.getFloorX() - radius,
-                                                pos.getFloorX() + radius);
-                                        var z =
-                                            random.nextInt(
-                                                pos.getFloorZ() - radius,
-                                                pos.getFloorZ() + radius);
-
-                                        return new XZGoal(x, z);
-                                      });
-                                    }))))
-            .then(
-                argument("y", new DynamicYArgumentType())
-                    .executes(
-                        help(
-                            "Makes selected bots walk to the y coordinates",
-                            c -> {
-                              var y = c.getArgument("y", DynamicYArgumentType.YLocationMapper.class);
-                              return executePathfinding(c, bot -> new YGoal(GenericMath.floor(
-                                  y.getAbsoluteLocation(bot.dataManager().localPlayer().y())
-                              )));
-                            })))
-            .then(
-                argument("xz", new DynamicXZArgumentType())
-                    .executes(
-                        help(
-                            "Makes selected bots walk to the xz coordinates",
-                            c -> {
-                              var xz = c.getArgument("xz", DynamicXZArgumentType.XZLocationMapper.class);
-                              return executePathfinding(c, bot -> {
-                                var xzGoal = xz.getAbsoluteLocation(Vector2d.from(
-                                    bot.dataManager().localPlayer().x(),
-                                    bot.dataManager().localPlayer().z()
-                                )).toInt();
-                                return new XZGoal(xzGoal.getX(), xzGoal.getY());
-                              });
-                            })))
-            .then(
-                argument("xyz", new DynamicXYZArgumentType())
-                    .executes(
-                        help(
-                            "Makes selected bots walk to the xyz coordinates",
-                            c -> {
-                              var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
-                              return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
-                                  xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos())
-                              )));
-                            }))));
+                        return new XZGoal(x, z);
+                      });
+                    }))))
+        .then(
+          argument("y", new DynamicYArgumentType())
+            .executes(
+              help(
+                "Makes selected bots walk to the y coordinates",
+                c -> {
+                  var y = c.getArgument("y", DynamicYArgumentType.YLocationMapper.class);
+                  return executePathfinding(c, bot -> new YGoal(GenericMath.floor(
+                    y.getAbsoluteLocation(bot.dataManager().localPlayer().y())
+                  )));
+                })))
+        .then(
+          argument("xz", new DynamicXZArgumentType())
+            .executes(
+              help(
+                "Makes selected bots walk to the xz coordinates",
+                c -> {
+                  var xz = c.getArgument("xz", DynamicXZArgumentType.XZLocationMapper.class);
+                  return executePathfinding(c, bot -> {
+                    var xzGoal = xz.getAbsoluteLocation(Vector2d.from(
+                      bot.dataManager().localPlayer().x(),
+                      bot.dataManager().localPlayer().z()
+                    )).toInt();
+                    return new XZGoal(xzGoal.getX(), xzGoal.getY());
+                  });
+                })))
+        .then(
+          argument("xyz", new DynamicXYZArgumentType())
+            .executes(
+              help(
+                "Makes selected bots walk to the xyz coordinates",
+                c -> {
+                  var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
+                  return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
+                    xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos())
+                  )));
+                }))));
   }
 
   public static int executePathfinding(CommandContext<CommandSourceStack> context,
                                        Function<BotConnection, GoalScorer> goalScorerFactory) throws CommandSyntaxException {
     return forEveryBot(
-        context,
-        bot -> {
-          PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraint(bot));
-          return Command.SINGLE_SUCCESS;
-        });
+      context,
+      bot -> {
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraint(bot));
+        return Command.SINGLE_SUCCESS;
+      });
   }
 }

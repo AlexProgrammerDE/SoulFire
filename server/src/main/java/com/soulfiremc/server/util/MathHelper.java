@@ -45,6 +45,7 @@ public class MathHelper {
       ASIN_TAB[i] = e;
     }
   }
+
   private MathHelper() {}
 
   public static boolean haveSameSign(double a, double b) {

@@ -53,16 +53,16 @@ public class Level implements LevelHeightAccessor {
   private final boolean debug;
   private final int seaLevel;
   private final LevelData levelData;
-  @Setter
-  private BorderState borderState;
   protected float oRainLevel;
   protected float rainLevel;
   protected float oThunderLevel;
   protected float thunderLevel;
+  @Setter
+  private BorderState borderState;
   private boolean tickDayTime;
 
   public Level(
-      BotConnection connection,
+    BotConnection connection,
     TagsState tagsState,
     DimensionType dimensionType,
     Key worldKey,

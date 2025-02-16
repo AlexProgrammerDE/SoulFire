@@ -29,52 +29,52 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 public class ExcavateCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-        literal("excavate")
-            .then(literal("rectangle")
-                .then(argument("from", new DynamicXYZArgumentType())
-                    .then(argument("to", new DynamicXYZArgumentType())
-                        .executes(
-                            help(
-                                "Makes selected bots dig a rectangle from the from to the to coordinates",
-                                c -> {
-                                  var from = c.getArgument("from", DynamicXYZArgumentType.XYZLocationMapper.class);
-                                  var to = c.getArgument("to", DynamicXYZArgumentType.XYZLocationMapper.class);
+      literal("excavate")
+        .then(literal("rectangle")
+          .then(argument("from", new DynamicXYZArgumentType())
+            .then(argument("to", new DynamicXYZArgumentType())
+              .executes(
+                help(
+                  "Makes selected bots dig a rectangle from the from to the to coordinates",
+                  c -> {
+                    var from = c.getArgument("from", DynamicXYZArgumentType.XYZLocationMapper.class);
+                    var to = c.getArgument("to", DynamicXYZArgumentType.XYZLocationMapper.class);
 
-                                  return forEveryBot(
-                                      c,
-                                      bot -> {
-                                        var dataManager = bot.dataManager();
-                                        bot.scheduler().schedule(() -> new ExcavateAreaController(
-                                            ExcavateAreaController.getRectangleFromTo(
-                                                SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.localPlayer().pos())),
-                                                SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.localPlayer().pos()))
-                                            )
-                                        ).start(bot));
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        var dataManager = bot.dataManager();
+                        bot.scheduler().schedule(() -> new ExcavateAreaController(
+                          ExcavateAreaController.getRectangleFromTo(
+                            SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.localPlayer().pos())),
+                            SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.localPlayer().pos()))
+                          )
+                        ).start(bot));
 
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                })))))
-            .then(literal("sphere")
-                .then(argument("position", new DynamicXYZArgumentType())
-                    .then(argument("radius", IntegerArgumentType.integer(1))
-                        .executes(
-                            help(
-                                "Makes selected bots dig a sphere with the given radius",
-                                c -> {
-                                  var position = c.getArgument("position", DynamicXYZArgumentType.XYZLocationMapper.class);
-                                  var radius = IntegerArgumentType.getInteger(c, "radius");
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  })))))
+        .then(literal("sphere")
+          .then(argument("position", new DynamicXYZArgumentType())
+            .then(argument("radius", IntegerArgumentType.integer(1))
+              .executes(
+                help(
+                  "Makes selected bots dig a sphere with the given radius",
+                  c -> {
+                    var position = c.getArgument("position", DynamicXYZArgumentType.XYZLocationMapper.class);
+                    var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                                  return forEveryBot(
-                                      c,
-                                      bot -> {
-                                        var dataManager = bot.dataManager();
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        var dataManager = bot.dataManager();
 
-                                        bot.scheduler().schedule(() -> new ExcavateAreaController(
-                                            ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.localPlayer().pos())), radius)
-                                        ).start(bot));
+                        bot.scheduler().schedule(() -> new ExcavateAreaController(
+                          ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.localPlayer().pos())), radius)
+                        ).start(bot));
 
-                                        return Command.SINGLE_SUCCESS;
-                                      });
-                                }))))));
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  }))))));
   }
 }

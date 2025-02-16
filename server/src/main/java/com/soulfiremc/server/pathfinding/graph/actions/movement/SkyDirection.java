@@ -32,9 +32,7 @@ public enum SkyDirection {
   WEST(new SFVec3i(-1, 0, 0), Direction.WEST, BlockFace.WEST);
 
   public static final SkyDirection[] VALUES = values();
-  private final SFVec3i offsetVector;
-  private final Direction direction;
-  private final BlockFace blockFace;
+
   static {
     // Enums can't reference each other in their constructors, so we have to do this manually
     NORTH.opposite = SOUTH;
@@ -43,6 +41,9 @@ public enum SkyDirection {
     WEST.opposite = EAST;
   }
 
+  private final SFVec3i offsetVector;
+  private final Direction direction;
+  private final BlockFace blockFace;
   private SkyDirection opposite;
 
   public SFVec3i offset(SFVec3i vector) {

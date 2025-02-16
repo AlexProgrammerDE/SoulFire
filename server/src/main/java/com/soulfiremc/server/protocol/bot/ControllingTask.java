@@ -45,6 +45,9 @@ public interface ControllingTask {
   interface Stage {
   }
 
+  interface ManualTaskMarker {
+  }
+
   @RequiredArgsConstructor
   class SingleTickTask implements ControllingTask {
     private final Runnable runnable;
@@ -74,9 +77,6 @@ public interface ControllingTask {
   record RunnableStage(Runnable runnable) implements Stage {}
 
   record WaitDelayStage(LongSupplier delaySupplier) implements Stage {}
-
-  interface ManualTaskMarker {
-  }
 
   @RequiredArgsConstructor
   class StagedTask implements ControllingTask {

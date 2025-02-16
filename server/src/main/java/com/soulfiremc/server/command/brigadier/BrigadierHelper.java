@@ -196,11 +196,17 @@ public class BrigadierHelper {
       });
   }
 
+  public static Component toComponent(Message message) {
+    return switch (message) {
+      case null -> null;
+      case BrigadierComponent brigadierComponent -> brigadierComponent.component();
+      default -> Component.text(message.getString());
+    };
+  }
+
   public interface CommandFunction<S> {
     int run(S subject) throws CommandSyntaxException;
   }
-
-  public record HelpData(String command, String help) {}
 
   public sealed interface HelpCarrier permits SingleRedirectHelpWrapper, CommandHelpWrapper, RedirectHelpWrapper {
     String help();
@@ -208,6 +214,8 @@ public class BrigadierHelper {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean privateCommand();
   }
+
+  public record HelpData(String command, String help) {}
 
   private record SingleRedirectHelpWrapper(
     SingleRedirectModifier<CommandSourceStack> command,
@@ -237,13 +245,5 @@ public class BrigadierHelper {
     public Collection<CommandSourceStack> apply(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       return command.apply(context);
     }
-  }
-
-  public static Component toComponent(Message message) {
-    return switch (message) {
-      case null -> null;
-      case BrigadierComponent brigadierComponent -> brigadierComponent.component();
-      default -> Component.text(message.getString());
-    };
   }
 }

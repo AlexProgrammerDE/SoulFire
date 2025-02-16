@@ -109,6 +109,23 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     }
   }
 
+  @Getter
+  @RequiredArgsConstructor
+  public enum ParkourDirection {
+    NORTH(new SFVec3i(0, 0, -1), ActionDirection.NORTH),
+    SOUTH(new SFVec3i(0, 0, 1), ActionDirection.SOUTH),
+    EAST(new SFVec3i(1, 0, 0), ActionDirection.EAST),
+    WEST(new SFVec3i(-1, 0, 0), ActionDirection.WEST);
+
+    public static final ParkourDirection[] VALUES = values();
+    private final SFVec3i offsetVector;
+    private final ActionDirection actionDirection;
+
+    public SFVec3i offset(SFVec3i vector) {
+      return vector.add(offsetVector);
+    }
+  }
+
   private interface ParkourMovementSubscription extends MinecraftGraph.MovementSubscription<ParkourMovement> {
   }
 
@@ -155,23 +172,6 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       }
 
       return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-    }
-  }
-
-  @Getter
-  @RequiredArgsConstructor
-  public enum ParkourDirection {
-    NORTH(new SFVec3i(0, 0, -1), ActionDirection.NORTH),
-    SOUTH(new SFVec3i(0, 0, 1), ActionDirection.SOUTH),
-    EAST(new SFVec3i(1, 0, 0), ActionDirection.EAST),
-    WEST(new SFVec3i(-1, 0, 0), ActionDirection.WEST);
-
-    public static final ParkourDirection[] VALUES = values();
-    private final SFVec3i offsetVector;
-    private final ActionDirection actionDirection;
-
-    public SFVec3i offset(SFVec3i vector) {
-      return vector.add(offsetVector);
     }
   }
 }

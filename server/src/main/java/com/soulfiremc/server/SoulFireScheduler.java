@@ -180,6 +180,15 @@ public class SoulFireScheduler implements Executor {
     schedule(command);
   }
 
+  @FunctionalInterface
+  public interface RunnableWrapper {
+    Runnable wrap(Runnable runnable);
+
+    default RunnableWrapper with(RunnableWrapper child) {
+      return runnable -> child.wrap(wrap(runnable));
+    }
+  }
+
   private record TimedRunnable(Runnable runnable, long time) implements Comparable<TimedRunnable> {
     public static TimedRunnable of(Runnable runnable, long delay, TimeUnit unit) {
       return new TimedRunnable(runnable, System.currentTimeMillis() + unit.toMillis(delay));
@@ -192,15 +201,6 @@ public class SoulFireScheduler implements Executor {
 
     public boolean isReady() {
       return System.currentTimeMillis() >= time;
-    }
-  }
-
-  @FunctionalInterface
-  public interface RunnableWrapper {
-    Runnable wrap(Runnable runnable);
-
-    default RunnableWrapper with(RunnableWrapper child) {
-      return runnable -> child.wrap(wrap(runnable));
     }
   }
 }
