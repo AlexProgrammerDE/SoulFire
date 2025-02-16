@@ -30,7 +30,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerActionTy
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundSetCarriedItemPacket;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -52,10 +51,6 @@ public class InventoryManager {
 
   public void setContainer(int containerId, Container container) {
     containerData.put(containerId, container);
-  }
-
-  private void sendHeldItemChange() {
-    connection.sendPacket(new ServerboundSetCarriedItemPacket(playerInventory().selected));
   }
 
   public void closeInventory() {
