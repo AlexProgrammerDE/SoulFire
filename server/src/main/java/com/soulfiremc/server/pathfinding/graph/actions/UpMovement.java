@@ -111,6 +111,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
     }
 
+    var requiresOneBlock = usableBlockItemsDiff <= 0;
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     // We need a block to place below us
@@ -131,6 +132,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
       usableBlockItemsDiff,
+      requiresOneBlock,
       actionDirection,
       cost,
       actions

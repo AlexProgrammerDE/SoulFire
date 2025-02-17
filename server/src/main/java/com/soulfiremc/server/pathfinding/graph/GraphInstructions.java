@@ -26,4 +26,10 @@ import java.util.List;
 
 @With
 public record GraphInstructions(
-  SFVec3i blockPosition, int deltaUsableBlockItems, ActionDirection moveDirection, double actionCost, List<WorldAction> actions) {}
+  SFVec3i blockPosition,
+  int deltaUsableBlockItems,
+  boolean requiresOneBlock,
+  ActionDirection moveDirection,
+  double actionCost,
+  List<WorldAction> actions
+) {}

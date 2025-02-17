@@ -285,6 +285,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
+    // Even creative mode needs a block in the inv to place
+    var requiresOneBlock = requiresAgainstBlock && usableBlockItemsDiff <= 0;
     if (requiresAgainstBlock) {
       if (graph.doUsableBlocksDecreaseWhenPlaced()) {
         // After the place we'll have one less usable block item
@@ -302,6 +304,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
       usableBlockItemsDiff,
+      requiresOneBlock,
       actionDirection,
       cost,
       actions
