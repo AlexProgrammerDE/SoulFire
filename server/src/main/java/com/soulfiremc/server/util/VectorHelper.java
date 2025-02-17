@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.data.BlockShapeGroup;
 import com.soulfiremc.server.data.BlockState;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -40,13 +41,16 @@ public class VectorHelper {
     return Vector2d.from(vector.getX(), vector.getZ());
   }
 
-  public static Vector3d topMiddleOfBlock(Vector3d vector, BlockState blockState) {
+  public static Vector3d topMiddleOfBlock(SFVec3i vector, BlockState blockState) {
     return topMiddleOfBlock(vector, blockState.collisionShape());
   }
 
-  public static Vector3d topMiddleOfBlock(Vector3d vector, BlockShapeGroup blockShapeGroup) {
-    return vector.floor().add(0.5, blockShapeGroup.blockShapes()
-      .stream().mapToDouble(a -> a.maxY).max().orElse(0), 0.5);
+  public static Vector3d topMiddleOfBlock(SFVec3i vector, BlockShapeGroup blockShapeGroup) {
+    return Vector3d.from(
+      vector.x + 0.5,
+      vector.y + blockShapeGroup.blockShapes().stream().mapToDouble(a -> a.maxY).max().orElse(0),
+      vector.z + 0.5
+    );
   }
 
   public static Vector3d xRot(Vector3d base, float pitch) {

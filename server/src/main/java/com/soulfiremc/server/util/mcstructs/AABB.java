@@ -457,10 +457,10 @@ public class AABB {
     return this.minX == 0 && this.minY == 0 && this.minZ == 0 && this.maxX == 1 && this.maxY == 1 && this.maxZ == 1;
   }
 
-  public double diagonalXZLength() {
+  public double minXZ() {
     var x = this.maxX - this.minX;
     var z = this.maxZ - this.minZ;
-    return Math.sqrt(x * x + z * z);
+    return Math.min(x, z);
   }
 
   public boolean isFullBlockXZ() {

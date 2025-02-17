@@ -44,12 +44,12 @@ public final class MovementAction implements WorldAction {
     var level = connection.dataManager().currentLevel();
 
     var blockMeta = level.getBlockState(blockPosition);
-    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
+    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
     if (MathHelper.isOutsideTolerance(botPosition.getY(), targetMiddleBlock.getY(), 0.25)) {
       // We want to be on the same Y level
       return false;
     } else {
-      var halfDiagonal = clientEntity.getBoundingBox().diagonalXZLength() / 2;
+      var halfDiagonal = clientEntity.getBoundingBox().minXZ() / 2;
 
       // Leave more space to allow falling
       var adjustedHalfDiagonal = halfDiagonal - 0.05;
