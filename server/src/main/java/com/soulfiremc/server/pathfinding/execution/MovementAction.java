@@ -70,7 +70,7 @@ public final class MovementAction implements WorldAction {
     var level = connection.dataManager().currentLevel();
 
     var blockMeta = level.getBlockState(blockPosition);
-    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition.toVector3d(), blockMeta);
+    var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
 
     var previousYRot = clientEntity.yRot();
     clientEntity.lookAt(RotationOrigin.EYES, targetMiddleBlock);
