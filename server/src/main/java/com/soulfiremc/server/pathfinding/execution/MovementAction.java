@@ -52,7 +52,7 @@ public final class MovementAction implements WorldAction {
       var halfDiagonal = clientEntity.getBoundingBox().minXZ() / 2;
 
       // Leave more space to allow falling
-      var adjustedHalfDiagonal = halfDiagonal - 0.05;
+      var adjustedHalfDiagonal = halfDiagonal - 0.1;
       return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
     }
   }
