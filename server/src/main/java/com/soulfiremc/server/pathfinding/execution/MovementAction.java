@@ -20,10 +20,13 @@ package com.soulfiremc.server.pathfinding.execution;
 import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cloudburstmc.math.vector.Vector2d;
+import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
@@ -35,6 +38,7 @@ public final class MovementAction implements WorldAction {
   private final boolean walkFewTicksNoJump;
   private boolean didLook = false;
   private boolean lockYRot = false;
+  private boolean wasStill = false;
   private int noJumpTicks = 0;
 
   @Override
@@ -49,12 +53,16 @@ public final class MovementAction implements WorldAction {
       // We want to be on the same Y level
       return false;
     } else {
-      var halfDiagonal = clientEntity.getBoundingBox().minXZ() / 2;
-
-      // Leave more space to allow falling
-      var adjustedHalfDiagonal = halfDiagonal - 0.1;
-      return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
+      return isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock);
     }
+  }
+
+  private boolean isAtTargetXZ(LocalPlayer clientEntity, Vector3d botPosition, Vector3d targetMiddleBlock) {
+    var halfDiagonal = clientEntity.getBoundingBox().minXZ() / 2;
+
+    // Leave more space to allow falling
+    var adjustedHalfDiagonal = halfDiagonal - 0.1;
+    return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
   }
 
   @Override
@@ -88,19 +96,30 @@ public final class MovementAction implements WorldAction {
       clientEntity.lastYRot(newYRot);
     }
 
-    connection.controlState().forward(true);
-
-    var deltaMovementY = clientEntity.deltaMovement().getY();
     var botPosition = clientEntity.pos();
-    if (
-      // Check if a jump is needed
-      targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
-        // Sometimes we want to walk a little closer before jump
-        && shouldJump()
-        // Ensure we're roughly standing still
-        && DoubleMath.fuzzyEquals(deltaMovementY, -clientEntity.getEntityBaseGravity(), 0.1)
-    ) {
-      connection.controlState().jumping(true);
+    var needsJump = targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY();
+    if (needsJump) {
+      // Make sure not to move if we have still other motion going on
+      if (!wasStill) {
+        var deltaMovementXZ = VectorHelper.toVector2dXZ(clientEntity.deltaMovement());
+        var isBaseGravity = DoubleMath.fuzzyEquals(clientEntity.deltaMovement().getY(), -clientEntity.getEntityBaseGravity(), 0.1);
+        var isStill = deltaMovementXZ.equals(Vector2d.ZERO);
+        var isMovingRoughlyTowardsBlock = !deltaMovementXZ.equals(Vector2d.ZERO)
+          && deltaMovementXZ.normalize().dot(VectorHelper.toVector2dXZ(targetMiddleBlock.sub(clientEntity.pos())).normalize()) > 0.8;
+        if (isBaseGravity && (isStill || isMovingRoughlyTowardsBlock)) {
+          wasStill = true;
+        } else {
+          return;
+        }
+      }
+
+      if (shouldJump()) {
+        connection.controlState().jumping(true);
+      }
+    }
+
+    if (!isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock)) {
+      connection.controlState().forward(true);
     }
   }
 
@@ -109,7 +128,7 @@ public final class MovementAction implements WorldAction {
       return true;
     }
 
-    if (noJumpTicks < 2) {
+    if (noJumpTicks < 3) {
       noJumpTicks++;
       return false;
     } else {
