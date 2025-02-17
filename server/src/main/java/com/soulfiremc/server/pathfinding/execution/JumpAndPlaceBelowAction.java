@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.google.common.math.DoubleMath;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.MultiPlayerGameMode;
@@ -65,7 +66,11 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
 
     var deltaMovement = clientEntity.deltaMovement();
     if (clientEntity.y() < blockPlacePosition.y + 1
+      // Ensure we're roughly standing still
+      && DoubleMath.fuzzyEquals(deltaMovement.getY(), -clientEntity.getEntityBaseGravity(), 0.1)
+      // No X movement
       && deltaMovement.getX() == 0
+      // No Z movement
       && deltaMovement.getZ() == 0) {
       // Make sure we are so high that we can place the block
       connection.controlState().jumping(true);

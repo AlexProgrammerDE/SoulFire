@@ -97,7 +97,9 @@ public final class MovementAction implements WorldAction {
     var botPosition = clientEntity.pos();
     if (targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
       && shouldJump()
+      // Ensure we're roughly standing still
       && DoubleMath.fuzzyEquals(deltaMovementY, -clientEntity.getEntityBaseGravity(), 0.1)
+      // Ensure we're not pulled into the wrong XZ direction
       && (deltaMovementXZ.equals(Vector2d.ZERO) || deltaMovementXZ.normalize().dot(lookAngleXZ.normalize()) > 0.8)
     ) {
       connection.controlState().jumping(true);
