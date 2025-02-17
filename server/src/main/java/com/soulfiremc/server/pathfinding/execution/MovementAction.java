@@ -24,7 +24,6 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cloudburstmc.math.vector.Vector2d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 @Slf4j
@@ -92,15 +91,14 @@ public final class MovementAction implements WorldAction {
     connection.controlState().forward(true);
 
     var deltaMovementY = clientEntity.deltaMovement().getY();
-    var deltaMovementXZ = VectorHelper.toVector2dXZ(clientEntity.deltaMovement());
-    var lookAngleXZ = VectorHelper.toVector2dXZ(clientEntity.getLookAngle());
     var botPosition = clientEntity.pos();
-    if (targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
-      && shouldJump()
-      // Ensure we're roughly standing still
-      && DoubleMath.fuzzyEquals(deltaMovementY, -clientEntity.getEntityBaseGravity(), 0.1)
-      // Ensure we're not pulled into the wrong XZ direction
-      && (deltaMovementXZ.equals(Vector2d.ZERO) || deltaMovementXZ.normalize().dot(lookAngleXZ.normalize()) > 0.8)
+    if (
+      // Check if a jump is needed
+      targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.getY()
+        // Sometimes we want to walk a little closer before jump
+        && shouldJump()
+        // Ensure we're roughly standing still
+        && DoubleMath.fuzzyEquals(deltaMovementY, -clientEntity.getEntityBaseGravity(), 0.1)
     ) {
       connection.controlState().jumping(true);
     }
