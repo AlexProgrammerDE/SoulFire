@@ -24,7 +24,7 @@ import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.SFBlockHelpers;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
 import org.jetbrains.annotations.Nullable;
 
@@ -217,7 +217,7 @@ public final class Costs {
       return 1;
     }
 
-    var tool = itemStack.components().getOptional(DataComponentType.TOOL);
+    var tool = itemStack.components().getOptional(DataComponentTypes.TOOL);
     if (tool.isEmpty()) {
       return 1;
     }
@@ -240,7 +240,7 @@ public final class Costs {
       return false;
     }
 
-    var tool = itemStack.components().getOptional(DataComponentType.TOOL);
+    var tool = itemStack.components().getOptional(DataComponentTypes.TOOL);
     if (tool.isEmpty()) {
       return false;
     }

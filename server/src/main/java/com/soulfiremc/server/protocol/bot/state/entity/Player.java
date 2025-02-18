@@ -39,7 +39,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -265,7 +265,7 @@ public abstract class Player extends LivingEntity {
   }
 
   public int getScore() {
-    return this.metadataState.getMetadata(NamedEntityData.PLAYER__SCORE, MetadataType.INT);
+    return this.metadataState.getMetadata(NamedEntityData.PLAYER__SCORE, MetadataTypes.INT);
   }
 
   @Override
