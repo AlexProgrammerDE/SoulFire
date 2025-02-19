@@ -97,7 +97,7 @@ hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7
 hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0.CR1"
 hibernate-hikaricp = "org.hibernate.orm:hibernate-hikaricp:7.0.0.Beta4"
 hikaricp = "com.zaxxer:HikariCP:6.2.1"
-sqlite = "org.xerial:sqlite-jdbc:3.49.0.0"
+sqlite = "org.xerial:sqlite-jdbc:3.49.1.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.5.1"
 kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.1.10"
 graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
