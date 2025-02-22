@@ -217,7 +217,7 @@ public final class Costs {
       return 1;
     }
 
-    var tool = itemStack.components().getOptional(DataComponentTypes.TOOL);
+    var tool = itemStack.getDataComponents().getOptional(DataComponentTypes.TOOL);
     if (tool.isEmpty()) {
       return 1;
     }
@@ -240,7 +240,7 @@ public final class Costs {
       return false;
     }
 
-    var tool = itemStack.components().getOptional(DataComponentTypes.TOOL);
+    var tool = itemStack.getDataComponents().getOptional(DataComponentTypes.TOOL);
     if (tool.isEmpty()) {
       return false;
     }

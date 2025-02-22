@@ -24,7 +24,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
@@ -33,13 +32,8 @@ import java.util.HashMap;
 public class SFItemStack extends ItemStack {
   private final ItemType type;
 
-  private SFItemStack(SFItemStack clone, int amount) {
-    super(clone.getId(), amount, clone.getDataComponents());
-    this.type = clone.type;
-  }
-
   private SFItemStack(ItemStack itemStack) {
-    super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponents());
+    super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponentsPatch());
     this.type = ItemType.REGISTRY.getById(itemStack.getId());
   }
 
@@ -66,19 +60,12 @@ public class SFItemStack extends ItemStack {
     return new SFItemStack(itemType, amount);
   }
 
-  @Deprecated
-  @Override
-  @SuppressWarnings("DeprecatedIsStillUsed")
-  public DataComponents getDataComponents() {
-    return super.getDataComponents();
-  }
-
-  public SFDataComponents components() {
+  public SFDataComponents getDataComponents() {
     var internalMap = new HashMap<DataComponentType<?>, DataComponent<?, ?>>();
     var newComponents = new SFDataComponents(internalMap);
     internalMap.putAll(type.components().components());
 
-    var overrideComponents = super.getDataComponents();
+    var overrideComponents = super.getDataComponentsPatch();
     if (overrideComponents != null) {
       internalMap.putAll(overrideComponents.getDataComponents());
     }
@@ -95,15 +82,15 @@ public class SFItemStack extends ItemStack {
   }
 
   public boolean has(DataComponentType<?> component) {
-    return components().getOptional(component).isPresent();
+    return getDataComponents().getOptional(component).isPresent();
   }
 
   public <T> T get(DataComponentType<T> component) {
-    return components().get(component);
+    return getDataComponents().get(component);
   }
 
   public <T> T getOrDefault(DataComponentType<T> component, T defaultValue) {
-    return components().getOptional(component).orElse(defaultValue);
+    return getDataComponents().getOptional(component).orElse(defaultValue);
   }
 
   public int getMaxStackSize() {

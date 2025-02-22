@@ -56,7 +56,7 @@ public class EntityAttributeState {
   }
 
   public void putItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {
-    var components = itemStack.components();
+    var components = itemStack.getDataComponents();
     for (var modifier : components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS).getModifiers()) {
       if (isNotPartOf(modifier.getSlot(), slot)) {
         continue;
@@ -69,7 +69,7 @@ public class EntityAttributeState {
   }
 
   public void removeItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {
-    var components = itemStack.components();
+    var components = itemStack.getDataComponents();
     for (var modifier : components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS).getModifiers()) {
       if (isNotPartOf(modifier.getSlot(), slot)) {
         continue;

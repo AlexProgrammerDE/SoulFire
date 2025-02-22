@@ -32,11 +32,11 @@ public class SFItemHelpers {
   }
 
   public static boolean isTool(SFItemStack itemStack) {
-    return itemStack.components().getOptional(DataComponentTypes.TOOL).isPresent();
+    return itemStack.getDataComponents().getOptional(DataComponentTypes.TOOL).isPresent();
   }
 
   public static boolean isGoodEdibleFood(SFItemStack itemStack) {
-    var components = itemStack.components();
+    var components = itemStack.getDataComponents();
     return components.getOptional(DataComponentTypes.CONSUMABLE).map(f -> {
       for (var consumeEffects : f.onConsumeEffects()) {
         if (!(consumeEffects instanceof ConsumeEffect.ApplyEffects applyEffects)) {
