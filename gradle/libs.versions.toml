@@ -106,6 +106,7 @@ graalvm-polyglot-ruby = { module = "org.graalvm.polyglot:ruby", version.ref = "g
 graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
 angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit = "org.junit.jupiter:junit-jupiter:5.12.0"
 
 [bundles]

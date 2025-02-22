@@ -103,6 +103,7 @@ dependencies {
   // For tls cert provisioning
   api(libs.acme4j)
 
+  testRuntimeOnly(libs.junit.launcher)
   testImplementation(libs.junit)
 }
 
