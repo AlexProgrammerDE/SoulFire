@@ -221,6 +221,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
                                   Long2IntMap blockItemsIndex,
                                   MinecraftRouteNode current,
                                   GraphInstructions instructions) {
+    // Creative mode placing requires us to have at least one block
+    if (instructions.requiresOneBlock() && current.node().usableBlockItems() < 1) {
+      return;
+    }
+
     var newBlocks = current.node().usableBlockItems() + instructions.deltaUsableBlockItems();
 
     // If we don't have enough items to reach this node, we can skip it

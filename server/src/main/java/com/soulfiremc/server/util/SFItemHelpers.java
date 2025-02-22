@@ -21,7 +21,7 @@ import com.soulfiremc.server.data.BlockItems;
 import com.soulfiremc.server.data.EffectType;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ConsumeEffect;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 
 public class SFItemHelpers {
   private SFItemHelpers() {}
@@ -32,12 +32,12 @@ public class SFItemHelpers {
   }
 
   public static boolean isTool(SFItemStack itemStack) {
-    return itemStack.components().getOptional(DataComponentType.TOOL).isPresent();
+    return itemStack.components().getOptional(DataComponentTypes.TOOL).isPresent();
   }
 
   public static boolean isGoodEdibleFood(SFItemStack itemStack) {
     var components = itemStack.components();
-    return components.getOptional(DataComponentType.CONSUMABLE).map(f -> {
+    return components.getOptional(DataComponentTypes.CONSUMABLE).map(f -> {
       for (var consumeEffects : f.onConsumeEffects()) {
         if (!(consumeEffects instanceof ConsumeEffect.ApplyEffects applyEffects)) {
           continue;

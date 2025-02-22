@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -106,7 +107,7 @@ public class SFItemStack extends ItemStack {
   }
 
   public int getMaxStackSize() {
-    return this.getOrDefault(DataComponentType.MAX_STACK_SIZE, 1);
+    return this.getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1);
   }
 
   public boolean isStackable() {
@@ -114,7 +115,7 @@ public class SFItemStack extends ItemStack {
   }
 
   public boolean isDamageableItem() {
-    return this.has(DataComponentType.MAX_DAMAGE) && !this.has(DataComponentType.UNBREAKABLE) && this.has(DataComponentType.DAMAGE);
+    return this.has(DataComponentTypes.MAX_DAMAGE) && !this.has(DataComponentTypes.UNBREAKABLE) && this.has(DataComponentTypes.DAMAGE);
   }
 
   public boolean isDamaged() {
@@ -122,11 +123,11 @@ public class SFItemStack extends ItemStack {
   }
 
   public int getDamageValue() {
-    return MathHelper.clamp(this.getOrDefault(DataComponentType.DAMAGE, 0), 0, this.getMaxDamage());
+    return MathHelper.clamp(this.getOrDefault(DataComponentTypes.DAMAGE, 0), 0, this.getMaxDamage());
   }
 
   public int getMaxDamage() {
-    return this.getOrDefault(DataComponentType.MAX_DAMAGE, 0);
+    return this.getOrDefault(DataComponentTypes.MAX_DAMAGE, 0);
   }
 
   public boolean isBroken() {

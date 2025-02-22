@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public record ByteDataComponents(Map<DataComponentType<?>, DataComponent<?, ?>> 
         var value = entry.getValue().getAsString();
         var bytes = Base64.getDecoder().decode(value);
         var buf = Unpooled.wrappedBuffer(bytes);
-        var dataComponentType = DataComponentType.from(MinecraftTypes.readVarInt(buf));
+        var dataComponentType = DataComponentTypes.from(MinecraftTypes.readVarInt(buf));
         var dataComponent = dataComponentType.readDataComponent(buf);
         map.put(dataComponentType, dataComponent);
       }

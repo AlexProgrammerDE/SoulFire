@@ -50,7 +50,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata;
@@ -599,7 +599,7 @@ public class Entity {
   }
 
   protected boolean getSharedFlag(int flag) {
-    return (this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE) & 1 << flag) != 0;
+    return (this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE) & 1 << flag) != 0;
   }
 
   public void tick() {
@@ -940,16 +940,16 @@ public class Entity {
   }
 
   protected void setSharedFlag(int flag, boolean set) {
-    byte b = this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE);
+    byte b = this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE);
     if (set) {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
     } else {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
+      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
     }
   }
 
   public boolean isNoGravity() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataType.BOOLEAN);
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataTypes.BOOLEAN);
   }
 
   protected double getDefaultGravity() {
@@ -968,11 +968,11 @@ public class Entity {
   }
 
   public Pose getPose() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE);
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE);
   }
 
   public void setPose(Pose pose) {
-    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataType.POSE, ObjectEntityMetadata::new, pose);
+    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE, ObjectEntityMetadata::new, pose);
   }
 
   public boolean hasPose(Pose pose) {
@@ -1248,7 +1248,7 @@ public class Entity {
   }
 
   public int getTicksFrozen() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataType.INT);
+    return this.metadataState.getMetadata(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataTypes.INT);
   }
 
   public float getPercentFrozen() {

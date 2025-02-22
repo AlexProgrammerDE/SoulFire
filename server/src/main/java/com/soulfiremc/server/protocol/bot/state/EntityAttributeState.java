@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
 
 import java.util.Map;
@@ -57,7 +57,7 @@ public class EntityAttributeState {
 
   public void putItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {
     var components = itemStack.components();
-    for (var modifier : components.get(DataComponentType.ATTRIBUTE_MODIFIERS).getModifiers()) {
+    for (var modifier : components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS).getModifiers()) {
       if (isNotPartOf(modifier.getSlot(), slot)) {
         continue;
       }
@@ -70,7 +70,7 @@ public class EntityAttributeState {
 
   public void removeItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {
     var components = itemStack.components();
-    for (var modifier : components.get(DataComponentType.ATTRIBUTE_MODIFIERS).getModifiers()) {
+    for (var modifier : components.get(DataComponentTypes.ATTRIBUTE_MODIFIERS).getModifiers()) {
       if (isNotPartOf(modifier.getSlot(), slot)) {
         continue;
       }

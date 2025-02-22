@@ -32,11 +32,11 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.FloatEntityMetadata;
-import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
 import javax.annotation.Nullable;
@@ -86,10 +86,10 @@ public abstract class LivingEntity extends Entity {
   }
 
   public static boolean canGlideUsing(SFItemStack stack, EquipmentSlot slow) {
-    if (!stack.has(DataComponentType.GLIDER)) {
+    if (!stack.has(DataComponentTypes.GLIDER)) {
       return false;
     } else {
-      var equippable = stack.get(DataComponentType.EQUIPPABLE);
+      var equippable = stack.get(DataComponentTypes.EQUIPPABLE);
       return equippable != null && slow == EquipmentSlot.fromMCPl(equippable.slot()) && !stack.nextDamageWillBreak();
     }
   }
@@ -526,7 +526,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public Optional<Vector3i> getSleepingPos() {
-    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataType.OPTIONAL_POSITION);
+    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
   }
 
   public boolean isSleeping() {
@@ -559,14 +559,14 @@ public abstract class LivingEntity extends Entity {
   }
 
   protected void setLivingEntityFlag(int key, boolean value) {
-    int currentFlags = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE);
+    int currentFlags = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE);
     if (value) {
       currentFlags |= key;
     } else {
       currentFlags &= ~key;
     }
 
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
   }
 
   @Override
@@ -608,7 +608,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public boolean isAutoSpinAttack() {
-    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE) & 4) != 0;
+    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 4) != 0;
   }
 
   @Override
@@ -629,11 +629,11 @@ public abstract class LivingEntity extends Entity {
   }
 
   public float getHealth() {
-    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataType.FLOAT);
+    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT);
   }
 
   public void setHealth(float health) {
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataType.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
+    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
   }
 
   public boolean isDeadOrDying() {
@@ -742,7 +742,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public boolean isUsingItem() {
-    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataType.BYTE) & 1) > 0;
+    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 1) > 0;
   }
 
   protected boolean canGlide() {

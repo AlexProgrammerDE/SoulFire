@@ -86,15 +86,9 @@ public class LenniHttpHelper {
             .request(HttpMethod.valueOf(httpRequest.getMethod()))
             .uri(httpRequest.getURL().toURI());
 
-        reactor.netty.http.client.HttpClient.ResponseReceiver<?> receiver;
-        if (httpRequest instanceof HttpContentRequest contentRequest) {
-          receiver =
-            base.send(
-              ByteBufFlux.fromInbound(
-                Flux.just(Objects.requireNonNull(contentRequest.getContent()).getAsBytes())));
-        } else {
-          receiver = base;
-        }
+        var receiver = httpRequest instanceof HttpContentRequest contentRequest
+          ? base.send(ByteBufFlux.fromInbound(Flux.just(Objects.requireNonNull(contentRequest.getContent()).getAsBytes())))
+          : base;
 
         return receiver
           .responseSingle(
