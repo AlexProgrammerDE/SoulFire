@@ -24,7 +24,7 @@ unimined.minecraft {
   mappings {
     intermediary()
     mojmap()
-    parchment("1.21", "2024.11.10")
+    parchment("1.21.4", "2025.02.16")
 
     devFallbackNamespace("intermediary")
   }
@@ -34,7 +34,7 @@ unimined.minecraft {
   }
 
   fabric {
-    loader("0.16.9")
+    loader("0.16.10")
   }
 
   defaultRemapJar = true
