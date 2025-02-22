@@ -61,6 +61,16 @@ public record InstanceSettingsImpl(
       .setPrettyPrinting()
       .create();
 
+  public InstanceSettingsImpl {
+    // Remove duplicate accounts
+    var newAccounts = new LinkedHashMap<UUID, MinecraftAccount>();
+    for (var account : accounts) {
+      newAccounts.put(account.profileId(), account);
+    }
+
+    accounts = List.copyOf(newAccounts.values());
+  }
+
   public static InstanceSettingsImpl deserialize(JsonElement json) {
     return PROFILE_GSON.fromJson(json, InstanceSettingsImpl.class);
   }
