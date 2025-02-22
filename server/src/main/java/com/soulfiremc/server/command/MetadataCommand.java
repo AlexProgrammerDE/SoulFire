@@ -38,19 +38,17 @@ public class MetadataCommand {
                 return forEveryBot(
                   c,
                   bot -> {
-                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                    if (entityId.isEmpty()) {
-                      c.getSource().source().sendWarn("Invalid entity specified!");
-                      return Command.SINGLE_SUCCESS;
-                    }
-
-                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
-                    if (entity == null) {
+                    var entity = bot.dataManager().currentLevel().entityTracker()
+                      .getEntities()
+                      .stream()
+                      .filter(ArgumentTypeHelper.parseEntityMatch(bot, entityName))
+                      .findAny();
+                    if (entity.isEmpty()) {
                       c.getSource().source().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    c.getSource().source().sendInfo("Metadata for entity {}: {}", entityId, entity.metadataState().toNamedMap());
+                    c.getSource().source().sendInfo("Metadata for entity {}: {}", entity.get().entityId(), entity.get().metadataState().toNamedMap());
 
                     return Command.SINGLE_SUCCESS;
                   });

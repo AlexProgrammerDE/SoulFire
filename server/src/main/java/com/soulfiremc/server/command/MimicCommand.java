@@ -39,30 +39,28 @@ public class MimicCommand {
                 return forEveryBot(
                   c,
                   bot -> {
-                    var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                    if (entityId.isEmpty()) {
-                      c.getSource().source().sendWarn("Invalid entity specified!");
-                      return Command.SINGLE_SUCCESS;
-                    }
-
-                    var entity = bot.dataManager().currentLevel().entityTracker().getEntity(entityId.getAsInt());
-                    if (entity == null) {
+                    var entity = bot.dataManager().currentLevel().entityTracker()
+                      .getEntities()
+                      .stream()
+                      .filter(ArgumentTypeHelper.parseEntityMatch(bot, entityName))
+                      .findAny();
+                    if (entity.isEmpty()) {
                       c.getSource().source().sendWarn("Entity not found!");
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    var offset = entity.pos().sub(bot.dataManager().localPlayer().pos());
+                    var offset = entity.get().pos().sub(bot.dataManager().localPlayer().pos());
                     bot.botControl().registerControllingTask(new ControllingTask() {
                       @Override
                       public void tick() {
                         bot.controlState().resetAll();
 
                         var localPlayer = bot.dataManager().localPlayer();
-                        localPlayer.setYRot(entity.yRot());
-                        localPlayer.setXRot(entity.xRot());
+                        localPlayer.setYRot(entity.get().yRot());
+                        localPlayer.setXRot(entity.get().xRot());
 
-                        localPlayer.setPos(entity.pos().sub(offset));
-                        localPlayer.setDeltaMovement(entity.deltaMovement());
+                        localPlayer.setPos(entity.get().pos().sub(offset));
+                        localPlayer.setDeltaMovement(entity.get().deltaMovement());
                       }
 
                       @Override

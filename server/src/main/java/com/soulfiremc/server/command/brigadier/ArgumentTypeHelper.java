@@ -22,9 +22,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.UUIDHelper;
 
-import java.util.OptionalInt;
+import java.util.function.Predicate;
 
 public class ArgumentTypeHelper {
   private ArgumentTypeHelper() {
@@ -52,28 +53,21 @@ public class ArgumentTypeHelper {
     return new DoubleAxisData(false, reader.readDouble());
   }
 
-  public static OptionalInt parseEntityId(BotConnection bot, String input) {
-    var dataManager = bot.dataManager();
-
+  public static Predicate<Entity> parseEntityMatch(BotConnection bot, String input) {
     var parsedUniqueId = UUIDHelper.tryParseUniqueId(input);
-    for (var entity : dataManager.currentLevel().getEntities()) {
+    return entity -> {
       if (parsedUniqueId.isPresent() && entity.uuid().equals(parsedUniqueId.get())) {
-        return OptionalInt.of(entity.entityId());
+        return true;
       }
 
       var entityProfile = bot.getEntityProfile(entity.uuid());
       if (entityProfile.isEmpty()) {
-        continue;
+        return false;
       }
 
-      var profile = entityProfile.get();
-      var gameProfile = profile.getProfile();
-      if (gameProfile != null && gameProfile.getName().equalsIgnoreCase(input)) {
-        return OptionalInt.of(entity.entityId());
-      }
-    }
-
-    return OptionalInt.empty();
+      var gameProfile = entityProfile.get().getProfile();
+      return gameProfile != null && gameProfile.getName().equalsIgnoreCase(input);
+    };
   }
 
   public record DoubleAxisData(boolean relative, double value) {

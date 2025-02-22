@@ -42,14 +42,9 @@ public class FollowCommand {
                   return forEveryBot(
                     c,
                     bot -> {
-                      var entityId = ArgumentTypeHelper.parseEntityId(bot, entityName);
-                      if (entityId.isEmpty()) {
-                        c.getSource().source().sendWarn("Invalid entity specified!");
-                        return Command.SINGLE_SUCCESS;
-                      }
-
+                      var entityMatcher = ArgumentTypeHelper.parseEntityMatch(bot, entityName);
                       bot.scheduler().schedule(() -> new FollowEntityController(
-                        entityId.getAsInt(),
+                        entityMatcher,
                         maxRadius
                       ).start(bot));
 
