@@ -84,6 +84,7 @@ public class ServerSettings implements SettingsObject {
       .defaultValue(587)
       .minValue(1)
       .maxValue(65535)
+      .thousandSeparator(false)
       .build();
   public static final StringProperty SMTP_USERNAME =
     ImmutableStringProperty.builder()
