@@ -21,14 +21,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.ServerConfig;
 import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import lombok.SneakyThrows;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,63 +51,50 @@ public record ServerSettingsImpl(
     return PROFILE_GSON.fromJson(json, ServerSettingsImpl.class);
   }
 
-  @SneakyThrows
   public static ServerSettingsImpl fromProto(ServerConfig request) {
-    var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
-
-    for (var namespace : request.getSettingsList()) {
-      Map<String, JsonElement> namespaceProperties = new HashMap<>();
-
-      for (var entry : namespace.getEntriesList()) {
-        namespaceProperties.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-      }
-
-      settingsProperties.put(namespace.getNamespace(), namespaceProperties);
-    }
-
-    return new ServerSettingsImpl(settingsProperties);
+    return new ServerSettingsImpl(
+      request.getSettingsList().stream().collect(
+        HashMap::new,
+        (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
+          HashMap::new,
+          (innerMap, entry) -> {
+            try {
+              innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+            } catch (InvalidProtocolBufferException e) {
+              log.error("Failed to deserialize settings", e);
+            }
+          },
+          HashMap::putAll
+        )),
+        HashMap::putAll
+      )
+    );
   }
 
   public JsonObject serializeToTree() {
     return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
   }
 
-  @SneakyThrows
   public ServerConfig toProto() {
-    var settingsProperties = new HashMap<String, Map<String, Value>>();
-    for (var entry : this.settings.entrySet()) {
-      var namespace = entry.getKey();
-      var innerMap = new HashMap<String, Value>();
-
-      for (var innerEntry : entry.getValue().entrySet()) {
-        var key = innerEntry.getKey();
-        var value = innerEntry.getValue();
-
-        var valueProto = Value.newBuilder();
-        JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), valueProto);
-
-        innerMap.put(key, valueProto.build());
-      }
-
-      settingsProperties.put(namespace, innerMap);
-    }
-
     return ServerConfig.newBuilder()
-      .addAllSettings(settingsProperties.entrySet().stream().map(entry -> {
-        var namespace = entry.getKey();
-
-        return SettingsNamespace.newBuilder()
-          .setNamespace(namespace)
-          .addAllEntries(entry.getValue().entrySet().stream().map(innerEntry -> {
-            var key = innerEntry.getKey();
-            var value = innerEntry.getValue();
-            return SettingsEntry.newBuilder()
-              .setKey(key)
-              .setValue(value)
-              .build();
-          }).toList())
-          .build();
-      }).toList())
+      .addAllSettings(this.settings.entrySet().stream()
+        .map(entry -> SettingsNamespace.newBuilder()
+          .setNamespace(entry.getKey())
+          .addAllEntries(entry.getValue().entrySet()
+            .stream()
+            .map(innerEntry -> SettingsEntry.newBuilder()
+              .setKey(innerEntry.getKey())
+              .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
+                try {
+                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                } catch (InvalidProtocolBufferException e) {
+                  log.error("Failed to serialize settings", e);
+                }
+              }))
+              .build())
+            .toList())
+          .build())
+        .toList())
       .build();
   }
 

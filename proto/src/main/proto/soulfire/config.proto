@@ -86,24 +86,19 @@ message MinMaxSetting {
   MinMaxSettingEntry maxEntry = 6;
 }
 
-// A single setting type with optional default value
-message SettingType {
-  oneof value {
-    StringSetting string = 1;
-    IntSetting int = 2;
-    DoubleSetting double = 3;
-    BoolSetting bool = 4;
-    ComboSetting combo = 5;
-    StringListSetting string_list = 6;
-    MinMaxSetting min_max = 7;
-  }
-}
-
 // A entry in the settings page
 message SettingEntry {
   // Basically we only send a kv map to the server with every setting entry
   string key = 1;
-  SettingType type = 4;
+  oneof value {
+    StringSetting string = 2;
+    IntSetting int = 3;
+    DoubleSetting double = 4;
+    BoolSetting bool = 5;
+    ComboSetting combo = 6;
+    StringListSetting string_list = 7;
+    MinMaxSetting min_max = 8;
+  }
 }
 
 message SettingsPage {

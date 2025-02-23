@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.*;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.InstanceConfig;
@@ -28,9 +29,9 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import lombok.SneakyThrows;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,75 +76,53 @@ public record InstanceSettingsImpl(
     return PROFILE_GSON.fromJson(json, InstanceSettingsImpl.class);
   }
 
-  @SneakyThrows
   public static InstanceSettingsImpl fromProto(InstanceConfig request) {
-    var settingsProperties = new HashMap<String, Map<String, JsonElement>>();
-
-    for (var namespace : request.getSettingsList()) {
-      Map<String, JsonElement> namespaceProperties = new HashMap<>();
-
-      for (var entry : namespace.getEntriesList()) {
-        namespaceProperties.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-      }
-
-      settingsProperties.put(namespace.getNamespace(), namespaceProperties);
-    }
-
-    var accounts = new ArrayList<MinecraftAccount>();
-    for (var account : request.getAccountsList()) {
-      accounts.add(MinecraftAccount.fromProto(account));
-    }
-
-    var proxies = new ArrayList<SFProxy>();
-    for (var proxy : request.getProxiesList()) {
-      proxies.add(SFProxy.fromProto(proxy));
-    }
-
-    return new InstanceSettingsImpl(settingsProperties, accounts, proxies);
+    return new InstanceSettingsImpl(
+      request.getSettingsList().stream().collect(
+        HashMap::new,
+        (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
+          HashMap::new,
+          (innerMap, entry) -> {
+            try {
+              innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+            } catch (InvalidProtocolBufferException e) {
+              log.error("Failed to deserialize settings", e);
+            }
+          },
+          HashMap::putAll
+        )),
+        HashMap::putAll
+      ),
+      request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
+      request.getProxiesList().stream().map(SFProxy::fromProto).toList()
+    );
   }
 
   public JsonObject serializeToTree() {
     return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
   }
 
-  @SneakyThrows
   public InstanceConfig toProto() {
-    var settingsProperties = new HashMap<String, Map<String, Value>>();
-    for (var entry : this.settings.entrySet()) {
-      var namespace = entry.getKey();
-      var innerMap = new HashMap<String, Value>();
-
-      for (var innerEntry : entry.getValue().entrySet()) {
-        var key = innerEntry.getKey();
-        var value = innerEntry.getValue();
-
-        var valueProto = Value.newBuilder();
-        JsonFormat.parser().merge(GsonInstance.GSON.toJson(value), valueProto);
-
-        innerMap.put(key, valueProto.build());
-      }
-
-      settingsProperties.put(namespace, innerMap);
-    }
-
     return InstanceConfig.newBuilder()
-      .addAllSettings(settingsProperties.entrySet().stream().map(entry -> {
-        var namespace = entry.getKey();
-
-        return SettingsNamespace.newBuilder()
-          .setNamespace(namespace)
-          .addAllEntries(entry.getValue().entrySet().stream().map(innerEntry -> {
-            var key = innerEntry.getKey();
-            var value = innerEntry.getValue();
-            return SettingsEntry.newBuilder()
-              .setKey(key)
-              .setValue(value)
-              .build();
-          }).toList())
-          .build();
-      }).toList())
-      .addAllAccounts(accounts.stream().map(MinecraftAccount::toProto).toList())
-      .addAllProxies(proxies.stream().map(SFProxy::toProto).toList())
+      .addAllSettings(this.settings.entrySet().stream()
+        .map(entry -> SettingsNamespace.newBuilder()
+          .setNamespace(entry.getKey())
+          .addAllEntries(entry.getValue().entrySet().stream()
+            .map(innerEntry -> SettingsEntry.newBuilder()
+              .setKey(innerEntry.getKey())
+              .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
+                try {
+                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                } catch (InvalidProtocolBufferException e) {
+                  log.error("Failed to serialize settings", e);
+                }
+              }))
+              .build())
+            .toList())
+          .build())
+        .toList())
+      .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
+      .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
       .build();
   }
 
