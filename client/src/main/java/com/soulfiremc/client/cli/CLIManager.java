@@ -112,10 +112,9 @@ public class CLIManager {
         var propertyKey = new PropertyKey(page.getNamespace(), entry.getKey());
 
         var baseArg = "--%s-%s".formatted(page.getNamespace(), entry.getKey());
-        var settingType = entry.getType();
-        switch (settingType.getValueCase()) {
+        switch (entry.getValueCase()) {
           case STRING -> {
-            var stringEntry = settingType.getString();
+            var stringEntry = entry.getString();
             var description = escapeFormatSpecifiers(stringEntry.getDescription());
 
             var reference = new AtomicReference<String>();
@@ -142,7 +141,7 @@ public class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case INT -> {
-            var intEntry = settingType.getInt();
+            var intEntry = entry.getInt();
             var description = escapeFormatSpecifiers(intEntry.getDescription());
 
             targetCommandSpec.addOption(addIntSetting(
@@ -153,7 +152,7 @@ public class CLIManager {
               intEntry));
           }
           case DOUBLE -> {
-            var doubleEntry = settingType.getDouble();
+            var doubleEntry = entry.getDouble();
             var description = escapeFormatSpecifiers(doubleEntry.getDescription());
 
             targetCommandSpec.addOption(addDoubleSetting(
@@ -164,7 +163,7 @@ public class CLIManager {
               doubleEntry));
           }
           case BOOL -> {
-            var boolEntry = settingType.getBool();
+            var boolEntry = entry.getBool();
             var description = escapeFormatSpecifiers(boolEntry.getDescription());
 
             var reference = new AtomicReference<Boolean>();
@@ -191,7 +190,7 @@ public class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case COMBO -> {
-            var comboEntry = settingType.getCombo();
+            var comboEntry = entry.getCombo();
             var description = escapeFormatSpecifiers(comboEntry.getDescription());
 
             var reference = new AtomicReference<String>();
@@ -221,7 +220,7 @@ public class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case STRING_LIST -> {
-            var stringListEntry = settingType.getStringList();
+            var stringListEntry = entry.getStringList();
             var description = escapeFormatSpecifiers(stringListEntry.getDescription());
 
             var reference = new AtomicReference<String[]>();
@@ -259,7 +258,7 @@ public class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case MIN_MAX -> {
-            var minMaxEntry = settingType.getMinMax();
+            var minMaxEntry = entry.getMinMax();
 
             var minEntry = minMaxEntry.getMinEntry();
             var minRef = new AtomicInteger();
@@ -312,7 +311,7 @@ public class CLIManager {
             targetCommandSpec.addOption(maxOptionSpec);
           }
           case VALUE_NOT_SET -> throw new IllegalStateException(
-            "Unexpected value: " + settingType.getValueCase());
+            "Unexpected value: " + entry.getValueCase());
         }
       }
     }
