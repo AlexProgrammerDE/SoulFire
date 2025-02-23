@@ -8,6 +8,8 @@ package soulfire.v1;
 message LogString {
   string id = 1;
   string message = 2;
+  optional string instance_id = 3;
+  optional string bot_id = 4;
 }
 
 message GlobalLogScope {

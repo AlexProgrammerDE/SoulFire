@@ -41,10 +41,26 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     SFLogAppender.INSTANCE.logConsumers().add(this::broadcastMessage);
   }
 
+  private static LogString fromEvent(SFLogAppender.SFLogEvent event) {
+    var builder = LogString.newBuilder()
+      .setId(event.id())
+      .setMessage(event.message());
+
+    if (event.instanceId() != null) {
+      builder.setInstanceId(event.instanceId().toString());
+    }
+
+    if (event.botAccountId() != null) {
+      builder.setBotId(event.botAccountId().toString());
+    }
+
+    return builder.build();
+  }
+
   public void broadcastMessage(SFLogAppender.SFLogEvent message) {
     for (var sender : subscribers.values()) {
       if (sender.eventPredicate().test(message)) {
-        sender.sendMessage(message.id(), message.message());
+        sender.sendMessage(fromEvent(message));
       }
     }
   }
@@ -53,7 +69,10 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     var messageId = UUID.randomUUID();
     subscribers.values().stream()
       .filter(sender -> sender.userId().equals(uuid))
-      .forEach(sender -> sender.sendMessage(messageId.toString(), message));
+      .forEach(sender -> sender.sendMessage(LogString.newBuilder()
+        .setId(messageId.toString())
+        .setMessage(message)
+        .build()));
   }
 
   @Override
@@ -82,10 +101,7 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
           .stream()
           .filter(predicate::test)
-          .map(event -> LogString.newBuilder()
-            .setId(event.id())
-            .setMessage(event.message())
-            .build())
+          .map(LogServiceImpl::fromEvent)
           .toList())
         .build());
       responseObserver.onCompleted();
@@ -146,15 +162,13 @@ public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       responseObserver.setOnCloseHandler(() -> subscribers.remove(responseId));
     }
 
-    public void sendMessage(String id, String message) {
+    public void sendMessage(LogString message) {
       if (responseObserver.isCancelled()) {
         return;
       }
 
       responseObserver.onNext(LogResponse.newBuilder()
-        .setMessage(LogString.newBuilder()
-          .setId(id)
-          .setMessage(message))
+        .setMessage(message)
         .build());
     }
   }
