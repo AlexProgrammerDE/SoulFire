@@ -57,20 +57,22 @@ public class BotSettings implements SettingsObject {
       .defaultValue(1)
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final MinMaxProperty JOIN_DELAY = ImmutableMinMaxProperty.builder()
     .namespace(NAMESPACE)
     .key("join-delay")
-    .minUiName("Min Join Delay (ms)")
-    .maxUiName("Max Join Delay (ms)")
-    .minDescription("Minimum delay between joins in milliseconds")
-    .maxDescription("Maximum delay between joins in milliseconds")
-    .minDefaultValue(1000)
-    .maxDefaultValue(3000)
     .minValue(0)
     .maxValue(Integer.MAX_VALUE)
-    .stepValue(1)
+    .minEntry(ImmutableMinMaxPropertyEntry.builder()
+      .uiName("Min Join Delay (ms)")
+      .description("Minimum delay between joins in milliseconds")
+      .defaultValue(1000)
+      .build())
+    .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+      .uiName("Max Join Delay (ms)")
+      .description("Maximum delay between joins in milliseconds")
+      .defaultValue(3000)
+      .build())
     .build();
   public static final ComboProperty PROTOCOL_VERSION =
     ImmutableComboProperty.builder()
@@ -90,7 +92,6 @@ public class BotSettings implements SettingsObject {
       .defaultValue(30)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final IntProperty WRITE_TIMEOUT =
     ImmutableIntProperty.builder()
@@ -101,7 +102,6 @@ public class BotSettings implements SettingsObject {
       .defaultValue(0)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final IntProperty CONNECT_TIMEOUT =
     ImmutableIntProperty.builder()
@@ -112,7 +112,6 @@ public class BotSettings implements SettingsObject {
       .defaultValue(30)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final BooleanProperty RESOLVE_SRV =
     ImmutableBooleanProperty.builder()
@@ -131,7 +130,6 @@ public class BotSettings implements SettingsObject {
       .defaultValue(1)
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final BooleanProperty RESTORE_ON_REBOOT =
     ImmutableBooleanProperty.builder()

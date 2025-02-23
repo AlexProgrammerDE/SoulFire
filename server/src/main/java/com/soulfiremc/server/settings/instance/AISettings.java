@@ -62,7 +62,6 @@ public class AISettings implements SettingsObject {
       .defaultValue(60)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final IntProperty MAX_RETRIES =
     ImmutableIntProperty.builder()
@@ -73,7 +72,6 @@ public class AISettings implements SettingsObject {
       .defaultValue(5)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
 
   public static OpenAIClient create(InstanceSettingsSource source) {

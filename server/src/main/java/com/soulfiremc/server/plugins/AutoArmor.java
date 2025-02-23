@@ -25,10 +25,7 @@ import com.soulfiremc.server.data.ArmorType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -155,15 +152,20 @@ public class AutoArmor extends InternalPlugin {
       ImmutableMinMaxProperty.builder()
         .namespace(NAMESPACE)
         .key("delay")
-        .minUiName("Min delay (seconds)")
-        .maxUiName("Max delay (seconds)")
-        .minDescription("Minimum delay between putting on armor")
-        .maxDescription("Maximum delay between putting on armor")
-        .minDefaultValue(1)
-        .maxDefaultValue(2)
         .minValue(0)
         .maxValue(Integer.MAX_VALUE)
-        .stepValue(1)
+        .minEntry(
+          ImmutableMinMaxPropertyEntry.builder()
+            .uiName("Min delay (seconds)")
+            .description("Minimum delay between putting on armor")
+            .defaultValue(1)
+            .build())
+        .maxEntry(
+          ImmutableMinMaxPropertyEntry.builder()
+            .uiName("Max delay (seconds)")
+            .description("Maximum delay between putting on armor")
+            .defaultValue(2)
+            .build())
         .build();
   }
 }

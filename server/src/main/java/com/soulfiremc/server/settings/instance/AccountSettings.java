@@ -60,6 +60,5 @@ public class AccountSettings implements SettingsObject {
       .defaultValue(3)
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
 }

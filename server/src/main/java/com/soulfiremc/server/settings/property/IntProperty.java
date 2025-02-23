@@ -19,8 +19,6 @@ package com.soulfiremc.server.settings.property;
 
 import org.immutables.value.Value;
 
-import java.util.Optional;
-
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class IntProperty implements Property {
@@ -36,12 +34,18 @@ public non-sealed abstract class IntProperty implements Property {
 
   public abstract int maxValue();
 
-  public abstract int stepValue();
-
-  public abstract Optional<String> format();
+  @Value.Default
+  public int stepValue() {
+    return 1;
+  }
 
   @Value.Default
   public String placeholder() {
     return "";
+  }
+
+  @Value.Default
+  public boolean thousandSeparator() {
+    return true;
   }
 }

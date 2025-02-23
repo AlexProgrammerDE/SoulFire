@@ -34,7 +34,6 @@ public class ProxySettings implements SettingsObject {
       .defaultValue(-1)
       .minValue(-1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
   public static final BooleanProperty SHUFFLE_PROXIES =
     ImmutableBooleanProperty.builder()
@@ -62,7 +61,6 @@ public class ProxySettings implements SettingsObject {
       .defaultValue(10)
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
       .build();
 
   public enum ProxyCheckService {

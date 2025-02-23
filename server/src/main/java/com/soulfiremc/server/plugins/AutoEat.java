@@ -23,10 +23,7 @@ import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -129,15 +126,18 @@ public class AutoEat extends InternalPlugin {
       ImmutableMinMaxProperty.builder()
         .namespace(NAMESPACE)
         .key("delay")
-        .minUiName("Min delay (seconds)")
-        .maxUiName("Max delay (seconds)")
-        .minDescription("Minimum delay between eating")
-        .maxDescription("Maximum delay between eating")
-        .minDefaultValue(1)
-        .maxDefaultValue(2)
         .minValue(0)
         .maxValue(Integer.MAX_VALUE)
-        .stepValue(1)
+        .minEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Min delay (seconds)")
+          .description("Minimum delay between eating")
+          .defaultValue(1)
+          .build())
+        .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Max delay (seconds)")
+          .description("Maximum delay between eating")
+          .defaultValue(2)
+          .build())
         .build();
   }
 }

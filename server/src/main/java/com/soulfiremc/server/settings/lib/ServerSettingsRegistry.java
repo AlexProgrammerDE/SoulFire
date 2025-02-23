@@ -37,55 +37,51 @@ public class ServerSettingsRegistry {
   private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
 
   private static IntSetting createIntSetting(IntProperty property) {
-    var builder =
-      IntSetting.newBuilder()
-        .setUiName(property.uiName())
-        .setDescription(property.description())
-        .setDef(property.defaultValue())
-        .setMin(property.minValue())
-        .setMax(property.maxValue())
-        .setStep(property.stepValue())
-        .setPlaceholder(property.placeholder());
-
-    property.format().ifPresent(builder::setFormat);
-
-    return builder.build();
+    return IntSetting.newBuilder()
+      .setUiName(property.uiName())
+      .setDescription(property.description())
+      .setDef(property.defaultValue())
+      .setMin(property.minValue())
+      .setMax(property.maxValue())
+      .setStep(property.stepValue())
+      .setPlaceholder(property.placeholder())
+      .setThousandSeparator(property.thousandSeparator())
+      .build();
   }
 
   private static DoubleSetting createDoubleSetting(DoubleProperty property) {
-    var builder =
-      DoubleSetting.newBuilder()
-        .setUiName(property.uiName())
-        .setDescription(property.description())
-        .setDef(property.defaultValue())
-        .setMin(property.minValue())
-        .setMax(property.maxValue())
-        .setStep(property.stepValue())
-        .setPlaceholder(property.placeholder());
+    return DoubleSetting.newBuilder()
+      .setUiName(property.uiName())
+      .setDescription(property.description())
+      .setDef(property.defaultValue())
+      .setMin(property.minValue())
+      .setMax(property.maxValue())
+      .setStep(property.stepValue())
+      .setPlaceholder(property.placeholder())
+      .setThousandSeparator(property.thousandSeparator())
+      .setDecimalScale(property.decimalScale())
+      .setFixedDecimalScale(property.fixedDecimalScale())
+      .build();
+  }
 
-    property.format().ifPresent(builder::setFormat);
-
-    return builder.build();
+  private static MinMaxSettingEntry createMinMaxSettingEntry(MinMaxPropertyEntry entry) {
+    return MinMaxSettingEntry.newBuilder()
+      .setUiName(entry.uiName())
+      .setDescription(entry.description())
+      .setDef(entry.defaultValue())
+      .setPlaceholder(entry.placeholder())
+      .build();
   }
 
   private static MinMaxSetting createMinMaxSetting(MinMaxProperty property) {
-    var builder =
-      MinMaxSetting.newBuilder()
-        .setMinUiName(property.minUiName())
-        .setMaxUiName(property.maxUiName())
-        .setMinDescription(property.minDescription())
-        .setMaxDescription(property.maxDescription())
-        .setMinDef(property.minDefaultValue())
-        .setMaxDef(property.maxDefaultValue())
-        .setMin(property.minValue())
-        .setMax(property.maxValue())
-        .setStep(property.stepValue())
-        .setMinPlaceholder(property.minPlaceholder())
-        .setMaxPlaceholder(property.maxPlaceholder());
-
-    property.format().ifPresent(builder::setFormat);
-
-    return builder.build();
+    return MinMaxSetting.newBuilder()
+      .setMin(property.minValue())
+      .setMax(property.maxValue())
+      .setStep(property.stepValue())
+      .setThousandSeparator(property.thousandSeparator())
+      .setMinEntry(createMinMaxSettingEntry(property.minEntry()))
+      .setMaxEntry(createMinMaxSettingEntry(property.maxEntry()))
+      .build();
   }
 
   /**

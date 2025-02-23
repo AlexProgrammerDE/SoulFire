@@ -123,7 +123,6 @@ public class ClientSettings extends InternalPlugin {
         .defaultValue(8)
         .minValue(2)
         .maxValue(32)
-        .stepValue(1)
         .build();
     public static final ComboProperty CHAT_VISIBILITY =
       ImmutableComboProperty.builder()

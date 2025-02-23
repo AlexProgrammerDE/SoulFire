@@ -19,8 +19,6 @@ package com.soulfiremc.server.settings.property;
 
 import org.immutables.value.Value;
 
-import java.util.Optional;
-
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class MinMaxProperty implements Property {
@@ -28,38 +26,26 @@ public non-sealed abstract class MinMaxProperty implements Property {
 
   public abstract String key();
 
-  public abstract String minUiName();
-
-  public abstract String maxUiName();
-
-  public abstract String minDescription();
-
-  public abstract String maxDescription();
-
-  public abstract int minDefaultValue();
-
-  public abstract int maxDefaultValue();
-
   public abstract int minValue();
 
   public abstract int maxValue();
 
-  public abstract int stepValue();
-
-  public abstract Optional<String> format();
-
   @Value.Default
-  public String minPlaceholder() {
-    return "";
+  public int stepValue() {
+    return 1;
   }
 
   @Value.Default
-  public String maxPlaceholder() {
-    return "";
+  public boolean thousandSeparator() {
+    return true;
   }
+
+  public abstract MinMaxPropertyEntry minEntry();
+
+  public abstract MinMaxPropertyEntry maxEntry();
 
   public DataLayout defaultDataLayout() {
-    return new DataLayout(minDefaultValue(), maxDefaultValue());
+    return new DataLayout(minEntry().defaultValue(), maxEntry().defaultValue());
   }
 
   public record DataLayout(int min, int max) {}

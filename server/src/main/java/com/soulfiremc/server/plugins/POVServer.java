@@ -1069,7 +1069,6 @@ public class POVServer extends InternalPlugin {
         .defaultValue(31765)
         .minValue(1)
         .maxValue(65535)
-        .stepValue(1)
         .build();
     public static final BooleanProperty ENABLE_COMMANDS =
       ImmutableBooleanProperty.builder()

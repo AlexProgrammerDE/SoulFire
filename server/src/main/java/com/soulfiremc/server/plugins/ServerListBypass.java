@@ -22,10 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -86,15 +83,18 @@ public class ServerListBypass extends InternalPlugin {
     public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
       .namespace(NAMESPACE)
       .key("delay")
-      .minUiName("Min delay (seconds)")
-      .maxUiName("Max delay (seconds)")
-      .minDescription("Minimum delay between joining the server")
-      .maxDescription("Maximum delay between joining the server")
-      .minDefaultValue(1)
-      .maxDefaultValue(3)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
+      .minEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Min delay (seconds)")
+        .description("Minimum delay between joining the server")
+        .defaultValue(1)
+        .build())
+      .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Max delay (seconds)")
+        .description("Maximum delay between joining the server")
+        .defaultValue(3)
+        .build())
       .build();
   }
 }

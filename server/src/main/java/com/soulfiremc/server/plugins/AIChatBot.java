@@ -192,7 +192,6 @@ public class AIChatBot extends InternalPlugin {
         .defaultValue(10)
         .minValue(1)
         .maxValue(Integer.MAX_VALUE)
-        .stepValue(1)
         .build();
   }
 }

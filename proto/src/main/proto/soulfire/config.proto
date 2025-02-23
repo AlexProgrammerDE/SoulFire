@@ -26,8 +26,8 @@ message IntSetting {
   int32 min = 4;
   int32 max = 5;
   int32 step = 6;
-  optional string format = 7;
-  string placeholder = 8;
+  string placeholder = 7;
+  bool thousand_separator = 8;
 }
 
 message DoubleSetting {
@@ -37,8 +37,10 @@ message DoubleSetting {
   double min = 4;
   double max = 5;
   double step = 6;
-  optional string format = 7;
-  string placeholder = 8;
+  string placeholder = 7;
+  bool thousand_separator = 8;
+  int32 decimal_scale = 9;
+  bool fixed_decimal_scale = 10;
 }
 
 message BoolSetting {
@@ -68,19 +70,20 @@ message StringListSetting {
   repeated string def = 3;
 }
 
+message MinMaxSettingEntry {
+  string ui_name = 1;
+  string description = 2;
+  int32 def = 3;
+  string placeholder = 4;
+}
+
 message MinMaxSetting {
-  string min_ui_name = 1;
-  string max_ui_name = 2;
-  string min_description = 3;
-  string max_description = 4;
-  int32 min_def = 5;
-  int32 max_def = 6;
-  int32 min = 7;
-  int32 max = 8;
-  int32 step = 9;
-  optional string format = 10;
-  string min_placeholder = 11;
-  string max_placeholder = 12;
+  int32 min = 1;
+  int32 max = 2;
+  int32 step = 3;
+  bool thousand_separator = 4;
+  MinMaxSettingEntry minEntry = 5;
+  MinMaxSettingEntry maxEntry = 6;
 }
 
 // A single setting type with optional default value

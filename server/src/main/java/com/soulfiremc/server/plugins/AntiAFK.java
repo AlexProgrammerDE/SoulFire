@@ -26,10 +26,7 @@ import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -97,28 +94,34 @@ public class AntiAFK extends InternalPlugin {
     public static final MinMaxProperty DISTANCE = ImmutableMinMaxProperty.builder()
       .namespace(NAMESPACE)
       .key("distance")
-      .minUiName("Min distance (blocks)")
-      .maxUiName("Max distance (blocks)")
-      .minDescription("Minimum distance to walk")
-      .maxDescription("Maximum distance to walk")
-      .minDefaultValue(10)
-      .maxDefaultValue(30)
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
+      .minEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Min distance (blocks)")
+        .description("Minimum distance to walk")
+        .defaultValue(10)
+        .build())
+      .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Max distance (blocks)")
+        .description("Maximum distance to walk")
+        .defaultValue(30)
+        .build())
       .build();
     public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
       .namespace(NAMESPACE)
       .key("delay")
-      .minUiName("Min delay (seconds)")
-      .maxUiName("Max delay (seconds)")
-      .minDescription("Minimum delay between moves")
-      .maxDescription("Maximum delay between moves")
-      .minDefaultValue(15)
-      .maxDefaultValue(30)
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
-      .stepValue(1)
+      .minEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Min delay (seconds)")
+        .description("Minimum delay between moves")
+        .defaultValue(15)
+        .build())
+      .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+        .uiName("Max delay (seconds)")
+        .description("Maximum delay between moves")
+        .defaultValue(30)
+        .build())
       .build();
   }
 }

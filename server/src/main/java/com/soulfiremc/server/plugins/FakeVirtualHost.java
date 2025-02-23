@@ -91,8 +91,7 @@ public class FakeVirtualHost extends InternalPlugin {
         .defaultValue(25565)
         .minValue(1)
         .maxValue(65535)
-        .stepValue(1)
-        .format("#")
+        .thousandSeparator(false)
         .build();
   }
 }

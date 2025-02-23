@@ -116,7 +116,6 @@ public class ChatLogger extends InternalPlugin {
         .defaultValue(1)
         .minValue(1)
         .maxValue(Integer.MAX_VALUE)
-        .stepValue(1)
         .build();
   }
 }

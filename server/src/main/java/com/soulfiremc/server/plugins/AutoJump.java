@@ -22,10 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableMinMaxProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -92,15 +89,18 @@ public class AutoJump extends InternalPlugin {
       ImmutableMinMaxProperty.builder()
         .namespace(NAMESPACE)
         .key("delay")
-        .minUiName("Min delay (seconds)")
-        .maxUiName("Max delay (seconds)")
-        .minDescription("Minimum delay between jumps")
-        .maxDescription("Maximum delay between jumps")
-        .minDefaultValue(2)
-        .maxDefaultValue(5)
         .minValue(0)
         .maxValue(Integer.MAX_VALUE)
-        .stepValue(1)
+        .minEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Min delay (seconds)")
+          .description("Minimum delay between jumps")
+          .defaultValue(2)
+          .build())
+        .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Max delay (seconds)")
+          .description("Maximum delay between jumps")
+          .defaultValue(5)
+          .build())
         .build();
   }
 }
