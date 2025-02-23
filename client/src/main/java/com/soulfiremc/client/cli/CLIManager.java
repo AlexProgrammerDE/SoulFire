@@ -261,13 +261,13 @@ public class CLIManager {
           case MIN_MAX -> {
             var minMaxEntry = settingType.getMinMax();
 
+            var minEntry = minMaxEntry.getMinEntry();
             var minRef = new AtomicInteger();
-            var minDescription = escapeFormatSpecifiers(minMaxEntry.getMinDescription());
             var minOptionSpec =
               CommandLine.Model.OptionSpec.builder(new String[]{baseArg + "-min"})
-                .description(minDescription)
+                .description(escapeFormatSpecifiers(minEntry.getDescription()))
                 .type(int.class)
-                .initialValue(minMaxEntry.getMinDef())
+                .initialValue(minEntry.getDef())
                 .hasInitialValue(true)
                 .setter(
                   new CommandLine.Model.ISetter() {
@@ -279,13 +279,13 @@ public class CLIManager {
                   })
                 .build();
 
+            var maxEntry = minMaxEntry.getMaxEntry();
             var maxRef = new AtomicInteger();
-            var maxDescription = escapeFormatSpecifiers(minMaxEntry.getMaxDescription());
             var maxOptionSpec =
               CommandLine.Model.OptionSpec.builder(new String[]{baseArg + "-max"})
-                .description(maxDescription)
+                .description(escapeFormatSpecifiers(maxEntry.getDescription()))
                 .type(int.class)
-                .initialValue(minMaxEntry.getMaxDef())
+                .initialValue(maxEntry.getDef())
                 .hasInitialValue(true)
                 .setter(
                   new CommandLine.Model.ISetter() {
