@@ -85,7 +85,7 @@ public class AutoReconnect extends InternalPlugin {
 
             instanceManager
               .botConnections()
-              .put(bot.connectionId(), newConnection);
+              .put(bot.accountProfileId(), newConnection);
 
             newConnection.connect();
           },

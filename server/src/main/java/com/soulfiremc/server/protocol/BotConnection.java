@@ -62,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public final class BotConnection {
   public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
-  private final UUID connectionId = UUID.randomUUID();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder metadata = new MetadataHolder();
@@ -112,9 +111,7 @@ public final class BotConnection {
     this.accountName = minecraftAccount.lastKnownName();
     this.runnableWrapper = instanceManager.runnableWrapper().with(runnable -> () -> {
       CURRENT.set(this);
-      try (
-        var ignored1 = MDC.putCloseable(SFLogAppender.SF_BOT_CONNECTION_ID, this.connectionId.toString());
-        var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString())) {
+      try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString())) {
         runnable.run();
       } finally {
         CURRENT.remove();

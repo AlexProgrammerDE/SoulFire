@@ -351,7 +351,7 @@ public class InstanceManager {
 
               logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
-              botConnections.put(botConnection.connectionId(), botConnection);
+              botConnections.put(botConnection.accountProfileId(), botConnection);
 
               try {
                 botConnection.connect().get();
