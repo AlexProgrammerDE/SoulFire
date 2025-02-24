@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 @Slf4j
 public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
@@ -49,22 +48,19 @@ public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireCLIBootstrap().internalBootstrap(args);
   }
 
+  private void startCLI(ServerAddress address, String jwt, String[] args) {
+    var rpcClient =
+      new RPCClient(address.host(), address.port(), jwt);
+
+    log.info("Starting CLI");
+    var cliManager = new CLIManager(rpcClient, pluginManager);
+    cliManager.initCLI(args);
+  }
+
   @Override
   protected void postMixinMain(String[] args) {
     pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
 
-    Consumer<RemoteServerData> remoteServerConsumer =
-      remoteServerData -> {
-        var rpcClient =
-          new RPCClient(
-            remoteServerData.serverAddress().host(),
-            remoteServerData.serverAddress().port(),
-            remoteServerData.token());
-
-        log.info("Starting CLI");
-        var cliManager = new CLIManager(rpcClient, pluginManager);
-        cliManager.initCLI(args);
-      };
     Runnable runIntegratedServer =
       () -> {
         var host = getRPCHost("localhost");
@@ -75,23 +71,28 @@ public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
           new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
         var jwtToken = soulFire.authSystem().generateJWT(soulFire.authSystem().rootUserData());
-        remoteServerConsumer.accept(
-          new RemoteServerData(ServerAddress.fromStringAndPort(host, port), jwtToken));
+        startCLI(
+          ServerAddress.fromStringAndPort(host, port),
+          jwtToken,
+          args
+        );
       };
     var address = System.getProperty("sf.remoteAddress");
     if (address == null) {
       runIntegratedServer.run();
     } else {
-      var token = System.getProperty("sf.remoteToken");
+      var jwtToken = System.getProperty("sf.remoteToken");
 
       Objects.requireNonNull(address, "Remote address must be set");
-      Objects.requireNonNull(token, "Remote token must be set");
+      Objects.requireNonNull(jwtToken, "Remote token must be set");
 
       log.info("Using remote server on {}", address);
 
-      remoteServerConsumer.accept(
-        new RemoteServerData(ServerAddress.fromStringDefaultPort(
-          address, PortHelper.SF_DEFAULT_PORT), token));
+      startCLI(
+        ServerAddress.fromStringDefaultPort(address, PortHelper.SF_DEFAULT_PORT),
+        jwtToken,
+        args
+      );
     }
   }
 
