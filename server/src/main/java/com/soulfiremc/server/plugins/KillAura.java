@@ -65,7 +65,7 @@ public class KillAura extends InternalPlugin {
       return;
     }
 
-    var whitelistedUser = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USER);
+    var whitelistedUsers = bot.settingsSource().get(KillAuraSettings.WHITELISTED_USERS);
 
     var lookRange = bot.settingsSource().get(KillAuraSettings.LOOK_RANGE);
     var hitRange = bot.settingsSource().get(KillAuraSettings.HIT_RANGE);
@@ -76,7 +76,7 @@ public class KillAura extends InternalPlugin {
     var target =
       control.getClosestEntity(
         max,
-        whitelistedUser,
+        whitelistedUsers,
         true,
         true,
         bot.settingsSource().get(KillAuraSettings.CHECK_WALLS));
@@ -153,13 +153,13 @@ public class KillAura extends InternalPlugin {
         .description("Enable KillAura")
         .defaultValue(false)
         .build();
-    public static final StringProperty WHITELISTED_USER =
-      ImmutableStringProperty.builder()
+    public static final StringListProperty WHITELISTED_USERS =
+      ImmutableStringListProperty.builder()
         .namespace(NAMESPACE)
-        .key("whitelisted-user")
-        .uiName("Whitelisted User")
-        .description("This user will be ignored by the kill aura")
-        .defaultValue("Pansexuel")
+        .key("whitelisted-users")
+        .uiName("Whitelisted Users")
+        .description("These users will be ignored by the kill aura")
+        .addDefaultValue("Dinnerbone")
         .build();
     public static final DoubleProperty HIT_RANGE =
       ImmutableDoubleProperty.builder()

@@ -44,6 +44,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -246,7 +247,7 @@ public class BotControlAPI {
 
   public Entity getClosestEntity(
     double range,
-    String whitelistedUser,
+    List<String> whitelistedUsers,
     boolean ignoreBots,
     boolean onlyInteractable,
     boolean mustBeSeen) {
@@ -284,15 +285,16 @@ public class BotControlAPI {
         continue;
       }
 
-      if (whitelistedUser != null
-        && !whitelistedUser.isEmpty()
+      if (whitelistedUsers != null
+        && !whitelistedUsers.isEmpty()
         && entity.entityType() == EntityType.PLAYER) {
         var connectedUsers = dataManager.playerListState();
         var playerListEntry = connectedUsers.entries().get(entity.uuid());
-        if (playerListEntry != null && playerListEntry.getProfile() != null) {
-          if (playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser)) {
-            continue;
-          }
+        if (playerListEntry != null
+          && playerListEntry.getProfile() != null
+          && whitelistedUsers.stream()
+          .anyMatch(whitelistedUser -> playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))) {
+          continue;
         }
       }
 
