@@ -17,13 +17,11 @@
  */
 package com.soulfiremc.server.api.event;
 
-import lombok.Getter;
 import lombok.Setter;
 import net.lenni0451.lambdaevents.types.ICancellableEvent;
 
-@Getter
 @Setter
-public class AbstractCancellable implements ICancellableEvent {
+public abstract class AbstractCancellable implements ICancellableEvent {
   private boolean cancelled;
 
   @Override

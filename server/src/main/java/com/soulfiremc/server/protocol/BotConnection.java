@@ -34,7 +34,6 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
-import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
@@ -214,14 +213,8 @@ public final class BotConnection {
 
       session.disconnect(Component.translatable("multiplayer.status.quitting"));
 
-      // Give the server one second to handle the disconnect
-      TimeUtil.waitTime(1, TimeUnit.SECONDS);
-
       // Shut down all executors
       scheduler.shutdown();
-
-      // Let threads finish that didn't immediately interrupt
-      TimeUtil.waitTime(100, TimeUnit.MILLISECONDS);
     }
   }
 
