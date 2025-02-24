@@ -18,8 +18,8 @@
 package com.soulfiremc.server.data;
 
 import com.google.gson.JsonObject;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;

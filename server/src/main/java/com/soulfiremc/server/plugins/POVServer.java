@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
@@ -45,7 +46,6 @@ import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.DefaultTagsState;
 import io.netty.buffer.Unpooled;

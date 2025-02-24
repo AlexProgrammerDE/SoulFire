@@ -18,6 +18,7 @@
 package com.soulfiremc.server.user;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
@@ -25,7 +26,6 @@ import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

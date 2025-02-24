@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.server.api.event.bot;
 
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import net.kyori.adventure.text.Component;
 
 /**

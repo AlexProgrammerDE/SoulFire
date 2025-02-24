@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.command;
 
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;

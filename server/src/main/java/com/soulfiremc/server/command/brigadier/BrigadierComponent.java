@@ -18,7 +18,7 @@
 package com.soulfiremc.server.command.brigadier;
 
 import com.mojang.brigadier.Message;
-import com.soulfiremc.server.util.SoulFireAdventure;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import net.kyori.adventure.text.Component;
 
 public record BrigadierComponent(Component component) implements Message {

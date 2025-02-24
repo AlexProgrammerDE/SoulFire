@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot;
 
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -35,7 +36,6 @@ import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.SoulFireAdventure;
 import com.soulfiremc.server.util.mcstructs.LevelLoadStatusManager;
 import com.soulfiremc.server.util.structs.EntityMovement;
 import com.soulfiremc.server.util.structs.TickTimer;
