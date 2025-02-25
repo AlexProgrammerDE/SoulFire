@@ -96,12 +96,12 @@ message InstanceStateChangeRequest {
 message InstanceStateChangeResponse {
 }
 
-message InstanceAuditLogsRequest {
+message InstanceAuditLogRequest {
   string id = 1;
 }
 
-message InstanceAuditLogsResponse {
-  enum AuditLogType {
+message InstanceAuditLogResponse {
+  enum AuditLogEntryType {
     EXECUTE_COMMAND = 0;
     START_ATTACK = 1;
     PAUSE_ATTACK = 2;
@@ -109,16 +109,16 @@ message InstanceAuditLogsResponse {
     STOP_ATTACK = 4;
   }
 
-  message AuditLog {
+  message AuditLogEntry {
     string id = 1;
     string user_id = 2;
     string user_name = 3;
-    AuditLogType type = 4;
+    AuditLogEntryType type = 4;
     google.protobuf.Timestamp timestamp = 5;
     string data = 6;
   }
 
-  repeated AuditLog logs = 1;
+  repeated AuditLogEntry entry = 1;
 }
 
 service InstanceService {
@@ -129,5 +129,5 @@ service InstanceService {
   rpc updateInstanceMeta(InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse);
   rpc updateInstanceConfig(InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse);
   rpc changeInstanceState(InstanceStateChangeRequest) returns (InstanceStateChangeResponse);
-  rpc getAuditLogs(InstanceAuditLogsRequest) returns (InstanceAuditLogsResponse);
+  rpc getAuditLog(InstanceAuditLogRequest) returns (InstanceAuditLogResponse);
 }

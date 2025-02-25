@@ -212,7 +212,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
   }
 
   @Override
-  public void getAuditLogs(InstanceAuditLogsRequest request, StreamObserver<InstanceAuditLogsResponse> responseObserver) {
+  public void getAuditLog(InstanceAuditLogRequest request, StreamObserver<InstanceAuditLogResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE_AUDIT_LOGS, instanceId));
 
@@ -228,18 +228,18 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           .list();
       });
 
-      var responseBuilder = InstanceAuditLogsResponse.newBuilder();
+      var responseBuilder = InstanceAuditLogResponse.newBuilder();
       for (var log : auditLogs) {
-        responseBuilder.addLogs(InstanceAuditLogsResponse.AuditLog.newBuilder()
+        responseBuilder.addEntry(InstanceAuditLogResponse.AuditLogEntry.newBuilder()
           .setId(log.id().toString())
           .setUserId(log.user().id().toString())
           .setUserName(log.user().username())
           .setType(switch (log.type()) {
-            case EXECUTE_COMMAND -> InstanceAuditLogsResponse.AuditLogType.EXECUTE_COMMAND;
-            case START_ATTACK -> InstanceAuditLogsResponse.AuditLogType.START_ATTACK;
-            case PAUSE_ATTACK -> InstanceAuditLogsResponse.AuditLogType.PAUSE_ATTACK;
-            case RESUME_ATTACK -> InstanceAuditLogsResponse.AuditLogType.RESUME_ATTACK;
-            case STOP_ATTACK -> InstanceAuditLogsResponse.AuditLogType.STOP_ATTACK;
+            case EXECUTE_COMMAND -> InstanceAuditLogResponse.AuditLogEntryType.EXECUTE_COMMAND;
+            case START_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.START_ATTACK;
+            case PAUSE_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.PAUSE_ATTACK;
+            case RESUME_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.RESUME_ATTACK;
+            case STOP_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.STOP_ATTACK;
           })
           .setTimestamp(Timestamps.fromMillis(log.createdAt().toEpochMilli()))
           .setData(log.data())
