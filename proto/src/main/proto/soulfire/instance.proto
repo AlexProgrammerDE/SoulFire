@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
+import "google/protobuf/timestamp.proto";
 
 message InstanceConfig {
   repeated SettingsNamespace settings = 1;
@@ -95,6 +96,31 @@ message InstanceStateChangeRequest {
 message InstanceStateChangeResponse {
 }
 
+message InstanceAuditLogsRequest {
+  string id = 1;
+}
+
+message InstanceAuditLogsResponse {
+  enum AuditLogType {
+    EXECUTE_COMMAND = 0;
+    START_ATTACK = 1;
+    PAUSE_ATTACK = 2;
+    RESUME_ATTACK = 3;
+    STOP_ATTACK = 4;
+  }
+
+  message AuditLog {
+    string id = 1;
+    string user_id = 2;
+    string user_name = 3;
+    AuditLogType type = 4;
+    google.protobuf.Timestamp timestamp = 5;
+    string data = 6;
+  }
+
+  repeated AuditLog logs = 1;
+}
+
 service InstanceService {
   rpc createInstance(InstanceCreateRequest) returns (InstanceCreateResponse);
   rpc deleteInstance(InstanceDeleteRequest) returns (InstanceDeleteResponse);
@@ -103,4 +129,5 @@ service InstanceService {
   rpc updateInstanceMeta(InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse);
   rpc updateInstanceConfig(InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse);
   rpc changeInstanceState(InstanceStateChangeRequest) returns (InstanceStateChangeResponse);
+  rpc getAuditLogs(InstanceAuditLogsRequest) returns (InstanceAuditLogsResponse);
 }

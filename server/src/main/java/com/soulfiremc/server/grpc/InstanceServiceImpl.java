@@ -17,9 +17,11 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
@@ -205,6 +207,49 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error changing instance state", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void getAuditLogs(InstanceAuditLogsRequest request, StreamObserver<InstanceAuditLogsResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE_AUDIT_LOGS, instanceId));
+
+    try {
+      var auditLogs = sessionFactory.fromTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instanceId", InstanceAuditLogEntity.class)
+          .setParameter("instanceId", instanceId)
+          .list();
+      });
+
+      var responseBuilder = InstanceAuditLogsResponse.newBuilder();
+      for (var log : auditLogs) {
+        responseBuilder.addLogs(InstanceAuditLogsResponse.AuditLog.newBuilder()
+          .setId(log.id().toString())
+          .setUserId(log.user().id().toString())
+          .setUserName(log.user().username())
+          .setType(switch (log.type()) {
+            case EXECUTE_COMMAND -> InstanceAuditLogsResponse.AuditLogType.EXECUTE_COMMAND;
+            case START_ATTACK -> InstanceAuditLogsResponse.AuditLogType.START_ATTACK;
+            case PAUSE_ATTACK -> InstanceAuditLogsResponse.AuditLogType.PAUSE_ATTACK;
+            case RESUME_ATTACK -> InstanceAuditLogsResponse.AuditLogType.RESUME_ATTACK;
+            case STOP_ATTACK -> InstanceAuditLogsResponse.AuditLogType.STOP_ATTACK;
+          })
+          .setTimestamp(Timestamps.fromMillis(log.createdAt().toEpochMilli()))
+          .setData(log.data())
+          .build());
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting audit logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

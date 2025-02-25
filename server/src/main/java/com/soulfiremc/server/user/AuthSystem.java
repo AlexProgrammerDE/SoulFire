@@ -175,7 +175,7 @@ public class AuthSystem {
                DELETE_OBJECT_STORAGE, DOWNLOAD_OBJECT_STORAGE, UPLOAD_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
-               READ_INSTANCE, INSTANCE_COMMAND_COMPLETION -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
+               READ_INSTANCE, INSTANCE_COMMAND_COMPLETION, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
         };
       };
