@@ -40,21 +40,26 @@ public class DatabaseManager {
       configuration.setProperty("hibernate.hikari.idleTimeout", 0);
       configuration.setProperty("hibernate.hikari.connectionTimeout", 30_000);
 
-      var metadataSources = new MetadataSources(new StandardServiceRegistryBuilder()
-        .applySettings(configuration.getProperties())
-        .build());
-      metadataSources.addPackage("com.soulfiremc.server.database");
-      metadataSources.addAnnotatedClasses(
-        UserEntity.class,
-        InstanceEntity.class,
-        ServerConfigEntity.class
-      );
-
-      return metadataSources.getMetadataBuilder()
-        .build()
-        .buildSessionFactory();
+      return fromConfiguration(configuration);
     } catch (Throwable ex) {
       throw new IllegalStateException(ex);
     }
+  }
+
+  private static SessionFactory fromConfiguration(Configuration configuration) {
+    var metadataSources = new MetadataSources(new StandardServiceRegistryBuilder()
+      .applySettings(configuration.getProperties())
+      .build());
+    metadataSources.addPackage("com.soulfiremc.server.database");
+    metadataSources.addAnnotatedClasses(
+      UserEntity.class,
+      InstanceEntity.class,
+      InstanceAuditLogEntity.class,
+      ServerConfigEntity.class
+    );
+
+    return metadataSources.getMetadataBuilder()
+      .build()
+      .buildSessionFactory();
   }
 }
