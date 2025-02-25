@@ -21,7 +21,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.soulfiremc.server.database.UserEntity;
-import com.soulfiremc.server.user.SoulFireUser;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -34,18 +33,13 @@ public class SetEmailCommand {
             help(
               "Set the email of the current user",
               c -> {
-                if (!(c.getSource().source() instanceof SoulFireUser user)) {
-                  c.getSource().source().sendInfo("Only SoulFire users can set their email.");
-                  return Command.SINGLE_SUCCESS;
-                }
-
                 var email = StringArgumentType.getString(c, "email");
                 c.getSource().soulFire().sessionFactory().inTransaction(s -> {
-                  var userData = s.find(UserEntity.class, user.getUniqueId());
+                  var userData = s.find(UserEntity.class, c.getSource().source().getUniqueId());
                   userData.email(email);
                   s.merge(userData);
                 });
-                c.getSource().source().sendInfo("Email of user {} set to {}", user.getUsername(), email);
+                c.getSource().source().sendInfo("Email of user {} set to {}", c.getSource().source().getUsername(), email);
 
                 return Command.SINGLE_SUCCESS;
               }))));

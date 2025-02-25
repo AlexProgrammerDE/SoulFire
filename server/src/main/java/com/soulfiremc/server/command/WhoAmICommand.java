@@ -19,7 +19,6 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.user.SoulFireUser;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
@@ -32,8 +31,7 @@ public class WhoAmICommand {
           help(
             "See who you are",
             c -> {
-              c.getSource().source().sendInfo("Your are: {}",
-                c.getSource().source() instanceof SoulFireUser user ? user.getUsername() : c.getSource().source().identifier());
+              c.getSource().source().sendInfo("Your are: {}", c.getSource().source().getUsername());
 
               return Command.SINGLE_SUCCESS;
             })));

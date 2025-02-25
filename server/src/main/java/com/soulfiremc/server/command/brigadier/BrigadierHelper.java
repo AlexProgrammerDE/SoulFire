@@ -159,6 +159,7 @@ public class BrigadierHelper {
     for (var instance : instances) {
       context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyNameCache().get()));
 
+      instance.logCommandExecution(context.getSource().source(), context.getInput());
       resultSum += consumer.run(instance);
     }
 

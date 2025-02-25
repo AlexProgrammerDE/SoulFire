@@ -18,6 +18,8 @@
 package com.soulfiremc.server.command;
 
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.user.SoulFireUser;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -26,17 +28,17 @@ import java.util.UUID;
 
 public record CommandSourceStack(
   SoulFireServer soulFire,
-  CommandSource source,
+  SoulFireUser source,
   @Nullable
   Set<UUID> instanceIds,
   @Nullable
   Set<UUID> botIds
 ) {
-  public static CommandSourceStack ofUnrestricted(SoulFireServer soulFire, CommandSource source) {
+  public static CommandSourceStack ofUnrestricted(SoulFireServer soulFire, SoulFireUser source) {
     return new CommandSourceStack(soulFire, source, null, null);
   }
 
-  public static CommandSourceStack ofInstance(SoulFireServer soulFire, CommandSource source, Set<UUID> instanceIds) {
+  public static CommandSourceStack ofInstance(SoulFireServer soulFire, SoulFireUser source, Set<UUID> instanceIds) {
     return new CommandSourceStack(soulFire, source, instanceIds, null);
   }
 
@@ -62,5 +64,9 @@ public record CommandSourceStack(
     }
 
     return new CommandSourceStack(soulFire, source, instanceIds, botIds);
+  }
+
+  public boolean isAdmin() {
+    return source.getRole() == UserEntity.Role.ADMIN;
   }
 }

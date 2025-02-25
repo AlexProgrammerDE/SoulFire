@@ -17,12 +17,58 @@
  */
 package com.soulfiremc.server.user;
 
-import com.soulfiremc.server.command.CommandSource;
 import com.soulfiremc.server.database.UserEntity;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.util.TriState;
+import org.slf4j.event.Level;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.util.UUID;
 
-public interface SoulFireUser extends CommandSource {
+public interface SoulFireUser {
+  private static String format(String format, Object[] params, Throwable t) {
+    return MessageFormatter.arrayFormat(format, params, t).getMessage();
+  }
+
+  default void sendInfo(String message, Object... args) {
+    sendMessage(Level.INFO, format(message, args, null));
+  }
+
+  default void sendWarn(String message, Object... args) {
+    sendMessage(Level.WARN, format(message, args, null));
+  }
+
+  default void sendError(String message, Throwable t) {
+    sendMessage(Level.ERROR, format(message, new Object[0], t));
+  }
+
+  default void sendMessage(Level level, String message) {
+    var component = Component.text(message);
+    sendMessage(level, switch (level) {
+      case WARN -> component.color(NamedTextColor.YELLOW);
+      case ERROR -> component.color(NamedTextColor.RED);
+      default -> component;
+    });
+  }
+
+  void sendMessage(Level level, Component message);
+
+  TriState getPermission(PermissionContext permission);
+
+  default boolean hasPermission(PermissionContext permission) {
+    return getPermission(permission).toBooleanOrElse(false);
+  }
+
+  default void hasPermissionOrThrow(PermissionContext permission) {
+    if (!hasPermission(permission)) {
+      throw new StatusRuntimeException(
+        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
+    }
+  }
+
   UUID getUniqueId();
 
   String getUsername();
@@ -30,9 +76,4 @@ public interface SoulFireUser extends CommandSource {
   String getEmail();
 
   UserEntity.Role getRole();
-
-  @Override
-  default String identifier() {
-    return "soulfire-user-" + getUniqueId();
-  }
 }

@@ -25,9 +25,6 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
-import com.soulfiremc.server.command.CommandSource;
-import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
@@ -42,8 +39,10 @@ import com.soulfiremc.server.protocol.netty.ViaServer;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
+import com.soulfiremc.server.settings.property.ImmutableIntProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
@@ -58,7 +57,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.util.TriState;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -131,7 +129,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import org.pf4j.Extension;
-import org.slf4j.event.Level;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -901,24 +898,6 @@ public class POVServer extends InternalPlugin {
                 return;
               }
             }
-            case ServerboundChatPacket chatPacket -> {
-              if (settingsSource.get(POVServerSettings.ENABLE_COMMANDS)) {
-                var message = chatPacket.getMessage();
-                var prefix = settingsSource.get(POVServerSettings.COMMAND_PREFIX);
-                if (message.startsWith(prefix)) {
-                  var command = message.substring(prefix.length());
-                  var source = new PovServerUser(clientSession, clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getName());
-
-                  var soulFire = instanceManager.soulFireServer();
-                  var code = soulFire.injector()
-                    .getSingleton(ServerCommandManager.class)
-                    .execute(command, CommandSourceStack.ofInstance(soulFire, source, Set.of(instanceManager.id())));
-
-                  log.info("Command \"{}\" executed! (Code: {})", command, code);
-                  return;
-                }
-              }
-            }
             default -> {
             }
           }
@@ -1071,38 +1050,5 @@ public class POVServer extends InternalPlugin {
         .maxValue(65535)
         .thousandSeparator(false)
         .build();
-    public static final BooleanProperty ENABLE_COMMANDS =
-      ImmutableBooleanProperty.builder()
-        .namespace(NAMESPACE)
-        .key("enable-commands")
-        .uiName("Enable commands")
-        .description("Allow users connected to the POV server to execute commands in the SF server shell")
-        .defaultValue(true)
-        .build();
-    public static final StringProperty COMMAND_PREFIX =
-      ImmutableStringProperty.builder()
-        .namespace(NAMESPACE)
-        .key("command-prefix")
-        .uiName("Command Prefix")
-        .description("The prefix to use for commands executed in the SF server shell")
-        .defaultValue("#")
-        .build();
-  }
-
-  private record PovServerUser(Session session, String username) implements CommandSource {
-    @Override
-    public TriState getPermission(PermissionContext permission) {
-      return TriState.TRUE;
-    }
-
-    @Override
-    public String identifier() {
-      return "pov-server-user-" + username;
-    }
-
-    @Override
-    public void sendMessage(Level ignored, Component message) {
-      session.send(new ClientboundSystemChatPacket(message, false));
-    }
   }
 }

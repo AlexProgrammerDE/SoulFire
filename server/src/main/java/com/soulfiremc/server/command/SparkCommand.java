@@ -30,6 +30,7 @@ public class SparkCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("spark")
+        .requires(CommandSourceStack::isAdmin)
         .then(argument("command", StringArgumentType.greedyString())
           .executes(
             help(

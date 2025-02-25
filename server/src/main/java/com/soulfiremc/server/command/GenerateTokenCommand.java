@@ -19,7 +19,6 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.user.SoulFireUser;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
@@ -32,15 +31,10 @@ public class GenerateTokenCommand {
           help(
             "Generate an auth JWT for the current user",
             c -> {
-              if (!(c.getSource().source() instanceof SoulFireUser user)) {
-                c.getSource().source().sendInfo("Only SoulFire users can generate tokens.");
-                return Command.SINGLE_SUCCESS;
-              }
-
               var authSystem = c.getSource().soulFire().authSystem();
-              user.sendInfo(
+              c.getSource().source().sendInfo(
                 "JWT (This gives full access to your user, make sure you only give this to trusted users): {}",
-                authSystem.generateJWT(authSystem.getUserData(user.getUniqueId()).orElseThrow()));
+                authSystem.generateJWT(authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow()));
 
               return Command.SINGLE_SUCCESS;
             })));

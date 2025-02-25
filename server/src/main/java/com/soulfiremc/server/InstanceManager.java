@@ -26,7 +26,9 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
@@ -36,6 +38,7 @@ import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
+import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
@@ -447,6 +450,30 @@ public class InstanceManager {
 
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
+    });
+  }
+
+  public void logCommandExecution(SoulFireUser source, String command) {
+    scheduler.runAsync(() -> {
+      sessionFactory.inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, id);
+        if (instanceEntity == null) {
+          return;
+        }
+
+        var userEntity = session.find(UserEntity.class, source.getUniqueId());
+        if (userEntity == null) {
+          return;
+        }
+
+        var auditLogEntry = new InstanceAuditLogEntity();
+        auditLogEntry.type(InstanceAuditLogEntity.AuditLogType.EXECUTE_COMMAND);
+        auditLogEntry.data(command);
+        auditLogEntry.instance(instanceEntity);
+        auditLogEntry.user(userEntity);
+
+        session.persist(auditLogEntry);
+      });
     });
   }
 
