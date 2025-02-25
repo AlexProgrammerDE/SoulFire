@@ -223,8 +223,8 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
         }
 
-        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instanceId", InstanceAuditLogEntity.class)
-          .setParameter("instanceId", instanceId)
+        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instance", InstanceAuditLogEntity.class)
+          .setParameter("instance", instanceEntity)
           .list();
       });
 
@@ -245,7 +245,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
             case STOP_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.STOP_ATTACK;
           })
           .setTimestamp(Timestamps.fromMillis(log.createdAt().toEpochMilli()))
-          .setData(log.data())
+          .setData(log.data() != null ? log.data() : "")
           .build());
       }
 
