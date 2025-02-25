@@ -158,7 +158,7 @@ public class AuthSystem {
       // Permissions for normal users
       return switch (permission) {
         case PermissionContext.GlobalContext global -> switch (global.globalPermission()) {
-          case GLOBAL_COMMAND_COMPLETION, GLOBAL_COMMAND_EXECUTION,
+          case GLOBAL_COMMAND_EXECUTION,
                DELETE_USER, UPDATE_USER, READ_USER,
                CREATE_USER, UPDATE_SERVER_CONFIG, READ_SERVER_CONFIG,
                GLOBAL_SUBSCRIBE_LOGS, INVALIDATE_SESSIONS -> TriState.FALSE;
@@ -175,7 +175,7 @@ public class AuthSystem {
                DELETE_OBJECT_STORAGE, DOWNLOAD_OBJECT_STORAGE, UPLOAD_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
-               READ_INSTANCE, INSTANCE_COMMAND_COMPLETION, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
+               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
         };
       };

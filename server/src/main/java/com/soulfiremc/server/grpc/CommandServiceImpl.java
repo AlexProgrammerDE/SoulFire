@@ -74,12 +74,12 @@ public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBas
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     var stack = switch (request.getScopeCase()) {
       case GLOBAL -> {
-        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_COMPLETION));
+        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
         yield CommandSourceStack.ofUnrestricted(soulFire, user);
       }
       case INSTANCE -> {
         var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_COMPLETION, instanceId));
+        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
 
         yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
       }
