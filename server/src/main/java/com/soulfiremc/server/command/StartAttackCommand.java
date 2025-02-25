@@ -34,7 +34,7 @@ public class StartAttackCommand {
               forEveryInstance(
                 c,
                 instance -> {
-                  instance.switchToState(AttackLifecycle.RUNNING);
+                  instance.switchToState(c.getSource().source(), AttackLifecycle.RUNNING);
 
                   return Command.SINGLE_SUCCESS;
                 }))));

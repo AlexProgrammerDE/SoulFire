@@ -49,6 +49,7 @@ import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -109,7 +110,7 @@ public class InstanceManager {
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
-      switchToState(instanceEntity.attackLifecycle());
+      switchToState(null, instanceEntity.attackLifecycle());
     } else {
       attackLifecycle(AttackLifecycle.STOPPED);
     }
@@ -204,23 +205,49 @@ public class InstanceManager {
     return refreshedAccount;
   }
 
-  public CompletableFuture<?> switchToState(AttackLifecycle targetState) {
+  public CompletableFuture<?> switchToState(@Nullable SoulFireUser initiator, AttackLifecycle targetState) {
     return switch (targetState) {
       case STARTING, RUNNING -> switch (attackLifecycle()) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
-        case PAUSED -> scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.RUNNING));
-        case STOPPED -> scheduler.runAsync(this::start);
+        case PAUSED -> {
+          if (initiator != null) {
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_ATTACK, null);
+          }
+          yield scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.RUNNING));
+        }
+        case STOPPED -> {
+          if (initiator != null) {
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
+          }
+          yield scheduler.runAsync(this::start);
+        }
       };
       case PAUSED -> switch (attackLifecycle()) {
-        case STARTING, RUNNING -> scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED));
+        case STARTING, RUNNING -> {
+          if (initiator != null) {
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
+          }
+          yield scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED));
+        }
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
-        case STOPPED -> scheduler.runAsync(() -> {
-          start();
-          this.attackLifecycle(AttackLifecycle.PAUSED);
-        });
+        case STOPPED -> {
+          if (initiator != null) {
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
+          }
+          yield scheduler.runAsync(() -> {
+            start();
+            this.attackLifecycle(AttackLifecycle.PAUSED);
+          });
+        }
       };
       case STOPPING, STOPPED -> switch (attackLifecycle()) {
-        case STARTING, RUNNING, PAUSED -> stopAttackPermanently();
+        case STARTING, RUNNING, PAUSED -> {
+          if (initiator != null) {
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.STOP_ATTACK, null);
+          }
+          yield stopAttackPermanently();
+        }
         case STOPPING, STOPPED -> CompletableFuture.completedFuture(null);
       };
     };
@@ -453,7 +480,7 @@ public class InstanceManager {
     });
   }
 
-  public void logCommandExecution(SoulFireUser source, String command) {
+  public void addAuditLog(SoulFireUser source, InstanceAuditLogEntity.AuditLogType logType, @Nullable String data) {
     scheduler.runAsync(() -> {
       sessionFactory.inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, id);
@@ -467,8 +494,8 @@ public class InstanceManager {
         }
 
         var auditLogEntry = new InstanceAuditLogEntity();
-        auditLogEntry.type(InstanceAuditLogEntity.AuditLogType.EXECUTE_COMMAND);
-        auditLogEntry.data(command);
+        auditLogEntry.type(logType);
+        auditLogEntry.data(data);
         auditLogEntry.instance(instanceEntity);
         auditLogEntry.user(userEntity);
 

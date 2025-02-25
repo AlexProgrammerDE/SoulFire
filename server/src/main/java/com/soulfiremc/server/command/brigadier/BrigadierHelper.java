@@ -26,6 +26,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.command.CommandSourceStack;
+import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import net.kyori.adventure.text.Component;
 
@@ -159,7 +160,7 @@ public class BrigadierHelper {
     for (var instance : instances) {
       context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyNameCache().get()));
 
-      instance.logCommandExecution(context.getSource().source(), context.getInput());
+      instance.addAuditLog(context.getSource().source(), InstanceAuditLogEntity.AuditLogType.EXECUTE_COMMAND, context.getInput());
       resultSum += consumer.run(instance);
     }
 

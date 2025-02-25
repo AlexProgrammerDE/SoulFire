@@ -200,7 +200,7 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       }
 
       var instance = optionalInstance.get();
-      instance.switchToState(AttackLifecycle.fromProto(request.getState())).join();
+      instance.switchToState(ServerRPCConstants.USER_CONTEXT_KEY.get(), AttackLifecycle.fromProto(request.getState())).join();
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

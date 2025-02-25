@@ -34,7 +34,7 @@ public class StopAttackCommand {
               forEveryInstance(
                 c,
                 instance -> {
-                  instance.switchToState(AttackLifecycle.STOPPED);
+                  instance.switchToState(c.getSource().source(), AttackLifecycle.STOPPED);
 
                   return Command.SINGLE_SUCCESS;
                 }))));
