@@ -232,8 +232,11 @@ public class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImpl
       for (var log : auditLogs) {
         responseBuilder.addEntry(InstanceAuditLogResponse.AuditLogEntry.newBuilder()
           .setId(log.id().toString())
-          .setUserId(log.user().id().toString())
-          .setUserName(log.user().username())
+          .setUser(InstanceUser.newBuilder()
+            .setId(log.user().id().toString())
+            .setUsername(log.user().username())
+            .setEmail(log.user().email())
+            .build())
           .setType(switch (log.type()) {
             case EXECUTE_COMMAND -> InstanceAuditLogResponse.AuditLogEntryType.EXECUTE_COMMAND;
             case START_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.START_ATTACK;

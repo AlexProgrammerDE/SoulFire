@@ -8,6 +8,12 @@ package soulfire.v1;
 import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 
+message InstanceUser {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+}
+
 message InstanceConfig {
   repeated SettingsNamespace settings = 1;
   repeated MinecraftAccountProto accounts = 2;
@@ -111,11 +117,10 @@ message InstanceAuditLogResponse {
 
   message AuditLogEntry {
     string id = 1;
-    string user_id = 2;
-    string user_name = 3;
-    AuditLogEntryType type = 4;
-    google.protobuf.Timestamp timestamp = 5;
-    string data = 6;
+    InstanceUser user = 2;
+    AuditLogEntryType type = 3;
+    google.protobuf.Timestamp timestamp = 4;
+    string data = 5;
   }
 
   repeated AuditLogEntry entry = 1;
