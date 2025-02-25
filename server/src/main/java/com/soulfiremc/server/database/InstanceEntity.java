@@ -63,7 +63,7 @@ public class InstanceEntity {
   @Column(nullable = false, length = 64)
   private String icon;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private UserEntity owner;
 

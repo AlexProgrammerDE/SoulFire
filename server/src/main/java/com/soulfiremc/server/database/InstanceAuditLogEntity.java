@@ -42,11 +42,11 @@ public class InstanceAuditLogEntity {
   @Column
   private String data;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private InstanceEntity instance;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private UserEntity user;
 
