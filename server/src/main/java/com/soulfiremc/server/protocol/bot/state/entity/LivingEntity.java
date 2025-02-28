@@ -27,6 +27,7 @@ import com.soulfiremc.server.util.mcstructs.MoverType;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+import net.raphimc.viabedrock.protocol.data.enums.java.InteractionHand;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -52,6 +53,9 @@ public abstract class LivingEntity extends Entity {
   private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
+  protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
+  protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
+  protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
   private final boolean discardFriction = false;
   public float xxa;
   public float yya;
@@ -160,6 +164,21 @@ public abstract class LivingEntity extends Entity {
     this.setDeltaMovement(packet.getMotionX(), packet.getMotionY(), packet.getMotionZ());
   }
 
+  @SuppressWarnings("StatementWithEmptyBody")
+  @Override
+  public void onSyncedDataUpdated(NamedEntityData entityData) {
+    super.onSyncedDataUpdated(entityData);
+    if (NamedEntityData.LIVING_ENTITY__SLEEPING_POS.equals(entityData)) {
+      this.getSleepingPos().ifPresent(this::setPosToBed);
+    } else if (NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS.equals(entityData)) {
+      // TODO: Implement item animations
+    }
+  }
+
+  private void setPosToBed(Vector3i pos) {
+    this.setPos((double) pos.getX() + 0.5, (double) pos.getY() + 0.6875, (double) pos.getZ() + 0.5);
+  }
+
   public void absMoveTo(double x, double y, double z, float yRot, float xRot) {
     this.absMoveTo(x, y, z);
     this.absRotateTo(yRot, xRot);
@@ -219,6 +238,16 @@ public abstract class LivingEntity extends Entity {
   @Override
   public float lerpTargetYRot() {
     return this.lerpSteps > 0 ? (float) this.lerpYRot : this.yRot();
+  }
+
+  public Optional<SFItemStack> getItemInHand(InteractionHand hand) {
+    if (hand == InteractionHand.MAIN_HAND) {
+      return this.getItemBySlot(EquipmentSlot.MAINHAND);
+    } else if (hand == InteractionHand.OFF_HAND) {
+      return this.getItemBySlot(EquipmentSlot.OFFHAND);
+    } else {
+      throw new IllegalArgumentException("Invalid hand " + hand);
+    }
   }
 
   public void aiStep() {

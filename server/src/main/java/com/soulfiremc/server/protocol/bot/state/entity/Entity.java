@@ -136,7 +136,7 @@ public class Entity {
   private Entity vehicle;
 
   public Entity(EntityType entityType, Level level) {
-    this.metadataState = new EntityMetadataState(entityType);
+    this.metadataState = new EntityMetadataState(this);
     this.entityType = entityType;
     this.level = level;
     this.dimensions = entityType.dimensions();
@@ -146,9 +146,7 @@ public class Entity {
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
     MinecraftTypes.readVarInt(buf);
-    for (var metadata : MinecraftTypes.readEntityMetadata(buf)) {
-      metadataState.setMetadata(metadata);
-    }
+    this.metadataState.assignValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
 
     this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();
@@ -374,6 +372,12 @@ public class Entity {
       var h = MathHelper.sin(facing * (float) (Math.PI / 180.0));
       var i = MathHelper.cos(facing * (float) (Math.PI / 180.0));
       return Vector3d.from(scaledMotion.getX() * (double) i - scaledMotion.getZ() * (double) h, scaledMotion.getY(), scaledMotion.getZ() * (double) i + scaledMotion.getX() * (double) h);
+    }
+  }
+
+  public void onSyncedDataUpdated(NamedEntityData entityData) {
+    if (NamedEntityData.ENTITY__POSE.equals(entityData)) {
+      this.refreshDimensions();
     }
   }
 
@@ -1065,6 +1069,14 @@ public class Entity {
 
   protected void reapplyPosition() {
     setPos(pos);
+  }
+
+  protected final AABB makeBoundingBox() {
+    return this.makeBoundingBox(this.pos);
+  }
+
+  protected AABB makeBoundingBox(Vector3d position) {
+    return this.dimensions.makeBoundingBox(position);
   }
 
   public double getEyeY() {

@@ -65,6 +65,17 @@ public enum Direction {
     this.normal = arg3;
   }
 
+  public static Direction fromMCPLDirection(org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction direction) {
+    return switch (direction) {
+      case DOWN -> DOWN;
+      case UP -> UP;
+      case NORTH -> NORTH;
+      case SOUTH -> SOUTH;
+      case WEST -> WEST;
+      case EAST -> EAST;
+    };
+  }
+
   private static Direction[] makeDirectionArray(Direction first, Direction second, Direction third) {
     return new Direction[]{first, second, third, third.getOpposite(), second.getOpposite(), first.getOpposite()};
   }

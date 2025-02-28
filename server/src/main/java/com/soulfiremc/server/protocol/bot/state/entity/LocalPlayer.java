@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.InputState;
 import com.soulfiremc.server.protocol.bot.state.KeyPresses;
@@ -221,6 +222,12 @@ public class LocalPlayer extends AbstractClientPlayer {
       abilities.flying = false;
       this.onUpdateAbilities();
     }
+  }
+
+  @Override
+  public void onSyncedDataUpdated(NamedEntityData entityData) {
+    super.onSyncedDataUpdated(entityData);
+    // TODO: Implement item animations
   }
 
   public void setExperienceValues(float currentXP, int maxXP, int level) {

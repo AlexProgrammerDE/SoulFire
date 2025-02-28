@@ -309,7 +309,7 @@ public final class SessionDataManager {
 
     this.localPlayer = newLocalPlayer;
     if (packet.isKeepMetadata()) {
-      newLocalPlayer.metadataState().assignValues(oldLocalPlayer.metadataState());
+      newLocalPlayer.metadataState().assignValues(oldLocalPlayer.metadataState().metadataStore().values());
 
       newLocalPlayer.setDeltaMovement(oldLocalPlayer.deltaMovement());
       newLocalPlayer.setYRot(oldLocalPlayer.yRot());
@@ -942,9 +942,7 @@ public final class SessionDataManager {
       return;
     }
 
-    for (var entry : packet.getMetadata()) {
-      state.metadataState().setMetadata(entry);
-    }
+    state.metadataState().assignValues(List.of(packet.getMetadata()));
   }
 
   @EventHandler

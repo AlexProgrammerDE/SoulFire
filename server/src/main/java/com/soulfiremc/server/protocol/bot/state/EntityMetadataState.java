@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.NamedEntityData;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
@@ -26,23 +26,37 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataType;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Data
 @RequiredArgsConstructor
 public class EntityMetadataState {
-  private final EntityType entityType;
+  private final Entity entity;
   private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
 
+  private NamedEntityData fromMetadata(EntityMetadata<?, ?> metadata) {
+    return NamedEntityData.VALUES.stream()
+      .filter(namedData -> entity.entityType().inheritedClasses().contains(namedData.entityClass()))
+      .filter(namedData -> namedData.networkId() == metadata.getId())
+      .findFirst()
+      .orElseThrow();
+  }
+
   public void setMetadata(EntityMetadata<?, ?> metadata) {
-    this.metadataStore.put(metadata.getId(), metadata);
+    setMetadata(fromMetadata(metadata), metadata);
+  }
+
+  private void setMetadata(NamedEntityData namedEntityData, EntityMetadata<?, ?> metadata) {
+    var existing = this.metadataStore.get(metadata.getId());
+    if (!Objects.equals(existing.getValue(), metadata.getValue())) {
+      this.metadataStore.put(metadata.getId(), metadata);
+      this.entity.onSyncedDataUpdated(namedEntityData);
+    }
   }
 
   public <V, T extends MetadataType<V>> void setMetadata(NamedEntityData namedEntityData, T metadataType, MetadataFactory<V, T> factory, V value) {
-    this.metadataStore.put(namedEntityData.networkId(), factory.create(namedEntityData.networkId(), metadataType, value));
+    setMetadata(namedEntityData, factory.create(namedEntityData.networkId(), metadataType, value));
   }
 
   public <T> T getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
@@ -63,7 +77,7 @@ public class EntityMetadataState {
 
   public Map<String, ?> toNamedMap() {
     var namedMap = new LinkedHashMap<String, Object>();
-    entityType.inheritedClasses().stream().flatMap(clazz -> {
+    entity.entityType().inheritedClasses().stream().flatMap(clazz -> {
         var stream = Stream.<NamedEntityData>empty();
         for (var namedData : NamedEntityData.VALUES) {
           if (namedData.entityClass().equals(clazz)) {
@@ -83,8 +97,11 @@ public class EntityMetadataState {
     return namedMap;
   }
 
-  public void assignValues(EntityMetadataState other) {
-    this.metadataStore.putAll(other.metadataStore);
+  public void assignValues(Collection<EntityMetadata<?, ?>> other) {
+    for (var metadata : other) {
+      this.metadataStore.put(metadata.getId(), metadata);
+      this.entity.onSyncedDataUpdated(fromMetadata(metadata));
+    }
   }
 
   public interface MetadataFactory<V, T extends MetadataType<V>> {
