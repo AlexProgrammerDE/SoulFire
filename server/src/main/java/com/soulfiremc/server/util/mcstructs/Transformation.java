@@ -169,4 +169,3 @@ public final class Transformation {
     return new Transformation(vector3f, quaternionf, vector3f2, quaternionf2);
   }
 }
-

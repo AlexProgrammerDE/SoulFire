@@ -24,5 +24,3 @@ public record Brightness(int block, int sky) {
     return new Brightness(block, sky);
   }
 }
-
-
