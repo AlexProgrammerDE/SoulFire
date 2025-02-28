@@ -265,7 +265,7 @@ public abstract class Player extends LivingEntity {
   }
 
   public int getScore() {
-    return this.metadataState.getMetadata(NamedEntityData.PLAYER__SCORE, MetadataTypes.INT);
+    return this.metadataState.get(NamedEntityData.PLAYER__SCORE, MetadataTypes.INT);
   }
 
   @Override

@@ -132,6 +132,7 @@ public class Entity {
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
   private int portalCooldown;
+  public int tickCount;
   @Nullable
   private Entity vehicle;
 
@@ -603,7 +604,7 @@ public class Entity {
   }
 
   protected boolean getSharedFlag(int flag) {
-    return (this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE) & 1 << flag) != 0;
+    return (this.metadataState.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE) & 1 << flag) != 0;
   }
 
   public void tick() {
@@ -944,16 +945,16 @@ public class Entity {
   }
 
   protected void setSharedFlag(int flag, boolean set) {
-    byte b = this.metadataState.getMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE);
+    byte b = this.metadataState.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE);
     if (set) {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
+      this.metadataState.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
     } else {
-      this.metadataState.setMetadata(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
+      this.metadataState.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
     }
   }
 
   public boolean isNoGravity() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__NO_GRAVITY, MetadataTypes.BOOLEAN);
+    return this.metadataState.get(NamedEntityData.ENTITY__NO_GRAVITY, MetadataTypes.BOOLEAN);
   }
 
   protected double getDefaultGravity() {
@@ -972,11 +973,11 @@ public class Entity {
   }
 
   public Pose getPose() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE);
+    return this.metadataState.get(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE);
   }
 
   public void setPose(Pose pose) {
-    this.metadataState.setMetadata(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE, ObjectEntityMetadata::new, pose);
+    this.metadataState.set(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE, ObjectEntityMetadata::new, pose);
   }
 
   public boolean hasPose(Pose pose) {
@@ -1081,6 +1082,11 @@ public class Entity {
 
   public double getEyeY() {
     return this.y() + this.eyeHeight();
+  }
+
+  public int getTeamColor() {
+    // TODO: Implement teams
+    return 16777215;
   }
 
   public BlockState getInBlockState() {
@@ -1260,7 +1266,7 @@ public class Entity {
   }
 
   public int getTicksFrozen() {
-    return this.metadataState.getMetadata(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataTypes.INT);
+    return this.metadataState.get(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataTypes.INT);
   }
 
   public float getPercentFrozen() {

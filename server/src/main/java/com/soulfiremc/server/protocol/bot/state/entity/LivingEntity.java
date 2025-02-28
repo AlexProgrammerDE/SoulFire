@@ -555,7 +555,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public Optional<Vector3i> getSleepingPos() {
-    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
+    return this.metadataState.get(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
   }
 
   public boolean isSleeping() {
@@ -588,14 +588,14 @@ public abstract class LivingEntity extends Entity {
   }
 
   protected void setLivingEntityFlag(int key, boolean value) {
-    int currentFlags = this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE);
+    int currentFlags = this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE);
     if (value) {
       currentFlags |= key;
     } else {
       currentFlags &= ~key;
     }
 
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
+    this.metadataState.set(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
   }
 
   @Override
@@ -637,7 +637,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public boolean isAutoSpinAttack() {
-    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 4) != 0;
+    return (this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 4) != 0;
   }
 
   @Override
@@ -658,11 +658,11 @@ public abstract class LivingEntity extends Entity {
   }
 
   public float getHealth() {
-    return this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT);
+    return this.metadataState.get(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT);
   }
 
   public void setHealth(float health) {
-    this.metadataState.setMetadata(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
+    this.metadataState.set(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
   }
 
   public boolean isDeadOrDying() {
@@ -771,7 +771,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public boolean isUsingItem() {
-    return (this.metadataState.getMetadata(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 1) > 0;
+    return (this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 1) > 0;
   }
 
   protected boolean canGlide() {

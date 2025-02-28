@@ -55,14 +55,14 @@ public class Mob extends LivingEntity {
   }
 
   public boolean isNoAi() {
-    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_NO_AI) != 0;
+    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_NO_AI) != 0;
   }
 
   public boolean isLeftHanded() {
-    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_LEFTHANDED) != 0;
+    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_LEFTHANDED) != 0;
   }
 
   public boolean isAggressive() {
-    return (this.metadataState.getMetadata(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_AGGRESSIVE) != 0;
+    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_AGGRESSIVE) != 0;
   }
 }

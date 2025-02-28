@@ -43,11 +43,11 @@ public class EntityMetadataState {
       .orElseThrow();
   }
 
-  public void setMetadata(EntityMetadata<?, ?> metadata) {
-    setMetadata(fromMetadata(metadata), metadata);
+  public void set(EntityMetadata<?, ?> metadata) {
+    set(fromMetadata(metadata), metadata);
   }
 
-  private void setMetadata(NamedEntityData namedEntityData, EntityMetadata<?, ?> metadata) {
+  private void set(NamedEntityData namedEntityData, EntityMetadata<?, ?> metadata) {
     var existing = this.metadataStore.get(metadata.getId());
     if (!Objects.equals(existing.getValue(), metadata.getValue())) {
       this.metadataStore.put(metadata.getId(), metadata);
@@ -55,16 +55,16 @@ public class EntityMetadataState {
     }
   }
 
-  public <V, T extends MetadataType<V>> void setMetadata(NamedEntityData namedEntityData, T metadataType, MetadataFactory<V, T> factory, V value) {
-    setMetadata(namedEntityData, factory.create(namedEntityData.networkId(), metadataType, value));
+  public <V, T extends MetadataType<V>> void set(NamedEntityData namedEntityData, T metadataType, MetadataFactory<V, T> factory, V value) {
+    set(namedEntityData, factory.create(namedEntityData.networkId(), metadataType, value));
   }
 
-  public <T> T getMetadata(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
-    return getMetadata(namedEntityData.networkId(), metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
+  public <T> T get(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
+    return get(namedEntityData.networkId(), metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
   }
 
   @SuppressWarnings("unchecked")
-  public <T> Optional<T> getMetadata(int id, MetadataType<T> metadataType) {
+  public <T> Optional<T> get(int id, MetadataType<T> metadataType) {
     assert metadataType != null;
 
     var metadata = this.metadataStore.get(id);

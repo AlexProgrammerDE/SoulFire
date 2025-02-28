@@ -70,6 +70,7 @@ public class EntityTrackerState {
   public void tick() {
     getEntities().forEach(entity -> {
       entity.setOldPosAndRot();
+      entity.tickCount++;
       entity.tick();
     });
   }

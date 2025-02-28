@@ -52,6 +52,10 @@ public class MathHelper {
     return a * b >= 0;
   }
 
+  public static int lerpInt(float delta, int start, int end) {
+    return start + floor(delta * (float) (end - start));
+  }
+
   public static boolean isOutsideTolerance(double a, double b, double tolerance) {
     return Math.abs(a - b) > tolerance;
   }

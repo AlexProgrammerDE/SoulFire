@@ -18,19 +18,24 @@
 package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.ItemType;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
 @Getter
 public class SFItemStack extends ItemStack {
+  public static final SFItemStack EMPTY = new SFItemStack(ItemType.AIR, 0);
   private final ItemType type;
+  @Nullable
+  private Entity entityRepresentation;
 
   private SFItemStack(ItemStack itemStack) {
     super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponentsPatch());
@@ -48,6 +53,21 @@ public class SFItemStack extends ItemStack {
     }
 
     return new SFItemStack(itemStack);
+  }
+
+  @Nullable
+  public Entity getEntityRepresentation() {
+    return !this.isEmpty() ? this.entityRepresentation : null;
+  }
+
+  public void setEntityRepresentation(@Nullable Entity entity) {
+    if (!this.isEmpty()) {
+      this.entityRepresentation = entity;
+    }
+  }
+
+  public boolean isEmpty() {
+    return this == EMPTY || this.type == ItemType.AIR || this.getAmount() <= 0;
   }
 
   @VisibleForTesting

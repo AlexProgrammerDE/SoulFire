@@ -33,6 +33,11 @@ unimined.minecraft {
     javaVersion = JavaVersion.VERSION_21
   }
 
+  runs.config("client") {
+    javaVersion = JavaVersion.VERSION_21
+    jvmArgs("-Dio.netty.transport.noNative=true")
+  }
+
   fabric {
     loader("0.16.10")
   }

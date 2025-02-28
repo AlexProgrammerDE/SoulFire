@@ -185,6 +185,10 @@ public class SFHelpers {
     return object;
   }
 
+  public static <T> T make(Supplier<T> consumer) {
+    return consumer.get();
+  }
+
   public static String stripForChat(String s) {
     var builder = new StringBuilder(s.length());
     for (var c : s.toCharArray()) {

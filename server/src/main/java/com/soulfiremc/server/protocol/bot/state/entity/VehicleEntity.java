@@ -30,26 +30,26 @@ public class VehicleEntity extends Entity {
   }
 
   public float getDamage() {
-    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataTypes.FLOAT);
+    return this.metadataState.get(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataTypes.FLOAT);
   }
 
   public void setDamage(float damage) {
-    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataTypes.FLOAT, FloatEntityMetadata::new, damage);
+    this.metadataState.set(NamedEntityData.VEHICLE_ENTITY__ID_DAMAGE, MetadataTypes.FLOAT, FloatEntityMetadata::new, damage);
   }
 
   public int getHurtTime() {
-    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataTypes.INT);
+    return this.metadataState.get(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataTypes.INT);
   }
 
   public void setHurtTime(int hurtTime) {
-    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataTypes.INT, IntEntityMetadata::new, hurtTime);
+    this.metadataState.set(NamedEntityData.VEHICLE_ENTITY__ID_HURT, MetadataTypes.INT, IntEntityMetadata::new, hurtTime);
   }
 
   public int getHurtDir() {
-    return this.metadataState.getMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataTypes.INT);
+    return this.metadataState.get(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataTypes.INT);
   }
 
   public void setHurtDir(int hurtDir) {
-    this.metadataState.setMetadata(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataTypes.INT, IntEntityMetadata::new, hurtDir);
+    this.metadataState.set(NamedEntityData.VEHICLE_ENTITY__ID_HURTDIR, MetadataTypes.INT, IntEntityMetadata::new, hurtDir);
   }
 }

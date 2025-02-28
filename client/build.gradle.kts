@@ -17,7 +17,7 @@ tasks.withType<AbstractArchiveTask> {
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireCLIJava8Launcher"
 
-task("runSFCLI", JavaExec::class) {
+tasks.register("runSFCLI", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
 
@@ -49,7 +49,7 @@ task("runSFCLI", JavaExec::class) {
   outputs.upToDateWhen { false }
 }
 
-task("printSFCliFlags", JavaExec::class) {
+tasks.register("printSFCliFlags", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
 

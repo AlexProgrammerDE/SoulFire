@@ -17,7 +17,7 @@ tasks.withType<AbstractArchiveTask> {
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireDedicatedJava8Launcher"
 
-task("runSFDedicated", JavaExec::class) {
+tasks.register("runSFDedicated", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire dedicated server"
 

@@ -52,6 +52,12 @@ public class EntityFactory {
       return Optional.of(new AbstractWindCharge(entityType, level));
     } else if (entityType.shulkerEntity()) {
       return Optional.of(new Shulker(entityType, level));
+    } else if (entityType == EntityType.BLOCK_DISPLAY) {
+      return Optional.of(new Display.BlockDisplay(entityType, level));
+    } else if (entityType == EntityType.ITEM_DISPLAY) {
+      return Optional.of(new Display.ItemDisplay(entityType, level));
+    } else if (entityType == EntityType.TEXT_DISPLAY) {
+      return Optional.of(new Display.TextDisplay(entityType, level));
     } else {
       return Optional.of(new Entity(entityType, level));
     }

@@ -114,15 +114,15 @@ public class AbstractBoat extends VehicleEntity {
   }
 
   public boolean getPaddleState(int i) {
-    return this.metadataState.getMetadata(i == 0 ? NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_LEFT : NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_RIGHT, MetadataTypes.BOOLEAN) && this.getControllingPassenger() != null;
+    return this.metadataState.get(i == 0 ? NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_LEFT : NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_RIGHT, MetadataTypes.BOOLEAN) && this.getControllingPassenger() != null;
   }
 
   private int getBubbleTime() {
-    return this.metadataState.getMetadata(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT);
+    return this.metadataState.get(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT);
   }
 
   private void setBubbleTime(int i) {
-    this.metadataState.setMetadata(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT, IntEntityMetadata::new, i);
+    this.metadataState.set(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT, IntEntityMetadata::new, i);
   }
 
   public float getBubbleAngle(float f) {
