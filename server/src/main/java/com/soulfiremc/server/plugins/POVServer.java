@@ -1039,8 +1039,8 @@ public final class POVServer extends InternalPlugin {
                   Integer.MIN_VALUE,
                   clientEntity.pos(),
                   clientEntity.deltaMovement(),
-                  clientEntity.xRot(),
                   clientEntity.yRot(),
+                  clientEntity.xRot(),
                   List.of()
                 ));
             }
@@ -1065,8 +1065,8 @@ public final class POVServer extends InternalPlugin {
                   Integer.MIN_VALUE,
                   Vector3d.ZERO,
                   Vector3d.ZERO,
-                  clientEntity.xRot(),
                   clientEntity.yRot(),
+                  clientEntity.xRot(),
                   List.of(PositionElement.X, PositionElement.Y, PositionElement.Z, PositionElement.DELTA_X, PositionElement.DELTA_Y, PositionElement.DELTA_Z)
                 ));
             }
