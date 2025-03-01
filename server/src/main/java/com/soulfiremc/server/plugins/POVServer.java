@@ -141,16 +141,6 @@ import java.util.concurrent.TimeUnit;
 @Extension
 public final class POVServer extends InternalPlugin {
   private static final MetadataKey<Server> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", Server.class);
-  private static final List<Class<?>> NOT_SYNCED =
-    List.of(
-      ClientboundKeepAlivePacket.class,
-      ServerboundKeepAlivePacket.class,
-      ClientboundPingPacket.class,
-      ServerboundPongPacket.class,
-      ClientboundCustomPayloadPacket.class,
-      ServerboundFinishConfigurationPacket.class,
-      ServerboundConfigurationAcknowledgedPacket.class,
-      ServerboundClientTickEndPacket.class);
   private static final byte[] FULL_LIGHT = new byte[2048];
 
   static {
@@ -884,46 +874,61 @@ public final class POVServer extends InternalPlugin {
           botConnection.session().addListener(new B2SAdapter(clientSession));
           botConnection.scheduler().schedule(() -> executeSync(clientSession));
         }
-      } else if (enableForwarding && !NOT_SYNCED.contains(packet.getClass())) {
+      } else if (enableForwarding) {
         // For data consistence, ensure all packets sent from client -> server are
         // handled on the bots tick event loop
         botConnection.preTickHooks().add(() -> {
           var clientEntity = botConnection.dataManager().localPlayer();
           switch (packet) {
+            case ServerboundKeepAlivePacket ignored -> {
+            }
+            case ServerboundPongPacket ignored -> {
+            }
+            case ServerboundFinishConfigurationPacket ignored -> {
+            }
+            case ServerboundConfigurationAcknowledgedPacket ignored -> {
+            }
+            case ServerboundClientTickEndPacket ignored -> {
+            }
             case ServerboundMovePlayerPosRotPacket posRot -> {
               lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
 
               clientEntity.setPos(posRot.getX(), posRot.getY(), posRot.getZ());
               clientEntity.setYRot(posRot.getYaw());
               clientEntity.setXRot(posRot.getPitch());
+
+              // MC Client -> Server of the bot
+              botConnection.session().send(packet);
             }
             case ServerboundMovePlayerPosPacket pos -> {
               lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
 
               clientEntity.setPos(pos.getX(), pos.getY(), pos.getZ());
+
+              // MC Client -> Server of the bot
+              botConnection.session().send(packet);
             }
             case ServerboundMovePlayerRotPacket rot -> {
               clientEntity.setYRot(rot.getYaw());
               clientEntity.setXRot(rot.getPitch());
+
+              // MC Client -> Server of the bot
+              botConnection.session().send(packet);
             }
             case ServerboundAcceptTeleportationPacket teleportationPacket -> {
-              // This was a forced teleport, the server should not know about it
+              // This was a sync teleport, the server should not know about it
               if (teleportationPacket.getId() == Integer.MIN_VALUE) {
                 return;
               }
+
+              // MC Client -> Server of the bot
+              botConnection.session().send(packet);
             }
             default -> {
+              // MC Client -> Server of the bot
+              botConnection.session().send(packet);
             }
           }
-
-          // The client spams too many packets when being force-moved,
-          // so we'll just ignore them
-          if (botConnection.botControl().activelyControlled()) {
-            return;
-          }
-
-          // MC Client -> Server of the bot
-          botConnection.session().send(packet);
         });
       }
     }
@@ -981,34 +986,44 @@ public final class POVServer extends InternalPlugin {
 
       @Override
       public void packetReceived(Session botSession, Packet packet) {
-        if (!enableForwarding
-          || NOT_SYNCED.contains(packet.getClass())) {
+        if (!enableForwarding) {
           return;
         }
 
-        if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-          // To avoid signature issues since the signature is for the bot, not the connected user
-          clientSession.send(new ClientboundSystemChatPacket(botConnection.dataManager().prepareChatTypeMessage(chatPacket.getChatType(), new SFChatType.BoundChatMessageInfo(
-            botConnection.dataManager().getComponentForPlayerChat(chatPacket),
-            chatPacket.getName(),
-            chatPacket.getTargetName()
-          )), false));
-          return;
+        switch (packet) {
+          case ClientboundKeepAlivePacket ignored -> {
+          }
+          case ClientboundPingPacket ignored -> {
+          }
+          case ClientboundCustomPayloadPacket ignored -> {
+          }
+          case ClientboundPlayerChatPacket chatPacket -> {
+            // To avoid signature issues since the signature is for the bot, not the connected user
+            clientSession.send(new ClientboundSystemChatPacket(
+              botConnection.dataManager().prepareChatTypeMessage(
+                chatPacket.getChatType(),
+                new SFChatType.BoundChatMessageInfo(
+                  botConnection.dataManager().getComponentForPlayerChat(chatPacket),
+                  chatPacket.getName(),
+                  chatPacket.getTargetName()
+                )),
+              false
+            ));
+          }
+          default -> {
+            // MC Server of the bot -> MC Client
+            clientSession.send(packet);
+          }
         }
-
-        // MC Server of the bot -> MC Client
-        clientSession.send(packet);
       }
 
       @Override
       public void packetSent(Session botSession, Packet packet) {
-        if (!enableForwarding
-          || NOT_SYNCED.contains(packet.getClass())) {
+        if (!enableForwarding) {
           return;
         }
 
-        var clientEntity =
-          botConnection.dataManager().localPlayer();
+        var clientEntity = botConnection.dataManager().localPlayer();
         // Bot -> MC Client
         switch (packet) {
           case ServerboundMovePlayerPosRotPacket posRot -> {
@@ -1016,9 +1031,9 @@ public final class POVServer extends InternalPlugin {
             clientSession.send(
               new ClientboundMoveEntityPosRotPacket(
                 clientEntity.entityId(),
-                (posRot.getX() * 32 - lastPosition.getX() * 32) * 128,
-                (posRot.getY() * 32 - lastPosition.getY() * 32) * 128,
-                (posRot.getZ() * 32 - lastPosition.getZ() * 32) * 128,
+                posRot.getX() - lastPosition.getX(),
+                posRot.getY() - lastPosition.getY(),
+                posRot.getZ() - lastPosition.getZ(),
                 posRot.getYaw(),
                 posRot.getPitch(),
                 clientEntity.onGround()));
@@ -1028,9 +1043,9 @@ public final class POVServer extends InternalPlugin {
             clientSession.send(
               new ClientboundMoveEntityPosPacket(
                 clientEntity.entityId(),
-                (pos.getX() * 32 - lastPosition.getX() * 32) * 128,
-                (pos.getY() * 32 - lastPosition.getY() * 32) * 128,
-                (pos.getZ() * 32 - lastPosition.getZ() * 32) * 128,
+                pos.getX() - lastPosition.getX(),
+                pos.getY() - lastPosition.getY(),
+                pos.getZ() - lastPosition.getZ(),
                 clientEntity.onGround()));
           }
           case ServerboundMovePlayerRotPacket rot -> clientSession.send(
@@ -1040,6 +1055,7 @@ public final class POVServer extends InternalPlugin {
               rot.getPitch(),
               clientEntity.onGround()));
           default -> {
+            // We don't need to handle all Bot -> Server packets
           }
         }
       }
