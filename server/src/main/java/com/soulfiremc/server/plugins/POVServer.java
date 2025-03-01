@@ -654,10 +654,9 @@ public final class POVServer extends InternalPlugin {
       var friendlyName = instanceManager.friendlyNameCache().get();
       return
         new ServerStatusInfo(
-          Component.text("Attack POV server for instance %s!".formatted(friendlyName))
-            .color(NamedTextColor.GREEN)
-            .decorate(TextDecoration.BOLD),
-          new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.botConnections().size(), List.of(
+          Component.text("POV server for instance %s!".formatted(friendlyName))
+            .color(NamedTextColor.GREEN),
+          new PlayerInfo(settingsSource.get(BotSettings.AMOUNT), instanceManager.getConnectedBots().size(), List.of(
             getFakePlayerListEntry(Component.text("Observe and control bots!").color(NamedTextColor.GREEN)),
             getFakePlayerListEntry(Component.text("Play the server through the bots.").color(NamedTextColor.GREEN)),
             getFakePlayerListEntry(Component.text("Still experimental!").color(NamedTextColor.RED))
@@ -863,7 +862,7 @@ public final class POVServer extends InternalPlugin {
           log.info("{}: {}", profile.getName(), selectedName);
 
           var first =
-            instanceManager.botConnections().values().stream()
+            instanceManager.getConnectedBots().stream()
               .filter(c -> c.accountName().equalsIgnoreCase(selectedName))
               .findFirst();
           if (first.isEmpty()) {

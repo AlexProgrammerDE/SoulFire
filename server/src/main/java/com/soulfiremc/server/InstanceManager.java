@@ -22,6 +22,7 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
@@ -144,8 +145,10 @@ public final class InstanceManager {
   private void evictBots() {
     // Remove botConnections from the map that are closed
     botConnections.entrySet().removeIf(entry -> {
-      if (entry.getValue().session().isDisconnected()) {
-        logger.debug("Removing bot {}", entry.getValue().minecraftAccount().lastKnownName());
+      var bot = entry.getValue();
+      if (bot.session().isDisconnected() || bot.explicitlyShutdown()) {
+        logger.debug("Removing bot {}", bot.accountName());
+        SoulFireAPI.postEvent(new AttackBotRemoveEvent(this, bot));
         return true;
       }
       return false;
@@ -394,7 +397,7 @@ public final class InstanceManager {
 
               logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
-              botConnections.put(botConnection.accountProfileId(), botConnection);
+              storeNewBot(botConnection);
 
               try {
                 botConnection.connect().get();
@@ -463,11 +466,12 @@ public final class InstanceManager {
       do {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
-        for (var entry : Map.copyOf(botConnections).entrySet()) {
-          disconnectFuture.add(scheduler.runAsync(entry.getValue()::gracefulDisconnect));
-          eventLoopGroups.add(entry.getValue().session().eventLoopGroup());
-          botConnections.remove(entry.getKey());
-        }
+        botConnections.entrySet().removeIf(entry -> {
+          var botConnection = entry.getValue();
+          disconnectFuture.add(scheduler.runAsync(botConnection::gracefulDisconnect));
+          eventLoopGroups.add(botConnection.session().eventLoopGroup());
+          return true;
+        });
 
         logger.info("Waiting for all bots to fully disconnect");
         for (var future : disconnectFuture) {
@@ -519,6 +523,14 @@ public final class InstanceManager {
 
   public Path getObjectStoragePath() {
     return soulFireServer.baseDirectory().resolve("object-storage").resolve(id.toString());
+  }
+
+  public List<BotConnection> getConnectedBots() {
+    return new ArrayList<>(botConnections.values());
+  }
+
+  public void storeNewBot(BotConnection connection) {
+    botConnections.put(connection.accountProfileId(), connection);
   }
 
   @Override

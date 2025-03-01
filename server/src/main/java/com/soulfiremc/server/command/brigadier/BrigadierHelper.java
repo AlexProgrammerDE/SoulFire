@@ -131,8 +131,7 @@ public final class BrigadierHelper {
   }
 
   public static List<BotConnection> getVisibleBots(InstanceManager instance, CommandContext<CommandSourceStack> context) {
-    return instance.botConnections()
-      .values()
+    return instance.getConnectedBots()
       .stream()
       .filter(bot -> context.getSource().botIds() == null || context.getSource().botIds()
         .stream()

@@ -299,7 +299,7 @@ public final class BotControlAPI {
       }
 
       if (ignoreBots
-        && dataManager.connection().instanceManager().botConnections().values().stream()
+        && dataManager.connection().instanceManager().getConnectedBots().stream()
         .anyMatch(
           b -> {
             if (b.dataManager().localPlayer() == null) {

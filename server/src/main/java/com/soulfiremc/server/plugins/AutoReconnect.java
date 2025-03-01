@@ -19,7 +19,7 @@ package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.attack.AttackTickEvent;
+import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
@@ -28,7 +28,6 @@ import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
@@ -50,45 +49,34 @@ public final class AutoReconnect extends InternalPlugin {
   }
 
   @EventHandler
-  public void onAttackTick(AttackTickEvent event) {
+  public void onAttackBotRemove(AttackBotRemoveEvent event) {
     var instanceManager = event.instanceManager();
-    for (var entries : List.copyOf(instanceManager.botConnections().entrySet())) {
-      var bot = entries.getValue();
-      if (!bot.session().isDisconnected() || bot.explicitlyShutdown()) {
-        continue;
-      }
-
-      var settingsSource = bot.settingsSource();
-      if (!settingsSource.get(AutoReconnectSettings.ENABLED)) {
-        continue;
-      }
-
-      // Ensure this bot is not reconnected twice
-      instanceManager.botConnections().remove(entries.getKey());
-
-      instanceManager
-        .scheduler()
-        .schedule(
-          () -> {
-            var eventLoopGroup = bot.session().eventLoopGroup();
-            if (eventLoopGroup.isShuttingDown()
-              || eventLoopGroup.isShutdown()
-              || eventLoopGroup.isTerminated()) {
-              return;
-            }
-
-            bot.gracefulDisconnect();
-            var newConnection = bot.factory().prepareConnection();
-
-            instanceManager
-              .botConnections()
-              .put(bot.accountProfileId(), newConnection);
-
-            newConnection.connect();
-          },
-          settingsSource.getRandom(AutoReconnectSettings.DELAY).getAsLong(),
-          TimeUnit.SECONDS);
+    var bot = event.botConnection();
+    var settingsSource = bot.settingsSource();
+    if (!settingsSource.get(AutoReconnectSettings.ENABLED)) {
+      return;
     }
+
+    instanceManager
+      .scheduler()
+      .schedule(
+        () -> {
+          var eventLoopGroup = bot.session().eventLoopGroup();
+          if (eventLoopGroup.isShuttingDown()
+            || eventLoopGroup.isShutdown()
+            || eventLoopGroup.isTerminated()) {
+            return;
+          }
+
+          bot.gracefulDisconnect();
+          var newConnection = bot.factory().prepareConnection();
+
+          instanceManager.storeNewBot(newConnection);
+
+          newConnection.connect();
+        },
+        settingsSource.getRandom(AutoReconnectSettings.DELAY).getAsLong(),
+        TimeUnit.SECONDS);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
