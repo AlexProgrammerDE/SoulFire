@@ -942,7 +942,7 @@ public final class POVServer extends InternalPlugin {
 
     private void executeSync(Session clientSession) {
       if (lastClientSettings != null && botConnection.settingsSource().get(POVServerSettings.USE_USER_SETTINGS)) {
-        clientSession.send(lastClientSettings);
+        botConnection.sendPacket(lastClientSettings);
       }
 
       try {
