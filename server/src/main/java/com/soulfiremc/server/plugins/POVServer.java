@@ -839,12 +839,12 @@ public final class POVServer extends InternalPlugin {
 
     @Override
     public void packetSent(Session clientSession, Packet packet) {
-      log.debug("POV -> C: {}", packet.getClass().getSimpleName());
+      log.trace("POV -> C: {}", packet.getClass().getSimpleName());
     }
 
     @Override
     public void packetReceived(Session clientSession, Packet packet) {
-      log.debug("USER -> POV: {}", packet.getClass().getSimpleName());
+      log.trace("USER -> POV: {}", packet.getClass().getSimpleName());
       if (packet instanceof ServerboundClientInformationPacket clientSettings) {
         lastClientSettings = clientSettings;
         return;
@@ -986,7 +986,7 @@ public final class POVServer extends InternalPlugin {
 
       @Override
       public void packetReceived(Session botSession, Packet packet) {
-        log.debug("SERVER -> BOT: {}", packet.getClass().getSimpleName());
+        log.trace("SERVER -> BOT: {}", packet.getClass().getSimpleName());
         if (!enableForwarding) {
           return;
         }
@@ -1020,7 +1020,7 @@ public final class POVServer extends InternalPlugin {
 
       @Override
       public void packetSent(Session botSession, Packet packet) {
-        log.debug("BOT -> SERVER: {}", packet.getClass().getSimpleName());
+        log.trace("BOT -> SERVER: {}", packet.getClass().getSimpleName());
         if (!enableForwarding) {
           return;
         }
