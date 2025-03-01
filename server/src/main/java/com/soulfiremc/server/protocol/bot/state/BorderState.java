@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class BorderState {
+public final class BorderState {
   private double centerX;
   private double centerZ;
   private double oldSize;

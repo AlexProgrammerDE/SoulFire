@@ -20,7 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
 
-public class AbstractWindCharge extends Entity {
+public final class AbstractWindCharge extends Entity {
   public AbstractWindCharge(EntityType entityType, Level level) {
     super(entityType, level);
   }

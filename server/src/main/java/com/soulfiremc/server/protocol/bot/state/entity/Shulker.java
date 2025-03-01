@@ -27,7 +27,7 @@ import com.soulfiremc.server.util.mcstructs.MoverType;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 
-public class Shulker extends Mob {
+public final class Shulker extends Mob {
   private float currentPeekAmountO;
   private float currentPeekAmount;
   private int clientSideTeleportInterpolation;

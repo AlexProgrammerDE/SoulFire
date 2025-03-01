@@ -30,7 +30,7 @@ import reactor.netty.ByteBufFlux;
 import java.net.URI;
 import java.util.UUID;
 
-public class SFSessionService {
+public final class SFSessionService {
   private static final URI MOJANG_JOIN_URI =
     URI.create("https://sessionserver.mojang.com/session/minecraft/join");
 

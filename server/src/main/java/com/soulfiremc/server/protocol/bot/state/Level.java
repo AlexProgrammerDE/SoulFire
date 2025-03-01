@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Getter
-public class Level implements LevelHeightAccessor {
+public final class Level implements LevelHeightAccessor {
   private final TickRateManager tickRateManager = new TickRateManager();
   private final EntityTrackerState entityTracker = new EntityTrackerState();
   private final BotConnection connection;
@@ -53,10 +53,10 @@ public class Level implements LevelHeightAccessor {
   private final boolean debug;
   private final int seaLevel;
   private final LevelData levelData;
-  protected float oRainLevel;
-  protected float rainLevel;
-  protected float oThunderLevel;
-  protected float thunderLevel;
+  private float oRainLevel;
+  private float rainLevel;
+  private float oThunderLevel;
+  private float thunderLevel;
   @Setter
   private BorderState borderState;
   private boolean tickDayTime;
@@ -85,7 +85,7 @@ public class Level implements LevelHeightAccessor {
     prepareWeather();
   }
 
-  protected void prepareWeather() {
+  private void prepareWeather() {
     if (this.levelData.raining()) {
       this.rainLevel = 1.0F;
     }

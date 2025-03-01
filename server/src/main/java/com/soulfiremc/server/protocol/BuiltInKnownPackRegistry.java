@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
-public class BuiltInKnownPackRegistry {
+public final class BuiltInKnownPackRegistry {
   public static final BuiltInKnownPackRegistry INSTANCE = new BuiltInKnownPackRegistry();
   private final List<KnownPack> supportedPacks;
   private final Map<Key, Map<Key, Pair<KnownPack, NbtMap>>> builtInRegistry = new HashMap<>();

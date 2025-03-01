@@ -29,7 +29,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttribut
 import java.util.Map;
 
 @Data
-public class EntityAttributeState {
+public final class EntityAttributeState {
   private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
   private static boolean isNotPartOf(ItemAttributeModifiers.EquipmentSlotGroup itemSlot, EquipmentSlot comparedTo) {

@@ -39,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Slf4j
-public class MultiPlayerGameMode {
+public final class MultiPlayerGameMode {
   private final BotConnection connection;
   private final SessionDataManager dataManager;
   private GameMode localPlayerMode = GameMode.SURVIVAL;

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class TagsState {
+public final class TagsState {
   private static final int[] EMPTY_INT_ARRAY = new int[0];
   private final Map<Key, Map<Key, int[]>> tags = new Object2ObjectOpenHashMap<>();
 

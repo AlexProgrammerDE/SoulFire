@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @Getter
-public class PlayerInventoryContainer extends Container {
+public final class PlayerInventoryContainer extends Container {
   private final ContainerSlot[] mainInventory = getSlots(9, 35);
   private final ContainerSlot[] hotbar = getSlots(36, 44);
 

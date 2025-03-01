@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 @Getter
-public class InstanceManager {
+public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();

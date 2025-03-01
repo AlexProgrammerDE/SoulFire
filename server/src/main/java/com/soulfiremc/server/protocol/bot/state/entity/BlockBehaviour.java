@@ -25,7 +25,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
 @SuppressWarnings("SameParameterValue")
-public class BlockBehaviour {
+public final class BlockBehaviour {
   public static void updateEntityMovementAfterFallOn(BlockType blockType, Entity entity) {
     if (blockType.bedBlock()) {
       updateEntityMovementAfterFallOnBed(entity);

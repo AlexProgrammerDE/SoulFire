@@ -33,7 +33,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-public class IdentifiedKey {
+public final class IdentifiedKey {
   private final Revision revision;
   private final PublicKey publicKey;
   private final byte[] signature;

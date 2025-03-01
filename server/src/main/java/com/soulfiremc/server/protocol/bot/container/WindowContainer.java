@@ -22,7 +22,7 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 
 @Getter
-public class WindowContainer extends Container {
+public final class WindowContainer extends Container {
   /**
    * The slots a normal player inventory on the bottom of a window has. 27 slots for the main
    * inventory and 9 slots for the hotbar.

@@ -25,7 +25,7 @@ import org.cloudburstmc.nbt.NbtMap;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-public class DimensionType implements RegistryValue<DimensionType> {
+public final class DimensionType implements RegistryValue<DimensionType> {
   private final Key key;
   private final int id;
   private final Registry<DimensionType> registry;

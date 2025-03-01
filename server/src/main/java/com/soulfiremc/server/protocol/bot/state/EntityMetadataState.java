@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 @Data
 @RequiredArgsConstructor
-public class EntityMetadataState {
+public final class EntityMetadataState {
   private final Entity entity;
   private final Int2ObjectMap<EntityMetadata<?, ?>> metadataStore = new Int2ObjectOpenHashMap<>();
 

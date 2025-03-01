@@ -39,7 +39,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class ViaServer extends NetworkServer {
+public final class ViaServer extends NetworkServer {
   private final Supplier<Executor> packetTickQueue;
 
   public ViaServer(SocketAddress bindAddress, Supplier<? extends PacketProtocol> protocol) {

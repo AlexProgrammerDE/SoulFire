@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class EntityTrackerState {
+public final class EntityTrackerState {
   private final Int2ObjectMap<Entity> entitiesMap = new Int2ObjectOpenHashMap<>();
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
 

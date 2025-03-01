@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 @Setter
 @Getter
 @ToString
-public class MapDataState {
+public final class MapDataState {
   private final byte[] colorData = new byte[128 * 128];
   private final byte scale;
   private final boolean locked;

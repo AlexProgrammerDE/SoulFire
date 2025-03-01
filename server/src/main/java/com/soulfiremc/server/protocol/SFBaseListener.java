@@ -65,7 +65,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class SFBaseListener extends SessionAdapter {
+public final class SFBaseListener extends SessionAdapter {
   private final BotConnection botConnection;
   private final @NonNull ProtocolState targetState;
 

@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * Lightweight scheduler for async tasks.
  * Used for most of the async tasks in the server, bots and plugins.
  */
-public class SoulFireScheduler implements Executor {
+public final class SoulFireScheduler implements Executor {
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
     .factory());

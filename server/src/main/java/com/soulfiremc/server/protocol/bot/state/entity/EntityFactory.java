@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntityFactory {
+public final class EntityFactory {
   public static Optional<Entity> createEntity(BotConnection connection, EntityType entityType, Level level, UUID uuid) {
     if (entityType == EntityType.PLAYER) {
       return connection.getEntityProfile(uuid).map(

@@ -24,7 +24,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class ControlState {
+public final class ControlState {
   private boolean forward;
   private boolean backward;
   private boolean left;

@@ -22,7 +22,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.ChunkSection;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 
-public class ChunkData {
+public final class ChunkData {
   private static final ReferenceCache<ChunkSection> SECTION_CACHE = new ReferenceCache<>();
   private final LevelHeightAccessor levelHeightAccessor;
   private final ChunkSection[] sections;

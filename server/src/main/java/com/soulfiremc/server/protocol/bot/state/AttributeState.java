@@ -32,7 +32,7 @@ import java.util.Map;
 @Setter
 @Getter
 @AllArgsConstructor
-public class AttributeState {
+public final class AttributeState {
   private final AttributeType type;
   private final Map<Key, AttributeModifier> modifiers = new Object2ObjectOpenHashMap<>();
   private double baseValue;

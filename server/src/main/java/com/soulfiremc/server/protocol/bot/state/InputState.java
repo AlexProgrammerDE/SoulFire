@@ -20,7 +20,7 @@ package com.soulfiremc.server.protocol.bot.state;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class InputState {
+public final class InputState {
   private final ControlState state;
   public KeyPresses keyPresses = KeyPresses.EMPTY;
   public float leftImpulse;

@@ -23,7 +23,7 @@ import net.kyori.adventure.key.Key;
 import org.geysermc.mcprotocollib.network.Flag;
 import org.geysermc.mcprotocollib.network.crypt.EncryptionConfig;
 
-public class SFProtocolConstants {
+public final class SFProtocolConstants {
   public static final Flag<EncryptionConfig> VL_ENCRYPTION_CONFIG = new Flag<>("vl-encryption-config", EncryptionConfig.class);
   public static final Flag<UserConnection> VIA_USER_CONNECTION = new Flag<>("via-user-connection", UserConnection.class);
   public static final Flag<GlobalTrafficShapingHandler> TRAFFIC_HANDLER = new Flag<>("netty-traffic-handler", GlobalTrafficShapingHandler.class);

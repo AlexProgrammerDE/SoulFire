@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 @ToString
-public class GlobalBlockPalette {
+public final class GlobalBlockPalette {
   public static final GlobalBlockPalette INSTANCE;
 
   static {

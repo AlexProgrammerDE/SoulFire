@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
-public class EntityEffectState {
+public final class EntityEffectState {
   private final Map<EffectType, EffectState> effects = new HashMap<>();
 
   public void updateEffect(

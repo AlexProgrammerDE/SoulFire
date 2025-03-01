@@ -79,7 +79,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Getter
-public class SoulFireServer {
+public final class SoulFireServer {
   public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
 
   private final Injector injector =

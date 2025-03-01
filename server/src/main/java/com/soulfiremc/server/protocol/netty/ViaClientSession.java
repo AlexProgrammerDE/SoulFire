@@ -57,7 +57,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ViaClientSession extends ClientNetworkSession {
+public final class ViaClientSession extends ClientNetworkSession {
   @Getter
   private final Logger logger;
   private final SFProxy proxy;

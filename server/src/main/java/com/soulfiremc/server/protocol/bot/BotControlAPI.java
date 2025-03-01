@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class BotControlAPI {
+public final class BotControlAPI {
   private final BotConnection connection;
   private final SecureRandom secureRandom = new SecureRandom();
   private final AtomicReference<ControllingTask> controllingTask = new AtomicReference<>();

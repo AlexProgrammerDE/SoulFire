@@ -31,7 +31,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.HashMap;
 
 @Getter
-public class SFItemStack extends ItemStack {
+public final class SFItemStack extends ItemStack {
   public static final SFItemStack EMPTY = new SFItemStack(ItemType.AIR, 0);
   private final ItemType type;
   @Nullable

@@ -20,7 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.bot.state.Level;
 
-public class AbstractMinecart extends VehicleEntity {
+public final class AbstractMinecart extends VehicleEntity {
   public AbstractMinecart(EntityType entityType, Level level) {
     super(entityType, level);
   }

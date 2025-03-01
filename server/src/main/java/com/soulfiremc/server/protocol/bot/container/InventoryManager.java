@@ -36,7 +36,7 @@ import java.util.Map;
 
 @Data
 @RequiredArgsConstructor
-public class InventoryManager {
+public final class InventoryManager {
   private final Int2ObjectMap<Container> containerData = new Int2ObjectOpenHashMap<>();
   private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   @ToString.Exclude

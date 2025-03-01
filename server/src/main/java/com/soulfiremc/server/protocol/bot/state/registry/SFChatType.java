@@ -50,7 +50,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 @Getter
-public class SFChatType implements RegistryValue<SFChatType> {
+public final class SFChatType implements RegistryValue<SFChatType> {
   private static final TextComponentCodec CODEC = TextComponentCodec.LATEST;
   private static final IStyleSerializer<INbtTag> NBT_STYLE_SERIALIZER = CODEC.getNbtSerializer().getStyleSerializer();
   private static final IStyleSerializer<JsonElement> JSON_STYLE_SERIALIZER = CODEC.getJsonSerializer().getStyleSerializer();

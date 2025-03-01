@@ -17,4 +17,4 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-public class LastSeenMessagesState {}
+public final class LastSeenMessagesState {}

@@ -21,7 +21,7 @@ import com.soulfiremc.server.SoulFireScheduler;
 import io.netty.channel.EventLoopGroup;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 
-public class SFNettyHelper {
+public final class SFNettyHelper {
   private SFNettyHelper() {}
 
   public static EventLoopGroup createEventLoopGroup(String name, SoulFireScheduler.RunnableWrapper runnableWrapper) {

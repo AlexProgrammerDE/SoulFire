@@ -31,7 +31,7 @@ import java.util.Hashtable;
 import java.util.Optional;
 
 @Slf4j
-public class ResolveUtil {
+public final class ResolveUtil {
   public static final int MC_JAVA_DEFAULT_PORT = 25565;
   public static final int MC_BEDROCK_DEFAULT_PORT = 19132;
   private static final DirContext DIR_CONTEXT;

@@ -24,7 +24,7 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 
 @Getter
-public class Biome implements RegistryValue<Biome> {
+public final class Biome implements RegistryValue<Biome> {
   private final Key key;
   private final int id;
   private final Registry<Biome> registry;

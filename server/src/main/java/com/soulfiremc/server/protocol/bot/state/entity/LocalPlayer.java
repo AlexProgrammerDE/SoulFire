@@ -47,10 +47,10 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class LocalPlayer extends AbstractClientPlayer {
+public final class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
   private final InputState input;
-  protected int sprintTriggerTime;
+  private int sprintTriggerTime;
   private int permissionLevel;
   private double lastX = 0;
   private double lastY = 0;
@@ -405,7 +405,7 @@ public class LocalPlayer extends AbstractClientPlayer {
     return false;
   }
 
-  protected boolean isControlledCamera() {
+  private boolean isControlledCamera() {
     return true;
   }
 

@@ -31,7 +31,7 @@ import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 
-public class SFSessionListener extends SessionAdapter {
+public final class SFSessionListener extends SessionAdapter {
   private final BotConnection botConnection;
   private final LambdaManager busInvoker;
 

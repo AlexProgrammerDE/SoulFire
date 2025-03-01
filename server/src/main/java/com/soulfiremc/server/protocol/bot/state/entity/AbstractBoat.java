@@ -24,7 +24,7 @@ import com.soulfiremc.server.util.MathHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata;
 
-public class AbstractBoat extends VehicleEntity {
+public final class AbstractBoat extends VehicleEntity {
   private final float[] paddlePositions = new float[2];
   private float invFriction;
   private float outOfControlTicks;
