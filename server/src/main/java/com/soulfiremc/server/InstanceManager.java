@@ -231,12 +231,15 @@ public final class InstanceManager {
           if (initiator != null) {
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_ATTACK, null);
           }
-          yield scheduler.runAsync(() -> this.attackLifecycle(allBotsConnected.get() ? AttackLifecycle.RUNNING : AttackLifecycle.STARTING));
+
+          this.attackLifecycle(allBotsConnected.get() ? AttackLifecycle.RUNNING : AttackLifecycle.STARTING);
+          yield CompletableFuture.completedFuture(null);
         }
         case STOPPED -> {
           if (initiator != null) {
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
           }
+
           yield scheduler.runAsync(this::start);
         }
       };
@@ -245,7 +248,9 @@ public final class InstanceManager {
           if (initiator != null) {
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
           }
-          yield scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED));
+
+          this.attackLifecycle(AttackLifecycle.PAUSED);
+          yield CompletableFuture.completedFuture(null);
         }
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> {
@@ -253,10 +258,9 @@ public final class InstanceManager {
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
           }
-          yield scheduler.runAsync(() -> {
-            start();
-            this.attackLifecycle(AttackLifecycle.PAUSED);
-          });
+
+          yield scheduler.runAsync(this::start)
+            .thenRunAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED), scheduler);
         }
       };
       case STOPPING, STOPPED -> switch (attackLifecycle()) {
