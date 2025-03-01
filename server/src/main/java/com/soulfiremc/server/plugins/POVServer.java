@@ -104,6 +104,7 @@ import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.Clientbound
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundKeepAlivePacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundPingPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundUpdateTagsPacket;
+import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundClientInformationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundKeepAlivePacket;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundPongPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundFinishConfigurationPacket;
@@ -204,7 +205,7 @@ public final class POVServer extends InternalPlugin {
     return future.orTimeout(30, TimeUnit.SECONDS);
   }
 
-  private static void syncBotAndUser(BotConnection botConnection, Session clientSession) {
+  private static void syncBotToUser(BotConnection botConnection, Session clientSession) {
     Objects.requireNonNull(botConnection);
     var protocol = (MinecraftProtocol) clientSession.getPacketProtocol();
     var dataManager = botConnection.dataManager();
@@ -844,6 +845,7 @@ public final class POVServer extends InternalPlugin {
     private BotConnection botConnection;
     private boolean enableForwarding;
     private Vector3d lastPosition;
+    private ServerboundClientInformationPacket lastClientSettings;
 
     @Override
     public void packetSent(Session clientSession, Packet packet) {
@@ -853,6 +855,11 @@ public final class POVServer extends InternalPlugin {
     @Override
     public void packetReceived(Session clientSession, Packet packet) {
       log.debug("C -> POV: {}", packet.getClass().getSimpleName());
+      if (packet instanceof ServerboundClientInformationPacket clientSettings) {
+        lastClientSettings = clientSettings;
+        return;
+      }
+
       if (botConnection == null) {
         if (packet instanceof ServerboundChatPacket chatPacket) {
           var profile =
@@ -934,10 +941,14 @@ public final class POVServer extends InternalPlugin {
     }
 
     private void executeSync(Session clientSession) {
+      if (lastClientSettings != null && botConnection.settingsSource().get(POVServerSettings.USE_USER_SETTINGS)) {
+        clientSession.send(lastClientSettings);
+      }
+
       try {
-        syncBotAndUser(botConnection, clientSession);
+        syncBotToUser(botConnection, clientSession);
       } catch (Throwable t) {
-        log.error("Failed to sync bot and user", t);
+        log.error("Failed to sync bot to user", t);
         clientSession.send(new ClientboundSystemChatPacket(
           Component.text("Error while syncing you with the bot! Report this error to SoulFire developers.")
             .color(NamedTextColor.RED),
@@ -1056,6 +1067,14 @@ public final class POVServer extends InternalPlugin {
         .minValue(1)
         .maxValue(65535)
         .thousandSeparator(false)
+        .build();
+    public static final BooleanProperty USE_USER_SETTINGS =
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("use-user-settings")
+        .uiName("Use user settings")
+        .description("Whether the Minecraft client of the POV User should be applied on the bot. Otherwise the user will use the bot's settings.")
+        .defaultValue(true)
         .build();
   }
 }
