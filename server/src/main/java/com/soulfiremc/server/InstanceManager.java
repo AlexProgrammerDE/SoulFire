@@ -78,7 +78,7 @@ public final class InstanceManager {
   private final SessionFactory sessionFactory;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final CachedLazyObject<String> friendlyNameCache;
-  private AttackLifecycle localAttackLifecycle = AttackLifecycle.STOPPED;
+  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
@@ -443,7 +443,7 @@ public final class InstanceManager {
   }
 
   private void attackLifecycle(AttackLifecycle attackLifecycle) {
-    localAttackLifecycle = attackLifecycle;
+    this.attackLifecycle = attackLifecycle;
     sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
       if (instanceEntity == null) {
@@ -454,10 +454,6 @@ public final class InstanceManager {
 
       session.merge(instanceEntity);
     });
-  }
-
-  private AttackLifecycle attackLifecycle() {
-    return localAttackLifecycle;
   }
 
   public CompletableFuture<?> stopAttackSession() {

@@ -23,6 +23,7 @@ import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -61,10 +62,16 @@ public final class AutoReconnect extends InternalPlugin {
       .scheduler()
       .schedule(
         () -> {
+          TimeUtil.waitCondition(() -> instanceManager.attackLifecycle().isPaused());
+
           var eventLoopGroup = bot.session().eventLoopGroup();
           if (eventLoopGroup.isShuttingDown()
             || eventLoopGroup.isShutdown()
             || eventLoopGroup.isTerminated()) {
+            return;
+          }
+
+          if (instanceManager.attackLifecycle().isStoppedOrStopping()) {
             return;
           }
 
