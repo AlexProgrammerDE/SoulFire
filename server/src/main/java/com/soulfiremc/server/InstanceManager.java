@@ -58,6 +58,7 @@ import org.slf4j.MDC;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,6 +79,7 @@ public final class InstanceManager {
   private final SessionFactory sessionFactory;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final CachedLazyObject<String> friendlyNameCache;
+  private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
@@ -229,7 +231,7 @@ public final class InstanceManager {
           if (initiator != null) {
             addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_ATTACK, null);
           }
-          yield scheduler.runAsync(() -> this.attackLifecycle(AttackLifecycle.RUNNING));
+          yield scheduler.runAsync(() -> this.attackLifecycle(allBotsConnected.get() ? AttackLifecycle.RUNNING : AttackLifecycle.STARTING));
         }
         case STOPPED -> {
           if (initiator != null) {
@@ -373,6 +375,7 @@ public final class InstanceManager {
     var connectSemaphore = new Semaphore(settingsSource.get(BotSettings.CONCURRENT_CONNECTS));
     scheduler.schedule(
       () -> {
+        allBotsConnected.set(false);
         while (!factories.isEmpty()) {
           var factory = factories.poll();
           if (factory == null) {
@@ -413,6 +416,7 @@ public final class InstanceManager {
             TimeUnit.MILLISECONDS);
         }
 
+        allBotsConnected.set(true);
         if (this.attackLifecycle() == AttackLifecycle.STARTING) {
           this.attackLifecycle(AttackLifecycle.RUNNING);
         }
@@ -458,6 +462,7 @@ public final class InstanceManager {
 
   public CompletableFuture<?> stopAttackSession() {
     return scheduler.runAsync(() -> {
+      allBotsConnected.set(false);
       logger.info("Disconnecting bots");
       do {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
