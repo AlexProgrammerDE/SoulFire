@@ -366,13 +366,9 @@ public final class InstanceManager {
 
     var usedProxies = proxies.stream().filter(ProxyData::hasBots).count();
     if (usedProxies == 0) {
-      logger.info("Starting attack at {} with {} bots", address, factories.size());
+      logger.info("Starting attack at server with {} bots", factories.size());
     } else {
-      logger.info(
-        "Starting attack at {} with {} bots and {} active proxies",
-        address,
-        factories.size(),
-        usedProxies);
+      logger.info("Starting attack at {} with server bots and {} active proxies", factories.size(), usedProxies);
     }
 
     SoulFireAPI.postEvent(new AttackStartEvent(this));
