@@ -19,6 +19,6 @@ package com.soulfiremc.test.utils;
 
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 
-public class TestPathConstraint {
+public final class TestPathConstraint {
   public static final PathConstraint INSTANCE = new PathConstraint(null, TestLevelHeightAccessor.INSTANCE);
 }

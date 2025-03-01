@@ -25,7 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class AttributesJavaGenerator implements IDataGenerator {
+public final class AttributesJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/AttributeType.java";

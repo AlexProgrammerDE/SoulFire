@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data.block;
 
 @SuppressWarnings("unused")
-public class BlockProperties {
+public final class BlockProperties {
   //@formatter:off
   // VALUES REPLACE
   //@formatter:on

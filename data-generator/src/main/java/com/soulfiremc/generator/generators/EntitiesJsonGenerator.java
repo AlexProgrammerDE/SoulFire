@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 @Slf4j
-public class EntitiesJsonGenerator implements IDataGenerator {
+public final class EntitiesJsonGenerator implements IDataGenerator {
 
   @SneakyThrows
   public static JsonObject generateEntity(EntityType<?> entityType) {

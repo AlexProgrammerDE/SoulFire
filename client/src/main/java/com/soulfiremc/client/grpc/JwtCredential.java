@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.concurrent.Executor;
 
 @RequiredArgsConstructor
-public class JwtCredential extends CallCredentials {
+public final class JwtCredential extends CallCredentials {
   private final String jwt;
 
   @Override

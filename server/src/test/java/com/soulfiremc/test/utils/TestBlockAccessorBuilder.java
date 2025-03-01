@@ -25,7 +25,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
 
-public class TestBlockAccessorBuilder {
+public final class TestBlockAccessorBuilder {
   private final Map<SFVec3i, BlockState> blocks = new Object2ObjectOpenHashMap<>();
   private final BlockState defaultBlock;
   private int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;

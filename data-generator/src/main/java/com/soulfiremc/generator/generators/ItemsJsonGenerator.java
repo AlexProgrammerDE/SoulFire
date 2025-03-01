@@ -29,7 +29,7 @@ import net.minecraft.world.item.Item;
 import java.util.Map;
 import java.util.Objects;
 
-public class ItemsJsonGenerator implements IDataGenerator {
+public final class ItemsJsonGenerator implements IDataGenerator {
   public static JsonObject generateItem(Item item) {
     var itemDesc = new JsonObject();
 

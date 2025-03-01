@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.minecraft.tags.*;
 
 @Slf4j
-public class TagsDataGenerator {
+public final class TagsDataGenerator {
   private TagsDataGenerator() {}
 
   public static class BlockTagsDataGenerator implements IDataGenerator {

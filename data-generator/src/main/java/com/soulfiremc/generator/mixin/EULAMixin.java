@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Eula.class)
-public class EULAMixin {
+public final class EULAMixin {
   @Inject(method = "hasAgreedToEULA()Z", at = @At("TAIL"), cancellable = true)
   public void init(CallbackInfoReturnable<Boolean> cir) {
     cir.setReturnValue(true);

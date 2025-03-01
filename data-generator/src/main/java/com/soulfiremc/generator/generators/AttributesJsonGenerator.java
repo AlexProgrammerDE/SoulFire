@@ -25,7 +25,7 @@ import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 
 import java.util.Objects;
 
-public class AttributesJsonGenerator implements IDataGenerator {
+public final class AttributesJsonGenerator implements IDataGenerator {
   public static JsonObject generateAttribute(Attribute attribute) {
     var attributeDesc = new JsonObject();
 

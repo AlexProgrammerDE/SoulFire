@@ -39,7 +39,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-public class PathfindingTest {
+public final class PathfindingTest {
   @Test
   public void testPathfindingStraight() {
     var accessor = new TestBlockAccessorBuilder();

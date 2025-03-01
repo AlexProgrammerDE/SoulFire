@@ -35,7 +35,7 @@ import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
 @Slf4j
-public class WorldExporterGenerator implements IDataGenerator {
+public final class WorldExporterGenerator implements IDataGenerator {
   private static final int CHUNK_X_MIN = -4;
   private static final int CHUNK_X_MAX = 4;
   private static final int CHUNK_Z_MIN = -4;

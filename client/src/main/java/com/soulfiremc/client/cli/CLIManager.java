@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Getter
-public class CLIManager {
+public final class CLIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
   private final Injector injector =

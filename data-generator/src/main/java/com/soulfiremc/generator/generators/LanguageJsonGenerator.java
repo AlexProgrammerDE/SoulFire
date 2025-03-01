@@ -19,7 +19,7 @@ package com.soulfiremc.generator.generators;
 
 import com.soulfiremc.generator.util.ResourceHelper;
 
-public class LanguageJsonGenerator implements IDataGenerator {
+public final class LanguageJsonGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "data/en_us.json";

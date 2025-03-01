@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.properties.*;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class BlockPropertiesJavaGenerator implements IDataGenerator {
+public final class BlockPropertiesJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/block/BlockProperties.java";

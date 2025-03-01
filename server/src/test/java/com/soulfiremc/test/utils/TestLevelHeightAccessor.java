@@ -19,7 +19,7 @@ package com.soulfiremc.test.utils;
 
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 
-public class TestLevelHeightAccessor implements LevelHeightAccessor {
+public final class TestLevelHeightAccessor implements LevelHeightAccessor {
   public static final TestLevelHeightAccessor INSTANCE = new TestLevelHeightAccessor();
 
   @Override

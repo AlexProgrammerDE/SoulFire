@@ -30,7 +30,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 @Slf4j
-public class DataGenerators {
+public final class DataGenerators {
   private static final List<IDataGenerator> GENERATORS =
     List.of(
       new RegistryKeysJavaGenerator(),

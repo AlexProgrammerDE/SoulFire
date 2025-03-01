@@ -25,7 +25,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 
 @Slf4j
-public class RegistryKeysJavaGenerator implements IDataGenerator {
+public final class RegistryKeysJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/RegistryKeys.java";

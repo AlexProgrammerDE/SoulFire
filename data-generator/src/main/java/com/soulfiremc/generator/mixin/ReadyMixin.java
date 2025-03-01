@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.nio.file.Path;
 
 @Mixin(DedicatedServer.class)
-public class ReadyMixin {
+public final class ReadyMixin {
   @Final
   @Shadow
   static Logger LOGGER;

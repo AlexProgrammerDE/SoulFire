@@ -22,7 +22,7 @@ import com.soulfiremc.generator.util.ResourceHelper;
 import net.lenni0451.reflect.stream.RStream;
 import net.minecraft.world.level.material.MapColor;
 
-public class MapColorJavaGenerator implements IDataGenerator {
+public final class MapColorJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/MapColor.java";

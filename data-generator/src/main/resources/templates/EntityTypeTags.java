@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class EntityTypeTags {
+public final class EntityTypeTags {
   public static final List<TagKey<EntityType>> TAGS = new ArrayList<>();
 
   //@formatter:off

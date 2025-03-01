@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class BlocksJsonGenerator implements IDataGenerator {
+public final class BlocksJsonGenerator implements IDataGenerator {
   private static List<LootPoolEntryContainer> fromComposite(CompositeEntryBase compositeEntryBase) {
     return RStream.of(compositeEntryBase).withSuper().fields().by("children").get();
   }

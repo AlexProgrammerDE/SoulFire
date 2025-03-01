@@ -24,7 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
-public class ItemsJavaGenerator implements IDataGenerator {
+public final class ItemsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/ItemType.java";

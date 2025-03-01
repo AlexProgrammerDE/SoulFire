@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 @Slf4j
-public class DefaultTagsDataGenerator implements IDataGenerator {
+public final class DefaultTagsDataGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "data/default_tags.json.zip";

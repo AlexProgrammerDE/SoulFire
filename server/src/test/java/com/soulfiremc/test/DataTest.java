@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DataTest {
+public final class DataTest {
   @Test
   public void checkBlockStateTypeCorrect() {
     var airBlockState = BlockState.forDefaultBlockType(BlockType.AIR);

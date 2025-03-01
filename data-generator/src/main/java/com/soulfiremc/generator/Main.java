@@ -19,7 +19,7 @@ package com.soulfiremc.generator;
 
 import net.fabricmc.api.ModInitializer;
 
-public class Main implements ModInitializer {
+public final class Main implements ModInitializer {
   @Override
   public void onInitialize() {
     // Entity.class;

@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Base64;
 import java.util.function.Consumer;
 
-public class MCHelper {
+public final class MCHelper {
   private MCHelper() {}
 
   public static ServerLevel getLevel() {

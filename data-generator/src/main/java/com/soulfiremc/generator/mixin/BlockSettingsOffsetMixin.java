@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockBehaviour.Properties.class)
-public class BlockSettingsOffsetMixin implements BlockSettingsAccessor {
+public final class BlockSettingsOffsetMixin implements BlockSettingsAccessor {
   @Unique
   private BlockBehaviour.OffsetType offsetType;
 

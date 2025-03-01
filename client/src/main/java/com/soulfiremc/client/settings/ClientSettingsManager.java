@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientSettingsManager {
+public final class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
     Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
   private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();

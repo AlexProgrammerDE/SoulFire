@@ -28,7 +28,7 @@ import org.pf4j.DefaultPluginManager;
 import java.nio.file.Path;
 import java.time.Instant;
 
-public class LoadTest {
+public final class LoadTest {
   @TempDir
   public Path tempDir;
 

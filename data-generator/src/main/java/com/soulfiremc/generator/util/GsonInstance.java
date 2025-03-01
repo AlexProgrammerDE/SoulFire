@@ -19,6 +19,6 @@ package com.soulfiremc.generator.util;
 
 import com.google.gson.Gson;
 
-public class GsonInstance {
+public final class GsonInstance {
   public static final Gson GSON = new Gson();
 }

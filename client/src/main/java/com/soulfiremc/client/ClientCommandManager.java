@@ -31,7 +31,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ClientCommandManager {
+public final class ClientCommandManager {
   private final RPCClient rpcClient;
   private final CLIManager cliManager;
 

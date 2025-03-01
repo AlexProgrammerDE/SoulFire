@@ -24,7 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-public class FluidsJavaGenerator implements IDataGenerator {
+public final class FluidsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/FluidType.java";

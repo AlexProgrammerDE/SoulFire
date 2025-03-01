@@ -32,7 +32,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 @Slf4j
-public class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
+public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
   private SoulFireCLIBootstrap() {
     super();
   }

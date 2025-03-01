@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class PacketsGenerator {
+public final class PacketsGenerator {
   private static final Set<Class<? extends Packet<?>>> PACKETS = Set.of(
     net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket.class,
     net.minecraft.network.protocol.common.ClientboundDisconnectPacket.class,

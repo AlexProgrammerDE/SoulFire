@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(DataPackConfig.class)
-public class DataPackConfigMixin {
+public final class DataPackConfigMixin {
   @Inject(method = "getEnabled", at = @At("HEAD"), cancellable = true)
   public void getEnabled(CallbackInfoReturnable<List<String>> cir) {
     cir.setReturnValue(FeatureFlags.REGISTRY.toNames(FeatureFlags.REGISTRY.allFlags()).stream().map(ResourceLocation::getPath).toList());

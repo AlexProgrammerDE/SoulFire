@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-public class NamedEntityDataJavaGenerator implements IDataGenerator {
+public final class NamedEntityDataJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/NamedEntityData.java";

@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 @Slf4j
-public class DefaultPacksDataGenerator implements IDataGenerator {
+public final class DefaultPacksDataGenerator implements IDataGenerator {
   public static void packRegistries(
     FriendlyByteBuf friendlyByteBuf,
     DynamicOps<Tag> ops,

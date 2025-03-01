@@ -22,7 +22,7 @@ import com.soulfiremc.server.util.SFPathConstants;
 
 import java.nio.file.Path;
 
-public class SoulFireCLILauncher extends SoulFireAbstractLauncher {
+public final class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   public static void main(String[] args) {
     new SoulFireCLILauncher().run(args);
   }

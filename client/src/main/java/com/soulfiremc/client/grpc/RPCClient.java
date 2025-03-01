@@ -35,7 +35,7 @@ import java.util.List;
 
 @Slf4j
 @Getter
-public class RPCClient {
+public final class RPCClient {
   private final List<Context.CancellableContext> contexts = new ArrayList<>();
   private final LogsServiceGrpc.LogsServiceBlockingStub logStubBlocking;
   private final CommandServiceGrpc.CommandServiceStub commandStub;

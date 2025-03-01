@@ -35,7 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class BlockShapesDataGenerator {
+public final class BlockShapesDataGenerator {
   private static final BlockShapesCache BLOCK_SHAPES_CACHE = new BlockShapesCache();
 
   private static boolean isAllTheSame(IntList list) {

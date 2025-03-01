@@ -20,7 +20,7 @@ package com.soulfiremc.generator.util;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class ResourceHelper {
+public final class ResourceHelper {
   private ResourceHelper() {}
 
   public static String getResourceAsString(String path) {

@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
   description = BuildData.DESCRIPTION,
   sortOptions = false,
   showAtFileInUsageHelp = true)
-public class SFCommandDefinition implements Callable<Integer> {
+public final class SFCommandDefinition implements Callable<Integer> {
   private final CLIManager cliManager;
   @Setter
   private CommandLine commandLine;

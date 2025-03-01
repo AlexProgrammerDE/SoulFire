@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data;
 
 @SuppressWarnings("unused")
-public class RegistryKeys {
+public final class RegistryKeys {
   //@formatter:off
   // VALUES REPLACE
   //@formatter:on

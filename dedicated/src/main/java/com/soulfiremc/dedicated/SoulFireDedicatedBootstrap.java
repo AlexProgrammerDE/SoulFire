@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.file.Path;
 
 @Slf4j
-public class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
+public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
   private SoulFireDedicatedBootstrap() {
     super();
   }

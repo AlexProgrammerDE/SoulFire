@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class FieldGenerationHelper {
+public final class FieldGenerationHelper {
   public static <F> Stream<FieldNameValuePair<F>> mapFields(Class<?> clazz, Class<F> fieldClass) {
     return mapFields(clazz, fieldClass, Function.identity());
   }

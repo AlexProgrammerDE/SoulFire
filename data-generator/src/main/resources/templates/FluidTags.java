@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class FluidTags {
+public final class FluidTags {
   public static final List<TagKey<FluidType>> TAGS = new ArrayList<>();
 
   //@formatter:off

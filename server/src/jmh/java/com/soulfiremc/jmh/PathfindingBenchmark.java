@@ -45,7 +45,7 @@ import java.util.zip.GZIPInputStream;
 
 @Slf4j
 @State(Scope.Benchmark)
-public class PathfindingBenchmark {
+public final class PathfindingBenchmark {
   private RouteFinder routeFinder;
   private NodeState initialState;
 

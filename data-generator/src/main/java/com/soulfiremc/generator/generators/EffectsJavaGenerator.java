@@ -25,7 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 
-public class EffectsJavaGenerator implements IDataGenerator {
+public final class EffectsJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/EffectType.java";

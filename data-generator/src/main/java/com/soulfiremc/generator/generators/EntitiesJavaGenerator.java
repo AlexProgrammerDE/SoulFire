@@ -23,7 +23,7 @@ import com.soulfiremc.generator.util.ResourceHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 
-public class EntitiesJavaGenerator implements IDataGenerator {
+public final class EntitiesJavaGenerator implements IDataGenerator {
   @Override
   public String getDataName() {
     return "java/EntityType.java";
