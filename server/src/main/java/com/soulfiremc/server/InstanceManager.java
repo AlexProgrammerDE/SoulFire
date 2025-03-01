@@ -429,11 +429,11 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> deleteInstance() {
-    return stopAttackPermanently().thenRun(scheduler::shutdown);
+    return stopAttackPermanently().thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
   }
 
   public CompletableFuture<?> shutdownHook() {
-    return stopAttackSession().thenRun(scheduler::shutdown);
+    return stopAttackSession().thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
   }
 
   public CompletableFuture<?> stopAttackPermanently() {
