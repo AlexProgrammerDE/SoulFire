@@ -900,24 +900,15 @@ public final class POVServer extends InternalPlugin {
               clientEntity.setPos(posRot.getX(), posRot.getY(), posRot.getZ());
               clientEntity.setYRot(posRot.getYaw());
               clientEntity.setXRot(posRot.getPitch());
-
-              // MC Client -> Server of the bot
-              botConnection.session().send(packet);
             }
             case ServerboundMovePlayerPosPacket pos -> {
               lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
 
               clientEntity.setPos(pos.getX(), pos.getY(), pos.getZ());
-
-              // MC Client -> Server of the bot
-              botConnection.session().send(packet);
             }
             case ServerboundMovePlayerRotPacket rot -> {
               clientEntity.setYRot(rot.getYaw());
               clientEntity.setXRot(rot.getPitch());
-
-              // MC Client -> Server of the bot
-              botConnection.session().send(packet);
             }
             case ServerboundAcceptTeleportationPacket teleportationPacket -> {
               // This was a sync teleport, the server should not know about it

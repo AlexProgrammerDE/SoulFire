@@ -61,7 +61,6 @@ public final class LocalPlayer extends AbstractClientPlayer {
   private boolean lastHorizontalCollision = false;
   private boolean wasShiftKeyDown;
   private boolean wasSprinting;
-  private boolean noPhysics = false;
   private boolean crouching;
   private int positionReminder = 0;
   private boolean wasFallFlying;
