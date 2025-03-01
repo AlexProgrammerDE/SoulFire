@@ -24,7 +24,7 @@ import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.Encrypti
 
 import java.util.Objects;
 
-public class SFViaEncryptionProvider extends EncryptionProvider {
+public final class SFViaEncryptionProvider extends EncryptionProvider {
   @Override
   public void enableDecryption(UserConnection user) {
     var session = Objects.requireNonNull(user.get(StorableSession.class)).session();

@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(ViaBedrockConfig.class)
-public class ViaBedrockConfigMixin {
+public final class ViaBedrockConfigMixin {
   @Overwrite
   public boolean shouldTranslateResourcePacks() {
     return false;

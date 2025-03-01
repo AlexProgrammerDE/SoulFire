@@ -19,6 +19,6 @@ package com.soulfiremc.launcher;
 
 import java.util.function.Consumer;
 
-public class SoulFireClassloaderConstants {
+public final class SoulFireClassloaderConstants {
   public static Consumer<ClassLoader> CHILD_CLASSLOADER_CONSUMER;
 }

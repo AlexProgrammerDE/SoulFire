@@ -28,7 +28,7 @@ import org.geysermc.mcprotocollib.network.NetworkConstants;
 import javax.crypto.SecretKey;
 import java.util.Objects;
 
-public class SFViaNettyPipelineProvider extends NettyPipelineProvider {
+public final class SFViaNettyPipelineProvider extends NettyPipelineProvider {
   @Override
   public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
     var channel = Objects.requireNonNull(user.getChannel());

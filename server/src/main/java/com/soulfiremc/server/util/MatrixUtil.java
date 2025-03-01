@@ -22,7 +22,7 @@ import com.soulfiremc.server.util.structs.Triple;
 import org.joml.*;
 import org.joml.Math;
 
-public class MatrixUtil {
+public final class MatrixUtil {
   private static final float G = 3.0F + 2.0F * org.joml.Math.sqrt(2.0F);
   private static final GivensParameters PI_4 = GivensParameters.fromPositiveAngle((float) (java.lang.Math.PI / 4));
 

@@ -37,7 +37,7 @@ import org.pf4j.Extension;
 import java.util.ArrayList;
 
 @Extension
-public class ClientSettings extends InternalPlugin {
+public final class ClientSettings extends InternalPlugin {
   public ClientSettings() {
     super(new PluginInfo(
       "client-settings",

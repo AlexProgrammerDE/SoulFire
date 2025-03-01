@@ -43,7 +43,7 @@ import java.util.function.Function;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class WalkCommand {
+public final class WalkCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("walk")

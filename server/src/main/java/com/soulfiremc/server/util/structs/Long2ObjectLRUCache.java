@@ -21,7 +21,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 
 import java.util.function.BiFunction;
 
-public class Long2ObjectLRUCache<V> {
+public final class Long2ObjectLRUCache<V> {
   private final Long2ObjectLinkedOpenHashMap<V> cache;
   private final int capacity;
 

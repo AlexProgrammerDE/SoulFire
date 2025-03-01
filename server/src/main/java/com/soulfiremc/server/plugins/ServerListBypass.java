@@ -33,7 +33,7 @@ import org.pf4j.Extension;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class ServerListBypass extends InternalPlugin {
+public final class ServerListBypass extends InternalPlugin {
   public ServerListBypass() {
     super(new PluginInfo(
       "server-list-bypass",

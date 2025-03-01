@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class DynamicXYZArgumentType implements ArgumentType<DynamicXYZArgumentType.XYZLocationMapper> {
+public final class DynamicXYZArgumentType implements ArgumentType<DynamicXYZArgumentType.XYZLocationMapper> {
   @Override
   public XYZLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
     var x = ArgumentTypeHelper.readAxis(stringReader);

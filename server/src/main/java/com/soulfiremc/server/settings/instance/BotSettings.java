@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class BotSettings implements SettingsObject {
+public final class BotSettings implements SettingsObject {
   public static final Function<String, ProtocolVersion> PROTOCOL_VERSION_PARSER =
     version -> {
       var split = version.split("\\|");

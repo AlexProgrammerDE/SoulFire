@@ -22,7 +22,7 @@ import com.soulfiremc.server.data.IDValue;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class IDMap<K extends IDValue, V> {
+public final class IDMap<K extends IDValue, V> {
   private final Object[] values;
 
   public IDMap(Collection<K> collection, Function<K, V> valueFunction) {

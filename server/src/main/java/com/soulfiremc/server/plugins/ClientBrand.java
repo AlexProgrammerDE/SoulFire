@@ -38,7 +38,7 @@ import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundL
 import org.pf4j.Extension;
 
 @Extension
-public class ClientBrand extends InternalPlugin {
+public final class ClientBrand extends InternalPlugin {
   public ClientBrand() {
     super(new PluginInfo(
       "client-brand",

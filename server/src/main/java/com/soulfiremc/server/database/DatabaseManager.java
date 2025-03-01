@@ -24,7 +24,7 @@ import org.hibernate.cfg.Configuration;
 
 import java.nio.file.Path;
 
-public class DatabaseManager {
+public final class DatabaseManager {
   public static SessionFactory forSqlite(Path dbFile) {
     try {
       var configuration = new Configuration();

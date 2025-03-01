@@ -23,7 +23,7 @@ import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 
-public class SFVersionConstants {
+public final class SFVersionConstants {
   public static final ProtocolVersion CURRENT_PROTOCOL_VERSION =
     ProtocolVersion.getProtocol(MinecraftCodec.CODEC.getProtocolVersion());
 

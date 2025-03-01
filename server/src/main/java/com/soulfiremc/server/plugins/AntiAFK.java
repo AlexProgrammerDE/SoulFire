@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Extension
-public class AntiAFK extends InternalPlugin {
+public final class AntiAFK extends InternalPlugin {
   public AntiAFK() {
     super(new PluginInfo(
       "anti-afk",

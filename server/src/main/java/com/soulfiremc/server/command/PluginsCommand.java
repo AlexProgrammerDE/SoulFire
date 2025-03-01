@@ -24,7 +24,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
-public class PluginsCommand {
+public final class PluginsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("plugins")

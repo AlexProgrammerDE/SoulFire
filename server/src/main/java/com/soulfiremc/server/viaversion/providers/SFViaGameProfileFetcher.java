@@ -22,7 +22,7 @@ import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfi
 
 import java.util.UUID;
 
-public class SFViaGameProfileFetcher extends GameProfileFetcher {
+public final class SFViaGameProfileFetcher extends GameProfileFetcher {
   @Override
   public UUID loadMojangUUID(String playerName) {
     throw new UnsupportedOperationException("This is not supported!");

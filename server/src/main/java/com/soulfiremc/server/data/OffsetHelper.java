@@ -21,7 +21,7 @@ import com.soulfiremc.server.util.MathHelper;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public class OffsetHelper {
+public final class OffsetHelper {
   public static Vector3d getOffsetForBlock(BlockType blockType, Vector3i block) {
     var offsetData = blockType.offsetData();
     if (offsetData == null) {

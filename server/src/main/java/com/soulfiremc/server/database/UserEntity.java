@@ -32,7 +32,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "users")
-public class UserEntity {
+public final class UserEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

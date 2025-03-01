@@ -30,7 +30,7 @@ import org.geysermc.mcprotocollib.protocol.packet.handshake.serverbound.ClientIn
 import org.pf4j.Extension;
 
 @Extension
-public class FakeVirtualHost extends InternalPlugin {
+public final class FakeVirtualHost extends InternalPlugin {
   public FakeVirtualHost() {
     super(new PluginInfo(
       "fake-virtual-host",

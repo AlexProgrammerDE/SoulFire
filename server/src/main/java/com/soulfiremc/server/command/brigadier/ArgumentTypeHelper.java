@@ -27,7 +27,7 @@ import com.soulfiremc.server.util.UUIDHelper;
 
 import java.util.function.Predicate;
 
-public class ArgumentTypeHelper {
+public final class ArgumentTypeHelper {
   private ArgumentTypeHelper() {
   }
 

@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-public class SFContextClassLoader extends URLClassLoader {
+public final class SFContextClassLoader extends URLClassLoader {
   // Prevent infinite loop when plugins are looking for classes inside this class loader
   private static final ThreadLocal<Boolean> PREVENT_LOOP = ThreadLocal.withInitial(() -> false);
   private final List<ClassLoader> childClassLoaders = new ArrayList<>();

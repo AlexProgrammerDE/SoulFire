@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
+public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
 

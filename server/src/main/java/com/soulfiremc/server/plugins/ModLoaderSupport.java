@@ -45,7 +45,7 @@ import java.util.List;
 
 @Slf4j
 @Extension(ordinal = 1)
-public class ModLoaderSupport extends InternalPlugin {
+public final class ModLoaderSupport extends InternalPlugin {
   private static final Key FML_HS_KEY = Key.key("fml:hs");
   private static final Key FML_FML_KEY = Key.key("fml:fml");
   private static final Key FML_MP_KEY = Key.key("fml:mp");

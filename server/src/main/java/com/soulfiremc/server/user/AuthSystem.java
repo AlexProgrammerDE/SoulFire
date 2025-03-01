@@ -42,7 +42,7 @@ import java.util.UUID;
 
 @Getter
 @Slf4j
-public class AuthSystem {
+public final class AuthSystem {
   public static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
   private static final String ROOT_USERNAME = "root";
   private final LogServiceImpl logService;

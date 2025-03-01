@@ -36,7 +36,7 @@ import java.util.List;
  * Holds and configures all server-side text commands of SoulFire itself.
  */
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ServerCommandManager {
+public final class ServerCommandManager {
   @Getter
   private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
   private final SoulFireServer soulFireServer;

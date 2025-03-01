@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A class that only allows a call to be made once in a given interval.
  */
-public class CallLimiter implements Runnable {
+public final class CallLimiter implements Runnable {
   private final Runnable c;
   private final long interval;
   private final boolean skipInitial;

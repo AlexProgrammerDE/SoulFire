@@ -20,7 +20,7 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.server.data.*;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-public class SFBlockHelpers {
+public final class SFBlockHelpers {
   // A player can jump up 1.25 blocks
   private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
 

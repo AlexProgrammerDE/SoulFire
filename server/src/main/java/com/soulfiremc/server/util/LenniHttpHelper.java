@@ -42,7 +42,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class LenniHttpHelper {
+public final class LenniHttpHelper {
   private LenniHttpHelper() {}
 
   public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {

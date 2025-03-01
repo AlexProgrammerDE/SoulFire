@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-public class SFUpdateChecker {
+public final class SFUpdateChecker {
   private static final URI UPDATE_URL =
     URI.create("https://api.github.com/repos/AlexProgrammerDE/SoulFire/releases/latest");
   private static SFUpdateChecker instance;

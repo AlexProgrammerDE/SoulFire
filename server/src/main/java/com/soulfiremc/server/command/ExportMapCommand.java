@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class ExportMapCommand {
+public final class ExportMapCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("export-map")

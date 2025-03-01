@@ -22,7 +22,7 @@ import com.soulfiremc.server.data.IDValue;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class IDBooleanMap<K extends IDValue> {
+public final class IDBooleanMap<K extends IDValue> {
   private final boolean[] values;
 
   public IDBooleanMap(Collection<K> collection, Function<K, Boolean> valueFunction) {

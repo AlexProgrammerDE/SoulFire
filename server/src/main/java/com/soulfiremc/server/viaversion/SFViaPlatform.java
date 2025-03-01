@@ -22,7 +22,7 @@ import com.viaversion.vialoader.impl.platform.ViaVersionPlatformImpl;
 
 import java.nio.file.Path;
 
-public class SFViaPlatform extends ViaVersionPlatformImpl {
+public final class SFViaPlatform extends ViaVersionPlatformImpl {
   public SFViaPlatform(Path rootFolder) {
     super(rootFolder.toFile());
   }

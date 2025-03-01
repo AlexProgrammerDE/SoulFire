@@ -17,6 +17,6 @@
  */
 package com.soulfiremc.server.util.structs;
 
-public class IntReference {
+public final class IntReference {
   public int value;
 }

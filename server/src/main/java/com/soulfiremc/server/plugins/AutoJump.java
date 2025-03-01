@@ -31,7 +31,7 @@ import org.pf4j.Extension;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoJump extends InternalPlugin {
+public final class AutoJump extends InternalPlugin {
   public AutoJump() {
     super(new PluginInfo(
       "auto-jump",

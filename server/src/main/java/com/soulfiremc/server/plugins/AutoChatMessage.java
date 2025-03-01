@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoChatMessage extends InternalPlugin {
+public final class AutoChatMessage extends InternalPlugin {
   public AutoChatMessage() {
     super(new PluginInfo(
       "auto-chat-message",

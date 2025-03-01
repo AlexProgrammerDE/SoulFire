@@ -23,7 +23,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
-public class AccountSettings implements SettingsObject {
+public final class AccountSettings implements SettingsObject {
   private static final String NAMESPACE = "account";
   public static final StringProperty NAME_FORMAT =
     ImmutableStringProperty.builder()

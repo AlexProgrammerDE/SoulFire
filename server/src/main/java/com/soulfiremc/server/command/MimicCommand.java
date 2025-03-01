@@ -25,7 +25,7 @@ import com.soulfiremc.server.protocol.bot.ControllingTask;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class MimicCommand {
+public final class MimicCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("mimic")

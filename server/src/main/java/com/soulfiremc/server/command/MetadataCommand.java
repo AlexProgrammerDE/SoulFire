@@ -24,7 +24,7 @@ import com.soulfiremc.server.command.brigadier.ArgumentTypeHelper;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class MetadataCommand {
+public final class MetadataCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("metadata")

@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data;
 
 @SuppressWarnings("unused")
-public class RegistryKeys {
+public final class RegistryKeys {
   //@formatter:off
   public static final ResourceKey<?> ACTIVITY = ResourceKey.key("minecraft:activity");
   public static final ResourceKey<?> ATTRIBUTE = ResourceKey.key("minecraft:attribute");

@@ -25,7 +25,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
-public class PrintPluginsCommand {
+public final class PrintPluginsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-plugins")

@@ -26,7 +26,7 @@ import com.soulfiremc.server.spark.SFSparkPlugin;
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class SparkCommand {
+public final class SparkCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("spark")

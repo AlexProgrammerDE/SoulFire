@@ -23,7 +23,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ProxySettings implements SettingsObject {
+public final class ProxySettings implements SettingsObject {
   private static final String NAMESPACE = "proxy";
   public static final IntProperty BOTS_PER_PROXY =
     ImmutableIntProperty.builder()

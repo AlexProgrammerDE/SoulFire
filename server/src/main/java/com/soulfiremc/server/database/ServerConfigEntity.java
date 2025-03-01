@@ -26,7 +26,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "server_config")
-public class ServerConfigEntity {
+public final class ServerConfigEntity {
   @Id
   private Long id = 1L;
 

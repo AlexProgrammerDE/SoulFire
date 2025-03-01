@@ -34,7 +34,7 @@ import java.time.Duration;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class AISettings implements SettingsObject {
+public final class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
   public static final StringProperty API_BASE_URL =
     ImmutableStringProperty.builder()

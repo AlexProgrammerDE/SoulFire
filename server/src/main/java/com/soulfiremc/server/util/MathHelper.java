@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
-public class MathHelper {
+public final class MathHelper {
   private static final float[] SIN = SFHelpers.make(new float[65536], fs -> {
     for (var ix = 0; ix < fs.length; ix++) {
       fs[ix] = (float) Math.sin((double) ix * Math.PI * 2.0 / 65536.0);

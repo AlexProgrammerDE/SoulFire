@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class ServerSettingsRegistry {
+public final class ServerSettingsRegistry {
   private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
 
   private static IntSetting createIntSetting(IntProperty property) {

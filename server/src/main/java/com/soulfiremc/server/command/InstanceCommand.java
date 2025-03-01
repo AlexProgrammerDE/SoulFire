@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class InstanceCommand {
+public final class InstanceCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("instance")

@@ -38,7 +38,7 @@ import org.pf4j.Extension;
 
 @Slf4j
 @Extension
-public class KillAura extends InternalPlugin {
+public final class KillAura extends InternalPlugin {
   private static final MetadataKey<Integer> COOLDOWN = MetadataKey.of("kill_aura", "cooldown", Integer.class);
 
   public KillAura() {

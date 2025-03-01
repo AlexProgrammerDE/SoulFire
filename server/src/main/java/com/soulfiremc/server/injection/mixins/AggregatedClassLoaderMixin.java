@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(AggregatedClassLoader.class)
-public class AggregatedClassLoaderMixin {
+public final class AggregatedClassLoaderMixin {
   @Overwrite
   private static ClassLoader locateSystemClassLoader() {
     return null;

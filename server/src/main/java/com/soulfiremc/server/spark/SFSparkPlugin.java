@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SFSparkPlugin implements SparkPlugin {
+public final class SFSparkPlugin implements SparkPlugin {
   public static SFSparkPlugin INSTANCE;
   private final Path sparkDirectory;
   private final SoulFireServer server;

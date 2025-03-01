@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 @SuppressWarnings("unchecked")
-public class DefaultTagsState {
+public final class DefaultTagsState {
   public static final TagsState TAGS_STATE = new TagsState();
 
   static {

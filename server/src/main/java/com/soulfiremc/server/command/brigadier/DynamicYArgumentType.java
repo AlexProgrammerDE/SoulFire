@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class DynamicYArgumentType implements ArgumentType<DynamicYArgumentType.YLocationMapper> {
+public final class DynamicYArgumentType implements ArgumentType<DynamicYArgumentType.YLocationMapper> {
   @Override
   public YLocationMapper parse(StringReader stringReader) throws CommandSyntaxException {
     var y = ArgumentTypeHelper.readAxis(stringReader);

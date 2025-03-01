@@ -27,7 +27,7 @@ import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 
 import java.util.Objects;
 
-public class SFViaVersionProvider extends BaseVersionProvider {
+public final class SFViaVersionProvider extends BaseVersionProvider {
   @Override
   public ProtocolVersion getClientProtocol(UserConnection connection) {
     final var clientProtocol = connection.getProtocolInfo().protocolVersion();

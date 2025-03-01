@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ConsumeEffect;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 
-public class SFItemHelpers {
+public final class SFItemHelpers {
   private SFItemHelpers() {}
 
   public static boolean isSafeFullBlockItem(SFItemStack itemStack) {

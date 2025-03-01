@@ -37,7 +37,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "instances")
-public class InstanceEntity {
+public final class InstanceEntity {
   public static final List<String> ICON_POOL = List.of(
     "pickaxe",
     "apple",

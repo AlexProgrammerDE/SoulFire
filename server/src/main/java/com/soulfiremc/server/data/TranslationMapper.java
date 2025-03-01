@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 @Slf4j
 @RequiredArgsConstructor
-public class TranslationMapper implements Function<TranslatableComponent, String> {
+public final class TranslationMapper implements Function<TranslatableComponent, String> {
   public static final TranslationMapper INSTANCE;
 
   static {

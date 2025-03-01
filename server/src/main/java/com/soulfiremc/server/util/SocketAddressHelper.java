@@ -27,7 +27,7 @@ import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnixDomainSocketAddress;
 
-public class SocketAddressHelper {
+public final class SocketAddressHelper {
   public static final TypeAdapter<SocketAddress> TYPE_ADAPTER =
     new TypeAdapter<>() {
       @Override

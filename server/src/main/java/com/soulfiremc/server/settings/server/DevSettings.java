@@ -24,7 +24,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class DevSettings implements SettingsObject {
+public final class DevSettings implements SettingsObject {
   private static final String NAMESPACE = "dev";
   public static final BooleanProperty CORE_DEBUG =
     ImmutableBooleanProperty.builder()

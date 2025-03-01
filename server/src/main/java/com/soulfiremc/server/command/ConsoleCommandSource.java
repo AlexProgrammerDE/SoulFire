@@ -32,7 +32,7 @@ import org.slf4j.event.Level;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class ConsoleCommandSource implements SoulFireUser {
+public final class ConsoleCommandSource implements SoulFireUser {
   private static final Logger log = LoggerFactory.getLogger("Console");
   private final AuthSystem authSystem;
 

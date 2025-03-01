@@ -25,7 +25,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class LookAtCommand {
+public final class LookAtCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("lookat")

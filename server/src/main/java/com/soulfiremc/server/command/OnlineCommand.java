@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class OnlineCommand {
+public final class OnlineCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("online")

@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectStorageServiceImplBase {
+public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectStorageServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   @Override

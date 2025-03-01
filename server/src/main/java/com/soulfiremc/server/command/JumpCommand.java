@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.bot.ControllingTask;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class JumpCommand {
+public final class JumpCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("jump")

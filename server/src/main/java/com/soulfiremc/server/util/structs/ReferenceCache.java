@@ -27,7 +27,7 @@ import java.util.function.Function;
  *
  * @param <T> The type of object to pool.
  */
-public class ReferenceCache<T> {
+public final class ReferenceCache<T> {
   private final Map<T, T> cache = new WeakHashMap<>();
 
   public T poolReference(T obj) {

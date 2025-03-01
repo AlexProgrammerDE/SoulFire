@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
+public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
   private final Cache<UUID, FlowStage> authFlows = Caffeine.newBuilder()
     .expireAfterWrite(15, TimeUnit.MINUTES)
     .build();

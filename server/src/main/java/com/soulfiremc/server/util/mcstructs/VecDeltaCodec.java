@@ -23,7 +23,7 @@ import org.cloudburstmc.math.vector.Vector3d;
 
 @Getter
 @Setter
-public class VecDeltaCodec {
+public final class VecDeltaCodec {
   private Vector3d base = Vector3d.ZERO;
 
   public Vector3d decode(double x, double y, double z) {

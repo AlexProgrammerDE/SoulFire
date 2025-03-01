@@ -24,7 +24,7 @@ import org.slf4j.event.Level;
 
 import java.util.UUID;
 
-public class SFSparkCommandSender extends AbstractCommandSender<SoulFireUser> {
+public final class SFSparkCommandSender extends AbstractCommandSender<SoulFireUser> {
   public SFSparkCommandSender(final SoulFireUser delegate) {
     super(delegate);
   }

@@ -24,7 +24,7 @@ import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public class VectorHelper {
+public final class VectorHelper {
   public static final int PACKED_HORIZONTAL_LENGTH = 1 + MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(30000000));
   public static final int PACKED_Y_LENGTH = 64 - 2 * PACKED_HORIZONTAL_LENGTH;
   private static final long PACKED_Y_MASK = (1L << PACKED_Y_LENGTH) - 1L;

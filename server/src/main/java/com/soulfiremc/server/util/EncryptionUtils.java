@@ -30,7 +30,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class EncryptionUtils {
+public final class EncryptionUtils {
   public static final Pair<String, String> PEM_RSA_PUBLIC_KEY_DESCRIPTOR =
     Pair.of("-----BEGIN RSA PUBLIC KEY-----", "-----END RSA PUBLIC KEY-----");
   public static final Pair<String, String> PEM_RSA_PRIVATE_KEY_DESCRIPTOR =

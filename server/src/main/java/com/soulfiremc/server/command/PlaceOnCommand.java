@@ -27,7 +27,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class PlaceOnCommand {
+public final class PlaceOnCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("placeon")

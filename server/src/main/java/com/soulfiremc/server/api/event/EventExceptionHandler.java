@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventExceptionHandler implements IExceptionHandler {
+public final class EventExceptionHandler implements IExceptionHandler {
   public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
   private static final Logger log = LoggerFactory.getLogger("SoulFire");
 

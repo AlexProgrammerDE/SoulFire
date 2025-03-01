@@ -20,7 +20,7 @@ package com.soulfiremc.server.util;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class JOMLUtil {
+public final class JOMLUtil {
   public static Quaternionf toQuaternion(org.cloudburstmc.math.imaginary.Quaternionf vector) {
     return new Quaternionf(vector.getX(), vector.getY(), vector.getZ(), vector.getW());
   }

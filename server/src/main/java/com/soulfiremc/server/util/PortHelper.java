@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 @Slf4j
-public class PortHelper {
+public final class PortHelper {
   public static final int SF_DEFAULT_PORT = 38765;
 
   public static int getAvailablePort(int startPort) {

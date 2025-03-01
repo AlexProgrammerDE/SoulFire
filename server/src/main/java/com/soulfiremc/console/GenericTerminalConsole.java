@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class GenericTerminalConsole extends SimpleTerminalConsole {
+public final class GenericTerminalConsole extends SimpleTerminalConsole {
   private static final Logger logger = LogManager.getLogger("SoulFireConsole");
   private final ShutdownManager shutdownManager;
   private final CommandExecutor commandExecutor;

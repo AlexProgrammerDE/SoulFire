@@ -34,7 +34,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @Slf4j
-public class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImplBase {
+public final class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServiceImplBase {
   public static @Nullable SFProxy convertProxy(BooleanSupplier hasProxy, Supplier<ProxyProto> proxy) {
     return hasProxy.getAsBoolean() ? SFProxy.fromProto(proxy.get()) : null;
   }

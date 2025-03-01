@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class RepeatCommand {
+public final class RepeatCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("repeat")

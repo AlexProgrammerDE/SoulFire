@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ShutdownManager {
+public final class ShutdownManager {
   private final Runnable shutdownHook;
   private final PluginManager pluginManager;
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);

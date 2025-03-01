@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 import static net.lenni0451.classtransform.utils.ASMUtils.slash;
 import static net.lenni0451.classtransform.utils.Sneaky.sneakySupply;
 
-public class CustomClassProvider implements IClassProvider {
+public final class CustomClassProvider implements IClassProvider {
   private final ClassPath[] classPaths;
   private final ClassLoader[] classLoaders;
 

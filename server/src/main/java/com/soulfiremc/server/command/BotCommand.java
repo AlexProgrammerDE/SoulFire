@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class BotCommand {
+public final class BotCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("bot")

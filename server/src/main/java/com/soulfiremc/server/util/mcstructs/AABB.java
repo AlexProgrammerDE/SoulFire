@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class AABB {
+public final class AABB {
   public static final double EPSILON = 1.0E-7;
   public final double minX;
   public final double minY;
@@ -479,7 +479,7 @@ public class AABB {
     };
   }
 
-  protected double get(Direction.Axis axis, int index) {
+  private double get(Direction.Axis axis, int index) {
     return this.getCoords(axis).getDouble(index);
   }
 
@@ -487,7 +487,7 @@ public class AABB {
     return this.getCoords(axis).size() - 1;
   }
 
-  protected int findIndex(Direction.Axis axis, double position) {
+  private int findIndex(Direction.Axis axis, double position) {
     return MathHelper.binarySearch(0, this.getSize(axis) + 1, value -> position < this.get(axis, value)) - 1;
   }
 
@@ -511,7 +511,7 @@ public class AABB {
     return x == 0 && y == 0 && z == 0; // TODO: Think about is this is correct
   }
 
-  protected double collideX(AxisCycle movementAxis, AABB collisionBox, double desiredOffset) {
+  private double collideX(AxisCycle movementAxis, AABB collisionBox, double desiredOffset) {
     if (this.isEmpty()) {
       return desiredOffset;
     } else if (Math.abs(desiredOffset) < 1.0E-7) {

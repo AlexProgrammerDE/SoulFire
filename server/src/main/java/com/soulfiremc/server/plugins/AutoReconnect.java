@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoReconnect extends InternalPlugin {
+public final class AutoReconnect extends InternalPlugin {
   public AutoReconnect() {
     super(new PluginInfo(
       "auto-reconnect",

@@ -36,7 +36,7 @@ import java.util.List;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 
-public class BrigadierHelper {
+public final class BrigadierHelper {
   private BrigadierHelper() {}
 
   public static LiteralArgumentBuilder<CommandSourceStack> literal(String name) {

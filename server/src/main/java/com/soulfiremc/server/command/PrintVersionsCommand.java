@@ -25,7 +25,7 @@ import com.viaversion.vialoader.util.ProtocolVersionList;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
-public class PrintVersionsCommand {
+public final class PrintVersionsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-versions")

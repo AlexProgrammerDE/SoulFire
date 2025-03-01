@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BlockShapeLoader {
+public final class BlockShapeLoader {
   public static final Map<Key, List<BlockShapeGroup>> BLOCK_COLLISION_SHAPES =
     new Object2ObjectOpenHashMap<>();
   public static final Map<Key, List<BlockShapeGroup>> BLOCK_SUPPORT_SHAPES =

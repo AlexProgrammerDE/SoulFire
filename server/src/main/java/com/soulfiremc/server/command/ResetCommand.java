@@ -23,7 +23,7 @@ import com.soulfiremc.server.protocol.bot.ControllingTask;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class ResetCommand {
+public final class ResetCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("reset")

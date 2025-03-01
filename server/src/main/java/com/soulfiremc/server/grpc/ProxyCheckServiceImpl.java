@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
+public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   private static final URL IPIFY_URL = ReactorHttpHelper.createURL("https://api.ipify.org");
   private static final URL AWS_URL = ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
   private final SoulFireServer soulFireServer;

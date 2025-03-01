@@ -35,7 +35,7 @@ import org.pf4j.Extension;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoRespawn extends InternalPlugin {
+public final class AutoRespawn extends InternalPlugin {
   public AutoRespawn() {
     super(new PluginInfo(
       "auto-respawn",

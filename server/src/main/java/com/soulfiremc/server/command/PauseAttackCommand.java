@@ -23,7 +23,7 @@ import com.soulfiremc.server.api.AttackLifecycle;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class PauseAttackCommand {
+public final class PauseAttackCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("pause-attack")

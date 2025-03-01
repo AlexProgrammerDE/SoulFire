@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class GsonDataHelper {
+public final class GsonDataHelper {
   public static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
     new TypeAdapter<>() {
       @Override

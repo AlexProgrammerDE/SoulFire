@@ -31,7 +31,7 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
  */
 @Getter
 @AllArgsConstructor
-public class SFPacketSendingEvent extends AbstractCancellable implements SoulFireBotEvent {
+public final class SFPacketSendingEvent extends AbstractCancellable implements SoulFireBotEvent {
   private final BotConnection connection;
   @Setter
   private MinecraftPacket packet;

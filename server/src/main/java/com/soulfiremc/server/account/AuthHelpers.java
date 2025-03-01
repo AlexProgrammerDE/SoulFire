@@ -23,7 +23,7 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 
-public class AuthHelpers {
+public final class AuthHelpers {
   public static MinecraftAccount fromFullBedrockSession(AuthType authType, AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
     var mcChain = fullBedrockSession.getMcChain();
     var xblXsts = mcChain.getXblXsts();

@@ -25,7 +25,7 @@ import io.jsonwebtoken.*;
 
 import java.util.Objects;
 
-public class JwtServerInterceptor implements ServerInterceptor {
+public final class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
   private final AuthSystem authSystem;
 

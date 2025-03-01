@@ -21,7 +21,7 @@ import com.soulfiremc.builddata.BuildData;
 import me.lucko.spark.common.platform.PlatformInfo;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 
-public class SFSparkPlatformInfo implements PlatformInfo {
+public final class SFSparkPlatformInfo implements PlatformInfo {
   @Override
   public Type getType() {
     return Type.CLIENT;

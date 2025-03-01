@@ -54,7 +54,7 @@ import java.util.List;
  * The CLI may also use this RPC server to communicate with the SoulFire server.
  */
 @Slf4j
-public class RPCServer {
+public final class RPCServer {
   @Getter
   private final String host;
   @Getter

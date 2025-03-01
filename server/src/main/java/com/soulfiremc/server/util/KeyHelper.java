@@ -34,7 +34,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class KeyHelper {
+public final class KeyHelper {
   private KeyHelper() {}
 
   public static String encodeBase64Key(Key key) {

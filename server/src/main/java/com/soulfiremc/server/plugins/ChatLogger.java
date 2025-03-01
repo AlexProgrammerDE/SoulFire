@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Extension
-public class ChatLogger extends InternalPlugin {
+public final class ChatLogger extends InternalPlugin {
   private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_logger", "chat_messages", Cache.class);
 
   public ChatLogger() {

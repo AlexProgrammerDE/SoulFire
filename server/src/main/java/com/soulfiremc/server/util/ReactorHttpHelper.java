@@ -27,7 +27,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 
-public class ReactorHttpHelper {
+public final class ReactorHttpHelper {
   private ReactorHttpHelper() {}
 
   public static URL createURL(String url) {

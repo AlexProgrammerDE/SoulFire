@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ServerSettings implements SettingsObject {
+public final class ServerSettings implements SettingsObject {
   private static final String NAMESPACE = "server";
   public static final StringProperty PUBLIC_ADDRESS =
     ImmutableStringProperty.builder()

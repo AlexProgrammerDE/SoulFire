@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class BlockTags {
+public final class BlockTags {
   public static final List<TagKey<BlockType>> TAGS = new ArrayList<>();
 
   //@formatter:off

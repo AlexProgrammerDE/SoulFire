@@ -56,7 +56,7 @@ import java.util.function.UnaryOperator;
 
 @Slf4j
 @Extension(ordinal = 2)
-public class ForwardingBypass extends InternalPlugin {
+public final class ForwardingBypass extends InternalPlugin {
   private static final char LEGACY_FORWARDING_SEPARATOR = '\0';
 
   public ForwardingBypass() {

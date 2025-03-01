@@ -20,7 +20,7 @@ package com.soulfiremc.server.util.structs;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class CachedLazyObject<V> implements Supplier<V> {
+public final class CachedLazyObject<V> implements Supplier<V> {
   private final Supplier<V> supplier;
   private final long cacheDuration;
   private V value;

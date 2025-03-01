@@ -19,7 +19,7 @@ package com.soulfiremc.server.util.mcstructs;
 
 import com.soulfiremc.server.util.MathHelper;
 
-public class ARGB {
+public final class ARGB {
   public static int alpha(int color) {
     return color >>> 24;
   }

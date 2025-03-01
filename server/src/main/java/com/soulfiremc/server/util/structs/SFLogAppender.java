@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 @Getter
-public class SFLogAppender extends AbstractAppender {
+public final class SFLogAppender extends AbstractAppender {
   public static final String SF_INSTANCE_ID = "sf-instance-id";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
   public static final String SF_SKIP_PUBLISHING = "sf-skip-publishing";

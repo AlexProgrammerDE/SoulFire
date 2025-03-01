@@ -22,7 +22,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class StopTaskCommand {
+public final class StopTaskCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("stop-task")

@@ -35,7 +35,7 @@ import java.time.Duration;
 import java.util.Scanner;
 
 @Slf4j
-public class AcmeClient {
+public final class AcmeClient {
   private static final Path TLS_DIR = Path.of("tls");
   public static final Path USER_KEY_FILE = TLS_DIR.resolve("acme-user.key");
   public static final Path DOMAIN_KEY_FILE = TLS_DIR.resolve("acme-domain.key");

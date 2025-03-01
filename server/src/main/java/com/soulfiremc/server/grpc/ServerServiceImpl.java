@@ -33,7 +33,7 @@ import javax.inject.Inject;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
+public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
   private final SoulFireServer soulFireServer;
   private final SessionFactory sessionFactory;
 

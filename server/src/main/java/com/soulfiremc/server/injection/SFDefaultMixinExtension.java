@@ -21,7 +21,7 @@ import com.soulfiremc.server.api.MixinExtension;
 
 import java.util.Set;
 
-public class SFDefaultMixinExtension implements MixinExtension {
+public final class SFDefaultMixinExtension implements MixinExtension {
   @Override
   public Set<String> getMixinPaths() {
     return Set.of(

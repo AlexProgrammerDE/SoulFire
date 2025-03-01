@@ -23,7 +23,7 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandler;
 import org.geysermc.mcprotocollib.network.NetworkConstants;
 
-public class SFVLPipeline extends VLPipeline {
+public final class SFVLPipeline extends VLPipeline {
   public SFVLPipeline(UserConnection user) {
     super(user);
   }

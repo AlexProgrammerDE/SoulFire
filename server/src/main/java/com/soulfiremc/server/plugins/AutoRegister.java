@@ -32,7 +32,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
 @Extension
-public class AutoRegister extends InternalPlugin {
+public final class AutoRegister extends InternalPlugin {
   public AutoRegister() {
     super(new PluginInfo(
       "auto-register",

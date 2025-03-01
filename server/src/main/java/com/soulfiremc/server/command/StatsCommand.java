@@ -23,7 +23,7 @@ import org.apache.commons.io.FileUtils;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class StatsCommand {
+public final class StatsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("stats")

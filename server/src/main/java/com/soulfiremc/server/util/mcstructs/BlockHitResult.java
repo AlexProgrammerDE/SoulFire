@@ -20,7 +20,7 @@ package com.soulfiremc.server.util.mcstructs;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 
-public class BlockHitResult extends HitResult {
+public final class BlockHitResult extends HitResult {
   private final Direction direction;
   private final Vector3i blockPos;
   private final boolean miss;

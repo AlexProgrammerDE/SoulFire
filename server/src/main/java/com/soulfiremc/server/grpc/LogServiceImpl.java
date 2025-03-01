@@ -33,7 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
+public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
   @Inject

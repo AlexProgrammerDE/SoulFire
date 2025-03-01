@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class CancellationCollector {
+public final class CancellationCollector {
   private final List<CompletableFuture<?>> futures = new ArrayList<>();
   @Getter
   private boolean cancelled = false;

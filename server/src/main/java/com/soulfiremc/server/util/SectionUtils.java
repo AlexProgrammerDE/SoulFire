@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
-public class SectionUtils {
+public final class SectionUtils {
   private SectionUtils() {}
 
   public static int blockToSection(int block) {

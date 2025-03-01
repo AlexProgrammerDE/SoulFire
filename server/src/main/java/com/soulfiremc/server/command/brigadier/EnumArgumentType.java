@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
+public final class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
   private final Class<T> type;
 
   @Override

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class MetadataHolder {
+public final class MetadataHolder {
   private final Map<Key, Object> metadata = new ConcurrentHashMap<>();
 
   public <T> T getOrSet(MetadataKey<T> key, Supplier<T> defaultValue) {

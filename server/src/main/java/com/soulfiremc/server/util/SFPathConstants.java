@@ -19,7 +19,7 @@ package com.soulfiremc.server.util;
 
 import java.nio.file.Path;
 
-public class SFPathConstants {
+public final class SFPathConstants {
   public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
   public static final Path CLIENT_DATA_DIRECTORY = Path.of(System.getProperty("user.home")).resolve(".soulfire");
   public static final Path INTEGRATED_SERVER_DIRECTORY = CLIENT_DATA_DIRECTORY.resolve("integrated-server");

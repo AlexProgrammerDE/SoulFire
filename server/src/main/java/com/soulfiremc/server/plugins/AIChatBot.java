@@ -37,7 +37,7 @@ import java.util.ArrayList;
 
 @Slf4j
 @Extension
-public class AIChatBot extends InternalPlugin {
+public final class AIChatBot extends InternalPlugin {
   private static final MetadataKey<ChatCompletionCreateParams> PLAYER_CONVERSATIONS = MetadataKey.of("ai_chat_bot", "conversations", ChatCompletionCreateParams.class);
 
   public AIChatBot() {

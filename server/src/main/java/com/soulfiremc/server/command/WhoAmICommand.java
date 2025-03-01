@@ -23,7 +23,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
-public class WhoAmICommand {
+public final class WhoAmICommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("whoami")

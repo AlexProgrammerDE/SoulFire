@@ -18,7 +18,7 @@
 package com.soulfiremc.server.data.block;
 
 @SuppressWarnings("unused")
-public class BlockProperties {
+public final class BlockProperties {
   //@formatter:off
   public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
   public static final BooleanProperty ATTACHED = BooleanProperty.create("attached");

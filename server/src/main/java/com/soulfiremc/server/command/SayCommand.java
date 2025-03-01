@@ -23,7 +23,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class SayCommand {
+public final class SayCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("say")

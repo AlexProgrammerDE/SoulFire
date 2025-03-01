@@ -24,7 +24,7 @@ import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.ansi.ColorLevel;
 
-public class SoulFireAdventure {
+public final class SoulFireAdventure {
   public static final ComponentFlattener FLATTENER =
     ComponentFlattener.basic().toBuilder()
       .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)

@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class LoginRateLimitingInterceptor implements ServerInterceptor {
+public final class LoginRateLimitingInterceptor implements ServerInterceptor {
   private final Cache<UUID, Integer> callCache = Caffeine.newBuilder()
     .expireAfterWrite(10, TimeUnit.MINUTES)
     .build();

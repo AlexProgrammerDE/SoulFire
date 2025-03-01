@@ -138,7 +138,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Extension
-public class POVServer extends InternalPlugin {
+public final class POVServer extends InternalPlugin {
   private static final MetadataKey<Server> TCP_SERVER = MetadataKey.of("pov_server", "tcp_server", Server.class);
   private static final List<Class<?>> NOT_SYNCED =
     List.of(

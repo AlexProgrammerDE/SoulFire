@@ -35,7 +35,7 @@ import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
+public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   private Collection<GlobalPermissionState> getGlobalPermissions() {

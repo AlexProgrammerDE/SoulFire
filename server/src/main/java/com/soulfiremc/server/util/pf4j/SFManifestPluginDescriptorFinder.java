@@ -23,7 +23,7 @@ import org.pf4j.PluginDescriptor;
 
 import java.util.jar.Manifest;
 
-public class SFManifestPluginDescriptorFinder extends ManifestPluginDescriptorFinder {
+public final class SFManifestPluginDescriptorFinder extends ManifestPluginDescriptorFinder {
   public static final String PLUGIN_WEBSITE = "Plugin-Website";
 
   protected PluginDescriptor createPluginDescriptor(Manifest manifest) {

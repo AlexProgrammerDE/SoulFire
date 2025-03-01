@@ -24,7 +24,7 @@ import com.soulfiremc.server.command.brigadier.BrigadierHelper;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
-public class PrintCommandsCommand {
+public final class PrintCommandsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-commands")

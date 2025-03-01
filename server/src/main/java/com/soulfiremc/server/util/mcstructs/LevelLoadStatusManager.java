@@ -20,7 +20,7 @@ package com.soulfiremc.server.util.mcstructs;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 
-public class LevelLoadStatusManager {
+public final class LevelLoadStatusManager {
   private final LocalPlayer player;
   private final Level level;
   private LevelLoadStatusManager.Status status = LevelLoadStatusManager.Status.WAITING_FOR_SERVER;

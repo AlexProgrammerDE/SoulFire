@@ -25,7 +25,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.ToString;
 
 @ToString
-public class BlockPropertiesHolder {
+public final class BlockPropertiesHolder {
   public static final JsonDeserializer<BlockPropertiesHolder> BLOCK_STATE_PROPERTIES =
     (json, typeOfT, context) -> new BlockPropertiesHolder(json.getAsJsonObject());
   private final Object2ObjectMap<String, String> stateProperties = new Object2ObjectOpenHashMap<>();

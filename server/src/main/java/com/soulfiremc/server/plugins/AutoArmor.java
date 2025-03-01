@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoArmor extends InternalPlugin {
+public final class AutoArmor extends InternalPlugin {
   public AutoArmor() {
     super(new PluginInfo(
       "auto-armor",

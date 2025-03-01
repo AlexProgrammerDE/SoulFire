@@ -23,7 +23,7 @@ import com.soulfiremc.server.api.AttackLifecycle;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public class StartAttackCommand {
+public final class StartAttackCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("start-attack")

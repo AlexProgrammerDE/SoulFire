@@ -38,7 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-public class TagBasedArgumentType<T extends RegistryValue<T>, R extends TagResolvable<T>> implements ArgumentType<R> {
+public final class TagBasedArgumentType<T extends RegistryValue<T>, R extends TagResolvable<T>> implements ArgumentType<R> {
   private static final String TAG_PREFIX = "#";
   private final Function<Key, R> directSupplier;
   private final Function<TagKey<T>, R> tagSupplier;

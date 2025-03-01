@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
+public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   @Override

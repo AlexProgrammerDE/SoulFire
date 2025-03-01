@@ -19,13 +19,13 @@ package com.soulfiremc.server.util.structs;
 
 import com.soulfiremc.server.util.TimeUtil;
 
-public class TickRateManager {
+public final class TickRateManager {
   public static final float MIN_TICKRATE = 1.0F;
-  protected float tickrate = 20.0F;
-  protected long nanosecondsPerTick = TimeUtil.NANOSECONDS_PER_SECOND / 20L;
-  protected int frozenTicksToRun = 0;
-  protected boolean runGameElements = true;
-  protected boolean isFrozen = false;
+  private float tickrate = 20.0F;
+  private long nanosecondsPerTick = TimeUtil.NANOSECONDS_PER_SECOND / 20L;
+  private int frozenTicksToRun = 0;
+  private boolean runGameElements = true;
+  private boolean isFrozen = false;
 
   public void setTickRate(float tickRate) {
     this.tickrate = Math.max(tickRate, MIN_TICKRATE);

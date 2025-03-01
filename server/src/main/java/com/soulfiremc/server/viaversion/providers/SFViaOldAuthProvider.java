@@ -24,7 +24,7 @@ import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAut
 
 import java.util.Objects;
 
-public class SFViaOldAuthProvider extends OldAuthProvider {
+public final class SFViaOldAuthProvider extends OldAuthProvider {
   @Override
   public void sendAuthRequest(UserConnection user, String serverId) {
     var session = (ViaClientSession) Objects.requireNonNull(user.get(StorableSession.class), "Session provider is null")

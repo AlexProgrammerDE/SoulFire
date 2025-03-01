@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
+public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
   private final SoulFireServer soulFire;
   private final ServerCommandManager serverCommandManager;
 

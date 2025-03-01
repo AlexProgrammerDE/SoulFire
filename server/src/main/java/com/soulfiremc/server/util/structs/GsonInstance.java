@@ -22,7 +22,7 @@ import com.google.gson.GsonBuilder;
 import com.soulfiremc.server.data.GsonDataHelper;
 import net.kyori.adventure.key.Key;
 
-public class GsonInstance {
+public final class GsonInstance {
   public static final Gson GSON = new GsonBuilder()
     .registerTypeAdapter(Key.class, GsonDataHelper.RESOURCE_KEY_ADAPTER)
     .create();

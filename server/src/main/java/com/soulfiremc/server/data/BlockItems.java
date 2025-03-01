@@ -21,7 +21,7 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 
 import java.util.Optional;
 
-public class BlockItems {
+public final class BlockItems {
   public static final BlockType[] VALUES = new BlockType[ItemType.REGISTRY.size()];
   public static final ItemType[] VALUES_REVERSE = new ItemType[BlockType.REGISTRY.size()];
 

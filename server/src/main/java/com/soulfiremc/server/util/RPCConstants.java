@@ -21,7 +21,7 @@ import io.grpc.Metadata;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
-public class RPCConstants {
+public final class RPCConstants {
   public static final int LOGIN_RATE_LIMIT = 20;
   public static final String BEARER_TYPE = "Bearer";
 

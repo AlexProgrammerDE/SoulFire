@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Extension
-public class AutoEat extends InternalPlugin {
+public final class AutoEat extends InternalPlugin {
   public AutoEat() {
     super(new PluginInfo(
       "auto-eat",

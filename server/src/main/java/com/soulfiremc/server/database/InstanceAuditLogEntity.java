@@ -30,7 +30,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "instance_audit_logs")
-public class InstanceAuditLogEntity {
+public final class InstanceAuditLogEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

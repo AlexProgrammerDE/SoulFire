@@ -23,6 +23,6 @@ import org.pf4j.DefaultPluginDescriptor;
 
 @Getter
 @Setter
-public class SFPluginDescriptor extends DefaultPluginDescriptor {
+public final class SFPluginDescriptor extends DefaultPluginDescriptor {
   private String website;
 }

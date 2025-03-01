@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.BooleanSupplier;
 
 @RequiredArgsConstructor
-public class LazyBoolean {
+public final class LazyBoolean {
   private final BooleanSupplier supplier;
   private boolean value;
   private boolean initialized;
