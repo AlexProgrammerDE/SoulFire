@@ -995,31 +995,33 @@ public final class POVServer extends InternalPlugin {
           return;
         }
 
-        switch (packet) {
-          case ClientboundKeepAlivePacket ignored -> {
+        botConnection.preTickHooks().add(() -> {
+          switch (packet) {
+            case ClientboundKeepAlivePacket ignored -> {
+            }
+            case ClientboundPingPacket ignored -> {
+            }
+            case ClientboundCustomPayloadPacket ignored -> {
+            }
+            case ClientboundPlayerChatPacket chatPacket -> {
+              // To avoid signature issues since the signature is for the bot, not the connected user
+              clientSession.send(new ClientboundSystemChatPacket(
+                botConnection.dataManager().prepareChatTypeMessage(
+                  chatPacket.getChatType(),
+                  new SFChatType.BoundChatMessageInfo(
+                    botConnection.dataManager().getComponentForPlayerChat(chatPacket),
+                    chatPacket.getName(),
+                    chatPacket.getTargetName()
+                  )),
+                false
+              ));
+            }
+            default -> {
+              // MC Server of the bot -> MC Client
+              clientSession.send(packet);
+            }
           }
-          case ClientboundPingPacket ignored -> {
-          }
-          case ClientboundCustomPayloadPacket ignored -> {
-          }
-          case ClientboundPlayerChatPacket chatPacket -> {
-            // To avoid signature issues since the signature is for the bot, not the connected user
-            clientSession.send(new ClientboundSystemChatPacket(
-              botConnection.dataManager().prepareChatTypeMessage(
-                chatPacket.getChatType(),
-                new SFChatType.BoundChatMessageInfo(
-                  botConnection.dataManager().getComponentForPlayerChat(chatPacket),
-                  chatPacket.getName(),
-                  chatPacket.getTargetName()
-                )),
-              false
-            ));
-          }
-          default -> {
-            // MC Server of the bot -> MC Client
-            clientSession.send(packet);
-          }
-        }
+        });
       }
 
       @Override
@@ -1031,50 +1033,52 @@ public final class POVServer extends InternalPlugin {
 
         var clientEntity = botConnection.dataManager().localPlayer();
         // Bot -> MC Client
-        switch (packet) {
-          case ServerboundMovePlayerPosRotPacket ignored -> {
-            if (!clientEntity.pos().equals(lastPosition)) {
-              clientSession.send(
-                new ClientboundPlayerPositionPacket(
-                  Integer.MIN_VALUE,
-                  clientEntity.pos(),
-                  clientEntity.deltaMovement(),
-                  clientEntity.yRot(),
-                  clientEntity.xRot(),
-                  List.of()
-                ));
+        botConnection.preTickHooks().add(() -> {
+          switch (packet) {
+            case ServerboundMovePlayerPosRotPacket ignored -> {
+              if (!clientEntity.pos().equals(lastPosition)) {
+                clientSession.send(
+                  new ClientboundPlayerPositionPacket(
+                    Integer.MIN_VALUE,
+                    clientEntity.pos(),
+                    clientEntity.deltaMovement(),
+                    clientEntity.yRot(),
+                    clientEntity.xRot(),
+                    List.of()
+                  ));
+              }
+            }
+            case ServerboundMovePlayerPosPacket ignored -> {
+              if (!clientEntity.pos().equals(lastPosition)) {
+                clientSession.send(
+                  new ClientboundPlayerPositionPacket(
+                    Integer.MIN_VALUE,
+                    clientEntity.pos(),
+                    clientEntity.deltaMovement(),
+                    0,
+                    0,
+                    List.of(PositionElement.Y_ROT, PositionElement.X_ROT)
+                  ));
+              }
+            }
+            case ServerboundMovePlayerRotPacket ignored -> {
+              if (!clientEntity.pos().equals(lastPosition)) {
+                clientSession.send(
+                  new ClientboundPlayerPositionPacket(
+                    Integer.MIN_VALUE,
+                    Vector3d.ZERO,
+                    Vector3d.ZERO,
+                    clientEntity.yRot(),
+                    clientEntity.xRot(),
+                    List.of(PositionElement.X, PositionElement.Y, PositionElement.Z, PositionElement.DELTA_X, PositionElement.DELTA_Y, PositionElement.DELTA_Z)
+                  ));
+              }
+            }
+            default -> {
+              // We don't need to handle all Bot -> Server packets
             }
           }
-          case ServerboundMovePlayerPosPacket ignored -> {
-            if (!clientEntity.pos().equals(lastPosition)) {
-              clientSession.send(
-                new ClientboundPlayerPositionPacket(
-                  Integer.MIN_VALUE,
-                  clientEntity.pos(),
-                  clientEntity.deltaMovement(),
-                  0,
-                  0,
-                  List.of(PositionElement.Y_ROT, PositionElement.X_ROT)
-                ));
-            }
-          }
-          case ServerboundMovePlayerRotPacket ignored -> {
-            if (!clientEntity.pos().equals(lastPosition)) {
-              clientSession.send(
-                new ClientboundPlayerPositionPacket(
-                  Integer.MIN_VALUE,
-                  Vector3d.ZERO,
-                  Vector3d.ZERO,
-                  clientEntity.yRot(),
-                  clientEntity.xRot(),
-                  List.of(PositionElement.X, PositionElement.Y, PositionElement.Z, PositionElement.DELTA_X, PositionElement.DELTA_Y, PositionElement.DELTA_Z)
-                ));
-            }
-          }
-          default -> {
-            // We don't need to handle all Bot -> Server packets
-          }
-        }
+        });
       }
     }
   }
