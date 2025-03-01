@@ -276,6 +276,7 @@ public final class InstanceManager {
       throw new IllegalStateException("Another attack is still running");
     }
 
+    allBotsConnected.set(false);
     this.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);
