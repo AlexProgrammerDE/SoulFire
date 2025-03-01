@@ -284,7 +284,7 @@ public final class InstanceManager {
     this.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);
-    logger.info("Preparing bot attack at {}", address);
+    logger.info("Preparing bot attack at server");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
