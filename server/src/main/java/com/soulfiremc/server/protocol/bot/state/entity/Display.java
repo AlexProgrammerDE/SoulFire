@@ -121,14 +121,14 @@ public abstract class Display extends Entity {
 
     if (this.updateRenderState) {
       this.updateRenderState = false;
-      var bl = this.interpolationDuration != 0;
-      if (bl && this.renderState != null) {
+      var interpolate = this.interpolationDuration != 0;
+      if (interpolate && this.renderState != null) {
         this.renderState = this.createInterpolatedRenderState(this.renderState, this.lastProgress);
       } else {
         this.renderState = this.createFreshRenderState();
       }
 
-      this.updateRenderSubState(bl, this.lastProgress);
+      this.updateRenderSubState(interpolate, this.lastProgress);
     }
 
     if (this.posRotInterpolationTarget != null) {

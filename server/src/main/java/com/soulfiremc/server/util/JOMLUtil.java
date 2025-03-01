@@ -17,12 +17,11 @@
  */
 package com.soulfiremc.server.util;
 
-import org.cloudburstmc.math.vector.Vector4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class JOMLUtil {
-  public static Quaternionf toQuaternion(Vector4f vector) {
+  public static Quaternionf toQuaternion(org.cloudburstmc.math.imaginary.Quaternionf vector) {
     return new Quaternionf(vector.getX(), vector.getY(), vector.getZ(), vector.getW());
   }
 
