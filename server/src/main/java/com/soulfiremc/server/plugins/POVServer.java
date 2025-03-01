@@ -844,7 +844,7 @@ public final class POVServer extends InternalPlugin {
 
     @Override
     public void packetReceived(Session clientSession, Packet packet) {
-      log.debug("C -> POV: {}", packet.getClass().getSimpleName());
+      log.debug("USER -> POV: {}", packet.getClass().getSimpleName());
       if (packet instanceof ServerboundClientInformationPacket clientSettings) {
         lastClientSettings = clientSettings;
         return;
@@ -935,14 +935,14 @@ public final class POVServer extends InternalPlugin {
 
     @Override
     public void packetError(PacketErrorEvent event) {
-      log.error("POV -> C Packet error", event.getCause());
+      log.error("POV -> USER Packet error", event.getCause());
     }
 
     @Override
     public void disconnected(DisconnectedEvent event) {
       log.atInfo()
         .setCause(event.getCause())
-        .log("POV -> C Disconnected: {}", SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()));
+        .log("POV -> USER Disconnected: {}", SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(event.getReason()));
     }
 
     private void executeSync(Session clientSession) {
@@ -986,6 +986,7 @@ public final class POVServer extends InternalPlugin {
 
       @Override
       public void packetReceived(Session botSession, Packet packet) {
+        log.debug("SERVER -> BOT: {}", packet.getClass().getSimpleName());
         if (!enableForwarding) {
           return;
         }
@@ -1019,6 +1020,7 @@ public final class POVServer extends InternalPlugin {
 
       @Override
       public void packetSent(Session botSession, Packet packet) {
+        log.debug("BOT -> SERVER: {}", packet.getClass().getSimpleName());
         if (!enableForwarding) {
           return;
         }
@@ -1027,7 +1029,6 @@ public final class POVServer extends InternalPlugin {
         // Bot -> MC Client
         switch (packet) {
           case ServerboundMovePlayerPosRotPacket posRot -> {
-            lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
             clientSession.send(
               new ClientboundMoveEntityPosRotPacket(
                 clientEntity.entityId(),
@@ -1037,9 +1038,9 @@ public final class POVServer extends InternalPlugin {
                 posRot.getYaw(),
                 posRot.getPitch(),
                 clientEntity.onGround()));
+            lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
           }
           case ServerboundMovePlayerPosPacket pos -> {
-            lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
             clientSession.send(
               new ClientboundMoveEntityPosPacket(
                 clientEntity.entityId(),
@@ -1047,6 +1048,7 @@ public final class POVServer extends InternalPlugin {
                 pos.getY() - lastPosition.getY(),
                 pos.getZ() - lastPosition.getZ(),
                 clientEntity.onGround()));
+            lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
           }
           case ServerboundMovePlayerRotPacket rot -> clientSession.send(
             new ClientboundMoveEntityRotPacket(
