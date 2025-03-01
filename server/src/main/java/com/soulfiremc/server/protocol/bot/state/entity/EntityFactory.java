@@ -32,18 +32,6 @@ public class EntityFactory {
     if (entityType == EntityType.PLAYER) {
       return connection.getEntityProfile(uuid).map(
         playerListEntry -> new RemotePlayer(connection, level, playerListEntry.getProfile()));
-    } else if (entityType.livingEntity()) {
-      // TODO: Implement entity inventories
-      return Optional.of(new LivingEntity(entityType, level) {
-        @Override
-        public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
-          return Optional.empty();
-        }
-
-        @Override
-        public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
-        }
-      });
     } else if (entityType.boatEntity()) {
       return Optional.of(new AbstractBoat(entityType, level));
     } else if (entityType.minecartEntity()) {
@@ -58,6 +46,18 @@ public class EntityFactory {
       return Optional.of(new Display.ItemDisplay(entityType, level));
     } else if (entityType == EntityType.TEXT_DISPLAY) {
       return Optional.of(new Display.TextDisplay(entityType, level));
+    } else if (entityType.livingEntity()) {
+      // TODO: Implement entity inventories
+      return Optional.of(new LivingEntity(entityType, level) {
+        @Override
+        public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
+          return Optional.empty();
+        }
+
+        @Override
+        public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+        }
+      });
     } else {
       return Optional.of(new Entity(entityType, level));
     }
