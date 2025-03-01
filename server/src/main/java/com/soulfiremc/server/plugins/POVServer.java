@@ -88,6 +88,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeT
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnInfo;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PositionElement;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.level.LightUpdateData;
@@ -1032,7 +1033,7 @@ public final class POVServer extends InternalPlugin {
         // Bot -> MC Client
         switch (packet) {
           case ServerboundMovePlayerPosRotPacket ignored -> {
-            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+            if (!clientEntity.pos().equals(lastPosition)) {
               clientSession.send(
                 new ClientboundPlayerPositionPacket(
                   Integer.MIN_VALUE,
@@ -1045,28 +1046,28 @@ public final class POVServer extends InternalPlugin {
             }
           }
           case ServerboundMovePlayerPosPacket ignored -> {
-            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+            if (!clientEntity.pos().equals(lastPosition)) {
               clientSession.send(
                 new ClientboundPlayerPositionPacket(
                   Integer.MIN_VALUE,
                   clientEntity.pos(),
                   clientEntity.deltaMovement(),
-                  clientEntity.xRot(),
-                  clientEntity.yRot(),
-                  List.of()
+                  0,
+                  0,
+                  List.of(PositionElement.Y_ROT, PositionElement.X_ROT)
                 ));
             }
           }
           case ServerboundMovePlayerRotPacket ignored -> {
-            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+            if (!clientEntity.pos().equals(lastPosition)) {
               clientSession.send(
                 new ClientboundPlayerPositionPacket(
                   Integer.MIN_VALUE,
-                  clientEntity.pos(),
-                  clientEntity.deltaMovement(),
+                  Vector3d.ZERO,
+                  Vector3d.ZERO,
                   clientEntity.xRot(),
                   clientEntity.yRot(),
-                  List.of()
+                  List.of(PositionElement.X, PositionElement.Y, PositionElement.Z, PositionElement.DELTA_X, PositionElement.DELTA_Y, PositionElement.DELTA_Z)
                 ));
             }
           }
