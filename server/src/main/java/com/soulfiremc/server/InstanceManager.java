@@ -137,6 +137,19 @@ public final class InstanceManager {
     if (attackLifecycle().isTicking()) {
       SoulFireAPI.postEvent(new AttackTickEvent(this));
     }
+
+    evictBots();
+  }
+
+  private void evictBots() {
+    // Remove botConnections from the map that are closed
+    botConnections.entrySet().removeIf(entry -> {
+      if (entry.getValue().session().isDisconnected()) {
+        logger.debug("Removing bot {}", entry.getValue().minecraftAccount().lastKnownName());
+        return true;
+      }
+      return false;
+    });
   }
 
   private void refreshExpiredAccounts() {

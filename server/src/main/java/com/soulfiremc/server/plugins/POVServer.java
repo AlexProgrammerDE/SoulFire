@@ -864,7 +864,7 @@ public final class POVServer extends InternalPlugin {
 
           var first =
             instanceManager.botConnections().values().stream()
-              .filter(c -> c.accountName().equals(selectedName))
+              .filter(c -> c.accountName().equalsIgnoreCase(selectedName))
               .findFirst();
           if (first.isEmpty()) {
             clientSession.send(
