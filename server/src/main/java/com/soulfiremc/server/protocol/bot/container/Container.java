@@ -17,17 +17,15 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
-import com.soulfiremc.server.data.ItemType;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.stream.Stream;
 
 @Getter
-public class Container {
+public abstract class Container {
   private final @Nonnull ContainerSlot[] slots;
   private final int id;
   private Int2IntMap properties;
@@ -49,10 +47,11 @@ public class Container {
   }
 
   public ContainerSlot[] getSlots(int start, int end) {
-    var items = new ContainerSlot[end - start + 1];
+    var length = end - start + 1;
+    var items = new ContainerSlot[length];
 
     if (end + 1 - start >= 0) {
-      System.arraycopy(slots, start, items, 0, end + 1 - start);
+      System.arraycopy(slots, start, items, 0, length);
     }
 
     return items;
@@ -73,16 +72,5 @@ public class Container {
     }
 
     return properties.getOrDefault(property, 0);
-  }
-
-  public Stream<ContainerSlot> stream() {
-    return Stream.of(slots);
-  }
-
-  public int countItems(ItemType itemType) {
-    return stream()
-      .filter(slot -> slot.item() != null && slot.item().type() == itemType)
-      .mapToInt(slot -> slot.item().getAmount())
-      .sum();
   }
 }

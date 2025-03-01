@@ -17,12 +17,13 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public final class ContainerSlot {
   private final int slot;
   private SFItemStack item;
