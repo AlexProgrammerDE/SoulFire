@@ -38,6 +38,7 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.mcstructs.LevelLoadStatusManager;
 import com.soulfiremc.server.util.structs.EntityMovement;
+import com.soulfiremc.server.util.structs.ReferenceCache;
 import com.soulfiremc.server.util.structs.TickTimer;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.buffer.Unpooled;
@@ -106,6 +107,8 @@ public final class SessionDataManager {
   private final InstanceSettingsSource settingsSource;
   private final Logger log;
   private final BotConnection connection;
+  private static final ReferenceCache<ServerPlayData> SERVER_PLAY_DATA_CACHE = new ReferenceCache<>();
+  private static final ReferenceCache<ClientboundCommandsPacket> COMMANDS_DATA_CACHE = new ReferenceCache<>();
   private final PlayerListState playerListState = new PlayerListState();
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
@@ -119,6 +122,7 @@ public final class SessionDataManager {
   private LocalPlayer localPlayer;
   private LevelLoadStatusManager levelLoadStatusManager;
   private @Nullable ServerPlayData serverPlayData;
+  private @Nullable ClientboundCommandsPacket commandsPacket;
   private GameProfile botProfile;
   @Getter(value = AccessLevel.PRIVATE)
   private Level level;
@@ -442,8 +446,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onServerPlayData(ClientboundServerDataPacket packet) {
-    serverPlayData =
-      new ServerPlayData(packet.getMotd(), packet.getIconBytes());
+    serverPlayData = SERVER_PLAY_DATA_CACHE
+      .poolReference(new ServerPlayData(packet.getMotd(), packet.getIconBytes()));
+  }
+
+  @EventHandler
+  public void onCommands(ClientboundCommandsPacket packet) {
+    commandsPacket = COMMANDS_DATA_CACHE.poolReference(packet);
   }
 
   @EventHandler

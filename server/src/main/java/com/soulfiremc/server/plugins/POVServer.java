@@ -182,7 +182,7 @@ public final class POVServer extends InternalPlugin {
     ));
     server.setGlobalFlag(MinecraftConstants.SERVER_LOGIN_HANDLER_KEY, new POVServerLoginHandler());
 
-    server.addListener(new POVServerAdapter(port, instanceManager, settingsSource));
+    server.addListener(new POVServerAdapter(port, instanceManager));
 
     server.bind();
   }
@@ -333,6 +333,16 @@ public final class POVServer extends InternalPlugin {
           borderState.newAbsoluteMaxSize(),
           borderState.warningBlocks(),
           borderState.warningTime()));
+    }
+
+    var serverData = dataManager.serverPlayData();
+    if (serverData != null) {
+      clientSession.send(new ClientboundServerDataPacket(serverData.motd(), serverData.iconBytes()));
+    }
+
+    var commandsPacket = dataManager.commandsPacket();
+    if (commandsPacket != null) {
+      clientSession.send(commandsPacket);
     }
 
     // Give initial coordinates to the client
@@ -779,7 +789,6 @@ public final class POVServer extends InternalPlugin {
   private static class POVServerAdapter extends ServerAdapter {
     private final int port;
     private final InstanceManager instanceManager;
-    private final InstanceSettingsSource settingsSource;
 
     @Override
     public void serverBound(ServerBoundEvent event) {
@@ -801,7 +810,7 @@ public final class POVServer extends InternalPlugin {
 
     @Override
     public void sessionAdded(SessionAddedEvent event) {
-      event.getSession().addListener(new C2POVAdapter(instanceManager, settingsSource));
+      event.getSession().addListener(new C2POVAdapter(instanceManager));
       event.getSession().addListener(new SessionAdapter() {
         private boolean fixedOnce;
 
@@ -833,7 +842,6 @@ public final class POVServer extends InternalPlugin {
   @RequiredArgsConstructor
   private static class C2POVAdapter extends SessionAdapter {
     private final InstanceManager instanceManager;
-    private final InstanceSettingsSource settingsSource;
     private BotConnection botConnection;
     private boolean enableForwarding;
     private Vector3d lastPosition;

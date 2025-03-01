@@ -20,5 +20,19 @@ package com.soulfiremc.server.protocol.bot.model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public record ServerPlayData(
-  Component motd, byte @Nullable [] iconBytes) {}
+  Component motd, byte @Nullable [] iconBytes) {
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ServerPlayData(var otherMotd, var otherIconBytes))) return false;
+    return Objects.equals(motd, otherMotd) && Objects.deepEquals(iconBytes, otherIconBytes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(motd, Arrays.hashCode(iconBytes));
+  }
+}
