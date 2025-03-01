@@ -114,7 +114,10 @@ import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.Clie
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.*;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
@@ -1028,34 +1031,45 @@ public final class POVServer extends InternalPlugin {
         var clientEntity = botConnection.dataManager().localPlayer();
         // Bot -> MC Client
         switch (packet) {
-          case ServerboundMovePlayerPosRotPacket posRot -> {
-            clientSession.send(
-              new ClientboundMoveEntityPosRotPacket(
-                clientEntity.entityId(),
-                posRot.getX() - lastPosition.getX(),
-                posRot.getY() - lastPosition.getY(),
-                posRot.getZ() - lastPosition.getZ(),
-                posRot.getYaw(),
-                posRot.getPitch(),
-                clientEntity.onGround()));
-            lastPosition = Vector3d.from(posRot.getX(), posRot.getY(), posRot.getZ());
+          case ServerboundMovePlayerPosRotPacket ignored -> {
+            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+              clientSession.send(
+                new ClientboundPlayerPositionPacket(
+                  Integer.MIN_VALUE,
+                  clientEntity.pos(),
+                  clientEntity.deltaMovement(),
+                  clientEntity.xRot(),
+                  clientEntity.yRot(),
+                  List.of()
+                ));
+            }
           }
-          case ServerboundMovePlayerPosPacket pos -> {
-            clientSession.send(
-              new ClientboundMoveEntityPosPacket(
-                clientEntity.entityId(),
-                pos.getX() - lastPosition.getX(),
-                pos.getY() - lastPosition.getY(),
-                pos.getZ() - lastPosition.getZ(),
-                clientEntity.onGround()));
-            lastPosition = Vector3d.from(pos.getX(), pos.getY(), pos.getZ());
+          case ServerboundMovePlayerPosPacket ignored -> {
+            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+              clientSession.send(
+                new ClientboundPlayerPositionPacket(
+                  Integer.MIN_VALUE,
+                  clientEntity.pos(),
+                  clientEntity.deltaMovement(),
+                  clientEntity.xRot(),
+                  clientEntity.yRot(),
+                  List.of()
+                ));
+            }
           }
-          case ServerboundMovePlayerRotPacket rot -> clientSession.send(
-            new ClientboundMoveEntityRotPacket(
-              clientEntity.entityId(),
-              rot.getYaw(),
-              rot.getPitch(),
-              clientEntity.onGround()));
+          case ServerboundMovePlayerRotPacket ignored -> {
+            if (clientEntity.pos().distance(lastPosition) > 0.1) {
+              clientSession.send(
+                new ClientboundPlayerPositionPacket(
+                  Integer.MIN_VALUE,
+                  clientEntity.pos(),
+                  clientEntity.deltaMovement(),
+                  clientEntity.xRot(),
+                  clientEntity.yRot(),
+                  List.of()
+                ));
+            }
+          }
           default -> {
             // We don't need to handle all Bot -> Server packets
           }
