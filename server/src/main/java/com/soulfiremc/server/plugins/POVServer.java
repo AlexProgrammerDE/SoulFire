@@ -941,10 +941,6 @@ public final class POVServer extends InternalPlugin {
     }
 
     private void executeSync(Session clientSession) {
-      if (lastClientSettings != null && botConnection.settingsSource().get(POVServerSettings.USE_USER_SETTINGS)) {
-        botConnection.sendPacket(lastClientSettings);
-      }
-
       try {
         syncBotToUser(botConnection, clientSession);
       } catch (Throwable t) {
@@ -957,6 +953,10 @@ public final class POVServer extends InternalPlugin {
 
       // Give the client a few moments to process the packets
       TimeUtil.waitTime(2, TimeUnit.SECONDS);
+
+      if (lastClientSettings != null && botConnection.settingsSource().get(POVServerSettings.USE_USER_SETTINGS)) {
+        botConnection.sendPacket(lastClientSettings);
+      }
 
       lastPosition = botConnection.dataManager().localPlayer().pos();
       enableForwarding = true;
