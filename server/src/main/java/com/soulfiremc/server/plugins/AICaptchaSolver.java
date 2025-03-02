@@ -173,9 +173,9 @@ public final class AICaptchaSolver extends InternalPlugin {
         .uiName("AI System prompt")
         .description("What the bots instruction is")
         .defaultValue("""
-          Reply with the text from the image.
-          Only respond with the text inside the captcha.
-          Example: XYZAB""")
+          Extract the text from the CAPTCHA image.
+          Only respond with the text exactly like in the image.
+          Do not write anything except the text.""")
         .textarea(true)
         .build();
     public static final StringProperty MODEL =
