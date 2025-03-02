@@ -37,7 +37,7 @@ public final class AutoRegister extends InternalPlugin {
     super(new PluginInfo(
       "auto-register",
       "1.0.0",
-      "Automatically registers bots on servers",
+      "Automatically registers bots AuthMe servers",
       "AlexProgrammerDE",
       "GPL-3.0",
       "https://soulfiremc.com"
