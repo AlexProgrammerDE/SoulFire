@@ -24,8 +24,6 @@ import com.google.gson.stream.JsonWriter;
 import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("unused")
 public record BlockType(

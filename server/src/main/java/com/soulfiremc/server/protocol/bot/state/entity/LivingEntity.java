@@ -35,8 +35,8 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeM
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.FloatEntityMetadata;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
@@ -85,6 +85,7 @@ public abstract class LivingEntity extends Entity {
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
     this.setHealth(this.getMaxHealth());
+    this.blocksBuilding = true;
     this.reapplyPosition();
     this.setYRot((float) (Math.random() * (float) (Math.PI * 2)));
   }
@@ -555,7 +556,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public Optional<Vector3i> getSleepingPos() {
-    return this.metadataState.get(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
+    return this.entityData.get(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
   }
 
   public boolean isSleeping() {
@@ -587,15 +588,12 @@ public abstract class LivingEntity extends Entity {
     return scale;
   }
 
-  protected void setLivingEntityFlag(int key, boolean value) {
-    int currentFlags = this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE);
-    if (value) {
-      currentFlags |= key;
-    } else {
-      currentFlags &= ~key;
-    }
+  public boolean isUsingItem() {
+    return (this.entityData.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & LIVING_ENTITY_FLAG_IS_USING) > 0;
+  }
 
-    this.metadataState.set(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) currentFlags);
+  public InteractionHand getUsedItemHand() {
+    return (this.entityData.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & LIVING_ENTITY_FLAG_OFF_HAND) > 0 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
   }
 
   @Override
@@ -637,7 +635,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public boolean isAutoSpinAttack() {
-    return (this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 4) != 0;
+    return (this.entityData.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & LIVING_ENTITY_FLAG_SPIN_ATTACK) != 0;
   }
 
   @Override
@@ -658,11 +656,11 @@ public abstract class LivingEntity extends Entity {
   }
 
   public float getHealth() {
-    return this.metadataState.get(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT);
   }
 
   public void setHealth(float health) {
-    this.metadataState.set(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
+    this.entityData.set(NamedEntityData.LIVING_ENTITY__HEALTH, MetadataTypes.FLOAT, FloatEntityMetadata::new, MathHelper.clamp(health, 0.0F, this.getMaxHealth()));
   }
 
   public boolean isDeadOrDying() {
@@ -770,10 +768,6 @@ public abstract class LivingEntity extends Entity {
     }
   }
 
-  public boolean isUsingItem() {
-    return (this.metadataState.get(NamedEntityData.LIVING_ENTITY__LIVING_ENTITY_FLAGS, MetadataTypes.BYTE) & 1) > 0;
-  }
-
   protected boolean canGlide() {
     if (!this.onGround() && !this.effectState().hasEffect(EffectType.LEVITATION)) {
       for (var slot : EquipmentSlot.values()) {
@@ -790,6 +784,12 @@ public abstract class LivingEntity extends Entity {
   public abstract Optional<SFItemStack> getItemBySlot(EquipmentSlot slot);
 
   public abstract void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item);
+
+  public abstract HandPreference getMainArm();
+
+  public boolean canUseSlot(EquipmentSlot slot) {
+    return false;
+  }
 
   protected float getFlyingSpeed() {
     return 0.02F;

@@ -36,6 +36,7 @@ public record EntityType(
   double defaultFollowRange,
   boolean playerEntity,
   boolean livingEntity,
+  boolean mobEntity,
   boolean boatEntity,
   boolean minecartEntity,
   boolean windChargeEntity,

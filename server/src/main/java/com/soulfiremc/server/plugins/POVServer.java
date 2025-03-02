@@ -567,12 +567,12 @@ public final class POVServer extends InternalPlugin {
             effect.getValue().blend()));
       }
 
-      if (!entity.metadataState().metadataStore().isEmpty()) {
+      if (!entity.entityData().metadataStore().isEmpty()) {
         clientSession.send(
           new ClientboundSetEntityDataPacket(
             entity.entityId(),
             entity
-              .metadataState()
+              .entityData()
               .metadataStore()
               .values()
               .toArray(new EntityMetadata<?, ?>[0])));

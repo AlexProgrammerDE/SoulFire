@@ -29,6 +29,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
@@ -90,6 +91,9 @@ public final class EntitiesJsonGenerator implements IDataGenerator {
     }
     if (defaultEntity instanceof LivingEntity) {
       entityDesc.addProperty("livingEntity", true);
+    }
+    if (defaultEntity instanceof Mob) {
+      entityDesc.addProperty("mobEntity", true);
     }
     if (defaultEntity instanceof AbstractBoat) {
       entityDesc.addProperty("boatEntity", true);

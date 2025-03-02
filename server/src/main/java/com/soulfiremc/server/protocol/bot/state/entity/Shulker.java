@@ -125,7 +125,7 @@ public final class Shulker extends Mob {
   }
 
   public Direction getAttachFace() {
-    return Direction.fromMCPLDirection(this.metadataState.get(NamedEntityData.SHULKER__ATTACH_FACE, MetadataTypes.DIRECTION));
+    return Direction.fromMCPLDirection(this.entityData.get(NamedEntityData.SHULKER__ATTACH_FACE, MetadataTypes.DIRECTION));
   }
 
   private boolean updatePeekAmount() {
@@ -145,6 +145,6 @@ public final class Shulker extends Mob {
   }
 
   private int getRawPeekAmount() {
-    return this.metadataState.get(NamedEntityData.SHULKER__PEEK, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.SHULKER__PEEK, MetadataTypes.INT);
   }
 }

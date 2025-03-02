@@ -45,6 +45,7 @@ public final class AbstractBoat extends VehicleEntity {
 
   public AbstractBoat(EntityType entityType, Level level) {
     super(entityType, level);
+    this.blocksBuilding = true;
   }
 
   @Override
@@ -114,15 +115,15 @@ public final class AbstractBoat extends VehicleEntity {
   }
 
   public boolean getPaddleState(int i) {
-    return this.metadataState.get(i == 0 ? NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_LEFT : NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_RIGHT, MetadataTypes.BOOLEAN) && this.getControllingPassenger() != null;
+    return this.entityData.get(i == 0 ? NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_LEFT : NamedEntityData.ABSTRACT_BOAT__ID_PADDLE_RIGHT, MetadataTypes.BOOLEAN) && this.getControllingPassenger() != null;
   }
 
   private int getBubbleTime() {
-    return this.metadataState.get(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT);
   }
 
   private void setBubbleTime(int i) {
-    this.metadataState.set(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT, IntEntityMetadata::new, i);
+    this.entityData.set(NamedEntityData.ABSTRACT_BOAT__ID_BUBBLE_TIME, MetadataTypes.INT, IntEntityMetadata::new, i);
   }
 
   public float getBubbleAngle(float f) {

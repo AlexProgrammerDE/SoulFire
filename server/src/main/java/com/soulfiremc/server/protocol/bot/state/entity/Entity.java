@@ -77,7 +77,7 @@ public class Entity {
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
   protected final EntityType entityType;
-  protected final EntityMetadataState metadataState;
+  protected final EntityMetadataState entityData;
   private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
   private final List<Entity.Movement> movementThisTick = new ArrayList<>();
   private final Set<BlockState> blocksInside = new ReferenceArraySet<>();
@@ -133,11 +133,12 @@ public class Entity {
   private AABB bb = INITIAL_AABB;
   private int portalCooldown;
   public int tickCount;
+  public boolean blocksBuilding;
   @Nullable
   private Entity vehicle;
 
   public Entity(EntityType entityType, Level level) {
-    this.metadataState = new EntityMetadataState(this);
+    this.entityData = new EntityMetadataState(this);
     this.entityType = entityType;
     this.level = level;
     this.dimensions = entityType.dimensions();
@@ -147,7 +148,7 @@ public class Entity {
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
     MinecraftTypes.readVarInt(buf);
-    this.metadataState.assignValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
+    this.entityData.assignValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
 
     this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();
@@ -393,6 +394,17 @@ public class Entity {
     data(packet.getData());
   }
 
+  public double distanceToSqr(Entity entity) {
+    return this.distanceToSqr(entity.pos());
+  }
+
+  public double distanceToSqr(Vector3d vec) {
+    var xDiff = this.x() - vec.getX();
+    var yDiff = this.y() - vec.getY();
+    var zDiff = this.z() - vec.getZ();
+    return xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
+  }
+
   public void syncPacketPositionCodec(double x, double y, double z) {
     this.packetPositionCodec.base(Vector3d.from(x, y, z));
   }
@@ -604,7 +616,7 @@ public class Entity {
   }
 
   protected boolean getSharedFlag(int flag) {
-    return (this.metadataState.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE) & 1 << flag) != 0;
+    return (this.entityData.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE) & 1 << flag) != 0;
   }
 
   public void tick() {
@@ -945,16 +957,16 @@ public class Entity {
   }
 
   protected void setSharedFlag(int flag, boolean set) {
-    byte b = this.metadataState.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE);
+    byte b = this.entityData.get(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE);
     if (set) {
-      this.metadataState.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
+      this.entityData.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b | 1 << flag));
     } else {
-      this.metadataState.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
+      this.entityData.set(NamedEntityData.ENTITY__SHARED_FLAGS, MetadataTypes.BYTE, ByteEntityMetadata::new, (byte) (b & ~(1 << flag)));
     }
   }
 
   public boolean isNoGravity() {
-    return this.metadataState.get(NamedEntityData.ENTITY__NO_GRAVITY, MetadataTypes.BOOLEAN);
+    return this.entityData.get(NamedEntityData.ENTITY__NO_GRAVITY, MetadataTypes.BOOLEAN);
   }
 
   protected double getDefaultGravity() {
@@ -973,11 +985,11 @@ public class Entity {
   }
 
   public Pose getPose() {
-    return this.metadataState.get(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE);
+    return this.entityData.get(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE);
   }
 
   public void setPose(Pose pose) {
-    this.metadataState.set(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE, ObjectEntityMetadata::new, pose);
+    this.entityData.set(NamedEntityData.ENTITY__POSE, MetadataTypes.POSE, ObjectEntityMetadata::new, pose);
   }
 
   public boolean hasPose(Pose pose) {
@@ -1266,7 +1278,7 @@ public class Entity {
   }
 
   public int getTicksFrozen() {
-    return this.metadataState.get(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.ENTITY__TICKS_FROZEN, MetadataTypes.INT);
   }
 
   public float getPercentFrozen() {

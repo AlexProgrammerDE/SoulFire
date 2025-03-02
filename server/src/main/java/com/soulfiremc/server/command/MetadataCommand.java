@@ -48,7 +48,7 @@ public final class MetadataCommand {
                       return Command.SINGLE_SUCCESS;
                     }
 
-                    c.getSource().source().sendInfo("Metadata for entity {}: {}", entity.get().entityId(), entity.get().metadataState().toNamedMap());
+                    c.getSource().source().sendInfo("Metadata for entity {}: {}", entity.get().entityId(), entity.get().entityData().toNamedMap());
 
                     return Command.SINGLE_SUCCESS;
                   });

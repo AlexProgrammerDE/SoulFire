@@ -62,6 +62,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "allay",
       "pathfinder_mob",
@@ -108,6 +109,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "armadillo",
       "animal",
@@ -178,6 +180,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "axolotl",
       "animal",
@@ -252,6 +255,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "bat",
       "ambient_creature",
@@ -277,6 +281,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "bee",
       "animal",
@@ -351,6 +356,7 @@
     "attackable": true,
     "defaultFollowRange": 48.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "blaze",
       "monster",
@@ -397,6 +403,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "bogged",
       "abstract_skeleton",
@@ -423,6 +430,7 @@
     "attackable": true,
     "defaultFollowRange": 24.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "breeze",
       "monster",
@@ -473,6 +481,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "camel",
       "abstract_horse",
@@ -501,6 +510,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "cat",
       "tamable_animal",
@@ -528,6 +538,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "cave_spider",
       "spider",
@@ -626,6 +637,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "chicken",
       "animal",
@@ -653,6 +665,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "cod",
       "abstract_schooling_fish",
@@ -704,6 +717,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "cow",
       "animal",
@@ -730,6 +744,7 @@
     "attackable": true,
     "defaultFollowRange": 32.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "creaking",
       "monster",
@@ -755,6 +770,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "creeper",
       "monster",
@@ -828,6 +844,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "dolphin",
       "ageable_water_creature",
@@ -855,6 +872,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "donkey",
       "abstract_chested_horse",
@@ -905,6 +923,7 @@
     "attackable": true,
     "defaultFollowRange": 35.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "drowned",
       "zombie",
@@ -954,6 +973,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "elder_guardian",
       "guardian",
@@ -980,6 +1000,7 @@
     "attackable": true,
     "defaultFollowRange": 64.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "ender_man",
       "monster",
@@ -1005,6 +1026,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "endermite",
       "monster",
@@ -1031,6 +1053,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "ender_dragon",
       "mob",
@@ -1098,6 +1121,7 @@
     "attackable": true,
     "defaultFollowRange": 12.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "evoker",
       "spellcaster_illager",
@@ -1271,6 +1295,7 @@
     "attackable": true,
     "defaultFollowRange": 32.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "fox",
       "animal",
@@ -1298,6 +1323,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "frog",
       "animal",
@@ -1348,6 +1374,7 @@
     "attackable": true,
     "defaultFollowRange": 100.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "ghast",
       "flying_mob",
@@ -1372,6 +1399,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "giant",
       "monster",
@@ -1421,6 +1449,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "glow_squid",
       "squid",
@@ -1449,6 +1478,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "goat",
       "animal",
@@ -1475,6 +1505,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "guardian",
       "monster",
@@ -1500,6 +1531,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "hoglin",
       "animal",
@@ -1551,6 +1583,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "horse",
       "abstract_horse",
@@ -1578,6 +1611,7 @@
     "attackable": true,
     "defaultFollowRange": 35.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "husk",
       "zombie",
@@ -1604,6 +1638,7 @@
     "attackable": true,
     "defaultFollowRange": 18.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "illusioner",
       "spellcaster_illager",
@@ -1654,6 +1689,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "iron_golem",
       "abstract_golem",
@@ -1830,6 +1866,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "llama",
       "abstract_chested_horse",
@@ -1880,6 +1917,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "magma_cube",
       "slime",
@@ -1995,6 +2033,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "mushroom_cow",
       "cow",
@@ -2023,6 +2062,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "mule",
       "abstract_chested_horse",
@@ -2099,6 +2139,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "ocelot",
       "animal",
@@ -2215,6 +2256,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "panda",
       "animal",
@@ -2242,6 +2284,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "parrot",
       "shoulder_riding_entity",
@@ -2270,6 +2313,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "phantom",
       "flying_mob",
@@ -2295,6 +2339,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "pig",
       "animal",
@@ -2321,6 +2366,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "piglin",
       "abstract_piglin",
@@ -2347,6 +2393,7 @@
     "attackable": true,
     "defaultFollowRange": 12.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "piglin_brute",
       "abstract_piglin",
@@ -2373,6 +2420,7 @@
     "attackable": true,
     "defaultFollowRange": 32.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "pillager",
       "abstract_illager",
@@ -2402,6 +2450,7 @@
     "attackable": true,
     "defaultFollowRange": 20.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "polar_bear",
       "animal",
@@ -2452,6 +2501,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "pufferfish",
       "abstract_fish",
@@ -2479,6 +2529,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "rabbit",
       "animal",
@@ -2505,6 +2556,7 @@
     "attackable": true,
     "defaultFollowRange": 32.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "ravager",
       "raider",
@@ -2533,6 +2585,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "salmon",
       "abstract_schooling_fish",
@@ -2561,6 +2614,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "sheep",
       "animal",
@@ -2588,6 +2642,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "shulkerEntity": true,
     "inheritedClasses": [
       "shulker",
@@ -2635,6 +2690,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "silverfish",
       "monster",
@@ -2660,6 +2716,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "skeleton",
       "abstract_skeleton",
@@ -2687,6 +2744,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "skeleton_horse",
       "abstract_horse",
@@ -2714,6 +2772,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "slime",
       "mob",
@@ -2761,6 +2820,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "sniffer",
       "animal",
@@ -2811,6 +2871,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "snow_golem",
       "abstract_golem",
@@ -2880,6 +2941,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "spider",
       "monster",
@@ -2953,6 +3015,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "squid",
       "ageable_water_creature",
@@ -2979,6 +3042,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "stray",
       "abstract_skeleton",
@@ -3007,6 +3071,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "strider",
       "animal",
@@ -3034,6 +3099,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "tadpole",
       "abstract_fish",
@@ -3126,6 +3192,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "trader_llama",
       "llama",
@@ -3177,6 +3244,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "tropical_fish",
       "abstract_schooling_fish",
@@ -3205,6 +3273,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "turtle",
       "animal",
@@ -3232,6 +3301,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "vex",
       "monster",
@@ -3258,6 +3328,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "villager",
       "abstract_villager",
@@ -3284,6 +3355,7 @@
     "attackable": true,
     "defaultFollowRange": 12.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "vindicator",
       "abstract_illager",
@@ -3313,6 +3385,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "wandering_trader",
       "abstract_villager",
@@ -3340,6 +3413,7 @@
     "attackable": true,
     "defaultFollowRange": 24.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "warden",
       "monster",
@@ -3389,6 +3463,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "witch",
       "raider",
@@ -3417,6 +3492,7 @@
     "attackable": true,
     "defaultFollowRange": 40.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "wither_boss",
       "monster",
@@ -3443,6 +3519,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "wither_skeleton",
       "abstract_skeleton",
@@ -3492,6 +3569,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "wolf",
       "tamable_animal",
@@ -3520,6 +3598,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "zoglin",
       "monster",
@@ -3545,6 +3624,7 @@
     "attackable": true,
     "defaultFollowRange": 35.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "zombie",
       "monster",
@@ -3571,6 +3651,7 @@
     "attackable": true,
     "defaultFollowRange": 16.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "zombie_horse",
       "abstract_horse",
@@ -3598,6 +3679,7 @@
     "attackable": true,
     "defaultFollowRange": 35.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "zombie_villager",
       "zombie",
@@ -3625,6 +3707,7 @@
     "attackable": true,
     "defaultFollowRange": 35.0,
     "livingEntity": true,
+    "mobEntity": true,
     "inheritedClasses": [
       "zombified_piglin",
       "zombie",

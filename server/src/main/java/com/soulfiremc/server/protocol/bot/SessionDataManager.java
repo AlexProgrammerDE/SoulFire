@@ -313,7 +313,7 @@ public final class SessionDataManager {
 
     this.localPlayer = newLocalPlayer;
     if (packet.isKeepMetadata()) {
-      newLocalPlayer.metadataState().assignValues(oldLocalPlayer.metadataState().metadataStore().values());
+      newLocalPlayer.entityData().assignValues(oldLocalPlayer.entityData().metadataStore().values());
 
       newLocalPlayer.setDeltaMovement(oldLocalPlayer.deltaMovement());
       newLocalPlayer.setYRot(oldLocalPlayer.yRot());
@@ -954,7 +954,7 @@ public final class SessionDataManager {
       return;
     }
 
-    state.metadataState().assignValues(List.of(packet.getMetadata()));
+    state.entityData().assignValues(List.of(packet.getMetadata()));
   }
 
   @EventHandler

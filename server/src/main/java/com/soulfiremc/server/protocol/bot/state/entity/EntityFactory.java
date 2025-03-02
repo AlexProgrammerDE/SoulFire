@@ -18,11 +18,8 @@
 package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.EntityType;
-import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -46,18 +43,12 @@ public final class EntityFactory {
       return Optional.of(new Display.ItemDisplay(entityType, level));
     } else if (entityType == EntityType.TEXT_DISPLAY) {
       return Optional.of(new Display.TextDisplay(entityType, level));
+    } else if (entityType == EntityType.ARMOR_STAND) {
+      return Optional.of(new ArmorStand(level));
+    } else if (entityType.mobEntity()) {
+      return Optional.of(new Mob(entityType, level));
     } else if (entityType.livingEntity()) {
-      // TODO: Implement entity inventories
-      return Optional.of(new LivingEntity(entityType, level) {
-        @Override
-        public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
-          return Optional.empty();
-        }
-
-        @Override
-        public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
-        }
-      });
+      throw new IllegalStateException("Unknown subtype of living entities!");
     } else {
       return Optional.of(new Entity(entityType, level));
     }

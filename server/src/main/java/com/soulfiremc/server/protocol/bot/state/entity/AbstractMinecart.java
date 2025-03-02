@@ -23,6 +23,7 @@ import com.soulfiremc.server.protocol.bot.state.Level;
 public final class AbstractMinecart extends VehicleEntity {
   public AbstractMinecart(EntityType entityType, Level level) {
     super(entityType, level);
+    this.blocksBuilding = true;
   }
 
   @Override
@@ -37,5 +38,9 @@ public final class AbstractMinecart extends VehicleEntity {
 
   @Override
   public void push(Entity entity) {
+  }
+
+  public boolean isRideable() {
+    return false;
   }
 }

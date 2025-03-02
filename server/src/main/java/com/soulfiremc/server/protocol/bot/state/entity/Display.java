@@ -198,49 +198,49 @@ public abstract class Display extends Entity {
   }
 
   private int getTransformationInterpolationDuration() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__TRANSFORMATION_INTERPOLATION_DURATION, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.DISPLAY__TRANSFORMATION_INTERPOLATION_DURATION, MetadataTypes.INT);
   }
 
   private int getTransformationInterpolationDelay() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.DISPLAY__TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS, MetadataTypes.INT);
   }
 
   private int getPosRotInterpolationDuration() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__POS_ROT_INTERPOLATION_DURATION, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.DISPLAY__POS_ROT_INTERPOLATION_DURATION, MetadataTypes.INT);
   }
 
   private Display.BillboardConstraints getBillboardConstraints() {
-    return Display.BillboardConstraints.fromId(this.metadataState.get(NamedEntityData.DISPLAY__BILLBOARD_RENDER_CONSTRAINTS, MetadataTypes.BYTE));
+    return Display.BillboardConstraints.fromId(this.entityData.get(NamedEntityData.DISPLAY__BILLBOARD_RENDER_CONSTRAINTS, MetadataTypes.BYTE));
   }
 
   @Nullable
   private Brightness getBrightnessOverride() {
-    int i = this.metadataState.get(NamedEntityData.DISPLAY__BRIGHTNESS_OVERRIDE, MetadataTypes.INT);
+    int i = this.entityData.get(NamedEntityData.DISPLAY__BRIGHTNESS_OVERRIDE, MetadataTypes.INT);
     return i != -1 ? Brightness.unpack(i) : null;
   }
 
   private int getPackedBrightnessOverride() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__BRIGHTNESS_OVERRIDE, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.DISPLAY__BRIGHTNESS_OVERRIDE, MetadataTypes.INT);
   }
 
   private float getViewRange() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__VIEW_RANGE, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.DISPLAY__VIEW_RANGE, MetadataTypes.FLOAT);
   }
 
   private float getShadowRadius() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__SHADOW_RADIUS, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.DISPLAY__SHADOW_RADIUS, MetadataTypes.FLOAT);
   }
 
   private float getShadowStrength() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__SHADOW_STRENGTH, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.DISPLAY__SHADOW_STRENGTH, MetadataTypes.FLOAT);
   }
 
   private float getWidth() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__WIDTH, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.DISPLAY__WIDTH, MetadataTypes.FLOAT);
   }
 
   private int getGlowColorOverride() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__GLOW_COLOR_OVERRIDE, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.DISPLAY__GLOW_COLOR_OVERRIDE, MetadataTypes.INT);
   }
 
   public float calculateInterpolationProgress(float partialTick) {
@@ -257,7 +257,7 @@ public abstract class Display extends Entity {
   }
 
   private float getHeight() {
-    return this.metadataState.get(NamedEntityData.DISPLAY__HEIGHT, MetadataTypes.FLOAT);
+    return this.entityData.get(NamedEntityData.DISPLAY__HEIGHT, MetadataTypes.FLOAT);
   }
 
   @Override
@@ -285,7 +285,7 @@ public abstract class Display extends Entity {
 
   private Display.RenderState createFreshRenderState() {
     return new Display.RenderState(
-      Display.GenericInterpolator.constant(createTransformation(this.metadataState)),
+      Display.GenericInterpolator.constant(createTransformation(this.entityData)),
       this.getBillboardConstraints(),
       this.getPackedBrightnessOverride(),
       Display.FloatInterpolator.constant(this.getShadowRadius()),
@@ -299,7 +299,7 @@ public abstract class Display extends Entity {
     var shadowRadius = renderState.shadowRadius.get(partialTick);
     var shadowStrength = renderState.shadowStrength.get(partialTick);
     return new Display.RenderState(
-      new Display.TransformationInterpolator(transform, createTransformation(this.metadataState)),
+      new Display.TransformationInterpolator(transform, createTransformation(this.entityData)),
       this.getBillboardConstraints(),
       this.getPackedBrightnessOverride(),
       new Display.LinearFloatInterpolator(shadowRadius, this.getShadowRadius()),
@@ -372,7 +372,7 @@ public abstract class Display extends Entity {
     }
 
     private BlockState getBlockState() {
-      return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(this.metadataState.get(NamedEntityData.BLOCK_DISPLAY__BLOCK_STATE, MetadataTypes.BLOCK_STATE));
+      return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(this.entityData.get(NamedEntityData.BLOCK_DISPLAY__BLOCK_STATE, MetadataTypes.BLOCK_STATE));
     }
 
     @Nullable
@@ -413,11 +413,11 @@ public abstract class Display extends Entity {
     }
 
     private SFItemStack getItemStack() {
-      return SFItemStack.from(this.metadataState.get(NamedEntityData.ITEM_DISPLAY__ITEM_STACK, MetadataTypes.ITEM));
+      return SFItemStack.from(this.entityData.get(NamedEntityData.ITEM_DISPLAY__ITEM_STACK, MetadataTypes.ITEM));
     }
 
     private ItemDisplayContext getItemTransform() {
-      return ItemDisplayContext.fromId(this.metadataState.get(NamedEntityData.ITEM_DISPLAY__ITEM_DISPLAY, MetadataTypes.BYTE));
+      return ItemDisplayContext.fromId(this.entityData.get(NamedEntityData.ITEM_DISPLAY__ITEM_DISPLAY, MetadataTypes.BYTE));
     }
 
     @Nullable
@@ -521,23 +521,23 @@ public abstract class Display extends Entity {
     }
 
     private Component getText() {
-      return this.metadataState.get(NamedEntityData.TEXT_DISPLAY__TEXT, MetadataTypes.CHAT);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__TEXT, MetadataTypes.CHAT);
     }
 
     private int getLineWidth() {
-      return this.metadataState.get(NamedEntityData.TEXT_DISPLAY__LINE_WIDTH, MetadataTypes.INT);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__LINE_WIDTH, MetadataTypes.INT);
     }
 
     private byte getTextOpacity() {
-      return this.metadataState.get(NamedEntityData.TEXT_DISPLAY__TEXT_OPACITY, MetadataTypes.BYTE);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__TEXT_OPACITY, MetadataTypes.BYTE);
     }
 
     private int getBackgroundColor() {
-      return this.metadataState.get(NamedEntityData.TEXT_DISPLAY__BACKGROUND_COLOR, MetadataTypes.INT);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__BACKGROUND_COLOR, MetadataTypes.INT);
     }
 
     private byte getFlags() {
-      return this.metadataState.get(NamedEntityData.TEXT_DISPLAY__STYLE_FLAGS, MetadataTypes.BYTE);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__STYLE_FLAGS, MetadataTypes.BYTE);
     }
 
     @Override

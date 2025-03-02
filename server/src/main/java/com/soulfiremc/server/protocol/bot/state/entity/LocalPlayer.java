@@ -31,6 +31,7 @@ import com.soulfiremc.server.util.mcstructs.Direction;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.raphimc.viabedrock.protocol.data.enums.java.InteractionHand;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
@@ -40,6 +41,9 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Represents the bot itself as an entity.
@@ -69,6 +73,8 @@ public final class LocalPlayer extends AbstractClientPlayer {
   private boolean showDeathScreen = true;
   private boolean doLimitedCrafting = false;
   private boolean flashOnSetHealth;
+  @Nullable
+  private InteractionHand usingItemHand;
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     this(connection, level, gameProfile, false, false);
@@ -227,6 +233,11 @@ public final class LocalPlayer extends AbstractClientPlayer {
   public void onSyncedDataUpdated(NamedEntityData entityData) {
     super.onSyncedDataUpdated(entityData);
     // TODO: Implement item animations
+  }
+
+  @Override
+  public InteractionHand getUsedItemHand() {
+    return Objects.requireNonNullElse(this.usingItemHand, InteractionHand.MAIN_HAND);
   }
 
   public void setExperienceValues(float currentXP, int maxXP, int level) {

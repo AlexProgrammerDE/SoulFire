@@ -41,6 +41,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.GlobalPos;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -264,8 +265,18 @@ public abstract class Player extends LivingEntity {
     return false;
   }
 
+  @Override
+  public HandPreference getMainArm() {
+    return this.entityData.get(NamedEntityData.PLAYER__PLAYER_MAIN_HAND, MetadataTypes.BYTE) == 0 ? HandPreference.LEFT_HAND : HandPreference.RIGHT_HAND;
+  }
+
+  @Override
+  public boolean canUseSlot(EquipmentSlot slot) {
+    return slot != EquipmentSlot.BODY;
+  }
+
   public int getScore() {
-    return this.metadataState.get(NamedEntityData.PLAYER__SCORE, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.PLAYER__SCORE, MetadataTypes.INT);
   }
 
   @Override

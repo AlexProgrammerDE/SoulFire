@@ -23,6 +23,7 @@ import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -55,14 +56,24 @@ public class Mob extends LivingEntity {
   }
 
   public boolean isNoAi() {
-    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_NO_AI) != 0;
+    return (this.entityData.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_NO_AI) != 0;
   }
 
   public boolean isLeftHanded() {
-    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_LEFTHANDED) != 0;
+    return (this.entityData.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_LEFTHANDED) != 0;
   }
 
   public boolean isAggressive() {
-    return (this.metadataState.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_AGGRESSIVE) != 0;
+    return (this.entityData.get(NamedEntityData.MOB__MOB_FLAGS, MetadataTypes.BYTE) & MOB_FLAG_AGGRESSIVE) != 0;
+  }
+
+  @Override
+  public HandPreference getMainArm() {
+    return this.isLeftHanded() ? HandPreference.LEFT_HAND : HandPreference.RIGHT_HAND;
+  }
+
+  @Override
+  public boolean canUseSlot(EquipmentSlot slot) {
+    return slot != EquipmentSlot.BODY;
   }
 }
