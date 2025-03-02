@@ -28,14 +28,17 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.protocol.BotConnection;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 
+@Slf4j
 public final class BrigadierHelper {
   private BrigadierHelper() {}
 
@@ -57,9 +60,9 @@ public final class BrigadierHelper {
     return new RedirectHelpWrapper(redirect, help, false);
   }
 
-  public static SingleRedirectModifier<CommandSourceStack> helpSingleRedirect(
+  public static RedirectModifier<CommandSourceStack> helpSingleRedirect(
     String help, SingleRedirectModifier<CommandSourceStack> redirect) {
-    return new SingleRedirectHelpWrapper(redirect, help, false);
+    return new RedirectHelpWrapper(o -> Collections.singleton(redirect.apply(o)), help, false);
   }
 
   public static Command<CommandSourceStack> privateCommand(Command<CommandSourceStack> command) {
@@ -86,6 +89,7 @@ public final class BrigadierHelper {
     }
 
     if (node.getCommand() != null) {
+      log.debug("Adding usage for {}", node.getUsageText());
       var helpWrapper = (BrigadierHelper.HelpCarrier) node.getCommand();
       if (!helpWrapper.privateCommand()) {
         result.add(new HelpData(prefix, helpWrapper.help()));
@@ -93,6 +97,7 @@ public final class BrigadierHelper {
     }
 
     if (node.getRedirect() != null) {
+      log.debug("Redirecting {} to {}", node.getUsageText(), node.getRedirect().getUsageText());
       var redirectHelpWrapper = (BrigadierHelper.HelpCarrier) node.getRedirectModifier();
       if (!redirectHelpWrapper.privateCommand()) {
         final var redirect =

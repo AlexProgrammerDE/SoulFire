@@ -38,7 +38,7 @@ public final class InstanceCommand {
 
                 return b.buildFuture();
               })
-            .redirect(
+            .forward(
               dispatcher.getRoot(),
               helpSingleRedirect(
                 "Instead of running a command for all possible instances, run it for a specific list of instances. Use a comma to separate the names",
@@ -51,6 +51,8 @@ public final class InstanceCommand {
                       .map(InstanceManager::id)
                       .collect(Collectors.toSet()));
                 }
-              ))));
+              ),
+              false
+            )));
   }
 }

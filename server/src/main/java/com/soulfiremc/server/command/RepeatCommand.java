@@ -30,7 +30,7 @@ public final class RepeatCommand {
       literal("repeat")
         .then(
           argument("amount", IntegerArgumentType.integer(1))
-            .fork(
+            .forward(
               dispatcher.getRoot(),
               helpRedirect(
                 "Repeat the command for the specified amount of times",
@@ -42,7 +42,8 @@ public final class RepeatCommand {
                   }
 
                   return list;
-                })
+                }),
+              true
             )));
   }
 }
