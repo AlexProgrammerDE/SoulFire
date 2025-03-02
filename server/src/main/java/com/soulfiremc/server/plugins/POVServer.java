@@ -361,27 +361,18 @@ public final class POVServer extends InternalPlugin {
           new MapData(128, 128, 0, 0, entry.getValue().colorData())));
     }
 
-    if (dataManager.playerListState().header() != null
-      && dataManager.playerListState().footer() != null) {
-      clientSession.send(
-        new ClientboundTabListPacket(
-          dataManager.playerListState().header(),
-          dataManager.playerListState().footer()));
-    }
+    var tabListHeader = dataManager.playerListState().header();
+    var tabListFooter = dataManager.playerListState().footer();
+    clientSession.send(
+      new ClientboundTabListPacket(
+        tabListHeader == null ? Component.empty() : tabListHeader,
+        tabListFooter == null ? Component.empty() : tabListFooter));
 
     var originalClientId =
       clientSession.getFlag(MinecraftConstants.PROFILE_KEY).getId();
     clientSession.send(
       new ClientboundPlayerInfoUpdatePacket(
-        EnumSet.of(
-          PlayerListEntryAction.ADD_PLAYER,
-          PlayerListEntryAction.INITIALIZE_CHAT,
-          PlayerListEntryAction.UPDATE_GAME_MODE,
-          PlayerListEntryAction.UPDATE_LISTED,
-          PlayerListEntryAction.UPDATE_LATENCY,
-          PlayerListEntryAction.UPDATE_DISPLAY_NAME,
-          PlayerListEntryAction.UPDATE_HAT,
-          PlayerListEntryAction.UPDATE_LIST_ORDER),
+        EnumSet.allOf(PlayerListEntryAction.class),
         dataManager.playerListState().entries().values().stream()
           .map(
             entry -> {

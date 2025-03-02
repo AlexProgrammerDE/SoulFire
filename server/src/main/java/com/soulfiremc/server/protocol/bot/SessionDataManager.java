@@ -514,8 +514,11 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onPlayerListHeaderFooter(ClientboundTabListPacket packet) {
-    playerListState.header(packet.getHeader());
-    playerListState.footer(packet.getFooter());
+    var header = packet.getHeader();
+    var footer = packet.getFooter();
+
+    playerListState.header(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(header).isEmpty() ? null : header);
+    playerListState.footer(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(footer).isEmpty() ? null : footer);
   }
 
   @EventHandler
