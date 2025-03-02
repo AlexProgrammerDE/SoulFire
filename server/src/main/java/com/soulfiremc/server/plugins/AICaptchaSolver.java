@@ -71,7 +71,7 @@ public final class AICaptchaSolver extends InternalPlugin {
         .content(ChatCompletionUserMessageParam.Content.ofArrayOfContentParts(List.of(
           ChatCompletionContentPart.ofImageUrl(ChatCompletionContentPartImage.builder()
             .imageUrl(ChatCompletionContentPartImage.ImageUrl.builder()
-              .url("data:image/jpeg;base64,%s".formatted(img))
+              .url("data:image/png;base64,%s".formatted(img))
               .build())
             .build())
         )))
@@ -102,14 +102,13 @@ public final class AICaptchaSolver extends InternalPlugin {
     connection.botControl().sendMessage(response);
   }
 
-  private static String toBase64PNG(BufferedImage image) {
-    var bos = new ByteArrayOutputStream();
-    try {
-      ImageIO.write(image, "png", bos);
+  private static String toBase64JPEG(BufferedImage image) {
+    try (var os = new ByteArrayOutputStream()) {
+      ImageIO.write(image, "png", os);
+      return Base64.getEncoder().encodeToString(os.toByteArray());
     } catch (IOException e) {
       throw new IllegalStateException("Failed to convert image to base64", e);
     }
-    return Base64.getEncoder().encodeToString(bos.toByteArray());
   }
 
   private static String getImageFromSource(BotConnection connection) {
@@ -124,7 +123,7 @@ public final class AICaptchaSolver extends InternalPlugin {
 
         int mapId = item.get(DataComponentTypes.MAP_ID);
         var mapState = connection.dataManager().mapDataStates().get(mapId);
-        yield toBase64PNG(mapState.toBufferedImage());
+        yield toBase64JPEG(mapState.toBufferedImage());
       }
     };
   }
@@ -137,21 +136,23 @@ public final class AICaptchaSolver extends InternalPlugin {
       return;
     }
 
-    try {
-      var plainMessage = event.parseToPlainText();
-      var textTrigger = settingsSource.get(AICaptchaSolverSettings.TEXT_TRIGGER);
+    event.connection().scheduler().runAsync(() -> {
+      try {
+        var plainMessage = event.parseToPlainText();
+        var textTrigger = settingsSource.get(AICaptchaSolverSettings.TEXT_TRIGGER);
 
-      if (plainMessage.contains(textTrigger)) {
-        handleImageInput(event.connection(), getImageFromSource(event.connection()));
+        if (plainMessage.contains(textTrigger)) {
+          handleImageInput(event.connection(), getImageFromSource(event.connection()));
+        }
+      } catch (Exception e) {
+        log.error("Failed to detect captcha", e);
       }
-    } catch (Exception e) {
-      log.error("Failed to detect captcha", e);
-    }
+    });
   }
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AICaptchaSolverSettings.class, "AI Chat Bot", this, "bot-message-square", AICaptchaSolverSettings.ENABLED);
+    event.settingsRegistry().addPluginPage(AICaptchaSolverSettings.class, "AI Captcha Solver", this, "eye", AICaptchaSolverSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -172,8 +173,9 @@ public final class AICaptchaSolver extends InternalPlugin {
         .uiName("AI System prompt")
         .description("What the bots instruction is")
         .defaultValue("""
-          Extract the text from the CAPTCHA image.
-          Only respond with the text inside the captcha.""")
+          Reply with the text from the image.
+          Only respond with the text inside the captcha.
+          Example: XYZAB""")
         .textarea(true)
         .build();
     public static final StringProperty MODEL =
@@ -190,7 +192,7 @@ public final class AICaptchaSolver extends InternalPlugin {
         .key("response-command")
         .uiName("Response Command")
         .description("What command should be ran using the response. Omit / to send a normal message")
-        .defaultValue("/captcha %s")
+        .defaultValue("%s")
         .build();
     public static final ComboProperty IMAGE_SOURCE =
       ImmutableComboProperty.builder()
