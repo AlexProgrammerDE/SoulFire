@@ -24,6 +24,7 @@ import lombok.Setter;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
@@ -38,17 +39,19 @@ public abstract class AbstractClientPlayer extends Player {
 
   @Override
   public boolean isSpectator() {
-    return getPlayerListEntry().getGameMode() == GameMode.SPECTATOR;
+    var entry = this.getPlayerListEntry();
+    return entry != null && entry.getGameMode() == GameMode.SPECTATOR;
   }
 
   @Override
   public boolean isCreative() {
-    return getPlayerListEntry().getGameMode() == GameMode.CREATIVE;
+    var entry = this.getPlayerListEntry();
+    return entry != null && entry.getGameMode() == GameMode.CREATIVE;
   }
 
-  private PlayerListEntry getPlayerListEntry() {
+  private @Nullable PlayerListEntry getPlayerListEntry() {
     if (playerListEntry == null) {
-      playerListEntry = connection.getEntityProfile(uuid).orElseThrow();
+      playerListEntry = connection.getEntityProfile(uuid).orElse(null);
     }
 
     return playerListEntry;
