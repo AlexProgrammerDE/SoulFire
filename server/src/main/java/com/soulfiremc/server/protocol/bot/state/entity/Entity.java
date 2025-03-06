@@ -201,44 +201,44 @@ public class Entity {
     var startX = MathHelper.floor(from.getX());
     var startY = MathHelper.floor(from.getY());
     var startZ = MathHelper.floor(from.getZ());
-    var l = MathHelper.sign(length.getX());
-    var m = MathHelper.sign(length.getY());
-    var n = MathHelper.sign(length.getZ());
-    var d = l == 0 ? Double.MAX_VALUE : (double) l / length.getX();
-    var e = m == 0 ? Double.MAX_VALUE : (double) m / length.getY();
-    var f = n == 0 ? Double.MAX_VALUE : (double) n / length.getZ();
-    var g = d * (l > 0 ? 1.0 - MathHelper.frac(from.getX()) : MathHelper.frac(from.getX()));
-    var h = e * (m > 0 ? 1.0 - MathHelper.frac(from.getY()) : MathHelper.frac(from.getY()));
-    var o = f * (n > 0 ? 1.0 - MathHelper.frac(from.getZ()) : MathHelper.frac(from.getZ()));
+    var xSign = MathHelper.sign(length.getX());
+    var ySign = MathHelper.sign(length.getY());
+    var zSign = MathHelper.sign(length.getZ());
+    var xDiv = xSign == 0 ? Double.MAX_VALUE : (double) xSign / length.getX();
+    var yDiv = ySign == 0 ? Double.MAX_VALUE : (double) ySign / length.getY();
+    var zDiv = zSign == 0 ? Double.MAX_VALUE : (double) zSign / length.getZ();
+    var xFrac = xDiv * (xSign > 0 ? 1.0 - MathHelper.frac(from.getX()) : MathHelper.frac(from.getX()));
+    var yFrac = yDiv * (ySign > 0 ? 1.0 - MathHelper.frac(from.getY()) : MathHelper.frac(from.getY()));
+    var zFrac = zDiv * (zSign > 0 ? 1.0 - MathHelper.frac(from.getZ()) : MathHelper.frac(from.getZ()));
     var p = 0;
 
-    while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
-      if (g < h) {
-        if (g < o) {
-          startX += l;
-          g += d;
+    while (xFrac <= 1.0 || yFrac <= 1.0 || zFrac <= 1.0) {
+      if (xFrac < yFrac) {
+        if (xFrac < zFrac) {
+          startX += xSign;
+          xFrac += xDiv;
         } else {
-          startZ += n;
-          o += f;
+          startZ += zSign;
+          zFrac += zDiv;
         }
-      } else if (h < o) {
-        startY += m;
-        h += e;
+      } else if (yFrac < zFrac) {
+        startY += ySign;
+        yFrac += yDiv;
       } else {
-        startZ += n;
-        o += f;
+        startZ += zSign;
+        zFrac += zDiv;
       }
 
       if (p++ > 16) {
         break;
       }
 
-      var optional = AABB.clip(startX, startY, startZ, startX + 1, startY + 1, startZ + 1, from, to);
-      if (optional.isPresent()) {
-        var lv2 = optional.get();
-        var xClamp = MathHelper.clamp(lv2.getX(), (double) startX + 1.0E-5F, (double) startX + 1.0 - 1.0E-5F);
-        var yClamp = MathHelper.clamp(lv2.getY(), (double) startY + 1.0E-5F, (double) startY + 1.0 - 1.0E-5F);
-        var zClamp = MathHelper.clamp(lv2.getZ(), (double) startZ + 1.0E-5F, (double) startZ + 1.0 - 1.0E-5F);
+      var clipOptional = AABB.clip(startX, startY, startZ, startX + 1, startY + 1, startZ + 1, from, to);
+      if (clipOptional.isPresent()) {
+        var clip = clipOptional.get();
+        var xClamp = MathHelper.clamp(clip.getX(), (double) startX + 1.0E-5F, (double) startX + 1.0 - 1.0E-5F);
+        var yClamp = MathHelper.clamp(clip.getY(), (double) startY + 1.0E-5F, (double) startY + 1.0 - 1.0E-5F);
+        var zClamp = MathHelper.clamp(clip.getZ(), (double) startZ + 1.0E-5F, (double) startZ + 1.0 - 1.0E-5F);
         var endX = MathHelper.floor(xClamp + bb.getXsize());
         var endY = MathHelper.floor(yClamp + bb.getYsize());
         var endZ = MathHelper.floor(zClamp + bb.getZsize());
@@ -254,10 +254,10 @@ public class Entity {
     }
   }
 
-  public static Iterable<Vector3i> betweenClosed(AABB arg) {
-    var lv = Vector3i.from(arg.minX, arg.minY, arg.minZ);
-    var lv2 = Vector3i.from(arg.maxX, arg.maxY, arg.maxZ);
-    return betweenClosed(lv, lv2);
+  public static Iterable<Vector3i> betweenClosed(AABB bb) {
+    var minVec = Vector3i.from(bb.minX, bb.minY, bb.minZ);
+    var maxVec = Vector3i.from(bb.maxX, bb.maxY, bb.maxZ);
+    return betweenClosed(minVec, maxVec);
   }
 
   public static Iterable<Vector3i> betweenClosed(Vector3i firstPos, Vector3i secondPos) {
@@ -272,31 +272,31 @@ public class Entity {
   }
 
   public static Iterable<Vector3i> betweenClosed(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-    var o = maxX - minX + 1;
-    var p = maxY - minY + 1;
-    var q = maxZ - minZ + 1;
-    var r = o * p * q;
+    var xDiff = maxX - minX + 1;
+    var yDiff = maxY - minY + 1;
+    var zDiff = maxZ - minZ + 1;
+    var squareDistance = xDiff * yDiff * zDiff;
     return () -> new AbstractIterator<>() {
       private int index;
 
       protected Vector3i computeNext() {
-        if (this.index == r) {
+        if (this.index == squareDistance) {
           return this.endOfData();
         } else {
-          var i = this.index % o;
-          var j = this.index / o;
-          var k = j % p;
-          var l = j / p;
+          var xMod = this.index % xDiff;
+          var xDiv = this.index / xDiff;
+          var yMod = xDiv % yDiff;
+          var yDiv = xDiv / yDiff;
           this.index++;
-          return Vector3i.from(minX + i, minY + k, minZ + l);
+          return Vector3i.from(minX + xMod, minY + yMod, minZ + yDiv);
         }
       }
     };
   }
 
   public static Vector3d collideBoundingBox(@Nullable Entity entity, Vector3d vec, AABB collisionBox, Level level, List<AABB> potentialHits) {
-    var list2 = collectColliders(entity, level, potentialHits, collisionBox.expandTowards(vec));
-    return collideWithShapes(vec, collisionBox, list2);
+    var colliders = collectColliders(entity, level, potentialHits, collisionBox.expandTowards(vec));
+    return collideWithShapes(vec, collisionBox, colliders);
   }
 
   private static List<AABB> collectColliders(@Nullable Entity entity, Level level, List<AABB> collisions, AABB boundingBox) {
@@ -342,8 +342,8 @@ public class Entity {
         }
       }
 
-      var bl = Math.abs(x) < Math.abs(z);
-      if (bl && z != 0.0) {
+      var xSmallerZ = Math.abs(x) < Math.abs(z);
+      if (xSmallerZ && z != 0.0) {
         z = collide(Direction.Axis.Z, entityBB, shapes, z);
         if (z != 0.0) {
           entityBB = entityBB.move(0.0, 0.0, z);
@@ -352,12 +352,12 @@ public class Entity {
 
       if (x != 0.0) {
         x = collide(Direction.Axis.X, entityBB, shapes, x);
-        if (!bl && x != 0.0) {
+        if (!xSmallerZ && x != 0.0) {
           entityBB = entityBB.move(x, 0.0, 0.0);
         }
       }
 
-      if (!bl && z != 0.0) {
+      if (!xSmallerZ && z != 0.0) {
         z = collide(Direction.Axis.Z, entityBB, shapes, z);
       }
 
@@ -366,14 +366,14 @@ public class Entity {
   }
 
   protected static Vector3d getInputVector(Vector3d relative, float motionScale, float facing) {
-    var d = relative.lengthSquared();
-    if (d < 1.0E-7) {
+    var dlegthSquared = relative.lengthSquared();
+    if (dlegthSquared < 1.0E-7) {
       return Vector3d.ZERO;
     } else {
-      var scaledMotion = (d > 1.0 ? relative.normalize() : relative).mul((double) motionScale);
-      var h = MathHelper.sin(facing * (float) (Math.PI / 180.0));
-      var i = MathHelper.cos(facing * (float) (Math.PI / 180.0));
-      return Vector3d.from(scaledMotion.getX() * (double) i - scaledMotion.getZ() * (double) h, scaledMotion.getY(), scaledMotion.getZ() * (double) i + scaledMotion.getX() * (double) h);
+      var scaledMotion = (dlegthSquared > 1.0 ? relative.normalize() : relative).mul((double) motionScale);
+      var sin = MathHelper.sin(facing * (float) (Math.PI / 180.0));
+      var cos = MathHelper.cos(facing * (float) (Math.PI / 180.0));
+      return Vector3d.from(scaledMotion.getX() * (double) cos - scaledMotion.getZ() * (double) sin, scaledMotion.getY(), scaledMotion.getZ() * (double) cos + scaledMotion.getX() * (double) sin);
     }
   }
 
@@ -736,28 +736,28 @@ public class Entity {
 
   public void push(Entity entity) {
     if (!entity.noPhysics && !this.noPhysics) {
-      var d = entity.x() - this.x();
-      var e = entity.z() - this.z();
-      var f = MathHelper.absMax(d, e);
-      if (f >= 0.01F) {
-        f = Math.sqrt(f);
-        d /= f;
-        e /= f;
-        var g = 1.0 / f;
-        if (g > 1.0) {
-          g = 1.0;
+      var xDiff = entity.x() - this.x();
+      var zDiff = entity.z() - this.z();
+      var xzAbsMax = MathHelper.absMax(xDiff, zDiff);
+      if (xzAbsMax >= 0.01F) {
+        xzAbsMax = Math.sqrt(xzAbsMax);
+        xDiff /= xzAbsMax;
+        zDiff /= xzAbsMax;
+        var maxFrac = 1.0 / xzAbsMax;
+        if (maxFrac > 1.0) {
+          maxFrac = 1.0;
         }
 
-        d *= g;
-        e *= g;
-        d *= 0.05F;
-        e *= 0.05F;
+        xDiff *= maxFrac;
+        zDiff *= maxFrac;
+        xDiff *= 0.05F;
+        zDiff *= 0.05F;
         if (this.isPushable()) {
-          this.push(-d, 0.0, -e);
+          this.push(-xDiff, 0.0, -zDiff);
         }
 
         if (entity.isPushable()) {
-          entity.push(d, 0.0, e);
+          entity.push(xDiff, 0.0, zDiff);
         }
       }
     }
@@ -784,9 +784,9 @@ public class Entity {
 
       pos = this.maybeBackOffFromEdge(pos, type);
       var collideOffset = this.collide(pos);
-      var d = collideOffset.lengthSquared();
-      if (d > 1.0E-7 || pos.lengthSquared() - d < 1.0E-7) {
-        if (this.fallDistance != 0.0F && d >= 1.0) {
+      var lengthSquared = collideOffset.lengthSquared();
+      if (lengthSquared > 1.0E-7 || pos.lengthSquared() - lengthSquared < 1.0E-7) {
+        if (this.fallDistance != 0.0F && lengthSquared >= 1.0) {
           var touchedPositions = this.level().getTouchedPositions(new AABB(this.pos(), this.pos().add(collideOffset)));
           for (var touchedPos : touchedPositions) {
             var blockState = this.level().getBlockState(touchedPos);
@@ -841,17 +841,17 @@ public class Entity {
     var xDiff = vec.getX() != collidedBB.getX();
     var yDiff = vec.getY() != collidedBB.getY();
     var zDiff = vec.getZ() != collidedBB.getZ();
-    var bl4 = yDiff && vec.getY() < 0.0;
-    if (this.maxUpStep() > 0.0F && (bl4 || this.onGround()) && (xDiff || zDiff)) {
-      var lv3 = bl4 ? bb.move(0.0, collidedBB.getY(), 0.0) : bb;
+    var negativeDiff = yDiff && vec.getY() < 0.0;
+    if (this.maxUpStep() > 0.0F && (negativeDiff || this.onGround()) && (xDiff || zDiff)) {
+      var lv3 = negativeDiff ? bb.move(0.0, collidedBB.getY(), 0.0) : bb;
       var lv4 = lv3.expandTowards(vec.getX(), this.maxUpStep(), vec.getZ());
-      if (!bl4) {
+      if (!negativeDiff) {
         lv4 = lv4.expandTowards(0.0, -1.0E-5F, 0.0);
       }
 
       var list2 = collectColliders(this, this.level, list, lv4);
-      var f = (float) collidedBB.getY();
-      var stepUpHeights = collectCandidateStepUpHeights(lv3, list2, this.maxUpStep(), f);
+      var collidedY = (float) collidedBB.getY();
+      var stepUpHeights = collectCandidateStepUpHeights(lv3, list2, this.maxUpStep(), collidedY);
 
       for (var stepUpHeight : stepUpHeights) {
         var collidedShapes = collideWithShapes(Vector3d.from(vec.getX(), stepUpHeight, vec.getZ()), lv3, list2);
@@ -1310,38 +1310,38 @@ public class Entity {
     if (this.touchingUnloadedChunk()) {
       return false;
     } else {
-      var lv = this.getBoundingBox().deflate(0.001);
-      var minX = MathHelper.floor(lv.minX);
-      var maxX = MathHelper.ceil(lv.maxX);
-      var minY = MathHelper.floor(lv.minY);
-      var maxY = MathHelper.ceil(lv.maxY);
-      var minZ = MathHelper.floor(lv.minZ);
-      var maxZ = MathHelper.ceil(lv.maxZ);
+      var bbDeflate = this.getBoundingBox().deflate(0.001);
+      var minX = MathHelper.floor(bbDeflate.minX);
+      var maxX = MathHelper.ceil(bbDeflate.maxX);
+      var minY = MathHelper.floor(bbDeflate.minY);
+      var maxY = MathHelper.ceil(bbDeflate.maxY);
+      var minZ = MathHelper.floor(bbDeflate.minZ);
+      var maxZ = MathHelper.ceil(bbDeflate.maxZ);
       var height = 0.0;
       var pushedByFluid = this.isPushedByFluid();
-      var bl2 = false;
+      var collidedY = false;
       var flow = Vector3d.ZERO;
-      var o = 0;
-      var lv3 = Vector3i.ZERO;
+      var i = 0;
+      var cursor = Vector3i.ZERO;
 
       for (var x = minX; x < maxX; x++) {
         for (var y = minY; y < maxY; y++) {
           for (var z = minZ; z < maxZ; z++) {
-            lv3 = Vector3i.from(x, y, z);
-            var lv4 = this.level().getBlockState(lv3).fluidState();
-            if (this.level().tagsState().is(lv4.type(), fluidTag)) {
-              var f = (double) ((float) y + lv4.getHeight(this.level(), lv3));
-              if (f >= lv.minY) {
-                bl2 = true;
-                height = Math.max(f - lv.minY, height);
+            cursor = Vector3i.from(x, y, z);
+            var fluidState = this.level().getBlockState(cursor).fluidState();
+            if (this.level().tagsState().is(fluidState.type(), fluidTag)) {
+              var f = (double) ((float) y + fluidState.getHeight(this.level(), cursor));
+              if (f >= bbDeflate.minY) {
+                collidedY = true;
+                height = Math.max(f - bbDeflate.minY, height);
                 if (pushedByFluid) {
-                  var flowDirection = lv4.getFlow(this.level(), lv3);
+                  var flowDirection = fluidState.getFlow(this.level(), cursor);
                   if (height < 0.4) {
                     flowDirection = flowDirection.mul(height);
                   }
 
                   flow = flow.add(flowDirection);
-                  o++;
+                  i++;
                 }
               }
             }
@@ -1350,8 +1350,8 @@ public class Entity {
       }
 
       if (flow.length() > 0.0) {
-        if (o > 0) {
-          flow = flow.mul(1.0 / (double) o);
+        if (i > 0) {
+          flow = flow.mul(1.0 / (double) i);
         }
 
         if (!(this instanceof Player)) {
@@ -1369,7 +1369,7 @@ public class Entity {
       }
 
       this.fluidHeight.put(fluidTag, height);
-      return bl2;
+      return collidedY;
     }
   }
 
