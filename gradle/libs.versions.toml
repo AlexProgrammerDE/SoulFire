@@ -1,7 +1,7 @@
 [versions]
 log4j = "2.24.3"
-grpc = "1.70.0"
-protobuf = "4.29.3"
+grpc = "1.71.0"
+protobuf = "4.30.0"
 via-version = "5.2.2-SNAPSHOT"
 via-backwards = "5.2.2-SNAPSHOT"
 via-rewind = "4.0.6-SNAPSHOT"
@@ -13,7 +13,7 @@ mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.19.0"
 reactor = "1.2.3"
 classtransform = "1.14.0"
-armeria = "1.31.3"
+armeria = "1.32.0"
 graalvm-polyglot = "24.1.2"
 
 [plugins]
@@ -25,11 +25,11 @@ license-report = "com.github.jk1.dependency-license-report:2.9"
 [libraries]
 gradle-plugin-shadow = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 gradle-plugin-licenser = "gradle.plugin.org.cadixdev.gradle:licenser:0.6.1"
-gradle-plugin-lombok = "io.freefair.gradle:lombok-plugin:8.12.2"
+gradle-plugin-lombok = "io.freefair.gradle:lombok-plugin:8.12.2.1"
 gradle-plugin-indra-git = "net.kyori:indra-git:3.1.3"
 gradle-plugin-unimined = "xyz.wagyourtail.unimined:xyz.wagyourtail.unimined.gradle.plugin:1.3.13"
 gradle-plugin-spotless = "com.diffplug.spotless:spotless-plugin-gradle:7.0.2"
-gradle-plugin-freefair = "io.freefair.gradle:maven-plugin:8.12.2"
+gradle-plugin-freefair = "io.freefair.gradle:maven-plugin:8.12.2.1"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
@@ -90,7 +90,7 @@ armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.30.0"
+openai = "com.openai:openai-java:0.31.1"
 immutables = "org.immutables:value:2.10.1 "
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta4"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta4"
