@@ -66,11 +66,11 @@ public abstract class Display extends Entity {
   }
 
   private static Transformation createTransformation(EntityMetadataState synchedEntityData) {
-    var vector3f = JOMLUtil.fromCloudburst(synchedEntityData.get(NamedEntityData.DISPLAY__TRANSLATION, MetadataTypes.VECTOR3));
-    var quaternionf = JOMLUtil.toQuaternion(synchedEntityData.get(NamedEntityData.DISPLAY__LEFT_ROTATION, MetadataTypes.QUATERNION));
-    var vector3f2 = JOMLUtil.fromCloudburst(synchedEntityData.get(NamedEntityData.DISPLAY__SCALE, MetadataTypes.VECTOR3));
-    var quaternionf2 = JOMLUtil.toQuaternion(synchedEntityData.get(NamedEntityData.DISPLAY__RIGHT_ROTATION, MetadataTypes.QUATERNION));
-    return new Transformation(vector3f, quaternionf, vector3f2, quaternionf2);
+    var translation = JOMLUtil.fromCloudburst(synchedEntityData.get(NamedEntityData.DISPLAY__TRANSLATION, MetadataTypes.VECTOR3));
+    var leftRotation = JOMLUtil.toQuaternion(synchedEntityData.get(NamedEntityData.DISPLAY__LEFT_ROTATION, MetadataTypes.QUATERNION));
+    var scale = JOMLUtil.fromCloudburst(synchedEntityData.get(NamedEntityData.DISPLAY__SCALE, MetadataTypes.VECTOR3));
+    var rightRotation = JOMLUtil.toQuaternion(synchedEntityData.get(NamedEntityData.DISPLAY__RIGHT_ROTATION, MetadataTypes.QUATERNION));
+    return new Transformation(translation, leftRotation, scale, rightRotation);
   }
 
   public Vector3d getTransformedPosition() {
