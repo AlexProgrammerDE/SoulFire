@@ -39,12 +39,12 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
   }
 
   @SuppressWarnings("unused")
-  public static void bootstrap(String[] args) {
-    new SoulFireDedicatedBootstrap().internalBootstrap(args);
+  public static String bootstrap(String[] args) {
+    return new SoulFireDedicatedBootstrap().internalBootstrap(args);
   }
 
   @Override
-  protected void postMixinMain(String[] args) {
+  protected String postMixinMain(String[] args) {
     pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
 
     var host = getRPCHost("0.0.0.0");
@@ -54,20 +54,25 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
     var soulFire =
       new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
-    if (soulFire.authSystem().rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
+    var authSystem = soulFire.authSystem();
+    if (authSystem.rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
       log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);
     }
 
-    var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
-    var commandSource = new ConsoleCommandSource(soulFire.authSystem());
-    new GenericTerminalConsole(
-      soulFire.shutdownManager(),
-      command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
-      (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
-      SFPathConstants.WORKING_DIRECTORY
-    ).start();
+    if (!Boolean.getBoolean("sf.jni.client")) {
+      var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
+      var commandSource = new ConsoleCommandSource(authSystem);
+      new GenericTerminalConsole(
+        soulFire.shutdownManager(),
+        command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
+        (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
+        SFPathConstants.WORKING_DIRECTORY
+      ).start();
 
-    soulFire.shutdownManager().awaitShutdown();
+      soulFire.shutdownManager().awaitShutdown();
+    }
+
+    return authSystem.generateJWT(authSystem.rootUserData());
   }
 
   @Override

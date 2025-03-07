@@ -38,14 +38,14 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
   }
 
   @SuppressWarnings("unused")
-  public static void bootstrap(String[] args) {
+  public static String bootstrap(String[] args) {
     if (args.length == 0) {
       System.err.println("ERROR: No command line arguments provided, please run with --help to see available options (java -jar ReplaceMe.jar --help)");
       System.exit(1);
-      return;
+      return null;
     }
 
-    new SoulFireCLIBootstrap().internalBootstrap(args);
+    return new SoulFireCLIBootstrap().internalBootstrap(args);
   }
 
   private void startCLI(ServerAddress address, String jwt, String[] args) {
@@ -58,7 +58,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
   }
 
   @Override
-  protected void postMixinMain(String[] args) {
+  protected String postMixinMain(String[] args) {
     pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
 
     Runnable runIntegratedServer =
@@ -94,6 +94,8 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
         args
       );
     }
+
+    return null;
   }
 
   @Override
