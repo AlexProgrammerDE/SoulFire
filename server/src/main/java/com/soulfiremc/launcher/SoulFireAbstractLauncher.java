@@ -23,11 +23,11 @@ import java.nio.file.Path;
 
 public abstract class SoulFireAbstractLauncher {
   @SuppressWarnings("resource")
-  public String run(String[] args) {
+  public void run(String[] args) {
     var contextClassLoader = new SFContextClassLoader(getLibrariesDirectory());
 
     try {
-      return (String) contextClassLoader
+      contextClassLoader
         .loadClass(getBootstrapClassName())
         .getDeclaredMethod("bootstrap", String[].class)
         .invoke(null, (Object) args);

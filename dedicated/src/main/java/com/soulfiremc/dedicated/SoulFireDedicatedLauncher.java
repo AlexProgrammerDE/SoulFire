@@ -27,11 +27,6 @@ public final class SoulFireDedicatedLauncher extends SoulFireAbstractLauncher {
     new SoulFireDedicatedLauncher().run(args);
   }
 
-  @SuppressWarnings("unused")
-  public static String jniMain() {
-    return new SoulFireDedicatedLauncher().run(new String[0]);
-  }
-
   @Override
   protected String getBootstrapClassName() {
     return "com.soulfiremc.dedicated.SoulFireDedicatedBootstrap";

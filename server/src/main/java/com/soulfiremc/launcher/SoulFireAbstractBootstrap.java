@@ -167,7 +167,7 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   @SneakyThrows
-  protected String internalBootstrap(String[] args) {
+  protected void internalBootstrap(String[] args) {
     try {
       var forkJoinPoolFactory = new CustomThreadFactory();
       // Ensure the ForkJoinPool uses our custom thread factory
@@ -184,13 +184,12 @@ public abstract class SoulFireAbstractBootstrap {
 
       initPlugins();
 
-      return injectMixinsAndRun(args);
+      injectMixinsAndRun(args);
     } catch (Throwable t) {
       // Ensure logs are written out on fatal errors
       log.error("Failed to start server", t);
       LogManager.shutdown();
       System.exit(1);
-      return null;
     }
   }
 
@@ -206,12 +205,12 @@ public abstract class SoulFireAbstractBootstrap {
     log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
   }
 
-  public String injectMixinsAndRun(String[] args) {
+  public void injectMixinsAndRun(String[] args) {
     injectMixins(pluginManager);
-    return this.postMixinMain(args);
+    this.postMixinMain(args);
   }
 
-  protected abstract String postMixinMain(String[] args);
+  protected abstract void postMixinMain(String[] args);
 
   protected abstract Path getBaseDirectory();
 
