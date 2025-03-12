@@ -22,13 +22,12 @@ import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class Mob extends LivingEntity {
   private static final int MOB_FLAG_NO_AI = 1;
@@ -41,12 +40,12 @@ public class Mob extends LivingEntity {
   }
 
   @Override
-  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
-    return Optional.ofNullable(slots.get(slot));
+  public SFItemStack getItemBySlot(EquipmentSlot slot) {
+    return slots.getOrDefault(slot, SFItemStack.EMPTY);
   }
 
   @Override
-  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+  public void setItemSlot(EquipmentSlot slot, @NonNull SFItemStack item) {
     slots.put(slot, item);
   }
 

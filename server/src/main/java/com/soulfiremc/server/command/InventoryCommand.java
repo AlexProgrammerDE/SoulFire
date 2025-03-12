@@ -52,12 +52,14 @@ public final class InventoryCommand {
                     c,
                     bot -> {
                       var inventory = bot.inventoryManager().currentContainer();
-                      if (inventory instanceof WindowContainer windowContainer) {
-                        c.getSource().source().sendInfo("Current inventory type: " + windowContainer.containerType() + " with title " + windowContainer.title());
-                      } else if (inventory instanceof PlayerInventoryContainer) {
-                        c.getSource().source().sendInfo("Current inventory: Player inventory");
-                      } else {
-                        c.getSource().source().sendInfo("Current inventory: Unknown");
+                      switch (inventory) {
+                        case null -> {
+                          c.getSource().source().sendInfo("No inventory is currently open");
+                          return Command.SINGLE_SUCCESS;
+                        }
+                        case WindowContainer windowContainer -> c.getSource().source().sendInfo("Current inventory type: " + windowContainer.containerType() + " with title " + windowContainer.title());
+                        case PlayerInventoryContainer ignored -> c.getSource().source().sendInfo("Current inventory: Player inventory");
+                        default -> c.getSource().source().sendInfo("Current inventory: Unknown");
                       }
 
                       for (var slot : inventory.getSlots(0, inventory.slots().length - 1)) {
@@ -79,8 +81,15 @@ public final class InventoryCommand {
                         bot -> {
                           var slot = c.getArgument("slot", Integer.class);
                           var inventoryManager = bot.inventoryManager();
-                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
-                            () -> inventoryManager.leftClickSlot(inventoryManager.currentContainer().getSlot(slot))));
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+                            var inventory = inventoryManager.currentContainer();
+                            if (inventory == null) {
+                              c.getSource().source().sendInfo("No inventory is currently open");
+                              return;
+                            }
+
+                            inventoryManager.leftClickSlot(inventory.getSlot(slot));
+                          }));
                           return Command.SINGLE_SUCCESS;
                         }))))));
   }

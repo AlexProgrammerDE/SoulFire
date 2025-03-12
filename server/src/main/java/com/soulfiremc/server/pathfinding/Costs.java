@@ -24,6 +24,7 @@ import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
@@ -132,7 +133,7 @@ public final class Costs {
     TagsState tagsState,
     @Nullable LocalPlayer entity,
     boolean onGround,
-    @Nullable SFItemStack itemStack,
+    @NonNull SFItemStack itemStack,
     BlockType blockType) {
     var correctToolUsed = isCorrectToolUsed(tagsState, itemStack, blockType);
 
@@ -153,7 +154,7 @@ public final class Costs {
   private static float getBlockDamagePerTick(TagsState tagsState,
                                              @Nullable LocalPlayer entity,
                                              boolean onGround,
-                                             @Nullable SFItemStack itemStack,
+                                             @NonNull SFItemStack itemStack,
                                              BlockType blockType) {
     if (entity != null && entity.abilitiesState().instabuild()) {
       // We instantly break any block in creative mode
@@ -173,7 +174,7 @@ public final class Costs {
   private static float getPlayerBlockDamagePerTick(TagsState tagsState,
                                                    @Nullable LocalPlayer entity,
                                                    boolean onGround,
-                                                   @Nullable SFItemStack itemStack,
+                                                   @NonNull SFItemStack itemStack,
                                                    BlockType blockType) {
     var speedMultiplier = getSpeedMultiplier(tagsState, itemStack, blockType);
 
@@ -212,7 +213,7 @@ public final class Costs {
   }
 
   private static float getSpeedMultiplier(
-    TagsState tagsState, @Nullable SFItemStack itemStack, BlockType blockType) {
+    TagsState tagsState, @NonNull SFItemStack itemStack, BlockType blockType) {
     if (itemStack == null) {
       return 1;
     }
@@ -231,7 +232,7 @@ public final class Costs {
     return tool.get().getDefaultMiningSpeed();
   }
 
-  private static boolean isCorrectToolUsed(TagsState tagsState, @Nullable SFItemStack itemStack, BlockType blockType) {
+  private static boolean isCorrectToolUsed(TagsState tagsState, @NonNull SFItemStack itemStack, BlockType blockType) {
     if (!blockType.requiresCorrectToolForDrops()) {
       return true;
     }
@@ -286,7 +287,7 @@ public final class Costs {
   }
 
   public record BlockMiningCosts(
-    double miningCost, @Nullable SFItemStack usedTool, boolean willDropUsableBlockItem) {}
+    double miningCost, @NonNull SFItemStack usedTool, boolean willDropUsableBlockItem) {}
 
   public record TickResult(int ticks, boolean willDropUsableBlockItem) {}
 }

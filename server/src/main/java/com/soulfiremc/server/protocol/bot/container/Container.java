@@ -20,7 +20,7 @@ package com.soulfiremc.server.protocol.bot.container;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
 
@@ -33,12 +33,12 @@ public abstract class Container {
   public Container(int slots, int id) {
     this.slots = new ContainerSlot[slots];
     for (var i = 0; i < slots; i++) {
-      this.slots[i] = new ContainerSlot(i, null);
+      this.slots[i] = new ContainerSlot(i, SFItemStack.EMPTY);
     }
     this.id = id;
   }
 
-  public void setSlot(int slot, @Nullable SFItemStack item) {
+  public void setSlot(int slot, @NonNull SFItemStack item) {
     slots[slot].setItem(item);
   }
 

@@ -118,9 +118,7 @@ public final class AICaptchaSolver extends InternalPlugin {
     return switch (imageSource) {
       case MAP_IN_HAND -> {
         var item = connection.dataManager().localPlayer()
-          .getItemInHand(InteractionHand.MAIN_HAND)
-          .orElseThrow(() -> new IllegalStateException("No item in hand"));
-
+          .getItemInHand(InteractionHand.MAIN_HAND);
         int mapId = item.get(DataComponentTypes.MAP_ID);
         var mapState = connection.dataManager().mapDataStates().get(mapId);
         yield toBase64JPEG(mapState.toBufferedImage());

@@ -34,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -307,12 +308,12 @@ public abstract class Player extends LivingEntity {
   }
 
   @Override
-  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
+  public SFItemStack getItemBySlot(EquipmentSlot slot) {
     return inventory.getEquipmentSlotItem(slot);
   }
 
   @Override
-  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+  public void setItemSlot(EquipmentSlot slot, @NonNull SFItemStack item) {
     inventory.setEquipmentSlotItem(slot, item);
   }
 

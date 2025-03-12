@@ -28,7 +28,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
 import net.raphimc.viabedrock.protocol.data.enums.java.InteractionHand;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -241,7 +241,7 @@ public abstract class LivingEntity extends Entity {
     return this.lerpSteps > 0 ? (float) this.lerpYRot : this.yRot();
   }
 
-  public Optional<SFItemStack> getItemInHand(InteractionHand hand) {
+  public SFItemStack getItemInHand(InteractionHand hand) {
     if (hand == InteractionHand.MAIN_HAND) {
       return this.getItemBySlot(EquipmentSlot.MAINHAND);
     } else if (hand == InteractionHand.OFF_HAND) {
@@ -465,9 +465,7 @@ public abstract class LivingEntity extends Entity {
     if (this.level().tagsState().is(entity.entityType(), EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS)) {
       return true;
     } else {
-      return entity instanceof LivingEntity le && le.getItemBySlot(EquipmentSlot.FEET)
-        .map(item -> item.type() == ItemType.LEATHER_BOOTS)
-        .orElse(false);
+      return entity instanceof LivingEntity le && le.getItemBySlot(EquipmentSlot.FEET).type() == ItemType.LEATHER_BOOTS;
     }
   }
 
@@ -771,8 +769,7 @@ public abstract class LivingEntity extends Entity {
   protected boolean canGlide() {
     if (!this.onGround() && !this.effectState().hasEffect(EffectType.LEVITATION)) {
       for (var slot : EquipmentSlot.values()) {
-        var item = this.getItemBySlot(slot);
-        if (item.isPresent() && canGlideUsing(item.get(), slot)) {
+        if (canGlideUsing(this.getItemBySlot(slot), slot)) {
           return true;
         }
       }
@@ -781,9 +778,9 @@ public abstract class LivingEntity extends Entity {
     return false;
   }
 
-  public abstract Optional<SFItemStack> getItemBySlot(EquipmentSlot slot);
+  public abstract SFItemStack getItemBySlot(EquipmentSlot slot);
 
-  public abstract void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item);
+  public abstract void setItemSlot(EquipmentSlot slot, @NonNull SFItemStack item);
 
   public abstract HandPreference getMainArm();
 
@@ -801,8 +798,8 @@ public abstract class LivingEntity extends Entity {
   }
 
   private void swapHandItems() {
-    var item = this.getItemBySlot(EquipmentSlot.OFFHAND).orElse(null);
-    this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND).orElse(null));
+    var item = this.getItemBySlot(EquipmentSlot.OFFHAND);
+    this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND));
     this.setItemSlot(EquipmentSlot.MAINHAND, item);
   }
 

@@ -19,7 +19,7 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.EquipmentSlot;
 import lombok.Getter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -44,8 +44,8 @@ public final class PlayerInventoryContainer extends Container {
     super(46, 0);
   }
 
-  public Optional<SFItemStack> getEquipmentSlotItem(EquipmentSlot slot) {
-    return getEquipmentSlot(slot).map(ContainerSlot::item);
+  public SFItemStack getEquipmentSlotItem(EquipmentSlot slot) {
+    return getEquipmentSlot(slot).map(ContainerSlot::item).orElse(SFItemStack.EMPTY);
   }
 
   public Optional<ContainerSlot> getEquipmentSlot(EquipmentSlot slot) {
@@ -60,7 +60,7 @@ public final class PlayerInventoryContainer extends Container {
     };
   }
 
-  public void setEquipmentSlotItem(EquipmentSlot slot, @Nullable SFItemStack item) {
+  public void setEquipmentSlotItem(EquipmentSlot slot, @NonNull SFItemStack item) {
     getEquipmentSlot(slot).ifPresent(containerSlot -> containerSlot.setItem(item));
   }
 

@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ClickItemAction;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerActionType;
@@ -45,8 +46,8 @@ public final class InventoryManager {
   @Nullable
   private Container currentContainer;
   private int lastStateId = 0;
-  @Nullable
-  private SFItemStack cursorItem;
+  @NonNull
+  private SFItemStack cursorItem = SFItemStack.EMPTY;
 
   public @Nullable Container getContainer(int containerId) {
     return containerData.get(containerId);
@@ -98,18 +99,18 @@ public final class InventoryManager {
     SFItemStack slotItem;
     {
       var containerSlot = currentContainer.getSlot(slot);
-      if (containerSlot.item() == null) {
+      if (containerSlot.item().isEmpty()) {
         // The target slot is empty, and we don't have an item in our cursor
-        if (cursorItem == null) {
+        if (cursorItem.isEmpty()) {
           return;
         }
 
         // Place the cursor into empty slot
         slotItem = cursorItem;
-        cursorItem = null;
-      } else if (cursorItem == null) {
+        cursorItem = SFItemStack.EMPTY;
+      } else if (cursorItem.isEmpty()) {
         // Take the slot into the cursor
-        slotItem = null;
+        slotItem = SFItemStack.EMPTY;
         cursorItem = containerSlot.item();
       } else {
         // Swap the cursor and the slot
@@ -148,7 +149,7 @@ public final class InventoryManager {
     var previousItem = lastInEquipment.get(equipmentSlot);
     boolean hasChanged;
     if (previousItem != null) {
-      if (item.isEmpty() || previousItem.type() != item.get().type()) {
+      if (item.isEmpty() || previousItem.type() != item.type()) {
         // Item before, but we don't have one now, or it's different
         hasChanged = true;
 
@@ -160,13 +161,13 @@ public final class InventoryManager {
       }
     } else {
       // No item before, but we have one now
-      hasChanged = item.isPresent();
+      hasChanged = !item.isEmpty();
     }
 
-    if (hasChanged && item.isPresent()) {
-      connection.dataManager().localPlayer().attributeState().putItemModifiers(item.get(), equipmentSlot);
+    if (hasChanged && !item.isEmpty()) {
+      connection.dataManager().localPlayer().attributeState().putItemModifiers(item, equipmentSlot);
     }
 
-    lastInEquipment.put(equipmentSlot, item.orElse(null));
+    lastInEquipment.put(equipmentSlot, item);
   }
 }

@@ -23,7 +23,7 @@ import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
@@ -31,7 +31,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreferenc
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class ArmorStand extends LivingEntity {
   public static final int CLIENT_FLAG_SMALL = 1;
@@ -67,16 +66,16 @@ public class ArmorStand extends LivingEntity {
   }
 
   @Override
-  public Optional<SFItemStack> getItemBySlot(EquipmentSlot slot) {
+  public SFItemStack getItemBySlot(EquipmentSlot slot) {
     return switch (slot.type()) {
-      case HAND -> Optional.ofNullable(this.handItems.get(slot));
-      case HUMANOID_ARMOR -> Optional.ofNullable(this.armorItems.get(slot));
-      case ANIMAL_ARMOR -> Optional.empty();
+      case HAND -> this.handItems.getOrDefault(slot, SFItemStack.EMPTY);
+      case HUMANOID_ARMOR -> this.armorItems.getOrDefault(slot, SFItemStack.EMPTY);
+      case ANIMAL_ARMOR -> SFItemStack.EMPTY;
     };
   }
 
   @Override
-  public void setItemSlot(EquipmentSlot slot, @Nullable SFItemStack item) {
+  public void setItemSlot(EquipmentSlot slot, @NonNull SFItemStack item) {
     switch (slot.type()) {
       case HAND -> this.handItems.put(slot, item);
       case HUMANOID_ARMOR -> this.armorItems.put(slot, item);

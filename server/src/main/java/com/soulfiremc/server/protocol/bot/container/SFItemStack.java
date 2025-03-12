@@ -21,6 +21,7 @@ import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
@@ -47,9 +48,9 @@ public final class SFItemStack extends ItemStack {
     this.type = itemType;
   }
 
-  public static @Nullable SFItemStack from(@Nullable ItemStack itemStack) {
+  public static @NonNull SFItemStack from(@Nullable ItemStack itemStack) {
     if (itemStack == null) {
-      return null;
+      return SFItemStack.EMPTY;
     }
 
     return new SFItemStack(itemStack);

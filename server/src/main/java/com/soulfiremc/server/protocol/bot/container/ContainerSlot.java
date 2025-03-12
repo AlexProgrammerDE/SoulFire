@@ -19,25 +19,25 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public final class ContainerSlot {
   private final int slot;
-  @Nullable
+  @NonNull
   private SFItemStack item;
 
   public int slot() {
     return slot;
   }
 
-  public @Nullable SFItemStack item() {
+  public @NonNull SFItemStack item() {
     return item;
   }
 
-  void setItem(@Nullable SFItemStack item) {
+  void setItem(@NonNull SFItemStack item) {
     this.item = item;
   }
 
