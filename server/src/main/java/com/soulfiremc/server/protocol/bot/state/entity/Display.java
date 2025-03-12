@@ -54,9 +54,7 @@ public abstract class Display extends Entity {
   private boolean noCulling = true;
   private boolean updateStartTick;
   private boolean updateInterpolationDuration;
-  @Nullable
   private Display.RenderState renderState;
-  @Nullable
   private Display.PosRotInterpolationTarget posRotInterpolationTarget;
 
   public Display(EntityType type, Level level) {
@@ -192,7 +190,6 @@ public abstract class Display extends Entity {
     return !this.noCulling;
   }
 
-  @Nullable
   public Display.RenderState renderState() {
     return this.renderState;
   }
@@ -356,7 +353,6 @@ public abstract class Display extends Entity {
   }
 
   public static class BlockDisplay extends Display {
-    @Nullable
     private Display.BlockDisplay.BlockRenderState blockRenderState;
 
     public BlockDisplay(EntityType type, Level level) {
@@ -375,7 +371,6 @@ public abstract class Display extends Entity {
       return GlobalBlockPalette.INSTANCE.getBlockStateForStateId(this.entityData.get(NamedEntityData.BLOCK_DISPLAY__BLOCK_STATE, MetadataTypes.BLOCK_STATE));
     }
 
-    @Nullable
     public Display.BlockDisplay.BlockRenderState blockRenderState() {
       return this.blockRenderState;
     }
@@ -397,7 +392,6 @@ public abstract class Display extends Entity {
   }
 
   public static class ItemDisplay extends Display {
-    @Nullable
     private Display.ItemDisplay.ItemRenderState itemRenderState;
 
     public ItemDisplay(EntityType type, Level level) {
@@ -420,7 +414,6 @@ public abstract class Display extends Entity {
       return ItemDisplayContext.fromId(this.entityData.get(NamedEntityData.ITEM_DISPLAY__ITEM_DISPLAY, MetadataTypes.BYTE));
     }
 
-    @Nullable
     public Display.ItemDisplay.ItemRenderState itemRenderState() {
       return this.itemRenderState;
     }
@@ -497,7 +490,6 @@ public abstract class Display extends Entity {
       NamedEntityData.TEXT_DISPLAY__TEXT_OPACITY.networkId(),
       NamedEntityData.TEXT_DISPLAY__STYLE_FLAGS.networkId()
     );
-    @Nullable
     private Display.TextDisplay.TextRenderState textRenderState;
 
     public TextDisplay(EntityType type, Level level) {
@@ -549,7 +541,6 @@ public abstract class Display extends Entity {
       }
     }
 
-    @Nullable
     public Display.TextDisplay.TextRenderState textRenderState() {
       return this.textRenderState;
     }
