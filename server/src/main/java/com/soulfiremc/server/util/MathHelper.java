@@ -355,9 +355,10 @@ public final class MathHelper {
     }
   }
 
+  @SuppressWarnings({"SuspiciousNameCombination"})
   public static double atan2(double y, double x) {
-    var f = x * x + y * y;
-    if (Double.isNaN(f)) {
+    var squared = x * x + y * y;
+    if (Double.isNaN(squared)) {
       return Double.NaN;
     } else {
       var bl = y < 0.0;
@@ -365,21 +366,21 @@ public final class MathHelper {
         y = -y;
       }
 
-      var bl2 = x < 0.0;
-      if (bl2) {
+      var xNegative = x < 0.0;
+      if (xNegative) {
         x = -x;
       }
 
-      var bl3 = y > x;
-      if (bl3) {
-        var g = x;
+      var yBiggerX = y > x;
+      if (yBiggerX) {
+        var temp = x;
         x = y;
-        y = g;
+        y = temp;
       }
 
-      var g = fastInvSqrt(f);
-      x *= g;
-      y *= g;
+      var sqrt = fastInvSqrt(squared);
+      x *= sqrt;
+      y *= sqrt;
       var h = FRAC_BIAS + y;
       var i = (int) Double.doubleToRawLongBits(h);
       var j = ASIN_TAB[i];
@@ -388,11 +389,11 @@ public final class MathHelper {
       var m = y * k - x * l;
       var n = (6.0 + m * m) * m * 0.16666666666666666;
       var o = j + n;
-      if (bl3) {
+      if (yBiggerX) {
         o = (Math.PI / 2) - o;
       }
 
-      if (bl2) {
+      if (xNegative) {
         o = Math.PI - o;
       }
 

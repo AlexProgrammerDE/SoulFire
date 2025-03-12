@@ -115,12 +115,10 @@ public final class EntitiesJsonGenerator implements IDataGenerator {
       BuiltInRegistries.ATTRIBUTE.stream()
         .map(BuiltInRegistries.ATTRIBUTE::wrapAsHolder)
         .filter(defaultSupplier::hasAttribute)
-        .forEach(attribute -> {
-          entityAttributesMap.addProperty(
-            attribute.unwrapKey().orElseThrow().location().toString(),
-            defaultSupplier.getBaseValue(attribute)
-          );
-        });
+        .forEach(attribute -> entityAttributesMap.addProperty(
+          attribute.unwrapKey().orElseThrow().location().toString(),
+          defaultSupplier.getBaseValue(attribute)
+        ));
       entityDesc.add("defaultAttributes", entityAttributesMap);
     }
 
