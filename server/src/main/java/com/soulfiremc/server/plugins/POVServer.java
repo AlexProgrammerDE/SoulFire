@@ -144,6 +144,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Slf4j
 @Extension
@@ -470,7 +471,7 @@ public final class POVServer extends InternalPlugin {
           windowContainer.title()));
     }
     var lastStateId = localPlayer.currentContainer.getStateId();
-    Set.of(localPlayer.inventoryMenu, localPlayer.currentContainer).forEach(container -> {
+    Stream.of(localPlayer.inventoryMenu, localPlayer.currentContainer).distinct().forEach(container -> {
       clientSession.send(
         new ClientboundContainerSetContentPacket(
           container.containerId(),
