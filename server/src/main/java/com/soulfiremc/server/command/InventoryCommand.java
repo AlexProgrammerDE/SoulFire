@@ -57,8 +57,8 @@ public final class InventoryCommand {
                         default -> c.getSource().source().sendInfo("Current inventory: Unknown");
                       }
 
-                      for (var slot : container.getSlots(0, container.slots().length - 1)) {
-                        c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + slot.item());
+                      for (var slot : container.slots()) {
+                        c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + (slot.item().isEmpty() ? "empty" : slot.item().type().key() + " x" + slot.item().getCount()));
                       }
 
                       return Command.SINGLE_SUCCESS;
