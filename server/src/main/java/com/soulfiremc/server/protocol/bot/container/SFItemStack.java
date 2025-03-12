@@ -49,7 +49,7 @@ public final class SFItemStack extends ItemStack {
   }
 
   public static @NonNull SFItemStack from(@Nullable ItemStack itemStack) {
-    if (itemStack == null) {
+    if (itemStack == null || itemStack.getId() == ItemType.AIR.id() || itemStack.getAmount() <= 0) {
       return SFItemStack.EMPTY;
     }
 
@@ -67,7 +67,6 @@ public final class SFItemStack extends ItemStack {
     }
   }
 
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isEmpty() {
     return this == EMPTY || this.type == ItemType.AIR || this.getAmount() <= 0;
   }
@@ -96,11 +95,11 @@ public final class SFItemStack extends ItemStack {
   }
 
   public boolean canStackWith(SFItemStack other) {
-    if (other == null) {
-      return false;
-    }
-
-    return this.type == other.type;
+    return !this.isEmpty()
+      && !other.isEmpty()
+      && this.isStackable()
+      && other.isStackable()
+      && this.type == other.type;
   }
 
   public boolean has(DataComponentType<?> component) {

@@ -29,7 +29,10 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
-import com.soulfiremc.server.protocol.bot.state.*;
+import com.soulfiremc.server.protocol.bot.state.Level;
+import com.soulfiremc.server.protocol.bot.state.MapDataState;
+import com.soulfiremc.server.protocol.bot.state.PlayerListState;
+import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.*;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
@@ -115,6 +118,7 @@ public final class SessionDataManager {
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final TagsState tagsState = new TagsState();
+  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private MultiPlayerGameMode gameModeState;
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
@@ -125,7 +129,6 @@ public final class SessionDataManager {
   private GameProfile botProfile;
   @Getter(value = AccessLevel.PRIVATE)
   private Level level;
-  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private Key[] levelNames;
   private int maxPlayers = 20;
   private int serverChunkRadius = 3;
@@ -133,7 +136,7 @@ public final class SessionDataManager {
   private boolean serverEnforcesSecureChat;
   private @Nullable ChunkKey centerChunk;
   private boolean joinedWorld = false;
-  private String serverBrand;
+  private @Nullable String serverBrand;
 
   public SessionDataManager(BotConnection connection) {
     this.settingsSource = connection.settingsSource();
@@ -851,18 +854,15 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onBorderInit(ClientboundInitializeBorderPacket packet) {
-    var level = currentLevel();
-    level.borderState(
-      new BorderState(
-        packet.getNewCenterX(),
-        packet.getNewCenterZ(),
-        packet.getOldSize(),
-        packet.getNewSize(),
-        packet.getLerpTime(),
-        packet.getNewAbsoluteMaxSize(),
-        packet.getWarningBlocks(),
-        packet.getWarningTime())
-    );
+    var borderState = currentLevel().borderState();
+    borderState.centerX(packet.getNewCenterX());
+    borderState.centerZ(packet.getNewCenterZ());
+    borderState.oldSize(packet.getOldSize());
+    borderState.newSize(packet.getNewSize());
+    borderState.lerpTime(packet.getLerpTime());
+    borderState.newAbsoluteMaxSize(packet.getNewAbsoluteMaxSize());
+    borderState.warningBlocks(packet.getWarningBlocks());
+    borderState.warningTime(packet.getWarningTime());
   }
 
   @EventHandler
@@ -962,6 +962,10 @@ public final class SessionDataManager {
       return;
     }
 
+    if (!(state instanceof LivingEntity livingEntity)) {
+      throw new IllegalStateException("Received entity attributes packet for non-living entity");
+    }
+
     for (var entry : packet.getAttributes()) {
       var key = entry.getType().getIdentifier();
       var attributeType = AttributeType.REGISTRY.getByKey(key);
@@ -970,16 +974,17 @@ public final class SessionDataManager {
         continue;
       }
 
-      var attribute =
-        state.attributeState().getOrCreateAttribute(attributeType).baseValue(entry.getValue());
-
-      attribute.modifiers().clear();
-      attribute
-        .modifiers()
-        .putAll(
-          entry.getModifiers()
-            .stream()
-            .collect(Collectors.toMap(AttributeModifier::getId, Function.identity())));
+      var attribute = livingEntity.attributeState().getInstance(attributeType);
+      if (attribute != null) {
+        attribute.baseValue(entry.getValue());
+        attribute.modifiers().clear();
+        attribute
+          .modifiers()
+          .putAll(
+            entry.getModifiers()
+              .stream()
+              .collect(Collectors.toMap(AttributeModifier::getId, Function.identity())));
+      }
     }
   }
 

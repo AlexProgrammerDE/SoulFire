@@ -248,17 +248,15 @@ public final class LocalPlayer extends AbstractClientPlayer {
 
   public void resetPos() {
     this.setPose(Pose.STANDING);
-    if (this.level() != null) {
-      for (var y = this.y(); y > (double) this.level().getMinY() && y <= (double) this.level().getMaxY(); y++) {
-        this.setPos(this.x(), y, this.z());
-        if (this.level().noCollision(this.getBoundingBox())) {
-          break;
-        }
+    for (var y = this.y(); y > (double) this.level().getMinY() && y <= (double) this.level().getMaxY(); y++) {
+      this.setPos(this.x(), y, this.z());
+      if (this.level().noCollision(this.getBoundingBox())) {
+        break;
       }
-
-      this.setDeltaMovement(Vector3d.ZERO);
-      this.setXRot(0.0F);
     }
+
+    this.setDeltaMovement(Vector3d.ZERO);
+    this.setXRot(0.0F);
 
     this.setHealth(this.getMaxHealth());
     this.deathTime = 0;

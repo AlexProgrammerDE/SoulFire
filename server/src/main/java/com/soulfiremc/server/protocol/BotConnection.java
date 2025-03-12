@@ -196,6 +196,7 @@ public final class BotConnection {
     SoulFireAPI.postEvent(new BotPostTickEvent(this));
   }
 
+  @Nullable
   public GlobalTrafficShapingHandler trafficHandler() {
     return session.getFlag(SFProtocolConstants.TRAFFIC_HANDLER);
   }

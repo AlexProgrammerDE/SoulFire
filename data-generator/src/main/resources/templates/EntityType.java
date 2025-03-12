@@ -20,6 +20,7 @@ package com.soulfiremc.server.data;
 import net.kyori.adventure.key.Key;
 
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public record EntityType(
@@ -41,6 +42,7 @@ public record EntityType(
   boolean minecartEntity,
   boolean windChargeEntity,
   boolean shulkerEntity,
+  Map<Key, Double> defaultAttributes,
   List<String> inheritedClasses,
   String defaultEntityMetadata) implements RegistryValue<EntityType> {
   public static final Registry<EntityType> REGISTRY = new Registry<>(RegistryKeys.ENTITY_TYPE);

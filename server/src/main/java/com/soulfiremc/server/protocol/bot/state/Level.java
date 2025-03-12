@@ -80,6 +80,21 @@ public final class Level implements LevelHeightAccessor {
     this.levelData = levelData;
 
     this.chunks = new ChunkHolder(this);
+    if (dimensionType.coordinateScale() != 1) {
+      this.borderState = new BorderState() {
+        @Override
+        public double centerX() {
+          return super.centerX() / dimensionType.coordinateScale();
+        }
+
+        @Override
+        public double centerZ() {
+          return super.centerZ() / dimensionType.coordinateScale();
+        }
+      };
+    } else {
+      this.borderState = new BorderState();
+    }
 
     this.levelData.setSpawn(Vector3i.from(8, 64, 8), 0.0F);
     prepareWeather();
@@ -93,9 +108,7 @@ public final class Level implements LevelHeightAccessor {
 
   public void tick() {
     // Tick border changes
-    if (borderState != null) {
-      borderState.tick();
-    }
+    borderState.tick();
 
     if (this.tickRateManager().runsNormally()) {
       this.tickTime();

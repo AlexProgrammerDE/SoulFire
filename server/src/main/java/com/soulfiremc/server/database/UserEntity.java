@@ -22,6 +22,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -58,6 +59,7 @@ public final class UserEntity {
   @Column(nullable = false)
   private Instant updatedAt;
 
+  @Nullable
   private Instant lastLoginAt;
 
   @CreationTimestamp

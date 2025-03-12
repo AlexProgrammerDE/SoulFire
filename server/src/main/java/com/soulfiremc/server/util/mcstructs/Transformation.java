@@ -122,22 +122,22 @@ public final class Transformation {
 
   public Vector3f getTranslation() {
     this.ensureDecomposed();
-    return new Vector3f(this.translation);
+    return new Vector3f(Objects.requireNonNull(this.translation));
   }
 
   public Quaternionf getLeftRotation() {
     this.ensureDecomposed();
-    return new Quaternionf(this.leftRotation);
+    return new Quaternionf(Objects.requireNonNull(this.leftRotation));
   }
 
   public Vector3f getScale() {
     this.ensureDecomposed();
-    return new Vector3f(this.scale);
+    return new Vector3f(Objects.requireNonNull(this.scale));
   }
 
   public Quaternionf getRightRotation() {
     this.ensureDecomposed();
-    return new Quaternionf(this.rightRotation);
+    return new Quaternionf(Objects.requireNonNull(this.rightRotation));
   }
 
   @Override

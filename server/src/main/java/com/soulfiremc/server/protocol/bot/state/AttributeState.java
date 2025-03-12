@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.ModifierOperation;
 
@@ -72,7 +73,7 @@ public final class AttributeState {
     modifiers.remove(id);
   }
 
-  public AttributeModifier getModifier(Key id) {
+  public @Nullable AttributeModifier getModifier(Key id) {
     return modifiers.get(id);
   }
 }

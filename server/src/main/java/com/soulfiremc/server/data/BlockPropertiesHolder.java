@@ -23,6 +23,7 @@ import com.soulfiremc.server.data.block.Property;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ToString
 public final class BlockPropertiesHolder {
@@ -30,7 +31,7 @@ public final class BlockPropertiesHolder {
     (json, typeOfT, context) -> new BlockPropertiesHolder(json.getAsJsonObject());
   private final Object2ObjectMap<String, String> stateProperties = new Object2ObjectOpenHashMap<>();
 
-  public BlockPropertiesHolder(JsonObject properties) {
+  public BlockPropertiesHolder(@Nullable JsonObject properties) {
     if (properties == null) {
       return;
     }

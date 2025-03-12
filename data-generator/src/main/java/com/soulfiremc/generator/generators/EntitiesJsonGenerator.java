@@ -31,6 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
@@ -43,6 +44,7 @@ import java.util.Locale;
 @Slf4j
 public final class EntitiesJsonGenerator implements IDataGenerator {
 
+  @SuppressWarnings("unchecked")
   @SneakyThrows
   public static JsonObject generateEntity(EntityType<?> entityType) {
     var entityDesc = new JsonObject();
@@ -106,6 +108,20 @@ public final class EntitiesJsonGenerator implements IDataGenerator {
     }
     if (defaultEntity instanceof Shulker) {
       entityDesc.addProperty("shulkerEntity", true);
+    }
+    if (defaultEntity instanceof LivingEntity) {
+      var entityAttributesMap = new JsonObject();
+      var defaultSupplier = DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) entityType);
+      BuiltInRegistries.ATTRIBUTE.stream()
+        .map(BuiltInRegistries.ATTRIBUTE::wrapAsHolder)
+        .filter(defaultSupplier::hasAttribute)
+        .forEach(attribute -> {
+          entityAttributesMap.addProperty(
+            attribute.unwrapKey().orElseThrow().location().toString(),
+            defaultSupplier.getBaseValue(attribute)
+          );
+        });
+      entityDesc.add("defaultAttributes", entityAttributesMap);
     }
 
     var inheritedClasses = new JsonArray();

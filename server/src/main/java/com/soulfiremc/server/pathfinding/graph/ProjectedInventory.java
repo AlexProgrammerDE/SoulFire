@@ -52,7 +52,7 @@ public final class ProjectedInventory {
   private final int usableBlockItems;
   @Getter
   @ToString.Include
-  private final SFItemStack[] usableToolsAndNull;
+  private final SFItemStack[] usableToolsAndEmpty;
   private final IDMap<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
@@ -60,7 +60,7 @@ public final class ProjectedInventory {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
-        .filter(item -> item != null && item.getAmount() > 0)
+        .filter(item -> !item.isEmpty())
         .toList(),
       entity,
       tagsState,
@@ -69,21 +69,21 @@ public final class ProjectedInventory {
 
   public ProjectedInventory(List<SFItemStack> items, @Nullable LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     var blockItems = 0;
-    var usableToolsAndNull = new HashSet<SFItemStack>();
+    var usableToolsAndEmpty = new HashSet<SFItemStack>();
 
     // Empty slot
-    usableToolsAndNull.add(null);
+    usableToolsAndEmpty.add(SFItemStack.EMPTY);
 
     for (var item : items) {
       if (pathConstraint.isPlaceable(item)) {
         blockItems += item.getAmount();
       } else if (pathConstraint.isTool(item)) {
-        usableToolsAndNull.add(item);
+        usableToolsAndEmpty.add(item);
       }
     }
 
     this.usableBlockItems = blockItems;
-    this.usableToolsAndNull = usableToolsAndNull.toArray(new SFItemStack[0]);
+    this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new SFItemStack[0]);
     this.sharedMiningCosts = new IDMap<>(BlockType.REGISTRY.values(),
       blockType -> Costs.calculateBlockBreakCost(tagsState, entity, this, blockType));
     this.stairsBlockToStandOn = new IDBooleanMap<>(BlockType.REGISTRY.values()

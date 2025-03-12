@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util.mcstructs;
 
+@SuppressWarnings("SuspiciousNameCombination")
 public enum AxisCycle {
   NONE {
     @Override

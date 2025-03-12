@@ -18,10 +18,12 @@
 package com.soulfiremc.server.protocol.bot.state;
 
 import com.soulfiremc.server.data.AttributeType;
+import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.ItemAttributeModifiers;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 @Data
 public final class EntityAttributeState {
+  private final EntityType entityType;
   private final Map<AttributeType, AttributeState> attributeStore = new Object2ObjectOpenHashMap<>();
 
   private static boolean isNotPartOf(ItemAttributeModifiers.EquipmentSlotGroup itemSlot, EquipmentSlot comparedTo) {
@@ -51,8 +54,15 @@ public final class EntityAttributeState {
     return attributeStore.containsKey(type);
   }
 
-  public AttributeState getOrCreateAttribute(AttributeType type) {
-    return attributeStore.computeIfAbsent(type, k -> new AttributeState(type, type.defaultValue()));
+  public @Nullable AttributeState getInstance(AttributeType type) {
+    return attributeStore.computeIfAbsent(type, k -> {
+      var entityDefault = entityType.defaultAttributes().get(k.key());
+      if (entityDefault == null) {
+        return null;
+      } else {
+        return new AttributeState(k, entityDefault);
+      }
+    });
   }
 
   public void putItemModifiers(SFItemStack itemStack, EquipmentSlot slot) {
@@ -62,9 +72,11 @@ public final class EntityAttributeState {
         continue;
       }
 
-      getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
-        .modifiers()
-        .put(modifier.getModifier().getId(), new AttributeModifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), modifier.getModifier().getOperation()));
+      var attribute = getInstance(AttributeType.REGISTRY.getById(modifier.getAttribute()));
+      if (attribute != null) {
+        attribute.modifiers()
+          .put(modifier.getModifier().getId(), new AttributeModifier(modifier.getModifier().getId(), modifier.getModifier().getAmount(), modifier.getModifier().getOperation()));
+      }
     }
   }
 
@@ -75,25 +87,31 @@ public final class EntityAttributeState {
         continue;
       }
 
-      getOrCreateAttribute(AttributeType.REGISTRY.getById(modifier.getAttribute()))
-        .modifiers()
-        .remove(modifier.getModifier().getId());
+      var attribute = getInstance(AttributeType.REGISTRY.getById(modifier.getAttribute()));
+      if (attribute != null) {
+        attribute.modifiers()
+          .remove(modifier.getModifier().getId());
+      }
     }
   }
 
   public void assignAllValues(EntityAttributeState other) {
     other.attributeStore.forEach((type, state) -> {
-      var attribute = getOrCreateAttribute(type);
-      attribute.baseValue(state.baseValue());
-      attribute.modifiers().clear();
-      attribute.modifiers().putAll(state.modifiers());
+      var attribute = getInstance(type);
+      if (attribute != null) {
+        attribute.baseValue(state.baseValue());
+        attribute.modifiers().clear();
+        attribute.modifiers().putAll(state.modifiers());
+      }
     });
   }
 
   public void assignBaseValues(EntityAttributeState other) {
     other.attributeStore.forEach((type, state) -> {
-      var attribute = getOrCreateAttribute(type);
-      attribute.baseValue(state.baseValue());
+      var attribute = getInstance(type);
+      if (attribute != null) {
+        attribute.baseValue(state.baseValue());
+      }
     });
   }
 }

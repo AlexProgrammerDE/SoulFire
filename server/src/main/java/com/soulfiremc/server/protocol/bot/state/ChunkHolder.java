@@ -25,6 +25,7 @@ import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.util.SectionUtils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.concurrent.locks.Lock;
@@ -52,16 +53,16 @@ public final class ChunkHolder implements BlockAccessor {
     this.levelHeightAccessor = chunkHolder.levelHeightAccessor;
   }
 
-  public ChunkData getChunk(int chunkX, int chunkZ) {
+  public @Nullable ChunkData getChunk(int chunkX, int chunkZ) {
     return getChunkFromSection(ChunkKey.calculateKey(chunkX, chunkZ));
   }
 
-  public ChunkData getChunk(Vector3i block) {
+  public @Nullable ChunkData getChunk(Vector3i block) {
     return getChunk(
       SectionUtils.blockToSection(block.getX()), SectionUtils.blockToSection(block.getZ()));
   }
 
-  private ChunkData getChunkFromSection(long sectionIndex) {
+  private @Nullable ChunkData getChunkFromSection(long sectionIndex) {
     if (readLock != null) {
       readLock.lock();
     }

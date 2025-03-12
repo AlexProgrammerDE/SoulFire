@@ -124,7 +124,7 @@ public final class BotControlAPI {
   public boolean toggleFlight() {
     var dataManager = connection.dataManager();
     var abilitiesData = dataManager.localPlayer().abilitiesState();
-    if (abilitiesData != null && !abilitiesData.mayfly()) {
+    if (!abilitiesData.mayfly()) {
       throw new IllegalStateException("You can't fly! (Server said so)");
     }
 
@@ -253,7 +253,7 @@ public final class BotControlAPI {
     boolean onlyInteractable,
     boolean mustBeSeen) {
     var dataManager = connection.dataManager();
-    if (dataManager.localPlayer() == null) {
+    if (!dataManager.joinedWorld()) {
       return null;
     }
 
@@ -302,7 +302,7 @@ public final class BotControlAPI {
         && dataManager.connection().instanceManager().getConnectedBots().stream()
         .anyMatch(
           b -> {
-            if (b.dataManager().localPlayer() == null) {
+            if (!dataManager.joinedWorld()) {
               return false;
             }
 

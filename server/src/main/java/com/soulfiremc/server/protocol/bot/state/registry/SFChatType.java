@@ -82,7 +82,7 @@ public final class SFChatType implements RegistryValue<SFChatType> {
   }
 
   @SneakyThrows
-  private static Style deserializeStyle(NbtMap styleData) {
+  private static Style deserializeStyle(@Nullable NbtMap styleData) {
     if (styleData == null) {
       return Style.empty();
     }

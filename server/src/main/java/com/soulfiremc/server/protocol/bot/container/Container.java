@@ -19,14 +19,16 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
 
-@Getter
 public abstract class Container {
+  @Getter
   private final @Nonnull ContainerSlot[] slots;
+  @Getter
   private final int id;
   private Int2IntMap properties;
 
@@ -72,5 +74,9 @@ public abstract class Container {
     }
 
     return properties.getOrDefault(property, 0);
+  }
+
+  public IntSet propertyKeys() {
+    return properties == null ? IntSet.of() : properties.keySet();
   }
 }

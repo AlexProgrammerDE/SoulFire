@@ -111,7 +111,7 @@ public final class Costs {
     var lowestMiningTicks = Integer.MAX_VALUE;
     SFItemStack bestItem = null;
     var willDropUsableBlockItem = false;
-    for (var slot : inventory.usableToolsAndNull()) {
+    for (var slot : inventory.usableToolsAndEmpty()) {
       var miningTicks = getRequiredMiningTicks(tagsState, entity, true, slot, blockType);
       if (miningTicks.ticks() < lowestMiningTicks) {
         lowestMiningTicks = miningTicks.ticks();
@@ -214,7 +214,7 @@ public final class Costs {
 
   private static float getSpeedMultiplier(
     TagsState tagsState, @NonNull SFItemStack itemStack, BlockType blockType) {
-    if (itemStack == null) {
+    if (itemStack.isEmpty()) {
       return 1;
     }
 
@@ -237,7 +237,7 @@ public final class Costs {
       return true;
     }
 
-    if (itemStack == null) {
+    if (itemStack.isEmpty()) {
       return false;
     }
 

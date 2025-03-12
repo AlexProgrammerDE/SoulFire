@@ -22,6 +22,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 
@@ -43,6 +44,7 @@ public record BlockType(
   boolean replaceable,
   boolean requiresCorrectToolForDrops,
   boolean blocksMotion,
+  @Nullable
   OffsetData offsetData,
   BlockStates statesData) implements RegistryValue<BlockType> {
   public static final TypeAdapter<FluidType> CUSTOM_FLUID_TYPE = new TypeAdapter<>() {

@@ -60,12 +60,13 @@ public final class EntityMetadataState {
   }
 
   public <T> T get(NamedEntityData namedEntityData, MetadataType<T> metadataType) {
-    return get(namedEntityData.networkId(), metadataType).orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
+    return get(namedEntityData.networkId(), metadataType)
+      .orElseThrow(() -> new IllegalArgumentException("Metadata not found"));
   }
 
   @SuppressWarnings("unchecked")
   public <T> Optional<T> get(int id, MetadataType<T> metadataType) {
-    assert metadataType != null;
+    Objects.requireNonNull(metadataType, "metadataType");
 
     var metadata = this.metadataStore.get(id);
     if (metadata == null) {
@@ -101,6 +102,13 @@ public final class EntityMetadataState {
     for (var metadata : other) {
       this.metadataStore.put(metadata.getId(), metadata);
       this.entity.onSyncedDataUpdated(fromMetadata(metadata));
+    }
+  }
+
+  // Only used for entity constructor
+  public void defineValues(Collection<EntityMetadata<?, ?>> other) {
+    for (var metadata : other) {
+      this.metadataStore.put(metadata.getId(), metadata);
     }
   }
 

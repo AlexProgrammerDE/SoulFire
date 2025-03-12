@@ -58,8 +58,12 @@ public final class AutoEat extends InternalPlugin {
         }
 
         var dataManager = connection.dataManager();
+        if (!dataManager.joinedWorld()) {
+          return;
+        }
+
         var localPlayer = dataManager.localPlayer();
-        if (localPlayer == null || localPlayer.getFoodData().hasEnoughFood()) {
+        if (localPlayer.getFoodData().hasEnoughFood()) {
           return;
         }
 
@@ -67,7 +71,7 @@ public final class AutoEat extends InternalPlugin {
         var playerInventory = inventoryManager.playerInventory();
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && SFItemHelpers.isGoodEdibleFood(slot.item()));
+          slot -> SFItemHelpers.isGoodEdibleFood(slot.item()));
         if (edibleSlot.isEmpty()) {
           return;
         }
@@ -91,7 +95,7 @@ public final class AutoEat extends InternalPlugin {
             new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(playerInventory.getHeldItem())),
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(() -> {
-              if (inventoryManager.cursorItem() != null) {
+              if (!inventoryManager.cursorItem().isEmpty()) {
                 inventoryManager.leftClickSlot(slot);
               }
             }),

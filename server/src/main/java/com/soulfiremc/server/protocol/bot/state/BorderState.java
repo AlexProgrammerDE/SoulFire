@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.protocol.bot.state;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
-@AllArgsConstructor
-public final class BorderState {
+@NoArgsConstructor
+public class BorderState {
   private double centerX;
   private double centerZ;
   private double oldSize;

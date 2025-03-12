@@ -57,7 +57,7 @@ public final class AutoArmor extends InternalPlugin {
       Arrays.stream(inventory.storage())
         .filter(
           s -> {
-            if (s.item() == null) {
+            if (s.item().isEmpty()) {
               return false;
             }
 
@@ -65,8 +65,6 @@ public final class AutoArmor extends InternalPlugin {
           })
         .reduce(
           (first, second) -> {
-            assert first.item() != null;
-
             var firstIndex = armorType.itemTypes().indexOf(first.item().type());
             var secondIndex = armorType.itemTypes().indexOf(second.item().type());
 
@@ -79,13 +77,13 @@ public final class AutoArmor extends InternalPlugin {
 
     var bestItemSlot = bestItemSlotOptional.get();
     var bestItem = bestItemSlot.item();
-    if (bestItem == null) {
+    if (bestItem.isEmpty()) {
       return;
     }
 
     var equipmentSlot = inventory.getEquipmentSlot(armorType.toEquipmentSlot()).orElseThrow();
     var equipmentSlotItem = equipmentSlot.item();
-    if (equipmentSlotItem != null) {
+    if (!equipmentSlotItem.isEmpty()) {
       var targetIndex = armorType.itemTypes().indexOf(equipmentSlotItem.type());
       var bestIndex = armorType.itemTypes().indexOf(bestItem.type());
 
@@ -105,7 +103,7 @@ public final class AutoArmor extends InternalPlugin {
       new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(equipmentSlot)),
       new ControllingTask.WaitDelayStage(() -> 50L),
       new ControllingTask.RunnableStage(() -> {
-        if (inventoryManager.cursorItem() != null) {
+        if (!inventoryManager.cursorItem().isEmpty()) {
           inventoryManager.leftClickSlot(bestItemSlot);
         }
       }),

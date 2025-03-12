@@ -21,7 +21,6 @@ import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ImmutableList;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
-import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.EntityMetadataState;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -73,7 +72,6 @@ public class Entity {
   private static final int FLAG_SWIMMING = 4;
   private static final int FLAG_INVISIBLE = 5;
   private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-  protected final EntityAttributeState attributeState = new EntityAttributeState();
   protected final EntityEffectState effectState = new EntityEffectState();
   protected final Set<TagKey<FluidType>> fluidOnEyes = new HashSet<>();
   protected final EntityType entityType;
@@ -148,7 +146,7 @@ public class Entity {
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
     MinecraftTypes.readVarInt(buf);
-    this.entityData.assignValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
+    this.entityData.defineValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
 
     this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();
@@ -681,10 +679,6 @@ public class Entity {
 
   public Vector3i blockPos() {
     return blockPosition;
-  }
-
-  public double attributeValue(AttributeType type) {
-    return attributeState.getOrCreateAttribute(type).calculateValue();
   }
 
   public final Vector3d calculateViewVector(float xRot, float yRot) {

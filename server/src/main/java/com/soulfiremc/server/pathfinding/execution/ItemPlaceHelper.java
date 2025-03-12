@@ -46,7 +46,7 @@ public final class ItemPlaceHelper {
     var leastDestroyTime = 0F;
     for (var slot : playerInventory.storage()) {
       var slotItem = slot.item();
-      if (slotItem == null) {
+      if (slotItem.isEmpty()) {
         continue;
       }
 
@@ -70,7 +70,7 @@ public final class ItemPlaceHelper {
     var finalLeastHardItemType = leastHardItemType;
     return placeInHand(inventoryManager, playerInventory,
       playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && slot.item().type() == finalLeastHardItemType)
+          slot -> slot.item().type() == finalLeastHardItemType)
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
@@ -83,7 +83,7 @@ public final class ItemPlaceHelper {
     var sawEmpty = false;
     for (var slot : playerInventory.storage()) {
       var slotItem = slot.item();
-      if (slotItem == null) {
+      if (slotItem.isEmpty()) {
         if (sawEmpty) {
           continue;
         }
@@ -105,7 +105,7 @@ public final class ItemPlaceHelper {
             optionalBlockType)
           .ticks();
 
-      if (cost < bestCost || (slotItem == null && cost == bestCost)) {
+      if (cost < bestCost || (slotItem.isEmpty() && cost == bestCost)) {
         bestCost = cost;
         bestItemStack = slotItem;
       }
@@ -119,7 +119,7 @@ public final class ItemPlaceHelper {
     var finalBestItemStack = bestItemStack;
     return placeInHand(inventoryManager, playerInventory,
       playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && slot.item().canStackWith(finalBestItemStack))
+          slot -> slot.item().canStackWith(finalBestItemStack))
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
@@ -142,7 +142,7 @@ public final class ItemPlaceHelper {
       inventoryManager.leftClickSlot(playerInventory.getHeldItem());
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-      if (inventoryManager.cursorItem() != null) {
+      if (!inventoryManager.cursorItem().isEmpty()) {
         inventoryManager.leftClickSlot(slot);
         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
       }

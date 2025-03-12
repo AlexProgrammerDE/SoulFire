@@ -61,12 +61,12 @@ public final class AutoTotem extends InternalPlugin {
         var offhandSlot = playerInventory.getOffhand();
 
         // We only want to use totems if there are no items in the offhand
-        if (offhandSlot.item() != null) {
+        if (!offhandSlot.item().isEmpty()) {
           return;
         }
 
         var totemSlot = playerInventory.findMatchingSlotForAction(
-          slot -> slot.item() != null && slot.item().type() == ItemType.TOTEM_OF_UNDYING);
+          slot -> slot.item().type() == ItemType.TOTEM_OF_UNDYING);
         if (totemSlot.isEmpty()) {
           return;
         }
@@ -83,7 +83,7 @@ public final class AutoTotem extends InternalPlugin {
           new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(offhandSlot)),
           new ControllingTask.WaitDelayStage(() -> 50L),
           new ControllingTask.RunnableStage(() -> {
-            if (inventoryManager.cursorItem() != null) {
+            if (!inventoryManager.cursorItem().isEmpty()) {
               inventoryManager.leftClickSlot(slot);
             }
           }),

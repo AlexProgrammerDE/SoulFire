@@ -33,6 +33,7 @@ import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
 import com.soulfiremc.server.protocol.netty.ViaServer;
@@ -208,16 +209,12 @@ public final class POVServer extends InternalPlugin {
     clientSession.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
     TimeUtil.waitCondition(() -> protocol.getInboundState() != ProtocolState.CONFIGURATION, Duration.ofSeconds(30));
 
-    if (dataManager.serverEnabledFeatures() != null) {
-      clientSession.send(
-        new ClientboundUpdateEnabledFeaturesPacket(
-          dataManager.serverEnabledFeatures()));
-    }
+    clientSession.send(
+      new ClientboundUpdateEnabledFeaturesPacket(
+        dataManager.serverEnabledFeatures()));
 
     var clientPacks = awaitReceived(clientSession, ServerboundSelectKnownPacks.class);
-    if (dataManager.serverKnownPacks() != null) {
-      clientSession.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
-    }
+    clientSession.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
 
     for (var entry : dataManager.resolvedRegistryData().entrySet()) {
       var registryKey = entry.getKey();
@@ -317,18 +314,16 @@ public final class POVServer extends InternalPlugin {
         abilitiesData.walkSpeed()));
 
     var borderState = dataManager.currentLevel().borderState();
-    if (borderState != null) {
-      clientSession.send(
-        new ClientboundInitializeBorderPacket(
-          borderState.centerX(),
-          borderState.centerZ(),
-          borderState.oldSize(),
-          borderState.newSize(),
-          borderState.lerpTime(),
-          borderState.newAbsoluteMaxSize(),
-          borderState.warningBlocks(),
-          borderState.warningTime()));
-    }
+    clientSession.send(
+      new ClientboundInitializeBorderPacket(
+        borderState.centerX(),
+        borderState.centerZ(),
+        borderState.oldSize(),
+        borderState.newSize(),
+        borderState.lerpTime(),
+        borderState.newAbsoluteMaxSize(),
+        borderState.warningBlocks(),
+        borderState.warningTime()));
 
     var serverData = dataManager.serverPlayData();
     if (serverData != null) {
@@ -462,36 +457,32 @@ public final class POVServer extends InternalPlugin {
           lightUpdateData));
     }
 
-    if (botConnection.inventoryManager() != null) {
+    clientSession.send(
+      new ClientboundSetHeldSlotPacket(
+        botConnection.inventoryManager().playerInventory().selected));
+    var stateIndex = 0;
+    for (var container :
+      botConnection.inventoryManager().containerData().values()) {
       clientSession.send(
-        new ClientboundSetHeldSlotPacket(
-          botConnection.inventoryManager().playerInventory().selected));
-      var stateIndex = 0;
-      for (var container :
-        botConnection.inventoryManager().containerData().values()) {
-        clientSession.send(
-          new ClientboundContainerSetContentPacket(
-            container.id(),
-            stateIndex++,
-            Arrays.stream(
-                botConnection
-                  .inventoryManager()
-                  .playerInventory()
-                  .slots())
-              .map(ContainerSlot::item)
-              .toList()
-              .toArray(new ItemStack[0]),
-            botConnection.inventoryManager().cursorItem()));
+        new ClientboundContainerSetContentPacket(
+          container.id(),
+          stateIndex++,
+          Arrays.stream(
+              botConnection
+                .inventoryManager()
+                .playerInventory()
+                .slots())
+            .map(ContainerSlot::item)
+            .toList()
+            .toArray(new ItemStack[0]),
+          botConnection.inventoryManager().cursorItem()));
 
-        if (container.properties() != null) {
-          for (var containerProperty : container.properties().int2IntEntrySet()) {
-            clientSession.send(
-              new ClientboundContainerSetDataPacket(
-                container.id(),
-                containerProperty.getIntKey(),
-                containerProperty.getIntValue()));
-          }
-        }
+      for (var propertyKey : container.propertyKeys()) {
+        clientSession.send(
+          new ClientboundContainerSetDataPacket(
+            container.id(),
+            propertyKey,
+            container.getProperty(propertyKey)));
       }
     }
 
@@ -578,11 +569,12 @@ public final class POVServer extends InternalPlugin {
               .toArray(new EntityMetadata<?, ?>[0])));
       }
 
-      if (!entity.attributeState().attributeStore().isEmpty()) {
+      if (entity instanceof LivingEntity livingEntity
+        && !livingEntity.attributeState().attributeStore().isEmpty()) {
         clientSession.send(
           new ClientboundUpdateAttributesPacket(
-            entity.entityId(),
-            entity.attributeState().attributeStore().values().stream()
+            livingEntity.entityId(),
+            livingEntity.attributeState().attributeStore().values().stream()
               .map(
                 attributeState ->
                   new Attribute(

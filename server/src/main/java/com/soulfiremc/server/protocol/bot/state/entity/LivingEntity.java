@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.data.block.BlockProperties;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.protocol.bot.state.EntityAttributeState;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.VectorHelper;
@@ -41,6 +42,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreferenc
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -56,6 +58,7 @@ public abstract class LivingEntity extends Entity {
   protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
   protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
   protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
+  protected final EntityAttributeState attributeState;
   private final boolean discardFriction = false;
   public float xxa;
   public float yya;
@@ -84,6 +87,7 @@ public abstract class LivingEntity extends Entity {
 
   public LivingEntity(EntityType entityType, Level level) {
     super(entityType, level);
+    this.attributeState = new EntityAttributeState(entityType);
     this.setHealth(this.getMaxHealth());
     this.blocksBuilding = true;
     this.reapplyPosition();
@@ -530,7 +534,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   protected void removeFrost() {
-    var speedAttribute = this.attributeState().getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
+    var speedAttribute = this.attributeState().getInstance(AttributeType.MOVEMENT_SPEED);
     if (speedAttribute != null) {
       if (speedAttribute.getModifier(SPEED_MODIFIER_POWDER_SNOW_ID) != null) {
         speedAttribute.removeModifier(SPEED_MODIFIER_POWDER_SNOW_ID);
@@ -542,7 +546,7 @@ public abstract class LivingEntity extends Entity {
     if (!this.getBlockStateOnLegacy().blockType().air()) {
       var ticksFrozen = this.getTicksFrozen();
       if (ticksFrozen > 0) {
-        var speedAttribute = this.attributeState().getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
+        var speedAttribute = this.attributeState().getInstance(AttributeType.MOVEMENT_SPEED);
         if (speedAttribute == null) {
           return;
         }
@@ -612,11 +616,16 @@ public abstract class LivingEntity extends Entity {
   @Override
   public void setSprinting(boolean sprinting) {
     super.setSprinting(sprinting);
-    var speedAttribute = this.attributeState.getOrCreateAttribute(AttributeType.MOVEMENT_SPEED);
+    var speedAttribute = Objects.requireNonNull(this.attributeState.getInstance(AttributeType.MOVEMENT_SPEED), "Missing movement speed attribute");
     speedAttribute.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
     if (sprinting) {
       speedAttribute.addModifier(SPEED_MODIFIER_SPRINTING);
     }
+  }
+
+  public double attributeValue(AttributeType type) {
+    return Objects.requireNonNull(attributeState.getInstance(type), "Invalid attribute type " + type)
+      .calculateValue();
   }
 
   public boolean isSuppressingSlidingDownLadder() {

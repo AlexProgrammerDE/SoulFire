@@ -185,10 +185,6 @@ public final class AcmeClient {
       case DNS -> dnsChallenge(auth);
     };
 
-    if (challenge == null) {
-      throw new AcmeException("No challenge found");
-    }
-
     // If the challenge is already verified, there's no need to execute it again.
     if (challenge.getStatus() == Status.VALID) {
       return;
