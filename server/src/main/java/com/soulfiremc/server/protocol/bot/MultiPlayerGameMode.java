@@ -27,6 +27,7 @@ import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.util.mcstructs.AABB;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
@@ -35,7 +36,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.InteractAction;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerAction;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Slf4j

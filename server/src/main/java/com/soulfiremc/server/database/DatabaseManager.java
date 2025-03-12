@@ -31,7 +31,7 @@ public final class DatabaseManager {
 
       configuration.setProperty("hibernate.dialect", "org.hibernate.community.dialect.SQLiteDialect");
       configuration.setProperty("hibernate.connection.driver_class", "org.sqlite.JDBC");
-      configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:" + dbFile.toString());
+      configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:" + dbFile);
       configuration.setProperty("hibernate.connection.pool_size", 1);
       // configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");

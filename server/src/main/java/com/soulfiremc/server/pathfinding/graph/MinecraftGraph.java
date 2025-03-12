@@ -26,6 +26,7 @@ import com.soulfiremc.server.protocol.bot.block.BlockAccessor;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,12 +108,12 @@ public record MinecraftGraph(TagsState tagsState,
     return !pathConstraint.canBreakBlockType(blockType);
   }
 
-  public void insertActions(SFVec3i node, ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
+  public void insertActions(SFVec3i node, @Nullable ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
     calculateActions(node, generateTemplateActions(fromDirection), callback);
   }
 
-  private GraphAction[] generateTemplateActions(ActionDirection fromDirection) {
+  private GraphAction[] generateTemplateActions(@Nullable ActionDirection fromDirection) {
     var actions = new GraphAction[ACTIONS_TEMPLATE.length];
     for (var i = 0; i < ACTIONS_TEMPLATE.length; i++) {
       var action = ACTIONS_TEMPLATE[i];

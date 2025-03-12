@@ -22,6 +22,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -34,7 +35,7 @@ public final class MSJavaRefreshTokenAuthService
   private MSJavaRefreshTokenAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
@@ -53,7 +54,7 @@ public final class MSJavaRefreshTokenAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());

@@ -20,6 +20,7 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.proxy.SFProxy;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
 
@@ -39,7 +40,7 @@ public final class ReactorHttpHelper {
   }
 
   public static HttpClient createReactorClient(
-    SFProxy proxyData, boolean withBody) {
+    @Nullable SFProxy proxyData, boolean withBody) {
     var base =
       HttpClient.create()
         .compress(true)

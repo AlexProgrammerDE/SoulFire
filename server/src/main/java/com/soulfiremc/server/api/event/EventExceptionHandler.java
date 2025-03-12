@@ -19,7 +19,7 @@ package com.soulfiremc.server.api.event;
 
 import net.lenni0451.lambdaevents.AHandler;
 import net.lenni0451.lambdaevents.IExceptionHandler;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public final class EventExceptionHandler implements IExceptionHandler {
   private static final Logger log = LoggerFactory.getLogger("SoulFire");
 
   @Override
-  public void handle(@NotNull AHandler handler, @NotNull Object event, @NotNull Throwable t) {
+  public void handle(@NonNull AHandler handler, @NonNull Object event, @NonNull Throwable t) {
     log.error(
       "Exception while handling event {} in handler {}",
       event.getClass().getName(),

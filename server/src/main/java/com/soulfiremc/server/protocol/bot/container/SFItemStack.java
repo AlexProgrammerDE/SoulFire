@@ -21,11 +21,11 @@ import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public final class SFItemStack extends ItemStack {
     this.type = itemType;
   }
 
-  public static SFItemStack from(ItemStack itemStack) {
+  public static @Nullable SFItemStack from(@Nullable ItemStack itemStack) {
     if (itemStack == null) {
       return null;
     }
@@ -66,6 +66,7 @@ public final class SFItemStack extends ItemStack {
     }
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isEmpty() {
     return this == EMPTY || this.type == ItemType.AIR || this.getAmount() <= 0;
   }

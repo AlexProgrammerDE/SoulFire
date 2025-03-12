@@ -22,7 +22,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 

@@ -19,7 +19,7 @@ package com.soulfiremc.server.protocol.bot.container;
 
 import com.soulfiremc.server.data.EquipmentSlot;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.function.Predicate;

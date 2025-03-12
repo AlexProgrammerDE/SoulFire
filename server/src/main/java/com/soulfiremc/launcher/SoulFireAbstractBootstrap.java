@@ -34,11 +34,11 @@ import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.Fields;
 import org.apache.logging.log4j.LogManager;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.fusesource.jansi.AnsiConsole;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -20,9 +20,9 @@ package com.soulfiremc.server.protocol.bot.container;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Getter
 public abstract class Container {

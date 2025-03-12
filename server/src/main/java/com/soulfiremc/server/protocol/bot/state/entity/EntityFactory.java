@@ -21,6 +21,7 @@ import com.soulfiremc.server.data.EntityType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.Level;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public final class EntityFactory {
   public static Optional<Entity> createEntity(BotConnection connection, EntityType entityType, Level level, UUID uuid) {
     if (entityType == EntityType.PLAYER) {
       return connection.getEntityProfile(uuid).map(
-        playerListEntry -> new RemotePlayer(connection, level, playerListEntry.getProfile()));
+        playerListEntry -> new RemotePlayer(connection, level, Objects.requireNonNull(playerListEntry.getProfile(), "Player profile is null")));
     } else if (entityType.boatEntity()) {
       return Optional.of(new AbstractBoat(entityType, level));
     } else if (entityType.minecartEntity()) {

@@ -20,7 +20,7 @@ package com.soulfiremc.server.command;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.SoulFireUser;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.Set;

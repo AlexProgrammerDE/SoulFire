@@ -21,8 +21,8 @@ import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.nbt.NbtMap;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 public final class DimensionType implements RegistryValue<DimensionType> {

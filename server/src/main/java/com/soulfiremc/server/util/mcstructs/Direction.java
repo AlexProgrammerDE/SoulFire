@@ -19,11 +19,11 @@ package com.soulfiremc.server.util.mcstructs;
 
 import com.google.common.collect.Iterators;
 import com.soulfiremc.server.util.MathHelper;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -480,6 +480,10 @@ public enum Direction {
 
     public int length() {
       return this.faces.length;
+    }
+
+    public Direction.Axis[] getAxis() {
+      return this.axis;
     }
   }
 }

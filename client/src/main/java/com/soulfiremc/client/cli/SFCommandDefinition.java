@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -60,21 +61,25 @@ public final class SFCommandDefinition implements Callable<Integer> {
   @Option(
     names = {"--account-file"},
     description = "File to load accounts from")
+  @Nullable
   private Path accountFile;
 
   @Option(
     names = {"--account-type"},
     description = "Type of accounts in the account file")
+  @Nullable
   private AuthType authType;
 
   @Option(
     names = {"--proxy-file"},
     description = "File to load proxies from")
+  @Nullable
   private Path proxyFile;
 
   @Option(
     names = {"--proxy-type"},
     description = "Type of proxies in the proxy file")
+  @Nullable
   private ProxyType proxyType;
 
   @Option(

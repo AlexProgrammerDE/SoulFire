@@ -35,10 +35,7 @@ import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -77,7 +74,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
     }
 
-    return bestNode;
+    return Objects.requireNonNull(bestNode, "No best node found");
   }
 
   public CompletableFuture<List<WorldAction>> findRouteFuture(NodeState from, boolean requiresRepositioning) {

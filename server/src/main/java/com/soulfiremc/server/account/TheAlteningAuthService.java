@@ -24,6 +24,7 @@ import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
@@ -45,7 +46,7 @@ public final class TheAlteningAuthService
   private TheAlteningAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> login(TheAlteningAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     var request = new AuthenticationRequest(data.altToken, PASSWORD, UUID.randomUUID().toString());
     return ReactorHttpHelper.createReactorClient(proxyData, true)
       .post()
@@ -76,7 +77,7 @@ public final class TheAlteningAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     // TODO: Figure out The Altening refreshing
     return CompletableFuture.completedFuture(account);
   }

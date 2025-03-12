@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.key.Key;
 import net.raphimc.viabedrock.protocol.data.enums.java.InteractionHand;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
@@ -40,7 +41,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreferenc
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -810,6 +810,7 @@ public abstract class LivingEntity extends Entity {
     return false;
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean canBeSeenAsEnemy() {
     return !this.isInvulnerable() && this.canBeSeenByAnyone();
   }

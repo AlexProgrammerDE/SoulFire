@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph.actions.movement;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @RequiredArgsConstructor
 public enum MovementDirection {
@@ -47,7 +48,9 @@ public enum MovementDirection {
 
   @Getter
   private final SFVec3i offsetVector;
+  @Nullable
   private final SkyDirection skyDirection;
+  @Nullable
   private final DiagonalDirection diagonalDirection;
   @Getter
   private final ActionDirection actionDirection;

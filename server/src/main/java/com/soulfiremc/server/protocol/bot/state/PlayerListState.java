@@ -19,6 +19,7 @@ package com.soulfiremc.server.protocol.bot.state;
 
 import lombok.Data;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 
 import java.util.LinkedHashMap;
@@ -28,6 +29,8 @@ import java.util.UUID;
 @Data
 public final class PlayerListState {
   private final Map<UUID, PlayerListEntry> entries = new LinkedHashMap<>();
+  @Nullable
   private Component header;
+  @Nullable
   private Component footer;
 }

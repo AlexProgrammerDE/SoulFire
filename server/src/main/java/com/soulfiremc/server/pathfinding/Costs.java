@@ -24,9 +24,9 @@ import com.soulfiremc.server.protocol.bot.state.EntityEffectState;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.HolderSet;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.OptionalInt;
@@ -212,7 +212,7 @@ public final class Costs {
   }
 
   private static float getSpeedMultiplier(
-    TagsState tagsState, SFItemStack itemStack, BlockType blockType) {
+    TagsState tagsState, @Nullable SFItemStack itemStack, BlockType blockType) {
     if (itemStack == null) {
       return 1;
     }
@@ -231,7 +231,7 @@ public final class Costs {
     return tool.get().getDefaultMiningSpeed();
   }
 
-  private static boolean isCorrectToolUsed(TagsState tagsState, SFItemStack itemStack, BlockType blockType) {
+  private static boolean isCorrectToolUsed(TagsState tagsState, @Nullable SFItemStack itemStack, BlockType blockType) {
     if (!blockType.requiresCorrectToolForDrops()) {
       return true;
     }

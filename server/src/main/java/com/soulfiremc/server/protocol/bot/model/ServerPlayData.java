@@ -18,7 +18,7 @@
 package com.soulfiremc.server.protocol.bot.model;
 
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;

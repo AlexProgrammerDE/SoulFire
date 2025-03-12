@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import java.util.UUID;
 public final class UUIDHelper {
   private UUIDHelper() {}
 
-  public static Optional<UUID> tryParseUniqueId(String str) {
+  public static Optional<UUID> tryParseUniqueId(@Nullable String str) {
     if (str == null || str.isBlank()) {
       return Optional.empty();
     }

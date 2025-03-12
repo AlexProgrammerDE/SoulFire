@@ -30,10 +30,10 @@ import com.soulfiremc.server.util.mcstructs.*;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class Display extends Entity {
   private static final IntSet RENDER_STATE_IDS = IntSet.of(

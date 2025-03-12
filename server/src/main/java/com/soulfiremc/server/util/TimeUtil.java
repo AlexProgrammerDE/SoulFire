@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
 import java.util.concurrent.ForkJoinPool;

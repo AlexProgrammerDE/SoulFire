@@ -20,7 +20,7 @@ package com.soulfiremc.server;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 import java.util.concurrent.*;
@@ -176,7 +176,7 @@ public final class SoulFireScheduler implements Executor {
   }
 
   @Override
-  public void execute(@NotNull Runnable command) {
+  public void execute(@NonNull Runnable command) {
     schedule(command);
   }
 

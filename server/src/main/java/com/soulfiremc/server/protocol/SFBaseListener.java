@@ -73,90 +73,107 @@ public final class SFBaseListener extends SessionAdapter {
   @Override
   public void packetReceived(Session session, Packet packet) {
     var protocol = (MinecraftProtocol) session.getPacketProtocol();
-    if (protocol.getInboundState() == ProtocolState.LOGIN) {
-      if (packet instanceof ClientboundHelloPacket helloPacket) {
-        var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
+    switch (protocol.getInboundState()) {
+      case LOGIN -> {
+        switch (packet) {
+          case ClientboundHelloPacket helloPacket -> {
+            var viaUserConnection = session.getFlag(SFProtocolConstants.VIA_USER_CONNECTION);
 
-        var needsAuth = helloPacket.isShouldAuthenticate();
-        var isLegacy = SFVersionConstants.isLegacy(botConnection.protocolVersion());
-        if (needsAuth && isLegacy) {
-          needsAuth =
-            Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class))
-              .authenticate;
-        }
+            var needsAuth = helloPacket.isShouldAuthenticate();
+            var isLegacy = SFVersionConstants.isLegacy(botConnection.protocolVersion());
+            if (needsAuth && isLegacy) {
+              needsAuth =
+                Objects.requireNonNull(viaUserConnection.get(ProtocolMetadataStorage.class))
+                  .authenticate;
+            }
 
-        SecretKey key;
-        try {
-          var gen = KeyGenerator.getInstance("AES");
-          gen.init(128);
-          key = gen.generateKey();
-        } catch (NoSuchAlgorithmException e) {
-          throw new IllegalStateException("Failed to generate shared key.", e);
-        }
+            SecretKey key;
+            try {
+              var gen = KeyGenerator.getInstance("AES");
+              gen.init(128);
+              key = gen.generateKey();
+            } catch (NoSuchAlgorithmException e) {
+              throw new IllegalStateException("Failed to generate shared key.", e);
+            }
 
-        botConnection.logger().debug("Needs auth: {}", needsAuth);
-        if (needsAuth) {
-          var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
-          botConnection.logger().debug("Can do auth: {}", canDoAuth);
-          if (canDoAuth) {
-            var serverId =
-              SessionService.getServerId(
-                helloPacket.getServerId(), helloPacket.getPublicKey(), key);
-            botConnection.joinServerId(serverId);
-          } else {
-            botConnection
-              .logger()
-              .info(
-                "Server sent a encryption request, but account is offline mode. Not authenticating with mojang.");
+            botConnection.logger().debug("Needs auth: {}", needsAuth);
+            if (needsAuth) {
+              var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
+              botConnection.logger().debug("Can do auth: {}", canDoAuth);
+              if (canDoAuth) {
+                var serverId =
+                  SessionService.getServerId(
+                    helloPacket.getServerId(), helloPacket.getPublicKey(), key);
+                botConnection.joinServerId(serverId);
+              } else {
+                botConnection
+                  .logger()
+                  .info(
+                    "Server sent a encryption request, but account is offline mode. Not authenticating with mojang.");
+              }
+            }
+
+            var keyPacket = new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge());
+
+            var encryptionConfig = new EncryptionConfig(new AESEncryption(key));
+            if (!isLegacy) {
+              session.send(keyPacket, () -> session.setEncryption(encryptionConfig));
+            } else {
+              botConnection.logger().debug("Storing legacy secret key.");
+              session.setFlag(SFProtocolConstants.VL_ENCRYPTION_CONFIG, encryptionConfig);
+            }
+          }
+          case ClientboundLoginFinishedPacket ignored -> {
+            session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
+            session.send(new ServerboundLoginAcknowledgedPacket());
+            session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+          }
+          case ClientboundLoginDisconnectPacket loginDisconnectPacket -> session.disconnect(loginDisconnectPacket.getReason());
+          case ClientboundLoginCompressionPacket loginCompressionPacket -> {
+            if (loginCompressionPacket.getThreshold() >= 0) {
+              session.setCompression(new CompressionConfig(loginCompressionPacket.getThreshold(), new ZlibCompression(), true));
+            }
+          }
+          default -> {
           }
         }
-
-        var keyPacket = new ServerboundKeyPacket(helloPacket.getPublicKey(), key, helloPacket.getChallenge());
-
-        var encryptionConfig = new EncryptionConfig(new AESEncryption(key));
-        if (!isLegacy) {
-          session.send(keyPacket, () -> session.setEncryption(encryptionConfig));
-        } else {
-          botConnection.logger().debug("Storing legacy secret key.");
-          session.setFlag(SFProtocolConstants.VL_ENCRYPTION_CONFIG, encryptionConfig);
-        }
-      } else if (packet instanceof ClientboundLoginFinishedPacket) {
-        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
-        session.send(new ServerboundLoginAcknowledgedPacket());
-        session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
-      } else if (packet instanceof ClientboundLoginDisconnectPacket loginDisconnectPacket) {
-        session.disconnect(loginDisconnectPacket.getReason());
-      } else if (packet instanceof ClientboundLoginCompressionPacket loginCompressionPacket) {
-        if (loginCompressionPacket.getThreshold() >= 0) {
-          session.setCompression(new CompressionConfig(loginCompressionPacket.getThreshold(), new ZlibCompression(), true));
+      }
+      case STATUS -> {
+        switch (packet) {
+          case ClientboundStatusResponsePacket ignored -> session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
+          case ClientboundPongResponsePacket ignored -> session.disconnect(Component.translatable("multiplayer.status.finished"));
+          default -> {
+          }
         }
       }
-    } else if (protocol.getInboundState() == ProtocolState.STATUS) {
-      if (packet instanceof ClientboundStatusResponsePacket) {
-        session.send(new ServerboundPingRequestPacket(System.currentTimeMillis()));
-      } else if (packet instanceof ClientboundPongResponsePacket) {
-        session.disconnect(Component.translatable("multiplayer.status.finished"));
+      case GAME -> {
+        switch (packet) {
+          case ClientboundKeepAlivePacket keepAlivePacket -> session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
+          case ClientboundPingPacket pingPacket -> session.send(new ServerboundPongPacket(pingPacket.getId()));
+          case ClientboundDisconnectPacket disconnectPacket -> session.disconnect(disconnectPacket.getReason());
+          case ClientboundStartConfigurationPacket ignored -> {
+            session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
+            session.send(new ServerboundConfigurationAcknowledgedPacket());
+            session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+          }
+          default -> {
+          }
+        }
       }
-    } else if (protocol.getInboundState() == ProtocolState.GAME) {
-      if (packet instanceof ClientboundKeepAlivePacket keepAlivePacket) {
-        session.send(new ServerboundKeepAlivePacket(keepAlivePacket.getPingId()));
-      } else if (packet instanceof ClientboundPingPacket pingPacket) {
-        session.send(new ServerboundPongPacket(pingPacket.getId()));
-      } else if (packet instanceof ClientboundDisconnectPacket disconnectPacket) {
-        session.disconnect(disconnectPacket.getReason());
-      } else if (packet instanceof ClientboundStartConfigurationPacket) {
-        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
-        session.send(new ServerboundConfigurationAcknowledgedPacket());
-        session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));
+      case CONFIGURATION -> {
+        switch (packet) {
+          case ClientboundFinishConfigurationPacket ignored -> {
+            session.switchInboundState(() -> protocol.setInboundState(ProtocolState.GAME));
+            session.send(new ServerboundFinishConfigurationPacket());
+            session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.GAME));
+          }
+          case ClientboundSelectKnownPacks selectKnownPacks -> session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
+            .getMatchingPacks(selectKnownPacks.getKnownPacks())));
+          default -> {
+          }
+        }
       }
-    } else if (protocol.getInboundState() == ProtocolState.CONFIGURATION) {
-      if (packet instanceof ClientboundFinishConfigurationPacket) {
-        session.switchInboundState(() -> protocol.setInboundState(ProtocolState.GAME));
-        session.send(new ServerboundFinishConfigurationPacket());
-        session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.GAME));
-      } else if (packet instanceof ClientboundSelectKnownPacks selectKnownPacks) {
-        session.send(new ServerboundSelectKnownPacks(BuiltInKnownPackRegistry.INSTANCE
-          .getMatchingPacks(selectKnownPacks.getKnownPacks())));
+      case null, default -> {
       }
     }
   }

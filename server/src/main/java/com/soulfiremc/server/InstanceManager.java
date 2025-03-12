@@ -49,8 +49,8 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -500,27 +500,25 @@ public final class InstanceManager {
   }
 
   public void addAuditLog(SoulFireUser source, InstanceAuditLogEntity.AuditLogType logType, @Nullable String data) {
-    scheduler.runAsync(() -> {
-      sessionFactory.inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, id);
-        if (instanceEntity == null) {
-          return;
-        }
+    scheduler.runAsync(() -> sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+      if (instanceEntity == null) {
+        return;
+      }
 
-        var userEntity = session.find(UserEntity.class, source.getUniqueId());
-        if (userEntity == null) {
-          return;
-        }
+      var userEntity = session.find(UserEntity.class, source.getUniqueId());
+      if (userEntity == null) {
+        return;
+      }
 
-        var auditLogEntry = new InstanceAuditLogEntity();
-        auditLogEntry.type(logType);
-        auditLogEntry.data(data);
-        auditLogEntry.instance(instanceEntity);
-        auditLogEntry.user(userEntity);
+      var auditLogEntry = new InstanceAuditLogEntity();
+      auditLogEntry.type(logType);
+      auditLogEntry.data(data);
+      auditLogEntry.instance(instanceEntity);
+      auditLogEntry.user(userEntity);
 
-        session.persist(auditLogEntry);
-      });
-    });
+      session.persist(auditLogEntry);
+    }));
   }
 
   public Path getObjectStoragePath() {

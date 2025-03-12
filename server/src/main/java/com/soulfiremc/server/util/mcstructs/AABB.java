@@ -19,10 +19,10 @@ package com.soulfiremc.server.util.mcstructs;
 
 import com.soulfiremc.server.util.MathHelper;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;

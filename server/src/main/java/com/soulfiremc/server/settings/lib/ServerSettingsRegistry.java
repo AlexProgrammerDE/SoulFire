@@ -22,9 +22,9 @@ import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.settings.property.*;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

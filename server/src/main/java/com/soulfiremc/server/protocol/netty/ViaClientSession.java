@@ -36,6 +36,7 @@ import lombok.Getter;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
@@ -49,7 +50,6 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.session.ClientNetworkSession;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.net.SocketAddress;
@@ -60,6 +60,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class ViaClientSession extends ClientNetworkSession {
   @Getter
   private final Logger logger;
+  @Nullable
   private final SFProxy proxy;
   @Getter
   private final EventLoopGroup eventLoopGroup;
@@ -72,6 +73,7 @@ public final class ViaClientSession extends ClientNetworkSession {
     SocketAddress targetAddress,
     Logger logger,
     PacketProtocol protocol,
+    @Nullable
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
     BotConnection botConnection) {
@@ -82,6 +84,7 @@ public final class ViaClientSession extends ClientNetworkSession {
     SocketAddress targetAddress,
     Logger logger,
     PacketProtocol protocol,
+    @Nullable
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
     BotConnection botConnection,
@@ -234,7 +237,7 @@ public final class ViaClientSession extends ClientNetworkSession {
   }
 
   @Override
-  public void send(@NotNull Packet packet, Runnable onSent) {
+  public void send(@NonNull Packet packet, @Nullable Runnable onSent) {
     var channel = getChannel();
     if (channel == null || !channel.isActive() || eventLoopGroup.isShutdown()) {
       logger.debug("Channel is not active, dropping packet {}", packet.getClass().getSimpleName());
@@ -272,7 +275,7 @@ public final class ViaClientSession extends ClientNetworkSession {
           });
   }
 
-  public void packetExceptionCaught(ChannelHandlerContext ctx, Throwable cause, Packet packet) {
+  public void packetExceptionCaught(@Nullable ChannelHandlerContext ctx, Throwable cause, Packet packet) {
     if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
       logger.debug("Packet was cancelled.", cause);
       callPacketSent(packet);

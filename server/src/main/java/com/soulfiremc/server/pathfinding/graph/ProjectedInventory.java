@@ -32,6 +32,7 @@ import com.soulfiremc.server.util.structs.IDMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
@@ -66,7 +67,7 @@ public final class ProjectedInventory {
       pathConstraint);
   }
 
-  public ProjectedInventory(List<SFItemStack> items, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<SFItemStack> items, @Nullable LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndNull = new HashSet<SFItemStack>();
 

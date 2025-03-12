@@ -23,6 +23,7 @@ import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -35,7 +36,7 @@ public final class MSBedrockCredentialsAuthService
   private MSBedrockCredentialsAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       try {
@@ -66,7 +67,7 @@ public final class MSBedrockCredentialsAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       var flow = MinecraftAuth.BEDROCK_CREDENTIALS_LOGIN;
       var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());

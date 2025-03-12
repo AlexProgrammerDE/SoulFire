@@ -27,7 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Base64;
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public final class MCHelper {
   public static GameTestHelper getGameTestHelper() {
     return new GameTestHelper(null) {
       @Override
-      public @NotNull ServerLevel getLevel() {
+      public @NonNull ServerLevel getLevel() {
         return MCHelper.getLevel();
       }
     };

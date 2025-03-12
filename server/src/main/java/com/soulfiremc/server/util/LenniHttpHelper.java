@@ -29,7 +29,8 @@ import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.lenni0451.commons.httpclient.utils.HttpRequestUtils;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 public final class LenniHttpHelper {
   private LenniHttpHelper() {}
 
-  public static HttpClient createLenniMCAuthHttpClient(SFProxy proxyData) {
+  public static HttpClient createLenniMCAuthHttpClient(@Nullable SFProxy proxyData) {
     return MinecraftAuth.createHttpClient()
       .setExecutor(client -> new ReactorLenniExecutor(proxyData, client));
   }
@@ -58,16 +59,17 @@ public final class LenniHttpHelper {
   }
 
   private static class ReactorLenniExecutor extends RequestExecutor {
+    @Nullable
     private final SFProxy proxyData;
 
-    public ReactorLenniExecutor(SFProxy proxyData, HttpClient httpClient) {
+    public ReactorLenniExecutor(@Nullable SFProxy proxyData, HttpClient httpClient) {
       super(httpClient);
       this.proxyData = proxyData;
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public HttpResponse execute(@NotNull HttpRequest httpRequest) throws IOException {
+    public HttpResponse execute(@NonNull HttpRequest httpRequest) throws IOException {
       var cookieManager = getCookieManager(httpRequest);
       try {
         log.debug("Executing request: {}", httpRequest.getURL());

@@ -19,7 +19,8 @@ package com.soulfiremc.server.util.structs;
 
 import com.google.common.reflect.ClassPath;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
@@ -50,7 +51,7 @@ public final class CustomClassProvider implements IClassProvider {
   }
 
   @Override
-  public byte @NotNull [] getClass(@NotNull String name) throws ClassNotFoundException {
+  public byte @NonNull [] getClass(@NonNull String name) throws ClassNotFoundException {
     for (var classLoader : this.classLoaders) {
       var bytes = this.getClassFromLoader(classLoader, name);
       if (bytes != null) {
@@ -61,7 +62,7 @@ public final class CustomClassProvider implements IClassProvider {
     throw new ClassNotFoundException("Class not found: " + name);
   }
 
-  private byte[] getClassFromLoader(ClassLoader classLoader, String name) {
+  private byte @Nullable [] getClassFromLoader(ClassLoader classLoader, String name) {
     try (var is = classLoader.getResourceAsStream(slash(name) + ".class")) {
       Objects.requireNonNull(is, "Class input stream is null");
       var baos = new ByteArrayOutputStream();

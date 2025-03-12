@@ -20,8 +20,8 @@ package com.soulfiremc.server.proxy;
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import lombok.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.network.ProxyInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;

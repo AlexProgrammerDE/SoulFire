@@ -84,7 +84,7 @@ public final class IdentifiedKey {
   /**
    * Sets the uuid for this key. Returns false if incorrect.
    */
-  public boolean internalAddHolder(UUID holder) {
+  public boolean internalAddHolder(@Nullable UUID holder) {
     if (holder == null) {
       return false;
     }
@@ -107,7 +107,7 @@ public final class IdentifiedKey {
     return isSignatureValid != null && isSignatureValid;
   }
 
-  private Boolean validateData(@Nullable UUID verify) {
+  private @Nullable Boolean validateData(@Nullable UUID verify) {
     if (revision == Revision.GENERIC_V1) {
       var pemKey = EncryptionUtils.pemEncodeRsaKey(publicKey);
       var expires = expiryTemporal.toEpochMilli();

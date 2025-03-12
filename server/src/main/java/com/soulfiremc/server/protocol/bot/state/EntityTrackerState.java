@@ -20,7 +20,7 @@ package com.soulfiremc.server.protocol.bot.state;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;

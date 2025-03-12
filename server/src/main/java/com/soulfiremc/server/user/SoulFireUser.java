@@ -23,13 +23,14 @@ import io.grpc.StatusRuntimeException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.TriState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.util.UUID;
 
 public interface SoulFireUser {
-  private static String format(String format, Object[] params, Throwable t) {
+  private static String format(String format, Object[] params, @Nullable Throwable t) {
     return MessageFormatter.arrayFormat(format, params, t).getMessage();
   }
 

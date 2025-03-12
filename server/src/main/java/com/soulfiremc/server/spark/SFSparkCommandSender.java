@@ -20,6 +20,7 @@ package com.soulfiremc.server.spark;
 import com.soulfiremc.server.user.SoulFireUser;
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.event.Level;
 
 import java.util.UUID;
@@ -35,7 +36,7 @@ public final class SFSparkCommandSender extends AbstractCommandSender<SoulFireUs
   }
 
   @Override
-  public UUID getUniqueId() {
+  public @Nullable UUID getUniqueId() {
     return null;
   }
 

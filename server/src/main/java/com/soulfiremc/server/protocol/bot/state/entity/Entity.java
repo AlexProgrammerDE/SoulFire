@@ -45,6 +45,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
@@ -56,7 +57,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEn
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.object.ObjectData;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -279,7 +279,7 @@ public class Entity {
     return () -> new AbstractIterator<>() {
       private int index;
 
-      protected Vector3i computeNext() {
+      protected @Nullable Vector3i computeNext() {
         if (this.index == squareDistance) {
           return this.endOfData();
         } else {
@@ -1443,7 +1443,7 @@ public class Entity {
 
   @Nullable
   public Entity getFirstPassenger() {
-    return this.passengers.isEmpty() ? null : this.passengers.get(0);
+    return this.passengers.isEmpty() ? null : this.passengers.getFirst();
   }
 
   public boolean hasPassenger(Entity entity) {
@@ -1488,7 +1488,7 @@ public class Entity {
     var currentEntity = this;
 
     while (currentEntity.isPassenger()) {
-      currentEntity = currentEntity.getVehicle();
+      currentEntity = Objects.requireNonNull(currentEntity.getVehicle(), "Root vehicle of a passenger cannot be null");
     }
 
     return currentEntity;
@@ -1502,7 +1502,7 @@ public class Entity {
     if (!entity.isPassenger()) {
       return false;
     } else {
-      var vehicle = entity.getVehicle();
+      var vehicle = Objects.requireNonNull(entity.getVehicle(), "Root vehicle of a passenger cannot be null");
       return vehicle == this || this.hasIndirectPassenger(vehicle);
     }
   }

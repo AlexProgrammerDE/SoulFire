@@ -18,6 +18,7 @@
 package com.soulfiremc.server.util.structs;
 
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -141,7 +142,7 @@ public final class SFContextClassLoader extends URLClassLoader {
     }
   }
 
-  private Class<?> loadParentClass(String name) {
+  private @Nullable Class<?> loadParentClass(String name) {
     try {
       var classBytes = this.getClassBytes(name);
       if (classBytes == null) {
@@ -198,7 +199,7 @@ public final class SFContextClassLoader extends URLClassLoader {
   }
 
   @SuppressWarnings("deprecation")
-  private URLConnection getClassConnection(String className) throws IOException {
+  private @Nullable URLConnection getClassConnection(String className) throws IOException {
     var url = this.getResource(nameToPath(className));
     if (url != null) {
       if ("jar".equalsIgnoreCase(url.getProtocol()) && url.getRef() == null) {
@@ -210,14 +211,15 @@ public final class SFContextClassLoader extends URLClassLoader {
     return null;
   }
 
-  private Package getAndVerifyPackage(String pkgName,
-                                      Manifest man, URL url) {
+  private @Nullable Package getAndVerifyPackage(String pkgName,
+                                                @Nullable Manifest man,
+                                                @Nullable URL url) {
     var pkg = getDefinedPackage(pkgName);
     if (pkg != null) {
       // Package found, so check package sealing.
       if (pkg.isSealed()) {
         // Verify that code source URL is the same.
-        if (!pkg.isSealed(url)) {
+        if (url == null || !pkg.isSealed(url)) {
           throw new SecurityException(
             "sealing violation: package " + pkgName + " is sealed");
         }
@@ -234,7 +236,7 @@ public final class SFContextClassLoader extends URLClassLoader {
     return pkg;
   }
 
-  private byte[] getClassBytes(String className) {
+  private byte @Nullable [] getClassBytes(String className) {
     try (var inputStream = this.getResourceAsStream(nameToPath(className))) {
       if (inputStream == null) {
         return null;
@@ -259,7 +261,7 @@ public final class SFContextClassLoader extends URLClassLoader {
   }
 
   @Override
-  public URL findResource(String name) {
+  public @Nullable URL findResource(String name) {
     var thisLoaderResource = super.findResource(name);
     if (thisLoaderResource != null) {
       return thisLoaderResource;

@@ -30,6 +30,7 @@ import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.common.serverbound.ServerboundCustomPayloadPacket;
@@ -205,7 +206,7 @@ public final class BotControlAPI {
     connection.sendPacket(new ServerboundCustomPayloadPacket(channel, data));
   }
 
-  public Vector3d getEntityVisiblePoint(Entity entity) {
+  public @Nullable Vector3d getEntityVisiblePoint(Entity entity) {
     var points = new ArrayList<Vector3d>();
     double halfWidth = entity.dimensions().width() / 2;
     double halfHeight = entity.dimensions().height() / 2;
@@ -245,7 +246,7 @@ public final class BotControlAPI {
     return null;
   }
 
-  public Entity getClosestEntity(
+  public @Nullable Entity getClosestEntity(
     double range,
     List<String> whitelistedUsers,
     boolean ignoreBots,
@@ -285,8 +286,7 @@ public final class BotControlAPI {
         continue;
       }
 
-      if (whitelistedUsers != null
-        && !whitelistedUsers.isEmpty()
+      if (!whitelistedUsers.isEmpty()
         && entity.entityType() == EntityType.PLAYER) {
         var connectedUsers = dataManager.playerListState();
         var playerListEntry = connectedUsers.entries().get(entity.uuid());

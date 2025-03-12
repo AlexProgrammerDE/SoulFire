@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ClickItemAction;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerActionType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
@@ -41,11 +42,13 @@ public final class InventoryManager {
   private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   @ToString.Exclude
   private final BotConnection connection;
+  @Nullable
   private Container currentContainer;
   private int lastStateId = 0;
+  @Nullable
   private SFItemStack cursorItem;
 
-  public Container getContainer(int containerId) {
+  public @Nullable Container getContainer(int containerId) {
     return containerData.get(containerId);
   }
 

@@ -24,6 +24,7 @@ import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.AllArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
@@ -39,9 +40,10 @@ public final class SFSessionService {
     URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
 
   private final URI joinEndpoint;
+  @Nullable
   private final SFProxy proxyData;
 
-  public SFSessionService(AuthType authType, SFProxy proxyData) {
+  public SFSessionService(AuthType authType, @Nullable SFProxy proxyData) {
     this.joinEndpoint =
       switch (authType) {
         case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;

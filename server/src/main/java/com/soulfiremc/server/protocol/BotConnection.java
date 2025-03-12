@@ -41,6 +41,7 @@ import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -99,6 +100,7 @@ public final class BotConnection {
     MinecraftAccount minecraftAccount,
     ProtocolState targetState,
     ProtocolVersion protocolVersion,
+    @Nullable
     SFProxy proxyData,
     EventLoopGroup eventLoopGroup) {
     this.factory = factory;

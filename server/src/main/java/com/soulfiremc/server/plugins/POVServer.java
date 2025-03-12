@@ -910,10 +910,8 @@ public final class POVServer extends InternalPlugin {
               // MC Client -> Server of the bot
               botConnection.session().send(packet);
             }
-            default -> {
-              // MC Client -> Server of the bot
+            default -> // MC Client -> Server of the bot
               botConnection.session().send(packet);
-            }
           }
         });
       }
@@ -985,8 +983,7 @@ public final class POVServer extends InternalPlugin {
             }
             case ClientboundCustomPayloadPacket ignored -> {
             }
-            case ClientboundPlayerChatPacket chatPacket -> {
-              // To avoid signature issues since the signature is for the bot, not the connected user
+            case ClientboundPlayerChatPacket chatPacket -> // To avoid signature issues since the signature is for the bot, not the connected user
               clientSession.send(new ClientboundSystemChatPacket(
                 botConnection.dataManager().prepareChatTypeMessage(
                   chatPacket.getChatType(),
@@ -997,11 +994,8 @@ public final class POVServer extends InternalPlugin {
                   )),
                 false
               ));
-            }
-            default -> {
-              // MC Server of the bot -> MC Client
+            default -> // MC Server of the bot -> MC Client
               clientSession.send(packet);
-            }
           }
         });
       }

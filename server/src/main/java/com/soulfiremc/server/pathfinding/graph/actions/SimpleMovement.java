@@ -32,6 +32,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.*;
 import com.soulfiremc.server.protocol.bot.MultiPlayerGameMode;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -334,7 +335,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private interface SimpleMovementSubscription extends MinecraftGraph.MovementSubscription<SimpleMovement> {
   }
 
-  private record MovementFreeSubscription(int blockArrayIndex, BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
+  private record MovementFreeSubscription(int blockArrayIndex, @Nullable BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
@@ -349,6 +350,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       // Search for a way to break this block
       if (graph.disallowedToBreakBlock(absoluteKey)
         || !simpleMovement.allowBlockActions
+        || blockBreakSideHint == null
         || graph.disallowedToBreakBlockType(blockState.blockType())
         // Check if we previously found out this block is unsafe to break
         || simpleMovement.unsafeToBreak[blockArrayIndex]) {

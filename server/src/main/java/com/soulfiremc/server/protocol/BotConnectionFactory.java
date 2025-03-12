@@ -27,6 +27,7 @@ import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -39,6 +40,7 @@ public record BotConnectionFactory(
   Logger logger,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
+  @Nullable
   SFProxy proxyData,
   EventLoopGroup eventLoopGroup) {
   public BotConnection prepareConnection() {

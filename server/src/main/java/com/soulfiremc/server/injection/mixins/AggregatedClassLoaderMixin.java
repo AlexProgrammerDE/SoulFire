@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.injection.mixins;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.boot.registry.classloading.internal.AggregatedClassLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(AggregatedClassLoader.class)
 public final class AggregatedClassLoaderMixin {
   @Overwrite
-  private static ClassLoader locateSystemClassLoader() {
+  private static @Nullable ClassLoader locateSystemClassLoader() {
     return null;
   }
 }

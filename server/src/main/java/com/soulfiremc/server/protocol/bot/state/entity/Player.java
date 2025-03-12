@@ -34,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
@@ -43,7 +44,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTyp
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -78,7 +78,7 @@ public abstract class Player extends LivingEntity {
   public int experienceLevel;
   public int totalExperience;
   public float experienceProgress;
-  protected FoodData foodData = new FoodData();
+  protected final FoodData foodData = new FoodData();
   protected boolean wasUnderwater = false;
   protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
   protected int autoSpinAttackTicks;

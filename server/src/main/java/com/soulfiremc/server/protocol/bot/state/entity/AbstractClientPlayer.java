@@ -21,10 +21,10 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter

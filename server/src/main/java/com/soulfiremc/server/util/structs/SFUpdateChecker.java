@@ -24,6 +24,7 @@ import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -52,7 +53,7 @@ public final class SFUpdateChecker {
       });
   }
 
-  private static String checkForUpdates() {
+  private static @Nullable String checkForUpdates() {
     if (Boolean.getBoolean("soulfire.disable-updates")) {
       log.info("Skipping update check because of system property");
       return null;

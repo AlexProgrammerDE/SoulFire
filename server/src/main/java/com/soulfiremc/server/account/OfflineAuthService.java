@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -38,7 +39,7 @@ public final class OfflineAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(OfflineAuthData data, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> login(OfflineAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.completedFuture(createAccount(data.username()));
   }
 
@@ -48,7 +49,7 @@ public final class OfflineAuthService
   }
 
   @Override
-  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.completedFuture(account);
   }
 

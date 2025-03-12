@@ -23,6 +23,7 @@ import net.kyori.adventure.key.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public record BlockStates(BlockState defaultState, List<BlockState> possibleStates) {
   public static BlockStates fromJsonArray(BlockType blockType, Key key, JsonArray array) {
@@ -52,6 +53,9 @@ public record BlockStates(BlockState defaultState, List<BlockState> possibleStat
       i++;
     }
 
-    return new BlockStates(defaultState, possibleStates);
+    return new BlockStates(
+      Objects.requireNonNull(defaultState, "No default state found in block states"),
+      possibleStates
+    );
   }
 }

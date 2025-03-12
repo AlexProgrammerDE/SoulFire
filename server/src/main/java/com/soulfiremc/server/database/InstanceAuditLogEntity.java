@@ -20,6 +20,7 @@ package com.soulfiremc.server.database;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -40,6 +41,7 @@ public final class InstanceAuditLogEntity {
   private AuditLogType type;
 
   @Column
+  @Nullable
   private String data;
 
   @ManyToOne(cascade = CascadeType.ALL)

@@ -19,7 +19,7 @@ package com.soulfiremc.server.util.mcstructs;
 
 import com.soulfiremc.server.util.MatrixUtil;
 import com.soulfiremc.server.util.SFHelpers;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

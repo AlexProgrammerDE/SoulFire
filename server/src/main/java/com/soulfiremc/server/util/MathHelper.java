@@ -166,6 +166,7 @@ public final class MathHelper {
     return Math.abs(y - x) < 1.0E-5F;
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public static boolean equal(double x, double y) {
     return Math.abs(y - x) < 1.0E-5F;
   }

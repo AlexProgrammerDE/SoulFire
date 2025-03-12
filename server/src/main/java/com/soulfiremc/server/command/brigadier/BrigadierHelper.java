@@ -30,6 +30,7 @@ import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -202,7 +203,7 @@ public final class BrigadierHelper {
       });
   }
 
-  public static Component toComponent(Message message) {
+  public static @Nullable Component toComponent(@Nullable Message message) {
     return switch (message) {
       case null -> null;
       case BrigadierComponent brigadierComponent -> brigadierComponent.component();
@@ -225,6 +226,7 @@ public final class BrigadierHelper {
 
   private record SingleRedirectHelpWrapper(
     SingleRedirectModifier<CommandSourceStack> command,
+    @Nullable
     String help,
     boolean privateCommand
   ) implements SingleRedirectModifier<CommandSourceStack>, HelpCarrier {
@@ -234,7 +236,7 @@ public final class BrigadierHelper {
     }
   }
 
-  private record CommandHelpWrapper(Command<CommandSourceStack> command, String help, boolean privateCommand)
+  private record CommandHelpWrapper(Command<CommandSourceStack> command, @Nullable String help, boolean privateCommand)
     implements Command<CommandSourceStack>, HelpCarrier {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -244,6 +246,7 @@ public final class BrigadierHelper {
 
   private record RedirectHelpWrapper(
     RedirectModifier<CommandSourceStack> command,
+    @Nullable
     String help,
     boolean privateCommand
   ) implements RedirectModifier<CommandSourceStack>, HelpCarrier {

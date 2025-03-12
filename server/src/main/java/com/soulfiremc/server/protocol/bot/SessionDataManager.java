@@ -50,8 +50,9 @@ import lombok.ToString;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
@@ -91,8 +92,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
@@ -223,12 +222,8 @@ public final class SessionDataManager {
       var entry = entries.get(i);
       var holderKey = entry.getId();
       var providedData = entry.getData();
-      NbtMap usedData;
-      if (providedData == null) {
-        usedData = BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks);
-      } else {
-        usedData = providedData;
-      }
+      var usedData = Objects.requireNonNullElseGet(providedData,
+        () -> BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks));
 
       registryWriter.register(holderKey, i, usedData);
       resolvedEntries.add(new RegistryEntry(holderKey, usedData));
@@ -1241,7 +1236,7 @@ public final class SessionDataManager {
     }
   }
 
-  public @NotNull Level currentLevel() {
+  public @NonNull Level currentLevel() {
     return Objects.requireNonNull(level, "Current level is not set");
   }
 
