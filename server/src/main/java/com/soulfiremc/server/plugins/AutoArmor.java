@@ -23,7 +23,7 @@ import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.data.ArmorType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
-import com.soulfiremc.server.protocol.bot.container.InventoryManager;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -49,9 +49,9 @@ public final class AutoArmor extends InternalPlugin {
   }
 
   private static void putOn(
-    InventoryManager inventoryManager,
+    LocalPlayer localPlayer,
     ArmorType armorType) {
-    var inventory = inventoryManager.playerInventory();
+    var inventory = localPlayer.inventory();
 
     var bestItemSlotOptional =
       Arrays.stream(inventory.storage())
@@ -81,7 +81,12 @@ public final class AutoArmor extends InternalPlugin {
       return;
     }
 
-    var equipmentSlot = inventory.getEquipmentSlot(armorType.toEquipmentSlot()).orElseThrow();
+    var equipmentSlot = inventory.armor()[switch (armorType) {
+      case HELMET -> 3;
+      case CHESTPLATE -> 2;
+      case LEGGINGS -> 1;
+      case BOOTS -> 0;
+    }];
     var equipmentSlotItem = equipmentSlot.item();
     if (!equipmentSlotItem.isEmpty()) {
       var targetIndex = armorType.itemTypes().indexOf(equipmentSlotItem.type());
@@ -92,23 +97,23 @@ public final class AutoArmor extends InternalPlugin {
       }
     }
 
-    if (inventoryManager.lookingAtForeignContainer()) {
+    if (localPlayer.lookingAtForeignContainer()) {
       return;
     }
 
-    inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
-      new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
-      new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(bestItemSlot)),
+    localPlayer.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
+      new ControllingTask.RunnableStage(localPlayer::openPlayerInventory),
+      new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(bestItemSlot)),
       new ControllingTask.WaitDelayStage(() -> 50L),
-      new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(equipmentSlot)),
+      new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(equipmentSlot)),
       new ControllingTask.WaitDelayStage(() -> 50L),
       new ControllingTask.RunnableStage(() -> {
-        if (!inventoryManager.cursorItem().isEmpty()) {
-          inventoryManager.leftClickSlot(bestItemSlot);
+        if (!localPlayer.inventoryMenu.getCarried().isEmpty()) {
+          localPlayer.inventoryMenu.leftClick(bestItemSlot);
         }
       }),
       new ControllingTask.WaitDelayStage(() -> 50L),
-      new ControllingTask.RunnableStage(inventoryManager::closeInventory)
+      new ControllingTask.RunnableStage(localPlayer::closeContainer)
     )));
   }
 
@@ -123,7 +128,7 @@ public final class AutoArmor extends InternalPlugin {
         }
 
         for (var type : ArmorType.VALUES) {
-          putOn(connection.inventoryManager(), type);
+          putOn(connection.dataManager().localPlayer(), type);
         }
       },
       settingsSource.getRandom(AutoArmorSettings.DELAY).asLongSupplier(),

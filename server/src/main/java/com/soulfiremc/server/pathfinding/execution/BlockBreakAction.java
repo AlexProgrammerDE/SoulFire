@@ -98,7 +98,7 @@ public final class BlockBreakAction implements WorldAction {
             dataManager.tagsState(),
             dataManager.localPlayer(),
             clientEntity.onGround(),
-            connection.inventoryManager().playerInventory().getHeldItem().item(),
+            connection.dataManager().localPlayer().inventory().getCarried(),
             optionalBlockType)
           .ticks();
       connection.dataManager().gameModeState()

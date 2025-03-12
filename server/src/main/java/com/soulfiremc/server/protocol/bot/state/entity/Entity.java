@@ -31,6 +31,7 @@ import com.soulfiremc.server.util.mcstructs.AABB;
 import com.soulfiremc.server.util.mcstructs.Direction;
 import com.soulfiremc.server.util.mcstructs.MoverType;
 import com.soulfiremc.server.util.mcstructs.VecDeltaCodec;
+import com.soulfiremc.server.util.structs.IDMap;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.floats.FloatArraySet;
 import it.unimi.dsi.fastutil.floats.FloatArrays;
@@ -50,6 +51,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.EntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ByteEntityMetadata;
@@ -64,6 +66,12 @@ import java.util.stream.Stream;
 @Slf4j
 @Getter
 public class Entity {
+  private static final IDMap<EntityType, List<EntityMetadata<?, ?>>> DEFAULT_ENTITY_METADATA = new IDMap<>(EntityType.REGISTRY.values(), entityType -> {
+    var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
+    var buf = Unpooled.wrappedBuffer(bytes);
+    MinecraftTypes.readVarInt(buf);
+    return List.of(MinecraftTypes.readEntityMetadata(buf));
+  });
   protected static final int FLAG_ONFIRE = 0;
   protected static final int FLAG_GLOWING = 6;
   protected static final int FLAG_FALL_FLYING = 7;
@@ -143,10 +151,7 @@ public class Entity {
     this.pos = Vector3d.ZERO;
     this.blockPosition = Vector3i.ZERO;
     this.chunkPosition = ChunkKey.ZERO;
-    var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
-    var buf = Unpooled.wrappedBuffer(bytes);
-    MinecraftTypes.readVarInt(buf);
-    this.entityData.defineValues(List.of(MinecraftTypes.readEntityMetadata(buf)));
+    this.entityData.defineValues(DEFAULT_ENTITY_METADATA.get(entityType));
 
     this.setPos(0.0, 0.0, 0.0);
     this.eyeHeight = entityType.dimensions().eyeHeight();

@@ -25,9 +25,9 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
-import com.soulfiremc.server.protocol.bot.container.InventoryManager;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,8 +39,8 @@ public final class ItemPlaceHelper {
   }
 
   public static boolean placeBestBlockInHand(BotConnection connection) {
-    var inventoryManager = connection.inventoryManager();
-    var playerInventory = inventoryManager.playerInventory();
+    var player = connection.dataManager().localPlayer();
+    var playerInventory = player.inventoryMenu;
 
     ItemType leastHardItemType = null;
     var leastDestroyTime = 0F;
@@ -68,15 +68,15 @@ public final class ItemPlaceHelper {
     }
 
     var finalLeastHardItemType = leastHardItemType;
-    return placeInHand(inventoryManager, playerInventory,
+    return placeInHand(player, playerInventory,
       playerInventory.findMatchingSlotForAction(
           slot -> slot.item().type() == finalLeastHardItemType)
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
   public static boolean placeBestToolInHand(SessionDataManager dataManager, SFVec3i blockPosition) {
-    var inventoryManager = dataManager.connection().inventoryManager();
-    var playerInventory = inventoryManager.playerInventory();
+    var player = dataManager.localPlayer();
+    var playerInventory = player.inventoryMenu;
 
     SFItemStack bestItemStack = null;
     var bestCost = Integer.MAX_VALUE;
@@ -117,37 +117,37 @@ public final class ItemPlaceHelper {
     }
 
     var finalBestItemStack = bestItemStack;
-    return placeInHand(inventoryManager, playerInventory,
+    return placeInHand(player, playerInventory,
       playerInventory.findMatchingSlotForAction(
-          slot -> slot.item().canStackWith(finalBestItemStack))
+          slot -> SFItemStack.isSameItemSameComponents(slot.item(), finalBestItemStack))
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
-  private static boolean placeInHand(InventoryManager inventoryManager, PlayerInventoryContainer playerInventory,
+  private static boolean placeInHand(LocalPlayer player, PlayerInventoryMenu playerInventory,
                                      ContainerSlot slot) {
-    if (inventoryManager.lookingAtForeignContainer()) {
+    if (player.lookingAtForeignContainer()) {
       log.warn("Cannot place item in hand while looking at a foreign container");
       return false;
     }
 
     if (playerInventory.isHeldItem(slot)) {
       return true;
-    } else if (playerInventory.isHotbar(slot)) {
-      inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot));
+    } else if (PlayerInventoryMenu.isHotbarSlot(slot)) {
+      player.inventory().selected = PlayerInventoryMenu.toHotbarIndex(slot);
       return true;
-    } else if (playerInventory.isMainInventory(slot)) {
-      inventoryManager.openPlayerInventory();
-      inventoryManager.leftClickSlot(slot);
+    } else if (PlayerInventoryMenu.isMainInventory(slot)) {
+      player.openPlayerInventory();
+      player.inventoryMenu.leftClick(slot);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-      inventoryManager.leftClickSlot(playerInventory.getHeldItem());
+      player.inventoryMenu.leftClick(playerInventory.getSelectedSlot());
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
-      if (!inventoryManager.cursorItem().isEmpty()) {
-        inventoryManager.leftClickSlot(slot);
+      if (!playerInventory.getCarried().isEmpty()) {
+        player.inventoryMenu.leftClick(slot);
         TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
       }
 
-      inventoryManager.closeInventory();
+      player.closeContainer();
       return true;
     } else {
       throw new IllegalStateException("Unexpected container slot type");

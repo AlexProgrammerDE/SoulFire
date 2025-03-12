@@ -25,6 +25,7 @@ import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventory;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
@@ -261,7 +262,6 @@ public final class SessionDataManager {
     if (localPlayer == null) {
       localPlayer = new LocalPlayer(connection, currentLevel(), botProfile);
       localPlayer.setYRot(-180.0F);
-      connection.inventoryManager().setContainer(0, localPlayer.inventory());
     }
 
     localPlayer.resetPos();
@@ -303,7 +303,6 @@ public final class SessionDataManager {
     var oldLocalPlayer = localPlayer;
     var newLocalPlayer = packet.isKeepMetadata() ? new LocalPlayer(connection, currentLevel(), botProfile, oldLocalPlayer.isShiftKeyDown(), oldLocalPlayer.isSprinting())
       : new LocalPlayer(connection, currentLevel(), botProfile);
-    connection.inventoryManager().setContainer(0, newLocalPlayer.inventory());
 
     this.startWaitingForNewLevel(newLocalPlayer, currentLevel());
 
@@ -626,63 +625,48 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onSetContainerContent(ClientboundContainerSetContentPacket packet) {
-    connection.inventoryManager().lastStateId(packet.getStateId());
-    var container = connection.inventoryManager().getContainer(packet.getContainerId());
-
-    if (container == null) {
-      log.debug(
-        "Received container content update for unknown container {}", packet.getContainerId());
-      return;
-    }
-
-    for (var i = 0; i < packet.getItems().length; i++) {
-      container.setSlot(i, SFItemStack.from(packet.getItems()[i]));
+    if (packet.getContainerId() == 0) {
+      localPlayer.inventoryMenu.initializeContents(packet.getStateId(),
+        Arrays.stream(packet.getItems()).map(SFItemStack::from).toList(), SFItemStack.from(packet.getCarriedItem()));
+    } else if (packet.getContainerId() == localPlayer.currentContainer.containerId()) {
+      localPlayer.currentContainer.initializeContents(packet.getStateId(),
+        Arrays.stream(packet.getItems()).map(SFItemStack::from).toList(), SFItemStack.from(packet.getCarriedItem()));
     }
   }
 
   @EventHandler
   public void onSetContainerSlot(ClientboundContainerSetSlotPacket packet) {
-    connection.inventoryManager().lastStateId(packet.getStateId());
-    if (packet.getContainerId() == -1 && packet.getSlot() == -1) {
-      connection.inventoryManager().cursorItem(SFItemStack.from(packet.getItem()));
-      return;
+    if (packet.getContainerId() == 0) {
+      localPlayer.inventoryMenu.setItem(packet.getSlot(), packet.getStateId(),
+        SFItemStack.from(packet.getItem()));
+    } else if (packet.getContainerId() == localPlayer.currentContainer.containerId()) {
+      localPlayer.currentContainer.setItem(packet.getSlot(), packet.getStateId(),
+        SFItemStack.from(packet.getItem()));
     }
-
-    var container = connection.inventoryManager().getContainer(packet.getContainerId());
-
-    if (container == null) {
-      log.debug("Received container slot update for unknown container {}", packet.getContainerId());
-      return;
-    }
-
-    container.setSlot(packet.getSlot(), SFItemStack.from(packet.getItem()));
   }
 
   @EventHandler
   public void onSetContainerData(ClientboundContainerSetDataPacket packet) {
-    var container = connection.inventoryManager().getContainer(packet.getContainerId());
-
-    if (container == null) {
-      log.debug("Received container data update for unknown container {}", packet.getContainerId());
-      return;
+    if (localPlayer.currentContainer.containerId() == packet.getContainerId()) {
+      localPlayer.currentContainer.setProperty(packet.getRawProperty(), packet.getValue());
     }
-
-    container.setProperty(packet.getRawProperty(), packet.getValue());
   }
 
   @EventHandler
   public void onSetPlayerInventory(ClientboundSetPlayerInventoryPacket packet) {
-    connection.inventoryManager().playerInventory().setSlot(packet.getSlot(), SFItemStack.from(packet.getContents()));
+    localPlayer.inventory().setSlot(packet.getSlot(), SFItemStack.from(packet.getContents()));
   }
 
   @EventHandler
   public void onSetCursor(ClientboundSetCursorItemPacket packet) {
-    connection.inventoryManager().cursorItem(SFItemStack.from(packet.getContents()));
+    localPlayer.currentContainer.setCarried(SFItemStack.from(packet.getContents()));
   }
 
   @EventHandler
-  public void onSetSlot(ClientboundSetHeldSlotPacket packet) {
-    localPlayer.inventory().selected = packet.getSlot();
+  public void onSetHeldSlot(ClientboundSetHeldSlotPacket packet) {
+    if (PlayerInventory.isHotbarSlot(packet.getSlot())) {
+      localPlayer.inventory().selected = packet.getSlot();
+    }
   }
 
   @EventHandler
@@ -702,10 +686,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onOpenScreen(ClientboundOpenScreenPacket packet) {
-    var container =
-      new WindowContainer(packet.getType(), packet.getTitle(), packet.getContainerId());
-    connection.inventoryManager().setContainer(packet.getContainerId(), container);
-    connection.inventoryManager().currentContainer(container);
+    this.localPlayer.currentContainer = new WindowContainer(localPlayer, packet.getType(), packet.getTitle(), packet.getContainerId());
   }
 
   @EventHandler
@@ -716,7 +697,7 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onCloseContainer(ClientboundContainerClosePacket packet) {
-    connection.inventoryManager().currentContainer(null);
+    this.localPlayer.clientSideCloseContainer();
   }
 
   @EventHandler

@@ -21,31 +21,41 @@ import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
+import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
+import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
+import java.util.Objects;
 
-@Getter
-public final class SFItemStack extends ItemStack {
+@ToString
+public final class SFItemStack {
   public static final SFItemStack EMPTY = new SFItemStack(ItemType.AIR, 0);
+  @Getter
   private final ItemType type;
+  private final @Nullable DataComponents dataComponentsPatch;
+  private int count;
   @Nullable
   private Entity entityRepresentation;
 
   private SFItemStack(ItemStack itemStack) {
-    super(itemStack.getId(), itemStack.getAmount(), itemStack.getDataComponentsPatch());
-    this.type = ItemType.REGISTRY.getById(itemStack.getId());
+    this(ItemType.REGISTRY.getById(itemStack.getId()), itemStack.getAmount(), itemStack.getDataComponentsPatch());
   }
 
-  private SFItemStack(ItemType itemType, int amount) {
-    super(itemType.id(), amount, null);
+  private SFItemStack(ItemType itemType, int count) {
+    this(itemType, count, null);
+  }
+
+  private SFItemStack(ItemType itemType, int count, @Nullable DataComponents dataComponentsPatch) {
     this.type = itemType;
+    this.count = count;
+    this.dataComponentsPatch = dataComponentsPatch;
   }
 
   public static @NonNull SFItemStack from(@Nullable ItemStack itemStack) {
@@ -67,8 +77,16 @@ public final class SFItemStack extends ItemStack {
     }
   }
 
-  public boolean isEmpty() {
-    return this == EMPTY || this.type == ItemType.AIR || this.getAmount() <= 0;
+  public static boolean isSameItem(SFItemStack stack, SFItemStack other) {
+    return stack.type == other.type;
+  }
+
+  public static boolean isSameItemSameComponents(SFItemStack stack, SFItemStack other) {
+    if (stack.type != other.type) {
+      return false;
+    } else {
+      return (stack.isEmpty() && other.isEmpty()) || Objects.equals(stack.dataComponentsPatch, other.dataComponentsPatch);
+    }
   }
 
   @VisibleForTesting
@@ -81,25 +99,46 @@ public final class SFItemStack extends ItemStack {
     return new SFItemStack(itemType, amount);
   }
 
+  public @Nullable ItemStack toMCPL() {
+    if (this.isEmpty()) {
+      return null;
+    }
+
+    return new ItemStack(type.id(), count, dataComponentsPatch);
+  }
+
+  public boolean isEmpty() {
+    return this == EMPTY || this.type == ItemType.AIR || this.count <= 0;
+  }
+
   public SFDataComponents getDataComponents() {
     var internalMap = new HashMap<DataComponentType<?>, DataComponent<?, ?>>();
     var newComponents = new SFDataComponents(internalMap);
     internalMap.putAll(type.components().components());
 
-    var overrideComponents = super.getDataComponentsPatch();
-    if (overrideComponents != null) {
-      internalMap.putAll(overrideComponents.getDataComponents());
+    if (dataComponentsPatch != null) {
+      internalMap.putAll(dataComponentsPatch.getDataComponents());
     }
 
     return newComponents;
   }
 
-  public boolean canStackWith(SFItemStack other) {
-    return !this.isEmpty()
-      && !other.isEmpty()
-      && this.isStackable()
-      && other.isStackable()
-      && this.type == other.type;
+  public SFItemStack copy() {
+    if (this.isEmpty()) {
+      return EMPTY;
+    } else {
+      return new SFItemStack(this.type, this.count, this.dataComponentsPatch);
+    }
+  }
+
+  public SFItemStack copyAndClear() {
+    if (this.isEmpty()) {
+      return EMPTY;
+    } else {
+      var copy = this.copy();
+      this.setCount(0);
+      return copy;
+    }
   }
 
   public boolean has(DataComponentType<?> component) {
@@ -144,5 +183,13 @@ public final class SFItemStack extends ItemStack {
 
   public boolean nextDamageWillBreak() {
     return this.isDamageableItem() && this.getDamageValue() >= this.getMaxDamage() - 1;
+  }
+
+  public int getCount() {
+    return this.isEmpty() ? 0 : this.count;
+  }
+
+  public void setCount(int count) {
+    this.count = count;
   }
 }

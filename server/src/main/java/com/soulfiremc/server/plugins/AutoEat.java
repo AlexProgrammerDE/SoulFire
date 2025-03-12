@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFItemHelpers;
@@ -67,8 +68,7 @@ public final class AutoEat extends InternalPlugin {
           return;
         }
 
-        var inventoryManager = connection.inventoryManager();
-        var playerInventory = inventoryManager.playerInventory();
+        var playerInventory = localPlayer.inventoryMenu;
 
         var edibleSlot = playerInventory.findMatchingSlotForAction(
           slot -> SFItemHelpers.isGoodEdibleFood(slot.item()));
@@ -77,30 +77,30 @@ public final class AutoEat extends InternalPlugin {
         }
 
         var slot = edibleSlot.get();
-        if (inventoryManager.lookingAtForeignContainer()) {
+        if (localPlayer.lookingAtForeignContainer()) {
           return;
         }
 
-        if (!playerInventory.isHeldItem(slot) && playerInventory.isHotbar(slot)) {
-          inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
-            new ControllingTask.RunnableStage(() -> inventoryManager.changeHeldItem(playerInventory.toHotbarIndex(slot))),
+        if (!playerInventory.isHeldItem(slot) && PlayerInventoryMenu.isHotbarSlot(slot)) {
+          connection.botControl().maybeRegister(ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(() -> localPlayer.inventory().selected = PlayerInventoryMenu.toHotbarIndex(slot)),
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
           )));
-        } else if (playerInventory.isMainInventory(slot)) {
-          inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
-            new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
-            new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(slot)),
+        } else if (PlayerInventoryMenu.isMainInventory(slot)) {
+          connection.botControl().maybeRegister(ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(localPlayer::openPlayerInventory),
+            new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(slot)),
             new ControllingTask.WaitDelayStage(() -> 50L),
-            new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(playerInventory.getHeldItem())),
+            new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(playerInventory.getSelectedSlot())),
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(() -> {
-              if (!inventoryManager.cursorItem().isEmpty()) {
-                inventoryManager.leftClickSlot(slot);
+              if (!localPlayer.inventoryMenu.getCarried().isEmpty()) {
+                localPlayer.inventoryMenu.leftClick(slot);
               }
             }),
             new ControllingTask.WaitDelayStage(() -> 50L),
-            new ControllingTask.RunnableStage(inventoryManager::closeInventory),
+            new ControllingTask.RunnableStage(localPlayer::closeContainer),
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
           )));

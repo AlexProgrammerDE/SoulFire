@@ -17,40 +17,26 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
+import com.soulfiremc.server.data.MenuType;
+import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.ContainerType;
 
 @Getter
-public final class WindowContainer extends Container {
-  /**
-   * The slots a normal player inventory on the bottom of a window has. 27 slots for the main
-   * inventory and 9 slots for the hotbar.
-   */
-  private static final int INVENTORY_SIZE = 27 + 9;
-
+public final class WindowContainer extends ViewableContainer {
   private final ContainerType containerType;
   private final Component title;
 
-  public WindowContainer(ContainerType containerType, Component title, int id) {
+  public WindowContainer(Player player, ContainerType containerType, Component title, int containerId) {
     super(
-      switch (containerType) {
-        case GENERIC_9X1, GENERIC_3X3 -> 9 + INVENTORY_SIZE;
-        case GENERIC_9X2 -> 18 + INVENTORY_SIZE;
-        case GENERIC_9X3, SHULKER_BOX -> 27 + INVENTORY_SIZE;
-        case GENERIC_9X4 -> 36 + INVENTORY_SIZE;
-        case GENERIC_9X5 -> 45 + INVENTORY_SIZE;
-        case GENERIC_9X6 -> 54 + INVENTORY_SIZE;
-        case CRAFTER_3x3, CRAFTING -> 10 + INVENTORY_SIZE;
-        case ANVIL, CARTOGRAPHY, FURNACE, BLAST_FURNACE, GRINDSTONE, MERCHANT, SMOKER -> 3 + INVENTORY_SIZE;
-        case BEACON -> 1 + INVENTORY_SIZE;
-        case BREWING_STAND, HOPPER -> 5 + INVENTORY_SIZE;
-        case ENCHANTMENT, STONECUTTER -> 2 + INVENTORY_SIZE;
-        case LECTERN -> 1; // Only one without a bottom inventory
-        case LOOM, SMITHING -> 4 + INVENTORY_SIZE;
-      },
-      id);
+      player,
+      MenuType.REGISTRY.getById(containerType.ordinal()).slots(),
+      containerId);
     this.containerType = containerType;
     this.title = title;
+    for (var slotEntry : MenuType.REGISTRY.getById(containerType.ordinal()).playerInventory().entrySet()) {
+      this.getSlot(slotEntry.getKey()).setStorageFrom(player.inventory().getSlot(slotEntry.getValue()));
+    }
   }
 }

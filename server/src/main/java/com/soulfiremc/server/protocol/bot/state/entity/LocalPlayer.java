@@ -19,8 +19,10 @@ package com.soulfiremc.server.protocol.bot.state.entity;
 
 import com.soulfiremc.server.data.AttributeType;
 import com.soulfiremc.server.data.EffectType;
+import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.NamedEntityData;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.InputState;
 import com.soulfiremc.server.protocol.bot.state.KeyPresses;
 import com.soulfiremc.server.protocol.bot.state.Level;
@@ -41,8 +43,11 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -75,6 +80,7 @@ public final class LocalPlayer extends AbstractClientPlayer {
   private boolean flashOnSetHealth;
   @Nullable
   private InteractionHand usingItemHand;
+  private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     this(connection, level, gameProfile, false, false);
@@ -227,6 +233,64 @@ public final class LocalPlayer extends AbstractClientPlayer {
       abilities.flying = false;
       this.onUpdateAbilities();
     }
+  }
+
+  @Override
+  public void closeContainer() {
+    this.connection.sendPacket(new ServerboundContainerClosePacket(this.currentContainer.containerId()));
+    this.clientSideCloseContainer();
+  }
+
+  public void clientSideCloseContainer() {
+    super.closeContainer();
+  }
+
+  public void openPlayerInventory() {
+    if (currentContainer == inventoryMenu) {
+      return;
+    }
+
+    closeContainer();
+  }
+
+  public boolean lookingAtForeignContainer() {
+    return currentContainer != inventoryMenu;
+  }
+
+  public void applyItemAttributes() {
+    applyIfMatches(EquipmentSlot.MAINHAND);
+    applyIfMatches(EquipmentSlot.OFFHAND);
+    applyIfMatches(EquipmentSlot.HEAD);
+    applyIfMatches(EquipmentSlot.CHEST);
+    applyIfMatches(EquipmentSlot.LEGS);
+    applyIfMatches(EquipmentSlot.FEET);
+  }
+
+  private void applyIfMatches(EquipmentSlot equipmentSlot) {
+    var item = getItemBySlot(equipmentSlot);
+    var previousItem = lastInEquipment.get(equipmentSlot);
+    boolean hasChanged;
+    if (previousItem != null) {
+      if (item.isEmpty() || previousItem.type() != item.type()) {
+        // Item before, but we don't have one now, or it's different
+        hasChanged = true;
+
+        // Remove the old item's modifiers
+        connection.dataManager().localPlayer().attributeState().removeItemModifiers(previousItem, equipmentSlot);
+      } else {
+        // Item before, and we have the same one now
+        hasChanged = false;
+      }
+    } else {
+      // No item before, but we have one now
+      hasChanged = !item.isEmpty();
+    }
+
+    if (hasChanged && !item.isEmpty()) {
+      connection.dataManager().localPlayer().attributeState().putItemModifiers(item, equipmentSlot);
+    }
+
+    lastInEquipment.put(equipmentSlot, item);
   }
 
   @Override

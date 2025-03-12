@@ -22,7 +22,7 @@ import com.soulfiremc.server.data.BlockTags;
 import com.soulfiremc.server.data.BlockType;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventory;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.state.TagsState;
 import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
@@ -56,7 +56,7 @@ public final class ProjectedInventory {
   private final IDMap<BlockType, Costs.BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
-  public ProjectedInventory(PlayerInventoryContainer playerInventory, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
+  public ProjectedInventory(PlayerInventory playerInventory, LocalPlayer entity, TagsState tagsState, PathConstraint pathConstraint) {
     this(
       Arrays.stream(playerInventory.storage())
         .map(ContainerSlot::item)
@@ -76,7 +76,7 @@ public final class ProjectedInventory {
 
     for (var item : items) {
       if (pathConstraint.isPlaceable(item)) {
-        blockItems += item.getAmount();
+        blockItems += item.getCount();
       } else if (pathConstraint.isTool(item)) {
         usableToolsAndEmpty.add(item);
       }

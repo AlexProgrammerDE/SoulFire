@@ -24,25 +24,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Objects;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-public final class ContainerSlot {
-  private final int slot;
+public final class SlotStorage {
   @NonNull
-  private SlotStorage storage;
-
-  public int slot() {
-    return slot;
-  }
+  private SFItemStack item;
 
   public @NonNull SFItemStack item() {
-    return storage.item();
+    return item;
   }
 
-  public void setItem(@NonNull SFItemStack item) {
-    this.storage.setItem(item);
-  }
-
-  void setStorageFrom(@NonNull ContainerSlot slot) {
-    this.storage = slot.storage;
+  void setItem(@NonNull SFItemStack item) {
+    this.item = item;
   }
 
   @Override
@@ -50,19 +41,19 @@ public final class ContainerSlot {
     if (obj == this) {
       return true;
     }
-    if (!(obj instanceof ContainerSlot that)) {
+    if (!(obj instanceof SlotStorage that)) {
       return false;
     }
-    return this.slot == that.slot && Objects.equals(this.storage, that.storage);
+    return Objects.equals(this.item, that.item);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(slot, storage);
+    return Objects.hash(item);
   }
 
   @Override
   public String toString() {
-    return "ContainerSlot[slot=%d, storage=%s]".formatted(slot, storage);
+    return "SlotStorage[item=%s]".formatted(item);
   }
 }

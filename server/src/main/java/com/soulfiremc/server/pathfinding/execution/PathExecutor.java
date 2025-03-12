@@ -68,7 +68,7 @@ public final class PathExecutor implements ControllingTask {
           .chunks()
           .immutableCopy();
         var inventory =
-          new ProjectedInventory(bot.inventoryManager().playerInventory(), dataManager.localPlayer(), dataManager.tagsState(), pathConstraint);
+          new ProjectedInventory(bot.dataManager().localPlayer().inventory(), dataManager.localPlayer(), dataManager.tagsState(), pathConstraint);
         var start =
           SFVec3i.fromDouble(clientEntity.pos());
         var startBlockState = level.getBlockState(start);

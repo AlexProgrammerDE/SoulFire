@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -56,10 +57,14 @@ public final class MCHelper {
 
   public static <T extends Entity> T createEntity(EntityType<T> entityType) {
     if (entityType == EntityType.PLAYER) {
-      return entityType.tryCast(MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE));
+      return entityType.tryCast(createPlayer());
     }
 
     return entityType.create(MCHelper.getLevel(), EntitySpawnReason.COMMAND);
+  }
+
+  public static Player createPlayer() {
+    return MCHelper.getGameTestHelper().makeMockPlayer(GameType.DEFAULT_MODE);
   }
 
   public static String serializeToBase64(Consumer<RegistryFriendlyByteBuf> consumer) {

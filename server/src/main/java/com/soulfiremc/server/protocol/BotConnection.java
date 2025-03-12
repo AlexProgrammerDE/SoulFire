@@ -28,7 +28,6 @@ import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.protocol.bot.BotControlAPI;
 import com.soulfiremc.server.protocol.bot.SessionDataManager;
-import com.soulfiremc.server.protocol.bot.container.InventoryManager;
 import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
@@ -66,7 +65,6 @@ public final class BotConnection {
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final ControlState controlState = new ControlState();
-  private final InventoryManager inventoryManager;
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
@@ -130,7 +128,6 @@ public final class BotConnection {
     this.session = new ViaClientSession(
       resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, this);
     this.dataManager = new SessionDataManager(this);
-    this.inventoryManager = new InventoryManager(this);
     this.botControl = new BotControlAPI(this);
 
     // Start the tick loop

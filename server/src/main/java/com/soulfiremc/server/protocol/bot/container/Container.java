@@ -24,20 +24,23 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public abstract class Container {
   @Getter
   private final @Nonnull ContainerSlot[] slots;
-  @Getter
-  private final int id;
   private Int2IntMap properties;
+  private SFItemStack carried = SFItemStack.EMPTY;
+  private int stateId;
 
-  public Container(int slots, int id) {
+  public Container(int slots) {
     this.slots = new ContainerSlot[slots];
     for (var i = 0; i < slots; i++) {
-      this.slots[i] = new ContainerSlot(i, SFItemStack.EMPTY);
+      this.slots[i] = new ContainerSlot(i, new SlotStorage(SFItemStack.EMPTY));
     }
-    this.id = id;
   }
 
   public void setSlot(int slot, @NonNull SFItemStack item) {
@@ -78,5 +81,35 @@ public abstract class Container {
 
   public IntSet propertyKeys() {
     return properties == null ? IntSet.of() : properties.keySet();
+  }
+
+  public void setItem(int slotId, int stateId, SFItemStack stack) {
+    this.getSlot(slotId).setItem(stack);
+    this.stateId = stateId;
+  }
+
+  public void initializeContents(int stateId, List<SFItemStack> items, SFItemStack carried) {
+    for (var i = 0; i < items.size(); i++) {
+      this.getSlot(i).setItem(items.get(i));
+    }
+
+    this.carried = carried;
+    this.stateId = stateId;
+  }
+
+  public SFItemStack getCarried() {
+    return this.carried;
+  }
+
+  public void setCarried(SFItemStack stack) {
+    this.carried = stack;
+  }
+
+  public int getStateId() {
+    return this.stateId;
+  }
+
+  public Optional<ContainerSlot> findMatchingSlotForAction(Predicate<ContainerSlot> predicate) {
+    return Arrays.stream(slots).filter(predicate).findFirst();
   }
 }

@@ -50,6 +50,8 @@ public final class DataGenerators {
       new ItemsJavaGenerator(),
       new AttributesJsonGenerator(),
       new AttributesJavaGenerator(),
+      new MenuJsonGenerator(),
+      new MenuJavaGenerator(),
       new LanguageJsonGenerator(),
       new MapColorJavaGenerator(),
       new TagsDataGenerator.BlockTagsDataGenerator(),

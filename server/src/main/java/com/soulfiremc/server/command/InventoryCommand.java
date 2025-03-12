@@ -20,10 +20,9 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InventoryCommand {
@@ -39,7 +38,7 @@ public final class InventoryCommand {
                   forEveryBot(
                     c,
                     bot -> {
-                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> bot.inventoryManager().closeInventory()));
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> bot.dataManager().localPlayer().closeContainer()));
                       return Command.SINGLE_SUCCESS;
                     }))))
         .then(
@@ -51,46 +50,18 @@ public final class InventoryCommand {
                   forEveryBot(
                     c,
                     bot -> {
-                      var inventory = bot.inventoryManager().currentContainer();
-                      switch (inventory) {
-                        case null -> {
-                          c.getSource().source().sendInfo("No inventory is currently open");
-                          return Command.SINGLE_SUCCESS;
-                        }
+                      var container = bot.dataManager().localPlayer().currentContainer;
+                      switch (container) {
                         case WindowContainer windowContainer -> c.getSource().source().sendInfo("Current inventory type: " + windowContainer.containerType() + " with title " + windowContainer.title());
-                        case PlayerInventoryContainer ignored -> c.getSource().source().sendInfo("Current inventory: Player inventory");
+                        case PlayerInventoryMenu ignored -> c.getSource().source().sendInfo("Current inventory: Player inventory");
                         default -> c.getSource().source().sendInfo("Current inventory: Unknown");
                       }
 
-                      for (var slot : inventory.getSlots(0, inventory.slots().length - 1)) {
+                      for (var slot : container.getSlots(0, container.slots().length - 1)) {
                         c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + slot.item());
                       }
 
                       return Command.SINGLE_SUCCESS;
-                    }))))
-        .then(
-          literal("left-click")
-            .then(
-              argument("slot", integer(0, Integer.MAX_VALUE))
-                .executes(
-                  help(
-                    "Drops the item in the specified slot for selected bots",
-                    c ->
-                      forEveryBot(
-                        c,
-                        bot -> {
-                          var slot = c.getArgument("slot", Integer.class);
-                          var inventoryManager = bot.inventoryManager();
-                          bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-                            var inventory = inventoryManager.currentContainer();
-                            if (inventory == null) {
-                              c.getSource().source().sendInfo("No inventory is currently open");
-                              return;
-                            }
-
-                            inventoryManager.leftClickSlot(inventory.getSlot(slot));
-                          }));
-                          return Command.SINGLE_SUCCESS;
-                        }))))));
+                    })))));
   }
 }

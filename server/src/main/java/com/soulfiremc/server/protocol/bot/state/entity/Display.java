@@ -33,7 +33,6 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes;
-import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
 public abstract class Display extends Entity {
   private static final IntSet RENDER_STATE_IDS = IntSet.of(
@@ -425,7 +424,7 @@ public abstract class Display extends Entity {
       this.itemRenderState = new Display.ItemDisplay.ItemRenderState(item, this.getItemTransform());
     }
 
-    public record ItemRenderState(ItemStack itemStack, ItemDisplayContext itemTransform) {
+    public record ItemRenderState(SFItemStack itemStack, ItemDisplayContext itemTransform) {
     }
   }
 

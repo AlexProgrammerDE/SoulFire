@@ -23,17 +23,18 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EquipmentSlot {
-  MAINHAND(Type.HAND, 0),
-  OFFHAND(Type.HAND, 5),
-  FEET(Type.HUMANOID_ARMOR, 1),
-  LEGS(Type.HUMANOID_ARMOR, 2),
-  CHEST(Type.HUMANOID_ARMOR, 3),
-  HEAD(Type.HUMANOID_ARMOR, 4),
-  BODY(Type.ANIMAL_ARMOR, 6);
+  MAINHAND(Type.HAND, 0, 0),
+  OFFHAND(Type.HAND, 1, 5),
+  FEET(Type.HUMANOID_ARMOR, 0, 1),
+  LEGS(Type.HUMANOID_ARMOR, 1, 2),
+  CHEST(Type.HUMANOID_ARMOR, 2, 3),
+  HEAD(Type.HUMANOID_ARMOR, 3, 4),
+  BODY(Type.ANIMAL_ARMOR, 0, 6);
 
   public static final EquipmentSlot[] VALUES = values();
 
   private final Type type;
+  private final int index;
   private final int id;
 
   public static EquipmentSlot fromMCPl(org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot slot) {

@@ -21,8 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.soulfiremc.server.data.*;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.protocol.bot.container.PlayerInventoryContainer;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventory;
+import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.protocol.bot.container.ViewableContainer;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
@@ -71,11 +73,14 @@ public abstract class Player extends LivingEntity {
   protected final GameProfile gameProfile;
   protected final float defaultFlySpeed = 0.02F;
   @Getter
-  private final PlayerInventoryContainer inventory = new PlayerInventoryContainer();
+  final PlayerInventory inventory = new PlayerInventory();
+  public PlayerInventoryMenu inventoryMenu = new PlayerInventoryMenu(this, inventory);
   @Getter
   private final AbilitiesState abilitiesState = new AbilitiesState();
   @Getter
   private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
+  @NonNull
+  public ViewableContainer currentContainer = inventoryMenu;
   public int experienceLevel;
   public int totalExperience;
   public float experienceProgress;
@@ -187,6 +192,10 @@ public abstract class Player extends LivingEntity {
     } else {
       super.travel(travelVector);
     }
+  }
+
+  protected void closeContainer() {
+    this.currentContainer = this.inventoryMenu;
   }
 
   public float getCurrentItemAttackStrengthDelay() {
@@ -309,12 +318,24 @@ public abstract class Player extends LivingEntity {
 
   @Override
   public SFItemStack getItemBySlot(EquipmentSlot slot) {
-    return inventory.getEquipmentSlotItem(slot);
+    if (slot == EquipmentSlot.MAINHAND) {
+      return this.inventory.getSelected();
+    } else if (slot == EquipmentSlot.OFFHAND) {
+      return this.inventory.offhand().item();
+    } else {
+      return slot.type() == EquipmentSlot.Type.HUMANOID_ARMOR ? this.inventory.armor()[slot.index()].item() : SFItemStack.EMPTY;
+    }
   }
 
   @Override
   public void setItemSlot(EquipmentSlot slot, @NonNull SFItemStack item) {
-    inventory.setEquipmentSlotItem(slot, item);
+    if (slot == EquipmentSlot.MAINHAND) {
+      this.inventory.getSelectedSlot().setItem(item);
+    } else if (slot == EquipmentSlot.OFFHAND) {
+      this.inventory.offhand().setItem(item);
+    } else if (slot.type() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+      this.inventory.armor()[slot.index()].setItem(item);
+    }
   }
 
   public void startFallFlying() {

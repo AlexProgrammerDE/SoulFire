@@ -29,6 +29,8 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BuiltInKnownPackRegistry;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
+import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
@@ -125,6 +127,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.ClientboundInitializeBorderPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundChatPacket;
@@ -457,34 +460,36 @@ public final class POVServer extends InternalPlugin {
           lightUpdateData));
     }
 
-    clientSession.send(
-      new ClientboundSetHeldSlotPacket(
-        botConnection.inventoryManager().playerInventory().selected));
-    var stateIndex = 0;
-    for (var container :
-      botConnection.inventoryManager().containerData().values()) {
+    var localPlayer = dataManager.localPlayer();
+    clientSession.send(new ClientboundSetHeldSlotPacket(localPlayer.inventory().selected));
+    if (localPlayer.currentContainer instanceof WindowContainer windowContainer) {
+      clientSession.send(
+        new ClientboundOpenScreenPacket(
+          windowContainer.containerId(),
+          windowContainer.containerType(),
+          windowContainer.title()));
+    }
+    var lastStateId = localPlayer.currentContainer.getStateId();
+    Set.of(localPlayer.inventoryMenu, localPlayer.currentContainer).forEach(container -> {
       clientSession.send(
         new ClientboundContainerSetContentPacket(
-          container.id(),
-          stateIndex++,
-          Arrays.stream(
-              botConnection
-                .inventoryManager()
-                .playerInventory()
-                .slots())
+          container.containerId(),
+          lastStateId,
+          Arrays.stream(container.slots())
             .map(ContainerSlot::item)
+            .map(SFItemStack::toMCPL)
             .toList()
             .toArray(new ItemStack[0]),
-          botConnection.inventoryManager().cursorItem()));
+          container.getCarried().toMCPL()));
 
       for (var propertyKey : container.propertyKeys()) {
         clientSession.send(
           new ClientboundContainerSetDataPacket(
-            container.id(),
+            container.containerId(),
             propertyKey,
             container.getProperty(propertyKey)));
       }
-    }
+    });
 
     for (var entity : dataManager.currentLevel().getEntities()) {
       if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {

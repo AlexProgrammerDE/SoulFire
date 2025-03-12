@@ -56,9 +56,9 @@ public final class AutoTotem extends InternalPlugin {
           return;
         }
 
-        var inventoryManager = connection.inventoryManager();
-        var playerInventory = inventoryManager.playerInventory();
-        var offhandSlot = playerInventory.getOffhand();
+        var localPlayer = connection.dataManager().localPlayer();
+        var playerInventory = localPlayer.inventoryMenu;
+        var offhandSlot = playerInventory.offhand();
 
         // We only want to use totems if there are no items in the offhand
         if (!offhandSlot.item().isEmpty()) {
@@ -72,23 +72,23 @@ public final class AutoTotem extends InternalPlugin {
         }
 
         var slot = totemSlot.get();
-        if (inventoryManager.lookingAtForeignContainer()) {
+        if (localPlayer.lookingAtForeignContainer()) {
           return;
         }
 
-        inventoryManager.connection().botControl().maybeRegister(ControllingTask.staged(List.of(
-          new ControllingTask.RunnableStage(inventoryManager::openPlayerInventory),
-          new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(slot)),
+        connection.botControl().maybeRegister(ControllingTask.staged(List.of(
+          new ControllingTask.RunnableStage(localPlayer::openPlayerInventory),
+          new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(slot)),
           new ControllingTask.WaitDelayStage(() -> 50L),
-          new ControllingTask.RunnableStage(() -> inventoryManager.leftClickSlot(offhandSlot)),
+          new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(offhandSlot)),
           new ControllingTask.WaitDelayStage(() -> 50L),
           new ControllingTask.RunnableStage(() -> {
-            if (!inventoryManager.cursorItem().isEmpty()) {
-              inventoryManager.leftClickSlot(slot);
+            if (!playerInventory.getCarried().isEmpty()) {
+              localPlayer.inventoryMenu.leftClick(slot);
             }
           }),
           new ControllingTask.WaitDelayStage(() -> 50L),
-          new ControllingTask.RunnableStage(inventoryManager::closeInventory)
+          new ControllingTask.RunnableStage(localPlayer::closeContainer)
         )));
       },
       settingsSource.getRandom(AutoTotemSettings.DELAY).asLongSupplier(),
