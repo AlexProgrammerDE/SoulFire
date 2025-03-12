@@ -30,7 +30,7 @@ public final class SFVLPipeline extends VLPipeline {
 
   @Override
   public ChannelHandler createViaCodec() {
-    return new ViaCodec(this.user);
+    return new ViaCodec(this.connection);
   }
 
   @Override
