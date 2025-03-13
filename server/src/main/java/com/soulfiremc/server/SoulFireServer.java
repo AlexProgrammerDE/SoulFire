@@ -176,8 +176,8 @@ public final class SoulFireServer {
 
     CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
 
-    this.authSystem = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory)).join();
-    this.rpcServer = scheduler.supplyAsync(() -> new RPCServer(host, port, injector)).join();
+    this.authSystem = authSystemFuture.join();
+    this.rpcServer = rpcServerFuture.join();
     this.sessionFactory = sessionFactoryFuture.join();
 
     // Via is ready, we can now set up all config stuff
