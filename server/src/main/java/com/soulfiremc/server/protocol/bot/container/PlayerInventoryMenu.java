@@ -90,6 +90,10 @@ public class PlayerInventoryMenu extends ViewableContainer {
       return Optional.of(heldItem);
     }
 
+    if (predicate.test(offhand)) {
+      return Optional.of(offhand);
+    }
+
     for (var hotbarSlot : hotbar()) {
       if (hotbarSlot == heldItem) {
         continue;
@@ -101,6 +105,12 @@ public class PlayerInventoryMenu extends ViewableContainer {
     }
 
     for (var slot : mainInventory()) {
+      if (predicate.test(slot)) {
+        return Optional.of(slot);
+      }
+    }
+
+    for (var slot : armor()) {
       if (predicate.test(slot)) {
         return Optional.of(slot);
       }
