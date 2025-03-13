@@ -77,7 +77,7 @@ public final class AutoEat extends InternalPlugin {
         }
 
         var slot = edibleSlot.get();
-        if (localPlayer.lookingAtForeignContainer()) {
+        if (localPlayer.hasContainerOpen()) {
           return;
         }
 

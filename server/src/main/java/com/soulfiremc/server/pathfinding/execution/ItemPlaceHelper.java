@@ -125,7 +125,7 @@ public final class ItemPlaceHelper {
 
   private static boolean placeInHand(LocalPlayer player, PlayerInventoryMenu playerInventory,
                                      ContainerSlot slot) {
-    if (player.lookingAtForeignContainer()) {
+    if (player.hasContainerOpen()) {
       log.warn("Cannot place item in hand while looking at a foreign container");
       return false;
     }

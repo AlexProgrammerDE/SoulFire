@@ -72,7 +72,7 @@ public final class AutoTotem extends InternalPlugin {
         }
 
         var slot = totemSlot.get();
-        if (localPlayer.lookingAtForeignContainer()) {
+        if (localPlayer.hasContainerOpen()) {
           return;
         }
 

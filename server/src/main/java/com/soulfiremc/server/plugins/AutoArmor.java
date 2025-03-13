@@ -97,7 +97,7 @@ public final class AutoArmor extends InternalPlugin {
       }
     }
 
-    if (localPlayer.lookingAtForeignContainer()) {
+    if (localPlayer.hasContainerOpen()) {
       return;
     }
 

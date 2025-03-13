@@ -245,18 +245,6 @@ public final class LocalPlayer extends AbstractClientPlayer {
     super.closeContainer();
   }
 
-  public void openPlayerInventory() {
-    if (currentContainer == inventoryMenu) {
-      return;
-    }
-
-    closeContainer();
-  }
-
-  public boolean lookingAtForeignContainer() {
-    return currentContainer != inventoryMenu;
-  }
-
   public void applyItemAttributes() {
     applyIfMatches(EquipmentSlot.MAINHAND);
     applyIfMatches(EquipmentSlot.OFFHAND);

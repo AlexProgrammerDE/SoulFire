@@ -21,7 +21,6 @@ import com.soulfiremc.server.data.ItemType;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
-import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
@@ -34,7 +33,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Objects;
 
-@ToString
 public final class SFItemStack {
   public static final SFItemStack EMPTY = new SFItemStack(ItemType.AIR, 0);
   @Getter
@@ -191,5 +189,10 @@ public final class SFItemStack {
 
   public void setCount(int count) {
     this.count = count;
+  }
+
+  @Override
+  public String toString() {
+    return "SFIStack{" + type.key() + " x" + count + "}";
   }
 }

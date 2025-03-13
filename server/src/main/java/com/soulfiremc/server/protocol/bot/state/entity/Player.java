@@ -338,6 +338,18 @@ public abstract class Player extends LivingEntity {
     }
   }
 
+  public void openPlayerInventory() {
+    if (currentContainer == inventoryMenu) {
+      return;
+    }
+
+    closeContainer();
+  }
+
+  public boolean hasContainerOpen() {
+    return currentContainer != inventoryMenu;
+  }
+
   public void startFallFlying() {
     this.setSharedFlag(FLAG_FALL_FLYING, true);
   }
