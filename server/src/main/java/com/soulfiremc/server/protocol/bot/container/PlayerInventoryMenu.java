@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.bot.container;
 
+import com.soulfiremc.server.data.EquipmentSlot;
 import com.soulfiremc.server.data.MenuType;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import lombok.Getter;
@@ -42,6 +43,18 @@ public class PlayerInventoryMenu extends ViewableContainer {
     for (var slotEntry : MenuType.SOULFIRE_INVENTORY_MENU.playerInventory().entrySet()) {
       this.getSlot(slotEntry.getKey()).setStorageFrom(player.inventory().getSlot(slotEntry.getValue()));
     }
+  }
+
+  public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {
+    return switch (slot) {
+      case MAINHAND -> getSelectedSlot();
+      case OFFHAND -> offhand;
+      case FEET -> armor[3];
+      case LEGS -> armor[2];
+      case CHEST -> armor[1];
+      case HEAD -> armor[0];
+      case BODY -> throw new IllegalArgumentException("Cannot get body slot on player");
+    };
   }
 
   public static boolean isHotbarSlot(ContainerSlot slot) {

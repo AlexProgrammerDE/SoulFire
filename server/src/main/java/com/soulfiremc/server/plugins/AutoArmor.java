@@ -81,12 +81,7 @@ public final class AutoArmor extends InternalPlugin {
       return;
     }
 
-    var equipmentSlot = inventory.armor()[switch (armorType) {
-      case HELMET -> 3;
-      case CHESTPLATE -> 2;
-      case LEGGINGS -> 1;
-      case BOOTS -> 0;
-    }];
+    var equipmentSlot = inventory.getEquipmentSlot(armorType.toEquipmentSlot());
     var equipmentSlotItem = equipmentSlot.item();
     if (!equipmentSlotItem.isEmpty()) {
       var targetIndex = armorType.itemTypes().indexOf(equipmentSlotItem.type());
