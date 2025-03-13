@@ -19,6 +19,7 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
@@ -38,7 +39,7 @@ public final class InventoryCommand {
           literal("close")
             .executes(
               help(
-                "Closes the current inventory for selected bots",
+                "Closes the current inventory for selected bots, opens the player inventory afterwards",
                 c ->
                   forEveryBot(
                     c,
@@ -68,6 +69,119 @@ public final class InventoryCommand {
                       }
 
                       return Command.SINGLE_SUCCESS;
-                    })))));
+                    }))))
+        .then(
+          literal("left-click")
+            .then(
+              argument("slot", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                .executes(
+                  help(
+                    "Left-clicks the specified slot in the current inventory for selected bots",
+                    c ->
+                      forEveryBot(
+                        c,
+                        bot -> {
+                          var slot = IntegerArgumentType.getInteger(c, "slot");
+                          var container = bot.dataManager().localPlayer().currentContainer;
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                            () -> container.leftClick(container.getSlot(slot))));
+                          return Command.SINGLE_SUCCESS;
+                        })))))
+        .then(
+          literal("right-click")
+            .then(
+              argument("slot", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                .executes(
+                  help(
+                    "Right-clicks the specified slot in the current inventory for selected bots",
+                    c ->
+                      forEveryBot(
+                        c,
+                        bot -> {
+                          var slot = IntegerArgumentType.getInteger(c, "slot");
+                          var container = bot.dataManager().localPlayer().currentContainer;
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                            () -> container.rightClick(container.getSlot(slot))));
+                          return Command.SINGLE_SUCCESS;
+                        })))))
+        .then(
+          literal("left-click-outside")
+            .executes(
+              help(
+                "Left-clicks outside current inventory for selected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var container = bot.dataManager().localPlayer().currentContainer;
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                        container::leftClickOutsideInventory));
+                      return Command.SINGLE_SUCCESS;
+                    }))))
+        .then(
+          literal("right-click-outside")
+            .executes(
+              help(
+                "Right-clicks outside current inventory for selected bots",
+                c ->
+                  forEveryBot(
+                    c,
+                    bot -> {
+                      var container = bot.dataManager().localPlayer().currentContainer;
+                      bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                        container::rightClickOutsideInventory));
+                      return Command.SINGLE_SUCCESS;
+                    }))))
+        .then(
+          literal("middle-click")
+            .then(
+              argument("slot", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                .executes(
+                  help(
+                    "Middle-clicks the specified slot in the current inventory for selected bots",
+                    c ->
+                      forEveryBot(
+                        c,
+                        bot -> {
+                          var slot = IntegerArgumentType.getInteger(c, "slot");
+                          var container = bot.dataManager().localPlayer().currentContainer;
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                            () -> container.middleClick(container.getSlot(slot))));
+                          return Command.SINGLE_SUCCESS;
+                        })))))
+        .then(
+          literal("drop-one")
+            .then(
+              argument("slot", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                .executes(
+                  help(
+                    "Drops one item from the specified slot in the current inventory for selected bots",
+                    c ->
+                      forEveryBot(
+                        c,
+                        bot -> {
+                          var slot = IntegerArgumentType.getInteger(c, "slot");
+                          var container = bot.dataManager().localPlayer().currentContainer;
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                            () -> container.dropOne(container.getSlot(slot))));
+                          return Command.SINGLE_SUCCESS;
+                        })))))
+        .then(
+          literal("drop-all")
+            .then(
+              argument("slot", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                .executes(
+                  help(
+                    "Drops all items from the specified slot in the current inventory for selected bots",
+                    c ->
+                      forEveryBot(
+                        c,
+                        bot -> {
+                          var slot = IntegerArgumentType.getInteger(c, "slot");
+                          var container = bot.dataManager().localPlayer().currentContainer;
+                          bot.botControl().registerControllingTask(ControllingTask.singleTick(
+                            () -> container.dropFullStack(container.getSlot(slot))));
+                          return Command.SINGLE_SUCCESS;
+                        }))))));
   }
 }
