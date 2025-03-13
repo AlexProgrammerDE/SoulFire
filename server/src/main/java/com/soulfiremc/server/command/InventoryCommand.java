@@ -21,11 +21,16 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
+import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InventoryCommand {
+  private static String format(SFItemStack item) {
+    return item.isEmpty() ? "empty" : item.type().key() + " x" + item.getCount();
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("inventory")
@@ -57,8 +62,9 @@ public final class InventoryCommand {
                         default -> c.getSource().source().sendInfo("Current inventory: Unknown");
                       }
 
+                      c.getSource().source().sendInfo("Carried item: " + format(container.getCarried()));
                       for (var slot : container.slots()) {
-                        c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + (slot.item().isEmpty() ? "empty" : slot.item().type().key() + " x" + slot.item().getCount()));
+                        c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + format(slot.item()));
                       }
 
                       return Command.SINGLE_SUCCESS;
