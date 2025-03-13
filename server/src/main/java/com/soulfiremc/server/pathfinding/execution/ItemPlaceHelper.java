@@ -135,7 +135,7 @@ public final class ItemPlaceHelper {
     } else if (PlayerInventoryMenu.isHotbarSlot(slot)) {
       player.inventory().selected = PlayerInventoryMenu.toHotbarIndex(slot);
       return true;
-    } else if (PlayerInventoryMenu.isMainInventory(slot)) {
+    } else {
       player.openPlayerInventory();
       player.inventoryMenu.leftClick(slot);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
@@ -149,8 +149,6 @@ public final class ItemPlaceHelper {
 
       player.closeContainer();
       return true;
-    } else {
-      throw new IllegalStateException("Unexpected container slot type");
     }
   }
 }
