@@ -22,6 +22,9 @@ import com.soulfiremc.server.data.MenuType;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import lombok.Getter;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 @Getter
 public class PlayerInventoryMenu extends ViewableContainer {
   private static final int HOTBAR_START = 36;
@@ -78,5 +81,31 @@ public class PlayerInventoryMenu extends ViewableContainer {
 
   public boolean isHeldItem(ContainerSlot slot) {
     return slot == getSelectedSlot();
+  }
+
+  @Override
+  public Optional<ContainerSlot> findMatchingSlotForAction(Predicate<ContainerSlot> predicate) {
+    var heldItem = getSelectedSlot();
+    if (predicate.test(heldItem)) {
+      return Optional.of(heldItem);
+    }
+
+    for (var hotbarSlot : hotbar()) {
+      if (hotbarSlot == heldItem) {
+        continue;
+      }
+
+      if (predicate.test(hotbarSlot)) {
+        return Optional.of(hotbarSlot);
+      }
+    }
+
+    for (var slot : mainInventory()) {
+      if (predicate.test(slot)) {
+        return Optional.of(slot);
+      }
+    }
+
+    return Optional.empty();
   }
 }
