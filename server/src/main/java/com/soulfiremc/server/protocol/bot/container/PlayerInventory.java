@@ -39,19 +39,11 @@ public final class PlayerInventory extends Container {
     return index >= 0 && index < 9;
   }
 
-  public static boolean isHotbarSlot(ContainerSlot slot) {
-    return isHotbarSlot(slot.slot());
-  }
-
   public SFItemStack getSelected() {
     return isHotbarSlot(this.selected) ? getSlot(this.selected).item() : SFItemStack.EMPTY;
   }
 
   public ContainerSlot getSelectedSlot() {
     return getSlot(selected);
-  }
-
-  public boolean isHeldItem(ContainerSlot slot) {
-    return slot == getSelectedSlot();
   }
 }

@@ -39,7 +39,7 @@ public abstract class Container {
   public Container(int slots) {
     this.slots = new ContainerSlot[slots];
     for (var i = 0; i < slots; i++) {
-      this.slots[i] = new ContainerSlot(i, new SlotStorage(SFItemStack.EMPTY));
+      this.slots[i] = new ContainerSlot(i);
     }
   }
 

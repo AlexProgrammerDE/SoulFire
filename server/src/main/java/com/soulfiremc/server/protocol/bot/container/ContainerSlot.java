@@ -29,16 +29,33 @@ public final class ContainerSlot {
   @NonNull
   private SlotStorage storage;
 
+  public ContainerSlot(int slot) {
+    this.slot = slot;
+    this.storage = new SlotStorage(SFItemStack.EMPTY);
+  }
+
   public int slot() {
     return slot;
   }
 
   public @NonNull SFItemStack item() {
-    return storage.item();
+    return storage.item;
   }
 
   public void setItem(@NonNull SFItemStack item) {
-    this.storage.setItem(item);
+    this.storage.item = item;
+  }
+
+  public int getMaxStackSize() {
+    return Math.min(storage.item.getMaxStackSize(), getContainerMaxStackSize());
+  }
+
+  public int getContainerMaxStackSize() {
+    return storage.containerMaxStackSize;
+  }
+
+  public void setContainerMaxStackSize(int containerMaxStackSize) {
+    this.storage.containerMaxStackSize = containerMaxStackSize;
   }
 
   void setStorageFrom(@NonNull ContainerSlot slot) {
@@ -64,5 +81,37 @@ public final class ContainerSlot {
   @Override
   public String toString() {
     return "ContainerSlot[slot=%d, storage=%s]".formatted(slot, storage);
+  }
+
+  @AllArgsConstructor(access = AccessLevel.PACKAGE)
+  private static class SlotStorage {
+    @NonNull
+    private SFItemStack item;
+    private int containerMaxStackSize = 99;
+
+    SlotStorage(SFItemStack item) {
+      this.item = item;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof SlotStorage that)) {
+        return false;
+      }
+      return Objects.equals(this.item, that.item);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(item);
+    }
+
+    @Override
+    public String toString() {
+      return "SlotStorage[item=%s]".formatted(item);
+    }
   }
 }

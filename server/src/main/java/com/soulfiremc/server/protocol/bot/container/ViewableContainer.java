@@ -46,7 +46,7 @@ public class ViewableContainer extends Container {
       slot.setItem(SFItemStack.EMPTY);
     } else if (SFItemStack.isSameItemSameComponents(slotItem, carried)) {
       var newCount = slotItem.getCount() + carried.getCount();
-      var maxStackSize = slotItem.getMaxStackSize();
+      var maxStackSize = slot.getMaxStackSize();
       if (newCount > maxStackSize) {
         slotItem.setCount(maxStackSize);
         carried.setCount(newCount - maxStackSize);
@@ -74,7 +74,7 @@ public class ViewableContainer extends Container {
       slotItem.setCount((int) Math.floor(newCount));
     } else if (SFItemStack.isSameItemSameComponents(slotItem, carried)) {
       var newCount = slotItem.getCount() + 1;
-      var maxStackSize = slotItem.getMaxStackSize();
+      var maxStackSize = slot.getMaxStackSize();
       if (newCount <= maxStackSize) {
         slotItem.setCount(newCount);
         carried.setCount(carried.getCount() - 1);

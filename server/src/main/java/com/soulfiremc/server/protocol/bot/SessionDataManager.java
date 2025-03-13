@@ -686,7 +686,13 @@ public final class SessionDataManager {
 
   @EventHandler
   public void onOpenScreen(ClientboundOpenScreenPacket packet) {
-    this.localPlayer.currentContainer = new WindowContainer(localPlayer, packet.getType(), packet.getTitle(), packet.getContainerId());
+    this.localPlayer.currentContainer = new WindowContainer(
+      localPlayer,
+      packet.getType(),
+      MenuType.REGISTRY.getById(packet.getType().ordinal()),
+      packet.getTitle(),
+      packet.getContainerId()
+    );
   }
 
   @EventHandler

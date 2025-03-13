@@ -26,7 +26,8 @@ public record MenuType(
   int id,
   Key key,
   int slots,
-  Map<Integer, Integer> playerInventory) implements RegistryValue<MenuType> {
+  Map<Integer, Integer> playerInventory,
+  Map<Integer, Integer> maxStackSize) implements RegistryValue<MenuType> {
   public static final Registry<MenuType> REGISTRY = new Registry<>(RegistryKeys.MENU);
 
   //@formatter:off

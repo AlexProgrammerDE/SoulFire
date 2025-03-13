@@ -43,6 +43,9 @@ public class PlayerInventoryMenu extends ViewableContainer {
     for (var slotEntry : MenuType.SOULFIRE_INVENTORY_MENU.playerInventory().entrySet()) {
       this.getSlot(slotEntry.getKey()).setStorageFrom(player.inventory().getSlot(slotEntry.getValue()));
     }
+    for (var slotEntry : MenuType.SOULFIRE_INVENTORY_MENU.maxStackSize().entrySet()) {
+      this.getSlot(slotEntry.getKey()).setContainerMaxStackSize(slotEntry.getValue());
+    }
   }
 
   public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {

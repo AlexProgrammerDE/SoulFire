@@ -28,15 +28,18 @@ public final class WindowContainer extends ViewableContainer {
   private final ContainerType containerType;
   private final Component title;
 
-  public WindowContainer(Player player, ContainerType containerType, Component title, int containerId) {
+  public WindowContainer(Player player, ContainerType containerType, MenuType menuType, Component title, int containerId) {
     super(
       player,
-      MenuType.REGISTRY.getById(containerType.ordinal()).slots(),
+      menuType.slots(),
       containerId);
     this.containerType = containerType;
     this.title = title;
-    for (var slotEntry : MenuType.REGISTRY.getById(containerType.ordinal()).playerInventory().entrySet()) {
+    for (var slotEntry : menuType.playerInventory().entrySet()) {
       this.getSlot(slotEntry.getKey()).setStorageFrom(player.inventory().getSlot(slotEntry.getValue()));
+    }
+    for (var slotEntry : menuType.maxStackSize().entrySet()) {
+      this.getSlot(slotEntry.getKey()).setContainerMaxStackSize(slotEntry.getValue());
     }
   }
 }

@@ -56,6 +56,14 @@ public final class MenuJsonGenerator implements IDataGenerator {
       }
     }
     menuDesc.add("playerInventory", playerInvMap);
+    var maxStackSizeMap = new JsonObject();
+    for (var slot : menu.slots) {
+      var containerMaxStackSize = slot.container.getMaxStackSize();
+      if (containerMaxStackSize != 99) {
+        maxStackSizeMap.addProperty(String.valueOf(slot.index), containerMaxStackSize);
+      }
+    }
+    menuDesc.add("maxStackSize", maxStackSizeMap);
   }
 
   @Override
