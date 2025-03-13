@@ -81,6 +81,7 @@ public final class ServerCommandManager {
     OnlineCommand.register(dispatcher);
     SayCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
+    HealthCommand.register(dispatcher);
     StatsCommand.register(dispatcher);
     MetadataCommand.register(dispatcher);
     ExportMapCommand.register(dispatcher);
