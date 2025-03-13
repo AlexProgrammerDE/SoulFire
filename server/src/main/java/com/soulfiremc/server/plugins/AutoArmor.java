@@ -51,7 +51,7 @@ public final class AutoArmor extends InternalPlugin {
   private static void putOn(
     LocalPlayer localPlayer,
     ArmorType armorType) {
-    var inventory = localPlayer.inventory();
+    var inventory = localPlayer.inventoryMenu;
 
     var bestItemSlotOptional =
       Arrays.stream(inventory.storage())
