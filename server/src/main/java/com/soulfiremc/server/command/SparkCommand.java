@@ -21,7 +21,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.soulfiremc.server.spark.SFSparkCommandSender;
-import com.soulfiremc.server.spark.SFSparkPlugin;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
@@ -37,7 +36,7 @@ public final class SparkCommand {
               "Runs a spark subcommand",
               c -> {
                 var command = StringArgumentType.getString(c, "command");
-                SFSparkPlugin.INSTANCE.platform()
+                c.getSource().soulFire().sparkPlugin().platform()
                   .executeCommand(new SFSparkCommandSender(c.getSource().source()), command.split(ARGUMENT_SEPARATOR));
                 return Command.SINGLE_SUCCESS;
               })))
@@ -45,7 +44,7 @@ public final class SparkCommand {
           help(
             "Get spark help",
             c -> {
-              SFSparkPlugin.INSTANCE.platform().executeCommand(new SFSparkCommandSender(c.getSource().source()), new String[]{});
+              c.getSource().soulFire().sparkPlugin().platform().executeCommand(new SFSparkCommandSender(c.getSource().source()), new String[]{});
               return Command.SINGLE_SUCCESS;
             })));
   }

@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 public final class SFSparkPlugin implements SparkPlugin {
-  public static SFSparkPlugin INSTANCE;
   private final Path sparkDirectory;
   private final SoulFireServer server;
   @Getter
@@ -42,8 +41,6 @@ public final class SFSparkPlugin implements SparkPlugin {
   public void init() {
     platform = new SparkPlatform(this);
     platform.enable();
-
-    INSTANCE = this;
   }
 
   @Override

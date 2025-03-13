@@ -107,6 +107,7 @@ public final class SoulFireServer {
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
   private final Path baseDirectory;
+  private final SFSparkPlugin sparkPlugin;
 
   public SoulFireServer(
     String host,
@@ -160,10 +161,12 @@ public final class SoulFireServer {
           TimeUtil.waitCondition(SFHelpers.not(Via.getManager().getProtocolManager()::hasLoadedMappings));
         });
     var sparkStart =
-      scheduler.runAsync(
+      scheduler.supplyAsync(
         () -> {
           var sparkPlugin = new SFSparkPlugin(configDirectory.resolve("spark"), this);
           sparkPlugin.init();
+
+          return sparkPlugin;
         });
     var updateCheck =
       scheduler.supplyAsync(
@@ -174,32 +177,50 @@ public final class SoulFireServer {
             .orElse(null);
         });
 
-    CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
+    var serverSettingsRegistryFuture = scheduler.supplyAsync(() -> {
+      var registry = new ServerSettingsRegistry()
+        .addInternalPage(ServerSettings.class, "Server Settings", "server")
+        .addInternalPage(DevSettings.class, "Dev Settings", "bug");
+
+      SoulFireAPI.postEvent(new ServerSettingsRegistryInitEvent(this, registry));
+
+      return registry;
+    });
+    var instanceSettingsRegistryFuture = viaStart.thenApply(ignored -> {
+      var registry = new ServerSettingsRegistry()
+        // Needs Via loaded to have all protocol versions
+        .addInternalPage(BotSettings.class, "Bot Settings", "bot")
+        .addInternalPage(AccountSettings.class, "Account Settings", "users")
+        .addInternalPage(ProxySettings.class, "Proxy Settings", "waypoints")
+        .addInternalPage(AISettings.class, "AI Settings", "sparkles");
+
+      SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
+
+      return registry;
+    });
 
     this.authSystem = authSystemFuture.join();
     this.rpcServer = rpcServerFuture.join();
     this.sessionFactory = sessionFactoryFuture.join();
 
+    var newVersion = updateCheck.join();
+    if (newVersion != null) {
+      log.warn(
+        "SoulFire is outdated! Current version: {}, latest version: {}",
+        BuildData.VERSION,
+        newVersion);
+    } else {
+      log.info("SoulFire is up to date!");
+    }
+
+    this.serverSettingsRegistry = serverSettingsRegistryFuture.join();
+    this.instanceSettingsRegistry = instanceSettingsRegistryFuture.join();
+    this.sparkPlugin = sparkStart.join();
+
+    viaStart.join();
+
     // Via is ready, we can now set up all config stuff
     setupLoggingAndVia();
-
-    SoulFireAPI.postEvent(
-      new ServerSettingsRegistryInitEvent(
-        this,
-        serverSettingsRegistry =
-          new ServerSettingsRegistry()
-            .addInternalPage(ServerSettings.class, "Server Settings", "server")
-            .addInternalPage(DevSettings.class, "Dev Settings", "bug")));
-    SoulFireAPI.postEvent(
-      new InstanceSettingsRegistryInitEvent(
-        this,
-        instanceSettingsRegistry =
-          new ServerSettingsRegistry()
-            // Needs Via loaded to have all protocol versions
-            .addInternalPage(BotSettings.class, "Bot Settings", "bot")
-            .addInternalPage(AccountSettings.class, "Account Settings", "users")
-            .addInternalPage(ProxySettings.class, "Proxy Settings", "waypoints")
-            .addInternalPage(AISettings.class, "AI Settings", "sparkles")));
 
     log.info("Loading instances...");
     loadInstances();
