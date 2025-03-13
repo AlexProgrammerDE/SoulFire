@@ -29,21 +29,19 @@ public final class HealthCommand {
         .executes(
           help(
             "Print the health of selected bots.",
-            c -> {
-              return forEveryBot(
-                c,
-                bot -> {
-                  if (!bot.isOnline()) {
-                    return Command.SINGLE_SUCCESS;
-                  }
-
-                  c.getSource().source().sendInfo("Info for " + bot.accountName() + ":");
-                  c.getSource().source().sendInfo("Health: " + bot.dataManager().localPlayer().getHealth() + " / " + bot.dataManager().localPlayer().getMaxHealth());
-                  c.getSource().source().sendInfo("Food: " + bot.dataManager().localPlayer().getFoodData().getFoodLevel());
-                  c.getSource().source().sendInfo("Saturation: " + bot.dataManager().localPlayer().getFoodData().getSaturationLevel());
-
+            c -> forEveryBot(
+              c,
+              bot -> {
+                if (!bot.isOnline()) {
                   return Command.SINGLE_SUCCESS;
-                });
-            })));
+                }
+
+                c.getSource().source().sendInfo("Info for " + bot.accountName() + ":");
+                c.getSource().source().sendInfo("Health: " + bot.dataManager().localPlayer().getHealth() + " / " + bot.dataManager().localPlayer().getMaxHealth());
+                c.getSource().source().sendInfo("Food: " + bot.dataManager().localPlayer().getFoodData().getFoodLevel());
+                c.getSource().source().sendInfo("Saturation: " + bot.dataManager().localPlayer().getFoodData().getSaturationLevel());
+
+                return Command.SINGLE_SUCCESS;
+              }))));
   }
 }
