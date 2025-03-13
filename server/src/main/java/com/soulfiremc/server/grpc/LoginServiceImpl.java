@@ -30,7 +30,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 import java.util.UUID;
@@ -44,7 +43,6 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
     .expireAfterWrite(15, TimeUnit.MINUTES)
     .build();
   private final SoulFireServer soulFireServer;
-  private final SessionFactory sessionFactory;
 
   private static String generateSixDigitCode() {
     var random = ThreadLocalRandom.current();
@@ -55,7 +53,7 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
   public void login(LoginRequest request, StreamObserver<NextAuthFlowResponse> responseObserver) {
     try {
       var authFlowToken = UUID.randomUUID();
-      var user = sessionFactory.fromTransaction(session -> session.createQuery("from UserEntity where email = :email", UserEntity.class)
+      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity where email = :email", UserEntity.class)
         .setParameter("email", request.getEmail())
         .uniqueResult());
 

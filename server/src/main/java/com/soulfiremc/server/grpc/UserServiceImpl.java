@@ -26,7 +26,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 import java.time.Instant;
@@ -36,14 +35,13 @@ import java.util.UUID;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   private final SoulFireServer soulFireServer;
-  private final SessionFactory sessionFactory;
 
   @Override
   public void createUser(UserCreateRequest request, StreamObserver<UserCreateResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
     try {
-      sessionFactory.inTransaction(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var userEntity = new UserEntity();
         userEntity.username(request.getUsername());
         userEntity.email(request.getEmail());
@@ -76,7 +74,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         throw new IllegalArgumentException("Cannot delete root user");
       }
 
-      sessionFactory.inTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
+      soulFireServer.sessionFactory().inTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
         .setParameter("id", uuid)
         .executeUpdate());
 
@@ -93,7 +91,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_USER));
 
     try {
-      var users = sessionFactory.fromTransaction(session -> session.createQuery("from UserEntity", UserEntity.class).list());
+      var users = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity", UserEntity.class).list());
 
       responseObserver.onNext(UserListResponse.newBuilder()
         .addAllUsers(users.stream().map(user -> UserListResponse.User.newBuilder()
@@ -119,7 +117,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_USER));
 
     try {
-      var user = sessionFactory.fromTransaction(session -> session.find(UserEntity.class, request.getId()));
+      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, request.getId()));
       if (user == null) {
         throw new IllegalArgumentException("User not found: " + request.getId());
       }
@@ -144,7 +142,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.INVALIDATE_SESSIONS));
 
     try {
-      sessionFactory.inTransaction(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, request.getId());
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + request.getId());

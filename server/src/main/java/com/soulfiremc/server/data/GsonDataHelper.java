@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 public final class GsonDataHelper {
   public static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
@@ -59,17 +58,6 @@ public final class GsonDataHelper {
         throw new RuntimeException("Failed to load data file " + file, e);
       }
     });
-  private static final Function<Map<Class<?>, Object>, Gson> GSON_FACTORY = (typeAdapters) -> {
-    var builder = new GsonBuilder()
-      .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
-      .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
-
-    for (var entry : typeAdapters.entrySet()) {
-      builder.registerTypeAdapter(entry.getKey(), entry.getValue());
-    }
-
-    return builder.create();
-  };
 
   public static <T> T fromJson(String dataFile, String dataKey, Class<T> clazz) {
     return fromJson(dataFile, dataKey, clazz, Map.of());
@@ -85,10 +73,18 @@ public final class GsonDataHelper {
       }
     }
 
-    throw new RuntimeException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
+    throw new IllegalStateException("Failed to find data key %s in file %s".formatted(dataKey, dataFile));
   }
 
   public static Gson createGson(Map<Class<?>, Object> typeAdapters) {
-    return GSON_FACTORY.apply(typeAdapters);
+    var builder = new GsonBuilder()
+      .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
+      .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
+
+    for (var entry : typeAdapters.entrySet()) {
+      builder.registerTypeAdapter(entry.getKey(), entry.getValue());
+    }
+
+    return builder.create();
   }
 }

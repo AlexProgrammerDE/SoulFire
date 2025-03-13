@@ -18,20 +18,22 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.LoginServiceGrpc;
-import com.soulfiremc.server.user.AuthSystem;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 import io.jsonwebtoken.*;
 
+import javax.inject.Inject;
 import java.util.Objects;
 
 public final class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
-  private final AuthSystem authSystem;
+  private final SoulFireServer soulFireServer;
 
-  public JwtServerInterceptor(AuthSystem authSystem) {
-    this.parser = Jwts.parser().verifyWith(authSystem.jwtSecretKey()).build();
-    this.authSystem = authSystem;
+  @Inject
+  public JwtServerInterceptor(SoulFireServer soulFireServer) {
+    this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
+    this.soulFireServer = soulFireServer;
   }
 
   @Override
@@ -67,7 +69,7 @@ public final class JwtServerInterceptor implements ServerInterceptor {
         status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
       }
       if (claims != null) {
-        var user = authSystem.authenticate(
+        var user = soulFireServer.authSystem().authenticate(
           claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
 
         if (user.isPresent()) {

@@ -19,7 +19,6 @@ package com.soulfiremc.server.util.structs;
 
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import io.netty.handler.codec.http.HttpStatusClass;
@@ -29,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public final class SFUpdateChecker {
@@ -42,15 +40,12 @@ public final class SFUpdateChecker {
     this.updateVersion = checkForUpdates();
   }
 
-  public static CompletableFuture<SFUpdateChecker> getInstance(SoulFireServer server) {
-    return server.scheduler().supplyAsync(
-      () -> {
-        if (instance == null) {
-          instance = new SFUpdateChecker();
-        }
+  public static SFUpdateChecker check() {
+    if (instance == null) {
+      instance = new SFUpdateChecker();
+    }
 
-        return instance;
-      });
+    return instance;
   }
 
   private static @Nullable String checkForUpdates() {

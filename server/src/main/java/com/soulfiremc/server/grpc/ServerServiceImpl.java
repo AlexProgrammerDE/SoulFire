@@ -27,7 +27,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 
@@ -35,14 +34,13 @@ import javax.inject.Inject;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
   private final SoulFireServer soulFireServer;
-  private final SessionFactory sessionFactory;
 
   @Override
   public void getServerInfo(ServerInfoRequest request, StreamObserver<ServerInfoResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_SERVER_CONFIG));
 
     try {
-      var configEntity = sessionFactory.fromTransaction(session -> session.find(ServerConfigEntity.class, 1));
+      var configEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(ServerConfigEntity.class, 1));
       ServerSettingsImpl config;
       if (configEntity == null) {
         config = ServerSettingsImpl.EMPTY;
@@ -65,7 +63,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SERVER_CONFIG));
 
     try {
-      sessionFactory.inTransaction(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
         if (currentConfigEntity == null) {
           var newConfigEntity = new ServerConfigEntity();

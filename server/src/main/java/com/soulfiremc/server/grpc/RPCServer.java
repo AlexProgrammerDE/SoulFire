@@ -35,7 +35,6 @@ import com.linecorp.armeria.server.healthcheck.HealthCheckService;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
-import com.soulfiremc.server.user.AuthSystem;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
@@ -65,8 +64,7 @@ public final class RPCServer {
   public RPCServer(
     String host,
     int port,
-    Injector injector,
-    AuthSystem authSystem) {
+    Injector injector) {
     this.host = host;
     this.port = port;
 
@@ -91,7 +89,7 @@ public final class RPCServer {
         .autoCompression(true)
         .intercept(List.of(
           new LoginRateLimitingInterceptor(),
-          new JwtServerInterceptor(authSystem)
+          injector.getSingleton(JwtServerInterceptor.class)
         ))
         .addService(injector.getSingleton(LogServiceImpl.class))
         .addService(injector.getSingleton(ConfigServiceImpl.class))

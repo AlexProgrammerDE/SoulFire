@@ -40,6 +40,7 @@ import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.user.*;
+import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.TimeUtil;
@@ -58,6 +59,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.SessionFactory;
 import org.pf4j.PluginManager;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -103,6 +105,7 @@ public final class SoulFireServer {
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final SessionFactory sessionFactory;
+  private final SecretKey jwtSecretKey;
   private final Path baseDirectory;
 
   public SoulFireServer(
@@ -122,11 +125,13 @@ public final class SoulFireServer {
 
     injector.register(ShutdownManager.class, shutdownManager);
 
-    this.sessionFactory = DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite"));
-    injector.register(SessionFactory.class, sessionFactory);
+    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
+    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite")));
+    var authSystemFuture = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory));
+    var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, injector));
 
     this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
-      sessionFactory.fromTransaction(session -> {
+      sessionFactoryFuture.join().fromTransaction(session -> {
         var entity = session.find(ServerConfigEntity.class, 1);
         if (entity == null) {
           entity = new ServerConfigEntity();
@@ -135,8 +140,6 @@ public final class SoulFireServer {
 
         return entity.settings();
       }), 1, TimeUnit.SECONDS));
-    this.authSystem = new AuthSystem(this);
-    this.rpcServer = new RPCServer(host, port, injector, authSystem);
 
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
@@ -162,28 +165,23 @@ public final class SoulFireServer {
           var sparkPlugin = new SFSparkPlugin(configDirectory.resolve("spark"), this);
           sparkPlugin.init();
         });
-
     var updateCheck =
-      CompletableFuture.supplyAsync(
+      scheduler.supplyAsync(
         () -> {
           log.info("Checking for updates...");
-          return SFUpdateChecker.getInstance(this).join().getUpdateVersion().orElse(null);
-        }, scheduler);
+          return SFUpdateChecker.check()
+            .getUpdateVersion()
+            .orElse(null);
+        });
 
     CompletableFuture.allOf(viaStart, sparkStart, updateCheck).join();
 
+    this.authSystem = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory)).join();
+    this.rpcServer = scheduler.supplyAsync(() -> new RPCServer(host, port, injector)).join();
+    this.sessionFactory = sessionFactoryFuture.join();
+
     // Via is ready, we can now set up all config stuff
     setupLoggingAndVia();
-
-    var newVersion = updateCheck.join();
-    if (newVersion != null) {
-      log.warn(
-        "SoulFire is outdated! Current version: {}, latest version: {}",
-        BuildData.VERSION,
-        newVersion);
-    } else {
-      log.info("SoulFire is up to date!");
-    }
 
     SoulFireAPI.postEvent(
       new ServerSettingsRegistryInitEvent(

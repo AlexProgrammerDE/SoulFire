@@ -31,7 +31,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -42,7 +41,6 @@ import java.util.UUID;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServiceImplBase {
   private final SoulFireServer soulFireServer;
-  private final SessionFactory sessionFactory;
 
   private Collection<InstancePermissionState> getInstancePermissions(UUID instanceId) {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
@@ -93,7 +91,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   public void listInstances(InstanceListRequest request, StreamObserver<InstanceListResponse> responseObserver) {
     try {
       responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(sessionFactory.fromTransaction(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
+        .addAllInstances(soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
           .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
           .map(instance -> InstanceListResponse.Instance.newBuilder()
             .setId(instance.id().toString())
@@ -117,7 +115,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var instanceEntity = sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
+      var instanceEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
       if (instanceEntity == null) {
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
@@ -142,7 +140,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
-      sessionFactory.inTransaction(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -171,7 +169,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      sessionFactory.inTransaction(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -217,7 +215,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE_AUDIT_LOGS, instanceId));
 
     try {
-      var auditLogs = sessionFactory.fromTransaction(session -> {
+      var auditLogs = soulFireServer.sessionFactory().fromTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));

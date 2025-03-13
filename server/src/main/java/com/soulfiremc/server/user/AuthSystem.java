@@ -24,8 +24,6 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
-import com.soulfiremc.server.util.KeyHelper;
-import com.soulfiremc.server.util.SFPathConstants;
 import io.jsonwebtoken.Jwts;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,16 +44,16 @@ public final class AuthSystem {
   public static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
   private static final String ROOT_USERNAME = "root";
   private final LogServiceImpl logService;
-  private final SessionFactory sessionFactory;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
+  private final SessionFactory sessionFactory;
   private final UUID rootUserId;
 
-  public AuthSystem(SoulFireServer soulFireServer) {
+  public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
     this.logService = soulFireServer.injector().getSingleton(LogServiceImpl.class);
-    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(soulFireServer.baseDirectory()));
-    this.sessionFactory = soulFireServer.sessionFactory();
+    this.jwtSecretKey = soulFireServer.jwtSecretKey();
     this.settingsSource = soulFireServer.settingsSource();
+    this.sessionFactory = sessionFactory;
     this.rootUserId = createRootUser();
   }
 
