@@ -75,10 +75,6 @@ public class PlayerInventoryMenu extends ViewableContainer {
     return slot.slot() - HOTBAR_START;
   }
 
-  public static boolean isMainInventory(ContainerSlot slot) {
-    return slot.slot() >= 9 && slot.slot() < 36;
-  }
-
   public ContainerSlot getSelectedSlot() {
     return getSlot(HOTBAR_START + playerInventory.selected);
   }

@@ -85,9 +85,9 @@ public final class MultiPlayerGameMode {
   }
 
   private void ensureHasSentCarriedItem() {
-    var i = this.dataManager.localPlayer().inventory().selected;
-    if (i != this.carriedIndex) {
-      this.carriedIndex = i;
+    var carried = this.dataManager.localPlayer().inventory().selected;
+    if (carried != this.carriedIndex) {
+      this.carriedIndex = carried;
       this.connection.sendPacket(new ServerboundSetCarriedItemPacket(this.carriedIndex));
     }
   }
