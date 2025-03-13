@@ -67,6 +67,10 @@ public class PlayerInventoryMenu extends ViewableContainer {
     return slot.slot() >= 36 && slot.slot() < 45;
   }
 
+  public static boolean isOffhandSlot(ContainerSlot slot) {
+    return slot.slot() == 45;
+  }
+
   public static int toHotbarIndex(ContainerSlot slot) {
     return slot.slot() - HOTBAR_START;
   }

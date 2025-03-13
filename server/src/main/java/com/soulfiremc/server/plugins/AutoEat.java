@@ -81,13 +81,21 @@ public final class AutoEat extends InternalPlugin {
           return;
         }
 
-        if (!playerInventory.isHeldItem(slot) && PlayerInventoryMenu.isHotbarSlot(slot)) {
+        if (playerInventory.isHeldItem(slot)) {
+          connection.botControl().maybeRegister(ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
+          )));
+        } else if (PlayerInventoryMenu.isOffhandSlot(slot)) {
+          connection.botControl().maybeRegister(ControllingTask.staged(List.of(
+            new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.OFF_HAND))
+          )));
+        } else if (PlayerInventoryMenu.isHotbarSlot(slot)) {
           connection.botControl().maybeRegister(ControllingTask.staged(List.of(
             new ControllingTask.RunnableStage(() -> localPlayer.inventory().selected = PlayerInventoryMenu.toHotbarIndex(slot)),
             new ControllingTask.WaitDelayStage(() -> 50L),
             new ControllingTask.RunnableStage(() -> connection.dataManager().gameModeState().useItemInHand(Hand.MAIN_HAND))
           )));
-        } else if (PlayerInventoryMenu.isMainInventory(slot)) {
+        } else {
           connection.botControl().maybeRegister(ControllingTask.staged(List.of(
             new ControllingTask.RunnableStage(localPlayer::openPlayerInventory),
             new ControllingTask.RunnableStage(() -> localPlayer.inventoryMenu.leftClick(slot)),
