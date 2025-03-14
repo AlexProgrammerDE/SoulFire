@@ -57,6 +57,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
@@ -109,6 +110,7 @@ import java.util.stream.Collectors;
 public final class SessionDataManager {
   private static final ReferenceCache<ServerPlayData> SERVER_PLAY_DATA_CACHE = new ReferenceCache<>();
   private static final ReferenceCache<ClientboundCommandsPacket> COMMANDS_DATA_CACHE = new ReferenceCache<>();
+  private static final ReferenceCache<RegistryEntry> REGISTRY_ENTRY_CACHE = new ReferenceCache<>();
   private final InstanceSettingsSource settingsSource;
   private final Logger log;
   private final BotConnection connection;
@@ -226,11 +228,19 @@ public final class SessionDataManager {
       var entry = entries.get(i);
       var holderKey = entry.getId();
       var providedData = entry.getData();
-      var usedData = Objects.requireNonNullElseGet(providedData,
-        () -> BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks));
 
-      registryWriter.register(holderKey, i, usedData);
-      resolvedEntries.add(new RegistryEntry(holderKey, usedData));
+      NbtMap resolvedData;
+      RegistryEntry resolvedEntry;
+      if (providedData == null) {
+        resolvedData = BuiltInKnownPackRegistry.INSTANCE.mustFindData(registryKey, holderKey, serverKnownPacks);
+        resolvedEntry = new RegistryEntry(holderKey, resolvedData);
+      } else {
+        resolvedData = providedData;
+        resolvedEntry = entry;
+      }
+
+      registryWriter.register(holderKey, i, resolvedData);
+      resolvedEntries.add(REGISTRY_ENTRY_CACHE.poolReference(resolvedEntry));
     }
 
     resolvedRegistryData.put(registryKey, resolvedEntries);
