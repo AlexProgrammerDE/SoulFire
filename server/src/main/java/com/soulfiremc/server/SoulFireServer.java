@@ -123,8 +123,8 @@ public final class SoulFireServer {
     this.baseDirectory = baseDirectory;
 
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
-    this.serverCommandManager = new ServerCommandManager(this);
 
+    var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
     var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite")));
     var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
@@ -213,6 +213,7 @@ public final class SoulFireServer {
     this.serverSettingsRegistry = serverSettingsRegistryFuture.join();
     this.instanceSettingsRegistry = instanceSettingsRegistryFuture.join();
     this.sparkPlugin = sparkStart.join();
+    this.serverCommandManager = serverCommandManagerFuture.join();
 
     viaStart.join();
 
