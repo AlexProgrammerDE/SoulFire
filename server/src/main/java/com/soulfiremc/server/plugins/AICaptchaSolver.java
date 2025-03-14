@@ -102,7 +102,7 @@ public final class AICaptchaSolver extends InternalPlugin {
     connection.botControl().sendMessage(response);
   }
 
-  private static String toBase64JPEG(BufferedImage image) {
+  private static String toBase64PNG(BufferedImage image) {
     try (var os = new ByteArrayOutputStream()) {
       ImageIO.write(image, "png", os);
       return Base64.getEncoder().encodeToString(os.toByteArray());
@@ -121,7 +121,7 @@ public final class AICaptchaSolver extends InternalPlugin {
           .getItemInHand(InteractionHand.MAIN_HAND);
         int mapId = item.get(DataComponentTypes.MAP_ID);
         var mapState = connection.dataManager().mapDataStates().get(mapId);
-        yield toBase64JPEG(mapState.toBufferedImage());
+        yield toBase64PNG(mapState.toBufferedImage());
       }
     };
   }
