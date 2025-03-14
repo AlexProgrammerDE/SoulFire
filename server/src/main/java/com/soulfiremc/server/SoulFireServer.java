@@ -17,18 +17,18 @@
  */
 package com.soulfiremc.server;
 
-import ch.jalu.injector.Injector;
-import ch.jalu.injector.InjectorBuilder;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ServerConfigEntity;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.instance.AISettings;
 import com.soulfiremc.server.settings.instance.AccountSettings;
@@ -84,8 +84,6 @@ import java.util.concurrent.TimeUnit;
 public final class SoulFireServer {
   public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
 
-  private final Injector injector =
-    new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final SoulFireScheduler.RunnableWrapper runnableWrapper = runnable -> () -> {
     CURRENT.set(this);
     try {
@@ -102,12 +100,15 @@ public final class SoulFireServer {
   private final AuthSystem authSystem;
   private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerSettingsRegistry instanceSettingsRegistry;
+  private final ServerCommandManager serverCommandManager;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
   private final Path baseDirectory;
   private final SFSparkPlugin sparkPlugin;
+  @Getter
+  private final LogServiceImpl logService = new LogServiceImpl();
 
   public SoulFireServer(
     String host,
@@ -121,15 +122,12 @@ public final class SoulFireServer {
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
     this.baseDirectory = baseDirectory;
 
-    // Register into injector
-    injector.register(SoulFireServer.class, this);
-
-    injector.register(ShutdownManager.class, shutdownManager);
-
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
+    this.serverCommandManager = new ServerCommandManager(this);
+
     var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite")));
     var authSystemFuture = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory));
-    var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, injector));
+    var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
     this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
       sessionFactoryFuture.join().fromTransaction(session -> {
@@ -243,8 +241,8 @@ public final class SoulFireServer {
 
   public EmailSender emailSender() {
     return switch (settingsSource.get(ServerSettings.EMAIL_TYPE, ServerSettings.EmailType.class)) {
-      case CONSOLE -> injector.getSingleton(ConsoleEmailSender.class);
-      case SMTP -> injector.getSingleton(SmtpEmailSender.class);
+      case CONSOLE -> new ConsoleEmailSender();
+      case SMTP -> new SmtpEmailSender(this);
     };
   }
 

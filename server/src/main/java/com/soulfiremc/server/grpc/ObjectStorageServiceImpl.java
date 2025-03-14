@@ -28,12 +28,11 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.nio.file.Files;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.ObjectStorageServiceImplBase {
   private final SoulFireServer soulFireServer;
 

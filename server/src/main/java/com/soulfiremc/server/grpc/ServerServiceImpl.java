@@ -28,10 +28,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
   private final SoulFireServer soulFireServer;
 

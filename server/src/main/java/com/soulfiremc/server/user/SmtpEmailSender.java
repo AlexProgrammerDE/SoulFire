@@ -27,12 +27,10 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.util.Properties;
 
 @Slf4j
 public record SmtpEmailSender(SoulFireServer soulFireServer) implements EmailSender {
-  @Inject
   public SmtpEmailSender {
     log.info("Using smtp email sender");
   }

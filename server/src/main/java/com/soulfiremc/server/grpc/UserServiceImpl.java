@@ -27,12 +27,11 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.time.Instant;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   private final SoulFireServer soulFireServer;
 

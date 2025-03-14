@@ -26,11 +26,10 @@ import com.soulfiremc.grpc.generated.InstanceCommandScope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class ClientCommandManager {
   private final RPCClient rpcClient;
   private final CLIManager cliManager;

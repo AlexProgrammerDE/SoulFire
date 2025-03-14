@@ -17,8 +17,6 @@
  */
 package com.soulfiremc.client.cli;
 
-import ch.jalu.injector.Injector;
-import ch.jalu.injector.InjectorBuilder;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -46,23 +44,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class CLIManager {
   private final RPCClient rpcClient;
   private final ClientCommandManager clientCommandManager;
-  private final Injector injector =
-    new InjectorBuilder().addDefaultHandlers("com.soulfiremc").create();
   private final ExecutorService threadPool = Executors.newCachedThreadPool();
   private final ShutdownManager shutdownManager;
   private final ClientSettingsManager clientSettingsManager;
   private UUID cliInstanceId;
 
   public CLIManager(RPCClient rpcClient, PluginManager pluginManager) {
-    injector.register(CLIManager.class, this);
-    injector.register(RPCClient.class, rpcClient);
-
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
-    injector.register(ShutdownManager.class, shutdownManager);
 
     this.rpcClient = rpcClient;
-    this.clientSettingsManager = injector.getSingleton(ClientSettingsManager.class);
-    this.clientCommandManager = injector.getSingleton(ClientCommandManager.class);
+    this.clientSettingsManager = new ClientSettingsManager(this.rpcClient);
+    this.clientCommandManager = new ClientCommandManager(this.rpcClient, this);
   }
 
   private static String escapeFormatSpecifiers(String input) {

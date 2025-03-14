@@ -24,7 +24,6 @@ import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ConsoleCommandSource;
-import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
@@ -58,7 +57,7 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
       log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);
     }
 
-    var commandManager = soulFire.injector().getSingleton(ServerCommandManager.class);
+    var commandManager = soulFire.serverCommandManager();
     var commandSource = new ConsoleCommandSource(soulFire.authSystem());
     new GenericTerminalConsole(
       soulFire.shutdownManager(),

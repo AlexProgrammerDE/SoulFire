@@ -26,23 +26,17 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.command.brigadier.BrigadierHelper;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import java.util.List;
 
 /**
  * Holds and configures all server-side text commands of SoulFire itself.
  */
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@Getter
 public final class ServerCommandManager {
-  @Getter
   private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
-  private final SoulFireServer soulFireServer;
 
-  @PostConstruct
-  public void postConstruct() {
+  public ServerCommandManager(SoulFireServer soulFireServer) {
     // Help
     HelpCommand.register(dispatcher);
 

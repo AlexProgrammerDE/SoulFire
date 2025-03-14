@@ -19,11 +19,9 @@ package com.soulfiremc.server.user;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 
 @Slf4j
 public record ConsoleEmailSender() implements EmailSender {
-  @Inject
   public ConsoleEmailSender {
     log.info("Using console email sender");
   }

@@ -27,7 +27,6 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
-  @Inject
   public LogServiceImpl() {
     SFLogAppender.INSTANCE.logConsumers().add(this::broadcastMessage);
   }

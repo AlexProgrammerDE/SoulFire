@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.grpc;
 
-import ch.jalu.injector.Injector;
 import com.linecorp.armeria.common.*;
 import com.linecorp.armeria.common.grpc.GrpcMeterIdPrefixFunction;
 import com.linecorp.armeria.common.grpc.GrpcSerializationFormats;
@@ -35,6 +34,7 @@ import com.linecorp.armeria.server.healthcheck.HealthCheckService;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
+import com.soulfiremc.server.SoulFireServer;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
@@ -64,7 +64,7 @@ public final class RPCServer {
   public RPCServer(
     String host,
     int port,
-    Injector injector) {
+    SoulFireServer soulFireServer) {
     this.host = host;
     this.port = port;
 
@@ -89,19 +89,19 @@ public final class RPCServer {
         .autoCompression(true)
         .intercept(List.of(
           new LoginRateLimitingInterceptor(),
-          injector.getSingleton(JwtServerInterceptor.class)
+          new JwtServerInterceptor(soulFireServer)
         ))
-        .addService(injector.getSingleton(LogServiceImpl.class))
-        .addService(injector.getSingleton(ConfigServiceImpl.class))
-        .addService(injector.getSingleton(CommandServiceImpl.class))
-        .addService(injector.getSingleton(InstanceServiceImpl.class))
-        .addService(injector.getSingleton(MCAuthServiceImpl.class))
-        .addService(injector.getSingleton(ProxyCheckServiceImpl.class))
-        .addService(injector.getSingleton(DownloadServiceImpl.class))
-        .addService(injector.getSingleton(ObjectStorageServiceImpl.class))
-        .addService(injector.getSingleton(ServerServiceImpl.class))
-        .addService(injector.getSingleton(UserServiceImpl.class))
-        .addService(injector.getSingleton(LoginServiceImpl.class))
+        .addService(soulFireServer.logService())
+        .addService(new ConfigServiceImpl(soulFireServer))
+        .addService(new CommandServiceImpl(soulFireServer))
+        .addService(new InstanceServiceImpl(soulFireServer))
+        .addService(new MCAuthServiceImpl(soulFireServer))
+        .addService(new ProxyCheckServiceImpl(soulFireServer))
+        .addService(new DownloadServiceImpl())
+        .addService(new ObjectStorageServiceImpl(soulFireServer))
+        .addService(new ServerServiceImpl(soulFireServer))
+        .addService(new UserServiceImpl(soulFireServer))
+        .addService(new LoginServiceImpl(soulFireServer))
         // Allow collecting info about callable methods.
         .addService(ProtoReflectionServiceV1.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)

@@ -74,7 +74,6 @@ classtransform-additionalclassprovider = { module = "net.lenni0451.classtransfor
 reflect = "net.lenni0451:Reflect:1.4.0"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
 minecraftauth = "net.raphimc:MinecraftAuth:4.1.2-SNAPSHOT"
-injector = "ch.jalu:injector:1.0"
 grpc-proto = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
 grpc-services = { module = "io.grpc:grpc-services", version.ref = "grpc" }
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }

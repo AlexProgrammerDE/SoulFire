@@ -35,14 +35,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
 import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
   private static final URL IPIFY_URL = ReactorHttpHelper.createURL("https://api.ipify.org");
   private static final URL AWS_URL = ReactorHttpHelper.createURL("https://checkip.amazonaws.com");

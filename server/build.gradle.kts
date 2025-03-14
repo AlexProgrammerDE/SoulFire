@@ -86,9 +86,6 @@ dependencies {
   api(libs.reflect)
   api(libs.lambdaevents)
 
-  // For class injection
-  api(libs.injector)
-
   // For database support
   api(libs.bundles.hibernate)
   api(libs.hikaricp)

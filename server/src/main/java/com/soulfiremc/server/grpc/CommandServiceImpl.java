@@ -20,7 +20,6 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -28,15 +27,13 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
 import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceImplBase {
   private final SoulFireServer soulFire;
-  private final ServerCommandManager serverCommandManager;
 
   @Override
   public void executeCommand(
@@ -57,7 +54,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
     };
 
     try {
-      var code = serverCommandManager.execute(request.getCommand(), stack);
+      var code = soulFire.serverCommandManager().execute(request.getCommand(), stack);
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
       responseObserver.onCompleted();
@@ -87,7 +84,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
     };
 
     try {
-      var suggestions = serverCommandManager.complete(request.getCommand(), request.getCursor(), stack)
+      var suggestions = soulFire.serverCommandManager().complete(request.getCommand(), request.getCursor(), stack)
         .stream()
         .map(completion -> {
           var builder = CommandCompletion.newBuilder()

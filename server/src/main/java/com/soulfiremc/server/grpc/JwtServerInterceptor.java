@@ -23,14 +23,12 @@ import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 import io.jsonwebtoken.*;
 
-import javax.inject.Inject;
 import java.util.Objects;
 
 public final class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
   private final SoulFireServer soulFireServer;
 
-  @Inject
   public JwtServerInterceptor(SoulFireServer soulFireServer) {
     this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.soulFireServer = soulFireServer;

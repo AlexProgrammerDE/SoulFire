@@ -50,7 +50,7 @@ public final class AuthSystem {
   private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
-    this.logService = soulFireServer.injector().getSingleton(LogServiceImpl.class);
+    this.logService = soulFireServer.logService();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
     this.settingsSource = soulFireServer.settingsSource();
     this.sessionFactory = sessionFactory;

@@ -34,26 +34,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor
 public final class ClientSettingsManager {
   private final Multimap<PropertyKey, Consumer<JsonElement>> listeners =
     Multimaps.newListMultimap(new LinkedHashMap<>(), ArrayList::new);
-  private final Map<String, Map<String, Provider<JsonElement>>> providers = new LinkedHashMap<>();
+  private final Map<String, Map<String, Supplier<JsonElement>>> providers = new LinkedHashMap<>();
   private final RPCClient rpcClient;
   @Setter
   private SFCommandDefinition commandDefinition;
   private InstanceSettingsImpl settingsSource = InstanceSettingsImpl.EMPTY;
 
-  public void registerProvider(PropertyKey property, Provider<JsonElement> provider) {
+  public void registerProvider(PropertyKey property, Supplier<JsonElement> provider) {
     providers
       .computeIfAbsent(property.namespace(), k -> new LinkedHashMap<>())
       .put(property.key(), provider);
