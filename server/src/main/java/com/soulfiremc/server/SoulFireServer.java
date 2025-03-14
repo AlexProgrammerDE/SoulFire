@@ -129,17 +129,6 @@ public final class SoulFireServer {
     var authSystemFuture = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory));
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
-    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
-      sessionFactoryFuture.join().fromTransaction(session -> {
-        var entity = session.find(ServerConfigEntity.class, 1);
-        if (entity == null) {
-          entity = new ServerConfigEntity();
-          session.persist(entity);
-        }
-
-        return entity.settings();
-      }), 1, TimeUnit.SECONDS));
-
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
     var viaStart =
       scheduler.runAsync(
@@ -197,9 +186,19 @@ public final class SoulFireServer {
       return registry;
     });
 
+    this.sessionFactory = sessionFactoryFuture.join();
+    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
+      this.sessionFactory.fromTransaction(session -> {
+        var entity = session.find(ServerConfigEntity.class, 1);
+        if (entity == null) {
+          entity = new ServerConfigEntity();
+          session.persist(entity);
+        }
+
+        return entity.settings();
+      }), 1, TimeUnit.SECONDS));
     this.authSystem = authSystemFuture.join();
     this.rpcServer = rpcServerFuture.join();
-    this.sessionFactory = sessionFactoryFuture.join();
 
     var newVersion = updateCheck.join();
     if (newVersion != null) {
