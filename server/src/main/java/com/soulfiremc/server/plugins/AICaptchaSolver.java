@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
-import com.openai.models.*;
+import com.openai.models.chat.completions.*;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;

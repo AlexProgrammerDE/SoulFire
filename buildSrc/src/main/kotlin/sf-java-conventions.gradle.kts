@@ -35,9 +35,6 @@ tasks {
   withType<Jar> {
     from(rootProject.file("LICENSE"))
   }
-  delombok {
-    sourcepath.setFrom(sourcepath.plus(compileJava.get().options.generatedSourceOutputDirectory))
-  }
 }
 
 java {
