@@ -21,15 +21,22 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
+import com.soulfiremc.server.protocol.bot.container.ContainerSlot;
 import com.soulfiremc.server.protocol.bot.container.PlayerInventoryMenu;
 import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
+import net.kyori.adventure.text.Component;
+import org.slf4j.event.Level;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InventoryCommand {
   private static String format(SFItemStack item) {
     return item.isEmpty() ? "empty" : item.type().key() + " x" + item.getCount();
+  }
+
+  private static String format(ContainerSlot slot) {
+    return "Slot " + slot.slot() + ": " + format(slot.item());
   }
 
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -56,16 +63,41 @@ public final class InventoryCommand {
                   forEveryBot(
                     c,
                     bot -> {
+                      var source = c.getSource().source();
                       var container = bot.dataManager().localPlayer().currentContainer;
                       switch (container) {
-                        case WindowContainer windowContainer -> c.getSource().source().sendInfo("Current inventory type: " + windowContainer.containerType() + " with title " + windowContainer.title());
-                        case PlayerInventoryMenu ignored -> c.getSource().source().sendInfo("Current inventory: Player inventory");
-                        default -> c.getSource().source().sendInfo("Current inventory: Unknown");
+                        case WindowContainer windowContainer -> source.sendMessage(
+                          Level.INFO,
+                          Component.text("Current inventory type: ")
+                            .append(Component.text(windowContainer.containerType().toString()))
+                            .append(Component.text(" with title "))
+                            .append(windowContainer.title())
+                        );
+                        case PlayerInventoryMenu ignored -> source.sendInfo("Current inventory: Player inventory");
+                        default -> source.sendInfo("Current inventory: Unknown");
                       }
 
-                      c.getSource().source().sendInfo("Carried item: " + format(container.getCarried()));
-                      for (var slot : container.slots()) {
-                        c.getSource().source().sendInfo("Slot " + slot.slot() + ": " + format(slot.item()));
+                      source.sendInfo("Carried item: " + format(container.getCarried()));
+                      if (container instanceof PlayerInventoryMenu playerInventoryMenu) {
+                        source.sendInfo(format(playerInventoryMenu.craftingResult()) + " (Crafting result)");
+                        source.sendInfo(format(playerInventoryMenu.craftingGrid()[0]) + " (Top left crafting grid)");
+                        source.sendInfo(format(playerInventoryMenu.craftingGrid()[1]) + " (Top right crafting grid)");
+                        source.sendInfo(format(playerInventoryMenu.craftingGrid()[2]) + " (Bottom left crafting grid)");
+                        source.sendInfo(format(playerInventoryMenu.craftingGrid()[3]) + " (Bottom right crafting grid:)");
+                        source.sendInfo(format(playerInventoryMenu.armor()[0]) + " (Helmet)");
+                        source.sendInfo(format(playerInventoryMenu.armor()[1]) + " (Chestplate)");
+                        source.sendInfo(format(playerInventoryMenu.armor()[2]) + " (Leggings)");
+                        source.sendInfo(format(playerInventoryMenu.armor()[3]) + " (Boots)");
+                        for (var slot : playerInventoryMenu.mainInventory()) {
+                          source.sendInfo(format(slot) + " (Main inventory row " + (slot.slot() - 9) / 9 + ", column " + (slot.slot() - 9) % 9 + ")");
+                        }
+                        for (var slot : playerInventoryMenu.hotbar()) {
+                          source.sendInfo(format(slot) + " (Hotbar " + (slot.slot() - 36) + ")");
+                        }
+                      } else {
+                        for (var slot : container.slots()) {
+                          source.sendInfo(format(slot));
+                        }
                       }
 
                       return Command.SINGLE_SUCCESS;
