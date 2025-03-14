@@ -126,7 +126,7 @@ public final class SoulFireServer {
     this.serverCommandManager = new ServerCommandManager(this);
 
     var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite")));
-    var authSystemFuture = sessionFactoryFuture.thenApply(sessionFactory -> new AuthSystem(this, sessionFactory));
+    var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
     var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
