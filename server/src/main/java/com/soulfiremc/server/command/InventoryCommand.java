@@ -94,6 +94,7 @@ public final class InventoryCommand {
                         for (var slot : playerInventoryMenu.hotbar()) {
                           source.sendInfo(format(slot) + " (Hotbar " + (slot.slot() - 36) + ")");
                         }
+                        source.sendInfo(format(playerInventoryMenu.offhand()) + " (Offhand)");
                       } else {
                         for (var slot : container.slots()) {
                           source.sendInfo(format(slot));
