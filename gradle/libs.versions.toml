@@ -1,7 +1,7 @@
 [versions]
 log4j = "2.24.3"
 grpc = "1.71.0"
-protobuf = "4.30.0"
+protobuf = "4.30.1"
 via-version = "5.2.2-SNAPSHOT"
 via-backwards = "5.2.2-SNAPSHOT"
 via-rewind = "4.0.6-SNAPSHOT"
@@ -13,7 +13,7 @@ mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.19.0"
 reactor = "1.2.4"
 classtransform = "1.14.0"
-armeria = "1.32.0"
+armeria = "1.32.2"
 graalvm-polyglot = "24.1.2"
 
 [plugins]
@@ -61,7 +61,7 @@ kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref 
 kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
 commons-validator = "commons-validator:commons-validator:1.9.0"
 commons-io = "commons-io:commons-io:2.18.0"
-oshi = "com.github.oshi:oshi-core:6.7.0"
+oshi = "com.github.oshi:oshi-core:6.7.1"
 guava = "com.google.guava:guava:33.4.0-jre"
 gson = "com.google.code.gson:gson:2.12.1"
 pf4j = "org.pf4j:pf4j:3.13.0"
