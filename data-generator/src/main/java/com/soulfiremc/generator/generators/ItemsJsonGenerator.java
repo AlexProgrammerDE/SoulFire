@@ -54,6 +54,10 @@ public final class ItemsJsonGenerator implements IDataGenerator {
     return itemDesc;
   }
 
+  private static <T> void writeComponent(RegistryFriendlyByteBuf buf, TypedDataComponent<T> typed) {
+    typed.type().streamCodec().encode(buf, typed.value());
+  }
+
   @Override
   public String getDataName() {
     return "data/items.json";
@@ -64,9 +68,5 @@ public final class ItemsJsonGenerator implements IDataGenerator {
     var resultArray = new JsonArray();
     BuiltInRegistries.ITEM.forEach(item -> resultArray.add(generateItem(item)));
     return resultArray;
-  }
-
-  private static <T> void writeComponent(RegistryFriendlyByteBuf buf, TypedDataComponent<T> typed) {
-    typed.type().streamCodec().encode(buf, typed.value());
   }
 }

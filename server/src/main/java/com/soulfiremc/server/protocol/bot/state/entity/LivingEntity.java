@@ -50,14 +50,14 @@ import java.util.stream.Stream;
 @Getter
 public abstract class LivingEntity extends Entity {
   protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
+  protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
+  protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
+  protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
   private static final Key SPEED_MODIFIER_POWDER_SNOW_ID = Key.key("powder_snow");
   private static final Key SPRINTING_MODIFIER_ID = Key.key("sprinting");
   private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
     SPRINTING_MODIFIER_ID, 0.3F, ModifierOperation.ADD_MULTIPLIED_TOTAL
   );
-  protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
-  protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
-  protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
   protected final EntityAttributeState attributeState;
   private final boolean discardFriction = false;
   public float xxa;

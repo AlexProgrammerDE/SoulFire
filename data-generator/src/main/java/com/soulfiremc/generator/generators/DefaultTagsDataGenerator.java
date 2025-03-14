@@ -38,6 +38,18 @@ import java.util.zip.GZIPOutputStream;
 
 @Slf4j
 public final class DefaultTagsDataGenerator implements IDataGenerator {
+  private static JsonObject toSorted(JsonObject obj) {
+    var sorted = new LinkedHashMap<String, JsonElement>();
+    obj.entrySet().stream()
+      .sorted(Map.Entry.comparingByKey())
+      .forEachOrdered(e -> sorted.put(e.getKey(), e.getValue()));
+
+    var result = new JsonObject();
+    sorted.forEach(result::add);
+
+    return result;
+  }
+
   @Override
   public String getDataName() {
     return "data/default_tags.json.zip";
@@ -84,17 +96,5 @@ public final class DefaultTagsDataGenerator implements IDataGenerator {
     }
 
     return byteOutputStream.toByteArray();
-  }
-
-  private static JsonObject toSorted(JsonObject obj) {
-    var sorted = new LinkedHashMap<String, JsonElement>();
-    obj.entrySet().stream()
-      .sorted(Map.Entry.comparingByKey())
-      .forEachOrdered(e -> sorted.put(e.getKey(), e.getValue()));
-
-    var result = new JsonObject();
-    sorted.forEach(result::add);
-
-    return result;
   }
 }

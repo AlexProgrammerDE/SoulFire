@@ -59,6 +59,7 @@ import java.util.Objects;
 public final class LocalPlayer extends AbstractClientPlayer {
   private final BotConnection connection;
   private final InputState input;
+  private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
   private int sprintTriggerTime;
   private int permissionLevel;
   private double lastX = 0;
@@ -80,7 +81,6 @@ public final class LocalPlayer extends AbstractClientPlayer {
   private boolean flashOnSetHealth;
   @Nullable
   private InteractionHand usingItemHand;
-  private final Map<EquipmentSlot, SFItemStack> lastInEquipment = new EnumMap<>(EquipmentSlot.class);
 
   public LocalPlayer(BotConnection connection, Level level, GameProfile gameProfile) {
     this(connection, level, gameProfile, false, false);

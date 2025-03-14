@@ -36,22 +36,6 @@ public final class Shulker extends Mob {
     super(entityType, level);
   }
 
-  @Override
-  public boolean canBeCollidedWith() {
-    return this.isAlive();
-  }
-
-  @Override
-  public void push(Entity entity) {
-  }
-
-  @Override
-  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
-    this.lerpSteps = 0;
-    this.setPos(x, y, z);
-    this.setRot(yRot, xRot);
-  }
-
   private static float getPhysicalPeek(float peek) {
     return 0.5F - MathHelper.sin((0.5F + peek) * (float) Math.PI) * 0.5F;
   }
@@ -75,6 +59,22 @@ public final class Shulker extends Mob {
         (double) (-expansionDirection.getStepZ()) * (1.0 + minPeek) * (double) scale
       );
     return newBB.move(position.getX(), position.getY(), position.getZ());
+  }
+
+  @Override
+  public boolean canBeCollidedWith() {
+    return this.isAlive();
+  }
+
+  @Override
+  public void push(Entity entity) {
+  }
+
+  @Override
+  public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+    this.lerpSteps = 0;
+    this.setPos(x, y, z);
+    this.setRot(yRot, xRot);
   }
 
   @Override

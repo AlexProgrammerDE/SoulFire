@@ -54,6 +54,6 @@ tasks {
     }
   }
   withType<RemapJarTask> {
-    onlyIf { false}
+    onlyIf { false }
   }
 }

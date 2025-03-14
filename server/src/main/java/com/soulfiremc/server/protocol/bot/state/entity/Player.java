@@ -72,19 +72,19 @@ public abstract class Player extends LivingEntity {
   public static final int CLIENT_LOADED_TIMEOUT_TIME = 60;
   protected final GameProfile gameProfile;
   protected final float defaultFlySpeed = 0.02F;
+  protected final FoodData foodData = new FoodData();
   @Getter
   final PlayerInventory inventory = new PlayerInventory();
-  public PlayerInventoryMenu inventoryMenu = new PlayerInventoryMenu(this, inventory);
   @Getter
   private final AbilitiesState abilitiesState = new AbilitiesState();
   @Getter
   private final Object2IntMap<Key> itemCoolDowns = Object2IntMaps.synchronize(new Object2IntOpenHashMap<>());
+  public PlayerInventoryMenu inventoryMenu = new PlayerInventoryMenu(this, inventory);
   @NonNull
   public ViewableContainer currentContainer = inventoryMenu;
   public int experienceLevel;
   public int totalExperience;
   public float experienceProgress;
-  protected final FoodData foodData = new FoodData();
   protected boolean wasUnderwater = false;
   protected int clientLoadedTimeoutTimer = CLIENT_LOADED_TIMEOUT_TIME;
   protected int autoSpinAttackTicks;

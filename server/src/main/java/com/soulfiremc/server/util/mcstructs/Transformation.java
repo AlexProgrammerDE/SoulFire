@@ -66,7 +66,7 @@ public final class Transformation {
   }
 
   private static Matrix4f compose(
-      @Nullable Vector3f translation, @Nullable Quaternionf leftRotation, @Nullable Vector3f scale, @Nullable Quaternionf rightRotation
+    @Nullable Vector3f translation, @Nullable Quaternionf leftRotation, @Nullable Vector3f scale, @Nullable Quaternionf rightRotation
   ) {
     var matrix4f = new Matrix4f();
     if (translation != null) {

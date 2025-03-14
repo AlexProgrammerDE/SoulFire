@@ -51,18 +51,6 @@ public class PlayerInventoryMenu extends ViewableContainer {
     }
   }
 
-  public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {
-    return switch (slot) {
-      case MAINHAND -> getSelectedSlot();
-      case OFFHAND -> offhand;
-      case FEET -> armor[3];
-      case LEGS -> armor[2];
-      case CHEST -> armor[1];
-      case HEAD -> armor[0];
-      case BODY -> throw new IllegalArgumentException("Cannot get body slot on player");
-    };
-  }
-
   public static boolean isHotbarSlot(ContainerSlot slot) {
     return slot.slot() >= 36 && slot.slot() < 45;
   }
@@ -73,6 +61,18 @@ public class PlayerInventoryMenu extends ViewableContainer {
 
   public static int toHotbarIndex(ContainerSlot slot) {
     return slot.slot() - HOTBAR_START;
+  }
+
+  public ContainerSlot getEquipmentSlot(EquipmentSlot slot) {
+    return switch (slot) {
+      case MAINHAND -> getSelectedSlot();
+      case OFFHAND -> offhand;
+      case FEET -> armor[3];
+      case LEGS -> armor[2];
+      case CHEST -> armor[1];
+      case HEAD -> armor[0];
+      case BODY -> throw new IllegalArgumentException("Cannot get body slot on player");
+    };
   }
 
   public ContainerSlot getSelectedSlot() {

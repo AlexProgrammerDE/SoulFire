@@ -64,17 +64,6 @@ public final class SFItemStack {
     return new SFItemStack(itemStack);
   }
 
-  @Nullable
-  public Entity getEntityRepresentation() {
-    return !this.isEmpty() ? this.entityRepresentation : null;
-  }
-
-  public void setEntityRepresentation(@Nullable Entity entity) {
-    if (!this.isEmpty()) {
-      this.entityRepresentation = entity;
-    }
-  }
-
   public static boolean isSameItem(SFItemStack stack, SFItemStack other) {
     return stack.type == other.type;
   }
@@ -95,6 +84,17 @@ public final class SFItemStack {
   @VisibleForTesting
   public static SFItemStack forTypeWithAmount(ItemType itemType, int amount) {
     return new SFItemStack(itemType, amount);
+  }
+
+  @Nullable
+  public Entity getEntityRepresentation() {
+    return !this.isEmpty() ? this.entityRepresentation : null;
+  }
+
+  public void setEntityRepresentation(@Nullable Entity entity) {
+    if (!this.isEmpty()) {
+      this.entityRepresentation = entity;
+    }
   }
 
   public @Nullable ItemStack toMCPL() {

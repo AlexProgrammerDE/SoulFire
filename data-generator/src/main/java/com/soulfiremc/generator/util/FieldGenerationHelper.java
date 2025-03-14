@@ -53,12 +53,12 @@ public final class FieldGenerationHelper {
     return list.stream();
   }
 
-  public record FieldNameValuePair<T>(String name, T value) {
-  }
-
   public static String toSnakeCase(String camelCase) {
     return camelCase
       .replaceAll("([a-z])([A-Z]+)", "$1_$2")
       .toUpperCase(Locale.ROOT);
+  }
+
+  public record FieldNameValuePair<T>(String name, T value) {
   }
 }

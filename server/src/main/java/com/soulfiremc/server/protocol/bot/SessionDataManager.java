@@ -107,11 +107,11 @@ import java.util.stream.Collectors;
 @Getter
 @ToString
 public final class SessionDataManager {
+  private static final ReferenceCache<ServerPlayData> SERVER_PLAY_DATA_CACHE = new ReferenceCache<>();
+  private static final ReferenceCache<ClientboundCommandsPacket> COMMANDS_DATA_CACHE = new ReferenceCache<>();
   private final InstanceSettingsSource settingsSource;
   private final Logger log;
   private final BotConnection connection;
-  private static final ReferenceCache<ServerPlayData> SERVER_PLAY_DATA_CACHE = new ReferenceCache<>();
-  private static final ReferenceCache<ClientboundCommandsPacket> COMMANDS_DATA_CACHE = new ReferenceCache<>();
   private final PlayerListState playerListState = new PlayerListState();
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
   private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
@@ -119,7 +119,6 @@ public final class SessionDataManager {
   private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final TagsState tagsState = new TagsState();
-  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private MultiPlayerGameMode gameModeState;
   private Key[] serverEnabledFeatures;
   private List<KnownPack> serverKnownPacks;
@@ -130,6 +129,7 @@ public final class SessionDataManager {
   private GameProfile botProfile;
   @Getter(value = AccessLevel.PRIVATE)
   private Level level;
+  private final TickTimer tickTimer = new TickTimer(20.0F, 0L, this::getTickTargetMillis);
   private Key[] levelNames;
   private int maxPlayers = 20;
   private int serverChunkRadius = 3;

@@ -66,15 +66,15 @@ import java.util.stream.Stream;
 @Slf4j
 @Getter
 public class Entity {
+  protected static final int FLAG_ONFIRE = 0;
+  protected static final int FLAG_GLOWING = 6;
+  protected static final int FLAG_FALL_FLYING = 7;
   private static final IDMap<EntityType, List<EntityMetadata<?, ?>>> DEFAULT_ENTITY_METADATA = new IDMap<>(EntityType.REGISTRY.values(), entityType -> {
     var bytes = Base64.getDecoder().decode(entityType.defaultEntityMetadata());
     var buf = Unpooled.wrappedBuffer(bytes);
     MinecraftTypes.readVarInt(buf);
     return List.of(MinecraftTypes.readEntityMetadata(buf));
   });
-  protected static final int FLAG_ONFIRE = 0;
-  protected static final int FLAG_GLOWING = 6;
-  protected static final int FLAG_FALL_FLYING = 7;
   private static final int FLAG_SHIFT_KEY_DOWN = 1;
   private static final int FLAG_SPRINTING = 3;
   private static final int FLAG_SWIMMING = 4;
@@ -103,6 +103,8 @@ public class Entity {
   public float xRotO;
   public boolean noPhysics;
   public boolean hasImpulse;
+  public int tickCount;
+  public boolean blocksBuilding;
   protected Object2DoubleMap<TagKey<FluidType>> fluidHeight = new Object2DoubleArrayMap<>(2);
   protected float fallDistance;
   @Setter
@@ -138,8 +140,6 @@ public class Entity {
   private float eyeHeight;
   private AABB bb = INITIAL_AABB;
   private int portalCooldown;
-  public int tickCount;
-  public boolean blocksBuilding;
   @Nullable
   private Entity vehicle;
 

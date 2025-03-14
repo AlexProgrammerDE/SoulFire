@@ -151,6 +151,11 @@ public final class EntitiesJsonGenerator implements IDataGenerator {
     return entityDesc;
   }
 
+  @SuppressWarnings("unchecked")
+  private static <T> SynchedEntityData.DataValue<T> createCasted(EntityDataAccessor<T> accessor, Object value) {
+    return SynchedEntityData.DataValue.create(accessor, (T) value);
+  }
+
   @Override
   public String getDataName() {
     return "data/entities.json";
@@ -161,10 +166,5 @@ public final class EntitiesJsonGenerator implements IDataGenerator {
     var resultArray = new JsonArray();
     BuiltInRegistries.ENTITY_TYPE.forEach(entity -> resultArray.add(generateEntity(entity)));
     return resultArray;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> SynchedEntityData.DataValue<T> createCasted(EntityDataAccessor<T> accessor, Object value) {
-    return SynchedEntityData.DataValue.create(accessor, (T) value);
   }
 }
