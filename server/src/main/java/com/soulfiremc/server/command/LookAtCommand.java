@@ -19,7 +19,7 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.command.brigadier.DynamicXYZArgumentType;
+import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.RotationOrigin;
 
@@ -29,23 +29,27 @@ public final class LookAtCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("lookat")
-        .then(argument("xyz", new DynamicXYZArgumentType())
-          .executes(
-            help(
-              "Makes selected bots look at the block at the xyz coordinates",
-              c -> {
-                var xyz = c.getArgument("xyz", DynamicXYZArgumentType.XYZLocationMapper.class);
+        .then(argument("x", DoubleAxisArgumentType.INSTANCE)
+          .then(argument("y", DoubleAxisArgumentType.INSTANCE)
+            .then(argument("z", DoubleAxisArgumentType.INSTANCE)
+              .executes(
+                help(
+                  "Makes selected bots look at the block at the xyz coordinates",
+                  c -> {
+                    var x = DoubleAxisArgumentType.getDoubleAxisData(c, "x");
+                    var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
+                    var z = DoubleAxisArgumentType.getDoubleAxisData(c, "z");
 
-                return forEveryBot(
-                  c,
-                  bot -> {
-                    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> bot.dataManager()
-                      .localPlayer()
-                      .lookAt(
-                        RotationOrigin.EYES,
-                        xyz.getAbsoluteLocation(bot.dataManager().localPlayer().pos()))));
-                    return Command.SINGLE_SUCCESS;
-                  });
-              }))));
+                    return forEveryBot(
+                      c,
+                      bot -> {
+                        bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> bot.dataManager()
+                          .localPlayer()
+                          .lookAt(
+                            RotationOrigin.EYES,
+                            DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.dataManager().localPlayer().pos()))));
+                        return Command.SINGLE_SUCCESS;
+                      });
+                  }))))));
   }
 }

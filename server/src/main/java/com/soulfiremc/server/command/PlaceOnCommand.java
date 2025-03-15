@@ -19,7 +19,7 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.command.brigadier.DynamicXYZArgumentType;
+import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
 import com.soulfiremc.server.command.brigadier.EnumArgumentType;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
@@ -31,23 +31,31 @@ public final class PlaceOnCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("placeon")
-        .then(argument("block", new DynamicXYZArgumentType())
-          .then(
-            argument("face", new EnumArgumentType<>(BlockFace.class))
-              .executes(
-                help(
-                  "Makes selected bots place a block on the specified face of a block",
-                  c -> {
-                    var block = c.getArgument("block", DynamicXYZArgumentType.XYZLocationMapper.class);
-                    var face = c.getArgument("face", BlockFace.class);
+        .then(argument("blockX", DoubleAxisArgumentType.INSTANCE)
+          .then(argument("blockY", DoubleAxisArgumentType.INSTANCE)
+            .then(argument("blockZ", DoubleAxisArgumentType.INSTANCE)
+              .then(
+                argument("face", new EnumArgumentType<>(BlockFace.class))
+                  .executes(
+                    help(
+                      "Makes selected bots place a block on the specified face of a block",
+                      c -> {
+                        var blockX = DoubleAxisArgumentType.getDoubleAxisData(c, "blockX");
+                        var blockY = DoubleAxisArgumentType.getDoubleAxisData(c, "blockY");
+                        var blockZ = DoubleAxisArgumentType.getDoubleAxisData(c, "blockZ");
+                        var face = c.getArgument("face", BlockFace.class);
 
-                    return forEveryBot(
-                      c,
-                      bot -> {
-                        bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-                          bot.dataManager().gameModeState().placeBlock(Hand.MAIN_HAND, block.getAbsoluteLocation(bot.dataManager().localPlayer().pos()).toInt(), face)));
-                        return Command.SINGLE_SUCCESS;
-                      });
-                  })))));
+                        return forEveryBot(
+                          c,
+                          bot -> {
+                            bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+                              bot.dataManager().gameModeState().placeBlock(
+                                Hand.MAIN_HAND,
+                                DoubleAxisArgumentType.forXYZAxis(blockX, blockY, blockZ, bot.dataManager().localPlayer().pos()).toInt(),
+                                face
+                              )));
+                            return Command.SINGLE_SUCCESS;
+                          });
+                      })))))));
   }
 }

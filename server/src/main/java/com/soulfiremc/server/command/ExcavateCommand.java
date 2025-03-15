@@ -20,7 +20,7 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.soulfiremc.server.command.brigadier.DynamicXYZArgumentType;
+import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
 
@@ -31,50 +31,66 @@ public final class ExcavateCommand {
     dispatcher.register(
       literal("excavate")
         .then(literal("rectangle")
-          .then(argument("from", new DynamicXYZArgumentType())
-            .then(argument("to", new DynamicXYZArgumentType())
-              .executes(
-                help(
-                  "Makes selected bots dig a rectangle from the from to the to coordinates",
-                  c -> {
-                    var from = c.getArgument("from", DynamicXYZArgumentType.XYZLocationMapper.class);
-                    var to = c.getArgument("to", DynamicXYZArgumentType.XYZLocationMapper.class);
+          .then(argument("fromX", DoubleAxisArgumentType.INSTANCE)
+            .then(argument("fromY", DoubleAxisArgumentType.INSTANCE)
+              .then(argument("fromZ", DoubleAxisArgumentType.INSTANCE)
+                .then(argument("toX", DoubleAxisArgumentType.INSTANCE)
+                  .then(argument("toY", DoubleAxisArgumentType.INSTANCE)
+                    .then(argument("toZ", DoubleAxisArgumentType.INSTANCE)
+                      .executes(
+                        help(
+                          "Makes selected bots dig a rectangle from the from to the to coordinates",
+                          c -> {
+                            var fromX = DoubleAxisArgumentType.getDoubleAxisData(c, "fromX");
+                            var fromY = DoubleAxisArgumentType.getDoubleAxisData(c, "fromY");
+                            var fromZ = DoubleAxisArgumentType.getDoubleAxisData(c, "fromZ");
+                            var toX = DoubleAxisArgumentType.getDoubleAxisData(c, "toX");
+                            var toY = DoubleAxisArgumentType.getDoubleAxisData(c, "toY");
+                            var toZ = DoubleAxisArgumentType.getDoubleAxisData(c, "toZ");
 
-                    return forEveryBot(
-                      c,
-                      bot -> {
-                        var dataManager = bot.dataManager();
-                        bot.scheduler().schedule(() -> new ExcavateAreaController(
-                          ExcavateAreaController.getRectangleFromTo(
-                            SFVec3i.fromDouble(from.getAbsoluteLocation(dataManager.localPlayer().pos())),
-                            SFVec3i.fromDouble(to.getAbsoluteLocation(dataManager.localPlayer().pos()))
-                          )
-                        ).start(bot));
+                            return forEveryBot(
+                              c,
+                              bot -> {
+                                var dataManager = bot.dataManager();
+                                bot.scheduler().schedule(() -> new ExcavateAreaController(
+                                  ExcavateAreaController.getRectangleFromTo(
+                                    SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(fromX, fromY, fromZ, dataManager.localPlayer().pos())),
+                                    SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(toX, toY, toZ, dataManager.localPlayer().pos()))
+                                  )
+                                ).start(bot));
 
-                        return Command.SINGLE_SUCCESS;
-                      });
-                  })))))
+                                return Command.SINGLE_SUCCESS;
+                              });
+                          })))))))))
         .then(literal("sphere")
-          .then(argument("position", new DynamicXYZArgumentType())
-            .then(argument("radius", IntegerArgumentType.integer(1))
-              .executes(
-                help(
-                  "Makes selected bots dig a sphere with the given radius",
-                  c -> {
-                    var position = c.getArgument("position", DynamicXYZArgumentType.XYZLocationMapper.class);
-                    var radius = IntegerArgumentType.getInteger(c, "radius");
+          .then(argument("x", DoubleAxisArgumentType.INSTANCE)
+            .then(argument("y", DoubleAxisArgumentType.INSTANCE)
+              .then(argument("z", DoubleAxisArgumentType.INSTANCE)
+                .then(argument("radius", IntegerArgumentType.integer(1))
+                  .executes(
+                    help(
+                      "Makes selected bots dig a sphere with the given radius",
+                      c -> {
+                        var x = DoubleAxisArgumentType.getDoubleAxisData(c, "x");
+                        var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
+                        var z = DoubleAxisArgumentType.getDoubleAxisData(c, "z");
 
-                    return forEveryBot(
-                      c,
-                      bot -> {
-                        var dataManager = bot.dataManager();
+                        var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                        bot.scheduler().schedule(() -> new ExcavateAreaController(
-                          ExcavateAreaController.getSphereRadius(SFVec3i.fromDouble(position.getAbsoluteLocation(dataManager.localPlayer().pos())), radius)
-                        ).start(bot));
+                        return forEveryBot(
+                          c,
+                          bot -> {
+                            var dataManager = bot.dataManager();
 
-                        return Command.SINGLE_SUCCESS;
-                      });
-                  }))))));
+                            bot.scheduler().schedule(() -> new ExcavateAreaController(
+                              ExcavateAreaController.getSphereRadius(
+                                SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(x, y, z, dataManager.localPlayer().pos())),
+                                radius
+                              )
+                            ).start(bot));
+
+                            return Command.SINGLE_SUCCESS;
+                          });
+                      }))))))));
   }
 }

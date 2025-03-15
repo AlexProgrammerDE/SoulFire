@@ -17,10 +17,6 @@
  */
 package com.soulfiremc.server.command.brigadier;
 
-import com.mojang.brigadier.LiteralMessage;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.UUIDHelper;
@@ -29,28 +25,6 @@ import java.util.function.Predicate;
 
 public final class ArgumentTypeHelper {
   private ArgumentTypeHelper() {
-  }
-
-  public static void mustReadSpace(StringReader reader) throws CommandSyntaxException {
-    if (!reader.canRead() || reader.peek() != ' ') {
-      throw new SimpleCommandExceptionType(new LiteralMessage("Expected space")).createWithContext(reader);
-    }
-
-    reader.skip();
-  }
-
-  public static DoubleAxisData readAxis(StringReader reader) throws CommandSyntaxException {
-    if (reader.canRead() && reader.peek() == '~') {
-      reader.skip();
-      double value = 0;
-      if (reader.canRead() && reader.peek() != ' ') {
-        value = reader.readDouble();
-      }
-
-      return new DoubleAxisData(true, value);
-    }
-
-    return new DoubleAxisData(false, reader.readDouble());
   }
 
   public static Predicate<Entity> parseEntityMatch(BotConnection bot, String input) {
@@ -68,8 +42,5 @@ public final class ArgumentTypeHelper {
       var gameProfile = entityProfile.get().getProfile();
       return gameProfile != null && gameProfile.getName().equalsIgnoreCase(input);
     };
-  }
-
-  public record DoubleAxisData(boolean relative, double value) {
   }
 }
