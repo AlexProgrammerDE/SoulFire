@@ -172,7 +172,7 @@ public final class POVServer extends InternalPlugin {
   }
 
   private static void startPOVServer(InstanceSettingsSource settingsSource, int port, InstanceManager instanceManager) {
-    var server = new ViaServer(new InetSocketAddress(port), MinecraftProtocol::new);
+    var server = new ViaServer(new InetSocketAddress(port), MinecraftProtocol::new, instanceManager);
 
     server.setGlobalFlag(MinecraftConstants.SHOULD_AUTHENTICATE, false);
     server.setGlobalFlag(MinecraftConstants.SERVER_INFO_BUILDER_KEY, new POVServerInfoHandler(

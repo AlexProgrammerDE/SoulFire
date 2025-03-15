@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol.netty;
 
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.protocol.SFProtocolConstants;
 import com.soulfiremc.server.viaversion.SFVLPipeline;
 import com.soulfiremc.server.viaversion.StorableSession;
@@ -25,30 +26,26 @@ import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.mcprotocollib.network.NetworkConstants;
+import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import org.geysermc.mcprotocollib.network.netty.AutoReadFlowControlHandler;
-import org.geysermc.mcprotocollib.network.netty.DefaultPacketHandlerExecutor;
 import org.geysermc.mcprotocollib.network.netty.MinecraftChannelInitializer;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.network.session.ServerNetworkSession;
 
 import java.net.SocketAddress;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public final class ViaServer extends NetworkServer {
-  private final Supplier<Executor> packetTickQueue;
+  private final InstanceManager instanceManager;
 
-  public ViaServer(SocketAddress bindAddress, Supplier<? extends PacketProtocol> protocol) {
-    this(bindAddress, protocol, DefaultPacketHandlerExecutor::createExecutor);
-  }
-
-  public ViaServer(SocketAddress bindAddress, Supplier<? extends PacketProtocol> protocol, Supplier<Executor> packetTickQueue) {
-    super(bindAddress, protocol, packetTickQueue);
-    this.packetTickQueue = packetTickQueue;
+  public ViaServer(SocketAddress bindAddress, Supplier<? extends PacketProtocol> protocol, InstanceManager instanceManager) {
+    super(bindAddress, protocol, () -> instanceManager.scheduler()::schedule);
+    this.instanceManager = instanceManager;
   }
 
   @Override
@@ -56,7 +53,7 @@ public final class ViaServer extends NetworkServer {
     return new MinecraftChannelInitializer<>((channel) -> {
       var protocol = this.createPacketProtocol();
 
-      var session = new ServerNetworkSession(channel.remoteAddress(), protocol, ViaServer.this, packetTickQueue.get());
+      var session = new ServerNetworkSession(channel.remoteAddress(), protocol, ViaServer.this, instanceManager.scheduler()::schedule);
       session.getPacketProtocol().newServerSession(ViaServer.this, session);
 
       return session;
@@ -83,5 +80,17 @@ public final class ViaServer extends NetworkServer {
         pipeline.addBefore(VLPipeline.VIA_CODEC_NAME, "via-" + NetworkConstants.FLOW_CONTROL_NAME, new AutoReadFlowControlHandler());
       }
     };
+  }
+
+  @Override
+  protected EventLoopGroup createBossEventLoopGroup() {
+    return TransportHelper.TRANSPORT_TYPE.eventLoopGroupFactory().apply(
+      r -> Thread.ofPlatform().unstarted(instanceManager.runnableWrapper().wrap(r)));
+  }
+
+  @Override
+  protected EventLoopGroup createWorkerEventLoopGroup() {
+    return TransportHelper.TRANSPORT_TYPE.eventLoopGroupFactory().apply(
+      r -> Thread.ofPlatform().unstarted(instanceManager.runnableWrapper().wrap(r)));
   }
 }
