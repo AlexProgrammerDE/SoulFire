@@ -33,9 +33,14 @@ public final class CachedLazyObject<V> implements Supplier<V> {
 
   @Override
   public V get() {
-    if (value == null || System.currentTimeMillis() >= invalidAt) {
-      value = supplier.get();
-      invalidAt = System.currentTimeMillis() + cacheDuration;
+    var now = System.currentTimeMillis();
+    if (value == null || now >= invalidAt) {
+      synchronized (this) {
+        if (value == null || now >= invalidAt) {
+          value = supplier.get();
+          invalidAt = now + cacheDuration;
+        }
+      }
     }
     return value;
   }
