@@ -220,7 +220,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
         }
 
-        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instance", InstanceAuditLogEntity.class)
+        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instance ORDER BY createdAt DESC", InstanceAuditLogEntity.class)
           .setParameter("instance", instanceEntity)
           .list();
       });
