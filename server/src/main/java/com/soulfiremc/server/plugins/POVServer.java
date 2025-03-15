@@ -628,7 +628,7 @@ public final class POVServer extends InternalPlugin {
       return;
     }
 
-    log.info("Stopping POV server for attack {}", instanceManager.id());
+    log.info("Stopping POV server for instance {}", instanceManager.friendlyNameCache().get());
     currentInstance.close();
   }
 
@@ -776,7 +776,7 @@ public final class POVServer extends InternalPlugin {
     @Override
     public void serverBound(ServerBoundEvent event) {
       var server = event.getServer();
-      log.info("Started POV server on 0.0.0.0:{} for attack {}", port, instanceManager.id());
+      log.info("Started POV server on 0.0.0.0:{} for instance {}", port, instanceManager.friendlyNameCache().get());
 
       instanceManager.metadata().set(TCP_SERVER, server);
     }
