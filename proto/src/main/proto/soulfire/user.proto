@@ -56,10 +56,21 @@ message InvalidateSessionsRequest {
 message InvalidateSessionsResponse {
 }
 
+message UpdateUserRequest {
+  string id = 1;
+  string username = 2;
+  UserRole role = 3;
+  string email = 4;
+}
+
+message UpdateUserResponse {
+}
+
 service UserService {
   rpc createUser(UserCreateRequest) returns (UserCreateResponse);
   rpc deleteUser(UserDeleteRequest) returns (UserDeleteResponse);
   rpc listUsers(UserListRequest) returns (UserListResponse);
   rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
   rpc invalidateSessions(InvalidateSessionsRequest) returns (InvalidateSessionsResponse);
+  rpc updateUser(UpdateUserRequest) returns (UpdateUserResponse);
 }

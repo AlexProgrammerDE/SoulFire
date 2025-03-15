@@ -47,7 +47,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         userEntity.role(switch (request.getRole()) {
           case ADMIN -> UserEntity.Role.ADMIN;
           case USER -> UserEntity.Role.USER;
-          default -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
+          case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
         });
 
         session.persist(userEntity);
@@ -156,6 +156,36 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting user info", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateUser(UpdateUserRequest request, StreamObserver<UpdateUserResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_USER));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var user = session.find(UserEntity.class, request.getId());
+        if (user == null) {
+          throw new IllegalArgumentException("User not found: " + request.getId());
+        }
+
+        user.username(request.getUsername());
+        user.email(request.getEmail());
+        user.role(switch (request.getRole()) {
+          case ADMIN -> UserEntity.Role.ADMIN;
+          case USER -> UserEntity.Role.USER;
+          case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
+        });
+
+        session.merge(user);
+      });
+
+      responseObserver.onNext(UpdateUserResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating user", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
