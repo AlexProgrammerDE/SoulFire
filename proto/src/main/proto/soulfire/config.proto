@@ -128,6 +128,12 @@ message ServerPlugin {
   string website = 6;
 }
 
+message ServerInfo {
+  string version = 1;
+  string commit_hash = 2;
+  string branch_name = 3;
+}
+
 message ClientDataResponse {
   string id = 6;
   string username = 1;
@@ -137,6 +143,7 @@ message ClientDataResponse {
   repeated ServerPlugin plugins = 3;
   repeated SettingsPage server_settings = 9;
   repeated SettingsPage instance_settings = 10;
+  ServerInfo server_info = 11;
 }
 
 service ConfigService {

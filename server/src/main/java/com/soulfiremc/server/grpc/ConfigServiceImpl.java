@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
@@ -75,6 +76,11 @@ public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImpl
           .addAllPlugins(getPlugins())
           .addAllServerSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
           .addAllInstanceSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
+          .setServerInfo(ServerInfo.newBuilder()
+            .setVersion(BuildData.VERSION)
+            .setCommitHash(BuildData.COMMIT_HASH)
+            .setBranchName(BuildData.BRANCH_NAME)
+            .build())
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

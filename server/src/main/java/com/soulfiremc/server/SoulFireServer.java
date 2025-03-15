@@ -116,7 +116,7 @@ public final class SoulFireServer {
     PluginManager pluginManager,
     Instant startTime,
     Path baseDirectory) {
-    log.info("Starting SoulFire v{}...", BuildData.VERSION);
+    log.info("Starting SoulFire v{} ({} @ {})", BuildData.VERSION, BuildData.BRANCH_NAME, BuildData.COMMIT_HASH.substring(0, 6));
 
     this.pluginManager = pluginManager;
     this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
