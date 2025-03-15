@@ -25,18 +25,53 @@ import org.hibernate.cfg.Configuration;
 import java.nio.file.Path;
 
 public final class DatabaseManager {
-  public static SessionFactory forSqlite(Path dbFile) {
+  public static SessionFactory select(Path baseDirectory) {
+    return switch (System.getProperty("database", "sqlite")) {
+      case "sqlite" -> forSqlite(baseDirectory.resolve("soulfire.sqlite"));
+      case "mysql" -> forMysql();
+      default -> throw new IllegalArgumentException("Invalid database type");
+    };
+  }
+
+  private static SessionFactory forSqlite(Path dbFile) {
     try {
       var configuration = new Configuration();
 
-      configuration.setProperty("hibernate.dialect", "org.hibernate.community.dialect.SQLiteDialect");
-      configuration.setProperty("hibernate.connection.driver_class", "org.sqlite.JDBC");
-      configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:" + dbFile);
+      configuration.setProperty("hibernate.dialect", org.hibernate.community.dialect.SQLiteDialect.class);
+      configuration.setProperty("hibernate.connection.driver_class", org.sqlite.JDBC.class);
+      configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:%s".formatted(dbFile));
       configuration.setProperty("hibernate.connection.pool_size", 1);
       // configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");
       configuration.setProperty("hibernate.hikari.minimumIdle", 1);
       configuration.setProperty("hibernate.hikari.maximumPoolSize", 1);
+      configuration.setProperty("hibernate.hikari.idleTimeout", 0);
+      configuration.setProperty("hibernate.hikari.connectionTimeout", 30_000);
+
+      return fromConfiguration(configuration);
+    } catch (Throwable ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  private static SessionFactory forMysql() {
+    try {
+      var configuration = new Configuration();
+
+      configuration.setProperty("hibernate.dialect", org.hibernate.dialect.MariaDBDialect.class);
+      configuration.setProperty("hibernate.connection.driver_class", org.mariadb.jdbc.Driver.class);
+      configuration.setProperty("hibernate.connection.url", "jdbc:mysql://%s:%s/%s".formatted(
+        System.getProperty("mysql.host", "localhost"),
+        Integer.getInteger("mysql.port", 3306),
+        System.getProperty("mysql.database", "soulfire")
+      ));
+      configuration.setProperty("hibernate.connection.username", System.getProperty("mysql.user"));
+      configuration.setProperty("hibernate.connection.password", System.getProperty("mysql.password"));
+      configuration.setProperty("hibernate.connection.pool_size", Integer.getInteger("mysql.pool_size", 10));
+      // configuration.setProperty("hibernate.show_sql", true);
+      configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+      configuration.setProperty("hibernate.hikari.minimumIdle", Integer.getInteger("mysql.minimumIdle", 1));
+      configuration.setProperty("hibernate.hikari.maximumPoolSize", Integer.getInteger("mysql.maximumPoolSize", 10));
       configuration.setProperty("hibernate.hikari.idleTimeout", 0);
       configuration.setProperty("hibernate.hikari.connectionTimeout", 30_000);
 

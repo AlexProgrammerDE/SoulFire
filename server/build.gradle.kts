@@ -90,6 +90,7 @@ dependencies {
   api(libs.bundles.hibernate)
   api(libs.hikaricp)
   api(libs.sqlite)
+  api(libs.mariadb)
 
   // For script support
   api(libs.bundles.graalvm.polyglot)

@@ -125,7 +125,7 @@ public final class SoulFireServer {
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
-    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.forSqlite(baseDirectory.resolve("soulfire.sqlite")));
+    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.select(baseDirectory));
     var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
