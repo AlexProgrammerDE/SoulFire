@@ -155,7 +155,7 @@ public final class RPCServer {
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
         .serviceUnder("/docs", DocService.builder()
-          .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "bearer <jwt>"))
+          .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
         .build();
     if (Boolean.getBoolean("sf.prometheus.enabled")) {
