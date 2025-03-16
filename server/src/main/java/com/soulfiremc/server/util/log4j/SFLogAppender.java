@@ -51,9 +51,9 @@ public final class SFLogAppender extends AbstractAppender {
   public static final SFLogAppender INSTANCE = new SFLogAppender();
   private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   private static final LoggerNamePatternSelector SELECTOR = LoggerNamePatternSelector.createSelector(
-    "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info_bot_only} [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
+    "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[]{
-      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info_bot_only} [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
+      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
     },
     true,
     false,

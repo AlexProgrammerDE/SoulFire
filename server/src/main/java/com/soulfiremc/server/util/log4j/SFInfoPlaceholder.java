@@ -23,6 +23,7 @@ import org.apache.logging.log4j.core.lookup.StrLookup;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Plugin(name = "soulfire", category = StrLookup.CATEGORY)
@@ -38,7 +39,7 @@ public class SFInfoPlaceholder implements StrLookup {
       var builder = new StringBuilder();
 
       var contextData = event.getContextData();
-      var usedData = new HashMap<>();
+      var usedData = new HashMap<String, String>();
       if (contextData.containsKey(SFLogAppender.SF_INSTANCE_NAME)) {
         usedData.put("instance", contextData.getValue(SFLogAppender.SF_INSTANCE_NAME));
       }
@@ -47,35 +48,13 @@ public class SFInfoPlaceholder implements StrLookup {
       }
 
       if (!usedData.isEmpty()) {
-        builder.append(" {");
+        builder.append(" [");
         builder.append(usedData
-          .entrySet()
+          .values()
           .stream()
-          .filter(entry -> entry.getValue() != null)
-          .map(entry -> "%s=%s".formatted(entry.getKey(), entry.getValue()))
-          .collect(Collectors.joining(", ")));
-        builder.append("}");
-      }
-
-      return builder.toString();
-    } else if (key.equals("context_info_bot_only")) {
-      var builder = new StringBuilder();
-
-      var contextData = event.getContextData();
-      var usedData = new HashMap<>();
-      if (contextData.containsKey(SFLogAppender.SF_BOT_ACCOUNT_NAME)) {
-        usedData.put("bot", contextData.getValue(SFLogAppender.SF_BOT_ACCOUNT_NAME));
-      }
-
-      if (!usedData.isEmpty()) {
-        builder.append(" {");
-        builder.append(usedData
-          .entrySet()
-          .stream()
-          .filter(entry -> entry.getValue() != null)
-          .map(entry -> "%s=%s".formatted(entry.getKey(), entry.getValue()))
-          .collect(Collectors.joining(", ")));
-        builder.append("}");
+          .filter(Objects::nonNull)
+          .collect(Collectors.joining(": ")));
+        builder.append("]");
       }
 
       return builder.toString();
