@@ -21,6 +21,7 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import org.geysermc.mcprotocollib.auth.SessionService;
@@ -64,6 +65,7 @@ import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+@Slf4j
 @RequiredArgsConstructor
 public final class SFBaseListener extends SessionAdapter {
   private final BotConnection botConnection;
@@ -96,20 +98,17 @@ public final class SFBaseListener extends SessionAdapter {
               throw new IllegalStateException("Failed to generate shared key.", e);
             }
 
-            botConnection.logger().debug("Needs auth: {}", needsAuth);
+            log.debug("Needs auth: {}", needsAuth);
             if (needsAuth) {
               var canDoAuth = botConnection.minecraftAccount().isPremiumJava();
-              botConnection.logger().debug("Can do auth: {}", canDoAuth);
+              log.debug("Can do auth: {}", canDoAuth);
               if (canDoAuth) {
                 var serverId =
                   SessionService.getServerId(
                     helloPacket.getServerId(), helloPacket.getPublicKey(), key);
                 botConnection.joinServerId(serverId);
               } else {
-                botConnection
-                  .logger()
-                  .info(
-                    "Server sent a encryption request, but account is offline mode. Not authenticating with mojang.");
+                log.info("Server sent a encryption request, but account is offline mode. Not authenticating with mojang.");
               }
             }
 
@@ -119,7 +118,7 @@ public final class SFBaseListener extends SessionAdapter {
             if (!isLegacy) {
               session.send(keyPacket, () -> session.setEncryption(encryptionConfig));
             } else {
-              botConnection.logger().debug("Storing legacy secret key.");
+              log.debug("Storing legacy secret key.");
               session.setFlag(SFProtocolConstants.VL_ENCRYPTION_CONFIG, encryptionConfig);
             }
           }

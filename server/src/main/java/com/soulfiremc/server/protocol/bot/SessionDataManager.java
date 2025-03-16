@@ -51,6 +51,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -97,7 +98,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.Serv
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerRotPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginDisconnectPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
-import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -105,6 +105,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 @ToString
 public final class SessionDataManager {
@@ -112,7 +113,6 @@ public final class SessionDataManager {
   private static final ReferenceCache<ClientboundCommandsPacket> COMMANDS_DATA_CACHE = new ReferenceCache<>();
   private static final ReferenceCache<RegistryEntry> REGISTRY_ENTRY_CACHE = new ReferenceCache<>();
   private final InstanceSettingsSource settingsSource;
-  private final Logger log;
   private final BotConnection connection;
   private final PlayerListState playerListState = new PlayerListState();
   private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
@@ -143,7 +143,6 @@ public final class SessionDataManager {
 
   public SessionDataManager(BotConnection connection) {
     this.settingsSource = connection.settingsSource();
-    this.log = connection.logger();
     this.connection = connection;
   }
 

@@ -33,6 +33,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,16 +51,14 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.session.ClientNetworkSession;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
-import org.slf4j.Logger;
 
 import java.net.SocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 public final class ViaClientSession extends ClientNetworkSession {
-  @Getter
-  private final Logger logger;
   @Nullable
   private final SFProxy proxy;
   @Getter
@@ -71,18 +70,16 @@ public final class ViaClientSession extends ClientNetworkSession {
 
   public ViaClientSession(
     SocketAddress targetAddress,
-    Logger logger,
     PacketProtocol protocol,
     @Nullable
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
     BotConnection botConnection) {
-    this(targetAddress, logger, protocol, proxy, eventLoopGroup, botConnection, new ConcurrentLinkedQueue<>());
+    this(targetAddress, protocol, proxy, eventLoopGroup, botConnection, new ConcurrentLinkedQueue<>());
   }
 
   private ViaClientSession(
     SocketAddress targetAddress,
-    Logger logger,
     PacketProtocol protocol,
     @Nullable
     SFProxy proxy,
@@ -90,7 +87,6 @@ public final class ViaClientSession extends ClientNetworkSession {
     BotConnection botConnection,
     Queue<Runnable> packetTickQueue) {
     super(targetAddress, protocol, packetTickQueue::add, null, proxy == null ? null : proxy.toMCPLProxy());
-    this.logger = logger;
     this.proxy = proxy;
     this.eventLoopGroup = eventLoopGroup;
     this.botConnection = botConnection;
@@ -205,13 +201,13 @@ public final class ViaClientSession extends ClientNetworkSession {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
-      logger.debug("Packet was cancelled.", cause);
+      log.debug("Packet was cancelled.", cause);
       return;
     }
 
     super.exceptionCaught(ctx, cause);
 
-    logger.debug("Exception caught in Netty session.", cause);
+    log.debug("Exception caught in Netty session.", cause);
   }
 
   @Override
@@ -240,7 +236,7 @@ public final class ViaClientSession extends ClientNetworkSession {
   public void send(@NonNull Packet packet, @Nullable Runnable onSent) {
     var channel = getChannel();
     if (channel == null || !channel.isActive() || eventLoopGroup.isShutdown()) {
-      logger.debug("Channel is not active, dropping packet {}", packet.getClass().getSimpleName());
+      log.debug("Channel is not active, dropping packet {}", packet.getClass().getSimpleName());
       return;
     }
 
@@ -253,7 +249,7 @@ public final class ViaClientSession extends ClientNetworkSession {
     this.callEvent(sendingEvent);
 
     if (sendingEvent.isCancelled()) {
-      logger.debug("Packet {} was cancelled.", packet.getClass().getSimpleName());
+      log.debug("Packet {} was cancelled.", packet.getClass().getSimpleName());
       return;
     }
 
@@ -277,14 +273,14 @@ public final class ViaClientSession extends ClientNetworkSession {
 
   public void packetExceptionCaught(@Nullable ChannelHandlerContext ctx, Throwable cause, Packet packet) {
     if (PipelineUtil.containsCause(cause, CancelCodecException.class)) {
-      logger.debug("Packet was cancelled.", cause);
+      log.debug("Packet was cancelled.", cause);
       callPacketSent(packet);
       return;
     }
 
     super.exceptionCaught(ctx, cause);
 
-    logger.debug("Exception caught in Netty session.", cause);
+    log.debug("Exception caught in Netty session.", cause);
   }
 
   public void flush() {

@@ -53,6 +53,7 @@ dependencies {
 
   // Log/Console libraries
   api(libs.bundles.log4j)
+  annotationProcessor(libs.bundles.log4j)
   api(libs.jline)
   api(libs.jansi)
   api(libs.bundles.ansi4j)

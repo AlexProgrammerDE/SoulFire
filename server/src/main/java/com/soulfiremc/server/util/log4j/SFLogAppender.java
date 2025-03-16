@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util.structs;
+package com.soulfiremc.server.util.log4j;
 
 import com.soulfiremc.server.util.UUIDHelper;
 import lombok.Getter;
@@ -43,15 +43,17 @@ import java.util.function.Consumer;
 @Getter
 public final class SFLogAppender extends AbstractAppender {
   public static final String SF_INSTANCE_ID = "sf-instance-id";
+  public static final String SF_INSTANCE_NAME = "sf-instance-name";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
+  public static final String SF_BOT_ACCOUNT_NAME = "sf-bot-account-name";
   public static final String SF_SKIP_PUBLISHING = "sf-skip-publishing";
   public static final String SF_SKIP_LOCAL_APPENDERS = "sf-skip-local-appenders";
   public static final SFLogAppender INSTANCE = new SFLogAppender();
   private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   private static final LoggerNamePatternSelector SELECTOR = LoggerNamePatternSelector.createSelector(
-    "%highlight{[%d{HH:mm:ss} %level] [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
+    "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info_bot_only} [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[]{
-      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level] [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
+      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info_bot_only} [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
     },
     true,
     false,

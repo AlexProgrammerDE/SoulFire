@@ -92,7 +92,7 @@ public final class SoulFireServer {
       CURRENT.remove();
     }
   };
-  private final SoulFireScheduler scheduler = new SoulFireScheduler(log, runnableWrapper);
+  private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final ServerSettingsDelegate settingsSource;

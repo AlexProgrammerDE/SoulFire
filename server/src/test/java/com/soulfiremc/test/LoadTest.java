@@ -20,7 +20,7 @@ package com.soulfiremc.test;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.server.util.structs.SFLogAppender;
+import com.soulfiremc.server.util.log4j.SFLogAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pf4j.DefaultPluginManager;

@@ -31,13 +31,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
-import org.slf4j.Logger;
 
 public record BotConnectionFactory(
   InstanceManager instanceManager,
   ResolveUtil.ResolvedAddress resolvedAddress,
   InstanceSettingsSource settingsSource,
-  Logger logger,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
   @Nullable
@@ -58,7 +56,6 @@ public record BotConnectionFactory(
         this,
         instanceManager,
         settingsSource,
-        logger,
         protocol,
         resolvedAddress,
         minecraftAccount,

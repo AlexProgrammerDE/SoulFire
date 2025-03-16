@@ -58,7 +58,6 @@ public final class PathExecutor implements ControllingTask {
   }
 
   public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer, PathConstraint pathConstraint) {
-    var logger = bot.logger();
     var dataManager = bot.dataManager();
     var clientEntity = dataManager.localPlayer();
 
@@ -80,11 +79,11 @@ public final class PathExecutor implements ControllingTask {
         var routeFinder =
           new RouteFinder(new MinecraftGraph(dataManager.tagsState(), level, inventory, pathConstraint), goalScorer);
 
-        logger.info("Starting calculations at: {}", start.formatXYZ());
+        log.info("Starting calculations at: {}", start.formatXYZ());
         var actionsFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory), requiresRepositioning);
         bot.shutdownHooks().add(() -> actionsFuture.cancel(true));
         var actions = actionsFuture.join();
-        logger.info("Calculated path with {} actions: {}", actions.size(), actions);
+        log.info("Calculated path with {} actions: {}", actions.size(), actions);
 
         return actions;
       };
@@ -115,7 +114,7 @@ public final class PathExecutor implements ControllingTask {
         }
 
         if (!isInitial) {
-          connection.logger().info("Waiting for one second for bot to finish falling...");
+          log.info("Waiting for one second for bot to finish falling...");
           TimeUtil.waitTime(1, TimeUnit.SECONDS);
           if (isDone()) {
             return;
@@ -128,11 +127,11 @@ public final class PathExecutor implements ControllingTask {
         }
 
         if (newActions.isEmpty()) {
-          connection.logger().info("We're already at the goal!");
+          log.info("We're already at the goal!");
           return;
         }
 
-        connection.logger().info("Found path with {} actions!", newActions.size());
+        log.info("Found path with {} actions!", newActions.size());
 
         preparePath(newActions);
 
@@ -173,31 +172,29 @@ public final class PathExecutor implements ControllingTask {
     }
 
     if (worldAction instanceof RecalculatePathAction) {
-      connection.logger().info("Recalculating path...");
+      log.info("Recalculating path...");
       recalculatePath();
       return;
     }
 
     if (ticks > 0 && ticks >= worldAction.getAllowedTicks()) {
-      connection.logger().warn("Took too long to complete action: {}", worldAction);
-      connection.logger().warn("Recalculating path...");
+      log.warn("Took too long to complete action: {}", worldAction);
+      log.warn("Recalculating path...");
       recalculatePath();
       return;
     }
 
     if (SFVec3i.fromDouble(connection.dataManager().localPlayer().pos())
       .distance(worldAction.targetPosition(connection)) > MAX_ERROR_DISTANCE) {
-      connection.logger().warn("More than {} blocks away from target, this must be a mistake!", MAX_ERROR_DISTANCE);
-      connection.logger().warn("Recalculating path...");
+      log.warn("More than {} blocks away from target, this must be a mistake!", MAX_ERROR_DISTANCE);
+      log.warn("Recalculating path...");
       recalculatePath();
       return;
     }
 
     if (worldAction.isCompleted(connection)) {
       worldActionQueue.remove();
-      connection
-        .logger()
-        .info("Reached goal {}/{} in {} ticks!", movementNumber, totalMovements, ticks);
+      log.info("Reached goal {}/{} in {} ticks!", movementNumber, totalMovements, ticks);
       movementNumber++;
       ticks = 0;
 
@@ -206,7 +203,7 @@ public final class PathExecutor implements ControllingTask {
 
       // If there are no more goals, stop
       if (worldAction == null) {
-        connection.logger().info("Finished all goals!");
+        log.info("Finished all goals!");
         connection.controlState().resetAll();
         pathCompletionFuture.complete(null);
         unregister();
@@ -214,12 +211,12 @@ public final class PathExecutor implements ControllingTask {
       }
 
       if (worldAction instanceof RecalculatePathAction) {
-        connection.logger().info("Recalculating path...");
+        log.info("Recalculating path...");
         recalculatePath();
         return;
       }
 
-      connection.logger().debug("Next goal: {}", worldAction);
+      log.debug("Next goal: {}", worldAction);
     }
 
     ticks++;

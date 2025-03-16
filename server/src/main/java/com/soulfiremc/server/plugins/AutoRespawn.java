@@ -26,6 +26,7 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
@@ -34,6 +35,7 @@ import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Extension
 public final class AutoRespawn extends InternalPlugin {
   public AutoRespawn() {
@@ -62,11 +64,7 @@ public final class AutoRespawn extends InternalPlugin {
 
       var message =
         SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(combatKillPacket.getMessage());
-      connection
-        .logger()
-        .info(
-          "[AutoRespawn] Died with message: '{}'",
-          message);
+      log.info("[AutoRespawn] Died with message: '{}'", message);
 
       connection
         .scheduler()

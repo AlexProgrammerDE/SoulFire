@@ -25,11 +25,13 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Extension
 public final class AutoJump extends InternalPlugin {
   public AutoJump() {
@@ -61,7 +63,7 @@ public final class AutoJump extends InternalPlugin {
         var clientEntity = dataManager.localPlayer();
         var blockPos = clientEntity.blockPos();
         if (clientEntity.level().isChunkPositionLoaded(blockPos.getX(), blockPos.getZ()) && clientEntity.onGround()) {
-          connection.logger().debug("[AutoJump] Jumping!");
+          log.debug("[AutoJump] Jumping!");
           clientEntity.jumpFromGround();
         }
       },

@@ -43,16 +43,14 @@ import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.log4j.SFLogAppender;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
-import com.soulfiremc.server.util.structs.SFLogAppender;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.nio.file.Path;
@@ -72,7 +70,6 @@ public final class InstanceManager {
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
   private final UUID id;
-  private final Logger logger;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
@@ -84,16 +81,16 @@ public final class InstanceManager {
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
-    this.logger = LoggerFactory.getLogger("InstanceManager-" + id);
     this.runnableWrapper = soulFireServer.runnableWrapper().with(runnable -> () -> {
       CURRENT.set(this);
-      try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, id.toString())) {
+      try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, id.toString());
+           var ignored2 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_NAME, friendlyNameCache().get())) {
         runnable.run();
       } finally {
         CURRENT.remove();
       }
     });
-    this.scheduler = new SoulFireScheduler(logger, runnableWrapper);
+    this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->
@@ -149,7 +146,7 @@ public final class InstanceManager {
     botConnections.entrySet().removeIf(entry -> {
       var bot = entry.getValue();
       if (bot.session().isDisconnected() || bot.explicitlyShutdown()) {
-        logger.debug("Removing bot {}", bot.accountName());
+        log.debug("Removing bot {}", bot.accountName());
         SoulFireAPI.postEvent(new AttackBotRemoveEvent(this, bot));
         return true;
       }
@@ -169,7 +166,7 @@ public final class InstanceManager {
       var authService = MCAuthService.convertService(account.authType());
       if (authService.isExpired(account)) {
         if (refreshed == 0) {
-          logger.info("Refreshing expired accounts");
+          log.info("Refreshing expired accounts");
         }
 
         accounts.add(authService.refresh(
@@ -185,7 +182,7 @@ public final class InstanceManager {
     }
 
     if (refreshed > 0) {
-      logger.info("Refreshed {} accounts", refreshed);
+      log.info("Refreshed {} accounts", refreshed);
       sessionFactory.inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, id);
 
@@ -202,7 +199,7 @@ public final class InstanceManager {
       return account;
     }
 
-    logger.info("Account {} is expired, refreshing before connecting", account.lastKnownName());
+    log.info("Account {} is expired, refreshing before connecting", account.lastKnownName());
     var refreshedAccount = authService.refresh(
       account,
       settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
@@ -284,7 +281,7 @@ public final class InstanceManager {
     this.attackLifecycle(AttackLifecycle.STARTING);
 
     var address = settingsSource.get(BotSettings.ADDRESS);
-    logger.info("Preparing bot attack at server");
+    log.info("Preparing bot attack at server");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
@@ -297,12 +294,12 @@ public final class InstanceManager {
     {
       var availableProxies = proxies.size();
       if (availableProxies == 0) {
-        logger.info("No proxies provided, attack will be performed without proxies");
+        log.info("No proxies provided, attack will be performed without proxies");
       } else {
         var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
         if (botAmount > maxBots) {
-          logger.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
-          logger.warn("Continuing with {} bots.", maxBots);
+          log.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
+          log.warn("Continuing with {} bots.", maxBots);
           botAmount = maxBots;
         }
 
@@ -318,15 +315,15 @@ public final class InstanceManager {
       var availableAccounts = accounts.size();
       if (availableAccounts > 0) {
         if (botAmount > availableAccounts) {
-          logger.warn(
+          log.warn(
             "You have requested {} bots, but only {} are possible with the current amount of accounts.",
             botAmount,
             availableAccounts);
-          logger.warn("Continuing with {} bots.", availableAccounts);
+          log.warn("Continuing with {} bots.", availableAccounts);
           botAmount = availableAccounts;
         }
       } else {
-        logger.info("No custom accounts provided, generating offline accounts based on name format");
+        log.info("No custom accounts provided, generating offline accounts based on name format");
         for (var i = 0; i < botAmount; i++) {
           accounts.add(OfflineAuthService.createAccount(String.format(settingsSource.get(AccountSettings.NAME_FORMAT), i + 1)));
         }
@@ -357,7 +354,6 @@ public final class InstanceManager {
           this,
           targetAddress,
           settingsSource,
-          LoggerFactory.getLogger(minecraftAccount.lastKnownName()),
           minecraftAccount,
           protocolVersion,
           proxyData,
@@ -366,9 +362,9 @@ public final class InstanceManager {
 
     var usedProxies = proxies.stream().filter(ProxyData::hasBots).count();
     if (usedProxies == 0) {
-      logger.info("Starting attack at server with {} bots", factories.size());
+      log.info("Starting attack at server with {} bots", factories.size());
     } else {
-      logger.info("Starting attack at {} with server bots and {} active proxies", factories.size(), usedProxies);
+      log.info("Starting attack at {} with server bots and {} active proxies", factories.size(), usedProxies);
     }
 
     SoulFireAPI.postEvent(new AttackStartEvent(this));
@@ -390,7 +386,7 @@ public final class InstanceManager {
             break;
           }
 
-          logger.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
+          log.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             () -> {
               if (attackLifecycle().isStoppedOrStopping()) {
@@ -399,14 +395,14 @@ public final class InstanceManager {
 
               TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
 
-              logger.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
+              log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection();
               storeNewBot(botConnection);
 
               try {
                 botConnection.connect().get();
               } catch (Throwable e) {
-                logger.error("Error while connecting", e);
+                log.error("Error while connecting", e);
               } finally {
                 connectSemaphore.release();
               }
@@ -437,13 +433,13 @@ public final class InstanceManager {
       return CompletableFuture.completedFuture(null);
     }
 
-    logger.info("Stopping bot attack");
+    log.info("Stopping bot attack");
     this.attackLifecycle(AttackLifecycle.STOPPING);
 
     return this.stopAttackSession()
       .thenRunAsync(() -> {
         this.attackLifecycle(AttackLifecycle.STOPPED);
-        logger.info("Attack stopped");
+        log.info("Attack stopped");
       }, scheduler);
   }
 
@@ -464,7 +460,7 @@ public final class InstanceManager {
   public CompletableFuture<?> stopAttackSession() {
     return scheduler.runAsync(() -> {
       allBotsConnected.set(false);
-      logger.info("Disconnecting bots");
+      log.info("Disconnecting bots");
       do {
         var eventLoopGroups = new HashSet<EventLoopGroup>();
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
@@ -475,21 +471,21 @@ public final class InstanceManager {
           return true;
         });
 
-        logger.info("Waiting for all bots to fully disconnect");
+        log.info("Waiting for all bots to fully disconnect");
         for (var future : disconnectFuture) {
           try {
             future.get();
           } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error while shutting down", e);
+            log.error("Error while shutting down", e);
           }
         }
 
-        logger.info("Shutting down attack event loop groups");
+        log.info("Shutting down attack event loop groups");
         for (var eventLoopGroup : eventLoopGroups) {
           try {
             eventLoopGroup.shutdownGracefully().get();
           } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error while shutting down", e);
+            log.error("Error while shutting down", e);
           }
         }
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected

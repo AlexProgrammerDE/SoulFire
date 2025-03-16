@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.dedicated;
 
-import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
@@ -27,6 +26,7 @@ import com.soulfiremc.server.command.ConsoleCommandSource;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;

@@ -19,12 +19,12 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.command.brigadier.BrigadierHelper;
+import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.Getter;
 
 import java.util.List;

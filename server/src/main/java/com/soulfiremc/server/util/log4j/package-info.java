@@ -16,6 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 /**
- * Console helpers for client and server.
+ * Log4j utility classes SoulFire uses.
  */
-package com.soulfiremc.console;
+package com.soulfiremc.server.util.log4j;

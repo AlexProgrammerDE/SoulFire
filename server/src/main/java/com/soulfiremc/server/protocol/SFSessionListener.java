@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSendingEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketSentEvent;
+import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.ASMGenerator;
 import org.geysermc.mcprotocollib.network.Session;
@@ -31,6 +32,7 @@ import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftPacket;
 
+@Slf4j
 public final class SFSessionListener extends SessionAdapter {
   private final BotConnection botConnection;
   private final LambdaManager busInvoker;
@@ -49,12 +51,12 @@ public final class SFSessionListener extends SessionAdapter {
       return;
     }
 
-    botConnection.logger().trace("Received packet: {}", packet.getClass().getSimpleName());
+    log.trace("Received packet: {}", packet.getClass().getSimpleName());
 
     try {
       busInvoker.call(event.packet());
     } catch (Throwable t) {
-      botConnection.logger().error("Error while handling packet!", t);
+      log.error("Error while handling packet!", t);
     }
   }
 
@@ -69,9 +71,7 @@ public final class SFSessionListener extends SessionAdapter {
       return;
     }
 
-    botConnection
-      .logger()
-      .trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
+    log.trace("Sending packet: {}", event.getPacket().getClass().getSimpleName());
   }
 
   @Override
@@ -79,7 +79,7 @@ public final class SFSessionListener extends SessionAdapter {
     var event = new SFPacketSentEvent(botConnection, (MinecraftPacket) packet);
     SoulFireAPI.postEvent(event);
 
-    botConnection.logger().trace("Sent packet: {}", packet.getClass().getSimpleName());
+    log.trace("Sent packet: {}", packet.getClass().getSimpleName());
   }
 
   @Override
@@ -87,7 +87,7 @@ public final class SFSessionListener extends SessionAdapter {
     try {
       botConnection.dataManager().onDisconnectEvent(event);
     } catch (Throwable t) {
-      botConnection.logger().error("Error while handling disconnect event!", t);
+      log.error("Error while handling disconnect event!", t);
     }
 
     SoulFireAPI.postEvent(new BotDisconnectedEvent(botConnection));

@@ -20,8 +20,8 @@ package com.soulfiremc.server;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.slf4j.Logger;
 
 import java.util.concurrent.*;
 import java.util.function.LongSupplier;
@@ -31,6 +31,7 @@ import java.util.function.Supplier;
  * Lightweight scheduler for async tasks.
  * Used for most of the async tasks in the server, bots and plugins.
  */
+@Slf4j
 public final class SoulFireScheduler implements Executor {
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
     .name("SoulFireScheduler-Management-", 0)
@@ -39,14 +40,12 @@ public final class SoulFireScheduler implements Executor {
     .name("SoulFireScheduler-Task-", 0)
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
-  private final Logger logger;
   private final RunnableWrapper runnableWrapper;
   @Setter
   private boolean blockNewTasks = false;
   private boolean isShutdown = false;
 
-  public SoulFireScheduler(Logger logger, RunnableWrapper runnableWrapper) {
-    this.logger = logger;
+  public SoulFireScheduler(RunnableWrapper runnableWrapper) {
     this.runnableWrapper = runnableWrapper;
 
     MANAGEMENT_SERVICE.submit(this::managementTask);
@@ -140,7 +139,7 @@ public final class SoulFireScheduler implements Executor {
         runnableWrapper.wrap(command).run();
       } catch (Throwable t) {
         runnableWrapper.wrap(() ->
-          logger.error("Error in async executor", t)).run();
+          log.error("Error in async executor", t)).run();
         throw new CompletionException(t);
       }
     };
@@ -156,7 +155,7 @@ public final class SoulFireScheduler implements Executor {
         return command.get();
       } catch (Throwable t) {
         runnableWrapper.wrap(() ->
-          logger.error("Error in async executor", t)).run();
+          log.error("Error in async executor", t)).run();
         throw new CompletionException(t);
       }
     };
@@ -171,7 +170,7 @@ public final class SoulFireScheduler implements Executor {
       runnableWrapper.wrap(command).run();
     } catch (Throwable t) {
       runnableWrapper.wrap(() ->
-        logger.error("Error in async executor", t)).run();
+        log.error("Error in async executor", t)).run();
     }
   }
 

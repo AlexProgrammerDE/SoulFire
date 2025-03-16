@@ -18,11 +18,11 @@
 package com.soulfiremc.client.cli;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
 import com.soulfiremc.server.util.SFPathConstants;
+import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

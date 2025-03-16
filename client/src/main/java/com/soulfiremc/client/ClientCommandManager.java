@@ -19,10 +19,10 @@ package com.soulfiremc.client;
 
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
-import com.soulfiremc.console.GenericTerminalConsole;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandRequest;
 import com.soulfiremc.grpc.generated.InstanceCommandScope;
+import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

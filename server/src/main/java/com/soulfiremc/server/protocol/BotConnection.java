@@ -33,12 +33,13 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
-import com.soulfiremc.server.util.structs.SFLogAppender;
+import com.soulfiremc.server.util.log4j.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.network.packet.Packet;
@@ -46,7 +47,6 @@ import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
-import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 import java.util.List;
@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Getter
 public final class BotConnection {
   public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
@@ -69,7 +70,6 @@ public final class BotConnection {
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
   private final InstanceSettingsSource settingsSource;
-  private final Logger logger;
   private final MinecraftProtocol protocol;
   private final ViaClientSession session;
   private final ResolveUtil.ResolvedAddress resolvedAddress;
@@ -92,7 +92,6 @@ public final class BotConnection {
     BotConnectionFactory factory,
     InstanceManager instanceManager,
     InstanceSettingsSource settingsSource,
-    Logger logger,
     MinecraftProtocol protocol,
     ResolveUtil.ResolvedAddress resolvedAddress,
     MinecraftAccount minecraftAccount,
@@ -104,19 +103,19 @@ public final class BotConnection {
     this.factory = factory;
     this.instanceManager = instanceManager;
     this.settingsSource = settingsSource;
-    this.logger = logger;
     this.minecraftAccount = minecraftAccount;
     this.accountProfileId = minecraftAccount.profileId();
     this.accountName = minecraftAccount.lastKnownName();
     this.runnableWrapper = instanceManager.runnableWrapper().with(runnable -> () -> {
       CURRENT.set(this);
-      try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString())) {
+      try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString());
+           var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, this.accountName)) {
         runnable.run();
       } finally {
         CURRENT.remove();
       }
     });
-    this.scheduler = new SoulFireScheduler(logger, runnableWrapper);
+    this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.protocol = protocol;
     this.resolvedAddress = resolvedAddress;
     this.targetState = targetState;
@@ -126,7 +125,7 @@ public final class BotConnection {
         ? new SFSessionService(minecraftAccount.authType(), proxyData)
         : null;
     this.session = new ViaClientSession(
-      resolvedAddress.resolvedAddress(), logger, protocol, proxyData, eventLoopGroup, this);
+      resolvedAddress.resolvedAddress(), protocol, proxyData, eventLoopGroup, this);
     this.dataManager = new SessionDataManager(this);
     this.botControl = new BotControlAPI(this);
 
@@ -176,7 +175,7 @@ public final class BotConnection {
       tickTimer.updatePauseState(this.pause);
       tickTimer.updateFrozenState(!dataManager.isLevelRunningNormally());
     } catch (Throwable t) {
-      logger.error("Error while ticking bot!", t);
+      log.error("Error while ticking bot!", t);
     }
   }
 
@@ -242,7 +241,7 @@ public final class BotConnection {
     try {
       var javaData = (OnlineJavaDataLike) minecraftAccount.accountData();
       sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
-      logger.debug("Successfully sent mojang join request!");
+      log.debug("Successfully sent mojang join request!");
     } catch (Exception e) {
       session.disconnect(Component.translatable("disconnect.loginFailedInfo", Component.text(e.getMessage())), e);
     }
