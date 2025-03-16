@@ -244,7 +244,7 @@ public final class BotConnection {
       sessionService.joinServer(accountProfileId, javaData.authToken(), serverId);
       logger.debug("Successfully sent mojang join request!");
     } catch (Exception e) {
-      session.disconnect(Component.translatable("disconnect.loginFailedInfo", e.getMessage()), e);
+      session.disconnect(Component.translatable("disconnect.loginFailedInfo", Component.text(e.getMessage())), e);
     }
   }
 
