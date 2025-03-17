@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 public class ScriptManager {
   private final Map<UUID, Script> scripts = new ConcurrentHashMap<>();
 
@@ -38,24 +40,33 @@ public class ScriptManager {
     scripts.put(script.scriptId(), script);
   }
 
-  public void spawnScripts() {
+  public void startScripts() {
+    log.info("Starting scripts");
     for (var script : scripts.values()) {
-      spawnScript(script);
+      var context = Context.newBuilder(script.language().languageId())
+        .sandbox(SandboxPolicy.CONSTRAINED)
+        .in(new ByteArrayInputStream(new byte[0]))
+        .out(IoBuilder.forLogger(script.logger()).setLevel(Level.INFO).buildPrintStream())
+        .err(IoBuilder.forLogger(script.logger()).setLevel(Level.ERROR).buildPrintStream())
+        .allowIO(IOAccess.newBuilder()
+          .fileSystem(new SandboxedFileSystem(script.runPath()))
+          .build())
+        .build();
+
+      script.context().set(context);
     }
+
+    log.info("Started scripts");
   }
 
-  private void spawnScript(Script script) {
-    var context = Context.newBuilder(script.language().languageId())
-      .sandbox(SandboxPolicy.CONSTRAINED)
-      .in(new ByteArrayInputStream(new byte[0]))
-      .out(IoBuilder.forLogger(script.logger()).setLevel(Level.INFO).buildPrintStream())
-      .err(IoBuilder.forLogger(script.logger()).setLevel(Level.ERROR).buildPrintStream())
-      .allowIO(IOAccess.newBuilder()
-        .fileSystem(new SandboxedFileSystem(script.runPath()))
-        .build())
-      .build();
+  public void killAllScripts() {
+    log.info("Stopping scripts");
 
-    script.context().set(context);
+    for (var script : scripts.values()) {
+      script.context().get().close();
+    }
+
+    log.info("Stopped scripts");
   }
 
   public record Script(UUID scriptId, Path runPath, Logger logger, ScriptLanguage language, ScriptSecurityMode security, AtomicReference<Context> context) {

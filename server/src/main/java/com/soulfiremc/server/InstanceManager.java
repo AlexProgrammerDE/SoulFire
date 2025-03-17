@@ -35,6 +35,7 @@ import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
@@ -69,6 +70,7 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
+  private final ScriptManager scriptManager = new ScriptManager();
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -280,7 +282,8 @@ public final class InstanceManager {
     allBotsConnected.set(false);
     this.attackLifecycle(AttackLifecycle.STARTING);
 
-    var address = settingsSource.get(BotSettings.ADDRESS);
+    scriptManager.startScripts();
+
     log.info("Preparing bot attack at server");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
@@ -489,6 +492,8 @@ public final class InstanceManager {
           }
         }
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
+
+      scriptManager.killAllScripts();
 
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
