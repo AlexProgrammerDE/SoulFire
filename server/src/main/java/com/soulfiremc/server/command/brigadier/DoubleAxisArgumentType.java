@@ -36,11 +36,6 @@ public final class DoubleAxisArgumentType implements ArgumentType<DoubleAxisArgu
     return c.getArgument(argument, DoubleAxisData.class);
   }
 
-  @Override
-  public Collection<String> getExamples() {
-    return List.of("~", "~1", "1", "~-1", "~0");
-  }
-
   public static double forYAxis(DoubleAxisData yData, double baseValue) {
     return yData.relative() ? baseValue + yData.value() : yData.value();
   }
@@ -58,6 +53,11 @@ public final class DoubleAxisArgumentType implements ArgumentType<DoubleAxisArgu
     var zValue = zData.relative() ? baseLocation.getZ() + zData.value() : zData.value();
 
     return Vector3d.from(xValue, yValue, zValue);
+  }
+
+  @Override
+  public Collection<String> getExamples() {
+    return List.of("~", "~1", "1", "~-1", "~0");
   }
 
   @Override

@@ -62,7 +62,7 @@ public final class SFSessionListener extends SessionAdapter {
 
   @Override
   public void packetSending(PacketSendingEvent event) {
-    var event1 = new SFPacketSendingEvent(botConnection, event.getPacket());
+    var event1 = new SFPacketSendingEvent(botConnection, (MinecraftPacket) event.getPacket());
     SoulFireAPI.postEvent(event1);
     event.setPacket(event1.packet());
     event.setCancelled(event1.isCancelled());

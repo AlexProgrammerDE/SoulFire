@@ -33,7 +33,6 @@ import org.geysermc.mcprotocollib.network.crypt.EncryptionConfig;
 import org.geysermc.mcprotocollib.network.event.session.ConnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 import org.geysermc.mcprotocollib.protocol.packet.common.clientbound.ClientboundDisconnectPacket;
@@ -74,7 +73,7 @@ public final class SFBaseListener extends SessionAdapter {
   @SneakyThrows
   @Override
   public void packetReceived(Session session, Packet packet) {
-    var protocol = (MinecraftProtocol) session.getPacketProtocol();
+    var protocol = session.getPacketProtocol();
     switch (protocol.getInboundState()) {
       case LOGIN -> {
         switch (packet) {
@@ -181,7 +180,7 @@ public final class SFBaseListener extends SessionAdapter {
   public void connected(ConnectedEvent event) {
     var resolvedAddress = botConnection.resolvedAddress().resolvedAddress();
     var session = event.getSession();
-    var protocol = (MinecraftProtocol) session.getPacketProtocol();
+    var protocol = session.getPacketProtocol();
     var intention = new ClientIntentionPacket(protocol.getCodec().getProtocolVersion(),
       resolvedAddress.getHostName(),
       resolvedAddress.getPort(),
