@@ -35,6 +35,7 @@ import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.script.ScriptLanguage;
 import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
@@ -50,11 +51,13 @@ import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -72,7 +75,7 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
-  private final ScriptManager scriptManager = new ScriptManager();
+  private final ScriptManager scriptManager = new ScriptManager(this);
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -115,6 +118,8 @@ public final class InstanceManager {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), LogManager.getLogger("Test"), ScriptLanguage.JAVASCRIPT);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);

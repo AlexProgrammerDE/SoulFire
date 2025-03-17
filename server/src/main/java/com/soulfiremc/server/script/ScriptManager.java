@@ -17,16 +17,19 @@
  */
 package com.soulfiremc.server.script;
 
+import com.soulfiremc.server.InstanceManager;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.SandboxPolicy;
 import org.graalvm.polyglot.io.IOAccess;
 
 import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
@@ -34,11 +37,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ScriptManager {
+  private final InstanceManager instanceManager;
   private final Map<UUID, Script> scripts = new ConcurrentHashMap<>();
 
-  public void registerScript(Script script) {
-    scripts.put(script.scriptId(), script);
+  @SneakyThrows
+  public void registerScript(UUID scriptId, Logger logger, ScriptLanguage language) {
+    var dataPath = instanceManager.getInstanceObjectStoragePath().resolve("script-data-" + scriptId);
+    var codePath = instanceManager.soulFireServer().getObjectStoragePath().resolve("script-code-" + scriptId);
+    Files.createDirectories(dataPath);
+    Files.createDirectories(codePath);
+
+    scripts.put(scriptId, new Script(
+      scriptId,
+      dataPath,
+      codePath,
+      logger,
+      language,
+      new AtomicReference<>()
+    ));
   }
 
   public void startScripts() {
@@ -52,8 +70,8 @@ public class ScriptManager {
         .allowIO(IOAccess.newBuilder()
           .fileSystem(new SandboxedFileSystem(script.runPath(), script.codePath()))
           .build())
+        .logHandler(IoBuilder.forLogger("ScriptManager").setLevel(Level.INFO).buildOutputStream())
         .currentWorkingDirectory(script.runPath())
-        .engine(Engine.create(script.language().languageId()))
         .build();
 
       script.context().set(context);
