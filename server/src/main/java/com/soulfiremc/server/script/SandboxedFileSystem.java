@@ -35,16 +35,19 @@ import java.util.Set;
  * The scheme is forced to be UNIX, and the root is the script's directory.
  */
 public class SandboxedFileSystem implements FileSystem {
-  private final Path baseDir;
+  private final Path dataDir;
+  private final Path codeDir;
   private final Path tempDir;
   private Path workingDir;
   private final FileSystem delegateFs = FileSystem.newDefaultFileSystem();
+  private final FileSystem delegateReadOnlyFs = FileSystem.newReadOnlyFileSystem(delegateFs);
 
   @SneakyThrows
-  public SandboxedFileSystem(Path baseDir) {
-    this.baseDir = baseDir;
+  public SandboxedFileSystem(Path dataDir, Path codeDir) {
+    this.dataDir = dataDir;
+    this.codeDir = codeDir;
     this.tempDir = Files.createTempDirectory("sandbox-tmp-dir");
-    this.workingDir = baseDir;
+    this.workingDir = dataDir;
   }
 
   @Override
@@ -66,13 +69,13 @@ public class SandboxedFileSystem implements FileSystem {
   @Override
   public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
     var resolvedPath = validatePath(dir);
-    delegateFs.createDirectory(resolvedPath, attrs);
+    getFileSystemForPaths(resolvedPath).createDirectory(resolvedPath, attrs);
   }
 
   @Override
   public void delete(Path path) throws IOException {
     var resolvedPath = validatePath(path);
-    delegateFs.delete(resolvedPath);
+    getFileSystemForPaths(resolvedPath).delete(resolvedPath);
   }
 
   @Override
@@ -110,35 +113,35 @@ public class SandboxedFileSystem implements FileSystem {
   @Override
   public void setAttribute(Path path, String attribute, Object value, LinkOption... options) throws IOException {
     var resolvedPath = validatePath(path);
-    delegateFs.setAttribute(resolvedPath, attribute, value, options);
+    getFileSystemForPaths(resolvedPath).setAttribute(resolvedPath, attribute, value, options);
   }
 
   @Override
   public void copy(Path source, Path target, CopyOption... options) throws IOException {
     var resolvedSource = validatePath(source);
     var resolvedTarget = validatePath(target);
-    delegateFs.copy(resolvedSource, resolvedTarget, options);
+    getFileSystemForPaths(resolvedTarget).copy(resolvedSource, resolvedTarget, options);
   }
 
   @Override
   public void move(Path source, Path target, CopyOption... options) throws IOException {
     var resolvedSource = validatePath(source);
     var resolvedTarget = validatePath(target);
-    delegateFs.move(resolvedSource, resolvedTarget, options);
+    getFileSystemForPaths(resolvedSource, resolvedTarget).move(resolvedSource, resolvedTarget, options);
   }
 
   @Override
   public void createLink(Path link, Path existing) throws IOException {
     var resolvedLink = validatePath(link);
     var resolvedExisting = validatePath(existing);
-    delegateFs.createLink(resolvedLink, resolvedExisting);
+    getFileSystemForPaths(resolvedLink).createLink(resolvedLink, resolvedExisting);
   }
 
   @Override
   public void createSymbolicLink(Path link, Path target, FileAttribute<?>... attrs) throws IOException {
     var resolvedLink = validatePath(link);
     var resolvedTarget = validatePath(target);
-    delegateFs.createSymbolicLink(resolvedLink, resolvedTarget, attrs);
+    getFileSystemForPaths(resolvedLink).createSymbolicLink(resolvedLink, resolvedTarget, attrs);
   }
 
   @Override
@@ -187,11 +190,6 @@ public class SandboxedFileSystem implements FileSystem {
     return delegateFs.isSameFile(resolvedPath1, resolvedPath2, options);
   }
 
-  /**
-   * Validates that the given path is within the sandbox and returns the resolved path.
-   *
-   * @throws SecurityException if the path is outside the sandbox
-   */
   private Path validatePath(Path path) {
     Path normalizedPath;
 
@@ -201,10 +199,26 @@ public class SandboxedFileSystem implements FileSystem {
       normalizedPath = workingDir.resolve(path).normalize();
     }
 
-    if (!normalizedPath.startsWith(baseDir) && !normalizedPath.startsWith(tempDir)) {
+    if (!normalizedPath.startsWith(dataDir)
+      && !normalizedPath.startsWith(tempDir)
+      && !normalizedPath.startsWith(codeDir)) {
       throw new SecurityException("Access to path outside sandbox: " + path);
     }
 
     return normalizedPath;
+  }
+
+  private boolean isReadOnlyPath(Path path) {
+    return validatePath(path).startsWith(codeDir);
+  }
+
+  private FileSystem getFileSystemForPaths(Path... paths) {
+    for (var path : paths) {
+      if (isReadOnlyPath(path)) {
+        return delegateReadOnlyFs;
+      }
+    }
+
+    return delegateFs;
   }
 }

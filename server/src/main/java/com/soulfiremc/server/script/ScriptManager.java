@@ -49,7 +49,7 @@ public class ScriptManager {
         .out(IoBuilder.forLogger(script.logger()).setLevel(Level.INFO).buildPrintStream())
         .err(IoBuilder.forLogger(script.logger()).setLevel(Level.ERROR).buildPrintStream())
         .allowIO(IOAccess.newBuilder()
-          .fileSystem(new SandboxedFileSystem(script.runPath()))
+          .fileSystem(new SandboxedFileSystem(script.runPath(), script.codePath()))
           .build())
         .build();
 
@@ -69,6 +69,6 @@ public class ScriptManager {
     log.info("Stopped scripts");
   }
 
-  public record Script(UUID scriptId, Path runPath, Logger logger, ScriptLanguage language, ScriptSecurityMode security, AtomicReference<Context> context) {
+  public record Script(UUID scriptId, Path runPath, Path codePath, Logger logger, ScriptLanguage language, ScriptSecurityMode security, AtomicReference<Context> context) {
   }
 }
