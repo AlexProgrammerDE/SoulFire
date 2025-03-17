@@ -132,12 +132,15 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
     try {
       EventPredicate predicate = switch (request.getScopeCase()) {
-        case GLOBAL -> event -> true;
+        case GLOBAL -> event ->
+          ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
         case INSTANCE -> {
           var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-          yield event -> instanceId.equals(event.instanceId());
+          yield event ->
+            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId))
+              && instanceId.equals(event.instanceId());
         }
-        case SCOPE_NOT_SET -> event -> false;
+        case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
       };
       new ConnectionMessageSender(
         subscribers,
