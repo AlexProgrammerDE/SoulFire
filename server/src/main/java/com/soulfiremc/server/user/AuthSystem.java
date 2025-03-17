@@ -109,6 +109,18 @@ public final class AuthSystem {
     });
   }
 
+  public void deleteUser(UUID uuid) {
+    if (uuid.equals(rootUserId)) {
+      throw new IllegalArgumentException("Cannot delete root user");
+    }
+
+    sessionFactory.fromTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
+      .setParameter("id", uuid)
+      .executeUpdate());
+
+    logService.disconnect(uuid);
+  }
+
   public UserEntity rootUserData() {
     return getUserData(rootUserId).orElseThrow();
   }
