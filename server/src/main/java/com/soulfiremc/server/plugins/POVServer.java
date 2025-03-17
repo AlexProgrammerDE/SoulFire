@@ -206,7 +206,7 @@ public final class POVServer extends InternalPlugin {
 
   private static void syncBotToUser(BotConnection botConnection, Session clientSession) {
     Objects.requireNonNull(botConnection);
-    var protocol = (MinecraftProtocol) clientSession.getPacketProtocol();
+    var protocol = clientSession.getPacketProtocol();
     var dataManager = botConnection.dataManager();
 
     clientSession.send(new ClientboundStartConfigurationPacket());

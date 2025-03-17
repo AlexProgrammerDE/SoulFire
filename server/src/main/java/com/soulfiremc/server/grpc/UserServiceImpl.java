@@ -69,13 +69,9 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var uuid = UUID.fromString(request.getId());
       if (uuid.equals(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId())) {
         throw new IllegalArgumentException("Cannot delete self");
-      } else if (uuid.equals(soulFireServer.authSystem().rootUserId())) {
-        throw new IllegalArgumentException("Cannot delete root user");
       }
 
-      soulFireServer.sessionFactory().inTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
-        .setParameter("id", uuid)
-        .executeUpdate());
+      soulFireServer.authSystem().deleteUser(uuid);
 
       responseObserver.onNext(UserDeleteResponse.newBuilder().build());
       responseObserver.onCompleted();

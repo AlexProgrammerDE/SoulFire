@@ -33,9 +33,9 @@ import org.geysermc.mcprotocollib.network.NetworkConstants;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import org.geysermc.mcprotocollib.network.netty.AutoReadFlowControlHandler;
 import org.geysermc.mcprotocollib.network.netty.MinecraftChannelInitializer;
-import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.server.NetworkServer;
 import org.geysermc.mcprotocollib.network.session.ServerNetworkSession;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 
 import java.net.SocketAddress;
 import java.util.function.Supplier;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 public final class ViaServer extends NetworkServer {
   private final InstanceManager instanceManager;
 
-  public ViaServer(SocketAddress bindAddress, Supplier<? extends PacketProtocol> protocol, InstanceManager instanceManager) {
+  public ViaServer(SocketAddress bindAddress, Supplier<? extends MinecraftProtocol> protocol, InstanceManager instanceManager) {
     super(bindAddress, protocol, () -> instanceManager.scheduler()::schedule);
     this.instanceManager = instanceManager;
   }

@@ -48,8 +48,8 @@ import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import org.geysermc.mcprotocollib.network.netty.AutoReadFlowControlHandler;
 import org.geysermc.mcprotocollib.network.netty.MinecraftChannelInitializer;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.network.packet.PacketProtocol;
 import org.geysermc.mcprotocollib.network.session.ClientNetworkSession;
+import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundDelimiterPacket;
 
 import java.net.SocketAddress;
@@ -70,7 +70,7 @@ public final class ViaClientSession extends ClientNetworkSession {
 
   public ViaClientSession(
     SocketAddress targetAddress,
-    PacketProtocol protocol,
+    MinecraftProtocol protocol,
     @Nullable
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
@@ -80,7 +80,7 @@ public final class ViaClientSession extends ClientNetworkSession {
 
   private ViaClientSession(
     SocketAddress targetAddress,
-    PacketProtocol protocol,
+    MinecraftProtocol protocol,
     @Nullable
     SFProxy proxy,
     EventLoopGroup eventLoopGroup,
