@@ -522,8 +522,8 @@ public final class InstanceManager {
     }));
   }
 
-  public Path getObjectStoragePath() {
-    return soulFireServer.baseDirectory().resolve("object-storage").resolve(id.toString());
+  public Path getInstanceObjectStoragePath() {
+    return soulFireServer.getObjectStoragePath().resolve("instance-" + id.toString());
   }
 
   public List<BotConnection> getConnectedBots() {

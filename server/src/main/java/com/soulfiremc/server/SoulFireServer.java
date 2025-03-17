@@ -246,6 +246,10 @@ public final class SoulFireServer {
     };
   }
 
+  public Path getObjectStoragePath() {
+    return baseDirectory.resolve("object-storage");
+  }
+
   public void configUpdateHook() {
     setupLoggingAndVia();
   }

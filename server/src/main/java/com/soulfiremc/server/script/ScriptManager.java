@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.SandboxPolicy;
 import org.graalvm.polyglot.io.IOAccess;
 
@@ -51,6 +52,8 @@ public class ScriptManager {
         .allowIO(IOAccess.newBuilder()
           .fileSystem(new SandboxedFileSystem(script.runPath(), script.codePath()))
           .build())
+        .currentWorkingDirectory(script.runPath())
+        .engine(Engine.create(script.language().languageId()))
         .build();
 
       script.context().set(context);
@@ -69,6 +72,6 @@ public class ScriptManager {
     log.info("Stopped scripts");
   }
 
-  public record Script(UUID scriptId, Path runPath, Path codePath, Logger logger, ScriptLanguage language, ScriptSecurityMode security, AtomicReference<Context> context) {
+  public record Script(UUID scriptId, Path runPath, Path codePath, Logger logger, ScriptLanguage language, AtomicReference<Context> context) {
   }
 }

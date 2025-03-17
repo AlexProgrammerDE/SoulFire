@@ -48,7 +48,7 @@ public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.Obj
     var instance = optionalInstance.get();
 
     try {
-      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      var filePath = instance.getInstanceObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
       Files.write(filePath, request.getData().toByteArray());
 
       responseObserver.onNext(ObjectStorageUploadResponse.newBuilder().build());
@@ -71,7 +71,7 @@ public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.Obj
     var instance = optionalInstance.get();
 
     try {
-      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      var filePath = instance.getInstanceObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
       var data = Files.readAllBytes(filePath);
 
       responseObserver.onNext(ObjectStorageDownloadResponse.newBuilder().setData(ByteString.copyFrom(data)).build());
@@ -94,7 +94,7 @@ public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.Obj
     var instance = optionalInstance.get();
 
     try {
-      var filePath = instance.getObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
+      var filePath = instance.getInstanceObjectStoragePath().resolve(SFHelpers.sanitizeFileName(request.getFileName()));
       Files.delete(filePath);
 
       responseObserver.onNext(ObjectStorageDeleteResponse.newBuilder().build());
@@ -118,7 +118,7 @@ public final class ObjectStorageServiceImpl extends ObjectStorageServiceGrpc.Obj
 
     try {
       responseObserver.onNext(ObjectStorageListResponse.newBuilder().addAllFileNames(
-        Files.list(instance.getObjectStoragePath())
+        Files.list(instance.getInstanceObjectStoragePath())
           .map(path -> path.getFileName().toString())
           .toList()
       ).build());
