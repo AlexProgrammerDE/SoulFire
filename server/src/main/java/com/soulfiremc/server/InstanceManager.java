@@ -54,6 +54,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 import org.slf4j.MDC;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
@@ -107,6 +109,12 @@ public final class InstanceManager {
           return instance.friendlyName();
         }
       }), 1, TimeUnit.SECONDS);
+
+    try {
+      Files.createDirectories(getInstanceObjectStoragePath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
@@ -424,7 +432,15 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> deleteInstance() {
-    return stopAttackPermanently().thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
+    return stopAttackPermanently()
+      .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
+      .thenRunAsync(() -> {
+        try {
+          SFHelpers.deleteDirectory(getInstanceObjectStoragePath());
+        } catch (IOException e) {
+          log.error("Error while deleting instance storage", e);
+        }
+      }, scheduler);
   }
 
   public CompletableFuture<?> shutdownHook() {
