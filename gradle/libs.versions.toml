@@ -14,7 +14,7 @@ kyori = "4.19.0"
 reactor = "1.2.4"
 classtransform = "1.14.0"
 armeria = "1.32.3"
-graalvm-polyglot = "24.1.2"
+graalvm-polyglot = "24.2.0"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
