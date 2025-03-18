@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.script.api;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
@@ -44,11 +43,11 @@ public class ScriptEventAPI {
         .add(new EventListener(true, callback));
   }
 
-  public void forwardEvent(String event, @Nullable Object eventArg) {
+  public void forwardEvent(String event, Object... eventArgs) {
     var listeners = eventListeners.get(event);
     if (listeners != null) {
       listeners.forEach(listener -> {
-        listener.callback.execute(eventArg);
+        listener.callback.execute(eventArgs);
         if (listener.once) {
           listeners.remove(listener);
         }

@@ -82,31 +82,31 @@ public class ScriptManager {
         case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
         case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
         case BotPreTickEvent ignored -> forwardEvent("preTick", botApi);
-        case ChatMessageReceiveEvent ignored -> forwardEvent("message", botApi);
+        case ChatMessageReceiveEvent chatMessageReceiveEvent -> forwardEvent("message", botApi, chatMessageReceiveEvent.message(), chatMessageReceiveEvent.timestamp());
         case PreBotConnectEvent ignored -> forwardEvent("preConnect", botApi);
-        case SFPacketReceiveEvent ignored -> forwardEvent("packetReceive", botApi);
-        case SFPacketSendingEvent ignored -> forwardEvent("packetSending", botApi);
-        case SFPacketSentEvent ignored -> forwardEvent("packetSent", botApi);
+        case SFPacketReceiveEvent packetReceiveEvent -> forwardEvent("packetReceive", botApi, packetReceiveEvent.packet());
+        case SFPacketSendingEvent packetSendingEvent -> forwardEvent("packetSending", botApi, packetSendingEvent.packet());
+        case SFPacketSentEvent packetSentEvent -> forwardEvent("packetSent", botApi, packetSentEvent.packet());
         default -> {
         }
       }
     } else {
       switch (event) {
         case AttackBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
-        case AttackEndedEvent ignored -> forwardEvent("attackEnded", null);
-        case AttackStartEvent ignored -> forwardEvent("attackStart", null);
-        case AttackTickEvent ignored -> forwardEvent("attackTick", null);
+        case AttackEndedEvent ignored -> forwardEvent("attackEnded");
+        case AttackStartEvent ignored -> forwardEvent("attackStart");
+        case AttackTickEvent ignored -> forwardEvent("attackTick");
         default -> {
         }
       }
     }
   }
 
-  private void forwardEvent(String event, @Nullable Object eventArg) {
+  private void forwardEvent(String event, Object... eventArgs) {
     for (var script : scripts.values()) {
       var runtime = script.runtime().get();
       if (runtime != null) {
-        runtime.scriptAPI().getEvent().forwardEvent(event, eventArg);
+        runtime.scriptAPI().getEvent().forwardEvent(event, eventArgs);
       }
     }
   }
@@ -139,12 +139,7 @@ public class ScriptManager {
     log.info("Stopping scripts");
 
     for (var script : scripts.values()) {
-      var runtime = script.runtime().get();
-      if (runtime != null) {
-        runtime.context().close();
-      }
-
-      script.runtime().set(null);
+      killScript(script.scriptId());
     }
 
     log.info("Stopped scripts");
@@ -152,97 +147,128 @@ public class ScriptManager {
     SoulFireAPI.unregisterListenersOfObject(this);
   }
 
+  public void killScript(UUID id) {
+    var script = scripts.get(id);
+    if (script == null) {
+      return;
+    }
+
+    log.info("Stopping script: {}", script.name());
+    var runtime = script.runtime().get();
+    if (runtime != null) {
+      runtime.context().close();
+    }
+
+    script.runtime().set(null);
+
+    log.info("Stopped script: {}", script.name());
+  }
+
   public void startScripts() {
     SoulFireAPI.registerListenersOfObject(this);
 
     log.info("Starting scripts");
     for (var script : scripts.values()) {
-      log.info("Starting script: {}", script.name());
-      var sandboxPolicy = switch (script.language()) {
-        case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
-        case PYTHON -> SandboxPolicy.TRUSTED;
-      };
-      var context = Context.newBuilder(script.language().languageId())
-        .allowExperimentalOptions(true)
-        .engine(Engine.newBuilder(script.language().languageId())
-          .sandbox(sandboxPolicy)
-          .option("engine.WarnInterpreterOnly", "false")
-          .in(InputStream.nullInputStream())
-          .out(IoBuilder.forLogger(script.name()).setLevel(Level.INFO).buildPrintStream())
-          .err(IoBuilder.forLogger(script.name()).setLevel(Level.ERROR).buildPrintStream())
-          .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
-          .build())
-        .sandbox(sandboxPolicy)
-        .allowIO(IOAccess.newBuilder()
-          .allowHostFileAccess(false)
-          .allowHostSocketAccess(false)
-          .fileSystem(new SandboxedFileSystem(
-            Set.of(script.dataPath().toAbsolutePath()),
-            Set.of(script.codePath().toAbsolutePath(), graalResourceCache.toAbsolutePath()),
-            script.dataPath().toAbsolutePath()
-          ))
-          .build())
-        .option("js.strict", "true")
-        .allowAllAccess(false)
-        .allowNativeAccess(false)
-        .allowCreateProcess(false)
-        .allowCreateThread(true)
-        .allowInnerContextOptions(false)
-        .allowPolyglotAccess(PolyglotAccess.NONE)
-        .allowHostClassLoading(false)
-        .allowHostAccess(HostAccess.newBuilder(HostAccess.CONSTRAINED)
-          .allowArrayAccess(true)
-          .allowListAccess(true)
-          .allowMapAccess(true)
-          .allowBufferAccess(true)
-          .allowIterableAccess(true)
-          .allowIteratorAccess(true)
-          .allowBigIntegerNumberAccess(true)
-          .build())
-        .allowEnvironmentAccess(EnvironmentAccess.NONE)
-        .currentWorkingDirectory(script.dataPath().toAbsolutePath())
-        .build();
-
-      var scriptAPI = new ScriptAPI(script, instanceManager);
-      context.getBindings(script.language().languageId())
-        .putMember("api", BeanWrapper.wrap(context.asValue(scriptAPI)));
-
-      script.runtime().set(new RuntimeComponents(
-        context,
-        scriptAPI
-      ));
-
-      SFHelpers.mustSupply(() -> switch (script.language()) {
-        case JAVASCRIPT -> () -> {
-          var mainFile = script.codePath().resolve("main.js");
-          if (!Files.exists(mainFile)) {
-            throw new IllegalStateException("main.js not found");
-          }
-
-          try {
-            context.eval(Source.newBuilder("js", mainFile.toFile()).build());
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        };
-        case PYTHON -> () -> {
-          var mainFile = script.codePath().resolve("main.py");
-          if (!Files.exists(mainFile)) {
-            throw new IllegalStateException("main.py not found");
-          }
-
-          try {
-            context.eval(Source.newBuilder("python", mainFile.toFile()).build());
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        };
-      });
-
-      log.info("Started script: {}", script.name());
+      startScript(script.scriptId());
     }
 
     log.info("Started scripts");
+  }
+
+  public HostAccess buildHostAccess() {
+    var builder = HostAccess.newBuilder(HostAccess.CONSTRAINED)
+      .allowArrayAccess(true)
+      .allowListAccess(true)
+      .allowBufferAccess(true)
+      .allowIterableAccess(true)
+      .allowIteratorAccess(true)
+      .allowMapAccess(true)
+      .allowBigIntegerNumberAccess(true);
+
+    return builder.build();
+  }
+
+  public void startScript(UUID id) {
+    var script = scripts.get(id);
+    if (script == null) {
+      return;
+    }
+
+    log.info("Starting script: {}", script.name());
+    var sandboxPolicy = switch (script.language()) {
+      case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
+      case PYTHON -> SandboxPolicy.TRUSTED;
+    };
+    var context = Context.newBuilder(script.language().languageId())
+      .allowExperimentalOptions(true)
+      .engine(Engine.newBuilder(script.language().languageId())
+        .sandbox(sandboxPolicy)
+        .option("engine.WarnInterpreterOnly", "false")
+        .in(InputStream.nullInputStream())
+        .out(IoBuilder.forLogger(script.name()).setLevel(Level.INFO).buildPrintStream())
+        .err(IoBuilder.forLogger(script.name()).setLevel(Level.ERROR).buildPrintStream())
+        .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
+        .build())
+      .sandbox(sandboxPolicy)
+      .allowIO(IOAccess.newBuilder()
+        .allowHostFileAccess(false)
+        .allowHostSocketAccess(false)
+        .fileSystem(new SandboxedFileSystem(
+          Set.of(script.dataPath().toAbsolutePath()),
+          Set.of(script.codePath().toAbsolutePath(), graalResourceCache.toAbsolutePath()),
+          script.dataPath().toAbsolutePath()
+        ))
+        .build())
+      .option("js.strict", "true")
+      .allowAllAccess(false)
+      .allowNativeAccess(false)
+      .allowCreateProcess(false)
+      .allowCreateThread(true)
+      .allowInnerContextOptions(false)
+      .allowPolyglotAccess(PolyglotAccess.NONE)
+      .allowHostClassLoading(false)
+      .allowHostAccess(buildHostAccess())
+      .allowEnvironmentAccess(EnvironmentAccess.NONE)
+      .currentWorkingDirectory(script.dataPath().toAbsolutePath())
+      .build();
+
+    var scriptAPI = new ScriptAPI(script, instanceManager);
+    context.getBindings(script.language().languageId())
+      .putMember("api", BeanWrapper.wrap(context.asValue(scriptAPI)));
+
+    script.runtime().set(new RuntimeComponents(
+      context,
+      scriptAPI
+    ));
+
+    SFHelpers.mustSupply(() -> switch (script.language()) {
+      case JAVASCRIPT -> () -> {
+        var mainFile = script.codePath().resolve("main.js");
+        if (!Files.exists(mainFile)) {
+          throw new IllegalStateException("main.js not found");
+        }
+
+        try {
+          context.eval(Source.newBuilder("js", mainFile.toFile()).build());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      };
+      case PYTHON -> () -> {
+        var mainFile = script.codePath().resolve("main.py");
+        if (!Files.exists(mainFile)) {
+          throw new IllegalStateException("main.py not found");
+        }
+
+        try {
+          context.eval(Source.newBuilder("python", mainFile.toFile()).build());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      };
+    });
+
+    log.info("Started script: {}", script.name());
   }
 
   public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
