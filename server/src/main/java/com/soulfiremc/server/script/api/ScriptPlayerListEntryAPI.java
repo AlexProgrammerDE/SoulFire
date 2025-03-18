@@ -17,35 +17,12 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.AttackLifecycle;
+import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.graalvm.polyglot.HostAccess;
 
-import java.util.List;
-
-public record ScriptInstanceAPI(InstanceManager instanceManager) {
+public record ScriptPlayerListEntryAPI(PlayerListEntry entry) {
   @HostAccess.Export
-  public String id() {
-    return instanceManager.id().toString();
-  }
-
-  @HostAccess.Export
-  public String name() {
-    return instanceManager.friendlyNameCache().get();
-  }
-
-  @HostAccess.Export
-  public List<ScriptBotAPI> getConnectedBots() {
-    return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
-  }
-
-  @HostAccess.Export
-  public AttackLifecycle getAttackState() {
-    return instanceManager.attackLifecycle();
-  }
-
-  @HostAccess.Export
-  public ScriptMetadataAPI getMetadata() {
-    return new ScriptMetadataAPI(instanceManager.metadata());
+  public String getProfileId() {
+    return entry.getProfileId().toString();
   }
 }

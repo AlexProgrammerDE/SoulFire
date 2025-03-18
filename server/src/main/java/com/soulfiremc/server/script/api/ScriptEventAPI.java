@@ -29,9 +29,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ScriptEventAPI {
   private final Map<String, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
 
-  public ScriptEventAPI() {
-  }
-
   @HostAccess.Export
   public void on(String event, Value callback) {
     eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())

@@ -17,35 +17,54 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.graalvm.polyglot.HostAccess;
 
-import java.util.List;
-
-public record ScriptInstanceAPI(InstanceManager instanceManager) {
+public record ScriptEntityAPI(Entity entity) {
   @HostAccess.Export
-  public String id() {
-    return instanceManager.id().toString();
+  public String getType() {
+    return entity.entityType().key().toString();
   }
 
   @HostAccess.Export
-  public String name() {
-    return instanceManager.friendlyNameCache().get();
+  public double getX() {
+    return entity.x();
   }
 
   @HostAccess.Export
-  public List<ScriptBotAPI> getConnectedBots() {
-    return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
+  public double getY() {
+    return entity.y();
   }
 
   @HostAccess.Export
-  public AttackLifecycle getAttackState() {
-    return instanceManager.attackLifecycle();
+  public double getZ() {
+    return entity.z();
   }
 
   @HostAccess.Export
-  public ScriptMetadataAPI getMetadata() {
-    return new ScriptMetadataAPI(instanceManager.metadata());
+  public int getBlockX() {
+    return entity.blockPos().getX();
+  }
+
+  @HostAccess.Export
+  public int getBlockY() {
+    return entity.blockPos().getY();
+  }
+
+  @HostAccess.Export
+  public int getBlockZ() {
+    return entity.blockPos().getZ();
+  }
+
+  @HostAccess.Export
+  public Vector3d getPos() {
+    return entity.pos();
+  }
+
+  @HostAccess.Export
+  public Vector3i getBlockPos() {
+    return entity.blockPos();
   }
 }

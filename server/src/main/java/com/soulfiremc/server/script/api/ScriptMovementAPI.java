@@ -18,14 +18,9 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.BotConnection;
-import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
-@SuppressWarnings("unused")
-@RequiredArgsConstructor
-public class ScriptMovementAPI {
-  private final BotConnection connection;
-
+public record ScriptMovementAPI(BotConnection connection) {
   @HostAccess.Export
   public boolean isFlying() {
     return connection.botControl().isFlying();
@@ -114,9 +109,5 @@ public class ScriptMovementAPI {
   @HostAccess.Export
   public void resetAll() {
     connection.controlState().resetAll();
-  }
-
-  public BotConnection getInternal() {
-    return connection;
   }
 }

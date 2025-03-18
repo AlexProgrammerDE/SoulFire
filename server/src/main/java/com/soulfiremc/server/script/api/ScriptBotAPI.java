@@ -18,14 +18,11 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.BotConnection;
-import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
-@SuppressWarnings("unused")
-@RequiredArgsConstructor
-public class ScriptBotAPI {
-  private final BotConnection connection;
+import java.util.List;
 
+public record ScriptBotAPI(BotConnection connection) {
   @HostAccess.Export
   public String getId() {
     return connection.accountProfileId().toString();
@@ -66,7 +63,18 @@ public class ScriptBotAPI {
     return new ScriptMetadataAPI(connection.metadata());
   }
 
-  public BotConnection getInternal() {
-    return connection;
+  @HostAccess.Export
+  public ScriptLevelAPI getLevel() {
+    return new ScriptLevelAPI(connection.dataManager().currentLevel());
+  }
+
+  @HostAccess.Export
+  public ScriptEntityAPI getPlayer() {
+    return new ScriptEntityAPI(connection.dataManager().localPlayer());
+  }
+
+  @HostAccess.Export
+  public List<ScriptPlayerListEntryAPI> getPlayerList() {
+    return connection.dataManager().playerListState().entries().values().stream().map(ScriptPlayerListEntryAPI::new).toList();
   }
 }

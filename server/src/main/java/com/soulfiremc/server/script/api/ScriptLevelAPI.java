@@ -17,35 +17,18 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.protocol.bot.state.Level;
 import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;
 
-public record ScriptInstanceAPI(InstanceManager instanceManager) {
-  @HostAccess.Export
-  public String id() {
-    return instanceManager.id().toString();
+public record ScriptLevelAPI(Level level) {
+  public String getBlockAt(int x, int y, int z) {
+    return level.getBlockState(x, y, z).blockType().key().toString();
   }
 
   @HostAccess.Export
-  public String name() {
-    return instanceManager.friendlyNameCache().get();
-  }
-
-  @HostAccess.Export
-  public List<ScriptBotAPI> getConnectedBots() {
-    return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
-  }
-
-  @HostAccess.Export
-  public AttackLifecycle getAttackState() {
-    return instanceManager.attackLifecycle();
-  }
-
-  @HostAccess.Export
-  public ScriptMetadataAPI getMetadata() {
-    return new ScriptMetadataAPI(instanceManager.metadata());
+  public List<ScriptEntityAPI> getEntities() {
+    return level.entityTracker().getEntities().stream().map(ScriptEntityAPI::new).toList();
   }
 }

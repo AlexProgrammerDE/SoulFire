@@ -19,7 +19,6 @@ package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.api.metadata.MetadataKey;
-import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.Key;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
@@ -27,10 +26,7 @@ import org.intellij.lang.annotations.Subst;
 
 import java.util.function.Supplier;
 
-@RequiredArgsConstructor
-public class ScriptMetadataAPI {
-  private final MetadataHolder metadata;
-
+public record ScriptMetadataAPI(MetadataHolder metadata) {
   @HostAccess.Export
   public Value getOrSet(String namespace, String key, Supplier<Value> defaultValue) {
     return this.metadata.getOrSet(getMetaKey(namespace, key), defaultValue);

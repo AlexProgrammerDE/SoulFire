@@ -26,6 +26,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.bot.*;
+import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
@@ -38,6 +39,8 @@ import net.lenni0451.reflect.stream.RStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.cloudburstmc.math.vector.Vector3d;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.graalvm.polyglot.*;
@@ -215,6 +218,9 @@ public class ScriptManager {
     }
 
     unlockClass(builder, Component.class);
+    unlockClass(builder, Vector3i.class);
+    unlockClass(builder, Vector3d.class);
+    unlockClass(builder, SFVec3i.class);
 
     return builder.build();
   }
@@ -383,6 +389,9 @@ public class ScriptManager {
       if (getter == null) {
         getter = nullableMember("is" + firstLetterUpperCase(key));
       }
+      if (getter == null && isValueRecord(delegate)) {
+        getter = delegate.getMember(key);
+      }
       return getter;
     }
 
@@ -392,6 +401,10 @@ public class ScriptManager {
 
     private @Nullable Value nullableMember(String key) {
       return delegate.hasMember(key) ? delegate.getMember(key) : null;
+    }
+
+    private boolean isValueRecord(Value value) {
+      return value.isHostObject() && value.asHostObject() instanceof Record;
     }
   }
 }
