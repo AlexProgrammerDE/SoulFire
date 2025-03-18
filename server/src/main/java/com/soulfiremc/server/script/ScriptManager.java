@@ -99,6 +99,7 @@ public class ScriptManager {
         .allowCreateThread(true)
         .allowInnerContextOptions(false)
         .allowPolyglotAccess(PolyglotAccess.NONE)
+        .allowHostClassLoading(false)
         .allowHostAccess(HostAccess.CONSTRAINED)
         .allowEnvironmentAccess(EnvironmentAccess.NONE)
         .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
