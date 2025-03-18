@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script;
 
+import com.soulfiremc.server.util.SFHelpers;
 import lombok.SneakyThrows;
 import org.graalvm.polyglot.io.FileSystem;
 
@@ -26,6 +27,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,19 +37,22 @@ import java.util.Set;
  * The scheme is forced to be UNIX, and the root is the script's directory.
  */
 public class SandboxedFileSystem implements FileSystem {
-  private final Path dataDir;
-  private final Path codeDir;
+  private final Set<Path> writableDirs;
+  private final Set<Path> readableDirs;
   private final Path tempDir;
   private Path workingDir;
   private final FileSystem delegateFs = FileSystem.newDefaultFileSystem();
   private final FileSystem delegateReadOnlyFs = FileSystem.newReadOnlyFileSystem(delegateFs);
 
   @SneakyThrows
-  public SandboxedFileSystem(Path dataDir, Path codeDir) {
-    this.dataDir = dataDir;
-    this.codeDir = codeDir;
-    this.tempDir = Files.createTempDirectory("sandbox-tmp-dir");
-    this.workingDir = dataDir;
+  public SandboxedFileSystem(Set<Path> writableDirs, Set<Path> readableDirs, Path defaultWorkingDir) {
+    this.readableDirs = Set.copyOf(readableDirs);
+    this.tempDir = Files.createTempDirectory("sf-script-temp-");
+    this.writableDirs = Set.copyOf(SFHelpers.make(new HashSet<>(), set -> {
+      set.addAll(writableDirs);
+      set.add(tempDir);
+    }));
+    this.workingDir = defaultWorkingDir;
   }
 
   @Override
@@ -179,7 +184,7 @@ public class SandboxedFileSystem implements FileSystem {
 
   @Override
   public Path getTempDirectory() {
-    return delegateFs.getTempDirectory();
+    return tempDir;
   }
 
   @Override
@@ -199,9 +204,8 @@ public class SandboxedFileSystem implements FileSystem {
       normalizedPath = workingDir.resolve(path).normalize();
     }
 
-    if (!normalizedPath.startsWith(dataDir)
-      && !normalizedPath.startsWith(tempDir)
-      && !normalizedPath.startsWith(codeDir)) {
+    if (writableDirs.stream().noneMatch(normalizedPath::startsWith)
+      && readableDirs.stream().noneMatch(normalizedPath::startsWith)) {
       throw new SecurityException("Access to path outside sandbox: " + path);
     }
 
@@ -209,7 +213,8 @@ public class SandboxedFileSystem implements FileSystem {
   }
 
   private boolean isReadOnlyPath(Path path) {
-    return validatePath(path).startsWith(codeDir);
+    var validatedPath = validatePath(path);
+    return writableDirs.stream().noneMatch(validatedPath::startsWith);
   }
 
   private FileSystem getFileSystemForPaths(Path... paths) {

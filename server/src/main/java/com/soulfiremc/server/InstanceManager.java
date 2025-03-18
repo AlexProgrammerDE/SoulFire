@@ -75,7 +75,7 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
-  private final ScriptManager scriptManager = new ScriptManager(this);
+  private final ScriptManager scriptManager;
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -112,6 +112,7 @@ public final class InstanceManager {
           return instance.friendlyName();
         }
       }), 1, TimeUnit.SECONDS);
+    this.scriptManager = new ScriptManager(this);
 
     try {
       Files.createDirectories(getInstanceObjectStoragePath());
@@ -119,7 +120,7 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), LogManager.getLogger("Test"), ScriptLanguage.JAVASCRIPT);
+    this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), LogManager.getLogger("Test"), ScriptLanguage.PYTHON);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
