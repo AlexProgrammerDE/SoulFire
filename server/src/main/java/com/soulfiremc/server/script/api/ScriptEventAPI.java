@@ -17,15 +17,45 @@
  */
 package com.soulfiremc.server.script.api;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public class ScriptEventAPI {
+  private final Map<String, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
+
   public ScriptEventAPI() {
   }
 
   @HostAccess.Export
   public void on(String event, Value callback) {
+    eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
+        .add(new EventListener(false, callback));
+  }
 
+  @HostAccess.Export
+  public void once(String event, Value callback) {
+    eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
+        .add(new EventListener(true, callback));
+  }
+
+  public void forwardEvent(String event, @Nullable Object eventArg) {
+    var listeners = eventListeners.get(event);
+    if (listeners != null) {
+      listeners.forEach(listener -> {
+        listener.callback.execute(eventArg);
+        if (listener.once) {
+          listeners.remove(listener);
+        }
+      });
+    }
+  }
+
+  private record EventListener(boolean once, Value callback) {
   }
 }

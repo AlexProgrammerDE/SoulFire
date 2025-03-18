@@ -514,10 +514,10 @@ public final class InstanceManager {
         }
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
-      scriptManager.killAllScripts();
-
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
+
+      scriptManager.killAllScripts();
     });
   }
 

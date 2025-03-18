@@ -18,11 +18,21 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.SoulFireBotEvent;
+import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
+import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
+import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
+import com.soulfiremc.server.api.event.attack.AttackStartEvent;
+import com.soulfiremc.server.api.event.attack.AttackTickEvent;
+import com.soulfiremc.server.api.event.bot.*;
 import com.soulfiremc.server.script.api.ScriptAPI;
+import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.lambdaevents.EventHandler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,6 +58,57 @@ public class ScriptManager {
     this.instanceManager = instanceManager;
     this.graalResourceCache = instanceManager.soulFireServer().baseDirectory().resolve(".graal-resource-cache");
     System.setProperty("polyglot.engine.userResourceCache", graalResourceCache.toString());
+  }
+
+  @EventHandler
+  public void handleGenericEvent(SoulFireInstanceEvent event) {
+    if (event.instanceManager() == instanceManager) {
+      forwardEvent(event);
+    }
+  }
+
+  private void forwardEvent(SoulFireInstanceEvent event) {
+    if (scripts.isEmpty()) {
+      return;
+    }
+
+    if (event instanceof SoulFireBotEvent botEvent) {
+      var botApi = new ScriptBotAPI(botEvent.connection());
+      switch (event) {
+        case BotConnectionInitEvent ignored -> forwardEvent("connectionInit", botApi);
+        case BotDisconnectedEvent ignored -> forwardEvent("disconnected", botApi);
+        case BotJoinedEvent ignored -> forwardEvent("joined", botApi);
+        case BotPostEntityTickEvent ignored -> forwardEvent("postEntityTick", botApi);
+        case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
+        case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
+        case BotPreTickEvent ignored -> forwardEvent("preTick", botApi);
+        case ChatMessageReceiveEvent ignored -> forwardEvent("message", botApi);
+        case PreBotConnectEvent ignored -> forwardEvent("preConnect", botApi);
+        case SFPacketReceiveEvent ignored -> forwardEvent("packetReceive", botApi);
+        case SFPacketSendingEvent ignored -> forwardEvent("packetSending", botApi);
+        case SFPacketSentEvent ignored -> forwardEvent("packetSent", botApi);
+        default -> {
+        }
+      }
+    } else {
+      switch (event) {
+        case AttackBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
+        case AttackEndedEvent ignored -> forwardEvent("attackEnded", null);
+        case AttackStartEvent ignored -> forwardEvent("attackStart", null);
+        case AttackTickEvent ignored -> forwardEvent("attackTick", null);
+        default -> {
+        }
+      }
+    }
+  }
+
+  private void forwardEvent(String event, @Nullable Object eventArg) {
+    for (var script : scripts.values()) {
+      var runtime = script.runtime().get();
+      if (runtime != null) {
+        runtime.scriptAPI().getEvent().forwardEvent(event, eventArg);
+      }
+    }
   }
 
   @SneakyThrows
@@ -78,25 +139,25 @@ public class ScriptManager {
     log.info("Stopping scripts");
 
     for (var script : scripts.values()) {
-      script.context().get().close();
+      var runtime = script.runtime().get();
+      if (runtime != null) {
+        runtime.context().close();
+      }
+
+      script.runtime().set(null);
     }
 
     log.info("Stopped scripts");
-  }
 
-  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<Context> context) {
-  }
-
-  static String firstLetterLowerCase(String name) {
-    if (name.isEmpty()) {
-      return name;
-    }
-    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+    SoulFireAPI.unregisterListenersOfObject(this);
   }
 
   public void startScripts() {
+    SoulFireAPI.registerListenersOfObject(this);
+
     log.info("Starting scripts");
     for (var script : scripts.values()) {
+      log.info("Starting script: {}", script.name());
       var sandboxPolicy = switch (script.language()) {
         case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
         case PYTHON -> SandboxPolicy.TRUSTED;
@@ -142,42 +203,59 @@ public class ScriptManager {
         .currentWorkingDirectory(script.dataPath().toAbsolutePath())
         .build();
 
+      var scriptAPI = new ScriptAPI(script, instanceManager);
       context.getBindings(script.language().languageId())
-        .putMember("api", BeanWrapper.wrap(context.asValue(new ScriptAPI(script, instanceManager))));
+        .putMember("api", BeanWrapper.wrap(context.asValue(scriptAPI)));
 
-      script.context().set(context);
+      script.runtime().set(new RuntimeComponents(
+        context,
+        scriptAPI
+      ));
 
-      instanceManager.scheduler().schedule(() -> {
-        SFHelpers.mustSupply(() -> switch (script.language()) {
-          case JAVASCRIPT -> () -> {
-            var mainFile = script.codePath().resolve("main.js");
-            if (!Files.exists(mainFile)) {
-              throw new IllegalStateException("main.js not found");
-            }
+      SFHelpers.mustSupply(() -> switch (script.language()) {
+        case JAVASCRIPT -> () -> {
+          var mainFile = script.codePath().resolve("main.js");
+          if (!Files.exists(mainFile)) {
+            throw new IllegalStateException("main.js not found");
+          }
 
-            try {
-              context.eval(Source.newBuilder("js", mainFile.toFile()).build());
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          };
-          case PYTHON -> () -> {
-            var mainFile = script.codePath().resolve("main.py");
-            if (!Files.exists(mainFile)) {
-              throw new IllegalStateException("main.py not found");
-            }
+          try {
+            context.eval(Source.newBuilder("js", mainFile.toFile()).build());
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        };
+        case PYTHON -> () -> {
+          var mainFile = script.codePath().resolve("main.py");
+          if (!Files.exists(mainFile)) {
+            throw new IllegalStateException("main.py not found");
+          }
 
-            try {
-              context.eval(Source.newBuilder("python", mainFile.toFile()).build());
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          };
-        });
+          try {
+            context.eval(Source.newBuilder("python", mainFile.toFile()).build());
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        };
       });
+
+      log.info("Started script: {}", script.name());
     }
 
     log.info("Started scripts");
+  }
+
+  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
+  }
+
+  static String firstLetterLowerCase(String name) {
+    if (name.isEmpty()) {
+      return name;
+    }
+    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+  }
+
+  public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {
   }
 
   @RequiredArgsConstructor
