@@ -30,7 +30,6 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -38,20 +37,20 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.reflect.stream.RStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.io.IoBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -149,13 +148,6 @@ public class ScriptManager {
     ));
   }
 
-  static String firstLetterUpperCase(String name) {
-    if (name.isEmpty()) {
-      return name;
-    }
-    return Character.toUpperCase(name.charAt(0)) + name.substring(1);
-  }
-
   public void killAllScripts() {
     log.info("Stopping scripts");
 
@@ -232,21 +224,17 @@ public class ScriptManager {
     }
 
     log.info("Starting script: {}", script.name());
-    var sandboxPolicy = switch (script.language()) {
-      case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
-      case PYTHON -> SandboxPolicy.TRUSTED;
-    };
     var context = Context.newBuilder(script.language().languageId())
       .allowExperimentalOptions(true)
       .engine(Engine.newBuilder(script.language().languageId())
-        .sandbox(sandboxPolicy)
+        .sandbox(SandboxPolicy.TRUSTED)
         .option("engine.WarnInterpreterOnly", "false")
         .in(InputStream.nullInputStream())
         .out(IoBuilder.forLogger(script.name()).setLevel(Level.INFO).buildPrintStream())
         .err(IoBuilder.forLogger(script.name()).setLevel(Level.ERROR).buildPrintStream())
         .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
         .build())
-      .sandbox(sandboxPolicy)
+      .sandbox(SandboxPolicy.TRUSTED)
       .allowIO(IOAccess.newBuilder()
         .allowHostFileAccess(false)
         .allowHostSocketAccess(false)
@@ -257,6 +245,8 @@ public class ScriptManager {
         ))
         .build())
       .option("js.strict", "true")
+      .option("js.nashorn-compat", "true")
+      .option("js.ecmascript-version", "latest")
       .allowAllAccess(false)
       .allowNativeAccess(false)
       .allowCreateProcess(false)
@@ -271,7 +261,7 @@ public class ScriptManager {
 
     var scriptAPI = new ScriptAPI(script, instanceManager);
     context.getBindings(script.language().languageId())
-      .putMember("api", BeanWrapper.wrap(context.asValue(scriptAPI)));
+      .putMember("api", scriptAPI);
 
     script.runtime().set(new RuntimeComponents(
       context,
@@ -311,140 +301,6 @@ public class ScriptManager {
   public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
   }
 
-  static String firstLetterLowerCase(String name) {
-    if (name.isEmpty()) {
-      return name;
-    }
-    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
-  }
-
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {
-  }
-
-  @RequiredArgsConstructor
-  public static final class BeanWrapper implements ProxyObject {
-    private final Value delegate;
-
-    public static Object wrap(Value polyglotValue) {
-      if (polyglotValue.isHostObject()) {
-        var hostValue = polyglotValue.asHostObject();
-        if (hostValue instanceof List<?> list) {
-          var wrappedList = new ArrayList<>();
-          for (var value : list) {
-            wrappedList.add(wrap(Value.asValue(value)));
-          }
-
-          return wrappedList;
-        } else if (hostValue instanceof Map<?, ?> map) {
-          var wrappedMap = new LinkedHashMap<>();
-          for (var entry : map.entrySet()) {
-            wrappedMap.put(wrap(Value.asValue(entry.getKey())), wrap(Value.asValue(entry.getValue())));
-          }
-
-          return wrappedMap;
-        } else {
-          return new BeanWrapper(polyglotValue);
-        }
-      } else {
-        return polyglotValue;
-      }
-    }
-
-    public static Value unwrap(Value polyglotValue) {
-      if (polyglotValue.isProxyObject()
-        && polyglotValue.asProxyObject() instanceof BeanWrapper beanWrapper) {
-        return beanWrapper.delegate;
-      } else {
-        return polyglotValue;
-      }
-    }
-
-    @Override
-    public Object getMember(String key) {
-      var getter = getGetter(key);
-      if (getter != null && getter.canExecute()) {
-        return wrap(getter.execute());
-      } else {
-        return wrap(delegate.getMember(key));
-      }
-    }
-
-    @Override
-    public List<String> getMemberKeys() {
-      var list = new ArrayList<>(delegate.getMemberKeys());
-      for (var key : delegate.getMemberKeys()) {
-        if (key.startsWith("get")) {
-          list.add(firstLetterLowerCase(key.substring(3)));
-        } else if (key.startsWith("is")) {
-          list.add(firstLetterLowerCase(key.substring(2)));
-        }
-      }
-
-      return list;
-    }
-
-    @Override
-    public boolean hasMember(String key) {
-      return getGetter(key) != null || delegate.hasMember(key);
-    }
-
-    @Override
-    public void putMember(String key, Value value) {
-      var setter = getSetter(key);
-      if (setter != null && setter.canExecute()) {
-        setter.execute(value);
-      } else {
-        delegate.putMember(key, value);
-      }
-    }
-
-    private @Nullable Value getGetter(String key) {
-      Value getter = null;
-      if (doesGetterMethodExist(key) && !key.startsWith("get") && !key.startsWith("is")) {
-        getter = delegate.getMember(key);
-      }
-      if (getter == null && doesGetterMethodExist("get" + firstLetterUpperCase(key))) {
-        getter = delegate.getMember("get" + firstLetterUpperCase(key));
-      }
-      if (getter == null && doesGetterMethodExist("is" + firstLetterUpperCase(key))) {
-        getter = delegate.getMember("is" + firstLetterUpperCase(key));
-      }
-      return getter;
-    }
-
-    private @Nullable Value getSetter(String key) {
-      Value setter = null;
-      if (doesSetterMethodExist(key)) {
-        setter = delegate.getMember(key);
-      }
-      if (setter == null && doesSetterMethodExist("set" + firstLetterUpperCase(key))) {
-        setter = delegate.getMember("set" + firstLetterUpperCase(key));
-      }
-      return setter;
-    }
-
-    private boolean doesGetterMethodExist(String key) {
-      var unwrapped = unwrap(delegate);
-      if (unwrapped.isHostObject()) {
-        return Arrays.stream(unwrapped.asHostObject().getClass().getMethods())
-          .anyMatch(method -> method.getName().equals(key)
-            && method.getParameterCount() == 0
-            && method.getReturnType() != void.class);
-      } else {
-        return false;
-      }
-    }
-
-    private boolean doesSetterMethodExist(String key) {
-      var unwrapped = unwrap(delegate);
-      if (unwrapped.isHostObject()) {
-        return Arrays.stream(unwrapped.asHostObject().getClass().getMethods())
-          .anyMatch(method -> method.getName().equals(key)
-            && method.getParameterCount() == 1
-            && method.getReturnType() == void.class);
-      } else {
-        return false;
-      }
-    }
   }
 }
