@@ -18,6 +18,8 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.script.api.ScriptInstanceAPI;
+import com.soulfiremc.server.script.api.ScriptPluginAPI;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,9 @@ public class ScriptManager {
     for (var script : scripts.values()) {
       var context = Context.newBuilder(script.language().languageId())
         .allowExperimentalOptions(true)
+        .engine(Engine.newBuilder()
+          .option("engine.WarnInterpreterOnly", "false")
+          .build())
         .sandbox(switch (script.language()) {
           case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
           case PYTHON -> SandboxPolicy.TRUSTED;
@@ -105,6 +110,9 @@ public class ScriptManager {
         .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
         .currentWorkingDirectory(script.runPath().toAbsolutePath())
         .build();
+
+      context.getBindings(script.language().languageId())
+        .putMember("api", new ScriptPluginAPI(new ScriptInstanceAPI(instanceManager)));
 
       script.context().set(context);
 
