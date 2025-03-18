@@ -69,8 +69,8 @@ public record ScriptBotAPI(BotConnection connection) {
   }
 
   @HostAccess.Export
-  public ScriptEntityAPI getPlayer() {
-    return new ScriptEntityAPI(connection.dataManager().localPlayer());
+  public ScriptPlayerAPI getPlayer() {
+    return new ScriptPlayerAPI(connection.dataManager().localPlayer());
   }
 
   @HostAccess.Export

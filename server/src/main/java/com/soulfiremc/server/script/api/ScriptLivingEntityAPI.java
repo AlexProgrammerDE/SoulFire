@@ -17,24 +17,19 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
-import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import org.graalvm.polyglot.HostAccess;
 
-import java.util.List;
+public class ScriptLivingEntityAPI extends ScriptEntityAPI {
+  private final LivingEntity entity;
 
-public record ScriptLevelAPI(Level level) {
-  public String getBlockAt(int x, int y, int z) {
-    return level.getBlockState(x, y, z).blockType().key().toString();
+  public ScriptLivingEntityAPI(LivingEntity entity) {
+    super(entity);
+    this.entity = entity;
   }
 
   @HostAccess.Export
-  public List<ScriptEntityAPI> getEntities() {
-    return level.entityTracker().getEntities().stream().map(e -> switch (e) {
-      case Player player -> new ScriptPlayerAPI(player);
-      case LivingEntity livingEntity -> new ScriptLivingEntityAPI(livingEntity);
-      default -> new ScriptEntityAPI(e);
-    }).toList();
+  public void jumpFromGround() {
+    entity.jumpFromGround();
   }
 }

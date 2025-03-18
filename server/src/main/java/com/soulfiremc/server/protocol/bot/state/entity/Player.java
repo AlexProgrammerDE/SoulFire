@@ -194,7 +194,7 @@ public abstract class Player extends LivingEntity {
     }
   }
 
-  protected void closeContainer() {
+  public void closeContainer() {
     this.currentContainer = this.inventoryMenu;
   }
 

@@ -22,10 +22,21 @@ import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.graalvm.polyglot.HostAccess;
 
-public record ScriptEntityAPI(Entity entity) {
+public class ScriptEntityAPI {
+  private final Entity entity;
+
+  public ScriptEntityAPI(Entity entity) {
+    this.entity = entity;
+  }
+
   @HostAccess.Export
   public String getType() {
     return entity.entityType().key().toString();
+  }
+
+  @HostAccess.Export
+  public int getId() {
+    return entity.entityId();
   }
 
   @HostAccess.Export
