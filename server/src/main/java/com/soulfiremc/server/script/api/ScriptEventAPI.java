@@ -17,26 +17,24 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.InstanceManager;
-import org.graalvm.polyglot.HostAccess;
+import com.soulfiremc.server.api.event.EventExceptionHandler;
+import com.soulfiremc.server.api.event.SoulFireEvent;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.ASMGenerator;
 
-import java.util.List;
+public class ScriptEventAPI {
+  private final LambdaManager lambdaManager;
 
-public class ScriptInstanceAPI {
-  @HostAccess.Export
-  public final String id;
-  @HostAccess.Export
-  public final String name;
-  private final InstanceManager instanceManager;
-
-  public ScriptInstanceAPI(InstanceManager instanceManager) {
-    this.instanceManager = instanceManager;
-    this.id = instanceManager.id().toString();
-    this.name = instanceManager.friendlyNameCache().get();
-  }
-
-  @HostAccess.Export
-  public List<ScriptBotAPI> connectedBots() {
-    return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
+  public ScriptEventAPI() {
+    this.lambdaManager = LambdaManager.threadSafe(new ASMGenerator())
+      .setExceptionHandler(EventExceptionHandler.INSTANCE)
+      .setEventFilter(
+        (c, h) -> {
+          if (SoulFireEvent.class.isAssignableFrom(c)) {
+            return true;
+          } else {
+            throw new IllegalStateException("This event handler only accepts global events");
+          }
+        });
   }
 }

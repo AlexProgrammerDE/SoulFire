@@ -18,13 +18,11 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.script.api.ScriptInstanceAPI;
-import com.soulfiremc.server.script.api.ScriptPluginAPI;
+import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
@@ -52,17 +50,17 @@ public class ScriptManager {
   }
 
   @SneakyThrows
-  public void registerScript(UUID scriptId, Logger logger, ScriptLanguage language) {
-    var dataPath = instanceManager.getInstanceObjectStoragePath().resolve("script-data-" + scriptId);
-    var codePath = instanceManager.soulFireServer().getObjectStoragePath().resolve("script-code-" + scriptId);
+  public void registerScript(UUID id, String name, ScriptLanguage language) {
+    var dataPath = instanceManager.getInstanceObjectStoragePath().resolve("script-data-" + id);
+    var codePath = instanceManager.soulFireServer().getObjectStoragePath().resolve("script-code-" + id);
     Files.createDirectories(dataPath);
     Files.createDirectories(codePath);
 
-    scripts.put(scriptId, new Script(
-      scriptId,
+    scripts.put(id, new Script(
+      id,
+      name,
       dataPath,
       codePath,
-      logger,
       language,
       new AtomicReference<>()
     ));
@@ -71,33 +69,31 @@ public class ScriptManager {
   public void startScripts() {
     log.info("Starting scripts");
     for (var script : scripts.values()) {
+      var sandboxPolicy = switch (script.language()) {
+        case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
+        case PYTHON -> SandboxPolicy.TRUSTED;
+      };
       var context = Context.newBuilder(script.language().languageId())
         .allowExperimentalOptions(true)
-        .engine(Engine.newBuilder()
+        .engine(Engine.newBuilder(script.language().languageId())
+          .sandbox(sandboxPolicy)
           .option("engine.WarnInterpreterOnly", "false")
+          .in(InputStream.nullInputStream())
+          .out(IoBuilder.forLogger(script.name()).setLevel(Level.INFO).buildPrintStream())
+          .err(IoBuilder.forLogger(script.name()).setLevel(Level.ERROR).buildPrintStream())
+          .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
           .build())
-        .sandbox(switch (script.language()) {
-          case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
-          case PYTHON -> SandboxPolicy.TRUSTED;
-        })
-        .in(InputStream.nullInputStream())
-        .out(IoBuilder.forLogger(script.logger()).setLevel(Level.INFO).buildPrintStream())
-        .err(IoBuilder.forLogger(script.logger()).setLevel(Level.ERROR).buildPrintStream())
+        .sandbox(sandboxPolicy)
         .allowIO(IOAccess.newBuilder()
           .allowHostFileAccess(false)
           .allowHostSocketAccess(false)
           .fileSystem(new SandboxedFileSystem(
-            Set.of(script.runPath().toAbsolutePath()),
+            Set.of(script.dataPath().toAbsolutePath()),
             Set.of(script.codePath().toAbsolutePath(), graalResourceCache.toAbsolutePath()),
-            script.runPath().toAbsolutePath()
+            script.dataPath().toAbsolutePath()
           ))
           .build())
-        .environment("SF_SCRIPT_ID", script.scriptId().toString())
-        .environment("SF_SCRIPT_DATA_PATH", script.runPath().toAbsolutePath().toString())
-        .environment("SF_SCRIPT_CODE_PATH", script.codePath().toAbsolutePath().toString())
         .option("js.strict", "true")
-        .option("js.commonjs-require", "true")
-        .option("js.commonjs-require-cwd", script.codePath().resolve("node_modules").toAbsolutePath().toString())
         .allowAllAccess(false)
         .allowNativeAccess(false)
         .allowCreateProcess(false)
@@ -107,12 +103,11 @@ public class ScriptManager {
         .allowHostClassLoading(false)
         .allowHostAccess(HostAccess.CONSTRAINED)
         .allowEnvironmentAccess(EnvironmentAccess.NONE)
-        .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
-        .currentWorkingDirectory(script.runPath().toAbsolutePath())
+        .currentWorkingDirectory(script.dataPath().toAbsolutePath())
         .build();
 
       context.getBindings(script.language().languageId())
-        .putMember("api", new ScriptPluginAPI(new ScriptInstanceAPI(instanceManager)));
+        .putMember("api", new ScriptAPI(script, instanceManager));
 
       script.context().set(context);
 
@@ -159,6 +154,6 @@ public class ScriptManager {
     log.info("Stopped scripts");
   }
 
-  public record Script(UUID scriptId, Path runPath, Path codePath, Logger logger, ScriptLanguage language, AtomicReference<Context> context) {
+  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<Context> context) {
   }
 }

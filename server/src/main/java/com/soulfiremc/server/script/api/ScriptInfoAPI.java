@@ -15,23 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event;
+package com.soulfiremc.server.script.api;
 
-import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.lambdaevents.AHandler;
-import net.lenni0451.lambdaevents.IExceptionHandler;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.soulfiremc.server.script.ScriptManager;
+import org.graalvm.polyglot.HostAccess;
 
-@Slf4j
-public final class EventExceptionHandler implements IExceptionHandler {
-  public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
+public class ScriptInfoAPI {
+  @HostAccess.Export
+  public final String id;
+  @HostAccess.Export
+  public final String name;
+  @HostAccess.Export
+  public final String dataDirectory;
+  @HostAccess.Export
+  public final String codeDirectory;
 
-  @Override
-  public void handle(@NonNull AHandler handler, @NonNull Object event, @NonNull Throwable t) {
-    log.error(
-      "Exception while handling event {} in handler {}",
-      event.getClass().getName(),
-      handler.getClass().getName(),
-      t);
+  public ScriptInfoAPI(ScriptManager.Script script) {
+    this.id = script.scriptId().toString();
+    this.name = script.name();
+    this.dataDirectory = script.dataPath().toString();
+    this.codeDirectory = script.codePath().toString();
   }
 }

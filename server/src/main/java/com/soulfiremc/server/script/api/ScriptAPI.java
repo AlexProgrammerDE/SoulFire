@@ -17,11 +17,21 @@
  */
 package com.soulfiremc.server.script.api;
 
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.script.ScriptManager;
 import org.graalvm.polyglot.HostAccess;
 
-public record ScriptPluginAPI(ScriptInstanceAPI instanceAPI) {
+public class ScriptAPI {
   @HostAccess.Export
-  public void test() {
-    System.out.println("test");
+  public final ScriptInfoAPI script;
+  @HostAccess.Export
+  public final ScriptEventAPI event;
+  @HostAccess.Export
+  public final ScriptInstanceAPI instance;
+
+  public ScriptAPI(ScriptManager.Script script, InstanceManager instanceManager) {
+    this.script = new ScriptInfoAPI(script);
+    this.event = new ScriptEventAPI();
+    this.instance = new ScriptInstanceAPI(instanceManager);
   }
 }

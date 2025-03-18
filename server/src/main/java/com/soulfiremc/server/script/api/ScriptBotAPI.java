@@ -18,6 +18,23 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.BotConnection;
+import org.graalvm.polyglot.HostAccess;
 
-public record ScriptBotAPI(BotConnection connection) {
+public class ScriptBotAPI {
+  @HostAccess.Export
+  public final String id;
+  @HostAccess.Export
+  public final String name;
+  private final BotConnection connection;
+
+  public ScriptBotAPI(BotConnection connection) {
+    this.connection = connection;
+    this.id = connection.accountProfileId().toString();
+    this.name = connection.accountName();
+  }
+
+  @HostAccess.Export
+  public void chat(String message) {
+    connection.botControl().sendMessage(message);
+  }
 }
