@@ -18,15 +18,13 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.BotConnection;
+import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
 @SuppressWarnings("unused")
+@RequiredArgsConstructor
 public class ScriptBotAPI {
   private final BotConnection connection;
-
-  public ScriptBotAPI(BotConnection connection) {
-    this.connection = connection;
-  }
 
   @HostAccess.Export
   public String getId() {
@@ -41,6 +39,36 @@ public class ScriptBotAPI {
   @HostAccess.Export
   public void chat(String message) {
     connection.botControl().sendMessage(message);
+  }
+
+  @HostAccess.Export
+  public boolean isConnected() {
+    return connection.session().isConnected();
+  }
+
+  @HostAccess.Export
+  public boolean isDisconnected() {
+    return connection.session().isDisconnected();
+  }
+
+  @HostAccess.Export
+  public void toggleFlight() {
+    connection.botControl().toggleFlight();
+  }
+
+  @HostAccess.Export
+  public void toggleSneak() {
+    connection.botControl().toggleSneak();
+  }
+
+  @HostAccess.Export
+  public void toggleSprint() {
+    connection.botControl().toggleSprint();
+  }
+
+  @HostAccess.Export
+  public ScriptMetadataAPI getMetadata() {
+    return new ScriptMetadataAPI(connection.metadata());
   }
 
   public BotConnection getInternal() {

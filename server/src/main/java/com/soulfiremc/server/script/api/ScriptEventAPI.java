@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.api;
 
+import com.soulfiremc.server.script.ScriptManager;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
@@ -47,7 +48,12 @@ public class ScriptEventAPI {
     var listeners = eventListeners.get(event);
     if (listeners != null) {
       listeners.forEach(listener -> {
-        listener.callback.execute(eventArgs);
+        var valueEventArgs = new Object[eventArgs.length];
+        for (var i = 0; i < eventArgs.length; i++) {
+          valueEventArgs[i] = ScriptManager.BeanWrapper.wrap(listener.callback.getContext().asValue(eventArgs[i]));
+        }
+
+        listener.callback.executeVoid(valueEventArgs);
         if (listener.once) {
           listeners.remove(listener);
         }

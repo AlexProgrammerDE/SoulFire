@@ -18,17 +18,16 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.api.AttackLifecycle;
+import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
+@RequiredArgsConstructor
 public class ScriptInstanceAPI {
   private final InstanceManager instanceManager;
-
-  public ScriptInstanceAPI(InstanceManager instanceManager) {
-    this.instanceManager = instanceManager;
-  }
 
   @HostAccess.Export
   public String id() {
@@ -43,6 +42,16 @@ public class ScriptInstanceAPI {
   @HostAccess.Export
   public List<ScriptBotAPI> getConnectedBots() {
     return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
+  }
+
+  @HostAccess.Export
+  public AttackLifecycle getAttackState() {
+    return instanceManager.attackLifecycle();
+  }
+
+  @HostAccess.Export
+  public ScriptMetadataAPI getMetadata() {
+    return new ScriptMetadataAPI(instanceManager.metadata());
   }
 
   public InstanceManager getInternal() {

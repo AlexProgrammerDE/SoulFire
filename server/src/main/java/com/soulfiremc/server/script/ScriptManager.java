@@ -32,10 +32,14 @@ import com.soulfiremc.server.util.SFHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.lenni0451.reflect.stream.RStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -64,6 +68,20 @@ public class ScriptManager {
   public void handleGenericEvent(SoulFireInstanceEvent event) {
     if (event.instanceManager() == instanceManager) {
       forwardEvent(event);
+    }
+  }
+
+  private static void unlockClass(HostAccess.Builder builder, Class<?> clazz) {
+    for (var field : clazz.getFields()) {
+      builder.allowAccess(field);
+    }
+
+    for (var method : clazz.getMethods()) {
+      builder.allowAccess(method);
+    }
+
+    for (var constructor : clazz.getConstructors()) {
+      builder.allowAccess(constructor);
     }
   }
 
@@ -185,6 +203,19 @@ public class ScriptManager {
       .allowMapAccess(true)
       .allowBigIntegerNumberAccess(true);
 
+    for (var protocolState : ProtocolState.values()) {
+      var codec = MinecraftCodec.CODEC.getCodec(protocolState);
+      for (var packet : RStream.of(codec).fields().by("clientboundIds").<Map<Class<?>, Integer>>get().keySet()) {
+        unlockClass(builder, packet);
+      }
+
+      for (var packet : RStream.of(codec).fields().by("serverboundIds").<Map<Class<?>, Integer>>get().keySet()) {
+        unlockClass(builder, packet);
+      }
+    }
+
+    unlockClass(builder, Component.class);
+
     return builder.build();
   }
 
@@ -285,7 +316,7 @@ public class ScriptManager {
   }
 
   @RequiredArgsConstructor
-  static final class BeanWrapper implements ProxyObject {
+  public static final class BeanWrapper implements ProxyObject {
     private final Value delegate;
 
     public static Object wrap(Value polyglotValue) {
@@ -297,6 +328,14 @@ public class ScriptManager {
         }
       } else {
         return polyglotValue;
+      }
+    }
+
+    public static Object unwrap(Object object) {
+      if (object instanceof BeanWrapper beanWrapper) {
+        return beanWrapper.delegate;
+      } else {
+        return object;
       }
     }
 
