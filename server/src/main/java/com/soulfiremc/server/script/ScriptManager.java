@@ -70,6 +70,7 @@ public class ScriptManager {
     log.info("Starting scripts");
     for (var script : scripts.values()) {
       var context = Context.newBuilder(script.language().languageId())
+        .allowExperimentalOptions(true)
         .sandbox(switch (script.language()) {
           case JAVASCRIPT -> SandboxPolicy.CONSTRAINED;
           case PYTHON -> SandboxPolicy.TRUSTED;
@@ -81,15 +82,17 @@ public class ScriptManager {
           .allowHostFileAccess(false)
           .allowHostSocketAccess(false)
           .fileSystem(new SandboxedFileSystem(
-            Set.of(script.runPath()),
-            Set.of(script.codePath(), graalResourceCache),
-            script.runPath()
+            Set.of(script.runPath().toAbsolutePath()),
+            Set.of(script.codePath().toAbsolutePath(), graalResourceCache.toAbsolutePath()),
+            script.runPath().toAbsolutePath()
           ))
           .build())
         .environment("SF_SCRIPT_ID", script.scriptId().toString())
-        .environment("SF_SCRIPT_DATA_PATH", script.runPath().toString())
-        .environment("SF_SCRIPT_CODE_PATH", script.codePath().toString())
-        .allowExperimentalOptions(true)
+        .environment("SF_SCRIPT_DATA_PATH", script.runPath().toAbsolutePath().toString())
+        .environment("SF_SCRIPT_CODE_PATH", script.codePath().toAbsolutePath().toString())
+        .option("js.strict", "true")
+        .option("js.commonjs-require", "true")
+        .option("js.commonjs-require-cwd", script.codePath().resolve("node_modules").toAbsolutePath().toString())
         .allowNativeAccess(false)
         .allowAllAccess(false)
         .allowEnvironmentAccess(EnvironmentAccess.NONE)
@@ -97,8 +100,8 @@ public class ScriptManager {
         .allowInnerContextOptions(false)
         .allowPolyglotAccess(PolyglotAccess.NONE)
         .allowHostAccess(HostAccess.UNTRUSTED)
-        .logHandler(IoBuilder.forLogger("ScriptManager").setLevel(Level.INFO).buildOutputStream())
-        .currentWorkingDirectory(script.runPath())
+        .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
+        .currentWorkingDirectory(script.runPath().toAbsolutePath())
         .build();
 
       script.context().set(context);
