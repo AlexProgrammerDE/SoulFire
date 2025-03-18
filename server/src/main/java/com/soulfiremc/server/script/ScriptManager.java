@@ -184,13 +184,15 @@ public class ScriptManager {
   static final class BeanWrapper implements ProxyObject {
     private final Value delegate;
 
-    public static Object wrap(Value javaBean) {
-      if (javaBean.isHostObject() && javaBean.asHostObject() instanceof BeanWrapper) {
-        return javaBean;
-      } else if (javaBean.isHostObject()) {
-        return new BeanWrapper(javaBean);
+    public static Object wrap(Value polyglotValue) {
+      if (polyglotValue.isHostObject()) {
+        if (polyglotValue.asHostObject() instanceof BeanWrapper) {
+          return polyglotValue;
+        } else {
+          return new BeanWrapper(polyglotValue);
+        }
       } else {
-        return javaBean;
+        return polyglotValue;
       }
     }
 
@@ -208,8 +210,10 @@ public class ScriptManager {
     public List<String> getMemberKeys() {
       var list = new ArrayList<>(delegate.getMemberKeys());
       for (var key : delegate.getMemberKeys()) {
-        if (key.startsWith("get") || key.startsWith("is")) {
+        if (key.startsWith("get")) {
           list.add(firstLetterLowerCase(key.substring(3)));
+        } else if (key.startsWith("is")) {
+          list.add(firstLetterLowerCase(key.substring(2)));
         }
       }
 
@@ -232,18 +236,18 @@ public class ScriptManager {
     }
 
     private @Nullable Value getGetter(String key) {
-      var getter = maybeGetMember("get" + firstLetterUpperCase(key));
+      var getter = nullableMember("get" + firstLetterUpperCase(key));
       if (getter == null) {
-        getter = maybeGetMember("is" + firstLetterUpperCase(key));
+        getter = nullableMember("is" + firstLetterUpperCase(key));
       }
       return getter;
     }
 
     private @Nullable Value getSetter(String key) {
-      return maybeGetMember("set" + firstLetterUpperCase(key));
+      return nullableMember("set" + firstLetterUpperCase(key));
     }
 
-    private @Nullable Value maybeGetMember(String key) {
+    private @Nullable Value nullableMember(String key) {
       return delegate.hasMember(key) ? delegate.getMember(key) : null;
     }
   }
