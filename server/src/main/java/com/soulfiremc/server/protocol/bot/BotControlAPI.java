@@ -121,48 +121,55 @@ public final class BotControlAPI {
     return null;
   }
 
-  public boolean toggleFlight() {
-    var dataManager = connection.dataManager();
-    var abilitiesData = dataManager.localPlayer().abilitiesState();
-    if (!abilitiesData.mayfly()) {
-      throw new IllegalStateException("You can't fly! (Server said so)");
-    }
-
-    var newFly = !dataManager.localPlayer().abilitiesState().flying();
-    dataManager.localPlayer().abilitiesState().flying(newFly);
-
-    // Let the server know we are flying
-    connection.sendPacket(new ServerboundPlayerAbilitiesPacket(newFly));
-
-    return newFly;
+  public boolean isFlying() {
+    return connection.dataManager().localPlayer().abilitiesState().flying();
   }
 
-  public boolean toggleSprint() {
-    var dataManager = connection.dataManager();
-    var newSprint = !connection.controlState().sprinting();
-    connection.controlState().sprinting(newSprint);
+  public void setFlying(boolean flying) {
+    if (flying == isFlying()) {
+      return;
+    }
+
+    connection.dataManager().localPlayer().abilitiesState().flying(flying);
+
+    // Let the server know we are flying
+    connection.sendPacket(new ServerboundPlayerAbilitiesPacket(flying));
+  }
+
+  public boolean isSprinting() {
+    return connection.controlState().sprinting();
+  }
+
+  public void setSprinting(boolean sprinting) {
+    if (sprinting == isSprinting()) {
+      return;
+    }
+
+    connection.controlState().sprinting(sprinting);
 
     // Let the server know we are sprinting
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.localPlayer().entityId(),
-        newSprint ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
-
-    return newSprint;
+        connection.dataManager().localPlayer().entityId(),
+        sprinting ? PlayerState.START_SPRINTING : PlayerState.STOP_SPRINTING));
   }
 
-  public boolean toggleSneak() {
-    var dataManager = connection.dataManager();
-    var newSneak = !connection.controlState().sneaking();
-    connection.controlState().sneaking(newSneak);
+  public boolean isSneaking() {
+    return connection.controlState().sneaking();
+  }
+
+  public void setSneaking(boolean sneaking) {
+    if (sneaking == isSneaking()) {
+      return;
+    }
+
+    connection.controlState().sneaking(sneaking);
 
     // Let the server know we are sneaking
     connection.sendPacket(
       new ServerboundPlayerCommandPacket(
-        dataManager.localPlayer().entityId(),
-        newSneak ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
-
-    return newSneak;
+        connection.dataManager().localPlayer().entityId(),
+        sneaking ? PlayerState.START_SNEAKING : PlayerState.STOP_SNEAKING));
   }
 
   public void sendMessage(String message) {

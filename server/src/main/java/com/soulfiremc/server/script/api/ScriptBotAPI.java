@@ -52,18 +52,13 @@ public class ScriptBotAPI {
   }
 
   @HostAccess.Export
-  public void toggleFlight() {
-    connection.botControl().toggleFlight();
+  public void disconnect() {
+    connection.session().disconnect("Disconnected by script");
   }
 
   @HostAccess.Export
-  public void toggleSneak() {
-    connection.botControl().toggleSneak();
-  }
-
-  @HostAccess.Export
-  public void toggleSprint() {
-    connection.botControl().toggleSprint();
+  public ScriptMovementAPI getMovement() {
+    return new ScriptMovementAPI(connection);
   }
 
   @HostAccess.Export

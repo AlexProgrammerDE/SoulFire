@@ -35,7 +35,7 @@ public final class SneakCommand {
                 c,
                 bot -> {
                   bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-                    bot.botControl().toggleSneak()));
+                    bot.botControl().setSneaking(!bot.botControl().isSneaking())));
                   return Command.SINGLE_SUCCESS;
                 }))));
   }
