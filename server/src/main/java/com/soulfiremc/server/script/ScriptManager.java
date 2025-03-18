@@ -20,20 +20,21 @@ package com.soulfiremc.server.script;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.util.SFHelpers;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.io.IoBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
+import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -64,6 +65,33 @@ public class ScriptManager {
       language,
       new AtomicReference<>()
     ));
+  }
+
+  static String firstLetterUpperCase(String name) {
+    if (name.isEmpty()) {
+      return name;
+    }
+    return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+  }
+
+  public void killAllScripts() {
+    log.info("Stopping scripts");
+
+    for (var script : scripts.values()) {
+      script.context().get().close();
+    }
+
+    log.info("Stopped scripts");
+  }
+
+  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<Context> context) {
+  }
+
+  static String firstLetterLowerCase(String name) {
+    if (name.isEmpty()) {
+      return name;
+    }
+    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
   }
 
   public void startScripts() {
@@ -101,13 +129,21 @@ public class ScriptManager {
         .allowInnerContextOptions(false)
         .allowPolyglotAccess(PolyglotAccess.NONE)
         .allowHostClassLoading(false)
-        .allowHostAccess(HostAccess.CONSTRAINED)
+        .allowHostAccess(HostAccess.newBuilder(HostAccess.CONSTRAINED)
+          .allowArrayAccess(true)
+          .allowListAccess(true)
+          .allowMapAccess(true)
+          .allowBufferAccess(true)
+          .allowIterableAccess(true)
+          .allowIteratorAccess(true)
+          .allowBigIntegerNumberAccess(true)
+          .build())
         .allowEnvironmentAccess(EnvironmentAccess.NONE)
         .currentWorkingDirectory(script.dataPath().toAbsolutePath())
         .build();
 
       context.getBindings(script.language().languageId())
-        .putMember("api", new ScriptAPI(script, instanceManager));
+        .putMember("api", BeanWrapper.wrap(context.asValue(new ScriptAPI(script, instanceManager))));
 
       script.context().set(context);
 
@@ -144,16 +180,71 @@ public class ScriptManager {
     log.info("Started scripts");
   }
 
-  public void killAllScripts() {
-    log.info("Stopping scripts");
+  @RequiredArgsConstructor
+  static final class BeanWrapper implements ProxyObject {
+    private final Value delegate;
 
-    for (var script : scripts.values()) {
-      script.context().get().close();
+    public static Object wrap(Value javaBean) {
+      if (javaBean.isHostObject() && javaBean.asHostObject() instanceof BeanWrapper) {
+        return javaBean;
+      } else if (javaBean.isHostObject()) {
+        return new BeanWrapper(javaBean);
+      } else {
+        return javaBean;
+      }
     }
 
-    log.info("Stopped scripts");
-  }
+    @Override
+    public Object getMember(String key) {
+      var getter = getGetter(key);
+      if (getter != null && getter.canExecute()) {
+        return wrap(getter.execute());
+      } else {
+        return wrap(delegate.getMember(key));
+      }
+    }
 
-  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<Context> context) {
+    @Override
+    public List<String> getMemberKeys() {
+      var list = new ArrayList<>(delegate.getMemberKeys());
+      for (var key : delegate.getMemberKeys()) {
+        if (key.startsWith("get") || key.startsWith("is")) {
+          list.add(firstLetterLowerCase(key.substring(3)));
+        }
+      }
+
+      return list;
+    }
+
+    @Override
+    public boolean hasMember(String key) {
+      return getGetter(key) != null || delegate.hasMember(key);
+    }
+
+    @Override
+    public void putMember(String key, Value value) {
+      var setter = getSetter(key);
+      if (setter != null && setter.canExecute()) {
+        setter.execute(value);
+      } else {
+        delegate.putMember(key, value);
+      }
+    }
+
+    private @Nullable Value getGetter(String key) {
+      var getter = maybeGetMember("get" + firstLetterUpperCase(key));
+      if (getter == null) {
+        getter = maybeGetMember("is" + firstLetterUpperCase(key));
+      }
+      return getter;
+    }
+
+    private @Nullable Value getSetter(String key) {
+      return maybeGetMember("set" + firstLetterUpperCase(key));
+    }
+
+    private @Nullable Value maybeGetMember(String key) {
+      return delegate.hasMember(key) ? delegate.getMember(key) : null;
+    }
   }
 }

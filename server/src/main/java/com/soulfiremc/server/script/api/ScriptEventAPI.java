@@ -17,24 +17,15 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.api.event.EventExceptionHandler;
-import com.soulfiremc.server.api.event.SoulFireEvent;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.ASMGenerator;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
 public class ScriptEventAPI {
-  private final LambdaManager lambdaManager;
-
   public ScriptEventAPI() {
-    this.lambdaManager = LambdaManager.threadSafe(new ASMGenerator())
-      .setExceptionHandler(EventExceptionHandler.INSTANCE)
-      .setEventFilter(
-        (c, h) -> {
-          if (SoulFireEvent.class.isAssignableFrom(c)) {
-            return true;
-          } else {
-            throw new IllegalStateException("This event handler only accepts global events");
-          }
-        });
+  }
+
+  @HostAccess.Export
+  public void on(String event, Value callback) {
+
   }
 }

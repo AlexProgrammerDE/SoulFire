@@ -22,21 +22,30 @@ import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ScriptInstanceAPI {
-  @HostAccess.Export
-  public final String id;
-  @HostAccess.Export
-  public final String name;
   private final InstanceManager instanceManager;
 
   public ScriptInstanceAPI(InstanceManager instanceManager) {
     this.instanceManager = instanceManager;
-    this.id = instanceManager.id().toString();
-    this.name = instanceManager.friendlyNameCache().get();
   }
 
   @HostAccess.Export
-  public List<ScriptBotAPI> connectedBots() {
+  public String id() {
+    return instanceManager.id().toString();
+  }
+
+  @HostAccess.Export
+  public String name() {
+    return instanceManager.friendlyNameCache().get();
+  }
+
+  @HostAccess.Export
+  public List<ScriptBotAPI> getConnectedBots() {
     return instanceManager.getConnectedBots().stream().map(ScriptBotAPI::new).toList();
+  }
+
+  public InstanceManager getInternal() {
+    return instanceManager;
   }
 }

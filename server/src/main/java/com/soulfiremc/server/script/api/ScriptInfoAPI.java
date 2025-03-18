@@ -20,20 +20,24 @@ package com.soulfiremc.server.script.api;
 import com.soulfiremc.server.script.ScriptManager;
 import org.graalvm.polyglot.HostAccess;
 
-public class ScriptInfoAPI {
+public record ScriptInfoAPI(ScriptManager.Script script) {
   @HostAccess.Export
-  public final String id;
-  @HostAccess.Export
-  public final String name;
-  @HostAccess.Export
-  public final String dataDirectory;
-  @HostAccess.Export
-  public final String codeDirectory;
+  public String getId() {
+    return script.scriptId().toString();
+  }
 
-  public ScriptInfoAPI(ScriptManager.Script script) {
-    this.id = script.scriptId().toString();
-    this.name = script.name();
-    this.dataDirectory = script.dataPath().toString();
-    this.codeDirectory = script.codePath().toString();
+  @HostAccess.Export
+  public String getName() {
+    return script.name();
+  }
+
+  @HostAccess.Export
+  public String getDataDirectory() {
+    return script.dataPath().toString();
+  }
+
+  @HostAccess.Export
+  public String getCodeDirectory() {
+    return script.codePath().toString();
   }
 }

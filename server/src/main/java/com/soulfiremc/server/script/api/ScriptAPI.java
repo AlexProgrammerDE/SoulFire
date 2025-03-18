@@ -22,16 +22,28 @@ import com.soulfiremc.server.script.ScriptManager;
 import org.graalvm.polyglot.HostAccess;
 
 public class ScriptAPI {
-  @HostAccess.Export
-  public final ScriptInfoAPI script;
-  @HostAccess.Export
-  public final ScriptEventAPI event;
-  @HostAccess.Export
-  public final ScriptInstanceAPI instance;
+  private final ScriptInfoAPI script;
+  private final ScriptEventAPI event;
+  private final ScriptInstanceAPI instance;
 
   public ScriptAPI(ScriptManager.Script script, InstanceManager instanceManager) {
     this.script = new ScriptInfoAPI(script);
     this.event = new ScriptEventAPI();
     this.instance = new ScriptInstanceAPI(instanceManager);
+  }
+
+  @HostAccess.Export
+  public ScriptInfoAPI getScript() {
+    return script;
+  }
+
+  @HostAccess.Export
+  public ScriptEventAPI getEvent() {
+    return event;
+  }
+
+  @HostAccess.Export
+  public ScriptInstanceAPI getInstance() {
+    return instance;
   }
 }
