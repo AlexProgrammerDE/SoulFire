@@ -327,21 +327,18 @@ public class ScriptManager {
 
     public static Object wrap(Value polyglotValue) {
       if (polyglotValue.isHostObject()) {
-        if (polyglotValue.asHostObject() instanceof BeanWrapper) {
-          return polyglotValue;
-        } else {
-          return new BeanWrapper(polyglotValue);
-        }
+        return new BeanWrapper(polyglotValue);
       } else {
         return polyglotValue;
       }
     }
 
-    public static Object unwrap(Object object) {
-      if (object instanceof BeanWrapper beanWrapper) {
+    public static Value unwrap(Value polyglotValue) {
+      if (polyglotValue.isProxyObject()
+        && polyglotValue.asProxyObject() instanceof BeanWrapper beanWrapper) {
         return beanWrapper.delegate;
       } else {
-        return object;
+        return polyglotValue;
       }
     }
 
@@ -385,26 +382,52 @@ public class ScriptManager {
     }
 
     private @Nullable Value getGetter(String key) {
-      var getter = nullableMember("get" + firstLetterUpperCase(key));
-      if (getter == null) {
-        getter = nullableMember("is" + firstLetterUpperCase(key));
-      }
-      if (getter == null && isValueRecord(delegate)) {
+      Value getter = null;
+      if (doesGetterMethodExist(key) && !key.startsWith("get") && !key.startsWith("is")) {
         getter = delegate.getMember(key);
+      }
+      if (getter == null && doesGetterMethodExist("get" + firstLetterUpperCase(key))) {
+        getter = delegate.getMember("get" + firstLetterUpperCase(key));
+      }
+      if (getter == null && doesGetterMethodExist("is" + firstLetterUpperCase(key))) {
+        getter = delegate.getMember("is" + firstLetterUpperCase(key));
       }
       return getter;
     }
 
     private @Nullable Value getSetter(String key) {
-      return nullableMember("set" + firstLetterUpperCase(key));
+      Value setter = null;
+      if (doesSetterMethodExist(key)) {
+        setter = delegate.getMember(key);
+      }
+      if (setter == null && doesSetterMethodExist("set" + firstLetterUpperCase(key))) {
+        setter = delegate.getMember("set" + firstLetterUpperCase(key));
+      }
+      return setter;
     }
 
-    private @Nullable Value nullableMember(String key) {
-      return delegate.hasMember(key) ? delegate.getMember(key) : null;
+    private boolean doesGetterMethodExist(String key) {
+      var unwrapped = unwrap(delegate);
+      if (unwrapped.isHostObject()) {
+        return Arrays.stream(unwrapped.asHostObject().getClass().getMethods())
+          .anyMatch(method -> method.getName().equals(key)
+            && method.getParameterCount() == 0
+            && method.getReturnType() != void.class);
+      } else {
+        return false;
+      }
     }
 
-    private boolean isValueRecord(Value value) {
-      return value.isHostObject() && value.asHostObject() instanceof Record;
+    private boolean doesSetterMethodExist(String key) {
+      var unwrapped = unwrap(delegate);
+      if (unwrapped.isHostObject()) {
+        return Arrays.stream(unwrapped.asHostObject().getClass().getMethods())
+          .anyMatch(method -> method.getName().equals(key)
+            && method.getParameterCount() == 1
+            && method.getReturnType() == void.class);
+      } else {
+        return false;
+      }
     }
   }
 }
