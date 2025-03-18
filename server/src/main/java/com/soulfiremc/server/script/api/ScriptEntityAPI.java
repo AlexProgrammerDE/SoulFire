@@ -18,8 +18,6 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.graalvm.polyglot.HostAccess;
 
 public class ScriptEntityAPI {
@@ -67,15 +65,5 @@ public class ScriptEntityAPI {
   @HostAccess.Export
   public int getBlockZ() {
     return entity.blockPos().getZ();
-  }
-
-  @HostAccess.Export
-  public Vector3d getPos() {
-    return entity.pos();
-  }
-
-  @HostAccess.Export
-  public Vector3i getBlockPos() {
-    return entity.blockPos();
   }
 }

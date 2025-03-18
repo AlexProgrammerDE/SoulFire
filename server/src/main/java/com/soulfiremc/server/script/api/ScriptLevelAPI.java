@@ -25,6 +25,7 @@ import org.graalvm.polyglot.HostAccess;
 import java.util.List;
 
 public record ScriptLevelAPI(Level level) {
+  @HostAccess.Export
   public String getBlockAt(int x, int y, int z) {
     return level.getBlockState(x, y, z).blockType().key().toString();
   }

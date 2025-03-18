@@ -25,12 +25,12 @@ import java.util.List;
 
 public record ScriptInstanceAPI(InstanceManager instanceManager) {
   @HostAccess.Export
-  public String id() {
+  public String getId() {
     return instanceManager.id().toString();
   }
 
   @HostAccess.Export
-  public String name() {
+  public String getName() {
     return instanceManager.friendlyNameCache().get();
   }
 

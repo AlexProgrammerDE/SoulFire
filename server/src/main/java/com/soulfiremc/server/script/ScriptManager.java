@@ -327,7 +327,24 @@ public class ScriptManager {
 
     public static Object wrap(Value polyglotValue) {
       if (polyglotValue.isHostObject()) {
-        return new BeanWrapper(polyglotValue);
+        var hostValue = polyglotValue.asHostObject();
+        if (hostValue instanceof List<?> list) {
+          var wrappedList = new ArrayList<>();
+          for (var value : list) {
+            wrappedList.add(wrap(Value.asValue(value)));
+          }
+
+          return wrappedList;
+        } else if (hostValue instanceof Map<?, ?> map) {
+          var wrappedMap = new LinkedHashMap<>();
+          for (var entry : map.entrySet()) {
+            wrappedMap.put(wrap(Value.asValue(entry.getKey())), wrap(Value.asValue(entry.getValue())));
+          }
+
+          return wrappedMap;
+        } else {
+          return new BeanWrapper(polyglotValue);
+        }
       } else {
         return polyglotValue;
       }
