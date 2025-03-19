@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.webdav;
 
+import com.soulfiremc.server.SoulFireServer;
 import io.milton.http.HttpManager;
 import io.milton.http.ResourceFactory;
 import io.milton.http.fs.FileSystemResourceFactory;
@@ -25,13 +26,12 @@ import io.milton.servlet.Config;
 import io.milton.servlet.Initable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.nio.file.Path;
-
 public class SFMiltonResourceFactory implements ResourceFactory, Initable {
   private FileSystemResourceFactory fileSystemResourceFactory;
 
   @Override
   public @Nullable Resource getResource(String host, String path) {
+    System.out.println("GET " + host + " " + path);
     // Your custom logic to control file access
     // For example, restrict certain paths or validate permissions
     if (path.contains("restricted")) {
@@ -43,8 +43,9 @@ public class SFMiltonResourceFactory implements ResourceFactory, Initable {
 
   @Override
   public void init(Config config, HttpManager manager) {
+    var soulFireServer = (SoulFireServer) config.getServletContext().getAttribute("soulfire.server");
     this.fileSystemResourceFactory = new FileSystemResourceFactory(
-      Path.of(config.getInitParameter("soulfire.objectStoragePath")).toFile(), new SFMiltonSecurityManager());
+      soulFireServer.getObjectStoragePath().toFile(), new SFMiltonSecurityManager(soulFireServer));
   }
 
   @Override

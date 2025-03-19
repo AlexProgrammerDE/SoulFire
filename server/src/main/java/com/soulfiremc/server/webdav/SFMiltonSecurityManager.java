@@ -17,7 +17,42 @@
  */
 package com.soulfiremc.server.webdav;
 
-import io.milton.http.fs.NullSecurityManager;
+import com.soulfiremc.server.SoulFireServer;
+import io.milton.http.Auth;
+import io.milton.http.Request;
+import io.milton.http.SecurityManager;
+import io.milton.http.http11.auth.DigestResponse;
+import io.milton.resource.Resource;
+import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SFMiltonSecurityManager extends NullSecurityManager {
+@RequiredArgsConstructor
+public class SFMiltonSecurityManager implements SecurityManager {
+  private final SoulFireServer soulFireServer;
+
+  @Override
+  public @Nullable Object authenticate(DigestResponse digestRequest) {
+    return null;
+  }
+
+  @Override
+  public Object authenticate(String user, String password) {
+    return user;
+  }
+
+  @Override
+  public boolean authorise(Request request, Request.Method method, Auth auth, Resource resource) {
+    System.out.println("AUTH " + method + " " + resource.getName());
+    return true;
+  }
+
+  @Override
+  public String getRealm(String host) {
+    return "soulfire";
+  }
+
+  @Override
+  public boolean isDigestAllowed() {
+    return false;
+  }
 }

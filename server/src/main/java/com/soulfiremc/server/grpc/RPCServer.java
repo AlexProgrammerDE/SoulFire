@@ -160,8 +160,8 @@ public final class RPCServer {
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
-        .serviceUnder("/jetty/", JettyService.builder()
-          .handler(newServletContext(soulFireServer))
+        .serviceUnder("/webdav/", JettyService.builder()
+          .handler(newWebDAVContext(soulFireServer))
           .build())
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
@@ -179,14 +179,14 @@ public final class RPCServer {
   }
 
   @SneakyThrows
-  ServletContextHandler newServletContext(SoulFireServer soulFireServer) {
+  ServletContextHandler newWebDAVContext(SoulFireServer soulFireServer) {
     var context = new ServletContextHandler();
     context.setContextPath("/");
+    context.setAttribute("soulfire.server", soulFireServer);
 
     var servletHolder = new ServletHolder(MiltonServlet.class);
     servletHolder.setInitParameter("resource.factory.class", SFMiltonResourceFactory.class.getName());
-    servletHolder.setInitParameter("soulfire.objectStoragePath", soulFireServer.getObjectStoragePath().toString());
-    context.addServlet(servletHolder, "/webdav/*");
+    context.addServlet(servletHolder, "/*");
     return context;
   }
 
