@@ -31,15 +31,21 @@ import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.docs.DocService;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.server.healthcheck.HealthCheckService;
+import com.linecorp.armeria.server.jetty.JettyService;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.webdav.SFMiltonResourceFactory;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
+import io.milton.servlet.MiltonServlet;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -154,6 +160,9 @@ public final class RPCServer {
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
+        .serviceUnder("/jetty/", JettyService.builder()
+          .handler(newServletContext(soulFireServer))
+          .build())
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
@@ -167,6 +176,18 @@ public final class RPCServer {
     } else {
       prometheusServer = null;
     }
+  }
+
+  @SneakyThrows
+  ServletContextHandler newServletContext(SoulFireServer soulFireServer) {
+    var context = new ServletContextHandler();
+    context.setContextPath("/");
+
+    var servletHolder = new ServletHolder(MiltonServlet.class);
+    servletHolder.setInitParameter("resource.factory.class", SFMiltonResourceFactory.class.getName());
+    servletHolder.setInitParameter("soulfire.objectStoragePath", soulFireServer.getObjectStoragePath().toString());
+    context.addServlet(servletHolder, "/webdav/*");
+    return context;
   }
 
   public void start() throws IOException {
