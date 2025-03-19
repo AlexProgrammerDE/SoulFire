@@ -181,6 +181,7 @@ public final class RPCServer {
     var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
 
     var servlet = Tomcat.addServlet(ctx, "webdav", new WebdavServlet());
+    servlet.addInitParameter("readonly", "false");
     servlet.addInitParameter("listings", "true");
     ctx.addServletMappingDecoded("/*", "webdav");
 
