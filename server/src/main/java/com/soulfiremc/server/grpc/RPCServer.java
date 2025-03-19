@@ -31,21 +31,19 @@ import com.linecorp.armeria.server.cors.CorsService;
 import com.linecorp.armeria.server.docs.DocService;
 import com.linecorp.armeria.server.grpc.GrpcService;
 import com.linecorp.armeria.server.healthcheck.HealthCheckService;
-import com.linecorp.armeria.server.jetty.JettyService;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
+import com.linecorp.armeria.server.tomcat.TomcatService;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.webdav.SFMiltonResourceFactory;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
-import io.milton.servlet.MiltonServlet;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.apache.catalina.servlets.WebdavServlet;
+import org.apache.catalina.startup.Tomcat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -160,9 +158,7 @@ public final class RPCServer {
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
-        .serviceUnder("/webdav/", JettyService.builder()
-          .handler(newWebDAVContext(soulFireServer))
-          .build())
+        .serviceUnder("/webdav/", TomcatService.of(newWebDAVContext(soulFireServer)))
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
@@ -179,15 +175,18 @@ public final class RPCServer {
   }
 
   @SneakyThrows
-  ServletContextHandler newWebDAVContext(SoulFireServer soulFireServer) {
-    var context = new ServletContextHandler();
-    context.setContextPath("/");
-    context.setAttribute("soulfire.server", soulFireServer);
+  Tomcat newWebDAVContext(SoulFireServer soulFireServer) {
+    var tomcat = new Tomcat();
 
-    var servletHolder = new ServletHolder(MiltonServlet.class);
-    servletHolder.setInitParameter("resource.factory.class", SFMiltonResourceFactory.class.getName());
-    context.addServlet(servletHolder, "/*");
-    return context;
+    var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
+
+    var servlet = Tomcat.addServlet(ctx, "webdav", new WebdavServlet());
+    servlet.addInitParameter("listings", "true");
+    ctx.addServletMappingDecoded("/*", "webdav");
+
+    tomcat.start();
+
+    return tomcat;
   }
 
   public void start() throws IOException {

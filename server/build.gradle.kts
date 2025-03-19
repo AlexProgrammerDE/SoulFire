@@ -81,8 +81,6 @@ dependencies {
   annotationProcessor(libs.immutables)
 
   api(libs.bundles.armeria)
-  api(libs.bundles.jetty)
-  api(libs.milton)
   api(libs.bundles.reactor.netty)
 
   api(libs.bundles.mixins)

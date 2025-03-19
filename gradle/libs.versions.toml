@@ -86,10 +86,7 @@ armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
 armeria-grpc-protocol = { module = "com.linecorp.armeria:armeria-grpc-protocol" }
 armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
-armeria-jetty12 = { module = "com.linecorp.armeria:armeria-jetty12" }
-jetty-bom = "org.eclipse.jetty:jetty-bom:12.0.18"
-jetty-servlet = "org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.18"
-milton = "io.milton:milton-server-ce:4.0.5.2400"
+armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
@@ -115,14 +112,13 @@ junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit = "org.junit.jupiter:junit-jupiter:5.12.1"
 
 [bundles]
-bom = ["netty-bom", "armeria-bom", "protobuf-bom", "kotlin-bom", "jetty-bom"]
+bom = ["netty-bom", "armeria-bom", "protobuf-bom", "kotlin-bom"]
 log4j = ["log4j-api", "log4j-core", "log4j-slf4j2-impl", "log4j-iostreams", "log4j-jul"]
 grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty", "protobuf-util"]
 mixins = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "classtransform-additionalclassprovider"]
 kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
-armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1", "armeria-jetty12"]
-jetty = ["jetty-servlet"]
+armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1", "armeria-tomcat10"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
 hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-validator", "hibernate-hikaricp"]
 graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-python", "graalvm-lsp"]
