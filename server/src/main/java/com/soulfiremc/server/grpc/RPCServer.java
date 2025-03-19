@@ -42,7 +42,6 @@ import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.servlets.WebdavServlet;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.IOException;
@@ -180,7 +179,7 @@ public final class RPCServer {
 
     var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
 
-    var webdavServlet = Tomcat.addServlet(ctx, "webdav", new WebdavServlet());
+    var webdavServlet = Tomcat.addServlet(ctx, "webdav", new SFWebDavServlet(soulFireServer));
     webdavServlet.addInitParameter("readonly", "false");
     webdavServlet.addInitParameter("listings", "true");
 

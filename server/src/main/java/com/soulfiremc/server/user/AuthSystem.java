@@ -24,7 +24,8 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
-import io.jsonwebtoken.Jwts;
+import com.soulfiremc.server.util.RPCConstants;
+import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -46,12 +47,14 @@ public final class AuthSystem {
   private final LogServiceImpl logService;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
+  private final JwtParser parser;
   private final SessionFactory sessionFactory;
   private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
     this.logService = soulFireServer.logService();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
+    this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.settingsSource = soulFireServer.settingsSource();
     this.sessionFactory = sessionFactory;
     this.rootUserId = createRootUser();
@@ -85,7 +88,28 @@ public final class AuthSystem {
     });
   }
 
-  public Optional<SoulFireUser> authenticate(String subject, Instant issuedAt) {
+  public Optional<SoulFireUser> authenticateByHeader(String authorization) {
+    // remove authorization type prefix
+    return authenticateByToken(authorization.substring(RPCConstants.BEARER_TYPE.length()).strip());
+  }
+
+  public Optional<SoulFireUser> authenticateByToken(String token) {
+    Jws<Claims> claims;
+    try {
+      // verify token signature and parse claims
+      claims = parser.parseSignedClaims(token);
+    } catch (JwtException e) {
+      return Optional.empty();
+    }
+
+    if (claims == null) {
+      return Optional.empty();
+    }
+
+    return authenticateBySubject(claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
+  }
+
+  public Optional<SoulFireUser> authenticateBySubject(String subject, Instant issuedAt) {
     var uuid = UUID.fromString(subject);
     return sessionFactory.fromTransaction(s -> {
       var userEntity = s.find(UserEntity.class, uuid);
