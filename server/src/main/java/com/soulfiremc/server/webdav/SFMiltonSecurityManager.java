@@ -42,7 +42,6 @@ public class SFMiltonSecurityManager implements SecurityManager {
 
   @Override
   public boolean authorise(Request request, Request.Method method, Auth auth, Resource resource) {
-    System.out.println("AUTH " + method + " " + resource.getName());
     return true;
   }
 

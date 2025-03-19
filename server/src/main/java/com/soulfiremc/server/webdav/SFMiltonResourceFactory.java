@@ -31,7 +31,6 @@ public class SFMiltonResourceFactory implements ResourceFactory, Initable {
 
   @Override
   public @Nullable Resource getResource(String host, String path) {
-    System.out.println("GET " + host + " " + path);
     // Your custom logic to control file access
     // For example, restrict certain paths or validate permissions
     if (path.contains("restricted")) {
