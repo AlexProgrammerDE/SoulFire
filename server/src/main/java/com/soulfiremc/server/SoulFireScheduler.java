@@ -19,7 +19,6 @@ package com.soulfiremc.server;
 
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -41,7 +40,6 @@ public final class SoulFireScheduler implements Executor {
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final RunnableWrapper runnableWrapper;
-  @Setter
   private boolean blockNewTasks = false;
   private boolean isShutdown = false;
 
@@ -172,6 +170,10 @@ public final class SoulFireScheduler implements Executor {
       runnableWrapper.wrap(() ->
         log.error("Error in async executor", t)).run();
     }
+  }
+
+  public void blockNewTasks() {
+    blockNewTasks = true;
   }
 
   @Override

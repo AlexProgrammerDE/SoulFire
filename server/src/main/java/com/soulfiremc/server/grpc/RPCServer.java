@@ -158,7 +158,7 @@ public final class RPCServer {
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
-        .serviceUnder("/webdav/", TomcatService.of(newWebDAVContext(soulFireServer)))
+        .serviceUnder("/webdav/", new RewriteBlocker(TomcatService.of(newWebDAVContext(soulFireServer))))
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
@@ -180,10 +180,11 @@ public final class RPCServer {
 
     var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
 
-    var servlet = Tomcat.addServlet(ctx, "webdav", new WebdavServlet());
-    servlet.addInitParameter("readonly", "false");
-    servlet.addInitParameter("listings", "true");
-    ctx.addServletMappingDecoded("/*", "webdav");
+    var webdavServlet = Tomcat.addServlet(ctx, "webdav", new WebdavServlet());
+    webdavServlet.addInitParameter("readonly", "false");
+    webdavServlet.addInitParameter("listings", "true");
+
+    ctx.addServletMappingDecoded("/webdav/*", "webdav");
 
     tomcat.start();
 
