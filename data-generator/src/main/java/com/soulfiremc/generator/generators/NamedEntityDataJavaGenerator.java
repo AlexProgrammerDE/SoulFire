@@ -21,11 +21,15 @@ import com.soulfiremc.generator.util.FieldGenerationHelper;
 import com.soulfiremc.generator.util.GeneratorConstants;
 import com.soulfiremc.generator.util.MCHelper;
 import com.soulfiremc.generator.util.ResourceHelper;
+import it.unimi.dsi.fastutil.Pair;
 import lombok.SneakyThrows;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -47,7 +51,7 @@ public final class NamedEntityDataJavaGenerator implements IDataGenerator {
           .flatMap(f -> {
             var defaultEntity = MCHelper.createEntity(f.value());
             Class<?> clazz = defaultEntity.getClass();
-            Stream<String> fields = Stream.empty();
+            Stream<Pair<String, String>> fields = Stream.empty();
 
             do {
               fields = Stream.concat(fields, generateFields(clazz));
@@ -56,15 +60,16 @@ public final class NamedEntityDataJavaGenerator implements IDataGenerator {
             return fields;
           })
           .distinct()
-          .sorted()
+          .sorted(Comparator.comparing(Pair::first))
+          .map(Pair::second)
           .toArray(String[]::new)));
   }
 
   @SneakyThrows
-  private Stream<String> generateFields(Class<?> clazz) {
+  private Stream<Pair<String, String>> generateFields(Class<?> clazz) {
     var className = FieldGenerationHelper.toSnakeCase(clazz.getSimpleName());
 
-    List<String> fields = new ArrayList<>();
+    List<Pair<String, String>> fields = new ArrayList<>();
     for (var field : clazz.getDeclaredFields()) {
       if (!EntityDataAccessor.class.isAssignableFrom(field.getType())) {
         continue;
@@ -83,12 +88,18 @@ public final class NamedEntityDataJavaGenerator implements IDataGenerator {
 
       field.setAccessible(true);
       var dataValue = (EntityDataAccessor<?>) field.get(null);
-      fields.add("public static final NamedEntityData %s = register(\"%s\", %d, \"%s\");".formatted(
-        className + "__" + dataName,
+      var fieldName = className + "__" + dataName;
+      fields.add(Pair.of(fieldName, "/** Type: %s **/\n  public static final NamedEntityData %s = register(\"%s\", %d, \"%s\");".formatted(
+        FieldGenerationHelper.mapFields(EntityDataSerializers.class, EntityDataSerializer.class)
+          .filter(f -> f.value().equals(dataValue.serializer()))
+          .map(FieldGenerationHelper.FieldNameValuePair::name)
+          .findFirst()
+          .orElseThrow(),
+        fieldName,
         dataName.toLowerCase(Locale.ROOT),
         dataValue.id(),
         className.toLowerCase(Locale.ROOT)
-      ));
+      )));
     }
 
     return fields.stream();

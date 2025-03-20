@@ -145,6 +145,6 @@ public final class Shulker extends Mob {
   }
 
   private int getRawPeekAmount() {
-    return this.entityData.get(NamedEntityData.SHULKER__PEEK, MetadataTypes.INT);
+    return this.entityData.get(NamedEntityData.SHULKER__PEEK, MetadataTypes.BYTE);
   }
 }
