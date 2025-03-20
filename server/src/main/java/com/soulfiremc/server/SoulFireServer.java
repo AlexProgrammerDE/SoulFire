@@ -108,7 +108,7 @@ public final class SoulFireServer {
   private final Path baseDirectory;
   private final SFSparkPlugin sparkPlugin;
   @Getter
-  private final LogServiceImpl logService = new LogServiceImpl();
+  private final LogServiceImpl logService = new LogServiceImpl(this);
 
   public SoulFireServer(
     String host,

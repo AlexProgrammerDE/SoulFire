@@ -24,6 +24,7 @@ import io.grpc.*;
 import io.jsonwebtoken.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public final class JwtServerInterceptor implements ServerInterceptor {
   private final JwtParser parser;
@@ -67,8 +68,9 @@ public final class JwtServerInterceptor implements ServerInterceptor {
         status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
       }
       if (claims != null) {
+        var issuedAt = claims.getPayload().getIssuedAt().toInstant();
         var user = soulFireServer.authSystem().authenticate(
-          claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
+          UUID.fromString(claims.getPayload().getSubject()), issuedAt);
 
         if (user.isPresent()) {
           // set client id into current context
@@ -76,7 +78,10 @@ public final class JwtServerInterceptor implements ServerInterceptor {
             Context.current()
               .withValue(
                 ServerRPCConstants.USER_CONTEXT_KEY,
-                user.get()),
+                user.get())
+              .withValue(
+                ServerRPCConstants.ISSUED_AT_CONTEXT_KEY,
+                issuedAt),
             serverCall,
             metadata,
             serverCallHandler

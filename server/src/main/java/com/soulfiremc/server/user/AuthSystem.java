@@ -85,8 +85,7 @@ public final class AuthSystem {
     });
   }
 
-  public Optional<SoulFireUser> authenticate(String subject, Instant issuedAt) {
-    var uuid = UUID.fromString(subject);
+  public Optional<SoulFireUser> authenticate(UUID uuid, Instant issuedAt) {
     return sessionFactory.fromTransaction(s -> {
       var userEntity = s.find(UserEntity.class, uuid);
       if (userEntity == null) {
