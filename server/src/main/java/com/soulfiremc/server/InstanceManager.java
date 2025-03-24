@@ -81,15 +81,7 @@ public final class InstanceManager {
 
   public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
     this.id = instanceEntity.id();
-    this.runnableWrapper = soulFireServer.runnableWrapper().with(runnable -> () -> {
-      CURRENT.set(this);
-      try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, id.toString());
-           var ignored2 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_NAME, friendlyNameCache().get())) {
-        runnable.run();
-      } finally {
-        CURRENT.remove();
-      }
-    });
+    this.runnableWrapper = soulFireServer.runnableWrapper().with(new InstanceRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
@@ -561,6 +553,21 @@ public final class InstanceManager {
 
     public boolean hasBots() {
       return usedBots() > 0;
+    }
+  }
+
+  private record InstanceRunnableWrapper(InstanceManager instanceManager) implements SoulFireScheduler.RunnableWrapper {
+    @Override
+    public Runnable wrap(Runnable runnable) {
+      return () -> {
+        CURRENT.set(instanceManager);
+        try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, instanceManager.id().toString());
+             var ignored2 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyNameCache().get())) {
+          runnable.run();
+        } finally {
+          CURRENT.remove();
+        }
+      };
     }
   }
 }

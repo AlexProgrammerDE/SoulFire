@@ -84,14 +84,7 @@ import java.util.concurrent.TimeUnit;
 public final class SoulFireServer {
   public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
 
-  private final SoulFireScheduler.RunnableWrapper runnableWrapper = runnable -> () -> {
-    CURRENT.set(this);
-    try {
-      runnable.run();
-    } finally {
-      CURRENT.remove();
-    }
-  };
+  private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
@@ -333,5 +326,19 @@ public final class SoulFireServer {
 
   public Optional<InstanceManager> getInstance(UUID id) {
     return Optional.ofNullable(instances.get(id));
+  }
+
+  private record ServerRunnableWrapper(SoulFireServer server) implements SoulFireScheduler.RunnableWrapper {
+    @Override
+    public Runnable wrap(Runnable runnable) {
+      return () -> {
+        CURRENT.set(server);
+        try {
+          runnable.run();
+        } finally {
+          CURRENT.remove();
+        }
+      };
+    }
   }
 }

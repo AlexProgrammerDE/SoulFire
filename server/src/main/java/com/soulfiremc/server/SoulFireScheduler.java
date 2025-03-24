@@ -51,7 +51,7 @@ public final class SoulFireScheduler implements Executor {
     MANAGEMENT_SERVICE.submit(this::managementTask);
   }
 
-  public void managementTask() {
+  private void managementTask() {
     if (isShutdown) {
       return;
     }
