@@ -27,6 +27,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface SoulFireUser {
@@ -77,4 +78,6 @@ public interface SoulFireUser {
   String getEmail();
 
   UserEntity.Role getRole();
+
+  Instant getIssuedAt();
 }

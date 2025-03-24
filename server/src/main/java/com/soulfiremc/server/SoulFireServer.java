@@ -61,6 +61,7 @@ import org.pf4j.PluginManager;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -116,6 +117,12 @@ public final class SoulFireServer {
     this.baseDirectory = baseDirectory;
 
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
+
+    try {
+      Files.createDirectories(getObjectStoragePath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
     var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.select(baseDirectory));

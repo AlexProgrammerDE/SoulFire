@@ -20,11 +20,8 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.server.user.SoulFireUser;
 import io.grpc.Context;
 
-import java.time.Instant;
-
 public final class ServerRPCConstants {
   public static final Context.Key<SoulFireUser> USER_CONTEXT_KEY = Context.key("user");
-  public static final Context.Key<Instant> ISSUED_AT_CONTEXT_KEY = Context.key("issuedAt");
 
   private ServerRPCConstants() {}
 }

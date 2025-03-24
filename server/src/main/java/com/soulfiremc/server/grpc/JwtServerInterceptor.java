@@ -23,7 +23,6 @@ import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public final class JwtServerInterceptor implements ServerInterceptor {
   private final SoulFireServer soulFireServer;
@@ -57,16 +56,12 @@ public final class JwtServerInterceptor implements ServerInterceptor {
     } else {
       var user = soulFireServer.authSystem().authenticateByHeader(value);
       if (user.isPresent()) {
-        var issuedAt = claims.getPayload().getIssuedAt().toInstant();
         // set client id into current context
         return Contexts.interceptCall(
           Context.current()
             .withValue(
               ServerRPCConstants.USER_CONTEXT_KEY,
-              user.get())
-            .withValue(
-              ServerRPCConstants.ISSUED_AT_CONTEXT_KEY,
-              issuedAt),
+              user.get()),
           serverCall,
           metadata,
           serverCallHandler

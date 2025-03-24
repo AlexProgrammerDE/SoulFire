@@ -106,7 +106,10 @@ public final class AuthSystem {
       return Optional.empty();
     }
 
-    return authenticateBySubject(claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
+    return authenticateBySubject(
+      UUID.fromString(claims.getPayload().getSubject()),
+      claims.getPayload().getIssuedAt().toInstant()
+    );
   }
 
   public Optional<SoulFireUser> authenticateBySubject(UUID uuid, Instant issuedAt) {
@@ -128,7 +131,7 @@ public final class AuthSystem {
         s.merge(userEntity);
       }
 
-      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource));
+      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource, issuedAt));
     });
   }
 
@@ -160,7 +163,13 @@ public final class AuthSystem {
       .compact();
   }
 
-  private record SoulFireUserImpl(LogServiceImpl logService, UserEntity userData, SessionFactory sessionFactory, ServerSettingsSource settingsSource) implements SoulFireUser {
+  private record SoulFireUserImpl(
+    LogServiceImpl logService,
+    UserEntity userData,
+    SessionFactory sessionFactory,
+    ServerSettingsSource settingsSource,
+    Instant issuedAt
+  ) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
       return userData.id();
@@ -179,6 +188,11 @@ public final class AuthSystem {
     @Override
     public UserEntity.Role getRole() {
       return userData.role();
+    }
+
+    @Override
+    public Instant getIssuedAt() {
+      return issuedAt;
     }
 
     @Override
