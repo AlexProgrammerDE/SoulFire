@@ -228,7 +228,6 @@ public final class ViaClientSession extends ClientNetworkSession {
 
   @Override
   public void callPacketSent(Packet packet) {
-    super.callPacketSent(packet);
     botConnection.runnableWrapper().runWrapped(() -> super.callPacketSent(packet));
   }
 
