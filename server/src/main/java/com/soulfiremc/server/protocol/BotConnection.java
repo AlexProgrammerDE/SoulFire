@@ -251,6 +251,15 @@ public final class BotConnection {
     @Override
     public Runnable wrap(Runnable runnable) {
       return () -> {
+        if (CURRENT.get() != null) {
+          if (CURRENT.get() == botConnection) {
+            runnable.run();
+            return;
+          } else {
+            throw new IllegalStateException("A BotConnection is already set for this thread");
+          }
+        }
+
         CURRENT.set(botConnection);
         try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
              var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName())) {

@@ -560,6 +560,15 @@ public final class InstanceManager {
     @Override
     public Runnable wrap(Runnable runnable) {
       return () -> {
+        if (CURRENT.get() != null) {
+          if (CURRENT.get() == instanceManager) {
+            runnable.run();
+            return;
+          } else {
+            throw new IllegalStateException("An InstanceManager is already set for this thread");
+          }
+        }
+
         CURRENT.set(instanceManager);
         try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, instanceManager.id().toString());
              var ignored2 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyNameCache().get())) {
