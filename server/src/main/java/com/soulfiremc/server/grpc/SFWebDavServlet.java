@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.grpc.generated.InstancePermission;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -198,7 +200,20 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
   private boolean isForbiddenPath(final HttpServletRequest req, final String path) {
     SoulFireUser user = (SoulFireUser) req.getAttribute(SF_USER_ATTRIBUTE);
-    return user.getRole() != UserEntity.Role.ADMIN;
+    if (user.getRole() == UserEntity.Role.ADMIN) {
+      return false;
+    }
+
+    var allowedPaths = new ArrayList<String>();
+    soulFireServer.instances().values()
+      .forEach(instanceManager -> {
+        if (user.hasPermission(PermissionContext.instance(
+          InstancePermission.ACCESS_OBJECT_STORAGE, instanceManager.id()))) {
+          allowedPaths.add("/instance-" + instanceManager.id());
+        }
+      });
+
+    return allowedPaths.stream().noneMatch(path::startsWith);
   }
 
   @Override
