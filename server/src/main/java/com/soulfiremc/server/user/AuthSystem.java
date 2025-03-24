@@ -24,7 +24,6 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
-import com.soulfiremc.server.util.RPCConstants;
 import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,9 @@ import org.hibernate.SessionFactory;
 import org.slf4j.event.Level;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,8 +90,20 @@ public final class AuthSystem {
   }
 
   public Optional<SoulFireUser> authenticateByHeader(String authorization) {
-    // remove authorization type prefix
-    return authenticateByToken(authorization.substring(RPCConstants.BEARER_TYPE.length()).strip());
+    if (authorization.startsWith("Bearer ")) {
+      return authenticateByToken(authorization.substring("Bearer ".length()));
+    } else if (authorization.startsWith("Basic ")) {
+      var credentials = authorization.substring("Basic ".length());
+      var decoded = new String(Base64.getDecoder().decode(credentials), StandardCharsets.UTF_8);
+      var parts = decoded.split(":", 2);
+      if (parts.length != 2) {
+        return Optional.empty();
+      }
+
+      return authenticateByToken(parts[1]);
+    } else {
+      return Optional.empty();
+    }
   }
 
   public Optional<SoulFireUser> authenticateByToken(String token) {
