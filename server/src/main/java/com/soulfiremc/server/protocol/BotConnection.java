@@ -106,15 +106,7 @@ public final class BotConnection {
     this.minecraftAccount = minecraftAccount;
     this.accountProfileId = minecraftAccount.profileId();
     this.accountName = minecraftAccount.lastKnownName();
-    this.runnableWrapper = instanceManager.runnableWrapper().with(runnable -> () -> {
-      CURRENT.set(this);
-      try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, this.accountProfileId.toString());
-           var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, this.accountName)) {
-        runnable.run();
-      } finally {
-        CURRENT.remove();
-      }
-    });
+    this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.protocol = protocol;
     this.resolvedAddress = resolvedAddress;
@@ -253,5 +245,29 @@ public final class BotConnection {
 
   public Optional<PlayerListEntry> getEntityProfile(UUID uuid) {
     return Optional.ofNullable(dataManager.playerListState().entries().get(uuid));
+  }
+
+  private record BotRunnableWrapper(BotConnection botConnection) implements SoulFireScheduler.RunnableWrapper {
+    @Override
+    public Runnable wrap(Runnable runnable) {
+      return () -> {
+        if (CURRENT.get() != null) {
+          if (CURRENT.get() == botConnection) {
+            runnable.run();
+            return;
+          } else {
+            throw new IllegalStateException("A BotConnection is already set for this thread");
+          }
+        }
+
+        CURRENT.set(botConnection);
+        try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
+             var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName())) {
+          runnable.run();
+        } finally {
+          CURRENT.remove();
+        }
+      };
+    }
   }
 }

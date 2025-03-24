@@ -109,8 +109,7 @@ public final class AuthSystem {
     return authenticateBySubject(claims.getPayload().getSubject(), claims.getPayload().getIssuedAt().toInstant());
   }
 
-  public Optional<SoulFireUser> authenticateBySubject(String subject, Instant issuedAt) {
-    var uuid = UUID.fromString(subject);
+  public Optional<SoulFireUser> authenticateBySubject(UUID uuid, Instant issuedAt) {
     return sessionFactory.fromTransaction(s -> {
       var userEntity = s.find(UserEntity.class, uuid);
       if (userEntity == null) {

@@ -84,14 +84,7 @@ import java.util.concurrent.TimeUnit;
 public final class SoulFireServer {
   public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
 
-  private final SoulFireScheduler.RunnableWrapper runnableWrapper = runnable -> () -> {
-    CURRENT.set(this);
-    try {
-      runnable.run();
-    } finally {
-      CURRENT.remove();
-    }
-  };
+  private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
@@ -108,7 +101,7 @@ public final class SoulFireServer {
   private final Path baseDirectory;
   private final SFSparkPlugin sparkPlugin;
   @Getter
-  private final LogServiceImpl logService = new LogServiceImpl();
+  private final LogServiceImpl logService = new LogServiceImpl(this);
 
   public SoulFireServer(
     String host,
@@ -337,5 +330,28 @@ public final class SoulFireServer {
 
   public Optional<InstanceManager> getInstance(UUID id) {
     return Optional.ofNullable(instances.get(id));
+  }
+
+  private record ServerRunnableWrapper(SoulFireServer server) implements SoulFireScheduler.RunnableWrapper {
+    @Override
+    public Runnable wrap(Runnable runnable) {
+      return () -> {
+        if (CURRENT.get() != null) {
+          if (CURRENT.get() == server) {
+            runnable.run();
+            return;
+          } else {
+            throw new IllegalStateException("A SoulFireServer is already set for this thread");
+          }
+        }
+
+        CURRENT.set(server);
+        try {
+          runnable.run();
+        } finally {
+          CURRENT.remove();
+        }
+      };
+    }
   }
 }

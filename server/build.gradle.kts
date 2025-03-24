@@ -89,6 +89,7 @@ dependencies {
 
   // For database support
   api(libs.bundles.hibernate)
+  api(libs.expressly)
   api(libs.hikaricp)
   api(libs.sqlite)
   api(libs.mariadb)

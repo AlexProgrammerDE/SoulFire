@@ -18,9 +18,11 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -30,12 +32,15 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
+  private final SoulFireServer soulFireServer;
   private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
-  public LogServiceImpl() {
+  public LogServiceImpl(SoulFireServer soulFireServer) {
+    this.soulFireServer = soulFireServer;
     SFLogAppender.INSTANCE.logConsumers().add(this::broadcastMessage);
   }
 
@@ -131,14 +136,19 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     });
 
     try {
+      var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
+      var issuedAt = ServerRPCConstants.ISSUED_AT_CONTEXT_KEY.get();
+      var user = new CachedLazyObject<>(() -> soulFireServer.authSystem().authenticate(userId, issuedAt), 1, TimeUnit.SECONDS);
       EventPredicate predicate = switch (request.getScopeCase()) {
         case GLOBAL -> event ->
-          ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
+          user.get().isPresent()
+            && user.get().get().hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
         case INSTANCE -> {
           var instanceId = UUID.fromString(request.getInstance().getInstanceId());
           yield event ->
-            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId))
-              && instanceId.equals(event.instanceId());
+            instanceId.equals(event.instanceId())
+              && user.get().isPresent()
+              && user.get().get().hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
         }
         case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
       };

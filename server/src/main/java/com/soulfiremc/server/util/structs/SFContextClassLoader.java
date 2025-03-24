@@ -38,8 +38,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 public final class SFContextClassLoader extends URLClassLoader {
-  // Prevent infinite loop when plugins are looking for classes inside this class loader
-  private static final ThreadLocal<Boolean> PREVENT_LOOP = ThreadLocal.withInitial(() -> false);
   private final List<ClassLoader> childClassLoaders = new ArrayList<>();
 
   @SneakyThrows
@@ -50,10 +48,6 @@ public final class SFContextClassLoader extends URLClassLoader {
     var constantsClass = loadClass("com.soulfiremc.launcher.SoulFireClassloaderConstants");
     var pluginUrlsField = constantsClass.getField("CHILD_CLASSLOADER_CONSUMER");
     pluginUrlsField.set(null, (Consumer<ClassLoader>) childClassLoaders::add);
-  }
-
-  private static ClassLoader getParentClassLoader() {
-    return ClassLoader.getSystemClassLoader().getParent();
   }
 
   private static String nameToPath(String name) {
@@ -88,58 +82,8 @@ public final class SFContextClassLoader extends URLClassLoader {
     }
   }
 
-  @Override
-  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    synchronized (getClassLoadingLock(name)) {
-      // First, check if the class has already been loaded
-      var c = findLoadedClass(name);
-      if (c == null) {
-        try {
-          c = getPlatformClassLoader().loadClass(name);
-        } catch (ClassNotFoundException ignored) {
-          // Ignore
-        }
-
-        // In the next step, we pretend we own the classes
-        // of either the parent or the child classloaders
-        if (c == null) {
-          c = loadParentClass(name);
-          if (c == null) {
-            if (PREVENT_LOOP.get()) {
-              // This classloader -> plugin classloader -> delegates back to this classloader -> tries to get it from the plugin classloader again
-              // We don't want to loop infinitely
-              throw new ClassNotFoundException(name);
-            }
-
-            PREVENT_LOOP.set(true);
-            try {
-              // Check if child class loaders can load the class
-              for (var childClassLoader : childClassLoaders) {
-                try {
-                  var pluginClass = childClassLoader.loadClass(name);
-                  if (pluginClass != null) {
-                    return pluginClass;
-                  }
-                } catch (ClassNotFoundException ignored) {
-                  // Ignore
-                }
-              }
-
-              throw new ClassNotFoundException(name);
-            } finally {
-              PREVENT_LOOP.set(false);
-            }
-          }
-        }
-      }
-
-      // Resolve the class if requested
-      if (resolve) {
-        resolveClass(c);
-      }
-
-      return c;
-    }
+  private static boolean hasResource(ClassLoader classLoader, String className) {
+    return classLoader.getResource(nameToPath(className)) != null;
   }
 
   private @Nullable Class<?> loadParentClass(String name) {
@@ -245,6 +189,53 @@ public final class SFContextClassLoader extends URLClassLoader {
       return inputStream.readAllBytes();
     } catch (IOException ignored) {
       return null;
+    }
+  }
+
+  @Override
+  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    synchronized (getClassLoadingLock(name)) {
+      // First, check if the class has already been loaded
+      var c = findLoadedClass(name);
+      if (c == null) {
+        try {
+          c = getPlatformClassLoader().loadClass(name);
+        } catch (ClassNotFoundException ignored) {
+          // Ignore
+        }
+
+        // In the next step, we pretend we own the classes
+        // of either the parent or the child classloaders
+        if (c == null) {
+          c = loadParentClass(name);
+          if (c == null) {
+            // Check if child class loaders can load the class
+            for (var childClassLoader : childClassLoaders) {
+              if (!hasResource(childClassLoader, name)) {
+                continue;
+              }
+
+              try {
+                var pluginClass = childClassLoader.loadClass(name);
+                if (pluginClass != null) {
+                  return pluginClass;
+                }
+              } catch (ClassNotFoundException ignored) {
+                // Ignore
+              }
+            }
+
+            throw new ClassNotFoundException(name);
+          }
+        }
+      }
+
+      // Resolve the class if requested
+      if (resolve) {
+        resolveClass(c);
+      }
+
+      return c;
     }
   }
 

@@ -43,6 +43,7 @@ import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.network.NetworkConstants;
 import org.geysermc.mcprotocollib.network.event.session.PacketSendingEvent;
+import org.geysermc.mcprotocollib.network.event.session.SessionEvent;
 import org.geysermc.mcprotocollib.network.helper.NettyHelper;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import org.geysermc.mcprotocollib.network.netty.AutoReadFlowControlHandler;
@@ -211,13 +212,24 @@ public final class ViaClientSession extends ClientNetworkSession {
   }
 
   @Override
+  public void callEvent(SessionEvent event) {
+    botConnection.runnableWrapper().runWrapped(() -> super.callEvent(event));
+  }
+
+  @Override
   public void callPacketReceived(Packet packet) {
     if (packet instanceof ClientboundDelimiterPacket) {
       // Block or unlock packets for processing
       delimiterBlockProcessing = !delimiterBlockProcessing;
     }
 
-    super.callPacketReceived(packet);
+    botConnection.runnableWrapper().runWrapped(() -> super.callPacketReceived(packet));
+  }
+
+  @Override
+  public void callPacketSent(Packet packet) {
+    super.callPacketSent(packet);
+    botConnection.runnableWrapper().runWrapped(() -> super.callPacketSent(packet));
   }
 
   public void tick() {
