@@ -52,6 +52,7 @@ message InstanceListResponse {
     string friendly_name = 2;
     string icon = 5;
     InstanceState state = 3;
+    repeated InstancePermissionState instance_permissions = 4;
   }
 
   repeated Instance instances = 1;
