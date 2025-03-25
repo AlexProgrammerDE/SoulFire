@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
@@ -89,15 +90,24 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var users = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity", UserEntity.class).list());
 
       responseObserver.onNext(UserListResponse.newBuilder()
-        .addAllUsers(users.stream().map(user -> UserListResponse.User.newBuilder()
-            .setId(user.id().toString())
-            .setUsername(user.username())
-            .setEmail(user.email())
-            .setRole(switch (user.role()) {
-              case ADMIN -> UserRole.ADMIN;
-              case USER -> UserRole.USER;
-            })
-            .build())
+        .addAllUsers(users.stream().map(user -> {
+            var result = UserListResponse.User.newBuilder()
+              .setId(user.id().toString())
+              .setUsername(user.username())
+              .setEmail(user.email())
+              .setRole(switch (user.role()) {
+                case ADMIN -> UserRole.ADMIN;
+                case USER -> UserRole.USER;
+              })
+              .setCreatedAt(Timestamps.fromMillis(user.createdAt().toEpochMilli()))
+              .setUpdatedAt(Timestamps.fromMillis(user.updatedAt().toEpochMilli()))
+              .setMinIssuedAt(Timestamps.fromMillis(user.minIssuedAt().toEpochMilli()));
+            if (user.lastLoginAt() != null) {
+              result.setLastLoginAt(Timestamps.fromMillis(user.lastLoginAt().toEpochMilli()));
+            }
+
+            return result.build();
+          })
           .toList())
         .build());
       responseObserver.onCompleted();
@@ -117,14 +127,21 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         throw new IllegalArgumentException("User not found: " + request.getId());
       }
 
-      responseObserver.onNext(UserInfoResponse.newBuilder()
+      var result = UserInfoResponse.newBuilder()
         .setUsername(user.username())
         .setEmail(user.email())
         .setRole(switch (user.role()) {
           case ADMIN -> UserRole.ADMIN;
           case USER -> UserRole.USER;
         })
-        .build());
+        .setCreatedAt(Timestamps.fromMillis(user.createdAt().toEpochMilli()))
+        .setUpdatedAt(Timestamps.fromMillis(user.updatedAt().toEpochMilli()))
+        .setMinIssuedAt(Timestamps.fromMillis(user.minIssuedAt().toEpochMilli()));
+      if (user.lastLoginAt() != null) {
+        result.setLastLoginAt(Timestamps.fromMillis(user.lastLoginAt().toEpochMilli()));
+      }
+
+      responseObserver.onNext(result.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting user info", t);

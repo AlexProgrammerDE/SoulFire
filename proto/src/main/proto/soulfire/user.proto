@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
+import "google/protobuf/timestamp.proto";
 
 message UserCreateRequest {
   string username = 1;
@@ -33,6 +34,10 @@ message UserListResponse {
     string username = 2;
     UserRole role = 3;
     string email = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    optional google.protobuf.Timestamp last_login_at = 7;
+    google.protobuf.Timestamp min_issued_at = 8;
   }
 
   repeated User users = 1;
@@ -46,6 +51,10 @@ message UserInfoResponse {
   string username = 1;
   UserRole role = 2;
   string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  optional google.protobuf.Timestamp last_login_at = 6;
+  google.protobuf.Timestamp min_issued_at = 7;
 }
 
 // Invalidate all sessions for a user, effectively logging them out of all devices.
