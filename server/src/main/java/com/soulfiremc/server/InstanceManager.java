@@ -35,7 +35,6 @@ import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.script.ScriptLanguage;
 import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
@@ -56,7 +55,6 @@ import org.hibernate.SessionFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -111,7 +109,7 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), "Test", ScriptLanguage.JAVASCRIPT);
+    // this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), "Test", ScriptLanguage.JAVASCRIPT);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
