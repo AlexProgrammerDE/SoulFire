@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.openai.models.chat.completions.*;
+import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -174,7 +175,7 @@ public final class AICaptchaSolver extends InternalPlugin {
           Extract the text from the CAPTCHA image.
           Only respond with the text exactly like in the image.
           Do not write anything except the text.""")
-        .textarea(true)
+        .type(StringSetting.InputType.TEXTAREA)
         .build();
     public static final StringProperty MODEL =
       ImmutableStringProperty.builder()

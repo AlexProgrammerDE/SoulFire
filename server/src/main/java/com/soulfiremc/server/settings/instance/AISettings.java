@@ -20,6 +20,7 @@ package com.soulfiremc.server.settings.instance;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.ClientOptions;
+import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
@@ -51,7 +52,7 @@ public final class AISettings implements SettingsObject {
       .uiName("API Key")
       .description("API key or none if using a custom provider")
       .defaultValue("")
-      .secret(true)
+      .type(StringSetting.InputType.PASSWORD)
       .build();
   public static final IntProperty REQUEST_TIMEOUT =
     ImmutableIntProperty.builder()

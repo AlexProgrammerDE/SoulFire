@@ -124,12 +124,24 @@ enum UserRole {
 }
 
 message StringSetting {
+  enum InputType {
+    TEXT = 0;
+    PASSWORD = 1;
+    EMAIL = 2;
+    SEARCH = 3;
+    TEL = 4;
+    URL = 5;
+    TEXTAREA = 6;
+  }
+
   string ui_name = 1;
   string description = 2;
   string def = 3;
-  bool secret = 4;
-  bool textarea = 5;
+  InputType input_type = 10;
   string placeholder = 6;
+  int32 min_length = 7;
+  int32 max_length = 8;
+  string pattern = 9;
 }
 
 message IntSetting {

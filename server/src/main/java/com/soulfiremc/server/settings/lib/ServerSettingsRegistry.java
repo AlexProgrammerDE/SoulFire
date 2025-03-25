@@ -89,9 +89,11 @@ public final class ServerSettingsRegistry {
       .setUiName(property.uiName())
       .setDescription(property.description())
       .setDef(property.defaultValue())
-      .setSecret(property.secret())
-      .setTextarea(property.textarea())
+      .setInputType(property.type())
       .setPlaceholder(property.placeholder())
+      .setMinLength(property.minLength())
+      .setMaxLength(property.maxLength())
+      .setPattern(property.pattern())
       .build();
   }
 

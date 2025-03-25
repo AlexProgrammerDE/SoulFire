@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.grpc.generated.StringSetting;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -31,17 +32,27 @@ public non-sealed abstract class StringProperty implements Property {
   public abstract String defaultValue();
 
   @Value.Default
-  public boolean secret() {
-    return false;
-  }
-
-  @Value.Default
-  public boolean textarea() {
-    return false;
+  public StringSetting.InputType type() {
+    return StringSetting.InputType.TEXT;
   }
 
   @Value.Default
   public String placeholder() {
     return "";
+  }
+
+  @Value.Default
+  public int minLength() {
+    return 0;
+  }
+
+  @Value.Default
+  public int maxLength() {
+    return Integer.MAX_VALUE;
+  }
+
+  @Value.Default
+  public String pattern() {
+    return ".*";
   }
 }

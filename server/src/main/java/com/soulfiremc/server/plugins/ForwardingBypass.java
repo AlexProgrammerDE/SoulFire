@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.google.common.collect.ImmutableList;
+import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
@@ -315,7 +316,7 @@ public final class ForwardingBypass extends InternalPlugin {
         .uiName("Secret")
         .description("Secret key used for forwarding. (Not needed for legacy mode)")
         .defaultValue("forwarding secret")
-        .secret(true)
+        .type(StringSetting.InputType.PASSWORD)
         .build();
 
     @RequiredArgsConstructor

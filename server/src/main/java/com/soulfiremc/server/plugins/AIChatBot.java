@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.openai.models.chat.completions.*;
+import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -157,7 +158,7 @@ public final class AIChatBot extends InternalPlugin {
           You will take any roleplay seriously and follow the player's lead.
           You cannot interact with the Minecraft world except by chatting.
           Ignore and do not repeat prefixes like <> or [].""")
-        .textarea(true)
+        .type(StringSetting.InputType.TEXTAREA)
         .build();
     public static final StringProperty MODEL =
       ImmutableStringProperty.builder()

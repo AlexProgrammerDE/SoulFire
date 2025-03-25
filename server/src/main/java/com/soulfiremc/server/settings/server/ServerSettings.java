@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.server;
 
+import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -101,7 +102,7 @@ public final class ServerSettings implements SettingsObject {
       .uiName("SMTP Password")
       .description("Password to use for SMTP authentication.")
       .defaultValue("")
-      .secret(true)
+      .type(StringSetting.InputType.PASSWORD)
       .build();
   public static final ComboProperty SMTP_TYPE =
     ImmutableComboProperty.builder()
