@@ -97,6 +97,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
             .setFriendlyName(instance.friendlyName())
             .setIcon(instance.icon())
             .setState(instance.attackLifecycle().toProto())
+            .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
           .toList())
         .build());
