@@ -95,7 +95,7 @@ public final class RPCServer {
           new JwtServerInterceptor(soulFireServer)
         ))
         .addService(soulFireServer.logService())
-        .addService(new ConfigServiceImpl(soulFireServer))
+        .addService(new ConfigServiceImpl())
         .addService(new CommandServiceImpl(soulFireServer))
         .addService(new InstanceServiceImpl(soulFireServer))
         .addService(new MCAuthServiceImpl(soulFireServer))

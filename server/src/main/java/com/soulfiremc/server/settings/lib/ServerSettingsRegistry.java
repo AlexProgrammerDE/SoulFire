@@ -217,7 +217,7 @@ public final class ServerSettingsRegistry {
         .setIconId(namespaceRegistry.iconId);
 
       if (namespaceRegistry.owningPlugin != null) {
-        settingsPageBuilder.setOwningPlugin(namespaceRegistry.owningPlugin.id());
+        settingsPageBuilder.setOwningPlugin(namespaceRegistry.owningPlugin.toProto());
       }
 
       if (namespaceRegistry.enabledProperty != null) {
