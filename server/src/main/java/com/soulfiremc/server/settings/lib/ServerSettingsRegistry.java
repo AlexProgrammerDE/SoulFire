@@ -129,17 +129,15 @@ public final class ServerSettingsRegistry {
   /**
    * Registers an internal class with the settings registry.
    * This is for classes associated to internal settings.
+   * They need to be handled explicitly by the client.
    *
    * @param clazz    The class to register
-   * @param pageName The name of the page
-   * @param iconId   The icon id
-   *                 Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
    * @return The registry
    */
   @This
   @ApiStatus.Internal
-  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName, String iconId) {
-    return addPage(clazz, pageName, null, iconId, null);
+  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz) {
+    return addPage(clazz, "Built-in Page", null, "triangle-alert", null);
   }
 
   /**

@@ -166,8 +166,8 @@ public final class SoulFireServer {
 
     var serverSettingsRegistryFuture = scheduler.supplyAsync(() -> {
       var registry = new ServerSettingsRegistry()
-        .addInternalPage(ServerSettings.class, "Server Settings", "server")
-        .addInternalPage(DevSettings.class, "Dev Settings", "bug");
+        .addInternalPage(ServerSettings.class)
+        .addInternalPage(DevSettings.class);
 
       SoulFireAPI.postEvent(new ServerSettingsRegistryInitEvent(this, registry));
 
@@ -176,10 +176,10 @@ public final class SoulFireServer {
     var instanceSettingsRegistryFuture = viaStart.thenApply(ignored -> {
       var registry = new ServerSettingsRegistry()
         // Needs Via loaded to have all protocol versions
-        .addInternalPage(BotSettings.class, "Bot Settings", "bot")
-        .addInternalPage(AccountSettings.class, "Account Settings", "users")
-        .addInternalPage(ProxySettings.class, "Proxy Settings", "waypoints")
-        .addInternalPage(AISettings.class, "AI Settings", "sparkles");
+        .addInternalPage(BotSettings.class)
+        .addInternalPage(AccountSettings.class)
+        .addInternalPage(ProxySettings.class)
+        .addInternalPage(AISettings.class);
 
       SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
 
