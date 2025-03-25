@@ -19,6 +19,7 @@ package com.soulfiremc.server.database;
 
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,8 +29,10 @@ import lombok.Setter;
 @Table(name = "server_config")
 public final class ServerConfigEntity {
   @Id
+  @NotNull(message = "ID cannot be null")
   private Long id = 1L;
 
+  @NotNull(message = "Settings cannot be null")
   @Convert(converter = ServerSettingsConverter.class)
   @Column(nullable = false)
   private ServerSettingsImpl settings = ServerSettingsImpl.EMPTY;

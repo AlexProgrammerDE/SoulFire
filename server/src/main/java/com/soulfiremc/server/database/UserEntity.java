@@ -20,6 +20,7 @@ package com.soulfiremc.server.database;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,6 +48,7 @@ public final class UserEntity {
   @Column(nullable = false, unique = true)
   private String email;
 
+  @NotNull(message = "Role cannot be null")
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
@@ -62,6 +64,7 @@ public final class UserEntity {
   @Nullable
   private Instant lastLoginAt;
 
+  @NotNull(message = "Minimum issued at timestamp cannot be null")
   @CreationTimestamp
   @Column(nullable = false)
   private Instant minIssuedAt;

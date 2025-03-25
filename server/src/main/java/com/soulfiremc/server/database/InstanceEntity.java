@@ -22,6 +22,7 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.util.SFHelpers;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -63,14 +64,17 @@ public final class InstanceEntity {
   @Column(nullable = false, length = 64)
   private String icon;
 
+  @NotNull(message = "Owner cannot be null")
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private UserEntity owner;
 
+  @NotNull(message = "Attack lifecycle cannot be null")
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
+  @NotNull(message = "Settings cannot be null")
   @JdbcTypeCode(SqlTypes.JSON)
   @Convert(converter = InstanceSettingsConverter.class)
   @Column(nullable = false)

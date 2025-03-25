@@ -18,6 +18,7 @@
 package com.soulfiremc.server.database;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,6 +37,7 @@ public final class InstanceAuditLogEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull(message = "Audit log type cannot be null")
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private AuditLogType type;
@@ -44,10 +46,12 @@ public final class InstanceAuditLogEntity {
   @Nullable
   private String data;
 
+  @NotNull(message = "Instance cannot be null")
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private InstanceEntity instance;
 
+  @NotNull(message = "User cannot be null")
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(nullable = false)
   private UserEntity user;
