@@ -96,9 +96,8 @@ public final class CLIManager {
   @SuppressWarnings("unchecked")
   private void registerOptions(CommandLine.Model.CommandSpec targetCommandSpec) {
     for (var page :
-      rpcClient
-        .configStubBlocking()
-        .getClientData(ClientDataRequest.getDefaultInstance())
+      rpcClient.instanceStubBlocking()
+        .getInstanceInfo(InstanceInfoRequest.newBuilder().setId(cliInstanceId.toString()).build())
         .getInstanceSettingsList()) {
       for (var entry : page.getEntriesList()) {
         var propertyKey = new PropertyKey(page.getNamespace(), entry.getKey());

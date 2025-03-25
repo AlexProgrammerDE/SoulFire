@@ -69,7 +69,7 @@ public final class ExportMapCommand {
           var image = mapDataState.toBufferedImage();
           var fileName = "map_%d_%d_%s.png".formatted(currentTime, mapId, bot.accountName());
           try {
-            var mapsDirectory = SFPathConstants.getMapsDirectory(bot.instanceManager().getObjectStoragePath());
+            var mapsDirectory = SFPathConstants.getMapsDirectory(bot.instanceManager().getInstanceObjectStoragePath());
             Files.createDirectories(mapsDirectory);
             var file = mapsDirectory.resolve(fileName);
             ImageIO.write(image, "png", file.toFile());

@@ -86,6 +86,7 @@ armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
 armeria-grpc-protocol = { module = "com.linecorp.armeria:armeria-grpc-protocol" }
 armeria-prometheus1 = { module = "com.linecorp.armeria:armeria-prometheus1" }
+armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
@@ -106,6 +107,7 @@ kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.1.20"
 graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
+graalvm-lsp = "org.graalvm.tools:lsp:23.0.7"
 angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -118,7 +120,7 @@ grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty", "protobuf-util
 mixins = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "classtransform-additionalclassprovider"]
 kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
-armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1"]
+armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1", "armeria-tomcat10"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
 hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-hikaricp", "hibernate-validator", "hibernate-validator-cdi"]
-graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-python"]
+graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-python", "graalvm-lsp"]

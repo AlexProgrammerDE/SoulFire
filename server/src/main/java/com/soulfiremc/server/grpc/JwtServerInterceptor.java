@@ -21,17 +21,13 @@ import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
-import io.jsonwebtoken.*;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public final class JwtServerInterceptor implements ServerInterceptor {
-  private final JwtParser parser;
   private final SoulFireServer soulFireServer;
 
   public JwtServerInterceptor(SoulFireServer soulFireServer) {
-    this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.soulFireServer = soulFireServer;
   }
 
@@ -55,40 +51,23 @@ public final class JwtServerInterceptor implements ServerInterceptor {
     var value = metadata.get(RPCConstants.AUTHORIZATION_METADATA_KEY);
     if (value == null) {
       status = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
-    } else if (!value.startsWith(RPCConstants.BEARER_TYPE)) {
+    } else if (!value.startsWith("Bearer ") && !value.startsWith("Basic ")) {
       status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
     } else {
-      Jws<Claims> claims = null;
-      // remove authorization type prefix
-      var token = value.substring(RPCConstants.BEARER_TYPE.length()).strip();
-      try {
-        // verify token signature and parse claims
-        claims = parser.parseSignedClaims(token);
-      } catch (JwtException e) {
-        status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
-      }
-      if (claims != null) {
-        var issuedAt = claims.getPayload().getIssuedAt().toInstant();
-        var user = soulFireServer.authSystem().authenticate(
-          UUID.fromString(claims.getPayload().getSubject()), issuedAt);
-
-        if (user.isPresent()) {
-          // set client id into current context
-          return Contexts.interceptCall(
-            Context.current()
-              .withValue(
-                ServerRPCConstants.USER_CONTEXT_KEY,
-                user.get())
-              .withValue(
-                ServerRPCConstants.ISSUED_AT_CONTEXT_KEY,
-                issuedAt),
-            serverCall,
-            metadata,
-            serverCallHandler
-          );
-        } else {
-          status = Status.UNAUTHENTICATED.withDescription("User not found");
-        }
+      var user = soulFireServer.authSystem().authenticateByHeader(value);
+      if (user.isPresent()) {
+        // set client id into current context
+        return Contexts.interceptCall(
+          Context.current()
+            .withValue(
+              ServerRPCConstants.USER_CONTEXT_KEY,
+              user.get()),
+          serverCall,
+          metadata,
+          serverCallHandler
+        );
+      } else {
+        status = Status.UNAUTHENTICATED.withDescription("User not found or invalid token");
       }
     }
 

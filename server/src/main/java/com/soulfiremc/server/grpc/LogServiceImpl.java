@@ -137,8 +137,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      var issuedAt = ServerRPCConstants.ISSUED_AT_CONTEXT_KEY.get();
-      var user = new CachedLazyObject<>(() -> soulFireServer.authSystem().authenticate(userId, issuedAt), 1, TimeUnit.SECONDS);
+      var issuedAt = ServerRPCConstants.USER_CONTEXT_KEY.get().getIssuedAt();
+      var user = new CachedLazyObject<>(() -> soulFireServer.authSystem().authenticateBySubject(userId, issuedAt), 1, TimeUnit.SECONDS);
       EventPredicate predicate = switch (request.getScopeCase()) {
         case GLOBAL -> event ->
           user.get().isPresent()

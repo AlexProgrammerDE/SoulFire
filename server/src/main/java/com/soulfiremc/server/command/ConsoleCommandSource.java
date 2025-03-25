@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -64,5 +65,10 @@ public final class ConsoleCommandSource implements SoulFireUser {
   @Override
   public UserEntity.Role getRole() {
     return authSystem.rootUserData().role();
+  }
+
+  @Override
+  public Instant getIssuedAt() {
+    return Instant.now();
   }
 }

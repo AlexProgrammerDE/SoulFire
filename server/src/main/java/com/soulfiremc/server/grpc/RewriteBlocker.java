@@ -15,23 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event;
+package com.soulfiremc.server.grpc;
 
-import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.lambdaevents.AHandler;
-import net.lenni0451.lambdaevents.IExceptionHandler;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.linecorp.armeria.common.HttpRequest;
+import com.linecorp.armeria.common.HttpResponse;
+import com.linecorp.armeria.server.HttpService;
+import com.linecorp.armeria.server.ServiceRequestContext;
+import com.linecorp.armeria.server.ServiceRequestContextWrapper;
+import lombok.RequiredArgsConstructor;
 
-@Slf4j
-public final class EventExceptionHandler implements IExceptionHandler {
-  public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
+@RequiredArgsConstructor
+public class RewriteBlocker implements HttpService {
+  private final HttpService delegate;
 
   @Override
-  public void handle(@NonNull AHandler handler, @NonNull Object event, @NonNull Throwable t) {
-    log.error(
-      "Exception while handling event {} in handler {}",
-      event.getClass().getName(),
-      handler.getClass().getName(),
-      t);
+  public HttpResponse serve(ServiceRequestContext ctx, HttpRequest req) throws Exception {
+    return delegate.serve(new ServiceRequestContextWrapper(ctx) {
+      @Override
+      public String mappedPath() {
+        return this.path();
+      }
+    }, req);
   }
 }

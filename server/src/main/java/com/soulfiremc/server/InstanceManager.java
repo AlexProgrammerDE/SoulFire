@@ -35,6 +35,7 @@ import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
@@ -53,6 +54,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 import org.slf4j.MDC;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
@@ -69,6 +72,7 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
+  private final ScriptManager scriptManager;
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -97,6 +101,15 @@ public final class InstanceManager {
           return instance.friendlyName();
         }
       }), 1, TimeUnit.SECONDS);
+    this.scriptManager = new ScriptManager(this);
+
+    try {
+      Files.createDirectories(getInstanceObjectStoragePath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    // this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), "Test", ScriptLanguage.JAVASCRIPT);
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
@@ -272,7 +285,8 @@ public final class InstanceManager {
     allBotsConnected.set(false);
     this.attackLifecycle(AttackLifecycle.STARTING);
 
-    var address = settingsSource.get(BotSettings.ADDRESS);
+    scriptManager.startScripts();
+
     log.info("Preparing bot attack at server");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
@@ -413,7 +427,15 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> deleteInstance() {
-    return stopAttackPermanently().thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
+    return stopAttackPermanently()
+      .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
+      .thenRunAsync(() -> {
+        try {
+          SFHelpers.deleteDirectory(getInstanceObjectStoragePath());
+        } catch (IOException e) {
+          log.error("Error while deleting instance storage", e);
+        }
+      }, scheduler);
   }
 
   public CompletableFuture<?> shutdownHook() {
@@ -484,6 +506,8 @@ public final class InstanceManager {
 
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
+
+      scriptManager.killAllScripts();
     });
   }
 
@@ -509,8 +533,8 @@ public final class InstanceManager {
     }));
   }
 
-  public Path getObjectStoragePath() {
-    return soulFireServer.baseDirectory().resolve("object-storage").resolve(id.toString());
+  public Path getInstanceObjectStoragePath() {
+    return soulFireServer.getObjectStoragePath().resolve("instance-" + id.toString());
   }
 
   public List<BotConnection> getConnectedBots() {

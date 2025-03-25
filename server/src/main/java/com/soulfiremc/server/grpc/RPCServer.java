@@ -34,12 +34,15 @@ import com.linecorp.armeria.server.healthcheck.HealthCheckService;
 import com.linecorp.armeria.server.logging.LoggingService;
 import com.linecorp.armeria.server.metric.MetricCollectingService;
 import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
+import com.linecorp.armeria.server.tomcat.TomcatService;
 import com.soulfiremc.server.SoulFireServer;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.startup.Tomcat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -92,13 +95,12 @@ public final class RPCServer {
           new JwtServerInterceptor(soulFireServer)
         ))
         .addService(soulFireServer.logService())
-        .addService(new ConfigServiceImpl(soulFireServer))
+        .addService(new ConfigServiceImpl())
         .addService(new CommandServiceImpl(soulFireServer))
         .addService(new InstanceServiceImpl(soulFireServer))
         .addService(new MCAuthServiceImpl(soulFireServer))
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new DownloadServiceImpl())
-        .addService(new ObjectStorageServiceImpl(soulFireServer))
         .addService(new ServerServiceImpl(soulFireServer))
         .addService(new UserServiceImpl(soulFireServer))
         .addService(new LoginServiceImpl(soulFireServer))
@@ -154,6 +156,7 @@ public final class RPCServer {
           MetricCollectingService.newDecorator(GrpcMeterIdPrefixFunction.of("soulfire")))
         .service("/health", HealthCheckService.builder().build())
         .service("/", new RedirectService("/docs"))
+        .serviceUnder("/webdav/", new RewriteBlocker(TomcatService.of(newWebDAVContext(soulFireServer))))
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
@@ -167,6 +170,23 @@ public final class RPCServer {
     } else {
       prometheusServer = null;
     }
+  }
+
+  @SneakyThrows
+  Tomcat newWebDAVContext(SoulFireServer soulFireServer) {
+    var tomcat = new Tomcat();
+
+    var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
+
+    var webdavServlet = Tomcat.addServlet(ctx, "webdav", new SFWebDavServlet(soulFireServer));
+    webdavServlet.addInitParameter("readonly", "false");
+    webdavServlet.addInitParameter("listings", "true");
+
+    ctx.addServletMappingDecoded("/webdav/*", "webdav");
+
+    tomcat.start();
+
+    return tomcat;
   }
 
   public void start() throws IOException {

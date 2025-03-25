@@ -36,6 +36,7 @@ public final class SoulFireAPI {
   private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
   private static final LambdaManager EVENT_BUS =
     LambdaManager.threadSafe(new ASMGenerator())
+      .setAlwaysCallParents(true)
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
       .setEventFilter(
         (c, h) -> {

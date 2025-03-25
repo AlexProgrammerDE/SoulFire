@@ -24,7 +24,7 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -33,7 +33,9 @@ import org.hibernate.SessionFactory;
 import org.slf4j.event.Level;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,12 +48,14 @@ public final class AuthSystem {
   private final LogServiceImpl logService;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
+  private final JwtParser parser;
   private final SessionFactory sessionFactory;
   private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
     this.logService = soulFireServer.logService();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
+    this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.settingsSource = soulFireServer.settingsSource();
     this.sessionFactory = sessionFactory;
     this.rootUserId = createRootUser();
@@ -85,7 +89,43 @@ public final class AuthSystem {
     });
   }
 
-  public Optional<SoulFireUser> authenticate(UUID uuid, Instant issuedAt) {
+  public Optional<SoulFireUser> authenticateByHeader(String authorization) {
+    if (authorization.startsWith("Bearer ")) {
+      return authenticateByToken(authorization.substring("Bearer ".length()));
+    } else if (authorization.startsWith("Basic ")) {
+      var credentials = authorization.substring("Basic ".length());
+      var decoded = new String(Base64.getDecoder().decode(credentials), StandardCharsets.UTF_8);
+      var parts = decoded.split(":", 2);
+      if (parts.length != 2) {
+        return Optional.empty();
+      }
+
+      return authenticateByToken(parts[1]);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  public Optional<SoulFireUser> authenticateByToken(String token) {
+    Jws<Claims> claims;
+    try {
+      // verify token signature and parse claims
+      claims = parser.parseSignedClaims(token);
+    } catch (JwtException e) {
+      return Optional.empty();
+    }
+
+    if (claims == null) {
+      return Optional.empty();
+    }
+
+    return authenticateBySubject(
+      UUID.fromString(claims.getPayload().getSubject()),
+      claims.getPayload().getIssuedAt().toInstant()
+    );
+  }
+
+  public Optional<SoulFireUser> authenticateBySubject(UUID uuid, Instant issuedAt) {
     return sessionFactory.fromTransaction(s -> {
       var userEntity = s.find(UserEntity.class, uuid);
       if (userEntity == null) {
@@ -104,7 +144,7 @@ public final class AuthSystem {
         s.merge(userEntity);
       }
 
-      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource));
+      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource, issuedAt));
     });
   }
 
@@ -136,7 +176,13 @@ public final class AuthSystem {
       .compact();
   }
 
-  private record SoulFireUserImpl(LogServiceImpl logService, UserEntity userData, SessionFactory sessionFactory, ServerSettingsSource settingsSource) implements SoulFireUser {
+  private record SoulFireUserImpl(
+    LogServiceImpl logService,
+    UserEntity userData,
+    SessionFactory sessionFactory,
+    ServerSettingsSource settingsSource,
+    Instant issuedAt
+  ) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
       return userData.id();
@@ -155,6 +201,11 @@ public final class AuthSystem {
     @Override
     public UserEntity.Role getRole() {
       return userData.role();
+    }
+
+    @Override
+    public Instant getIssuedAt() {
+      return issuedAt;
     }
 
     @Override
@@ -180,8 +231,7 @@ public final class AuthSystem {
             && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
           case UPDATE_INSTANCE_META -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
             && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
-          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, LIST_OBJECT_STORAGE,
-               DELETE_OBJECT_STORAGE, DOWNLOAD_OBJECT_STORAGE, UPLOAD_OBJECT_STORAGE,
+          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, ACCESS_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
                READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));

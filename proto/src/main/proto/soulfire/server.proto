@@ -16,6 +16,7 @@ message ServerInfoRequest {
 
 message ServerInfoResponse {
   ServerConfig config = 1;
+  repeated SettingsPage server_settings = 2;
 }
 
 message ServerUpdateConfigRequest {

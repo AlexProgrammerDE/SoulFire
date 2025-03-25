@@ -113,10 +113,7 @@ enum InstancePermission {
   AUTHENTICATE_MC_ACCOUNT = 6;
   CHECK_PROXY = 7;
   DOWNLOAD_URL = 8;
-  UPLOAD_OBJECT_STORAGE = 9;
-  DOWNLOAD_OBJECT_STORAGE = 10;
-  DELETE_OBJECT_STORAGE = 11;
-  LIST_OBJECT_STORAGE = 12;
+  ACCESS_OBJECT_STORAGE = 9;
   INSTANCE_SUBSCRIBE_LOGS = 13;
   READ_INSTANCE_AUDIT_LOGS = 15;
 }
@@ -124,4 +121,117 @@ enum InstancePermission {
 enum UserRole {
   ADMIN = 0;
   USER = 1;
+}
+
+message StringSetting {
+  string ui_name = 1;
+  string description = 2;
+  string def = 3;
+  bool secret = 4;
+  bool textarea = 5;
+  string placeholder = 6;
+}
+
+message IntSetting {
+  string ui_name = 1;
+  string description = 2;
+  int32 def = 3;
+  int32 min = 4;
+  int32 max = 5;
+  int32 step = 6;
+  string placeholder = 7;
+  bool thousand_separator = 8;
+}
+
+message DoubleSetting {
+  string ui_name = 1;
+  string description = 2;
+  double def = 3;
+  double min = 4;
+  double max = 5;
+  double step = 6;
+  string placeholder = 7;
+  bool thousand_separator = 8;
+  int32 decimal_scale = 9;
+  bool fixed_decimal_scale = 10;
+}
+
+message BoolSetting {
+  string ui_name = 1;
+  string description = 2;
+  bool def = 3;
+}
+
+message ComboOption {
+  // Sent to server
+  string id = 1;
+  // Displayed to user
+  string display_name = 2;
+}
+
+message ComboSetting {
+  string ui_name = 1;
+  string description = 2;
+  // List of options
+  repeated ComboOption options = 3;
+  string def = 4;
+}
+
+message StringListSetting {
+  string ui_name = 1;
+  string description = 2;
+  repeated string def = 3;
+}
+
+message MinMaxSettingEntry {
+  string ui_name = 1;
+  string description = 2;
+  int32 def = 3;
+  string placeholder = 4;
+}
+
+message MinMaxSetting {
+  int32 min = 1;
+  int32 max = 2;
+  int32 step = 3;
+  bool thousand_separator = 4;
+  MinMaxSettingEntry minEntry = 5;
+  MinMaxSettingEntry maxEntry = 6;
+}
+
+// A entry in the settings page
+message SettingEntry {
+  // Basically we only send a kv map to the server with every setting entry
+  string key = 1;
+  oneof value {
+    StringSetting string = 2;
+    IntSetting int = 3;
+    DoubleSetting double = 4;
+    BoolSetting bool = 5;
+    ComboSetting combo = 6;
+    StringListSetting string_list = 7;
+    MinMaxSetting min_max = 8;
+  }
+}
+
+message SettingsPage {
+  optional ServerPlugin owning_plugin = 2;
+  // The name of the page for these settings
+  string page_name = 3;
+  // What namespace the settings of this page represent
+  string namespace = 4;
+  repeated SettingEntry entries = 5;
+  // https://lucide.dev icon id for this page (Usually rendered left of the page name)
+  string icon_id = 6;
+  // Key which makes this plugin "enabled" or "disabled"
+  optional string enabled_key = 7;
+}
+
+message ServerPlugin {
+  string id = 1;
+  string version = 2;
+  string description = 3;
+  string author = 4;
+  string license = 5;
+  string website = 6;
 }

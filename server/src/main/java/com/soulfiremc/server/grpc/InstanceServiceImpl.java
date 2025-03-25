@@ -97,7 +97,6 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
             .setFriendlyName(instance.friendlyName())
             .setIcon(instance.icon())
             .setState(instance.attackLifecycle().toProto())
-            .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
           .toList())
         .build());
@@ -125,6 +124,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .setConfig(instanceEntity.settings().toProto())
         .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
+        .addAllInstanceSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

@@ -19,10 +19,6 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.api.Plugin;
-import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -36,8 +32,6 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
-  private final SoulFireServer soulFireServer;
-
   private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(GlobalPermission.values())
@@ -46,13 +40,6 @@ public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImpl
         .setGlobalPermission(permission)
         .setGranted(user.hasPermission(PermissionContext.global(permission)))
         .build())
-      .toList();
-  }
-
-  private Collection<ServerPlugin> getPlugins() {
-    return SoulFireAPI.getServerExtensions().stream()
-      .map(Plugin::pluginInfo)
-      .map(PluginInfo::toProto)
       .toList();
   }
 
@@ -73,9 +60,6 @@ public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImpl
             case USER -> UserRole.USER;
           })
           .addAllServerPermissions(getGlobalPermissions())
-          .addAllPlugins(getPlugins())
-          .addAllServerSettings(soulFireServer.serverSettingsRegistry().exportSettingsMeta())
-          .addAllInstanceSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
           .setServerInfo(ServerInfo.newBuilder()
             .setVersion(BuildData.VERSION)
             .setCommitHash(BuildData.COMMIT_HASH)
