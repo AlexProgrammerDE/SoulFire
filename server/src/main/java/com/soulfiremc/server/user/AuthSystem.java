@@ -231,8 +231,7 @@ public final class AuthSystem {
             && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
           case UPDATE_INSTANCE_META -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
             && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
-          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, LIST_OBJECT_STORAGE,
-               DELETE_OBJECT_STORAGE, DOWNLOAD_OBJECT_STORAGE, UPLOAD_OBJECT_STORAGE,
+          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, ACCESS_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
                READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));

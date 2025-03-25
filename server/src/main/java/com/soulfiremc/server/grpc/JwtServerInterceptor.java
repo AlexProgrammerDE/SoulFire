@@ -51,7 +51,7 @@ public final class JwtServerInterceptor implements ServerInterceptor {
     var value = metadata.get(RPCConstants.AUTHORIZATION_METADATA_KEY);
     if (value == null) {
       status = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
-    } else if (!value.startsWith(RPCConstants.BEARER_TYPE)) {
+    } else if (!value.startsWith("Bearer ") && !value.startsWith("Basic ")) {
       status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
     } else {
       var user = soulFireServer.authSystem().authenticateByHeader(value);
