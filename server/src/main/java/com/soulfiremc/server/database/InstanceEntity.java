@@ -23,6 +23,8 @@ import com.soulfiremc.server.util.SFHelpers;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,10 +59,13 @@ public final class InstanceEntity {
   private UUID id;
 
   @NotBlank(message = "Friendly name cannot be blank")
+  @Size(min = 3, max = 32, message = "Friendly name must be between 3 and 32 characters")
   @Column(nullable = false, length = 32)
   private String friendlyName;
 
   @NotBlank(message = "Icon cannot be blank")
+  @Size(min = 1, max = 64, message = "Icon name must be between 1 and 64 characters")
+  @Pattern(regexp = "^[a-z-]+$", message = "Icon must contain only lowercase letters and hyphens")
   @Column(nullable = false, length = 64)
   private String icon;
 

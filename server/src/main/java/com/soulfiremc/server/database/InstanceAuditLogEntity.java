@@ -19,6 +19,7 @@ package com.soulfiremc.server.database;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,6 +45,7 @@ public final class InstanceAuditLogEntity {
 
   @Column
   @Nullable
+  @Size(max = 4000, message = "Data must not exceed 4000 characters")
   private String data;
 
   @NotNull(message = "Instance cannot be null")
