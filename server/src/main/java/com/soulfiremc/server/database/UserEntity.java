@@ -65,7 +65,6 @@ public final class UserEntity {
   @Nullable
   private Instant lastLoginAt;
 
-  @NotNull(message = "Minimum issued at timestamp cannot be null")
   @CreationTimestamp
   @Column(nullable = false)
   private Instant minIssuedAt;
