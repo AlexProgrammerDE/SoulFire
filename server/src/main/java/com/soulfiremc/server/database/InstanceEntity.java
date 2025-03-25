@@ -56,7 +56,7 @@ public final class InstanceEntity {
   private UUID id;
 
   @NotBlank(message = "Friendly name cannot be blank")
-  @Column(nullable = false, unique = true, length = 32)
+  @Column(nullable = false, length = 32)
   private String friendlyName;
 
   @NotBlank(message = "Icon cannot be blank")
