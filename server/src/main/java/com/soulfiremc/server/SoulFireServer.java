@@ -20,7 +20,6 @@ package com.soulfiremc.server;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.command.ServerCommandManager;
@@ -30,10 +29,6 @@ import com.soulfiremc.server.database.ServerConfigEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
-import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.instance.AccountSettings;
-import com.soulfiremc.server.settings.instance.BotSettings;
-import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.settings.server.DevSettings;
@@ -93,7 +88,6 @@ public final class SoulFireServer {
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
   private final ServerSettingsRegistry serverSettingsRegistry;
-  private final ServerSettingsRegistry instanceSettingsRegistry;
   private final ServerCommandManager serverCommandManager;
   private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
@@ -173,18 +167,6 @@ public final class SoulFireServer {
 
       return registry;
     });
-    var instanceSettingsRegistryFuture = viaStart.thenApply(ignored -> {
-      var registry = new ServerSettingsRegistry()
-        // Needs Via loaded to have all protocol versions
-        .addInternalPage(BotSettings.class)
-        .addInternalPage(AccountSettings.class)
-        .addInternalPage(ProxySettings.class)
-        .addInternalPage(AISettings.class);
-
-      SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
-
-      return registry;
-    });
 
     this.sessionFactory = sessionFactoryFuture.join();
     this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
@@ -211,7 +193,6 @@ public final class SoulFireServer {
     }
 
     this.serverSettingsRegistry = serverSettingsRegistryFuture.join();
-    this.instanceSettingsRegistry = instanceSettingsRegistryFuture.join();
     this.sparkPlugin = sparkStart.join();
     this.serverCommandManager = serverCommandManagerFuture.join();
 

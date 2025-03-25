@@ -119,13 +119,19 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
 
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instanceEntity.friendlyName())
         .setIcon(instanceEntity.icon())
         .setConfig(instanceEntity.settings().toProto())
         .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
-        .addAllInstanceSettings(soulFireServer.instanceSettingsRegistry().exportSettingsMeta())
+        .addAllInstanceSettings(instance.instanceSettingsRegistry().exportSettingsMeta())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
