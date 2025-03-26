@@ -22,6 +22,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
+import com.soulfiremc.server.util.RPCConstants;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -150,7 +151,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    var user = soulFireServer.authSystem().authenticateByHeader(authorization);
+    var user = soulFireServer.authSystem().authenticateByHeader(authorization, RPCConstants.WEBDAV_AUDIENCE);
     if (user.isEmpty()) {
       resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;

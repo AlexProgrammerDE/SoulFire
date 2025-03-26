@@ -25,6 +25,7 @@ import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.grpc.generated.NextAuthFlowResponse;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -97,7 +98,9 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
           .setAuthFlowToken(authFlowToken.toString())
           .setSuccess(NextAuthFlowResponse.Success.newBuilder()
             .setToken(soulFireServer.authSystem().generateJWT(
-              soulFireServer.authSystem().getUserData(userId).orElseThrow()))
+              soulFireServer.authSystem().getUserData(userId).orElseThrow(),
+              RPCConstants.API_AUDIENCE
+            ))
             .build())
           .build());
         responseObserver.onCompleted();

@@ -24,6 +24,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.Plugin;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.util.PortHelper;
+import com.soulfiremc.server.util.RPCConstants;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,10 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
         var soulFire =
           new SoulFireServer(host, port, pluginManager, START_TIME, getBaseDirectory());
 
-        var jwtToken = soulFire.authSystem().generateJWT(soulFire.authSystem().rootUserData());
+        var jwtToken = soulFire.authSystem().generateJWT(
+          soulFire.authSystem().rootUserData(),
+          RPCConstants.API_AUDIENCE
+        );
         startCLI(
           ServerAddress.fromStringAndPort(host, port),
           jwtToken,

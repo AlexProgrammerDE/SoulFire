@@ -54,7 +54,7 @@ public final class JwtServerInterceptor implements ServerInterceptor {
     } else if (!value.startsWith("Bearer ") && !value.startsWith("Basic ")) {
       status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
     } else {
-      var user = soulFireServer.authSystem().authenticateByHeader(value);
+      var user = soulFireServer.authSystem().authenticateByHeader(value, RPCConstants.API_AUDIENCE);
       if (user.isPresent()) {
         // set client id into current context
         return Contexts.interceptCall(

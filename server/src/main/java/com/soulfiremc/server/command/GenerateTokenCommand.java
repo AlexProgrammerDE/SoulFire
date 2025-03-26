@@ -19,6 +19,7 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.util.RPCConstants;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
@@ -34,7 +35,10 @@ public final class GenerateTokenCommand {
               var authSystem = c.getSource().soulFire().authSystem();
               c.getSource().source().sendInfo(
                 "JWT (This gives full access to your user, make sure you only give this to trusted users): {}",
-                authSystem.generateJWT(authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow()));
+                authSystem.generateJWT(
+                  authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow(),
+                  RPCConstants.API_AUDIENCE
+                ));
 
               return Command.SINGLE_SUCCESS;
             })));

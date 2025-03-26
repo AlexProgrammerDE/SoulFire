@@ -99,9 +99,9 @@ public final class AuthSystem {
     });
   }
 
-  public Optional<SoulFireUser> authenticateByHeader(String authorization) {
+  public Optional<SoulFireUser> authenticateByHeader(String authorization, String audience) {
     if (authorization.startsWith("Bearer ")) {
-      return authenticateByToken(authorization.substring("Bearer ".length()));
+      return authenticateByToken(authorization.substring("Bearer ".length()), audience);
     } else if (authorization.startsWith("Basic ")) {
       var credentials = authorization.substring("Basic ".length());
       var decoded = new String(Base64.getDecoder().decode(credentials), StandardCharsets.UTF_8);
@@ -110,13 +110,13 @@ public final class AuthSystem {
         return Optional.empty();
       }
 
-      return authenticateByToken(parts[1]);
+      return authenticateByToken(parts[1], audience);
     } else {
       return Optional.empty();
     }
   }
 
-  public Optional<SoulFireUser> authenticateByToken(String token) {
+  public Optional<SoulFireUser> authenticateByToken(String token, String audience) {
     Jws<Claims> claims;
     try {
       // verify token signature and parse claims
@@ -125,7 +125,7 @@ public final class AuthSystem {
       return Optional.empty();
     }
 
-    if (claims == null) {
+    if (claims == null || !claims.getPayload().getAudience().contains(audience)) {
       return Optional.empty();
     }
 
@@ -178,12 +178,15 @@ public final class AuthSystem {
     return Optional.ofNullable(sessionFactory.fromTransaction(s -> s.find(UserEntity.class, uuid)));
   }
 
-  public String generateJWT(UserEntity user) {
+  public String generateJWT(UserEntity user, String audience) {
     return Jwts.builder()
       .signWith(jwtSecretKey, Jwts.SIG.HS256)
       .claims()
       .subject(user.id().toString())
       .issuedAt(Date.from(Instant.now()))
+      .audience()
+      .add(audience)
+      .and()
       .and()
       .compact();
   }
