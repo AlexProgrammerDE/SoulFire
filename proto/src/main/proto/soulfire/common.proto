@@ -179,6 +179,8 @@ message ComboOption {
   string id = 1;
   // Displayed to user
   string display_name = 2;
+  // May be used for an icon for an option
+  optional string icon_id = 3;
 }
 
 message ComboSetting {

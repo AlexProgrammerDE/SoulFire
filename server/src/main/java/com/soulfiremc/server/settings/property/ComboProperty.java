@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.util.Arrays;
@@ -32,7 +33,7 @@ public non-sealed abstract class ComboProperty implements Property {
     var options = new ComboOption[values.length];
 
     for (var i = 0; i < values.length; i++) {
-      options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]));
+      options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]), null);
     }
 
     return options;
@@ -71,6 +72,6 @@ public non-sealed abstract class ComboProperty implements Property {
     }
   }
 
-  public record ComboOption(String id, String displayName) {
+  public record ComboOption(String id, String displayName, @Nullable String iconId) {
   }
 }

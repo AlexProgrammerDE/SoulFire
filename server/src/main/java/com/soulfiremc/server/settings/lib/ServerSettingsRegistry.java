@@ -104,10 +104,16 @@ public final class ServerSettingsRegistry {
       .setDef(property.defaultValue())
       .addAllOptions(property.options()
         .stream()
-        .map(option -> ComboOption.newBuilder()
-          .setId(option.id())
-          .setDisplayName(option.displayName())
-          .build())
+        .map(option -> {
+          var builder = ComboOption.newBuilder()
+            .setId(option.id())
+            .setDisplayName(option.displayName());
+          if (option.iconId() != null) {
+            builder.setIconId(option.iconId());
+          }
+
+          return builder.build();
+        })
         .toList())
       .build();
   }
@@ -133,7 +139,7 @@ public final class ServerSettingsRegistry {
    * This is for classes associated to internal settings.
    * They need to be handled explicitly by the client.
    *
-   * @param clazz    The class to register
+   * @param clazz The class to register
    * @return The registry
    */
   @This
