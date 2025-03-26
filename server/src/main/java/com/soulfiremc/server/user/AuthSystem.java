@@ -125,7 +125,9 @@ public final class AuthSystem {
       return Optional.empty();
     }
 
-    if (claims == null || !claims.getPayload().getAudience().contains(audience)) {
+    if (claims == null
+      || claims.getPayload().getAudience() == null
+      || !claims.getPayload().getAudience().contains(audience)) {
       return Optional.empty();
     }
 
