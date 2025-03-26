@@ -107,7 +107,8 @@ public final class ServerSettingsRegistry {
         .map(option -> {
           var builder = ComboOption.newBuilder()
             .setId(option.id())
-            .setDisplayName(option.displayName());
+            .setDisplayName(option.displayName())
+            .addAllKeywords(option.keywords());
           if (option.iconId() != null) {
             builder.setIconId(option.iconId());
           }

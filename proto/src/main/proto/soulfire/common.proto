@@ -181,6 +181,8 @@ message ComboOption {
   string display_name = 2;
   // May be used for an icon for an option
   optional string icon_id = 3;
+  // keywords to also use for filtering
+  repeated string keywords = 4;
 }
 
 message ComboSetting {

@@ -26,6 +26,7 @@ import com.viaversion.viaversion.api.protocol.version.VersionType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.function.Function;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -148,7 +149,7 @@ public final class BotSettings implements SettingsObject {
 
   private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
     return ProtocolVersionList.getProtocolsNewToOld().stream()
-      .map(version -> new ComboProperty.ComboOption(formatVersion(version), version.getName(), null))
+      .map(version -> new ComboProperty.ComboOption(formatVersion(version), version.getName(), null, List.of(String.valueOf(version.getOriginalVersion()))))
       .toArray(ComboProperty.ComboOption[]::new);
   }
 

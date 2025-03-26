@@ -33,7 +33,7 @@ public non-sealed abstract class ComboProperty implements Property {
     var options = new ComboOption[values.length];
 
     for (var i = 0; i < values.length; i++) {
-      options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]), null);
+      options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]), null, List.of());
     }
 
     return options;
@@ -72,6 +72,6 @@ public non-sealed abstract class ComboProperty implements Property {
     }
   }
 
-  public record ComboOption(String id, String displayName, @Nullable String iconId) {
+  public record ComboOption(String id, String displayName, @Nullable String iconId, List<String> keywords) {
   }
 }
