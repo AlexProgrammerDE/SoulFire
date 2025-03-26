@@ -101,6 +101,7 @@ enum GlobalPermission {
   DELETE_USER = 8;
   GLOBAL_COMMAND_EXECUTION = 9;
   INVALIDATE_SESSIONS = 11;
+  GENERATE_SELF_WEBDAV_TOKEN = 12;
 }
 
 enum InstancePermission {

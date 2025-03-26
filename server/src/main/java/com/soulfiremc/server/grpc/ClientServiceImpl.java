@@ -19,7 +19,9 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -32,6 +34,8 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImplBase {
+  private final SoulFireServer soulFireServer;
+
   private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(GlobalPermission.values())
@@ -65,6 +69,26 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
             .setCommitHash(BuildData.COMMIT_HASH)
             .setBranchName(BuildData.BRANCH_NAME)
             .build())
+          .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting client data", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void generateWebDAVToken(GenerateWebDAVTokenRequest request, StreamObserver<GenerateWebDAVTokenResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GENERATE_SELF_WEBDAV_TOKEN));
+
+    try {
+      var currentUSer = ServerRPCConstants.USER_CONTEXT_KEY.get();
+      responseObserver.onNext(
+        GenerateWebDAVTokenResponse.newBuilder()
+          .setToken(soulFireServer.authSystem().generateJWT(
+            soulFireServer.authSystem().getUserData(currentUSer.getUniqueId()).orElseThrow(),
+            RPCConstants.WEBDAV_AUDIENCE
+          ))
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

@@ -30,6 +30,14 @@ message ClientDataResponse {
   ServerInfo server_info = 11;
 }
 
+message GenerateWebDAVTokenRequest {
+}
+
+message GenerateWebDAVTokenResponse {
+  string token = 1;
+}
+
 service ClientService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
+  rpc generateWebDAVToken(GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse);
 }
