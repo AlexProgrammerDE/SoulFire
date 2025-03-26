@@ -79,15 +79,6 @@ public final class AuthSystem {
     sessionFactory.inTransaction((s) -> {
       var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
-        var collidingUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
-          .setParameter("username", "root")
-          .uniqueResult();
-        if (collidingUser != null) {
-          collidingUser.username("old-root-" + UUID.randomUUID().toString().substring(0, 6));
-          collidingUser.email("old-root-" + UUID.randomUUID().toString().substring(0, 6) + "@soulfiremc.com");
-          s.merge(collidingUser);
-        }
-
         var rootUser = new UserEntity();
         rootUser.id(ROOT_USER_ID);
         rootUser.username("root");
