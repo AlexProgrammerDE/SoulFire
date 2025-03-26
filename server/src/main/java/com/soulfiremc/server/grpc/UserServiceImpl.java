@@ -122,9 +122,10 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_USER));
 
     try {
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, request.getId()));
+      var userId = UUID.fromString(request.getId());
+      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
       if (user == null) {
-        throw new IllegalArgumentException("User not found: " + request.getId());
+        throw new IllegalArgumentException("User not found: " + userId);
       }
 
       var result = UserInfoResponse.newBuilder()
@@ -154,10 +155,11 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.INVALIDATE_SESSIONS));
 
     try {
+      var userId = UUID.fromString(request.getId());
       soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, request.getId());
+        var user = session.find(UserEntity.class, userId);
         if (user == null) {
-          throw new IllegalArgumentException("User not found: " + request.getId());
+          throw new IllegalArgumentException("User not found: " + userId);
         }
 
         user.minIssuedAt(Instant.now());
@@ -178,10 +180,11 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_USER));
 
     try {
+      var userId = UUID.fromString(request.getId());
       soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, request.getId());
+        var user = session.find(UserEntity.class, userId);
         if (user == null) {
-          throw new IllegalArgumentException("User not found: " + request.getId());
+          throw new IllegalArgumentException("User not found: " + userId);
         }
 
         user.username(request.getUsername());
