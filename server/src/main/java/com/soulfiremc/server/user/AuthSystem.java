@@ -170,9 +170,11 @@ public final class AuthSystem {
 
   public String generateJWT(UserEntity user) {
     return Jwts.builder()
+      .signWith(jwtSecretKey, Jwts.SIG.HS256)
+      .claims()
       .subject(user.id().toString())
       .issuedAt(Date.from(Instant.now()))
-      .signWith(jwtSecretKey, Jwts.SIG.HS256)
+      .and()
       .compact();
   }
 
