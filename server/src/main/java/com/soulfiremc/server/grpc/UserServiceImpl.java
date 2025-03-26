@@ -50,6 +50,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
           case USER -> UserEntity.Role.USER;
           case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
         });
+        userEntity.minIssuedAt(Instant.now());
 
         session.persist(userEntity);
       });

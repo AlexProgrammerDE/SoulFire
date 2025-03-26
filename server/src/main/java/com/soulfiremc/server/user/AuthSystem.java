@@ -71,6 +71,7 @@ public final class AuthSystem {
         rootUser.username("root");
         rootUser.role(UserEntity.Role.ADMIN);
         rootUser.email(ROOT_DEFAULT_EMAIL);
+        rootUser.minIssuedAt(Instant.now());
         s.persist(rootUser);
 
         log.warn("The root user email is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);

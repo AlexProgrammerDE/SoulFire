@@ -65,7 +65,6 @@ public final class UserEntity {
   @Nullable
   private Instant lastLoginAt;
 
-  @CreationTimestamp
   @Column(nullable = false)
   private Instant minIssuedAt;
 
