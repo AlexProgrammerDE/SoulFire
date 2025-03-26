@@ -50,7 +50,7 @@ public final class ProxySettings implements SettingsObject {
       .uiName("Proxy check service")
       .description("What service to use to check if a proxy is working")
       .defaultValue(ProxyCheckService.IPIFY.name())
-      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), Enum::name))
+      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), Enum::name, e -> "cloud"))
       .build();
   public static final IntProperty PROXY_CHECK_CONCURRENCY =
     ImmutableIntProperty.builder()

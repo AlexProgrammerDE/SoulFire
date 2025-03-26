@@ -257,7 +257,10 @@ public final class ModLoaderSupport extends InternalPlugin {
         .uiName("Mod Loader mode")
         .description("What mod loader to use")
         .defaultValue(ModLoaderMode.FML2.name())
-        .addOptions(ComboProperty.optionsFromEnum(ModLoaderMode.values(), ModLoaderMode::toString))
+        .addOptions(ComboProperty.optionsFromEnum(ModLoaderMode.values(), ModLoaderMode::toString, e -> switch (e) {
+          case FML -> "turtle";
+          case FML2 -> "rabbit";
+        }))
         .build();
 
     @RequiredArgsConstructor

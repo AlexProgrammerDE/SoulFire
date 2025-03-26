@@ -307,7 +307,12 @@ public final class ForwardingBypass extends InternalPlugin {
         .uiName("Forwarding mode")
         .description("What type of forwarding to use")
         .defaultValue(ForwardingMode.LEGACY.name())
-        .addOptions(ComboProperty.optionsFromEnum(ForwardingMode.values(), ForwardingMode::toString))
+        .addOptions(ComboProperty.optionsFromEnum(ForwardingMode.values(), ForwardingMode::toString, e -> switch (e) {
+          case LEGACY -> "hourglass";
+          case BUNGEE_GUARD -> "shield-user";
+          case MODERN -> "fingerprint";
+          case SF_BYPASS -> "door-open";
+        }))
         .build();
     public static final StringProperty SECRET =
       ImmutableStringProperty.builder()

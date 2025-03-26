@@ -131,7 +131,11 @@ public final class ClientSettings extends InternalPlugin {
         .uiName("Chat visibility")
         .description("What type of chat messages the client will receive")
         .defaultValue(ChatVisibility.FULL.name())
-        .addOptions(ComboProperty.optionsFromEnum(ChatVisibility.values(), ComboProperty::capitalizeEnum))
+        .addOptions(ComboProperty.optionsFromEnum(ChatVisibility.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
+          case FULL -> "eye";
+          case SYSTEM -> "view";
+          case HIDDEN -> "eye-off";
+        }))
         .build();
     public static final BooleanProperty USE_CHAT_COLORS =
       ImmutableBooleanProperty.builder()
@@ -204,7 +208,10 @@ public final class ClientSettings extends InternalPlugin {
         .uiName("Hand preference")
         .description("What hand the client prefers to use for items")
         .defaultValue(HandPreference.RIGHT_HAND.name())
-        .addOptions(ComboProperty.optionsFromEnum(HandPreference.values(), ComboProperty::capitalizeEnum))
+        .addOptions(ComboProperty.optionsFromEnum(HandPreference.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
+          case LEFT_HAND -> "circle-arrow-left";
+          case RIGHT_HAND -> "circle-arrow-right";
+        }))
         .build();
     public static final BooleanProperty TEXT_FILTERING_ENABLED =
       ImmutableBooleanProperty.builder()
@@ -229,7 +236,11 @@ public final class ClientSettings extends InternalPlugin {
         .uiName("Particle Status")
         .description("How many particles the client will render")
         .defaultValue(ParticleStatus.ALL.name())
-        .addOptions(ComboProperty.optionsFromEnum(ParticleStatus.values(), ComboProperty::capitalizeEnum))
+        .addOptions(ComboProperty.optionsFromEnum(ParticleStatus.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
+          case ALL -> "sparkles";
+          case DECREASED -> "sparkle";
+          case MINIMAL -> "moon-star";
+        }))
         .build();
   }
 }

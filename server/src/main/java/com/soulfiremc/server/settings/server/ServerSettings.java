@@ -66,7 +66,10 @@ public final class ServerSettings implements SettingsObject {
       .uiName("Email Type")
       .description("How emails should be delivered.")
       .defaultValue(EmailType.CONSOLE.name())
-      .addOptions(ComboProperty.optionsFromEnum(EmailType.values(), EmailType::toString))
+      .addOptions(ComboProperty.optionsFromEnum(EmailType.values(), EmailType::toString, e -> switch (e) {
+        case CONSOLE -> "logs";
+        case SMTP -> "mails";
+      }))
       .build();
   public static final StringProperty SMTP_HOST =
     ImmutableStringProperty.builder()
@@ -111,7 +114,11 @@ public final class ServerSettings implements SettingsObject {
       .uiName("SMTP Type")
       .description("Type of encryption to use for SMTP.")
       .defaultValue(SmtpType.STARTTLS.name())
-      .addOptions(ComboProperty.optionsFromEnum(SmtpType.values(), SmtpType::toString))
+      .addOptions(ComboProperty.optionsFromEnum(SmtpType.values(), SmtpType::toString, e -> switch (e) {
+        case STARTTLS -> "shield-check";
+        case SSL_TLS -> "shield";
+        case NONE -> "shield-off";
+      }))
       .build();
   public static final StringProperty SMTP_FROM =
     ImmutableStringProperty.builder()

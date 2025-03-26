@@ -29,11 +29,12 @@ import java.util.function.Function;
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class ComboProperty implements Property {
   public static <T extends Enum<T>> ComboOption[] optionsFromEnum(
-    T[] values, Function<T, String> mapper) {
+    T[] values, Function<T, String> displayNameMapper, Function<T, @Nullable String> iconMapper) {
     var options = new ComboOption[values.length];
 
     for (var i = 0; i < values.length; i++) {
-      options[i] = new ComboOption(values[i].name(), mapper.apply(values[i]), null, List.of());
+      var enumValue = values[i];
+      options[i] = new ComboOption(enumValue.name(), displayNameMapper.apply(enumValue), iconMapper.apply(enumValue), List.of());
     }
 
     return options;

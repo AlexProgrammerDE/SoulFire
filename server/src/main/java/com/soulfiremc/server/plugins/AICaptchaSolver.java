@@ -200,7 +200,9 @@ public final class AICaptchaSolver extends InternalPlugin {
         .uiName("Image Source")
         .description("Where should the captcha images be taken from")
         .defaultValue(ImageSource.MAP_IN_HAND.name())
-        .addOptions(ComboProperty.optionsFromEnum(ImageSource.values(), ComboProperty::capitalizeEnum))
+        .addOptions(ComboProperty.optionsFromEnum(ImageSource.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
+          case MAP_IN_HAND -> "map";
+        }))
         .build();
     public static final ComboProperty CAPTCHA_TRIGGER =
       ImmutableComboProperty.builder()
@@ -209,7 +211,9 @@ public final class AICaptchaSolver extends InternalPlugin {
         .uiName("Captcha Trigger")
         .description("What triggers the captcha solver")
         .defaultValue(CaptchaTrigger.CHAT_MESSAGE.name())
-        .addOptions(ComboProperty.optionsFromEnum(CaptchaTrigger.values(), ComboProperty::capitalizeEnum))
+        .addOptions(ComboProperty.optionsFromEnum(CaptchaTrigger.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
+          case CHAT_MESSAGE -> "message-circle";
+        }))
         .build();
     public static final StringProperty TEXT_TRIGGER =
       ImmutableStringProperty.builder()
