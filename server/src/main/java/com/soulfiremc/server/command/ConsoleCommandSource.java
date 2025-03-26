@@ -49,7 +49,7 @@ public final class ConsoleCommandSource implements SoulFireUser {
 
   @Override
   public UUID getUniqueId() {
-    return authSystem.rootUserId();
+    return AuthSystem.ROOT_USER_ID;
   }
 
   @Override

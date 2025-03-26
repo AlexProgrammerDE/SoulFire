@@ -43,14 +43,13 @@ import java.util.UUID;
 @Getter
 @Slf4j
 public final class AuthSystem {
+  public static final UUID ROOT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   public static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
-  private static final String ROOT_USERNAME = "root";
   private final LogServiceImpl logService;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
   private final JwtParser parser;
   private final SessionFactory sessionFactory;
-  private final UUID rootUserId;
 
   public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
     this.logService = soulFireServer.logService();
@@ -58,16 +57,25 @@ public final class AuthSystem {
     this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.settingsSource = soulFireServer.settingsSource();
     this.sessionFactory = sessionFactory;
-    this.rootUserId = createRootUser();
+
+    createRootUser();
   }
 
-  private UUID createRootUser() {
-    return sessionFactory.fromTransaction((s) -> {
-      var currentRootUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
-        .setParameter("username", ROOT_USERNAME)
-        .uniqueResult();
+  private void createRootUser() {
+    sessionFactory.inTransaction((s) -> {
+      var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
+        var collidingUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
+          .setParameter("username", "root")
+          .uniqueResult();
+        if (collidingUser != null) {
+          collidingUser.username("old-root-" + UUID.randomUUID().toString().substring(0, 6));
+          collidingUser.email("old-root-" + UUID.randomUUID().toString().substring(0, 6) + "@soulfiremc.com");
+          s.merge(collidingUser);
+        }
+
         var rootUser = new UserEntity();
+        rootUser.id(ROOT_USER_ID);
         rootUser.username("root");
         rootUser.role(UserEntity.Role.ADMIN);
         rootUser.email(ROOT_DEFAULT_EMAIL);
@@ -75,8 +83,6 @@ public final class AuthSystem {
         s.persist(rootUser);
 
         log.warn("The root user email is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
-
-        return rootUser.id();
       } else {
         currentRootUser.role(UserEntity.Role.ADMIN);
         s.merge(currentRootUser);
@@ -84,8 +90,6 @@ public final class AuthSystem {
         if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.email())) {
           log.warn("The root user email is currently set to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
         }
-
-        return currentRootUser.id();
       }
     });
   }
@@ -150,7 +154,7 @@ public final class AuthSystem {
   }
 
   public void deleteUser(UUID uuid) {
-    if (uuid.equals(rootUserId)) {
+    if (uuid.equals(ROOT_USER_ID)) {
       throw new IllegalArgumentException("Cannot delete root user");
     }
 
@@ -162,7 +166,7 @@ public final class AuthSystem {
   }
 
   public UserEntity rootUserData() {
-    return getUserData(rootUserId).orElseThrow();
+    return getUserData(ROOT_USER_ID).orElseThrow();
   }
 
   public Optional<UserEntity> getUserData(UUID uuid) {

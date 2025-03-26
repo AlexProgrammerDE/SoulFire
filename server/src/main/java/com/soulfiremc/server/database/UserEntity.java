@@ -34,7 +34,6 @@ import java.util.UUID;
 @Table(name = "users")
 public final class UserEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @NotBlank(message = "Username cannot be blank")

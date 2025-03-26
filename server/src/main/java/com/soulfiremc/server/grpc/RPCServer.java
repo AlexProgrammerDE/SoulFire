@@ -140,7 +140,8 @@ public final class RPCServer {
           .logWriter(LogWriter.builder()
             .logger(log)
             .responseLogLevelMapper(l -> {
-              if (l.responseCause() instanceof StatusRuntimeException e && e.getStatus().getCode() == Status.Code.CANCELLED) {
+              if (l.responseCause() instanceof StatusRuntimeException e
+                && (e.getStatus().getCode() == Status.Code.CANCELLED || e.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
                 return LogLevel.DEBUG;
               }
 
