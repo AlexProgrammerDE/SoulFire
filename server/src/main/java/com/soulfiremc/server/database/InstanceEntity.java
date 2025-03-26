@@ -60,6 +60,7 @@ public final class InstanceEntity {
 
   @NotBlank(message = "Friendly name cannot be blank")
   @Size(min = 3, max = 32, message = "Friendly name must be between 3 and 32 characters")
+  @Pattern(regexp = "^[a-zA-Z0-9 ]+$", message = "Friendly name must contain only letters, numbers, and spaces")
   @Column(nullable = false, length = 32)
   private String friendlyName;
 
