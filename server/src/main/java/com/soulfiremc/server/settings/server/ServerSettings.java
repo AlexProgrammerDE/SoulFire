@@ -43,6 +43,22 @@ public final class ServerSettings implements SettingsObject {
       .description("Allow (non-admin) users to create instances.")
       .defaultValue(true)
       .build();
+  public static final BooleanProperty ALLOW_UPDATING_SELF_USERNAME =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-updating-self-username")
+      .uiName("Allow updating self username")
+      .description("Allow (non-admin) users to change their username.")
+      .defaultValue(true)
+      .build();
+  public static final BooleanProperty ALLOW_UPDATING_SELF_EMAIL =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-updating-self-email")
+      .uiName("Allow updating self email")
+      .description("Allow (non-admin) users to change their email.")
+      .defaultValue(true)
+      .build();
   public static final BooleanProperty ALLOW_DELETING_INSTANCES =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)

@@ -37,7 +37,23 @@ message GenerateWebDAVTokenResponse {
   string token = 1;
 }
 
+message UpdateSelfUsernameRequest {
+  string username = 1;
+}
+
+message UpdateSelfUsernameResponse {
+}
+
+message UpdateSelfEmailRequest {
+  string email = 1;
+}
+
+message UpdateSelfEmailResponse {
+}
+
 service ClientService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
   rpc generateWebDAVToken(GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse);
+  rpc updateSelfUsername(UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse);
+  rpc updateSelfEmail(UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse);
 }

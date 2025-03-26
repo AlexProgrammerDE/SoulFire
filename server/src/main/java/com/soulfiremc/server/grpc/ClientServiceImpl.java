@@ -20,6 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
@@ -92,7 +93,57 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
           .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting client data", t);
+      log.error("Error generating WebDAV token", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateSelfUsername(UpdateSelfUsernameRequest request, StreamObserver<UpdateSelfUsernameResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SELF_USERNAME));
+
+    try {
+      var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var user = session.find(UserEntity.class, userId);
+        if (user == null) {
+          throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        user.username(request.getUsername());
+
+        session.merge(user);
+      });
+
+      responseObserver.onNext(UpdateSelfUsernameResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating self username", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateSelfEmail(UpdateSelfEmailRequest request, StreamObserver<UpdateSelfEmailResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SELF_EMAIL));
+
+    try {
+      var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var user = session.find(UserEntity.class, userId);
+        if (user == null) {
+          throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        user.email(request.getEmail());
+
+        session.merge(user);
+      });
+
+      responseObserver.onNext(UpdateSelfEmailResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating self email", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
