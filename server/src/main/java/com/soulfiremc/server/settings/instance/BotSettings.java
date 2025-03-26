@@ -152,7 +152,23 @@ public final class BotSettings implements SettingsObject {
       .map(version -> new ComboProperty.ComboOption(
         formatVersion(version),
         version.getName(),
-        null,
+        switch (version.getVersionType()) {
+          case CLASSIC -> "archive";
+          case ALPHA_INITIAL, ALPHA_LATER -> "flask-conical";
+          case BETA_INITIAL, BETA_LATER -> "test-tube";
+          case RELEASE_INITIAL, RELEASE -> "box";
+          case SPECIAL -> {
+            if (SFVersionConstants.isBedrock(version)) {
+              yield "brick-wall";
+            } else if (SFVersionConstants.isAprilFools(version)) {
+              yield "ghost";
+            } else if (SFVersionConstants.isLegacy(version)) {
+              yield "archive";
+            } else {
+              throw new RuntimeException("Unknown version: " + version);
+            }
+          }
+        },
         Stream.concat(
           version.getIncludedVersions().stream(),
           Stream.of(String.valueOf(version.getOriginalVersion()))
