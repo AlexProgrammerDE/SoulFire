@@ -31,7 +31,7 @@ import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor
-public final class ConfigServiceImpl extends ConfigServiceGrpc.ConfigServiceImplBase {
+public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImplBase {
   private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(GlobalPermission.values())

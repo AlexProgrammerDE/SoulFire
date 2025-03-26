@@ -30,6 +30,6 @@ message ClientDataResponse {
   ServerInfo server_info = 11;
 }
 
-service ConfigService {
+service ClientService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
 }
