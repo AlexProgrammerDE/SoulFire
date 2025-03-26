@@ -28,19 +28,35 @@ public final class GenerateTokenCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("generate-token")
-        .executes(
-          help(
-            "Generate an auth JWT for the current user",
-            c -> {
-              var authSystem = c.getSource().soulFire().authSystem();
-              c.getSource().source().sendInfo(
-                "JWT (This gives full access to your user, make sure you only give this to trusted users): {}",
-                authSystem.generateJWT(
-                  authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow(),
-                  RPCConstants.API_AUDIENCE
-                ));
+        .then(literal("api")
+          .executes(
+            help(
+              "Generate an API JWT for the current user",
+              c -> {
+                var authSystem = c.getSource().soulFire().authSystem();
+                c.getSource().source().sendInfo(
+                  "JWT (This gives full access to your account, keep this secret): {}",
+                  authSystem.generateJWT(
+                    authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow(),
+                    RPCConstants.API_AUDIENCE
+                  ));
 
-              return Command.SINGLE_SUCCESS;
-            })));
+                return Command.SINGLE_SUCCESS;
+              })))
+        .then(literal("webdav")
+          .executes(
+            help(
+              "Generate a WebDAV JWT for the current user",
+              c -> {
+                var authSystem = c.getSource().soulFire().authSystem();
+                c.getSource().source().sendInfo(
+                  "JWT (This gives full access to your WebDAV files, keep this secret): {}",
+                  authSystem.generateJWT(
+                    authSystem.getUserData(c.getSource().source().getUniqueId()).orElseThrow(),
+                    RPCConstants.API_AUDIENCE
+                  ));
+
+                return Command.SINGLE_SUCCESS;
+              }))));
   }
 }
