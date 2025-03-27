@@ -23,15 +23,17 @@ import com.soulfiremc.server.data.ResourceKey;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
+import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.RegistryEntry;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class SFRegistriesState {
-  public final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
-  public final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
-  public final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
-  public final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
+  private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
+  private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
+  private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
+  private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
 }

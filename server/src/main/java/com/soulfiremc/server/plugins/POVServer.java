@@ -220,7 +220,7 @@ public final class POVServer extends InternalPlugin {
     var clientPacks = awaitReceived(clientSession, ServerboundSelectKnownPacks.class);
     clientSession.send(new ClientboundSelectKnownPacks(dataManager.serverKnownPacks()));
 
-    for (var entry : dataManager.resolvedRegistryData().entrySet()) {
+    for (var entry : dataManager.registriesState().resolvedRegistryData().entrySet()) {
       var registryKey = entry.getKey();
 
       var sentEntries = new ArrayList<RegistryEntry>();
