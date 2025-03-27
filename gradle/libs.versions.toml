@@ -90,7 +90,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.37.0"
+openai = "com.openai:openai-java:0.39.0"
 immutables = "org.immutables:value:2.10.1 "
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta5"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.0.0.Beta5"
@@ -99,7 +99,7 @@ hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.0.CR1"
 hibernate-validator-cdi = "org.hibernate.validator:hibernate-validator-cdi:9.0.0.CR1"
 expressly = "org.glassfish.expressly:expressly:6.0.0-M1"
 hikaricp = "com.zaxxer:HikariCP:6.3.0"
-mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.2"
+mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.3"
 sqlite = "org.xerial:sqlite-jdbc:3.49.1.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.5.1"
 joml = "org.joml:joml:1.10.8"
