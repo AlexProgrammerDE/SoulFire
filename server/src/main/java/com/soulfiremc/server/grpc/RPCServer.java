@@ -46,6 +46,7 @@ import org.apache.catalina.startup.Tomcat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,6 +177,7 @@ public final class RPCServer {
   @SneakyThrows
   Tomcat newWebDAVContext(SoulFireServer soulFireServer) {
     var tomcat = new Tomcat();
+    tomcat.setBaseDir(Files.createTempDirectory("soulfire-webdav-").toAbsolutePath().toString());
 
     var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
 
