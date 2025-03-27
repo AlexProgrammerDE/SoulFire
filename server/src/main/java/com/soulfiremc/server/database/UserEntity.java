@@ -38,7 +38,7 @@ public final class UserEntity {
 
   @NotBlank(message = "Username cannot be blank")
   @Size(min = 3, max = 32, message = "Username must be between 3 and 32 characters")
-  @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Username can only contain letters, numbers, underscores, and hyphens")
+  @Pattern(regexp = "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", message = "Usernames must be lowercase, begin with an alphanumeric character, followed by more alphanumeric characters or dashes, and end with an alphanumeric character.")
   @Column(nullable = false, unique = true, length = 32)
   private String username;
 
