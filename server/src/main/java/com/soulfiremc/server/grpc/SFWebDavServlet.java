@@ -23,7 +23,10 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.RPCConstants;
-import jakarta.servlet.*;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,10 +41,7 @@ import org.apache.tomcat.util.http.ConcurrentDateFormat;
 import org.apache.tomcat.util.http.FastHttpDateFormat;
 import org.apache.tomcat.util.http.RequestUtil;
 import org.apache.tomcat.util.security.ConcurrentMessageDigest;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -90,10 +90,10 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     super.init();
 
     // Validate that the Servlet is only mapped to wildcard mappings
-    String servletName = getServletConfig().getServletName();
-    ServletRegistration servletRegistration = getServletConfig().getServletContext().getServletRegistration(servletName);
-    Collection<String> servletMappings = servletRegistration.getMappings();
-    for (String mapping : servletMappings) {
+    var servletName = getServletConfig().getServletName();
+    var servletRegistration = getServletConfig().getServletContext().getServletRegistration(servletName);
+    var servletMappings = servletRegistration.getMappings();
+    for (var mapping : servletMappings) {
       if (!mapping.endsWith("/*")) {
         log(sm.getString("webdavservlet.nonWildcardMapping", mapping));
       }
@@ -111,15 +111,15 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   @Override
   public void periodicEvent() {
     // Check expiration of all locks
-    for (LockInfo currentLock : resourceLocks.values()) {
+    for (var currentLock : resourceLocks.values()) {
       if (currentLock.hasExpired()) {
         resourceLocks.remove(currentLock.path);
         removeLockNull(currentLock.path);
       }
     }
-    Iterator<LockInfo> collectionLocksIterator = collectionLocks.iterator();
+    var collectionLocksIterator = collectionLocks.iterator();
     while (collectionLocksIterator.hasNext()) {
-      LockInfo currentLock = collectionLocksIterator.next();
+      var currentLock = collectionLocksIterator.next();
       if (currentLock.hasExpired()) {
         collectionLocksIterator.remove();
         removeLockNull(currentLock.path);
@@ -159,7 +159,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     req.setAttribute(SF_USER_ATTRIBUTE, user.get());
 
-    final String path = getRelativePath(req);
+    final var path = getRelativePath(req);
 
     // Error page check needs to come before special path check since
     // custom error pages are often located below WEB-INF so they are
@@ -179,7 +179,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    final String method = req.getMethod();
+    final var method = req.getMethod();
 
     if (debug > 0) {
       log("[" + method + "] " + path);
@@ -200,7 +200,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   }
 
   private boolean isForbiddenPath(final HttpServletRequest req, final String path) {
-    SoulFireUser user = (SoulFireUser) req.getAttribute(SF_USER_ATTRIBUTE);
+    var user = (SoulFireUser) req.getAttribute(SF_USER_ATTRIBUTE);
     if (user.getRole() == UserEntity.Role.ADMIN) {
       return false;
     }
@@ -234,7 +234,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       pathInfo = request.getPathInfo();
     }
 
-    StringBuilder result = new StringBuilder();
+    var result = new StringBuilder();
     if (pathInfo != null) {
       result.append(pathInfo);
     }
@@ -248,7 +248,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   @Override
   protected String getPathPrefix(final HttpServletRequest request) {
     // Repeat the servlet path (e.g. /webdav/) in the listing path
-    String contextPath = request.getContextPath();
+    var contextPath = request.getContextPath();
     if (request.getServletPath() != null) {
       contextPath = contextPath + request.getServletPath();
     }
@@ -269,7 +269,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
     if (path.length() > 1 && path.endsWith("/")) {
       path = path.substring(0, path.length() - 1);
     }
@@ -277,11 +277,11 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     // Properties which are to be displayed.
     List<String> properties = null;
     // Propfind depth
-    int depth = maxDepth;
+    var depth = maxDepth;
     // Propfind type
-    int type = FIND_ALL_PROP;
+    var type = FIND_ALL_PROP;
 
-    String depthStr = req.getHeader("Depth");
+    var depthStr = req.getHeader("Depth");
 
     if (depthStr == null) {
       depth = maxDepth;
@@ -297,17 +297,17 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     Node propNode = null;
 
     if (req.getContentLengthLong() > 0) {
-      DocumentBuilder documentBuilder = getDocumentBuilder();
+      var documentBuilder = getDocumentBuilder();
 
       try {
-        Document document = documentBuilder.parse(new InputSource(req.getInputStream()));
+        var document = documentBuilder.parse(new InputSource(req.getInputStream()));
 
         // Get the root element of the document
-        Element rootElement = document.getDocumentElement();
-        NodeList childList = rootElement.getChildNodes();
+        var rootElement = document.getDocumentElement();
+        var childList = rootElement.getChildNodes();
 
-        for (int i = 0; i < childList.getLength(); i++) {
-          Node currentNode = childList.item(i);
+        for (var i = 0; i < childList.getLength(); i++) {
+          var currentNode = childList.item(i);
           switch (currentNode.getNodeType()) {
             case Node.TEXT_NODE -> {
             }
@@ -335,15 +335,15 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     if (type == FIND_BY_PROPERTY) {
       properties = new ArrayList<>();
       // propNode must be non-null if type == FIND_BY_PROPERTY
-      @SuppressWarnings("null") NodeList childList = propNode.getChildNodes();
+      @SuppressWarnings("null") var childList = propNode.getChildNodes();
 
-      for (int i = 0; i < childList.getLength(); i++) {
-        Node currentNode = childList.item(i);
+      for (var i = 0; i < childList.getLength(); i++) {
+        var currentNode = childList.item(i);
         switch (currentNode.getNodeType()) {
           case Node.TEXT_NODE -> {
           }
           case Node.ELEMENT_NODE -> {
-            String nodeName = currentNode.getNodeName();
+            var nodeName = currentNode.getNodeName();
             String propertyName;
             if (nodeName.indexOf(':') != -1) {
               propertyName = nodeName.substring(nodeName.indexOf(':') + 1);
@@ -357,20 +357,20 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
     }
 
-    WebResource resource = resources.getResource(path);
+    var resource = resources.getResource(path);
 
     if (!resource.exists()) {
-      int slash = path.lastIndexOf('/');
+      var slash = path.lastIndexOf('/');
       if (slash != -1) {
-        String parentPath = path.substring(0, slash);
+        var parentPath = path.substring(0, slash);
         List<String> currentLockNullResources = lockNullResources.get(parentPath);
         if (currentLockNullResources != null) {
-          for (String lockNullPath : currentLockNullResources) {
+          for (var lockNullPath : currentLockNullResources) {
             if (lockNullPath.equals(path)) {
               resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
               resp.setContentType("text/xml; charset=UTF-8");
               // Create multistatus object
-              XMLWriter generatedXML = new XMLWriter(resp.getWriter());
+              var generatedXML = new XMLWriter(resp.getWriter());
               generatedXML.writeXMLHeader();
               generatedXML.writeElement("D", DEFAULT_NAMESPACE, "multistatus", XMLWriter.OPENING);
               parseLockNullProperties(req, generatedXML, lockNullPath, type, properties);
@@ -393,7 +393,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     resp.setContentType("text/xml; charset=UTF-8");
 
     // Create multistatus object
-    XMLWriter generatedXML = new XMLWriter(resp.getWriter());
+    var generatedXML = new XMLWriter(resp.getWriter());
     generatedXML.writeXMLHeader();
 
     generatedXML.writeElement("D", DEFAULT_NAMESPACE, "multistatus", XMLWriter.OPENING);
@@ -410,16 +410,16 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
       while ((!stack.isEmpty()) && (depth >= 0)) {
 
-        String currentPath = stack.remove();
+        var currentPath = stack.remove();
         parseProperties(req, generatedXML, currentPath, type, properties);
 
         resource = resources.getResource(currentPath);
 
         if (resource.isDirectory() && (depth > 0)) {
 
-          String[] entries = resources.list(currentPath);
-          for (String entry : entries) {
-            String newPath = currentPath;
+          var entries = resources.list(currentPath);
+          for (var entry : entries) {
+            var newPath = currentPath;
             if (!(newPath.endsWith("/"))) {
               newPath += "/";
             }
@@ -429,13 +429,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
           // Displaying the lock-null resources present in that
           // collection
-          String lockPath = currentPath;
+          var lockPath = currentPath;
           if (lockPath.endsWith("/")) {
             lockPath = lockPath.substring(0, lockPath.length() - 1);
           }
           List<String> currentLockNullResources = lockNullResources.get(lockPath);
           if (currentLockNullResources != null) {
-            for (String lockNullPath : currentLockNullResources) {
+            for (var lockNullPath : currentLockNullResources) {
               parseLockNullProperties(req, generatedXML, lockNullPath, type, properties);
             }
           }
@@ -475,9 +475,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
   protected void doMkcol(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
 
-    WebResource resource = resources.getResource(path);
+    var resource = resources.getResource(path);
 
     // Can't create a collection if a resource already exists at the given
     // path
@@ -497,7 +497,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     if (req.getContentLengthLong() > 0) {
-      DocumentBuilder documentBuilder = getDocumentBuilder();
+      var documentBuilder = getDocumentBuilder();
       try {
         // Document document =
         documentBuilder.parse(new InputSource(req.getInputStream()));
@@ -545,8 +545,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    String path = getRelativePath(req);
-    WebResource resource = resources.getResource(path);
+    var path = getRelativePath(req);
+    var resource = resources.getResource(path);
     if (resource.isDirectory()) {
       sendNotAllowed(req, resp);
       return;
@@ -580,7 +580,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
 
     if (copyResource(req, resp)) {
       deleteResource(path, req, resp, false);
@@ -599,13 +599,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    LockInfo lock = new LockInfo(maxDepth);
+    var lock = new LockInfo(maxDepth);
 
     // Parsing lock request
 
     // Parsing depth header
 
-    String depthStr = req.getHeader("Depth");
+    var depthStr = req.getHeader("Depth");
 
     if (depthStr == null) {
       lock.depth = maxDepth;
@@ -619,10 +619,10 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     // Parsing timeout header
 
-    int lockDuration = DEFAULT_TIMEOUT;
-    String lockDurationStr = req.getHeader("Timeout");
+    var lockDuration = DEFAULT_TIMEOUT;
+    var lockDurationStr = req.getHeader("Timeout");
     if (lockDurationStr != null) {
-      int commaPos = lockDurationStr.indexOf(',');
+      var commaPos = lockDurationStr.indexOf(',');
       // If multiple timeouts, just use the first
       if (commaPos != -1) {
         lockDurationStr = lockDurationStr.substring(0, commaPos);
@@ -649,17 +649,17 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
     lock.expiresAt = System.currentTimeMillis() + (lockDuration * 1000L);
 
-    int lockRequestType = LOCK_CREATION;
+    var lockRequestType = LOCK_CREATION;
 
     Node lockInfoNode = null;
 
-    DocumentBuilder documentBuilder = getDocumentBuilder();
+    var documentBuilder = getDocumentBuilder();
 
     try {
-      Document document = documentBuilder.parse(new InputSource(req.getInputStream()));
+      var document = documentBuilder.parse(new InputSource(req.getInputStream()));
 
       // Get the root element of the document
-      Element rootElement = document.getDocumentElement();
+      var rootElement = document.getDocumentElement();
       lockInfoNode = rootElement;
     } catch (IOException | SAXException e) {
       lockRequestType = LOCK_REFRESH;
@@ -669,7 +669,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
       // Reading lock information
 
-      NodeList childList = lockInfoNode.getChildNodes();
+      var childList = lockInfoNode.getChildNodes();
       StringWriter strWriter;
       DOMWriter domWriter;
 
@@ -677,13 +677,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       Node lockTypeNode = null;
       Node lockOwnerNode = null;
 
-      for (int i = 0; i < childList.getLength(); i++) {
-        Node currentNode = childList.item(i);
+      for (var i = 0; i < childList.getLength(); i++) {
+        var currentNode = childList.item(i);
         switch (currentNode.getNodeType()) {
           case Node.TEXT_NODE -> {
           }
           case Node.ELEMENT_NODE -> {
-            String nodeName = currentNode.getNodeName();
+            var nodeName = currentNode.getNodeName();
             if (nodeName.endsWith("lockscope")) {
               lockScopeNode = currentNode;
             }
@@ -700,13 +700,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       if (lockScopeNode != null) {
 
         childList = lockScopeNode.getChildNodes();
-        for (int i = 0; i < childList.getLength(); i++) {
-          Node currentNode = childList.item(i);
+        for (var i = 0; i < childList.getLength(); i++) {
+          var currentNode = childList.item(i);
           switch (currentNode.getNodeType()) {
             case Node.TEXT_NODE -> {
             }
             case Node.ELEMENT_NODE -> {
-              String tempScope = currentNode.getNodeName();
+              var tempScope = currentNode.getNodeName();
               if (tempScope.indexOf(':') != -1) {
                 lock.scope = tempScope.substring(tempScope.indexOf(':') + 1);
               } else {
@@ -729,13 +729,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       if (lockTypeNode != null) {
 
         childList = lockTypeNode.getChildNodes();
-        for (int i = 0; i < childList.getLength(); i++) {
-          Node currentNode = childList.item(i);
+        for (var i = 0; i < childList.getLength(); i++) {
+          var currentNode = childList.item(i);
           switch (currentNode.getNodeType()) {
             case Node.TEXT_NODE -> {
             }
             case Node.ELEMENT_NODE -> {
-              String tempType = currentNode.getNodeName();
+              var tempType = currentNode.getNodeName();
               if (tempType.indexOf(':') != -1) {
                 lock.type = tempType.substring(tempType.indexOf(':') + 1);
               } else {
@@ -758,8 +758,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       if (lockOwnerNode != null) {
 
         childList = lockOwnerNode.getChildNodes();
-        for (int i = 0; i < childList.getLength(); i++) {
-          Node currentNode = childList.item(i);
+        for (var i = 0; i < childList.getLength(); i++) {
+          var currentNode = childList.item(i);
           switch (currentNode.getNodeType()) {
             case Node.TEXT_NODE -> lock.owner += currentNode.getNodeValue();
             case Node.ELEMENT_NODE -> {
@@ -781,17 +781,17 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
     }
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
 
     lock.path = path;
 
-    WebResource resource = resources.getResource(path);
+    var resource = resources.getResource(path);
 
     if (lockRequestType == LOCK_CREATION) {
 
       // Generating lock id
-      String lockTokenStr = req.getServletPath() + "-" + lock.type + "-" + lock.scope + "-" + req.getUserPrincipal() + "-" + lock.depth + "-" + lock.owner + "-" + lock.tokens + "-" + lock.expiresAt + "-" + System.currentTimeMillis() + "-" + secret;
-      String lockToken = HexUtils.toHexString(ConcurrentMessageDigest.digestMD5(lockTokenStr.getBytes(StandardCharsets.ISO_8859_1)));
+      var lockTokenStr = req.getServletPath() + "-" + lock.type + "-" + lock.scope + "-" + req.getUserPrincipal() + "-" + lock.depth + "-" + lock.owner + "-" + lock.tokens + "-" + lock.expiresAt + "-" + System.currentTimeMillis() + "-" + secret;
+      var lockToken = HexUtils.toHexString(ConcurrentMessageDigest.digestMD5(lockTokenStr.getBytes(StandardCharsets.ISO_8859_1)));
 
       if (resource.isDirectory() && lock.depth == maxDepth) {
 
@@ -800,9 +800,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         // Checking if a child resource of this collection is
         // already locked
         List<String> lockPaths = new ArrayList<>();
-        Iterator<LockInfo> collectionLocksIterator = collectionLocks.iterator();
+        var collectionLocksIterator = collectionLocks.iterator();
         while (collectionLocksIterator.hasNext()) {
-          LockInfo currentLock = collectionLocksIterator.next();
+          var currentLock = collectionLocksIterator.next();
           if (currentLock.hasExpired()) {
             collectionLocksIterator.remove();
             continue;
@@ -812,7 +812,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             lockPaths.add(currentLock.path);
           }
         }
-        for (LockInfo currentLock : resourceLocks.values()) {
+        for (var currentLock : resourceLocks.values()) {
           if (currentLock.hasExpired()) {
             resourceLocks.remove(currentLock.path);
             continue;
@@ -830,12 +830,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
           resp.setStatus(WebdavStatus.SC_CONFLICT);
 
-          XMLWriter generatedXML = new XMLWriter();
+          var generatedXML = new XMLWriter();
           generatedXML.writeXMLHeader();
 
           generatedXML.writeElement("D", DEFAULT_NAMESPACE, "multistatus", XMLWriter.OPENING);
 
-          for (String lockPath : lockPaths) {
+          for (var lockPath : lockPaths) {
             generatedXML.writeElement("D", "response", XMLWriter.OPENING);
             generatedXML.writeElement("D", "href", XMLWriter.OPENING);
             generatedXML.writeText(lockPath);
@@ -855,10 +855,10 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
           return;
         }
 
-        boolean addLock = true;
+        var addLock = true;
 
         // Checking if there is already a shared lock on this path
-        for (LockInfo currentLock : collectionLocks) {
+        for (var currentLock : collectionLocks) {
           if (currentLock.path.equals(lock.path)) {
 
             if (currentLock.isExclusive()) {
@@ -887,7 +887,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         // Locking a single resource
 
         // Retrieving an already existing lock on that resource
-        LockInfo presentLock = resourceLocks.get(lock.path);
+        var presentLock = resourceLocks.get(lock.path);
         if (presentLock != null) {
 
           if ((presentLock.isExclusive()) || (lock.isExclusive())) {
@@ -909,8 +909,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
           if (!resource.exists()) {
 
             // "Creating" a lock-null resource
-            int slash = lock.path.lastIndexOf('/');
-            String parentPath = lock.path.substring(0, slash);
+            var slash = lock.path.lastIndexOf('/');
+            var parentPath = lock.path.substring(0, slash);
 
             lockNullResources.computeIfAbsent(parentPath, k -> new CopyOnWriteArrayList<>()).add(lock.path);
           }
@@ -924,18 +924,18 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     if (lockRequestType == LOCK_REFRESH) {
 
-      String ifHeader = req.getHeader("If");
+      var ifHeader = req.getHeader("If");
       if (ifHeader == null) {
         ifHeader = "";
       }
 
       // Checking resource locks
 
-      LockInfo toRenew = resourceLocks.get(path);
+      var toRenew = resourceLocks.get(path);
 
       if (toRenew != null) {
         // At least one of the tokens of the locks must have been given
-        for (String token : toRenew.tokens) {
+        for (var token : toRenew.tokens) {
           if (ifHeader.contains(token)) {
             toRenew.expiresAt = lock.expiresAt;
             lock = toRenew;
@@ -944,9 +944,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
 
       // Checking inheritable collection locks
-      for (LockInfo collecionLock : collectionLocks) {
+      for (var collecionLock : collectionLocks) {
         if (path.equals(collecionLock.path)) {
-          for (String token : collecionLock.tokens) {
+          for (var token : collecionLock.tokens) {
             if (ifHeader.contains(token)) {
               collecionLock.expiresAt = lock.expiresAt;
               lock = collecionLock;
@@ -958,7 +958,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     // Set the status, then generate the XML response containing
     // the lock information
-    XMLWriter generatedXML = new XMLWriter();
+    var generatedXML = new XMLWriter();
     generatedXML.writeXMLHeader();
     generatedXML.writeElement("D", DEFAULT_NAMESPACE, "prop", XMLWriter.OPENING);
 
@@ -989,22 +989,22 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
 
-    String lockTokenHeader = req.getHeader("Lock-Token");
+    var lockTokenHeader = req.getHeader("Lock-Token");
     if (lockTokenHeader == null) {
       lockTokenHeader = "";
     }
 
     // Checking resource locks
 
-    LockInfo lock = resourceLocks.get(path);
+    var lock = resourceLocks.get(path);
     if (lock != null) {
 
       // At least one of the tokens of the locks must have been given
-      Iterator<String> tokenList = lock.tokens.iterator();
+      var tokenList = lock.tokens.iterator();
       while (tokenList.hasNext()) {
-        String token = tokenList.next();
+        var token = tokenList.next();
         if (lockTokenHeader.contains(token)) {
           tokenList.remove();
         }
@@ -1019,13 +1019,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Checking inheritable collection locks
-    Iterator<LockInfo> collectionLocksList = collectionLocks.iterator();
+    var collectionLocksList = collectionLocks.iterator();
     while (collectionLocksList.hasNext()) {
       lock = collectionLocksList.next();
       if (path.equals(lock.path)) {
-        Iterator<String> tokenList = lock.tokens.iterator();
+        var tokenList = lock.tokens.iterator();
         while (tokenList.hasNext()) {
-          String token = tokenList.next();
+          var token = tokenList.next();
           if (lockTokenHeader.contains(token)) {
             tokenList.remove();
             break;
@@ -1046,14 +1046,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
   private boolean isLocked(HttpServletRequest req) {
 
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
 
-    String ifHeader = req.getHeader("If");
+    var ifHeader = req.getHeader("If");
     if (ifHeader == null) {
       ifHeader = "";
     }
 
-    String lockTokenHeader = req.getHeader("Lock-Token");
+    var lockTokenHeader = req.getHeader("Lock-Token");
     if (lockTokenHeader == null) {
       lockTokenHeader = "";
     }
@@ -1065,15 +1065,15 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     // Checking resource locks
 
-    LockInfo lock = resourceLocks.get(path);
+    var lock = resourceLocks.get(path);
     if ((lock != null) && (lock.hasExpired())) {
       resourceLocks.remove(path);
     } else if (lock != null) {
 
       // At least one of the tokens of the locks must have been given
 
-      boolean tokenMatch = false;
-      for (String token : lock.tokens) {
+      var tokenMatch = false;
+      for (var token : lock.tokens) {
         if (ifHeader.contains(token)) {
           tokenMatch = true;
           break;
@@ -1085,14 +1085,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Checking inheritable collection locks
-    Iterator<LockInfo> collectionLockList = collectionLocks.iterator();
+    var collectionLockList = collectionLocks.iterator();
     while (collectionLockList.hasNext()) {
       lock = collectionLockList.next();
       if (lock.hasExpired()) {
         collectionLockList.remove();
       } else if (path.startsWith(lock.path)) {
-        boolean tokenMatch = false;
-        for (String token : lock.tokens) {
+        var tokenMatch = false;
+        for (var token : lock.tokens) {
           if (ifHeader.contains(token)) {
             tokenMatch = true;
             break;
@@ -1110,8 +1110,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   private boolean copyResource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
     // Check the source exists
-    String path = getRelativePath(req);
-    WebResource source = resources.getResource(path);
+    var path = getRelativePath(req);
+    var source = resources.getResource(path);
     if (!source.exists()) {
       resp.sendError(WebdavStatus.SC_NOT_FOUND);
       return false;
@@ -1119,7 +1119,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     // Parsing destination header
     // See RFC 4918
-    String destinationHeader = req.getHeader("Destination");
+    var destinationHeader = req.getHeader("Destination");
 
     if (destinationHeader == null || destinationHeader.isEmpty()) {
       resp.sendError(WebdavStatus.SC_BAD_REQUEST);
@@ -1134,7 +1134,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return false;
     }
 
-    String destinationPath = destinationUri.getPath();
+    var destinationPath = destinationUri.getPath();
 
     // Destination isn't allowed to use '.' or '..' segments
     if (!destinationPath.equals(RequestUtil.normalize(destinationPath))) {
@@ -1161,7 +1161,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Cross-context operations aren't supported
-    String reqContextPath = getPathPrefix(req);
+    var reqContextPath = getPathPrefix(req);
     if (!destinationPath.startsWith(reqContextPath + "/")) {
       resp.sendError(WebdavStatus.SC_FORBIDDEN);
       return false;
@@ -1191,14 +1191,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return false;
     }
 
-    boolean overwrite = true;
-    String overwriteHeader = req.getHeader("Overwrite");
+    var overwrite = true;
+    var overwriteHeader = req.getHeader("Overwrite");
     if (overwriteHeader != null) {
       overwrite = overwriteHeader.equalsIgnoreCase("T");
     }
 
     // Overwriting the destination
-    WebResource destination = resources.getResource(destinationPath);
+    var destination = resources.getResource(destinationPath);
     if (overwrite) {
       // Delete destination resource, if it exists
       if (destination.exists()) {
@@ -1220,8 +1220,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     Map<String, Integer> errorList = new LinkedHashMap<>();
 
-    boolean infiniteCopy = true;
-    String depthHeader = req.getHeader("Depth");
+    var infiniteCopy = true;
+    var depthHeader = req.getHeader("Depth");
     if (depthHeader != null) {
       if (depthHeader.equals("infinity")) {
         // NO-OP - this is the default
@@ -1233,7 +1233,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
     }
 
-    boolean result = copyResource(errorList, path, destinationPath, infiniteCopy);
+    var result = copyResource(errorList, path, destinationPath, infiniteCopy);
 
     if ((!result) || (!errorList.isEmpty())) {
       if (errorList.size() == 1) {
@@ -1264,11 +1264,11 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       log("Copy: " + source + " To: " + dest + " Infinite: " + infiniteCopy);
     }
 
-    WebResource sourceResource = resources.getResource(source);
+    var sourceResource = resources.getResource(source);
 
     if (sourceResource.isDirectory()) {
       if (!resources.mkdir(dest)) {
-        WebResource destResource = resources.getResource(dest);
+        var destResource = resources.getResource(dest);
         if (!destResource.isDirectory()) {
           errorList.put(dest, WebdavStatus.SC_CONFLICT);
           return false;
@@ -1276,14 +1276,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
 
       if (infiniteCopy) {
-        String[] entries = resources.list(source);
-        for (String entry : entries) {
-          String childDest = dest;
+        var entries = resources.list(source);
+        for (var entry : entries) {
+          var childDest = dest;
           if (!childDest.equals("/")) {
             childDest += "/";
           }
           childDest += entry;
-          String childSrc = source;
+          var childSrc = source;
           if (!childSrc.equals("/")) {
             childSrc += "/";
           }
@@ -1292,12 +1292,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         }
       }
     } else if (sourceResource.isFile()) {
-      WebResource destResource = resources.getResource(dest);
+      var destResource = resources.getResource(dest);
       if (!destResource.exists() && !destResource.getWebappPath().endsWith("/")) {
-        int lastSlash = destResource.getWebappPath().lastIndexOf('/');
+        var lastSlash = destResource.getWebappPath().lastIndexOf('/');
         if (lastSlash > 0) {
-          String parent = destResource.getWebappPath().substring(0, lastSlash);
-          WebResource parentResource = resources.getResource(parent);
+          var parent = destResource.getWebappPath().substring(0, lastSlash);
+          var parentResource = resources.getResource(parent);
           if (!parentResource.isDirectory()) {
             errorList.put(source, WebdavStatus.SC_CONFLICT);
             return false;
@@ -1311,7 +1311,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         // to file (without trailing '/')
         dest = dest.substring(0, dest.length() - 1);
       }
-      try (InputStream is = sourceResource.getInputStream()) {
+      try (var is = sourceResource.getInputStream()) {
         if (!resources.write(dest, is, false)) {
           errorList.put(source, WebdavStatus.SC_INTERNAL_SERVER_ERROR);
           return false;
@@ -1327,18 +1327,18 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   }
 
   private boolean deleteResource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    String path = getRelativePath(req);
+    var path = getRelativePath(req);
     return deleteResource(path, req, resp, true);
   }
 
   private boolean deleteResource(String path, HttpServletRequest req, HttpServletResponse resp, boolean setStatus) throws IOException {
 
-    String ifHeader = req.getHeader("If");
+    var ifHeader = req.getHeader("If");
     if (ifHeader == null) {
       ifHeader = "";
     }
 
-    String lockTokenHeader = req.getHeader("Lock-Token");
+    var lockTokenHeader = req.getHeader("Lock-Token");
     if (lockTokenHeader == null) {
       lockTokenHeader = "";
     }
@@ -1348,7 +1348,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return false;
     }
 
-    WebResource resource = resources.getResource(path);
+    var resource = resources.getResource(path);
 
     if (!resource.exists()) {
       resp.sendError(WebdavStatus.SC_NOT_FOUND);
@@ -1406,20 +1406,20 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    String ifHeader = req.getHeader("If");
+    var ifHeader = req.getHeader("If");
     if (ifHeader == null) {
       ifHeader = "";
     }
 
-    String lockTokenHeader = req.getHeader("Lock-Token");
+    var lockTokenHeader = req.getHeader("Lock-Token");
     if (lockTokenHeader == null) {
       lockTokenHeader = "";
     }
 
-    String[] entries = resources.list(path);
+    var entries = resources.list(path);
 
-    for (String entry : entries) {
-      String childName = path;
+    for (var entry : entries) {
+      var childName = path;
       if (!childName.equals("/")) {
         childName += "/";
       }
@@ -1430,7 +1430,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         errorList.put(childName, WebdavStatus.SC_LOCKED);
 
       } else {
-        WebResource childResource = resources.getResource(childName);
+        var childResource = resources.getResource(childName);
         if (childResource.isDirectory()) {
           deleteCollection(req, childName, errorList);
         }
@@ -1460,13 +1460,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
 
-    XMLWriter generatedXML = new XMLWriter();
+    var generatedXML = new XMLWriter();
     generatedXML.writeXMLHeader();
 
     generatedXML.writeElement("D", DEFAULT_NAMESPACE, "multistatus", XMLWriter.OPENING);
 
-    for (Map.Entry<String, Integer> errorEntry : errorList.entrySet()) {
-      String errorPath = errorEntry.getKey();
+    for (var errorEntry : errorList.entrySet()) {
+      var errorPath = errorEntry.getKey();
       int errorCode = errorEntry.getValue();
 
       generatedXML.writeElement("D", "response", XMLWriter.OPENING);
@@ -1496,14 +1496,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    WebResource resource = resources.getResource(path);
+    var resource = resources.getResource(path);
     if (!resource.exists()) {
       // File is in directory listing but doesn't appear to exist
       // Broken symlink or odd permission settings?
       return;
     }
 
-    String href = getPathPrefix(req);
+    var href = getPathPrefix(req);
     if ((href.endsWith("/")) && (path.startsWith("/"))) {
       href += path.substring(1);
     } else {
@@ -1513,7 +1513,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       href += "/";
     }
 
-    String rewrittenUrl = rewriteUrl(href);
+    var rewrittenUrl = rewriteUrl(href);
 
     generatePropFindResponse(generatedXML, rewrittenUrl, path, type, properties, resource.isFile(), false, resource.getCreation(), resource.getLastModified(), resource.getContentLength(), getServletContext().getMimeType(resource.getName()), generateETag(resource));
   }
@@ -1526,20 +1526,20 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Retrieving the lock associated with the lock-null resource
-    LockInfo lock = resourceLocks.get(path);
+    var lock = resourceLocks.get(path);
 
     if (lock == null) {
       return;
     }
 
-    String absoluteUri = req.getRequestURI();
-    String relativePath = getRelativePath(req);
-    String toAppend = path.substring(relativePath.length());
+    var absoluteUri = req.getRequestURI();
+    var relativePath = getRelativePath(req);
+    var toAppend = path.substring(relativePath.length());
     if (!toAppend.startsWith("/")) {
       toAppend = "/" + toAppend;
     }
 
-    String rewrittenUrl = rewriteUrl(RequestUtil.normalize(absoluteUri + toAppend));
+    var rewrittenUrl = rewriteUrl(RequestUtil.normalize(absoluteUri + toAppend));
 
     generatePropFindResponse(generatedXML, rewrittenUrl, path, type, properties, true, true, lock.creationDate.getTime(), lock.creationDate.getTime(), 0, "", "");
   }
@@ -1547,20 +1547,20 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   private void generatePropFindResponse(XMLWriter generatedXML, String rewrittenUrl, String path, int propFindType, List<String> properties, boolean isFile, boolean isLockNull, long created, long lastModified, long contentLength, String contentType, String eTag) {
 
     generatedXML.writeElement("D", "response", XMLWriter.OPENING);
-    String status = "HTTP/1.1 " + WebdavStatus.SC_OK + " ";
+    var status = "HTTP/1.1 " + WebdavStatus.SC_OK + " ";
 
     // Generating href element
     generatedXML.writeElement("D", "href", XMLWriter.OPENING);
     generatedXML.writeText(rewrittenUrl);
     generatedXML.writeElement("D", "href", XMLWriter.CLOSING);
 
-    String resourceName = path;
-    int lastSlash = path.lastIndexOf('/');
+    var resourceName = path;
+    var lastSlash = path.lastIndexOf('/');
     if (lastSlash != -1) {
       resourceName = resourceName.substring(lastSlash + 1);
     }
 
-    String supportedLocks = "<D:lockentry>" + "<D:lockscope><D:exclusive/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>" + "<D:lockentry>" + "<D:lockscope><D:shared/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>";
+    var supportedLocks = "<D:lockentry>" + "<D:lockscope><D:exclusive/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>" + "<D:lockentry>" + "<D:lockscope><D:shared/></D:lockscope>" + "<D:locktype><D:write/></D:locktype>" + "</D:lockentry>";
     switch (propFindType) {
       case FIND_ALL_PROP -> {
 
@@ -1637,7 +1637,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         generatedXML.writeElement("D", "propstat", XMLWriter.OPENING);
         generatedXML.writeElement("D", "prop", XMLWriter.OPENING);
 
-        for (String property : properties) {
+        for (var property : properties) {
           switch (property) {
             case "creationdate" -> generatedXML.writeProperty("D", "creationdate", getISOCreationDate(created));
             case "displayname" -> {
@@ -1724,7 +1724,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
           generatedXML.writeElement("D", "propstat", XMLWriter.OPENING);
           generatedXML.writeElement("D", "prop", XMLWriter.OPENING);
 
-          for (String propertyNotFound : propertiesNotFound) {
+          for (var propertyNotFound : propertiesNotFound) {
             generatedXML.writeElement("D", propertyNotFound, XMLWriter.NO_CONTENT);
           }
 
@@ -1741,9 +1741,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   }
 
   private boolean generateLockDiscovery(String path, XMLWriter generatedXML) {
-    LockInfo resourceLock = resourceLocks.get(path);
+    var resourceLock = resourceLocks.get(path);
 
-    boolean wroteStart = false;
+    var wroteStart = false;
 
     if (resourceLock != null) {
       wroteStart = true;
@@ -1751,7 +1751,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       resourceLock.toXML(generatedXML);
     }
 
-    for (LockInfo currentLock : collectionLocks) {
+    for (var currentLock : collectionLocks) {
       if (path.startsWith(currentLock.path)) {
         if (!wroteStart) {
           wroteStart = true;
@@ -1776,11 +1776,11 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
   @Override
   protected String determineMethodsAllowed(HttpServletRequest req) {
-    WebResource resource = resources.getResource(getRelativePath(req));
+    var resource = resources.getResource(getRelativePath(req));
 
     // These methods are always allowed. They may return a 404 (not a 405)
     // if the resource does not exist.
-    StringBuilder methodsAllowed = new StringBuilder("OPTIONS, GET, POST, HEAD");
+    var methodsAllowed = new StringBuilder("OPTIONS, GET, POST, HEAD");
 
     if (!readOnly) {
       methodsAllowed.append(", DELETE");
@@ -1808,9 +1808,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   }
 
   private void removeLockNull(String path) {
-    int slash = path.lastIndexOf('/');
+    var slash = path.lastIndexOf('/');
     if (slash >= 0) {
-      String parentPath = path.substring(0, slash);
+      var parentPath = path.substring(0, slash);
       List<String> paths = lockNullResources.get(parentPath);
       if (paths != null) {
         paths.remove(path);
@@ -1839,7 +1839,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     @Override
     public String toString() {
-      StringBuilder result = new StringBuilder("Type:");
+      var result = new StringBuilder("Type:");
       result.append(type);
       result.append("\nScope:");
       result.append(scope);
@@ -1849,7 +1849,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       result.append(owner);
       result.append("\nExpiration:");
       result.append(FastHttpDateFormat.formatDate(expiresAt));
-      for (String token : tokens) {
+      for (var token : tokens) {
         result.append("\nToken:");
         result.append(token);
       }
@@ -1890,12 +1890,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       generatedXML.writeElement("D", "owner", XMLWriter.CLOSING);
 
       generatedXML.writeElement("D", "timeout", XMLWriter.OPENING);
-      long timeout = (expiresAt - System.currentTimeMillis()) / 1000;
+      var timeout = (expiresAt - System.currentTimeMillis()) / 1000;
       generatedXML.writeText("Second-" + timeout);
       generatedXML.writeElement("D", "timeout", XMLWriter.CLOSING);
 
       generatedXML.writeElement("D", "locktoken", XMLWriter.OPENING);
-      for (String token : tokens) {
+      for (var token : tokens) {
         generatedXML.writeElement("D", "href", XMLWriter.OPENING);
         generatedXML.writeText("opaquelocktoken:" + token);
         generatedXML.writeElement("D", "href", XMLWriter.CLOSING);
