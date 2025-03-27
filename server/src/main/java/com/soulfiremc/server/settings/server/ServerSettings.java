@@ -32,7 +32,7 @@ public final class ServerSettings implements SettingsObject {
       .namespace(NAMESPACE)
       .key("public-address")
       .uiName("Public address")
-      .description("The address clients on the internet use to connect to this SoulFire instance.\nUsed for links in E-Mails.")
+      .description("The address clients on the internet use to connect to this SoulFire instance.\nUsed for links in E-Mails and WebDAV.")
       .defaultValue("http://127.0.0.1:38765")
       .build();
   public static final BooleanProperty ALLOW_CREATING_INSTANCES =

@@ -19,6 +19,8 @@ message ServerInfo {
   string version = 1;
   string commit_hash = 2;
   string branch_name = 3;
+  string public_address = 4;
+  string public_webdav_address = 5;
 }
 
 message ClientDataResponse {

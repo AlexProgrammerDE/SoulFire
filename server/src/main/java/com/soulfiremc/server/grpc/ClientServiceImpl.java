@@ -21,6 +21,7 @@ import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
@@ -48,6 +49,14 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       .toList();
   }
 
+  private static String buildWebDAVAddress(String baseUrl) {
+    if (baseUrl.endsWith("/")) {
+      return baseUrl + "webdav";
+    } else {
+      return baseUrl + "/webdav";
+    }
+  }
+
   @Override
   public void getClientData(
     ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
@@ -55,6 +64,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var currentUSer = ServerRPCConstants.USER_CONTEXT_KEY.get();
+      var publicAddress = soulFireServer.settingsSource().get(ServerSettings.PUBLIC_ADDRESS);
       responseObserver.onNext(
         ClientDataResponse.newBuilder()
           .setId(currentUSer.getUniqueId().toString())
@@ -69,6 +79,8 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
             .setVersion(BuildData.VERSION)
             .setCommitHash(BuildData.COMMIT_HASH)
             .setBranchName(BuildData.BRANCH_NAME)
+            .setPublicAddress(publicAddress)
+            .setPublicWebdavAddress(buildWebDAVAddress(publicAddress))
             .build())
           .build());
       responseObserver.onCompleted();
