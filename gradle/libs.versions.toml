@@ -46,7 +46,7 @@ brigadier = "com.mojang:brigadier:1.1.8"
 picoli = "info.picocli:picocli:4.7.6"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.6"
 mcprotocollib = { group = "org.geysermc.mcprotocollib", name = "protocol", version.ref = "mcprotocollib" }
-mcstructs = "net.lenni0451.mcstructs:all:2.5.5"
+mcstructs = "net.lenni0451.mcstructs:all:3.0.0"
 netty-raknet = "org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT"
 via-version = { module = "com.viaversion:viaversion-common", version.ref = "via-version" }
 via-backwards = { module = "com.viaversion:viabackwards-common", version.ref = "via-backwards" }
