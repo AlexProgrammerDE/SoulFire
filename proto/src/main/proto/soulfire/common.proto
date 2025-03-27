@@ -105,6 +105,8 @@ enum GlobalPermission {
   GENERATE_SELF_API_TOKEN = 15;
   UPDATE_SELF_USERNAME = 13;
   UPDATE_SELF_EMAIL = 14;
+  GENERATE_API_TOKEN = 16;
+  INVALIDATE_SELF_SESSIONS = 17;
 }
 
 enum InstancePermission {

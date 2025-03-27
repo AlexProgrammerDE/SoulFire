@@ -75,6 +75,14 @@ message UpdateUserRequest {
 message UpdateUserResponse {
 }
 
+message GenerateUserAPITokenRequest {
+  string id = 1;
+}
+
+message GenerateUserAPITokenResponse {
+  string token = 1;
+}
+
 service UserService {
   rpc createUser(UserCreateRequest) returns (UserCreateResponse);
   rpc deleteUser(UserDeleteRequest) returns (UserDeleteResponse);
@@ -82,4 +90,5 @@ service UserService {
   rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
   rpc invalidateSessions(InvalidateSessionsRequest) returns (InvalidateSessionsResponse);
   rpc updateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc generateUserAPIToken(GenerateUserAPITokenRequest) returns (GenerateUserAPITokenResponse);
 }

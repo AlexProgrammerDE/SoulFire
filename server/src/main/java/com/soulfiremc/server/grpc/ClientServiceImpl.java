@@ -30,6 +30,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -185,6 +186,31 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating self email", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void invalidateSelfSessions(InvalidateSelfSessionsRequest request, StreamObserver<InvalidateSelfSessionsResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.INVALIDATE_SELF_SESSIONS));
+
+    try {
+      var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var user = session.find(UserEntity.class, userId);
+        if (user == null) {
+          throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        user.minIssuedAt(Instant.now());
+
+        session.merge(user);
+      });
+
+      responseObserver.onNext(InvalidateSelfSessionsResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error invalidating self sessions", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

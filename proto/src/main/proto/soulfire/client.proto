@@ -61,10 +61,17 @@ message UpdateSelfEmailRequest {
 message UpdateSelfEmailResponse {
 }
 
+message InvalidateSelfSessionsRequest {
+}
+
+message InvalidateSelfSessionsResponse {
+}
+
 service ClientService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
   rpc generateWebDAVToken(GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse);
   rpc generateAPIToken(GenerateAPITokenRequest) returns (GenerateAPITokenResponse);
   rpc updateSelfUsername(UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse);
   rpc updateSelfEmail(UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse);
+  rpc invalidateSelfSessions(InvalidateSelfSessionsRequest) returns (InvalidateSelfSessionsResponse);
 }

@@ -22,6 +22,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -203,6 +204,29 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating user", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void generateUserAPIToken(GenerateUserAPITokenRequest request, StreamObserver<GenerateUserAPITokenResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GENERATE_API_TOKEN));
+
+    try {
+      var userId = UUID.fromString(request.getId());
+      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
+      if (user == null) {
+        throw new IllegalArgumentException("User not found: " + userId);
+      }
+
+      var token = soulFireServer.authSystem().generateJWT(user, RPCConstants.API_AUDIENCE);
+
+      responseObserver.onNext(GenerateUserAPITokenResponse.newBuilder()
+        .setToken(token)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error generating user API token", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
