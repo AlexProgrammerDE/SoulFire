@@ -57,6 +57,14 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
     }
   }
 
+  private static String buildDocsAddress(String baseUrl) {
+    if (baseUrl.endsWith("/")) {
+      return baseUrl + "docs";
+    } else {
+      return baseUrl + "/docs";
+    }
+  }
+
   @Override
   public void getClientData(
     ClientDataRequest request, StreamObserver<ClientDataResponse> responseObserver) {
@@ -79,8 +87,9 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
             .setVersion(BuildData.VERSION)
             .setCommitHash(BuildData.COMMIT_HASH)
             .setBranchName(BuildData.BRANCH_NAME)
-            .setPublicAddress(publicAddress)
+            .setPublicApiAddress(publicAddress)
             .setPublicWebdavAddress(buildWebDAVAddress(publicAddress))
+            .setPublicDocsAddress(buildDocsAddress(publicAddress))
             .build())
           .build());
       responseObserver.onCompleted();
@@ -106,6 +115,26 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error generating WebDAV token", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void generateAPIToken(GenerateAPITokenRequest request, StreamObserver<GenerateAPITokenResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GENERATE_SELF_API_TOKEN));
+
+    try {
+      var currentUSer = ServerRPCConstants.USER_CONTEXT_KEY.get();
+      responseObserver.onNext(
+        GenerateAPITokenResponse.newBuilder()
+          .setToken(soulFireServer.authSystem().generateJWT(
+            soulFireServer.authSystem().getUserData(currentUSer.getUniqueId()).orElseThrow(),
+            RPCConstants.API_AUDIENCE
+          ))
+          .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error generating API token", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

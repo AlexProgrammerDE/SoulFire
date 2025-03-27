@@ -242,7 +242,7 @@ public final class AuthSystem {
           case CREATE_INSTANCE -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_CREATING_INSTANCES));
           case UPDATE_SELF_USERNAME -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_UPDATING_SELF_USERNAME));
           case UPDATE_SELF_EMAIL -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_UPDATING_SELF_EMAIL));
-          case READ_CLIENT_DATA, GENERATE_SELF_WEBDAV_TOKEN -> TriState.TRUE;
+          case READ_CLIENT_DATA, GENERATE_SELF_WEBDAV_TOKEN, GENERATE_SELF_API_TOKEN -> TriState.TRUE;
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + global.globalPermission());
         };
         case PermissionContext.InstanceContext instance -> switch (instance.instancePermission()) {

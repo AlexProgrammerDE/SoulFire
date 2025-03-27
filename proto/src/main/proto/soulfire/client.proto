@@ -19,8 +19,9 @@ message ServerInfo {
   string version = 1;
   string commit_hash = 2;
   string branch_name = 3;
-  string public_address = 4;
+  string public_api_address = 4;
   string public_webdav_address = 5;
+  string public_docs_address = 6;
 }
 
 message ClientDataResponse {
@@ -36,6 +37,13 @@ message GenerateWebDAVTokenRequest {
 }
 
 message GenerateWebDAVTokenResponse {
+  string token = 1;
+}
+
+message GenerateAPITokenRequest {
+}
+
+message GenerateAPITokenResponse {
   string token = 1;
 }
 
@@ -56,6 +64,7 @@ message UpdateSelfEmailResponse {
 service ClientService {
   rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
   rpc generateWebDAVToken(GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse);
+  rpc generateAPIToken(GenerateAPITokenRequest) returns (GenerateAPITokenResponse);
   rpc updateSelfUsername(UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse);
   rpc updateSelfEmail(UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse);
 }
