@@ -21,6 +21,7 @@ import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
@@ -36,6 +37,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   private final SoulFireServer soulFireServer;
+
+  private static void mutateOrThrow(UUID targetUser) {
+    if (targetUser.equals(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId())) {
+      throw new IllegalArgumentException("Cannot mutate self");
+    } else if (targetUser.equals(AuthSystem.ROOT_USER_ID)) {
+      throw new IllegalArgumentException("Cannot mutate root user");
+    }
+  }
 
   @Override
   public void createUser(UserCreateRequest request, StreamObserver<UserCreateResponse> responseObserver) {
@@ -69,12 +78,10 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.DELETE_USER));
 
     try {
-      var uuid = UUID.fromString(request.getId());
-      if (uuid.equals(ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId())) {
-        throw new IllegalArgumentException("Cannot delete self");
-      }
+      var userId = UUID.fromString(request.getId());
+      mutateOrThrow(userId);
 
-      soulFireServer.authSystem().deleteUser(uuid);
+      soulFireServer.authSystem().deleteUser(userId);
 
       responseObserver.onNext(UserDeleteResponse.newBuilder().build());
       responseObserver.onCompleted();
@@ -158,6 +165,8 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     try {
       var userId = UUID.fromString(request.getId());
+      mutateOrThrow(userId);
+
       soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
@@ -183,6 +192,8 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     try {
       var userId = UUID.fromString(request.getId());
+      mutateOrThrow(userId);
+
       soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
@@ -214,6 +225,8 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     try {
       var userId = UUID.fromString(request.getId());
+      mutateOrThrow(userId);
+
       var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
       if (user == null) {
         throw new IllegalArgumentException("User not found: " + userId);
