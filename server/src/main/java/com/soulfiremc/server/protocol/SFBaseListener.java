@@ -150,6 +150,7 @@ public final class SFBaseListener extends SessionAdapter {
           case ClientboundPingPacket pingPacket -> session.send(new ServerboundPongPacket(pingPacket.getId()));
           case ClientboundDisconnectPacket disconnectPacket -> session.disconnect(disconnectPacket.getReason());
           case ClientboundStartConfigurationPacket ignored -> {
+            botConnection.clearClientLevel();
             session.switchInboundState(() -> protocol.setInboundState(ProtocolState.CONFIGURATION));
             session.send(new ServerboundConfigurationAcknowledgedPacket());
             session.switchOutboundState(() -> protocol.setOutboundState(ProtocolState.CONFIGURATION));

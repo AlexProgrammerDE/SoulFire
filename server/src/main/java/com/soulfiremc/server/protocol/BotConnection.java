@@ -79,10 +79,10 @@ public final class BotConnection {
   private final ProtocolState targetState;
   private final ProtocolVersion protocolVersion;
   private final SFSessionService sessionService;
-  private final SessionDataManager dataManager;
   private final BotControlAPI botControl;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
+  private SessionDataManager dataManager;
   private boolean explicitlyShutdown = false;
   private boolean running = true;
   @Setter
@@ -147,21 +147,23 @@ public final class BotConnection {
       return;
     }
 
-    runTick();
+    runTick(true);
   }
 
-  public void runTick() {
+  public void runTick(boolean renderLevel) {
     try {
-      session.tick(); // Ensure all packets are handled before ticking
-
-      while (!preTickHooks.isEmpty()) {
-        preTickHooks.poll().run();
-      }
-
       var tickTimer = dataManager.tickTimer();
-      var ticks = tickTimer.advanceTime(System.nanoTime() / 1000000L, true);
-      for (var i = 0; i < Math.min(10, ticks); i++) {
-        this.tick();
+      var ticks = tickTimer.advanceTime(System.nanoTime() / 1000000L, renderLevel);
+      if (renderLevel) {
+        session.tick(); // Ensure all packets are handled before ticking
+
+        while (!preTickHooks.isEmpty()) {
+          preTickHooks.poll().run();
+        }
+
+        for (var i = 0; i < Math.min(10, ticks); i++) {
+          this.tick();
+        }
       }
 
       tickTimer.updatePauseState(this.pause);
@@ -182,6 +184,12 @@ public final class BotConnection {
     }
 
     SoulFireAPI.postEvent(new BotPostTickEvent(this));
+  }
+
+  public void clearClientLevel() {
+    this.dataManager.clearLevelAndPlayer();
+    this.runTick(false);
+    this.dataManager = SessionDataManager.toCommon(this.dataManager);
   }
 
   @Nullable

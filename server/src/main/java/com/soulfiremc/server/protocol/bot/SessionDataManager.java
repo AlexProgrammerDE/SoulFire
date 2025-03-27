@@ -30,10 +30,7 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
-import com.soulfiremc.server.protocol.bot.state.Level;
-import com.soulfiremc.server.protocol.bot.state.MapDataState;
-import com.soulfiremc.server.protocol.bot.state.PlayerListState;
-import com.soulfiremc.server.protocol.bot.state.TagsState;
+import com.soulfiremc.server.protocol.bot.state.*;
 import com.soulfiremc.server.protocol.bot.state.entity.*;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
@@ -115,10 +112,7 @@ public final class SessionDataManager {
   private final InstanceSettingsSource settingsSource;
   private final BotConnection connection;
   private final PlayerListState playerListState = new PlayerListState();
-  private final Map<ResourceKey<?>, List<RegistryEntry>> resolvedRegistryData = new LinkedHashMap<>();
-  private final Registry<DimensionType> dimensionTypeRegistry = new Registry<>(RegistryKeys.DIMENSION_TYPE);
-  private final Registry<Biome> biomeRegistry = new Registry<>(RegistryKeys.BIOME);
-  private final Registry<SFChatType> chatTypeRegistry = new Registry<>(RegistryKeys.CHAT_TYPE);
+  private final SFRegistriesState registriesState;
   private final Int2ObjectMap<MapDataState> mapDataStates = new Int2ObjectOpenHashMap<>();
   private final TagsState tagsState = new TagsState();
   private MultiPlayerGameMode gameModeState;
@@ -144,12 +138,29 @@ public final class SessionDataManager {
   public SessionDataManager(BotConnection connection) {
     this.settingsSource = connection.settingsSource();
     this.connection = connection;
+    this.registriesState = new SFRegistriesState();
+  }
+
+  // Copies to a base "common" instance
+  @SuppressWarnings("CopyConstructorMissesField")
+  private SessionDataManager(SessionDataManager other) {
+    this.settingsSource = other.connection.settingsSource();
+    this.connection = other.connection;
+    this.botProfile = other.botProfile;
+    this.registriesState = other.registriesState;
+    this.serverEnabledFeatures = other.serverEnabledFeatures;
+    this.serverBrand = other.serverBrand;
+    this.serverPlayData = other.serverPlayData;
+  }
+
+  public static SessionDataManager toCommon(SessionDataManager oldManager) {
+    return new SessionDataManager(oldManager);
   }
 
   private static void setValuesFromPositionPacket(EntityMovement newMovement, List<PositionElement> set, Entity entity, boolean canLerp) {
-    var lv = EntityMovement.ofEntityUsingLerpTarget(entity);
-    var absolutePos = EntityMovement.calculateAbsolute(lv, newMovement, set);
-    var teleport = lv.pos().distanceSquared(absolutePos.pos()) > 4096.0;
+    var lerpTarget = EntityMovement.ofEntityUsingLerpTarget(entity);
+    var absolutePos = EntityMovement.calculateAbsolute(lerpTarget, newMovement, set);
+    var teleport = lerpTarget.pos().distanceSquared(absolutePos.pos()) > 4096.0;
     if (canLerp && !teleport) {
       entity.lerpTo(absolutePos.pos().getX(), absolutePos.pos().getY(), absolutePos.pos().getZ(), absolutePos.yRot(), absolutePos.xRot(), 3);
       entity.setDeltaMovement(absolutePos.deltaMovement());
@@ -211,11 +222,11 @@ public final class SessionDataManager {
 
     Registry.RegistryDataWriter registryWriter;
     if (registryKey.equals(RegistryKeys.DIMENSION_TYPE)) {
-      registryWriter = dimensionTypeRegistry.writer(DimensionType::new);
+      registryWriter = registriesState.dimensionTypeRegistry.writer(DimensionType::new);
     } else if (registryKey.equals(RegistryKeys.BIOME)) {
-      registryWriter = biomeRegistry.writer(Biome::new);
+      registryWriter = registriesState.biomeRegistry.writer(Biome::new);
     } else if (registryKey.equals(RegistryKeys.CHAT_TYPE)) {
-      registryWriter = chatTypeRegistry.writer(SFChatType::new);
+      registryWriter = registriesState.chatTypeRegistry.writer(SFChatType::new);
     } else {
       log.debug("Received registry data for unknown registry {}", registryKey);
       registryWriter = Registry.RegistryDataWriter.NO_OP;
@@ -242,7 +253,7 @@ public final class SessionDataManager {
       resolvedEntries.add(REGISTRY_ENTRY_CACHE.poolReference(resolvedEntry));
     }
 
-    resolvedRegistryData.put(registryKey, resolvedEntries);
+    registriesState.resolvedRegistryData.put(registryKey, resolvedEntries);
   }
 
   @EventHandler
@@ -255,7 +266,7 @@ public final class SessionDataManager {
     serverSimulationDistance = packet.getSimulationDistance();
 
     var spawnInfo = packet.getCommonPlayerSpawnInfo();
-    var dimensionType = dimensionTypeRegistry.getById(spawnInfo.getDimension());
+    var dimensionType = registriesState.dimensionTypeRegistry.getById(spawnInfo.getDimension());
 
     level = new Level(
       connection,
@@ -301,7 +312,7 @@ public final class SessionDataManager {
       level = new Level(
         connection,
         tagsState,
-        dimensionTypeRegistry.getById(spawnInfo.getDimension()),
+        registriesState.dimensionTypeRegistry.getById(spawnInfo.getDimension()),
         spawnInfo.getWorldName(),
         spawnInfo.getHashedSeed(),
         spawnInfo.isDebug(),
@@ -511,7 +522,7 @@ public final class SessionDataManager {
   }
 
   public Component prepareChatTypeMessage(Holder<ChatType> chatTypeHolder, SFChatType.BoundChatMessageInfo chatInfo) {
-    return SFChatType.buildChatComponent(chatTypeHolder.getOrCompute(id -> chatTypeRegistry.getById(id).mcplChatType()), chatInfo);
+    return SFChatType.buildChatComponent(chatTypeHolder.getOrCompute(id -> registriesState.chatTypeRegistry.getById(id).mcplChatType()), chatInfo);
   }
 
   private void onChat(long stamp, Component message) {
@@ -1210,6 +1221,12 @@ public final class SessionDataManager {
     log.info("Disconnected with reason \"{}\"", plainMessage);
 
     handleTips(plainMessage);
+  }
+
+  public void clearLevelAndPlayer() {
+    this.level = null;
+    this.levelLoadStatusManager = null;
+    this.localPlayer = null;
   }
 
   public void onDisconnectEvent(DisconnectedEvent event) {
