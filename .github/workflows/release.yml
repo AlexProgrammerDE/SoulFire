@@ -56,5 +56,5 @@ jobs:
           content: <@&850705047938793503> New SoulFire version released!
           embed-title: SoulFire ${{ steps.set-version.outputs.version }}
           embed-description: SoulFire ${{ steps.set-version.outputs.version }} has been released! Changelog and download can be found at https://github.com/AlexProgrammerDE/SoulFire/releases/tag/${{ steps.set-version.outputs.version }}
-          embed-color: 16641028
+          embed-color: 3312063
           embed-thumbnail-url: https://soulfiremc.com/logo.png
