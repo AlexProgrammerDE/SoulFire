@@ -38,20 +38,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
   @Override
   public void executeCommand(
     CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    var stack = switch (request.getScopeCase()) {
-      case GLOBAL -> {
-        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
-        yield CommandSourceStack.ofUnrestricted(soulFire, user);
-      }
-      case INSTANCE -> {
-        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
-
-        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
-      }
-      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-    };
+    var stack = validateScope(request.getScope());
 
     try {
       var code = soulFire.serverCommandManager().execute(request.getCommand(), stack);
@@ -68,20 +55,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
   public void tabCompleteCommand(
     CommandCompletionRequest request,
     StreamObserver<CommandCompletionResponse> responseObserver) {
-    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    var stack = switch (request.getScopeCase()) {
-      case GLOBAL -> {
-        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
-        yield CommandSourceStack.ofUnrestricted(soulFire, user);
-      }
-      case INSTANCE -> {
-        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
-
-        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
-      }
-      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-    };
+    var stack = validateScope(request.getScope());
 
     try {
       var suggestions = soulFire.serverCommandManager().complete(request.getCommand(), request.getCursor(), stack)
@@ -105,5 +79,22 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
       log.error("Error tab completing", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
+  }
+
+  private CommandSourceStack validateScope(CommandScope scope) {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    return switch (scope.getScopeCase()) {
+      case GLOBAL -> {
+        user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
+        yield CommandSourceStack.ofUnrestricted(soulFire, user);
+      }
+      case INSTANCE -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
+
+        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
+      }
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    };
   }
 }

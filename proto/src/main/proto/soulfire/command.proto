@@ -12,11 +12,15 @@ message InstanceCommandScope {
   string instance_id = 1;
 }
 
-message CommandRequest {
+message CommandScope {
   oneof scope {
     GlobalCommandScope global = 1;
     InstanceCommandScope instance = 2;
   }
+}
+
+message CommandRequest {
+  CommandScope scope = 4;
   string command = 3;
 }
 
@@ -25,10 +29,7 @@ message CommandResponse {
 }
 
 message CommandCompletionRequest {
-  oneof scope {
-    GlobalCommandScope global = 1;
-    InstanceCommandScope instance = 2;
-  }
+  CommandScope scope = 5;
   string command = 3;
   int32 cursor = 4;
 }
