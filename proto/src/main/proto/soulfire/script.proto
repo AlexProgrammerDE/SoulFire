@@ -50,9 +50,27 @@ message UpdateScriptRequest {
 message UpdateScriptResponse {
 }
 
+message ListScriptsRequest {
+  oneof scope {
+    GlobalScriptScope global_script = 1;
+    InstanceScriptScope instance_script = 2;
+  }
+}
+
+message Script {
+  string id = 1;
+  string script_name = 2;
+  bool elevated_permissions = 3;
+}
+
+message ListScriptsResponse {
+  repeated Script scripts = 1;
+}
+
 service ScriptService {
   rpc CreateScript (CreateScriptRequest) returns (CreateScriptResponse) {}
   rpc DeleteScript (DeleteScriptRequest) returns (DeleteScriptResponse) {}
   rpc RestartScript (RestartScriptRequest) returns (RestartScriptResponse) {}
   rpc UpdateScript (UpdateScriptRequest) returns (UpdateScriptResponse) {}
+  rpc ListScripts (ListScriptsRequest) returns (ListScriptsResponse) {}
 }

@@ -212,4 +212,43 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
+
+  @Override
+  public void listScripts(ListScriptsRequest request, StreamObserver<ListScriptsResponse> responseObserver) {
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL_SCRIPT -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_GLOBAL_SCRIPT));
+      case INSTANCE_SCRIPT -> () -> {
+        var instanceId = UUID.fromString(request.getInstanceScript().getId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_SCRIPT, instanceId));
+      };
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    });
+
+    try {
+      var scripts = soulFireServer.sessionFactory()
+        .fromTransaction(session -> session.createQuery("from ScriptEntity", ScriptEntity.class).list());
+
+      var response = ListScriptsResponse.newBuilder();
+      for (var script : scripts) {
+        if (switch (request.getScopeCase()) {
+          case GLOBAL_SCRIPT -> script.type() == ScriptEntity.ScriptType.GLOBAL;
+          case INSTANCE_SCRIPT -> script.type() == ScriptEntity.ScriptType.INSTANCE
+            && script.instance().id().equals(UUID.fromString(request.getInstanceScript().getId()));
+          case SCOPE_NOT_SET -> false;
+        }) {
+          response.addScripts(Script.newBuilder()
+            .setId(script.id().toString())
+            .setScriptName(script.scriptName())
+            .setElevatedPermissions(script.elevatedPermissions())
+            .build());
+        }
+      }
+
+      responseObserver.onNext(response.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error listing scripts", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
 }
