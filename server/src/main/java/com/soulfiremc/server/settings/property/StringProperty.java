@@ -18,8 +18,10 @@
 package com.soulfiremc.server.settings.property;
 
 import com.soulfiremc.grpc.generated.StringSetting;
+import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
+@Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class StringProperty implements Property {

@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.property;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
+@Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class ComboProperty implements Property {

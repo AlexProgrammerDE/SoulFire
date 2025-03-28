@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
 import java.util.List;
 
+@Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class StringListProperty implements Property {

@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
+@Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public non-sealed abstract class IntProperty implements Property {
