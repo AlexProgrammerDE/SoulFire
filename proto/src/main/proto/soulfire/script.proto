@@ -54,7 +54,7 @@ message UpdateScriptRequest {
 message UpdateScriptResponse {
 }
 
-message ListScriptsRequest {
+message ScriptListRequest {
   ScriptScope scope = 1;
 }
 
@@ -70,7 +70,7 @@ message Script {
   ScriptLanguage language = 4;
 }
 
-message ListScriptsResponse {
+message ScriptListResponse {
   repeated Script scripts = 1;
 }
 
@@ -79,5 +79,5 @@ service ScriptService {
   rpc DeleteScript (DeleteScriptRequest) returns (DeleteScriptResponse) {}
   rpc RestartScript (RestartScriptRequest) returns (RestartScriptResponse) {}
   rpc UpdateScript (UpdateScriptRequest) returns (UpdateScriptResponse) {}
-  rpc ListScripts (ListScriptsRequest) returns (ListScriptsResponse) {}
+  rpc ListScripts (ScriptListRequest) returns (ScriptListResponse) {}
 }

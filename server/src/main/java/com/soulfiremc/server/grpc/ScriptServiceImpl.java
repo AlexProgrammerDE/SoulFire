@@ -82,9 +82,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         """);
 
       SFHelpers.mustSupply(() -> switch (request.getScope().getScopeCase()) {
-        case GLOBAL_SCRIPT -> () -> {
-          soulFireServer.instances().values().forEach(instance -> instance.scriptManager().registerScript(result));
-        };
+        case GLOBAL_SCRIPT -> () -> soulFireServer.instances().values().forEach(instance -> instance.scriptManager().registerScript(result));
         case INSTANCE_SCRIPT -> () -> {
           var instanceId = UUID.fromString(request.getScope().getInstanceScript().getId());
           var instance = soulFireServer.instances().get(instanceId);
@@ -207,14 +205,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   }
 
   @Override
-  public void listScripts(ListScriptsRequest request, StreamObserver<ListScriptsResponse> responseObserver) {
+  public void listScripts(ScriptListRequest request, StreamObserver<ScriptListResponse> responseObserver) {
     verifyScope(request.getScope());
 
     try {
       var scripts = soulFireServer.sessionFactory()
         .fromTransaction(session -> session.createQuery("from ScriptEntity", ScriptEntity.class).list());
 
-      var response = ListScriptsResponse.newBuilder();
+      var response = ScriptListResponse.newBuilder();
       for (var script : scripts) {
         if (switch (request.getScope().getScopeCase()) {
           case GLOBAL_SCRIPT -> script.type() == ScriptEntity.ScriptType.GLOBAL;
