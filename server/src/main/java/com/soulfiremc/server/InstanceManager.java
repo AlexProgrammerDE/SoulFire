@@ -30,6 +30,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
@@ -87,8 +88,8 @@ public final class InstanceManager {
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
-  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, InstanceEntity instanceEntity) {
-    this.id = instanceEntity.id();
+  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, UUID id, AttackLifecycle lastState) {
+    this.id = id;
     this.runnableWrapper = soulFireServer.runnableWrapper().with(new InstanceRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
@@ -113,7 +114,18 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    // this.scriptManager.registerScript(UUID.nameUUIDFromBytes("Test".getBytes(StandardCharsets.UTF_8)), "Test", ScriptLanguage.JAVASCRIPT);
+    for (var script : sessionFactory.fromTransaction(session -> {
+      var instance = session.find(InstanceEntity.class, id);
+      if (instance == null) {
+        return Collections.<ScriptEntity>emptyList();
+      }
+
+      return session.createQuery("FROM ScriptEntity WHERE instance = null OR instance = :instance", ScriptEntity.class)
+        .setParameter("instance", instance)
+        .list();
+    })) {
+      scriptManager.registerScript(script.id(), script.scriptName());
+    }
 
     var registry = new ServerSettingsRegistry()
       // Needs Via loaded to have all protocol versions
@@ -129,7 +141,7 @@ public final class InstanceManager {
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
-      switchToState(null, instanceEntity.attackLifecycle());
+      switchToState(null, lastState);
     } else {
       attackLifecycle(AttackLifecycle.STOPPED);
     }
@@ -299,8 +311,6 @@ public final class InstanceManager {
     allBotsConnected.set(false);
     this.attackLifecycle(AttackLifecycle.STARTING);
 
-    scriptManager.startScripts();
-
     log.info("Preparing bot attack at server");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
@@ -442,6 +452,7 @@ public final class InstanceManager {
 
   public CompletableFuture<?> deleteInstance() {
     return stopAttackPermanently()
+      .thenRunAsync(scriptManager::destroyManager, scheduler)
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
       .thenRunAsync(() -> {
         try {
@@ -453,7 +464,9 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> shutdownHook() {
-    return stopAttackSession().thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
+    return stopAttackSession()
+      .thenRunAsync(scriptManager::destroyManager, scheduler)
+      .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
   }
 
   public CompletableFuture<?> stopAttackPermanently() {
@@ -520,8 +533,6 @@ public final class InstanceManager {
 
       // Notify plugins of state change
       SoulFireAPI.postEvent(new AttackEndedEvent(this));
-
-      scriptManager.killAllScripts();
     });
   }
 

@@ -23,8 +23,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ScriptLanguage {
-  JAVASCRIPT("js"),
-  PYTHON("python");
+  JAVASCRIPT("js", "main.js"),
+  PYTHON("python", "main.py");
+
+  public static final ScriptLanguage[] VALUES = values();
 
   private final String languageId;
+  private final String entryFile;
 }

@@ -29,7 +29,6 @@ import com.soulfiremc.server.api.event.bot.*;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
-import com.soulfiremc.server.util.SFHelpers;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -49,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -65,6 +65,7 @@ public class ScriptManager {
     this.instanceManager = instanceManager;
     this.graalResourceCache = instanceManager.soulFireServer().baseDirectory().resolve(".graal-resource-cache");
     System.setProperty("polyglot.engine.userResourceCache", graalResourceCache.toString());
+    SoulFireAPI.registerListenersOfObject(this);
   }
 
   @EventHandler
@@ -133,23 +134,38 @@ public class ScriptManager {
   }
 
   @SneakyThrows
-  public void registerScript(UUID id, String name, ScriptLanguage language) {
+  public void registerScript(UUID id, String name) {
+    if (scripts.containsKey(id)) {
+      log.info("Reloading script: {}", name);
+      this.killScript(id);
+    }
+
     var dataPath = instanceManager.getInstanceObjectStoragePath().resolve("script-data-" + id);
     var codePath = instanceManager.soulFireServer().getObjectStoragePath().resolve("script-code-" + id);
     Files.createDirectories(dataPath);
     Files.createDirectories(codePath);
+
+    var scriptLanguage = Arrays.stream(ScriptLanguage.VALUES)
+      .filter(language -> Files.exists(codePath.resolve(language.entryFile())))
+      .findFirst();
+    if (scriptLanguage.isEmpty()) {
+      log.warn("No script entry file found for script: {}", name);
+      return;
+    }
 
     scripts.put(id, new Script(
       id,
       name,
       dataPath,
       codePath,
-      language,
+      scriptLanguage.get(),
       new AtomicReference<>()
     ));
+
+    this.startScript(id);
   }
 
-  public void killAllScripts() {
+  public void destroyManager() {
     log.info("Stopping scripts");
 
     for (var script : scripts.values()) {
@@ -176,17 +192,6 @@ public class ScriptManager {
     script.runtime().set(null);
 
     log.info("Stopped script: {}", script.name());
-  }
-
-  public void startScripts() {
-    SoulFireAPI.registerListenersOfObject(this);
-
-    log.info("Starting scripts");
-    for (var script : scripts.values()) {
-      startScript(script.scriptId());
-    }
-
-    log.info("Started scripts");
   }
 
   public HostAccess buildHostAccess() {
@@ -270,32 +275,18 @@ public class ScriptManager {
       scriptAPI
     ));
 
-    SFHelpers.mustSupply(() -> switch (script.language()) {
-      case JAVASCRIPT -> () -> {
-        var mainFile = script.codePath().resolve("main.js");
-        if (!Files.exists(mainFile)) {
-          throw new IllegalStateException("main.js not found");
-        }
+    var mainFile = script.codePath().resolve(script.language.entryFile());
+    if (!Files.exists(mainFile)) {
+      log.warn("Main file not found for script: {}", script.name());
+      return;
+    }
 
-        try {
-          context.eval(Source.newBuilder("js", mainFile.toFile()).build());
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      };
-      case PYTHON -> () -> {
-        var mainFile = script.codePath().resolve("main.py");
-        if (!Files.exists(mainFile)) {
-          throw new IllegalStateException("main.py not found");
-        }
-
-        try {
-          context.eval(Source.newBuilder("python", mainFile.toFile()).build());
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      };
-    });
+    try {
+      context.eval(Source.newBuilder(script.language.languageId(), mainFile.toFile()).build());
+    } catch (IOException e) {
+      log.error("Failed to load script", e);
+      return;
+    }
 
     log.info("Started script: {}", script.name());
   }

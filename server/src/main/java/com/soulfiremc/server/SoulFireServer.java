@@ -18,6 +18,7 @@
 package com.soulfiremc.server;
 
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
@@ -249,7 +250,7 @@ public final class SoulFireServer {
       for (var instanceData : sessionFactory.fromTransaction(s ->
         s.createQuery("FROM InstanceEntity", InstanceEntity.class).list())) {
         try {
-          var instance = new InstanceManager(this, sessionFactory, instanceData);
+          var instance = new InstanceManager(this, sessionFactory, instanceData.id(), instanceData.attackLifecycle());
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
@@ -292,7 +293,7 @@ public final class SoulFireServer {
 
       return newInstanceEntity;
     });
-    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity);
+    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity.id(), AttackLifecycle.STOPPED);
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);
