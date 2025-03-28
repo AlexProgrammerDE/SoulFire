@@ -220,7 +220,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             && script.instance().id().equals(UUID.fromString(request.getScope().getInstanceScript().getId()));
           case SCOPE_NOT_SET -> false;
         }) {
-          response.addScripts(Script.newBuilder()
+          response.addScripts(ScriptListResponse.Script.newBuilder()
             .setId(script.id().toString())
             .setScriptName(script.scriptName())
             .setElevatedPermissions(script.elevatedPermissions())

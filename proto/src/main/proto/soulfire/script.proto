@@ -63,14 +63,14 @@ enum ScriptLanguage {
   PYTHON = 1;
 }
 
-message Script {
-  string id = 1;
-  string script_name = 2;
-  bool elevated_permissions = 3;
-  ScriptLanguage language = 4;
-}
-
 message ScriptListResponse {
+  message Script {
+    string id = 1;
+    string script_name = 2;
+    bool elevated_permissions = 3;
+    ScriptLanguage language = 4;
+  }
+
   repeated Script scripts = 1;
 }
 
