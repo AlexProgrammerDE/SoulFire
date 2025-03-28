@@ -57,6 +57,10 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       builder.setBotId(event.botAccountId().toString());
     }
 
+    if (event.scriptId() != null) {
+      builder.setScriptId(event.scriptId().toString());
+    }
+
     return builder.build();
   }
 
