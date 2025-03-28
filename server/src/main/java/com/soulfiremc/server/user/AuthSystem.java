@@ -257,7 +257,8 @@ public final class AuthSystem {
             && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
           case CREATE_SCRIPT, READ_SCRIPT, UPDATE_SCRIPT, DELETE_SCRIPT -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
             && settingsSource.get(ServerSettings.ALLOW_INSTANCE_SCRIPTS));
-          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS, ACCESS_OBJECT_STORAGE,
+          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS,
+               ACCESS_OBJECT_STORAGE, ACCESS_SCRIPT_CODE_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
                READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));

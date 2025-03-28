@@ -33,6 +33,7 @@ import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +66,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ScriptManager {
   private final InstanceManager instanceManager;
   private final Path graalResourceCache;
+  @Getter
   private final Map<UUID, Script> scripts = new ConcurrentHashMap<>();
 
   public ScriptManager(InstanceManager instanceManager) {
@@ -140,11 +142,16 @@ public class ScriptManager {
   }
 
   public void registerScript(ScriptEntity scriptEntity) {
-    this.registerScript(scriptEntity.id(), scriptEntity.scriptName(), scriptEntity.elevatedPermissions());
+    this.registerScript(
+      scriptEntity.id(),
+      scriptEntity.scriptName(),
+      scriptEntity.type(),
+      scriptEntity.elevatedPermissions()
+    );
   }
 
   @SneakyThrows
-  public void registerScript(UUID id, String name, boolean elevatedPermissions) {
+  public void registerScript(UUID id, String name, ScriptEntity.ScriptType scriptType, boolean elevatedPermissions) {
     if (scripts.containsKey(id)) {
       log.info("Reloading script: {}", name);
       this.killScript(id);
@@ -168,6 +175,7 @@ public class ScriptManager {
       name,
       dataPath,
       codePath,
+      scriptType,
       elevatedPermissions,
       scriptLanguage.get(),
       new AtomicReference<>()
@@ -307,7 +315,7 @@ public class ScriptManager {
     log.info("Started script: {}", script.name());
   }
 
-  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, boolean elevatedPermissions, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
+  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptEntity.ScriptType scriptType, boolean elevatedPermissions, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
   }
 
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {

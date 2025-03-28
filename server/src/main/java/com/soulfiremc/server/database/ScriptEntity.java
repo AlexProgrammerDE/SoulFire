@@ -42,7 +42,7 @@ public final class ScriptEntity {
   @NotNull(message = "Script type cannot be null")
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ScriptEntity.InstanceType type;
+  private ScriptEntity.ScriptType type;
 
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn
@@ -68,7 +68,7 @@ public final class ScriptEntity {
   @Version
   private long version;
 
-  public enum InstanceType {
+  public enum ScriptType {
     INSTANCE,
     GLOBAL
   }
