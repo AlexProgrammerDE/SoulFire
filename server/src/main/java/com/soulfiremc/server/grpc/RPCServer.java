@@ -103,6 +103,7 @@ public final class RPCServer {
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new DownloadServiceImpl())
         .addService(new ServerServiceImpl(soulFireServer))
+          .addService(new ScriptServiceImpl(soulFireServer))
         .addService(new UserServiceImpl(soulFireServer))
         .addService(new LoginServiceImpl(soulFireServer))
         // Allow collecting info about callable methods.

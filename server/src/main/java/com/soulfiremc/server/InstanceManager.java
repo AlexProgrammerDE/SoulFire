@@ -123,7 +123,7 @@ public final class InstanceManager {
         .setParameter("instance", instance)
         .list();
     })) {
-      scriptManager.registerScript(script.id(), script.scriptName());
+      scriptManager.registerScript(script);
     }
 
     var registry = new ServerSettingsRegistry()

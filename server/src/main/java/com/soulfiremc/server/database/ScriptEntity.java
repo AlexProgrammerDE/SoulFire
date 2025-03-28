@@ -54,6 +54,9 @@ public final class ScriptEntity {
   @Column(nullable = false, unique = true, length = 32)
   private String scriptName;
 
+  @Column(nullable = false)
+  private boolean elevatedPermissions;
+
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Instant createdAt;

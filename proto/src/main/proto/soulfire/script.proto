@@ -20,6 +20,7 @@ message CreateScriptRequest {
     InstanceScriptScope instance_script = 2;
   }
   string script_name = 3;
+  bool elevated_permissions = 4;
 }
 
 message CreateScriptResponse {
@@ -43,6 +44,7 @@ message RestartScriptResponse {
 message UpdateScriptRequest {
   string id = 1;
   string script_name = 2;
+  bool elevated_permissions = 3;
 }
 
 message UpdateScriptResponse {

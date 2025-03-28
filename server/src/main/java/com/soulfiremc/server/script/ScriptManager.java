@@ -27,6 +27,7 @@ import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
 import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.bot.*;
+import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
@@ -138,8 +139,12 @@ public class ScriptManager {
     }
   }
 
+  public void registerScript(ScriptEntity scriptEntity) {
+    this.registerScript(scriptEntity.id(), scriptEntity.scriptName(), scriptEntity.elevatedPermissions());
+  }
+
   @SneakyThrows
-  public void registerScript(UUID id, String name) {
+  public void registerScript(UUID id, String name, boolean elevatedPermissions) {
     if (scripts.containsKey(id)) {
       log.info("Reloading script: {}", name);
       this.killScript(id);
@@ -163,6 +168,7 @@ public class ScriptManager {
       name,
       dataPath,
       codePath,
+      elevatedPermissions,
       scriptLanguage.get(),
       new AtomicReference<>()
     ));
@@ -199,7 +205,11 @@ public class ScriptManager {
     log.info("Stopped script: {}", script.name());
   }
 
-  public HostAccess buildHostAccess() {
+  public HostAccess buildHostAccess(Script script) {
+    if (script.elevatedPermissions) {
+      return HostAccess.ALL;
+    }
+
     var builder = HostAccess.newBuilder(HostAccess.CONSTRAINED)
       .allowArrayAccess(true)
       .allowListAccess(true)
@@ -267,7 +277,7 @@ public class ScriptManager {
       .allowInnerContextOptions(false)
       .allowPolyglotAccess(PolyglotAccess.NONE)
       .allowHostClassLoading(false)
-      .allowHostAccess(buildHostAccess())
+      .allowHostAccess(buildHostAccess(script))
       .allowEnvironmentAccess(EnvironmentAccess.NONE)
       .currentWorkingDirectory(script.dataPath().toAbsolutePath())
       .build();
@@ -297,7 +307,7 @@ public class ScriptManager {
     log.info("Started script: {}", script.name());
   }
 
-  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
+  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, boolean elevatedPermissions, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
   }
 
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {

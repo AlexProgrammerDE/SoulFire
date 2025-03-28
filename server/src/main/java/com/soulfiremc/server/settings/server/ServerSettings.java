@@ -75,6 +75,14 @@ public final class ServerSettings implements SettingsObject {
       .description("Allow the owner of an instance to change meta like instance name and icon.")
       .defaultValue(true)
       .build();
+  public static final BooleanProperty ALLOW_INSTANCE_SCRIPTS =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("allow-instance-scripts")
+      .uiName("Allow instance scripts")
+      .description("Allow users of instances to create custom instance-level scripts.")
+      .defaultValue(true)
+      .build();
   public static final ComboProperty EMAIL_TYPE =
     ImmutableComboProperty.builder()
       .namespace(NAMESPACE)
