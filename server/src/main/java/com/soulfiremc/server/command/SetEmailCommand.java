@@ -34,7 +34,7 @@ public final class SetEmailCommand {
               "Set the email of the current user",
               c -> {
                 var email = StringArgumentType.getString(c, "email");
-                c.getSource().soulFire().sessionFactory().inSession(s -> {
+                c.getSource().soulFire().sessionFactory().inTransaction(s -> {
                   var userData = s.find(UserEntity.class, c.getSource().source().getUniqueId());
                   userData.email(email);
                   s.merge(userData);

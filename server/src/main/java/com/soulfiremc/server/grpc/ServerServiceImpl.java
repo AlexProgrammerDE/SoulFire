@@ -39,7 +39,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_SERVER_CONFIG));
 
     try {
-      var configEntity = soulFireServer.sessionFactory().fromSession(session -> session.find(ServerConfigEntity.class, 1));
+      var configEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(ServerConfigEntity.class, 1));
       ServerSettingsImpl config;
       if (configEntity == null) {
         config = ServerSettingsImpl.EMPTY;
@@ -63,7 +63,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SERVER_CONFIG));
 
     try {
-      soulFireServer.sessionFactory().inSession(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
         if (currentConfigEntity == null) {
           var newConfigEntity = new ServerConfigEntity();

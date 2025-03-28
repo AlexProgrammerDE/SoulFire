@@ -146,7 +146,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inSession(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + userId);
@@ -171,7 +171,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inSession(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + userId);
@@ -196,7 +196,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inSession(session -> {
+      soulFireServer.sessionFactory().inTransaction(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + userId);

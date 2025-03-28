@@ -53,7 +53,7 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
   public void login(LoginRequest request, StreamObserver<NextAuthFlowResponse> responseObserver) {
     try {
       var authFlowToken = UUID.randomUUID();
-      var user = soulFireServer.sessionFactory().fromSession(session -> session.createQuery("from UserEntity where email = :email", UserEntity.class)
+      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity where email = :email", UserEntity.class)
         .setParameter("email", request.getEmail())
         .uniqueResult());
 
