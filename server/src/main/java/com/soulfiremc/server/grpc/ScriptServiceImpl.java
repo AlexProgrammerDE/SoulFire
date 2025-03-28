@@ -41,27 +41,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   @Override
   public void createScript(CreateScriptRequest request, StreamObserver<CreateScriptResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL_SCRIPT -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_GLOBAL_SCRIPT));
-      case INSTANCE_SCRIPT -> () -> {
-        var instanceId = UUID.fromString(request.getInstanceScript().getId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.CREATE_SCRIPT, instanceId));
-      };
-      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-    });
+    verifyScope(request.getScope());
 
     try {
       var result = soulFireServer.sessionFactory().fromTransaction(session -> {
         var scriptEntity = new ScriptEntity();
-        scriptEntity.type(switch (request.getScopeCase()) {
+        scriptEntity.type(switch (request.getScope().getScopeCase()) {
           case GLOBAL_SCRIPT -> ScriptEntity.ScriptType.GLOBAL;
           case INSTANCE_SCRIPT -> ScriptEntity.ScriptType.INSTANCE;
           case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
         });
-        SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+        SFHelpers.mustSupply(() -> switch (request.getScope().getScopeCase()) {
           case GLOBAL_SCRIPT -> () -> {};
           case INSTANCE_SCRIPT -> () -> {
-            var instanceId = UUID.fromString(request.getInstanceScript().getId());
+            var instanceId = UUID.fromString(request.getScope().getInstanceScript().getId());
             var instance = session.find(InstanceEntity.class, instanceId);
             if (instance == null) {
               throw new IllegalArgumentException("Instance not found");
@@ -88,12 +81,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         console.log('Hello, World!');
         """);
 
-      SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      SFHelpers.mustSupply(() -> switch (request.getScope().getScopeCase()) {
         case GLOBAL_SCRIPT -> () -> {
           soulFireServer.instances().values().forEach(instance -> instance.scriptManager().registerScript(result));
         };
         case INSTANCE_SCRIPT -> () -> {
-          var instanceId = UUID.fromString(request.getInstanceScript().getId());
+          var instanceId = UUID.fromString(request.getScope().getInstanceScript().getId());
           var instance = soulFireServer.instances().get(instanceId);
           if (instance == null) {
             throw new IllegalArgumentException("Instance not found");
@@ -215,14 +208,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   @Override
   public void listScripts(ListScriptsRequest request, StreamObserver<ListScriptsResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL_SCRIPT -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_GLOBAL_SCRIPT));
-      case INSTANCE_SCRIPT -> () -> {
-        var instanceId = UUID.fromString(request.getInstanceScript().getId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_SCRIPT, instanceId));
-      };
-      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-    });
+    verifyScope(request.getScope());
 
     try {
       var scripts = soulFireServer.sessionFactory()
@@ -230,16 +216,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       var response = ListScriptsResponse.newBuilder();
       for (var script : scripts) {
-        if (switch (request.getScopeCase()) {
+        if (switch (request.getScope().getScopeCase()) {
           case GLOBAL_SCRIPT -> script.type() == ScriptEntity.ScriptType.GLOBAL;
           case INSTANCE_SCRIPT -> script.type() == ScriptEntity.ScriptType.INSTANCE
-            && script.instance().id().equals(UUID.fromString(request.getInstanceScript().getId()));
+            && script.instance().id().equals(UUID.fromString(request.getScope().getInstanceScript().getId()));
           case SCOPE_NOT_SET -> false;
         }) {
           response.addScripts(Script.newBuilder()
             .setId(script.id().toString())
             .setScriptName(script.scriptName())
             .setElevatedPermissions(script.elevatedPermissions())
+            .setLanguage(switch (ScriptLanguage.determineLanguage(soulFireServer.getScriptCodePath(script.id()))) {
+              case JAVASCRIPT -> com.soulfiremc.grpc.generated.ScriptLanguage.JAVASCRIPT;
+              case PYTHON -> com.soulfiremc.grpc.generated.ScriptLanguage.PYTHON;
+            })
             .build());
         }
       }
@@ -249,6 +239,17 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     } catch (Throwable t) {
       log.error("Error listing scripts", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  private void verifyScope(ScriptScope scope) {
+    switch (scope.getScopeCase()) {
+      case GLOBAL_SCRIPT -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_GLOBAL_SCRIPT));
+      case INSTANCE_SCRIPT -> {
+        var instanceId = UUID.fromString(scope.getInstanceScript().getId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_SCRIPT, instanceId));
+      }
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     }
   }
 }

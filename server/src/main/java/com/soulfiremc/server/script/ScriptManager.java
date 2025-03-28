@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -169,14 +168,7 @@ public class ScriptManager {
     var codePath = instanceManager.soulFireServer().getScriptCodePath(id);
     Files.createDirectories(codePath);
 
-    var scriptLanguage = Arrays.stream(ScriptLanguage.VALUES)
-      .filter(language -> Files.exists(codePath.resolve(language.entryFile())))
-      .findFirst();
-    if (scriptLanguage.isEmpty()) {
-      log.warn("No script entry file found for script: {}", name);
-      return;
-    }
-
+    var scriptLanguage = ScriptLanguage.determineLanguage(codePath);
     scripts.put(id, new Script(
       id,
       name,
@@ -184,7 +176,7 @@ public class ScriptManager {
       codePath,
       scriptType,
       elevatedPermissions,
-      scriptLanguage.get(),
+      scriptLanguage,
       new AtomicReference<>()
     ));
 

@@ -14,13 +14,17 @@ message InstanceScriptScope {
   string id = 1;
 }
 
-message CreateScriptRequest {
+message ScriptScope {
   oneof scope {
     GlobalScriptScope global_script = 1;
     InstanceScriptScope instance_script = 2;
   }
-  string script_name = 3;
-  bool elevated_permissions = 4;
+}
+
+message CreateScriptRequest {
+  ScriptScope scope = 1;
+  string script_name = 2;
+  bool elevated_permissions = 3;
 }
 
 message CreateScriptResponse {
@@ -51,16 +55,19 @@ message UpdateScriptResponse {
 }
 
 message ListScriptsRequest {
-  oneof scope {
-    GlobalScriptScope global_script = 1;
-    InstanceScriptScope instance_script = 2;
-  }
+  ScriptScope scope = 1;
+}
+
+enum ScriptLanguage {
+  JAVASCRIPT = 0;
+  PYTHON = 1;
 }
 
 message Script {
   string id = 1;
   string script_name = 2;
   bool elevated_permissions = 3;
+  ScriptLanguage language = 4;
 }
 
 message ListScriptsResponse {

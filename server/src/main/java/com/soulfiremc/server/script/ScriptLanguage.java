@@ -20,14 +20,29 @@ package com.soulfiremc.server.script;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @Getter
 @RequiredArgsConstructor
 public enum ScriptLanguage {
   JAVASCRIPT("js", "main.js"),
   PYTHON("python", "main.py");
 
+  public static final ScriptLanguage DEFAULT = JAVASCRIPT;
   public static final ScriptLanguage[] VALUES = values();
 
   private final String languageId;
   private final String entryFile;
+
+  public static ScriptLanguage determineLanguage(Path codePath) {
+    for (var language : VALUES) {
+      if (Files.exists(codePath.resolve(language.entryFile))
+        && Files.isRegularFile(codePath.resolve(language.entryFile))) {
+        return language;
+      }
+    }
+
+    return DEFAULT;
+  }
 }
