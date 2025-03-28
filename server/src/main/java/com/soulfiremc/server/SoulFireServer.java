@@ -232,6 +232,10 @@ public final class SoulFireServer {
     return baseDirectory.resolve("object-storage");
   }
 
+  public Path getScriptCodePath(UUID id) {
+    return getObjectStoragePath().resolve("script-code-" + id);
+  }
+
   public void configUpdateHook() {
     setupLoggingAndVia();
   }

@@ -150,6 +150,12 @@ public class ScriptManager {
     );
   }
 
+  public void maybeReRegisterScript(ScriptEntity scriptEntity) {
+    if (scripts.containsKey(scriptEntity.id())) {
+      this.registerScript(scriptEntity);
+    }
+  }
+
   @SneakyThrows
   public void registerScript(UUID id, String name, ScriptEntity.ScriptType scriptType, boolean elevatedPermissions) {
     if (scripts.containsKey(id)) {
@@ -157,9 +163,10 @@ public class ScriptManager {
       this.killScript(id);
     }
 
-    var dataPath = instanceManager.getInstanceObjectStoragePath().resolve("script-data-" + id);
-    var codePath = instanceManager.soulFireServer().getObjectStoragePath().resolve("script-code-" + id);
+    var dataPath = instanceManager.getScriptDataPath(id);
     Files.createDirectories(dataPath);
+
+    var codePath = instanceManager.soulFireServer().getScriptCodePath(id);
     Files.createDirectories(codePath);
 
     var scriptLanguage = Arrays.stream(ScriptLanguage.VALUES)

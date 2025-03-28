@@ -19,9 +19,20 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.script.ScriptLanguage;
+import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFHelpers;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,21 +41,175 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   @Override
   public void createScript(CreateScriptRequest request, StreamObserver<CreateScriptResponse> responseObserver) {
-    super.createScript(request, responseObserver);
+    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+      case GLOBAL_SCRIPT -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_GLOBAL_SCRIPT));
+      case INSTANCE_SCRIPT -> () -> {
+        var instanceId = UUID.fromString(request.getInstanceScript().getId());
+        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.CREATE_SCRIPT, instanceId));
+      };
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    });
+
+    try {
+      var result = soulFireServer.sessionFactory().fromTransaction(session -> {
+        var scriptEntity = new ScriptEntity();
+        scriptEntity.type(switch (request.getScopeCase()) {
+          case GLOBAL_SCRIPT -> ScriptEntity.ScriptType.GLOBAL;
+          case INSTANCE_SCRIPT -> ScriptEntity.ScriptType.INSTANCE;
+          case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+        });
+        SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+          case GLOBAL_SCRIPT -> () -> {};
+          case INSTANCE_SCRIPT -> () -> {
+            var instanceId = UUID.fromString(request.getInstanceScript().getId());
+            var instance = session.find(InstanceEntity.class, instanceId);
+            if (instance == null) {
+              throw new IllegalArgumentException("Instance not found");
+            }
+
+            scriptEntity.instance(instance);
+          };
+          case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+        });
+        scriptEntity.scriptName(request.getScriptName());
+        if (request.getElevatedPermissions()) {
+          ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.ELEVATE_SCRIPT_PERMISSIONS));
+          scriptEntity.elevatedPermissions(true);
+        }
+
+        session.persist(scriptEntity);
+
+        return scriptEntity;
+      });
+      var codePath = soulFireServer.getScriptCodePath(result.id());
+      Files.createDirectories(codePath);
+      Files.writeString(codePath.resolve(ScriptLanguage.JAVASCRIPT.entryFile()), """
+        // This is a SoulFire script
+        console.log('Hello, World!');
+        """);
+
+      SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
+        case GLOBAL_SCRIPT -> () -> {
+          soulFireServer.instances().values().forEach(instance -> instance.scriptManager().registerScript(result));
+        };
+        case INSTANCE_SCRIPT -> () -> {
+          var instanceId = UUID.fromString(request.getInstanceScript().getId());
+          var instance = soulFireServer.instances().get(instanceId);
+          if (instance == null) {
+            throw new IllegalArgumentException("Instance not found");
+          }
+
+          instance.scriptManager().registerScript(result);
+        };
+        case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+      });
+
+      responseObserver.onNext(CreateScriptResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error creating script", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void deleteScript(DeleteScriptRequest request, StreamObserver<DeleteScriptResponse> responseObserver) {
-    super.deleteScript(request, responseObserver);
+    try {
+      var scriptId = UUID.fromString(request.getId());
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var script = session.find(ScriptEntity.class, scriptId);
+        if (script == null) {
+          throw new IllegalArgumentException("Script not found");
+        }
+
+        SFHelpers.mustSupply(() -> switch (script.type()) {
+          case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.DELETE_GLOBAL_SCRIPT));
+          case INSTANCE -> () -> {
+            var instanceId = script.instance().id();
+            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DELETE_SCRIPT, instanceId));
+          };
+        });
+
+        session.remove(script);
+
+        soulFireServer.instances().values().forEach(instance -> instance.scriptManager().killScript(scriptId));
+
+        var codePath = soulFireServer.getScriptCodePath(scriptId);
+        try {
+          SFHelpers.deleteDirectory(codePath);
+        } catch (IOException e) {
+          log.error("Error while deleting script code", e);
+        }
+      });
+
+      responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error deleting script", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void restartScript(RestartScriptRequest request, StreamObserver<RestartScriptResponse> responseObserver) {
-    super.restartScript(request, responseObserver);
+    try {
+      var scriptId = UUID.fromString(request.getId());
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var script = session.find(ScriptEntity.class, scriptId);
+        if (script == null) {
+          throw new IllegalArgumentException("Script not found");
+        }
+
+        SFHelpers.mustSupply(() -> switch (script.type()) {
+          case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.DELETE_GLOBAL_SCRIPT));
+          case INSTANCE -> () -> {
+            var instanceId = script.instance().id();
+            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DELETE_SCRIPT, instanceId));
+          };
+        });
+
+        soulFireServer.instances().values().forEach(instance -> instance.scriptManager().maybeReRegisterScript(script));
+      });
+
+      responseObserver.onNext(RestartScriptResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error restarting script", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 
   @Override
   public void updateScript(UpdateScriptRequest request, StreamObserver<UpdateScriptResponse> responseObserver) {
-    super.updateScript(request, responseObserver);
+    try {
+      var scriptId = UUID.fromString(request.getId());
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var script = session.find(ScriptEntity.class, scriptId);
+        if (script == null) {
+          throw new IllegalArgumentException("Script not found");
+        }
+
+        SFHelpers.mustSupply(() -> switch (script.type()) {
+          case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_GLOBAL_SCRIPT));
+          case INSTANCE -> () -> {
+            var instanceId = script.instance().id();
+            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_SCRIPT, instanceId));
+          };
+        });
+
+        script.scriptName(request.getScriptName());
+        script.elevatedPermissions(request.getElevatedPermissions());
+
+        soulFireServer.instances().values().forEach(instance -> instance.scriptManager().maybeReRegisterScript(script));
+
+        session.merge(script);
+      });
+
+      responseObserver.onNext(UpdateScriptResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating script", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
   }
 }

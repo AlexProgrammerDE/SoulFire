@@ -561,6 +561,10 @@ public final class InstanceManager {
     return soulFireServer.getObjectStoragePath().resolve("instance-" + id.toString());
   }
 
+  public Path getScriptDataPath(UUID id) {
+    return getInstanceObjectStoragePath().resolve("script-data-" + id);
+  }
+
   public List<BotConnection> getConnectedBots() {
     return new ArrayList<>(botConnections.values());
   }
