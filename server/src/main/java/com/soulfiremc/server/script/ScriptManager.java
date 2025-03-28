@@ -212,6 +212,11 @@ public class ScriptManager {
     log.info("Stopped script: {}", script.name());
   }
 
+  public void unregisterScript(UUID id) {
+    this.killScript(id);
+    scripts.remove(id);
+  }
+
   public HostAccess buildHostAccess(Script script) {
     if (script.elevatedPermissions) {
       return HostAccess.ALL;

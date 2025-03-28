@@ -125,7 +125,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         session.remove(script);
       });
 
-      soulFireServer.instances().values().forEach(instance -> instance.scriptManager().killScript(scriptId));
+      soulFireServer.instances().values().forEach(instance -> instance.scriptManager().unregisterScript(scriptId));
 
       var codePath = soulFireServer.getScriptCodePath(scriptId);
       try {
