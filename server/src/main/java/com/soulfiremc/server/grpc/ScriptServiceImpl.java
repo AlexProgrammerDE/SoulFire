@@ -190,6 +190,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         });
 
         script.scriptName(request.getScriptName());
+        if (request.getElevatedPermissions() != script.elevatedPermissions()) {
+          ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.ELEVATE_SCRIPT_PERMISSIONS));
+        }
+
         script.elevatedPermissions(request.getElevatedPermissions());
 
         soulFireServer.instances().values().forEach(instance -> instance.scriptManager().maybeReRegisterScript(script));
