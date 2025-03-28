@@ -72,6 +72,7 @@ message ScriptListResponse {
     ScriptLanguage language = 4;
     google.protobuf.Timestamp created_at = 5;
     google.protobuf.Timestamp updated_at = 6;
+    ScriptScope script_scope = 7;
   }
 
   repeated Script scripts = 1;

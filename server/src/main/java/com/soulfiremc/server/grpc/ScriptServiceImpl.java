@@ -153,10 +153,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
 
         SFHelpers.mustSupply(() -> switch (script.type()) {
-          case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.DELETE_GLOBAL_SCRIPT));
+          case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_GLOBAL_SCRIPT));
           case INSTANCE -> () -> {
             var instanceId = script.instance().id();
-            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DELETE_SCRIPT, instanceId));
+            ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_SCRIPT, instanceId));
           };
         });
 
@@ -216,7 +216,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var response = ScriptListResponse.newBuilder();
       for (var script : scripts) {
         if (switch (request.getScope().getScopeCase()) {
-          case GLOBAL_SCRIPT -> script.type() == ScriptEntity.ScriptType.GLOBAL;
+          case GLOBAL_SCRIPT -> true;
           case INSTANCE_SCRIPT -> script.type() == ScriptEntity.ScriptType.INSTANCE
             && script.instance().id().equals(UUID.fromString(request.getScope().getInstanceScript().getId()));
           case SCOPE_NOT_SET -> false;
@@ -231,6 +231,16 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             })
             .setCreatedAt(Timestamps.fromMillis(script.createdAt().toEpochMilli()))
             .setUpdatedAt(Timestamps.fromMillis(script.updatedAt().toEpochMilli()))
+            .setScriptScope(switch (script.type()) {
+              case INSTANCE -> ScriptScope.newBuilder()
+                .setInstanceScript(InstanceScriptScope.newBuilder()
+                  .setId(script.instance().id().toString())
+                  .build())
+                .build();
+              case GLOBAL -> ScriptScope.newBuilder()
+                .setGlobalScript(GlobalScriptScope.newBuilder().build())
+                .build();
+            })
             .build());
         }
       }
