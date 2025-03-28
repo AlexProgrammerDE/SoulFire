@@ -36,6 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.reflect.stream.RStream;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -224,14 +225,15 @@ public class ScriptManager {
     }
 
     log.info("Starting script: {}", script.name());
+    var scriptLogger = LogManager.getLogger("Script: %s".formatted(script.name()));
     var context = Context.newBuilder(script.language().languageId())
       .allowExperimentalOptions(true)
       .engine(Engine.newBuilder(script.language().languageId())
         .sandbox(SandboxPolicy.TRUSTED)
         .option("engine.WarnInterpreterOnly", "false")
         .in(InputStream.nullInputStream())
-        .out(IoBuilder.forLogger(script.name()).setLevel(Level.INFO).buildPrintStream())
-        .err(IoBuilder.forLogger(script.name()).setLevel(Level.ERROR).buildPrintStream())
+        .out(IoBuilder.forLogger(scriptLogger).setLevel(Level.INFO).buildPrintStream())
+        .err(IoBuilder.forLogger(scriptLogger).setLevel(Level.ERROR).buildPrintStream())
         .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
         .build())
       .sandbox(SandboxPolicy.TRUSTED)
