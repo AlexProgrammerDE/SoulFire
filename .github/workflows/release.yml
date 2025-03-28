@@ -34,7 +34,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{steps.github_release.outputs.changelog}}
+          body: ${{ steps.github_release.outputs.changelog }}
           tag_name: ${{ steps.set-version.outputs.version }}
           generate_release_notes: true
           draft: false
