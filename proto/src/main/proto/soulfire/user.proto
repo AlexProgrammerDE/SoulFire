@@ -84,11 +84,11 @@ message GenerateUserAPITokenResponse {
 }
 
 service UserService {
-  rpc createUser(UserCreateRequest) returns (UserCreateResponse);
-  rpc deleteUser(UserDeleteRequest) returns (UserDeleteResponse);
-  rpc listUsers(UserListRequest) returns (UserListResponse);
-  rpc getUserInfo(UserInfoRequest) returns (UserInfoResponse);
-  rpc invalidateSessions(InvalidateSessionsRequest) returns (InvalidateSessionsResponse);
-  rpc updateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc generateUserAPIToken(GenerateUserAPITokenRequest) returns (GenerateUserAPITokenResponse);
+  rpc CreateUser (UserCreateRequest) returns (UserCreateResponse) {}
+  rpc DeleteUser (UserDeleteRequest) returns (UserDeleteResponse) {}
+  rpc ListUsers (UserListRequest) returns (UserListResponse) {}
+  rpc GetUserInfo (UserInfoRequest) returns (UserInfoResponse) {}
+  rpc InvalidateSessions (InvalidateSessionsRequest) returns (InvalidateSessionsResponse) {}
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {}
+  rpc GenerateUserAPIToken (GenerateUserAPITokenRequest) returns (GenerateUserAPITokenResponse) {}
 }

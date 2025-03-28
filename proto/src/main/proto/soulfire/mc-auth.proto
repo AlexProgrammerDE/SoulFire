@@ -63,7 +63,7 @@ message RefreshResponse {
 }
 
 service MCAuthService {
-  rpc loginCredentials(CredentialsAuthRequest) returns (stream CredentialsAuthResponse);
-  rpc loginDeviceCode(DeviceCodeAuthRequest) returns (stream DeviceCodeAuthResponse);
-  rpc refresh(RefreshRequest) returns (RefreshResponse);
+  rpc LoginCredentials (CredentialsAuthRequest) returns (stream CredentialsAuthResponse) {}
+  rpc LoginDeviceCode (DeviceCodeAuthRequest) returns (stream DeviceCodeAuthResponse) {}
+  rpc Refresh (RefreshRequest) returns (RefreshResponse) {}
 }

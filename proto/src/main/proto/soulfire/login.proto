@@ -39,6 +39,6 @@ message EmailCodeRequest {
 }
 
 service LoginService {
-  rpc login(LoginRequest) returns (NextAuthFlowResponse);
-  rpc emailCode(EmailCodeRequest) returns (NextAuthFlowResponse);
+  rpc Login (LoginRequest) returns (NextAuthFlowResponse) {}
+  rpc EmailCode (EmailCodeRequest) returns (NextAuthFlowResponse) {}
 }

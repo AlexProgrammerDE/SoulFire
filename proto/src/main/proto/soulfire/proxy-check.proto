@@ -41,5 +41,5 @@ message ProxyCheckResponse {
 }
 
 service ProxyCheckService {
-  rpc check(ProxyCheckRequest) returns (stream ProxyCheckResponse);
+  rpc Check (ProxyCheckRequest) returns (stream ProxyCheckResponse) {}
 }

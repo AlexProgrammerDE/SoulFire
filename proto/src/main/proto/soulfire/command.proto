@@ -43,6 +43,6 @@ message CommandCompletionResponse {
 }
 
 service CommandService {
-  rpc executeCommand(CommandRequest) returns (CommandResponse);
-  rpc tabCompleteCommand(CommandCompletionRequest) returns (CommandCompletionResponse);
+  rpc ExecuteCommand (CommandRequest) returns (CommandResponse) {}
+  rpc TabCompleteCommand (CommandCompletionRequest) returns (CommandCompletionResponse) {}
 }

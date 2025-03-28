@@ -43,6 +43,6 @@ message LogResponse {
 }
 
 service LogsService {
-  rpc getPrevious(PreviousLogRequest) returns (PreviousLogResponse);
-  rpc subscribe(LogRequest) returns (stream LogResponse);
+  rpc GetPrevious (PreviousLogRequest) returns (PreviousLogResponse) {}
+  rpc Subscribe (LogRequest) returns (stream LogResponse) {}
 }

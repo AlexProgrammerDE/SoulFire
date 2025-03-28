@@ -27,6 +27,6 @@ message ServerUpdateConfigResponse {
 }
 
 service ServerService {
-  rpc getServerInfo(ServerInfoRequest) returns (ServerInfoResponse);
-  rpc updateServerConfig(ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse);
+  rpc GetServerInfo (ServerInfoRequest) returns (ServerInfoResponse) {}
+  rpc UpdateServerConfig (ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse) {}
 }

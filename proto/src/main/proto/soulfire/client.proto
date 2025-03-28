@@ -68,10 +68,10 @@ message InvalidateSelfSessionsResponse {
 }
 
 service ClientService {
-  rpc getClientData(ClientDataRequest) returns (ClientDataResponse);
-  rpc generateWebDAVToken(GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse);
-  rpc generateAPIToken(GenerateAPITokenRequest) returns (GenerateAPITokenResponse);
-  rpc updateSelfUsername(UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse);
-  rpc updateSelfEmail(UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse);
-  rpc invalidateSelfSessions(InvalidateSelfSessionsRequest) returns (InvalidateSelfSessionsResponse);
+  rpc GetClientData (ClientDataRequest) returns (ClientDataResponse) {}
+  rpc GenerateWebDAVToken (GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse) {}
+  rpc GenerateAPIToken (GenerateAPITokenRequest) returns (GenerateAPITokenResponse) {}
+  rpc UpdateSelfUsername (UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse) {}
+  rpc UpdateSelfEmail (UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse) {}
+  rpc InvalidateSelfSessions (InvalidateSelfSessionsRequest) returns (InvalidateSelfSessionsResponse) {}
 }

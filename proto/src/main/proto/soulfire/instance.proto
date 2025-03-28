@@ -128,12 +128,12 @@ message InstanceAuditLogResponse {
 }
 
 service InstanceService {
-  rpc createInstance(InstanceCreateRequest) returns (InstanceCreateResponse);
-  rpc deleteInstance(InstanceDeleteRequest) returns (InstanceDeleteResponse);
-  rpc listInstances(InstanceListRequest) returns (InstanceListResponse);
-  rpc getInstanceInfo(InstanceInfoRequest) returns (InstanceInfoResponse);
-  rpc updateInstanceMeta(InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse);
-  rpc updateInstanceConfig(InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse);
-  rpc changeInstanceState(InstanceStateChangeRequest) returns (InstanceStateChangeResponse);
-  rpc getAuditLog(InstanceAuditLogRequest) returns (InstanceAuditLogResponse);
+  rpc CreateInstance (InstanceCreateRequest) returns (InstanceCreateResponse) {}
+  rpc DeleteInstance (InstanceDeleteRequest) returns (InstanceDeleteResponse) {}
+  rpc ListInstances (InstanceListRequest) returns (InstanceListResponse) {}
+  rpc GetInstanceInfo (InstanceInfoRequest) returns (InstanceInfoResponse) {}
+  rpc UpdateInstanceMeta (InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse) {}
+  rpc UpdateInstanceConfig (InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse) {}
+  rpc ChangeInstanceState (InstanceStateChangeRequest) returns (InstanceStateChangeResponse) {}
+  rpc GetAuditLog (InstanceAuditLogRequest) returns (InstanceAuditLogResponse) {}
 }

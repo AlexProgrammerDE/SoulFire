@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "soulfire/common.proto";
+
+message GlobalScriptScope {
+}
+
+message InstanceScriptScope {
+  string id = 1;
+}
+
+message CreateScriptRequest {
+  oneof scope {
+    GlobalScriptScope global_script = 1;
+    InstanceScriptScope instance_script = 2;
+  }
+  string script_name = 3;
+}
+
+message CreateScriptResponse {
+  string id = 1;
+}
+
+message DeleteScriptRequest {
+  string id = 1;
+}
+
+message DeleteScriptResponse {
+}
+
+message RestartScriptRequest {
+  string id = 1;
+}
+
+message RestartScriptResponse {
+}
+
+message UpdateScriptRequest {
+  string id = 1;
+  string script_name = 2;
+}
+
+message UpdateScriptResponse {
+}
+
+service ScriptService {
+  rpc CreateScript (CreateScriptRequest) returns (CreateScriptResponse) {}
+  rpc DeleteScript (DeleteScriptRequest) returns (DeleteScriptResponse) {}
+  rpc RestartScript (RestartScriptRequest) returns (RestartScriptResponse) {}
+  rpc UpdateScript (UpdateScriptRequest) returns (UpdateScriptResponse) {}
+}
