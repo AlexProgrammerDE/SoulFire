@@ -325,20 +325,9 @@ public final class SoulFireServer {
     @Override
     public Runnable wrap(Runnable runnable) {
       return () -> {
-        if (CURRENT.get() != null) {
-          if (CURRENT.get() == server) {
-            runnable.run();
-            return;
-          } else {
-            throw new IllegalStateException("A SoulFireServer is already set for this thread");
-          }
-        }
-
-        CURRENT.set(server);
-        try {
+        try (
+          var ignored1 = SFHelpers.smartThreadLocalCloseable(CURRENT, server)) {
           runnable.run();
-        } finally {
-          CURRENT.remove();
         }
       };
     }

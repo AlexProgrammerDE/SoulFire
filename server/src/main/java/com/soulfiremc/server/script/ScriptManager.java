@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
@@ -29,6 +30,9 @@ import com.soulfiremc.server.api.event.bot.*;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
+import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.log4j.SFLogAppender;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -46,6 +50,7 @@ import org.graalvm.polyglot.io.IOAccess;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -231,15 +236,16 @@ public class ScriptManager {
 
     log.info("Starting script: {}", script.name());
     var scriptLogger = LogManager.getLogger("Script: %s".formatted(script.name()));
+    var wrapper = instanceManager.runnableWrapper().with(new ScriptRunnableWrapper(id));
     var context = Context.newBuilder(script.language().languageId())
       .allowExperimentalOptions(true)
       .engine(Engine.newBuilder(script.language().languageId())
         .sandbox(SandboxPolicy.TRUSTED)
         .option("engine.WarnInterpreterOnly", "false")
         .in(InputStream.nullInputStream())
-        .out(IoBuilder.forLogger(scriptLogger).setLevel(Level.INFO).buildPrintStream())
-        .err(IoBuilder.forLogger(scriptLogger).setLevel(Level.ERROR).buildPrintStream())
-        .logHandler(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream())
+        .out(new WrappingOutputStream(IoBuilder.forLogger(scriptLogger).setLevel(Level.INFO).buildOutputStream(), wrapper))
+        .err(new WrappingOutputStream(IoBuilder.forLogger(scriptLogger).setLevel(Level.ERROR).buildOutputStream(), wrapper))
+        .logHandler(new WrappingOutputStream(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream(), wrapper))
         .build())
       .sandbox(SandboxPolicy.TRUSTED)
       .allowIO(IOAccess.newBuilder()
@@ -295,5 +301,47 @@ public class ScriptManager {
   }
 
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {
+  }
+
+  @RequiredArgsConstructor
+  private static class WrappingOutputStream extends OutputStream {
+    private final OutputStream delegate;
+    private final SoulFireScheduler.RunnableWrapper wrapper;
+
+    @Override
+    public void write(int b) throws IOException {
+      wrapper.runWrappedWithIOException(() -> delegate.write(b));
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+      wrapper.runWrappedWithIOException(() -> delegate.write(b));
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+      wrapper.runWrappedWithIOException(() -> delegate.write(b, off, len));
+    }
+
+    @Override
+    public void flush() throws IOException {
+      wrapper.runWrappedWithIOException(delegate::flush);
+    }
+
+    @Override
+    public void close() throws IOException {
+      wrapper.runWrappedWithIOException(delegate::close);
+    }
+  }
+
+  private record ScriptRunnableWrapper(UUID scriptId) implements SoulFireScheduler.RunnableWrapper {
+    @Override
+    public Runnable wrap(Runnable runnable) {
+      return () -> {
+        try (var ignored1 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_SCRIPT_ID, scriptId.toString())) {
+          runnable.run();
+        }
+      };
+    }
   }
 }

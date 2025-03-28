@@ -56,7 +56,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
-import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -609,21 +608,11 @@ public final class InstanceManager {
     @Override
     public Runnable wrap(Runnable runnable) {
       return () -> {
-        if (CURRENT.get() != null) {
-          if (CURRENT.get() == instanceManager) {
-            runnable.run();
-            return;
-          } else {
-            throw new IllegalStateException("An InstanceManager is already set for this thread");
-          }
-        }
-
-        CURRENT.set(instanceManager);
-        try (var ignored1 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_ID, instanceManager.id().toString());
-             var ignored2 = MDC.putCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyNameCache().get())) {
+        try (
+          var ignored1 = SFHelpers.smartThreadLocalCloseable(CURRENT, instanceManager);
+          var ignored2 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_INSTANCE_ID, instanceManager.id().toString());
+          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyNameCache().get())) {
           runnable.run();
-        } finally {
-          CURRENT.remove();
         }
       };
     }

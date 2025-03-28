@@ -18,9 +18,11 @@
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.util.structs.CancellationCollector;
+import com.soulfiremc.server.util.structs.SafeCloseable;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.shredzone.acme4j.exception.AcmeProtocolException;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -261,5 +263,23 @@ public final class SFHelpers {
         return FileVisitResult.CONTINUE;
       }
     });
+  }
+
+  public static SafeCloseable smartMDCCloseable(String key, String val) {
+    var oldVal = MDC.get(key);
+    MDC.put(key, val);
+    return () -> {
+      if (oldVal == null) {
+        MDC.remove(key);
+      } else {
+        MDC.put(key, oldVal);
+      }
+    };
+  }
+
+  public static <T> SafeCloseable smartThreadLocalCloseable(ThreadLocal<T> threadLocal, T val) {
+    var oldVal = threadLocal.get();
+    threadLocal.set(val);
+    return () -> threadLocal.set(oldVal);
   }
 }

@@ -46,6 +46,7 @@ public final class SFLogAppender extends AbstractAppender {
   public static final String SF_INSTANCE_NAME = "sf-instance-name";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
   public static final String SF_BOT_ACCOUNT_NAME = "sf-bot-account-name";
+  public static final String SF_SCRIPT_ID = "sf-script-id";
   public static final String SF_SKIP_PUBLISHING = "sf-skip-publishing";
   public static final String SF_SKIP_LOCAL_APPENDERS = "sf-skip-local-appenders";
   public static final SFLogAppender INSTANCE = new SFLogAppender();

@@ -33,6 +33,7 @@ import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
@@ -47,7 +48,6 @@ import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
-import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.Optional;
@@ -259,21 +259,11 @@ public final class BotConnection {
     @Override
     public Runnable wrap(Runnable runnable) {
       return () -> {
-        if (CURRENT.get() != null) {
-          if (CURRENT.get() == botConnection) {
-            runnable.run();
-            return;
-          } else {
-            throw new IllegalStateException("A BotConnection is already set for this thread");
-          }
-        }
-
-        CURRENT.set(botConnection);
-        try (var ignored = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
-             var ignored2 = MDC.putCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName())) {
+        try (
+          var ignored1 = SFHelpers.smartThreadLocalCloseable(CURRENT, botConnection);
+          var ignored2 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
+          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName())) {
           runnable.run();
-        } finally {
-          CURRENT.remove();
         }
       };
     }

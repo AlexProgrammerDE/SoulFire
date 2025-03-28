@@ -22,6 +22,8 @@ import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.*;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -189,6 +191,25 @@ public final class SoulFireScheduler implements Executor {
     default void runWrapped(Runnable runnable) {
       wrap(runnable).run();
     }
+
+    default void runWrappedWithIOException(RunnableIOException runnable) throws IOException {
+      try {
+        wrap(() -> {
+          try {
+            runnable.run();
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+        }).run();
+      } catch (UncheckedIOException e) {
+        throw e.getCause();
+      }
+    }
+  }
+
+  @FunctionalInterface
+  public interface RunnableIOException {
+    void run() throws IOException;
   }
 
   private record TimedRunnable(Runnable runnable, long time) implements Comparable<TimedRunnable> {
