@@ -20,7 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import io.grpc.Status;
@@ -88,26 +88,10 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
-      case INSTANCE -> () -> {
-        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
-      };
-      case SCOPE_NOT_SET -> () -> {
-        throw new IllegalArgumentException("Scope not set");
-      };
-    });
+    validateScopeAccess(request.getScope());
 
     try {
-      EventPredicate predicate = switch (request.getScopeCase()) {
-        case GLOBAL -> event -> true;
-        case INSTANCE -> {
-          var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-          yield event -> instanceId.equals(event.instanceId());
-        }
-        case SCOPE_NOT_SET -> event -> false;
-      };
+      var predicate = eventPredicate(request.getScope());
       responseObserver.onNext(PreviousLogResponse.newBuilder()
         .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
           .stream()
@@ -124,39 +108,19 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   @Override
   public void subscribe(LogRequest request, StreamObserver<LogResponse> responseObserver) {
-    SFHelpers.mustSupply(() -> switch (request.getScopeCase()) {
-      case GLOBAL -> () -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
-      case INSTANCE -> () -> {
-        var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-        ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
-      };
-      case SCOPE_NOT_SET -> () -> {
-        throw new IllegalArgumentException("Scope not set");
-      };
-    });
+    validateScopeAccess(request.getScope());
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
       var issuedAt = ServerRPCConstants.USER_CONTEXT_KEY.get().getIssuedAt();
       var user = new CachedLazyObject<>(() -> soulFireServer.authSystem().authenticateBySubject(userId, issuedAt), 1, TimeUnit.SECONDS);
-      EventPredicate predicate = switch (request.getScopeCase()) {
-        case GLOBAL -> event ->
-          user.get().isPresent()
-            && user.get().get().hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
-        case INSTANCE -> {
-          var instanceId = UUID.fromString(request.getInstance().getInstanceId());
-          yield event ->
-            instanceId.equals(event.instanceId())
-              && user.get().isPresent()
-              && user.get().get().hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
-        }
-        case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-      };
+      var predicate = eventPredicate(request.getScope());
       new ConnectionMessageSender(
         subscribers,
         ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(),
         (ServerCallStreamObserver<LogResponse>) responseObserver,
-        predicate
+        event -> user.get().filter(soulFireUser -> hasScopeAccess(soulFireUser, request.getScope())
+          && predicate.test(event)).isPresent()
       );
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
@@ -167,6 +131,49 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   @FunctionalInterface
   public interface EventPredicate {
     boolean test(SFLogAppender.SFLogEvent event);
+  }
+
+  private void validateScopeAccess(LogScope scope) {
+    if (!hasScopeAccess(ServerRPCConstants.USER_CONTEXT_KEY.get(), scope)) {
+      throw new StatusRuntimeException(
+        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
+    }
+  }
+
+  private boolean hasScopeAccess(SoulFireUser user, LogScope scope) {
+    return switch (scope.getScopeCase()) {
+      case GLOBAL, GLOBAL_SCRIPT -> user.hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
+      case INSTANCE, BOT, INSTANCE_SCRIPT -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        yield user.hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
+      }
+      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
+    };
+  }
+
+  private EventPredicate eventPredicate(LogScope scope) {
+    return switch (scope.getScopeCase()) {
+      case GLOBAL -> event -> true;
+      case GLOBAL_SCRIPT -> {
+        var scriptId = UUID.fromString(scope.getGlobalScript().getScriptId());
+        yield event -> scriptId.equals(event.scriptId());
+      }
+      case INSTANCE -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        yield event -> instanceId.equals(event.instanceId());
+      }
+      case BOT -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        var botId = UUID.fromString(scope.getBot().getBotId());
+        yield event -> instanceId.equals(event.instanceId()) && botId.equals(event.botAccountId());
+      }
+      case INSTANCE_SCRIPT -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        var scriptId = UUID.fromString(scope.getInstanceScript().getScriptId());
+        yield event -> instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
+      }
+      case SCOPE_NOT_SET -> event -> false;
+    };
   }
 
   private record ConnectionMessageSender(Map<UUID, ConnectionMessageSender> subscribers,

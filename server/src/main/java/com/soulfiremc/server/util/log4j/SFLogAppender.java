@@ -97,13 +97,14 @@ public final class SFLogAppender extends AbstractAppender {
     logs.add(event);
   }
 
-  public record SFLogEvent(String id, String message, @Nullable UUID instanceId, @Nullable UUID botAccountId) {
+  public record SFLogEvent(String id, String message, @Nullable UUID instanceId, @Nullable UUID botAccountId, @Nullable UUID scriptId) {
     public static SFLogEvent fromEvent(LogEvent event, String formatted) {
       return new SFLogEvent(
         event.getTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
         formatted,
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
-        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID))
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_SCRIPT_ID))
       );
     }
   }

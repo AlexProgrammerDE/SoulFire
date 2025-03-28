@@ -10,6 +10,7 @@ message LogString {
   string message = 2;
   optional string instance_id = 3;
   optional string bot_id = 4;
+  optional string script_id = 5;
 }
 
 message GlobalLogScope {
@@ -19,11 +20,32 @@ message InstanceLogScope {
   string instance_id = 1;
 }
 
-message PreviousLogRequest {
+message BotLogScope {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message GlobalScriptLogScope {
+  string script_id = 1;
+}
+
+message InstanceScriptLogScope {
+  string instance_id = 1;
+  string script_id = 2;
+}
+
+message LogScope {
   oneof scope {
     GlobalLogScope global = 1;
     InstanceLogScope instance = 2;
+    BotLogScope bot = 3;
+    GlobalScriptLogScope global_script = 4;
+    InstanceScriptLogScope instance_script = 5;
   }
+}
+
+message PreviousLogRequest {
+  LogScope scope = 4;
   int32 count = 3;
 }
 
@@ -32,10 +54,7 @@ message PreviousLogResponse {
 }
 
 message LogRequest {
-  oneof scope {
-    GlobalLogScope global = 1;
-    InstanceLogScope instance = 2;
-  }
+  LogScope scope = 3;
 }
 
 message LogResponse {
