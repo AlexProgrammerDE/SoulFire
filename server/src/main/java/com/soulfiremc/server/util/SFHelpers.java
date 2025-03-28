@@ -250,6 +250,10 @@ public final class SFHelpers {
   }
 
   public static void deleteDirectory(Path path) throws IOException {
+    if (!Files.exists(path)) {
+      return;
+    }
+
     Files.walkFileTree(path, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
