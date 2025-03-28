@@ -45,7 +45,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     verifyScope(request.getScope());
 
     try {
-      var result = soulFireServer.sessionFactory().fromTransaction(session -> {
+      var result = soulFireServer.sessionFactory().fromSession(session -> {
         var scriptEntity = new ScriptEntity();
         scriptEntity.type(switch (request.getScope().getScopeCase()) {
           case GLOBAL_SCRIPT -> ScriptEntity.ScriptType.GLOBAL;
@@ -108,7 +108,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   public void deleteScript(DeleteScriptRequest request, StreamObserver<DeleteScriptResponse> responseObserver) {
     try {
       var scriptId = UUID.fromString(request.getId());
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null) {
           throw new IllegalArgumentException("Script not found");
@@ -146,7 +146,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   public void restartScript(RestartScriptRequest request, StreamObserver<RestartScriptResponse> responseObserver) {
     try {
       var scriptId = UUID.fromString(request.getId());
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null) {
           throw new IllegalArgumentException("Script not found");
@@ -175,7 +175,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   public void updateScript(UpdateScriptRequest request, StreamObserver<UpdateScriptResponse> responseObserver) {
     try {
       var scriptId = UUID.fromString(request.getId());
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null) {
           throw new IllegalArgumentException("Script not found");
@@ -211,7 +211,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       var scripts = soulFireServer.sessionFactory()
-        .fromTransaction(session -> session.createQuery("from ScriptEntity", ScriptEntity.class).list());
+        .fromSession(session -> session.createQuery("from ScriptEntity", ScriptEntity.class).list());
 
       var response = ScriptListResponse.newBuilder();
       for (var script : scripts) {

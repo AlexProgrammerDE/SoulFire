@@ -90,7 +90,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   public void listInstances(InstanceListRequest request, StreamObserver<InstanceListResponse> responseObserver) {
     try {
       responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
+        .addAllInstances(soulFireServer.sessionFactory().fromSession(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
           .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
           .map(instance -> InstanceListResponse.Instance.newBuilder()
             .setId(instance.id().toString())
@@ -114,7 +114,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var instanceEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
+      var instanceEntity = soulFireServer.sessionFactory().fromSession(session -> session.find(InstanceEntity.class, instanceId));
       if (instanceEntity == null) {
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
       }
@@ -146,7 +146,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -175,7 +175,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
@@ -221,7 +221,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE_AUDIT_LOGS, instanceId));
 
     try {
-      var auditLogs = soulFireServer.sessionFactory().fromTransaction(session -> {
+      var auditLogs = soulFireServer.sessionFactory().fromSession(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));

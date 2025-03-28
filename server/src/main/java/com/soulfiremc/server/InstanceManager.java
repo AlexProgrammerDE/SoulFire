@@ -94,9 +94,9 @@ public final class InstanceManager {
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->
-      sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
+      sessionFactory.fromSession(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
     this.friendlyNameCache = new CachedLazyObject<>(() ->
-      sessionFactory.fromTransaction(session -> {
+      sessionFactory.fromSession(session -> {
         var instance = session.find(InstanceEntity.class, id);
 
         if (instance == null) {
@@ -113,7 +113,7 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    for (var script : sessionFactory.fromTransaction(session -> {
+    for (var script : sessionFactory.fromSession(session -> {
       var instance = session.find(InstanceEntity.class, id);
       if (instance == null) {
         return Collections.<ScriptEntity>emptyList();
@@ -213,7 +213,7 @@ public final class InstanceManager {
 
     if (refreshed > 0) {
       log.info("Refreshed {} accounts", refreshed);
-      sessionFactory.inTransaction(session -> {
+      sessionFactory.inSession(session -> {
         var instanceEntity = session.find(InstanceEntity.class, id);
 
         instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
@@ -239,7 +239,7 @@ public final class InstanceManager {
     var accounts = new ArrayList<>(settingsSource.accounts());
     accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
       && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
-    sessionFactory.inTransaction(session -> {
+    sessionFactory.inSession(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
 
       instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
@@ -485,7 +485,7 @@ public final class InstanceManager {
 
   private void attackLifecycle(AttackLifecycle attackLifecycle) {
     this.attackLifecycle = attackLifecycle;
-    sessionFactory.inTransaction(session -> {
+    sessionFactory.inSession(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
       if (instanceEntity == null) {
         return;
@@ -536,7 +536,7 @@ public final class InstanceManager {
   }
 
   public void addAuditLog(SoulFireUser source, InstanceAuditLogEntity.AuditLogType logType, @Nullable String data) {
-    scheduler.runAsync(() -> sessionFactory.inTransaction(session -> {
+    scheduler.runAsync(() -> sessionFactory.inSession(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
       if (instanceEntity == null) {
         return;

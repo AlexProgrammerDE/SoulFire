@@ -62,7 +62,7 @@ public final class AuthSystem {
   }
 
   private void createRootUser() {
-    sessionFactory.inTransaction((s) -> {
+    sessionFactory.inSession((s) -> {
       var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
         var collidingUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
@@ -76,7 +76,7 @@ public final class AuthSystem {
       }
     });
 
-    sessionFactory.inTransaction((s) -> {
+    sessionFactory.inSession((s) -> {
       var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
         var rootUser = new UserEntity();
@@ -138,7 +138,7 @@ public final class AuthSystem {
   }
 
   public Optional<SoulFireUser> authenticateBySubject(UUID uuid, Instant issuedAt) {
-    return sessionFactory.fromTransaction(s -> {
+    return sessionFactory.fromSession(s -> {
       var userEntity = s.find(UserEntity.class, uuid);
       if (userEntity == null) {
         return Optional.empty();
@@ -165,7 +165,7 @@ public final class AuthSystem {
       throw new IllegalArgumentException("Cannot delete root user");
     }
 
-    sessionFactory.fromTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
+    sessionFactory.fromSession(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
       .setParameter("id", uuid)
       .executeUpdate());
 
@@ -177,7 +177,7 @@ public final class AuthSystem {
   }
 
   public Optional<UserEntity> getUserData(UUID uuid) {
-    return Optional.ofNullable(sessionFactory.fromTransaction(s -> s.find(UserEntity.class, uuid)));
+    return Optional.ofNullable(sessionFactory.fromSession(s -> s.find(UserEntity.class, uuid)));
   }
 
   public String generateJWT(UserEntity user, String audience) {
@@ -273,7 +273,7 @@ public final class AuthSystem {
     }
 
     private boolean isOwnerOfInstance(UUID instanceId) {
-      return sessionFactory.fromTransaction(s -> {
+      return sessionFactory.fromSession(s -> {
         var instanceEntity = s.createQuery("FROM InstanceEntity WHERE id = :id AND owner = :owner", InstanceEntity.class)
           .setParameter("id", instanceId)
           .setParameter("owner", userData)

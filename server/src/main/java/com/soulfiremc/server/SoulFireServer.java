@@ -171,7 +171,7 @@ public final class SoulFireServer {
 
     this.sessionFactory = sessionFactoryFuture.join();
     this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
-      this.sessionFactory.fromTransaction(session -> {
+      this.sessionFactory.fromSession(session -> {
         var entity = session.find(ServerConfigEntity.class, 1);
         if (entity == null) {
           entity = new ServerConfigEntity();
@@ -251,7 +251,7 @@ public final class SoulFireServer {
 
   private void loadInstances() {
     try {
-      for (var instanceData : sessionFactory.fromTransaction(s ->
+      for (var instanceData : sessionFactory.fromSession(s ->
         s.createQuery("FROM InstanceEntity", InstanceEntity.class).list())) {
         try {
           var instance = new InstanceManager(this, sessionFactory, instanceData.id(), instanceData.attackLifecycle());
@@ -288,7 +288,7 @@ public final class SoulFireServer {
   }
 
   public UUID createInstance(String friendlyName, SoulFireUser owner) {
-    var instanceEntity = sessionFactory.fromTransaction(s -> {
+    var instanceEntity = sessionFactory.fromSession(s -> {
       var newInstanceEntity = new InstanceEntity();
       newInstanceEntity.friendlyName(friendlyName);
       newInstanceEntity.icon(InstanceEntity.randomInstanceIcon());
@@ -314,7 +314,7 @@ public final class SoulFireServer {
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
-    sessionFactory.inTransaction(s -> s.createMutationQuery("DELETE FROM InstanceEntity WHERE id = :id")
+    sessionFactory.inSession(s -> s.createMutationQuery("DELETE FROM InstanceEntity WHERE id = :id")
       .setParameter("id", id)
       .executeUpdate());
 

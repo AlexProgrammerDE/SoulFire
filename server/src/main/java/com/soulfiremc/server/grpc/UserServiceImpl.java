@@ -51,7 +51,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var userEntity = new UserEntity();
         userEntity.username(request.getUsername());
         userEntity.email(request.getEmail());
@@ -96,7 +96,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_USER));
 
     try {
-      var users = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity", UserEntity.class).list());
+      var users = soulFireServer.sessionFactory().fromSession(session -> session.createQuery("from UserEntity", UserEntity.class).list());
 
       responseObserver.onNext(UserListResponse.newBuilder()
         .addAllUsers(users.stream().map(user -> {
@@ -132,7 +132,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     try {
       var userId = UUID.fromString(request.getId());
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
+      var user = soulFireServer.sessionFactory().fromSession(session -> session.find(UserEntity.class, userId));
       if (user == null) {
         throw new IllegalArgumentException("User not found: " + userId);
       }
@@ -167,7 +167,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + userId);
@@ -194,7 +194,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
+      soulFireServer.sessionFactory().inSession(session -> {
         var user = session.find(UserEntity.class, userId);
         if (user == null) {
           throw new IllegalArgumentException("User not found: " + userId);
@@ -227,7 +227,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
+      var user = soulFireServer.sessionFactory().fromSession(session -> session.find(UserEntity.class, userId));
       if (user == null) {
         throw new IllegalArgumentException("User not found: " + userId);
       }
