@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
@@ -228,6 +229,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
               case JAVASCRIPT -> com.soulfiremc.grpc.generated.ScriptLanguage.JAVASCRIPT;
               case PYTHON -> com.soulfiremc.grpc.generated.ScriptLanguage.PYTHON;
             })
+            .setCreatedAt(Timestamps.fromMillis(script.createdAt().toEpochMilli()))
+            .setUpdatedAt(Timestamps.fromMillis(script.updatedAt().toEpochMilli()))
             .build());
         }
       }

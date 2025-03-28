@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
+import "google/protobuf/timestamp.proto";
 
 message GlobalScriptScope {
 }
@@ -69,6 +70,8 @@ message ScriptListResponse {
     string script_name = 2;
     bool elevated_permissions = 3;
     ScriptLanguage language = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
   }
 
   repeated Script scripts = 1;
