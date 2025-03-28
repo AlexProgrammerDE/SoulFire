@@ -21,6 +21,7 @@ import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.CommandCompletionRequest;
 import com.soulfiremc.grpc.generated.CommandRequest;
+import com.soulfiremc.grpc.generated.CommandScope;
 import com.soulfiremc.grpc.generated.InstanceCommandScope;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,10 @@ public final class ClientCommandManager {
     return rpcClient
       .commandStubBlocking()
       .executeCommand(CommandRequest.newBuilder()
-        .setInstance(InstanceCommandScope.newBuilder()
-          .setInstanceId(cliManager.cliInstanceId().toString())
+        .setScope(CommandScope.newBuilder()
+          .setInstance(InstanceCommandScope.newBuilder()
+            .setInstanceId(cliManager.cliInstanceId().toString())
+            .build())
           .build())
         .setCommand(command)
         .build())
@@ -52,8 +55,10 @@ public final class ClientCommandManager {
     return rpcClient
       .commandStubBlocking()
       .tabCompleteCommand(CommandCompletionRequest.newBuilder()
-        .setInstance(InstanceCommandScope.newBuilder()
-          .setInstanceId(cliManager.cliInstanceId().toString())
+        .setScope(CommandScope.newBuilder()
+          .setInstance(InstanceCommandScope.newBuilder()
+            .setInstanceId(cliManager.cliInstanceId().toString())
+            .build())
           .build())
         .setCommand(command)
         .setCursor(cursor)
