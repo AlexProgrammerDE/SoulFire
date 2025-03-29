@@ -113,28 +113,34 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    for (var script : sessionFactory.fromTransaction(session -> {
-      var instance = session.find(InstanceEntity.class, id);
-      if (instance == null) {
-        return Collections.<ScriptEntity>emptyList();
+    scheduler.runAsync(() -> {
+      for (var script : sessionFactory.fromTransaction(session -> {
+        var instance = session.find(InstanceEntity.class, id);
+        if (instance == null) {
+          return Collections.<ScriptEntity>emptyList();
+        }
+
+        return session.createQuery("FROM ScriptEntity WHERE instance = null OR instance = :instance", ScriptEntity.class)
+          .setParameter("instance", instance)
+          .list();
+      })) {
+        scriptManager.registerScript(script);
       }
+    }).join();
 
-      return session.createQuery("FROM ScriptEntity WHERE instance = null OR instance = :instance", ScriptEntity.class)
-        .setParameter("instance", instance)
-        .list();
-    })) {
-      scriptManager.registerScript(script);
-    }
 
-    var registry = new ServerSettingsRegistry()
-      // Needs Via loaded to have all protocol versions
-      .addInternalPage(BotSettings.class)
-      .addInternalPage(AccountSettings.class)
-      .addInternalPage(ProxySettings.class)
-      .addInternalPage(AISettings.class);
+    this.instanceSettingsRegistry = scheduler.supplyAsync(() -> {
+      var registry = new ServerSettingsRegistry()
+        // Needs Via loaded to have all protocol versions
+        .addInternalPage(BotSettings.class)
+        .addInternalPage(AccountSettings.class)
+        .addInternalPage(ProxySettings.class)
+        .addInternalPage(AISettings.class);
 
-    SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
-    this.instanceSettingsRegistry = registry;
+      SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
+
+      return registry;
+    }).join();
 
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
