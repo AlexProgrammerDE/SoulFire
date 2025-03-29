@@ -271,17 +271,21 @@ public class ScriptManager {
       case GLOBAL -> "Global Script: %s";
     }).formatted(script.name()));
     var wrapper = instanceManager.runnableWrapper().with(new ScriptRunnableWrapper(id));
+    var sandbox = script.elevatedPermissions ? SandboxPolicy.TRUSTED : switch (script.language) {
+      case JAVASCRIPT, TYPESCRIPT -> SandboxPolicy.CONSTRAINED;
+      case PYTHON -> SandboxPolicy.TRUSTED;
+    };
     var context = Context.newBuilder(script.language().languageId())
       .allowExperimentalOptions(true)
       .engine(Engine.newBuilder(script.language().languageId())
-        .sandbox(SandboxPolicy.TRUSTED)
+        .sandbox(sandbox)
         .option("engine.WarnInterpreterOnly", "false")
         .in(InputStream.nullInputStream())
         .out(new WrappingOutputStream(IoBuilder.forLogger(scriptLogger).setLevel(Level.INFO).buildOutputStream(), wrapper))
         .err(new WrappingOutputStream(IoBuilder.forLogger(scriptLogger).setLevel(Level.ERROR).buildOutputStream(), wrapper))
         .logHandler(new WrappingOutputStream(IoBuilder.forLogger(ScriptManager.class).setLevel(Level.INFO).buildOutputStream(), wrapper))
         .build())
-      .sandbox(SandboxPolicy.TRUSTED)
+      .sandbox(sandbox)
       .allowIO(IOAccess.newBuilder()
         .allowHostFileAccess(false)
         .allowHostSocketAccess(false)
@@ -292,7 +296,6 @@ public class ScriptManager {
         ))
         .build())
       .option("js.strict", "true")
-      .option("js.nashorn-compat", "true")
       .option("js.ecmascript-version", "latest")
       .allowAllAccess(false)
       .allowNativeAccess(false)
