@@ -20,35 +20,15 @@ package com.soulfiremc.server.data;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import net.kyori.adventure.key.Key;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 
 public final class GsonDataHelper {
-  public static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
-    new TypeAdapter<>() {
-      @Override
-      public void write(JsonWriter out, Key value) throws IOException {
-        out.value(value.asString());
-      }
-
-      @Override
-      @SuppressWarnings("PatternValidation")
-      public Key read(JsonReader in) throws IOException {
-        var key = in.nextString();
-        return Key.key(key);
-      }
-    };
   private static final LoadingCache<String, JsonArray> LOADED_DATA = Caffeine.newBuilder()
     .expireAfterAccess(Duration.ofSeconds(1))
     .build(file -> {
@@ -77,8 +57,7 @@ public final class GsonDataHelper {
   }
 
   public static Gson createGson(Map<Class<?>, Object> typeAdapters) {
-    var builder = new GsonBuilder()
-      .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER)
+    var builder = GsonInstance.GSON.newBuilder()
       .registerTypeAdapter(ByteDataComponents.class, ByteDataComponents.SERIALIZER);
 
     for (var entry : typeAdapters.entrySet()) {

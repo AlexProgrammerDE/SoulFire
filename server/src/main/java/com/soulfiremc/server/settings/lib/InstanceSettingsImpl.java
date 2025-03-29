@@ -54,7 +54,7 @@ public record InstanceSettingsImpl(
   List<SFProxy> proxies) implements InstanceSettingsSource {
   public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of());
   private static final Gson PROFILE_GSON =
-    new GsonBuilder()
+    GsonInstance.GSON.newBuilder()
       .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
       .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
       .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
@@ -191,7 +191,7 @@ public record InstanceSettingsImpl(
     }
 
     private Gson createGson(AuthType authType) {
-      return new GsonBuilder()
+      return GsonInstance.GSON.newBuilder()
         .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
         .create();
     }

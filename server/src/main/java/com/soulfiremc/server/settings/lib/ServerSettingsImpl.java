@@ -18,7 +18,6 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -43,7 +42,7 @@ public record ServerSettingsImpl(
   Map<String, Map<String, JsonElement>> settings) implements ServerSettingsSource {
   public static final ServerSettingsImpl EMPTY = new ServerSettingsImpl(Map.of());
   private static final Gson PROFILE_GSON =
-    new GsonBuilder()
+    GsonInstance.GSON.newBuilder()
       .setPrettyPrinting()
       .create();
 

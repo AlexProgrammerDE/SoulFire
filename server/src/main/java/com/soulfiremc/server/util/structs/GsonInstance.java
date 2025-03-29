@@ -19,11 +19,40 @@ package com.soulfiremc.server.util.structs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.soulfiremc.server.data.GsonDataHelper;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import net.kyori.adventure.key.Key;
 
+import java.io.IOException;
+import java.util.ServiceLoader;
+
 public final class GsonInstance {
-  public static final Gson GSON = new GsonBuilder()
-    .registerTypeAdapter(Key.class, GsonDataHelper.RESOURCE_KEY_ADAPTER)
-    .create();
+  public static final Gson GSON;
+  private static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
+    new TypeAdapter<>() {
+      @Override
+      public void write(JsonWriter out, Key value) throws IOException {
+        out.value(value.asString());
+      }
+
+      @Override
+      @SuppressWarnings("PatternValidation")
+      public Key read(JsonReader in) throws IOException {
+        var key = in.nextString();
+        return Key.key(key);
+      }
+    };
+
+  static {
+    var builder = new GsonBuilder()
+      .registerTypeAdapter(Key.class, RESOURCE_KEY_ADAPTER);
+
+    for (var factory : ServiceLoader.load(TypeAdapterFactory.class)) {
+      builder.registerTypeAdapterFactory(factory);
+    }
+
+    GSON = builder.create();
+  }
 }
