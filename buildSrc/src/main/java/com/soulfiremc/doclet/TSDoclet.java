@@ -3,11 +3,13 @@ package com.soulfiremc.doclet;
 import com.soulfiremc.doclet.options.IgnoredOption;
 import com.soulfiremc.doclet.options.OutputDirectoryOption;
 import com.soulfiremc.doclet.options.VersionOption;
+import com.soulfiremc.doclet.tsdoclet.TypeScriptGenerator;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 
 import javax.lang.model.SourceVersion;
+import javax.tools.Diagnostic;
 import java.util.Locale;
 import java.util.Set;
 
@@ -46,6 +48,14 @@ public class TSDoclet implements Doclet {
 
   @Override
   public boolean run(DocletEnvironment environment) {
-    return true;
+    try {
+      var generator = new TypeScriptGenerator(environment);
+      generator.generate();
+      return true;
+    } catch (Exception e) {
+      reporter.print(Diagnostic.Kind.ERROR, "Failed to generate TypeScript definitions: " + e.getMessage());
+      e.printStackTrace();
+      return false;
+    }
   }
 }
