@@ -137,7 +137,7 @@ public class TypeScriptGenerator {
   private void gatherImports(TypeElement classElement, Set<String> imports) {
     // Add imports for superclass, interfaces, and field types
     var superclass = classElement.getSuperclass();
-    if (superclass.getKind() != TypeKind.NONE && !superclass.toString().equals("java.lang.Object")) {
+    if (superclass.getKind() != TypeKind.NONE) {
       var superType = (DeclaredType) superclass;
       var superName = superType.asElement().getSimpleName().toString();
       if (!typeMap.containsKey(superName)) {
@@ -170,8 +170,8 @@ public class TypeScriptGenerator {
       }
     }
   }
-
   private void generateEnum(TypeElement enumElement, PrintWriter writer) {
+    writeDocComment(writer, enumElement, 0);
     writer.println("export enum " + enumElement.getSimpleName() + " {");
 
     var enumConstants = ElementFilter.fieldsIn(enumElement.getEnclosedElements())
@@ -181,6 +181,7 @@ public class TypeScriptGenerator {
 
     for (var i = 0; i < enumConstants.size(); i++) {
       var constant = enumConstants.get(i);
+      writeDocComment(writer, constant, 2);
       writer.println("  " + constant.getSimpleName() + " = \"" + constant.getSimpleName() + "\"" +
         (i < enumConstants.size() - 1 ? "," : ""));
     }
@@ -189,6 +190,7 @@ public class TypeScriptGenerator {
   }
 
   private void generateInterface(TypeElement interfaceElement, PrintWriter writer) {
+    writeDocComment(writer, interfaceElement, 0);
     writer.println("export interface " + interfaceElement.getSimpleName() + " {");
 
     // Add methods
@@ -197,6 +199,7 @@ public class TypeScriptGenerator {
         continue;
       }
 
+      writeDocComment(writer, method, 2);
       var returnType = convertType(method.getReturnType());
       var methodName = method.getSimpleName().toString();
 
@@ -216,12 +219,15 @@ public class TypeScriptGenerator {
   }
 
   private void generateClass(TypeElement classElement, PrintWriter writer) {
+    // Add class documentation
+    writeDocComment(writer, classElement, 0);
+
     // Check if it's an abstract class
     writer.print("export interface " + classElement.getSimpleName());
 
     // Add extends clause for superclass
     var superclass = classElement.getSuperclass();
-    if (superclass.getKind() != TypeKind.NONE && !superclass.toString().equals("java.lang.Object")) {
+    if (superclass.getKind() != TypeKind.NONE) {
       var superType = (DeclaredType) superclass;
       var superName = superType.asElement().getSimpleName().toString();
       writer.print(" extends " + superName);
@@ -250,6 +256,7 @@ public class TypeScriptGenerator {
         continue;
       }
 
+      writeDocComment(writer, field, 2);
       writer.println("  " + field.getSimpleName() +
         (field.getModifiers().contains(Modifier.FINAL) ? ": " : "?: ") +
         convertType(field.asType()) + ";");
@@ -263,6 +270,7 @@ public class TypeScriptGenerator {
         continue;
       }
 
+      writeDocComment(writer, method, 2);
       var returnType = convertType(method.getReturnType());
       var methodName = method.getSimpleName().toString();
 
@@ -279,6 +287,33 @@ public class TypeScriptGenerator {
     }
 
     writer.println("}");
+  }
+
+  private String getDocComment(javax.lang.model.element.Element element) {
+    var docComment = environment.getElementUtils().getDocComment(element);
+    if (docComment == null || docComment.isEmpty()) {
+      return null;
+    }
+
+    // Remove asterisks from each line and trim
+    return Arrays.stream(docComment.split("\n"))
+      .map(line -> line.replaceFirst("^\\s*\\*\\s*", "").trim())
+      .filter(line -> !line.isEmpty())
+      .collect(StringBuilder::new,
+        (sb, line) -> sb.append(!sb.isEmpty() ? "\n * " : "").append(line),
+        StringBuilder::append)
+      .toString();
+  }
+
+  private void writeDocComment(PrintWriter writer, javax.lang.model.element.Element element, int indent) {
+    var docComment = getDocComment(element);
+    if (docComment != null && !docComment.isEmpty()) {
+      // Indent the comment
+      var indentSpaces = " ".repeat(indent);
+      writer.println(indentSpaces + "/**");
+      writer.println(indentSpaces + " * " + docComment);
+      writer.println(indentSpaces + " */");
+    }
   }
 
   private boolean isConstructor(ExecutableElement method) {
