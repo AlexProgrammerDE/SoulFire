@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.google.gson.JsonObject;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -33,25 +34,22 @@ import com.soulfiremc.server.api.event.attack.AttackStartEvent;
 import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.bot.*;
 import com.soulfiremc.server.database.ScriptEntity;
-import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.lenni0451.reflect.stream.RStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.io.IoBuilder;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodec;
-import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.io.IOAccess;
 
@@ -227,32 +225,28 @@ public class ScriptManager {
       return HostAccess.ALL;
     }
 
-    var builder = HostAccess.newBuilder(HostAccess.CONSTRAINED)
+    return HostAccess.newBuilder(HostAccess.CONSTRAINED)
       .allowArrayAccess(true)
       .allowListAccess(true)
       .allowBufferAccess(true)
       .allowIterableAccess(true)
       .allowIteratorAccess(true)
       .allowMapAccess(true)
-      .allowBigIntegerNumberAccess(true);
-
-    for (var protocolState : ProtocolState.values()) {
-      var codec = MinecraftCodec.CODEC.getCodec(protocolState);
-      for (var packet : RStream.of(codec).fields().by("clientboundIds").<Map<Class<?>, Integer>>get().keySet()) {
-        unlockClass(builder, packet);
-      }
-
-      for (var packet : RStream.of(codec).fields().by("serverboundIds").<Map<Class<?>, Integer>>get().keySet()) {
-        unlockClass(builder, packet);
-      }
-    }
-
-    unlockClass(builder, Component.class);
-    unlockClass(builder, Vector3i.class);
-    unlockClass(builder, Vector3d.class);
-    unlockClass(builder, SFVec3i.class);
-
-    return builder.build();
+      .allowBigIntegerNumberAccess(true)
+      .targetTypeMapping(String.class, UUID.class, string -> true,
+        UUIDHelper::tryParseUniqueIdOrNull)
+      .targetTypeMapping(Value.class, JsonObject.class, value -> true,
+        value -> {
+          var context = value.getContext();
+          var metaLanguage = ScriptHelper.getMetaLanguage(context);
+          return GsonInstance.GSON.fromJson(context.eval(metaLanguage.languageId(), switch (metaLanguage) {
+            case JAVASCRIPT -> "JSON.stringify";
+            case PYTHON -> "json.dumps";
+          }).execute(value).asString(), JsonObject.class);
+        })
+      .targetTypeMapping(Value.class, Component.class, value -> true,
+        value -> GsonComponentSerializer.gson().deserializeFromTree(value.as(JsonObject.class)))
+      .build();
   }
 
   public void startScript(UUID id) {
@@ -275,9 +269,9 @@ public class ScriptManager {
       case JAVASCRIPT, TYPESCRIPT -> SandboxPolicy.CONSTRAINED;
       case PYTHON -> SandboxPolicy.TRUSTED;
     };
-    var context = Context.newBuilder(script.language().languageId())
+    var context = Context.newBuilder(script.language().metaLanguage().languageId())
       .allowExperimentalOptions(true)
-      .engine(Engine.newBuilder(script.language().languageId())
+      .engine(Engine.newBuilder(script.language().metaLanguage().languageId())
         .sandbox(sandbox)
         .option("engine.WarnInterpreterOnly", "false")
         .in(InputStream.nullInputStream())
@@ -310,7 +304,7 @@ public class ScriptManager {
       .build();
 
     var scriptAPI = new ScriptAPI(script, instanceManager);
-    context.getBindings(script.language().languageId())
+    context.getBindings(script.language().metaLanguage().languageId())
       .putMember("api", scriptAPI);
 
     script.runtime().set(new RuntimeComponents(
@@ -325,7 +319,7 @@ public class ScriptManager {
     }
 
     try {
-      context.eval(Source.newBuilder(script.language.languageId(), mainFile.toFile()).build());
+      context.eval(Source.newBuilder(script.language.metaLanguage().languageId(), mainFile.toFile()).build());
     } catch (IOException e) {
       log.error("Failed to load script", e);
       return;

@@ -120,7 +120,7 @@ public final class InstanceManager {
           return Collections.<ScriptEntity>emptyList();
         }
 
-        return session.createQuery("FROM ScriptEntity WHERE instance = null OR instance = :instance", ScriptEntity.class)
+        return session.createQuery("FROM ScriptEntity WHERE instance IS NULL OR instance = :instance", ScriptEntity.class)
           .setParameter("instance", instance)
           .list();
       })) {
