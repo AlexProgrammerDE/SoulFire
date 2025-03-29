@@ -19,6 +19,7 @@ package com.soulfiremc.server.script;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.soulfiremc.server.InstanceManager;
@@ -347,6 +348,8 @@ public class ScriptManager {
       var swc4j = new Swc4j();
       var options = new Swc4jTranspileOptions()
         .setSpecifier(file.toUri().toURL())
+        .setInlineSources(false)
+        .setSourceMap(Swc4jSourceMapOption.None)
         .setMediaType(Swc4jMediaType.TypeScript);
       var output = swc4j.transpile(Files.readString(file), options);
       var outFileName = SFHelpers.changeExtension(file.getFileName().toString(), "js");
