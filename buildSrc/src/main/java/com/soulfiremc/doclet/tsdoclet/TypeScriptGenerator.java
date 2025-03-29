@@ -8,6 +8,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -73,7 +74,7 @@ public class TypeScriptGenerator {
 
   private boolean shouldProcess(TypeElement element) {
     // Skip private classes, annotations, and anonymous classes
-    return !element.getModifiers().contains(Modifier.PRIVATE)
+    return element.getModifiers().contains(Modifier.PUBLIC)
       && element.getKind() != ElementKind.ANNOTATION_TYPE
       && !element.getQualifiedName().toString().contains("$");
   }
@@ -90,7 +91,7 @@ public class TypeScriptGenerator {
       writer.println("export * from './types';");
 
       // Add re-exports for all generated files
-      var files = outputDirectory.listFiles((dir, name) -> name.endsWith(".ts") && !name.equals("index.ts"));
+      var files = outputDirectory.listFiles((ignored, name) -> name.endsWith(".ts") && !name.equals("index.ts"));
       if (files != null) {
         for (var file : files) {
           var name = file.getName().replace(".ts", "");
@@ -117,6 +118,7 @@ public class TypeScriptGenerator {
       for (var importType : imports) {
         writer.println("import { " + importType + " } from './" + importType + "';");
       }
+
       if (!imports.isEmpty()) {
         writer.println();
       }
@@ -154,14 +156,16 @@ public class TypeScriptGenerator {
 
     // Add imports for field types
     for (var field : ElementFilter.fieldsIn(classElement.getEnclosedElements())) {
-      if (!field.getModifiers().contains(Modifier.PRIVATE)) {
-        var fieldType = field.asType();
-        if (fieldType.getKind() == TypeKind.DECLARED) {
-          var declaredType = (DeclaredType) fieldType;
-          var typeName = declaredType.asElement().getSimpleName().toString();
-          if (!typeMap.containsKey(typeName) && !typeName.equals(classElement.getSimpleName().toString())) {
-            imports.add(typeName);
-          }
+      if (!field.getModifiers().contains(Modifier.PUBLIC)) {
+        continue;
+      }
+
+      var fieldType = field.asType();
+      if (fieldType.getKind() == TypeKind.DECLARED) {
+        var declaredType = (DeclaredType) fieldType;
+        var typeName = declaredType.asElement().getSimpleName().toString();
+        if (!typeMap.containsKey(typeName) && !typeName.equals(classElement.getSimpleName().toString())) {
+          imports.add(typeName);
         }
       }
     }
@@ -189,21 +193,23 @@ public class TypeScriptGenerator {
 
     // Add methods
     for (var method : ElementFilter.methodsIn(interfaceElement.getEnclosedElements())) {
-      if (!method.getModifiers().contains(Modifier.PRIVATE)) {
-        var returnType = convertType(method.getReturnType());
-        var methodName = method.getSimpleName().toString();
-
-        writer.print("  " + methodName + "(");
-        var parameters = method.getParameters();
-        for (var i = 0; i < parameters.size(); i++) {
-          var param = parameters.get(i);
-          writer.print(param.getSimpleName() + ": " + convertType(param.asType()));
-          if (i < parameters.size() - 1) {
-            writer.print(", ");
-          }
-        }
-        writer.println("): " + returnType + ";");
+      if (!method.getModifiers().contains(Modifier.PUBLIC)) {
+        continue;
       }
+
+      var returnType = convertType(method.getReturnType());
+      var methodName = method.getSimpleName().toString();
+
+      writer.print("  " + methodName + "(");
+      var parameters = method.getParameters();
+      for (var i = 0; i < parameters.size(); i++) {
+        var param = parameters.get(i);
+        writer.print(param.getSimpleName() + ": " + convertType(param.asType()));
+        if (i < parameters.size() - 1) {
+          writer.print(", ");
+        }
+      }
+      writer.println("): " + returnType + ";");
     }
 
     writer.println("}");
@@ -239,33 +245,37 @@ public class TypeScriptGenerator {
 
     // Add fields
     for (var field : ElementFilter.fieldsIn(classElement.getEnclosedElements())) {
-      if (!field.getModifiers().contains(Modifier.PRIVATE) &&
-        field.getKind() != ElementKind.ENUM_CONSTANT) {
-        writer.println("  " + field.getSimpleName() +
-          (field.getModifiers().contains(Modifier.FINAL) ? ": " : "?: ") +
-          convertType(field.asType()) + ";");
+      if (!field.getModifiers().contains(Modifier.PUBLIC) ||
+        field.getKind() == ElementKind.ENUM_CONSTANT) {
+        continue;
       }
+
+      writer.println("  " + field.getSimpleName() +
+        (field.getModifiers().contains(Modifier.FINAL) ? ": " : "?: ") +
+        convertType(field.asType()) + ";");
     }
 
     // Add methods (only if they are not already in parent interfaces)
     for (var method : ElementFilter.methodsIn(classElement.getEnclosedElements())) {
-      if (!method.getModifiers().contains(Modifier.PRIVATE) &&
-        !isConstructor(method) &&
-        !isOverride(method, classElement)) {
-        var returnType = convertType(method.getReturnType());
-        var methodName = method.getSimpleName().toString();
-
-        writer.print("  " + methodName + "(");
-        var parameters = method.getParameters();
-        for (var i = 0; i < parameters.size(); i++) {
-          var param = parameters.get(i);
-          writer.print(param.getSimpleName() + ": " + convertType(param.asType()));
-          if (i < parameters.size() - 1) {
-            writer.print(", ");
-          }
-        }
-        writer.println("): " + returnType + ";");
+      if (!method.getModifiers().contains(Modifier.PUBLIC) ||
+        isConstructor(method) ||
+        isOverride(method, classElement)) {
+        continue;
       }
+
+      var returnType = convertType(method.getReturnType());
+      var methodName = method.getSimpleName().toString();
+
+      writer.print("  " + methodName + "(");
+      var parameters = method.getParameters();
+      for (var i = 0; i < parameters.size(); i++) {
+        var param = parameters.get(i);
+        writer.print(param.getSimpleName() + ": " + convertType(param.asType()));
+        if (i < parameters.size() - 1) {
+          writer.print(", ");
+        }
+      }
+      writer.println("): " + returnType + ";");
     }
 
     writer.println("}");
@@ -333,7 +343,7 @@ public class TypeScriptGenerator {
 
     // Handle arrays
     if (type.getKind() == TypeKind.ARRAY) {
-      var componentType = convertType(((javax.lang.model.type.ArrayType) type).getComponentType());
+      var componentType = convertType(((ArrayType) type).getComponentType());
       return componentType + "[]";
     }
 
