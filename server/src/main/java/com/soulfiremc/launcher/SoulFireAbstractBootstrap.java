@@ -58,7 +58,8 @@ public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();
 
   static {
-    System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    // Install the Log4J JUL bridge
+    org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
 
     // If Velocity's natives are being extracted to a different temporary directory, make sure the
     // Netty natives are extracted there as well
