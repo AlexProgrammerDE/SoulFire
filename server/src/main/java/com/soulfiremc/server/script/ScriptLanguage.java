@@ -26,6 +26,7 @@ import java.nio.file.Path;
 @Getter
 @RequiredArgsConstructor
 public enum ScriptLanguage {
+  TYPESCRIPT("js", "main.js"),
   JAVASCRIPT("js", "main.js"),
   PYTHON("python", "main.py");
 

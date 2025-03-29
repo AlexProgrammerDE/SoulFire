@@ -17,6 +17,10 @@
  */
 package com.soulfiremc.server.script;
 
+import com.caoccao.javet.swc4j.Swc4j;
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -256,6 +260,10 @@ public class ScriptManager {
       return;
     }
 
+    if (script.language() == ScriptLanguage.TYPESCRIPT) {
+      compileTypescriptFiles(script);
+    }
+
     log.info("Starting script: {}", script.name());
     var scriptLogger = LogManager.getLogger((switch (script.scriptType) {
       case INSTANCE -> "Instance Script: %s";
@@ -320,6 +328,36 @@ public class ScriptManager {
     }
 
     log.info("Started script: {}", script.name());
+  }
+
+  private void compileTypescriptFiles(Script script) {
+    log.info("Compiling TypeScript files for script: {}", script.name());
+    try {
+      Files.walk(script.codePath())
+        .filter(Files::isRegularFile)
+        .filter(path -> path.toString().endsWith(".ts"))
+        .forEach(this::compileTypescriptFile);
+    } catch (IOException e) {
+      log.error("Failed to create dist folder for script", e);
+    }
+  }
+
+  private void compileTypescriptFile(Path file) {
+    try {
+      var swc4j = new Swc4j();
+      var options = new Swc4jTranspileOptions()
+        .setSpecifier(file.toUri().toURL())
+        .setMediaType(Swc4jMediaType.TypeScript);
+      var output = swc4j.transpile(Files.readString(file), options);
+      var outFileName = SFHelpers.changeExtension(file.getFileName().toString(), "js");
+      var outFile = file.resolveSibling(outFileName);
+
+      Files.writeString(outFile, output.getCode());
+    } catch (IOException e) {
+      log.error("Failed to create dist folder for script: {}", file, e);
+    } catch (Swc4jCoreException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptEntity.ScriptType scriptType, boolean elevatedPermissions, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {

@@ -77,7 +77,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       });
       var codePath = soulFireServer.getScriptCodePath(result.id());
       Files.createDirectories(codePath);
-      Files.writeString(codePath.resolve(ScriptLanguage.JAVASCRIPT.entryFile()), """
+      Files.writeString(codePath.resolve("main.ts"), """
         // This is a SoulFire script
         console.log('Hello, World!');
         """);
@@ -236,6 +236,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             .setLanguage(switch (ScriptLanguage.determineLanguage(soulFireServer.getScriptCodePath(script.id()))) {
               case JAVASCRIPT -> com.soulfiremc.grpc.generated.ScriptLanguage.JAVASCRIPT;
               case PYTHON -> com.soulfiremc.grpc.generated.ScriptLanguage.PYTHON;
+              case TYPESCRIPT -> com.soulfiremc.grpc.generated.ScriptLanguage.TYPESCRIPT;
             })
             .setCreatedAt(Timestamps.fromMillis(script.createdAt().toEpochMilli()))
             .setUpdatedAt(Timestamps.fromMillis(script.updatedAt().toEpochMilli()))

@@ -62,6 +62,7 @@ message ScriptListRequest {
 enum ScriptLanguage {
   JAVASCRIPT = 0;
   PYTHON = 1;
+  TYPESCRIPT = 2;
 }
 
 message ScriptListResponse {

@@ -98,6 +98,7 @@ dependencies {
 
   // For script support
   api(libs.bundles.graalvm.polyglot)
+  api(libs.swc4j)
 
   // For mail support
   api(libs.angus)

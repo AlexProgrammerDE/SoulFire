@@ -286,4 +286,10 @@ public final class SFHelpers {
     threadLocal.set(val);
     return () -> threadLocal.set(oldVal);
   }
+
+  public static String changeExtension(String filename, String newExt) {
+    var dotIndex = filename.lastIndexOf('.');
+    if (dotIndex == -1) return filename + "." + newExt; // No extension found
+    return filename.substring(0, dotIndex) + "." + newExt;
+  }
 }
