@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.api;
 
+import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.script.ScriptManager;
 import org.graalvm.polyglot.HostAccess;
 
@@ -39,5 +40,15 @@ public record ScriptInfoAPI(ScriptManager.Script script) {
   @HostAccess.Export
   public String getCodeDirectory() {
     return script.codePath().toString();
+  }
+
+  @HostAccess.Export
+  public boolean getElevatedPermissions() {
+    return script.elevatedPermissions();
+  }
+
+  @HostAccess.Export
+  public ScriptEntity.ScriptType getScriptType() {
+    return script.scriptType();
   }
 }

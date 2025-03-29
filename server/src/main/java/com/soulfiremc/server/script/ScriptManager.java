@@ -366,7 +366,16 @@ public class ScriptManager {
     }
   }
 
-  public record Script(UUID scriptId, String name, Path dataPath, Path codePath, ScriptEntity.ScriptType scriptType, boolean elevatedPermissions, ScriptLanguage language, AtomicReference<RuntimeComponents> runtime) {
+  public record Script(
+    UUID scriptId,
+    String name,
+    Path dataPath,
+    Path codePath,
+    ScriptEntity.ScriptType scriptType,
+    boolean elevatedPermissions,
+    ScriptLanguage language,
+    AtomicReference<RuntimeComponents> runtime
+  ) {
   }
 
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {

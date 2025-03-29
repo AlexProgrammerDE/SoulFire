@@ -31,23 +31,21 @@ public class ScriptEventAPI {
   @HostAccess.Export
   public void on(String event, Value callback) {
     eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
-        .add(new EventListener(false, callback));
+      .add(new EventListener(false, callback));
   }
 
   @HostAccess.Export
   public void once(String event, Value callback) {
     eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
-        .add(new EventListener(true, callback));
+      .add(new EventListener(true, callback));
   }
 
   public void forwardEvent(String event, Object... eventArgs) {
     var listeners = eventListeners.get(event);
     if (listeners != null) {
-      listeners.forEach(listener -> {
+      listeners.removeIf(listener -> {
         listener.callback.executeVoid(eventArgs);
-        if (listener.once) {
-          listeners.remove(listener);
-        }
+        return listener.once;
       });
     }
   }
