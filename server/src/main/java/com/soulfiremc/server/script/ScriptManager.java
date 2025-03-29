@@ -257,7 +257,10 @@ public class ScriptManager {
     }
 
     log.info("Starting script: {}", script.name());
-    var scriptLogger = LogManager.getLogger("Script: %s".formatted(script.name()));
+    var scriptLogger = LogManager.getLogger((switch (script.scriptType) {
+      case INSTANCE -> "Instance Script: %s";
+      case GLOBAL -> "Global Script: %s";
+    }).formatted(script.name()));
     var wrapper = instanceManager.runnableWrapper().with(new ScriptRunnableWrapper(id));
     var context = Context.newBuilder(script.language().languageId())
       .allowExperimentalOptions(true)

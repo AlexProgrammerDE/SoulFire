@@ -51,7 +51,7 @@ public final class ScriptEntity {
   @NotBlank(message = "Script names cannot be blank")
   @Size(min = 3, max = 32, message = "Script names must be between 3 and 32 characters")
   @Pattern(regexp = "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", message = "Script names must be lowercase, begin with an alphanumeric character, followed by more alphanumeric characters or dashes, and end with an alphanumeric character.")
-  @Column(nullable = false, unique = true, length = 32)
+  @Column(nullable = false, length = 32)
   private String scriptName;
 
   @Column(nullable = false)
