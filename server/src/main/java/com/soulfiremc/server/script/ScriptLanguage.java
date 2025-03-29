@@ -26,20 +26,21 @@ import java.nio.file.Path;
 @Getter
 @RequiredArgsConstructor
 public enum ScriptLanguage {
-  TYPESCRIPT("js", "main.js"),
-  JAVASCRIPT("js", "main.js"),
-  PYTHON("python", "main.py");
+  TYPESCRIPT("js", "main.ts", "main.js"),
+  JAVASCRIPT("js", "main.js", "main.js"),
+  PYTHON("python", "main.py", "main.py");
 
   public static final ScriptLanguage DEFAULT = JAVASCRIPT;
   public static final ScriptLanguage[] VALUES = values();
 
   private final String languageId;
+  private final String detectFile;
   private final String entryFile;
 
   public static ScriptLanguage determineLanguage(Path codePath) {
     for (var language : VALUES) {
-      if (Files.exists(codePath.resolve(language.entryFile))
-        && Files.isRegularFile(codePath.resolve(language.entryFile))) {
+      var detectFile = codePath.resolve(language.detectFile);
+      if (Files.exists(detectFile) && Files.isRegularFile(detectFile)) {
         return language;
       }
     }
