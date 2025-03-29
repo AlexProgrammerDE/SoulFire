@@ -59,7 +59,6 @@ public record InstanceSettingsImpl(
       .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
       .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
       .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
-      .setPrettyPrinting()
       .create();
 
   public InstanceSettingsImpl {

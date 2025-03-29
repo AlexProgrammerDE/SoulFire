@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -41,13 +40,9 @@ import java.util.Optional;
 public record ServerSettingsImpl(
   Map<String, Map<String, JsonElement>> settings) implements ServerSettingsSource {
   public static final ServerSettingsImpl EMPTY = new ServerSettingsImpl(Map.of());
-  private static final Gson PROFILE_GSON =
-    GsonInstance.GSON.newBuilder()
-      .setPrettyPrinting()
-      .create();
 
   public static ServerSettingsImpl deserialize(JsonElement json) {
-    return PROFILE_GSON.fromJson(json, ServerSettingsImpl.class);
+    return GsonInstance.GSON.fromJson(json, ServerSettingsImpl.class);
   }
 
   public static ServerSettingsImpl fromProto(ServerConfig request) {
@@ -71,7 +66,7 @@ public record ServerSettingsImpl(
   }
 
   public JsonObject serializeToTree() {
-    return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
+    return GsonInstance.GSON.toJsonTree(this).getAsJsonObject();
   }
 
   public ServerConfig toProto() {
