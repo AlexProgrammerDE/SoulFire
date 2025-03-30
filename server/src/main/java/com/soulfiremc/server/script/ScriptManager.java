@@ -115,7 +115,7 @@ public class ScriptManager {
         case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
         case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
         case BotPreTickEvent ignored -> forwardEvent("preTick", botApi);
-        case ChatMessageReceiveEvent chatMessageReceiveEvent -> forwardEvent("message", botApi, chatMessageReceiveEvent.message(), chatMessageReceiveEvent.timestamp());
+        case ChatMessageReceiveEvent chatMessageReceiveEvent -> forwardEvent("message", botApi, ScriptHelper.componentToValue(chatMessageReceiveEvent.message()), chatMessageReceiveEvent.timestamp());
         case PreBotConnectEvent ignored -> forwardEvent("preConnect", botApi);
         case SFPacketReceiveEvent packetReceiveEvent -> forwardEvent("packetReceive", botApi, packetReceiveEvent.packet());
         case SFPacketSendingEvent packetSendingEvent -> forwardEvent("packetSending", botApi, packetSendingEvent.packet());
