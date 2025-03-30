@@ -46,6 +46,11 @@ public non-sealed abstract class MinMaxProperty implements Property {
 
   public abstract MinMaxPropertyEntry maxEntry();
 
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
+
   public DataLayout defaultDataLayout() {
     return new DataLayout(minEntry().defaultValue(), maxEntry().defaultValue());
   }

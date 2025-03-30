@@ -60,4 +60,9 @@ public non-sealed abstract class DoubleProperty implements Property {
   public boolean fixedDecimalScale() {
     return true;
   }
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

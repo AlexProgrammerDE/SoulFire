@@ -50,4 +50,9 @@ public non-sealed abstract class IntProperty implements Property {
   public boolean thousandSeparator() {
     return true;
   }
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

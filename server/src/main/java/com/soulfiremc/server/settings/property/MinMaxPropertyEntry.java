@@ -34,4 +34,9 @@ public abstract class MinMaxPropertyEntry {
   public String placeholder() {
     return "";
   }
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

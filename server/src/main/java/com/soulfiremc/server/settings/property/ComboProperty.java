@@ -64,6 +64,11 @@ public non-sealed abstract class ComboProperty implements Property {
 
   public abstract String defaultValue();
 
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
+
   @Value.Check
   protected void check() {
     if (options().isEmpty()) {

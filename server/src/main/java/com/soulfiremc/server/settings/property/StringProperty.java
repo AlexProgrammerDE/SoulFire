@@ -57,4 +57,9 @@ public non-sealed abstract class StringProperty implements Property {
   public String pattern() {
     return ".*";
   }
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

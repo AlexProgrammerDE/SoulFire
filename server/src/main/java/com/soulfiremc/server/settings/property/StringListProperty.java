@@ -33,4 +33,9 @@ public non-sealed abstract class StringListProperty implements Property {
   public abstract String description();
 
   public abstract List<String> defaultValue();
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

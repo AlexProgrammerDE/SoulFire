@@ -46,6 +46,7 @@ public final class ServerSettingsRegistry {
       .setStep(property.stepValue())
       .setPlaceholder(property.placeholder())
       .setThousandSeparator(property.thousandSeparator())
+      .setDisabled(property.disabled())
       .build();
   }
 
@@ -61,11 +62,12 @@ public final class ServerSettingsRegistry {
       .setThousandSeparator(property.thousandSeparator())
       .setDecimalScale(property.decimalScale())
       .setFixedDecimalScale(property.fixedDecimalScale())
+      .setDisabled(property.disabled())
       .build();
   }
 
-  private static MinMaxSettingEntry createMinMaxSettingEntry(MinMaxPropertyEntry entry) {
-    return MinMaxSettingEntry.newBuilder()
+  private static MinMaxSetting.Entry createMinMaxSettingEntry(MinMaxPropertyEntry entry) {
+    return MinMaxSetting.Entry.newBuilder()
       .setUiName(entry.uiName())
       .setDescription(entry.description())
       .setDef(entry.defaultValue())
@@ -81,6 +83,7 @@ public final class ServerSettingsRegistry {
       .setThousandSeparator(property.thousandSeparator())
       .setMinEntry(createMinMaxSettingEntry(property.minEntry()))
       .setMaxEntry(createMinMaxSettingEntry(property.maxEntry()))
+      .setDisabled(property.disabled())
       .build();
   }
 
@@ -94,6 +97,7 @@ public final class ServerSettingsRegistry {
       .setMinLength(property.minLength())
       .setMaxLength(property.maxLength())
       .setPattern(property.pattern())
+      .setDisabled(property.disabled())
       .build();
   }
 
@@ -105,7 +109,7 @@ public final class ServerSettingsRegistry {
       .addAllOptions(property.options()
         .stream()
         .map(option -> {
-          var builder = ComboOption.newBuilder()
+          var builder = ComboSetting.Option.newBuilder()
             .setId(option.id())
             .setDisplayName(option.displayName())
             .addAllKeywords(option.keywords());
@@ -116,6 +120,7 @@ public final class ServerSettingsRegistry {
           return builder.build();
         })
         .toList())
+      .setDisabled(property.disabled())
       .build();
   }
 
@@ -124,6 +129,7 @@ public final class ServerSettingsRegistry {
       .setUiName(property.uiName())
       .setDescription(property.description())
       .addAllDef(property.defaultValue())
+      .setDisabled(property.disabled())
       .build();
   }
 
@@ -132,6 +138,7 @@ public final class ServerSettingsRegistry {
       .setUiName(property.uiName())
       .setDescription(property.description())
       .setDef(property.defaultValue())
+      .setDisabled(property.disabled())
       .build();
   }
 

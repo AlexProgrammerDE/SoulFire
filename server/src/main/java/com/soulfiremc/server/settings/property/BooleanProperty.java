@@ -31,4 +31,9 @@ public non-sealed abstract class BooleanProperty implements Property {
   public abstract String description();
 
   public abstract boolean defaultValue();
+
+  @Value.Default
+  public boolean disabled() {
+    return false;
+  }
 }

@@ -158,6 +158,7 @@ message StringSetting {
   int32 min_length = 7;
   int32 max_length = 8;
   string pattern = 9;
+  bool disabled = 11;
 }
 
 message IntSetting {
@@ -169,6 +170,7 @@ message IntSetting {
   int32 step = 6;
   string placeholder = 7;
   bool thousand_separator = 8;
+  bool disabled = 9;
 }
 
 message DoubleSetting {
@@ -182,53 +184,58 @@ message DoubleSetting {
   bool thousand_separator = 8;
   int32 decimal_scale = 9;
   bool fixed_decimal_scale = 10;
+  bool disabled = 11;
 }
 
 message BoolSetting {
   string ui_name = 1;
   string description = 2;
   bool def = 3;
-}
-
-message ComboOption {
-  // Sent to server
-  string id = 1;
-  // Displayed to user
-  string display_name = 2;
-  // May be used for an icon for an option
-  optional string icon_id = 3;
-  // keywords to also use for filtering
-  repeated string keywords = 4;
+  bool disabled = 4;
 }
 
 message ComboSetting {
+  message Option {
+    // Sent to server
+    string id = 1;
+    // Displayed to user
+    string display_name = 2;
+    // May be used for an icon for an option
+    optional string icon_id = 3;
+    // keywords to also use for filtering
+    repeated string keywords = 4;
+  }
+
   string ui_name = 1;
   string description = 2;
   // List of options
-  repeated ComboOption options = 3;
+  repeated Option options = 3;
   string def = 4;
+  bool disabled = 5;
 }
 
 message StringListSetting {
   string ui_name = 1;
   string description = 2;
   repeated string def = 3;
-}
-
-message MinMaxSettingEntry {
-  string ui_name = 1;
-  string description = 2;
-  int32 def = 3;
-  string placeholder = 4;
+  bool disabled = 4;
 }
 
 message MinMaxSetting {
+  message Entry {
+    string ui_name = 1;
+    string description = 2;
+    int32 def = 3;
+    string placeholder = 4;
+  }
+
   int32 min = 1;
   int32 max = 2;
   int32 step = 3;
   bool thousand_separator = 4;
-  MinMaxSettingEntry minEntry = 5;
-  MinMaxSettingEntry maxEntry = 6;
+  Entry minEntry = 5;
+  Entry maxEntry = 6;
+  bool disabled = 7;
 }
 
 // A entry in the settings page
