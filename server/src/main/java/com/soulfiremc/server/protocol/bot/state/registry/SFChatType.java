@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.protocol.bot.state.registry;
 
-import com.google.gson.JsonElement;
 import com.soulfiremc.server.data.Registry;
 import com.soulfiremc.server.data.RegistryValue;
 import com.soulfiremc.server.util.SFHelpers;
@@ -29,11 +28,9 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.lenni0451.mcstructs.nbt.INbtTag;
 import net.lenni0451.mcstructs.nbt.io.NbtIO;
 import net.lenni0451.mcstructs.nbt.io.NbtReadTracker;
 import net.lenni0451.mcstructs.text.serializer.TextComponentCodec;
-import net.lenni0451.mcstructs.text.serializer.subtypes.IStyleSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.nbt.NBTOutputStream;
 import org.cloudburstmc.nbt.NbtMap;
@@ -51,9 +48,7 @@ import java.util.Objects;
 
 @Getter
 public final class SFChatType implements RegistryValue<SFChatType> {
-  private static final TextComponentCodec CODEC = TextComponentCodec.LATEST;
-  private static final IStyleSerializer<INbtTag> NBT_STYLE_SERIALIZER = CODEC.getNbtSerializer().getStyleSerializer();
-  private static final IStyleSerializer<JsonElement> JSON_STYLE_SERIALIZER = CODEC.getJsonSerializer().getStyleSerializer();
+  private static final TextComponentCodec CODEC = TextComponentCodec.V1_21_4;
   private final Key key;
   private final int id;
   private final Registry<SFChatType> registry;
@@ -89,9 +84,17 @@ public final class SFChatType implements RegistryValue<SFChatType> {
 
     var output = new ByteArrayOutputStream();
     new NBTOutputStream(new DataOutputStream(output)).writeValue(styleData, 512);
-    var lenniStyleNbt = NBT_STYLE_SERIALIZER.deserialize(NbtIO.JAVA.getReader()
-      .readCompound(new DataInputStream(new ByteArrayInputStream(output.toByteArray())), NbtReadTracker.unlimited()));
-    var lenniStyleJson = JSON_STYLE_SERIALIZER.serialize(lenniStyleNbt);
+    var lenniStyleNbt = CODEC.getStyleCodec().deserialize(CODEC.getNbtConverter(), NbtIO.LATEST.getReader()
+      .readCompound(new DataInputStream(new ByteArrayInputStream(output.toByteArray())), NbtReadTracker.unlimitedDepth())).get();
+    if (lenniStyleNbt == null) {
+      return Style.empty();
+    }
+
+    var lenniStyleJson = CODEC.getStyleCodec().serialize(CODEC.getJsonConverter(), lenniStyleNbt).get();
+    if (lenniStyleJson == null) {
+      return Style.empty();
+    }
+
     return GsonComponentSerializer.gson().serializer().fromJson(lenniStyleJson, Style.class);
   }
 
