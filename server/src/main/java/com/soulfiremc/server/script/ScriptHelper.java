@@ -17,24 +17,31 @@
  */
 package com.soulfiremc.server.script;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 
 public class ScriptHelper {
-  public static MetaLanguage getMetaLanguage(Context context) {
-    var languageId = context.getEngine().getLanguages().keySet().stream().findFirst().orElseThrow(
+  public static MetaLanguage getMetaLanguage() {
+    var languageId = Context.getCurrent().getEngine()
+      .getLanguages().keySet().stream().findFirst().orElseThrow(
       () -> new IllegalStateException("No language found in context"));
 
     return MetaLanguage.fromId(languageId).orElseThrow(
       () -> new IllegalStateException("No language found for id: " + languageId));
   }
 
-  public static Value jsonToValue(Context context, JsonObject value) {
-    var metaLanguage = getMetaLanguage(context);
-    return context.eval(metaLanguage.languageId(), switch (metaLanguage) {
+  public static Value jsonToValue(JsonElement value) {
+    var metaLanguage = getMetaLanguage();
+    return Context.getCurrent().eval(metaLanguage.languageId(), switch (metaLanguage) {
       case JAVASCRIPT -> "JSON.parse";
       case PYTHON -> "json.loads";
     }).execute(value.toString());
+  }
+
+  public static Value componentToValue(Component component) {
+    return jsonToValue(GsonComponentSerializer.gson().serializeToTree(component));
   }
 }

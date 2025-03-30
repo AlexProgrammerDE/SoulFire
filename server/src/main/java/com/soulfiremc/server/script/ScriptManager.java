@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
@@ -235,17 +236,18 @@ public class ScriptManager {
       .allowBigIntegerNumberAccess(true)
       .targetTypeMapping(String.class, UUID.class, string -> true,
         UUIDHelper::tryParseUniqueIdOrNull)
-      .targetTypeMapping(Value.class, JsonObject.class, value -> true,
+      .targetTypeMapping(Value.class, JsonElement.class, value -> true,
         value -> {
-          var context = value.getContext();
-          var metaLanguage = ScriptHelper.getMetaLanguage(context);
-          return GsonInstance.GSON.fromJson(context.eval(metaLanguage.languageId(), switch (metaLanguage) {
+          var metaLanguage = ScriptHelper.getMetaLanguage();
+          return GsonInstance.GSON.fromJson(value.getContext().eval(metaLanguage.languageId(), switch (metaLanguage) {
             case JAVASCRIPT -> "JSON.stringify";
             case PYTHON -> "json.dumps";
-          }).execute(value).asString(), JsonObject.class);
+          }).execute(value).asString(), JsonElement.class);
         })
+      .targetTypeMapping(Value.class, JsonObject.class, value -> value.as(JsonElement.class).isJsonObject(),
+        value -> value.as(JsonElement.class).getAsJsonObject())
       .targetTypeMapping(Value.class, Component.class, value -> true,
-        value -> GsonComponentSerializer.gson().deserializeFromTree(value.as(JsonObject.class)))
+        value -> GsonComponentSerializer.gson().deserializeFromTree(value.as(JsonElement.class)))
       .build();
   }
 
