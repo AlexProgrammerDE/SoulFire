@@ -322,7 +322,7 @@ public class ScriptManager {
 
     try {
       context.eval(Source.newBuilder(script.language.metaLanguage().languageId(), mainFile.toFile()).build());
-    } catch (IOException e) {
+    } catch (PolyglotException | IOException e) {
       log.error("Failed to load script", e);
       return;
     }
