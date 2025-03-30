@@ -22,33 +22,22 @@ import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.script.ScriptHelper;
 import com.soulfiremc.server.script.ScriptManager;
 import net.kyori.adventure.text.Component;
+import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
 public class ScriptAPI {
-  private final ScriptInfoAPI script;
-  private final ScriptEventAPI event;
-  private final ScriptInstanceAPI instance;
+  @HostAccess.Export
+  public final ScriptInfoAPI script;
+  @HostAccess.Export
+  public final ScriptEventAPI event;
+  @HostAccess.Export
+  public final ScriptInstanceAPI instance;
 
-  public ScriptAPI(ScriptManager.Script script, InstanceManager instanceManager) {
+  public ScriptAPI(Context context, ScriptManager.Script script, InstanceManager instanceManager) {
     this.script = new ScriptInfoAPI(script);
-    this.event = new ScriptEventAPI();
+    this.event = new ScriptEventAPI(context);
     this.instance = new ScriptInstanceAPI(instanceManager);
-  }
-
-  @HostAccess.Export
-  public ScriptInfoAPI getScript() {
-    return script;
-  }
-
-  @HostAccess.Export
-  public ScriptEventAPI getEvent() {
-    return event;
-  }
-
-  @HostAccess.Export
-  public ScriptInstanceAPI getInstance() {
-    return instance;
   }
 
   @HostAccess.Export
@@ -58,7 +47,7 @@ public class ScriptAPI {
 
   @HostAccess.Export
   public Value componentFromLegacySection(String legacy) {
-    return ScriptHelper.componentToValue(SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.deserialize(legacy));
+    return ScriptHelper.componentToValue(Context.getCurrent(), SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.deserialize(legacy));
   }
 
   @HostAccess.Export
@@ -68,7 +57,7 @@ public class ScriptAPI {
 
   @HostAccess.Export
   public Value componentFromLegacyAmpersand(String legacy) {
-    return ScriptHelper.componentToValue(SoulFireAdventure.LEGACY_AMPERSAND_MESSAGE_SERIALIZER.deserialize(legacy));
+    return ScriptHelper.componentToValue(Context.getCurrent(), SoulFireAdventure.LEGACY_AMPERSAND_MESSAGE_SERIALIZER.deserialize(legacy));
   }
 
   @HostAccess.Export
@@ -78,6 +67,6 @@ public class ScriptAPI {
 
   @HostAccess.Export
   public Value componentFromPlain(String plain) {
-    return ScriptHelper.componentToValue(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.deserialize(plain));
+    return ScriptHelper.componentToValue(Context.getCurrent(), SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.deserialize(plain));
   }
 }

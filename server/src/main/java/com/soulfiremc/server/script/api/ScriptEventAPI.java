@@ -17,6 +17,16 @@
  */
 package com.soulfiremc.server.script.api;
 
+import com.soulfiremc.server.api.event.SoulFireBotEvent;
+import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
+import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
+import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
+import com.soulfiremc.server.api.event.attack.AttackStartEvent;
+import com.soulfiremc.server.api.event.attack.AttackTickEvent;
+import com.soulfiremc.server.api.event.bot.*;
+import com.soulfiremc.server.script.ScriptHelper;
+import lombok.RequiredArgsConstructor;
+import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
@@ -25,7 +35,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@RequiredArgsConstructor
 public class ScriptEventAPI {
+  private final Context context;
   private final Map<String, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
 
   @HostAccess.Export
@@ -38,6 +50,37 @@ public class ScriptEventAPI {
   public void once(String event, Value callback) {
     eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
       .add(new EventListener(true, callback));
+  }
+
+  public void forwardEvent(SoulFireInstanceEvent event) {
+    if (event instanceof SoulFireBotEvent botEvent) {
+      var botApi = new ScriptBotAPI(botEvent.connection());
+      switch (event) {
+        case BotConnectionInitEvent ignored -> forwardEvent("connectionInit", botApi);
+        case BotDisconnectedEvent ignored -> forwardEvent("disconnected", botApi);
+        case BotJoinedEvent ignored -> forwardEvent("joined", botApi);
+        case BotPostEntityTickEvent ignored -> forwardEvent("postEntityTick", botApi);
+        case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
+        case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
+        case BotPreTickEvent ignored -> forwardEvent("preTick", botApi);
+        case ChatMessageReceiveEvent chatMessageReceiveEvent -> forwardEvent("message", botApi, ScriptHelper.componentToValue(context, chatMessageReceiveEvent.message()), chatMessageReceiveEvent.timestamp());
+        case PreBotConnectEvent ignored -> forwardEvent("preConnect", botApi);
+        case SFPacketReceiveEvent packetReceiveEvent -> forwardEvent("packetReceive", botApi, packetReceiveEvent.packet());
+        case SFPacketSendingEvent packetSendingEvent -> forwardEvent("packetSending", botApi, packetSendingEvent.packet());
+        case SFPacketSentEvent packetSentEvent -> forwardEvent("packetSent", botApi, packetSentEvent.packet());
+        default -> {
+        }
+      }
+    } else {
+      switch (event) {
+        case AttackBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
+        case AttackEndedEvent ignored -> forwardEvent("attackEnded");
+        case AttackStartEvent ignored -> forwardEvent("attackStart");
+        case AttackTickEvent ignored -> forwardEvent("attackTick");
+        default -> {
+        }
+      }
+    }
   }
 
   public void forwardEvent(String event, Object... eventArgs) {

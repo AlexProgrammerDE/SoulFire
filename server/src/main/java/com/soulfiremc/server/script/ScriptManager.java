@@ -27,16 +27,9 @@ import com.google.gson.JsonObject;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
-import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
-import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
-import com.soulfiremc.server.api.event.attack.AttackStartEvent;
-import com.soulfiremc.server.api.event.attack.AttackTickEvent;
-import com.soulfiremc.server.api.event.bot.*;
 import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.script.api.ScriptAPI;
-import com.soulfiremc.server.script.api.ScriptBotAPI;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
@@ -101,45 +94,10 @@ public class ScriptManager {
   }
 
   private void forwardEvent(SoulFireInstanceEvent event) {
-    if (scripts.isEmpty()) {
-      return;
-    }
-
-    if (event instanceof SoulFireBotEvent botEvent) {
-      var botApi = new ScriptBotAPI(botEvent.connection());
-      switch (event) {
-        case BotConnectionInitEvent ignored -> forwardEvent("connectionInit", botApi);
-        case BotDisconnectedEvent ignored -> forwardEvent("disconnected", botApi);
-        case BotJoinedEvent ignored -> forwardEvent("joined", botApi);
-        case BotPostEntityTickEvent ignored -> forwardEvent("postEntityTick", botApi);
-        case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
-        case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
-        case BotPreTickEvent ignored -> forwardEvent("preTick", botApi);
-        case ChatMessageReceiveEvent chatMessageReceiveEvent -> forwardEvent("message", botApi, ScriptHelper.componentToValue(chatMessageReceiveEvent.message()), chatMessageReceiveEvent.timestamp());
-        case PreBotConnectEvent ignored -> forwardEvent("preConnect", botApi);
-        case SFPacketReceiveEvent packetReceiveEvent -> forwardEvent("packetReceive", botApi, packetReceiveEvent.packet());
-        case SFPacketSendingEvent packetSendingEvent -> forwardEvent("packetSending", botApi, packetSendingEvent.packet());
-        case SFPacketSentEvent packetSentEvent -> forwardEvent("packetSent", botApi, packetSentEvent.packet());
-        default -> {
-        }
-      }
-    } else {
-      switch (event) {
-        case AttackBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
-        case AttackEndedEvent ignored -> forwardEvent("attackEnded");
-        case AttackStartEvent ignored -> forwardEvent("attackStart");
-        case AttackTickEvent ignored -> forwardEvent("attackTick");
-        default -> {
-        }
-      }
-    }
-  }
-
-  private void forwardEvent(String event, Object... eventArgs) {
     for (var script : scripts.values()) {
       var runtime = script.runtime().get();
       if (runtime != null) {
-        runtime.scriptAPI().getEvent().forwardEvent(event, eventArgs);
+        runtime.scriptAPI().event.forwardEvent(event);
       }
     }
   }
@@ -238,7 +196,7 @@ public class ScriptManager {
         UUIDHelper::tryParseUniqueIdOrNull)
       .targetTypeMapping(Value.class, JsonElement.class, value -> true,
         value -> {
-          var metaLanguage = ScriptHelper.getMetaLanguage();
+          var metaLanguage = ScriptHelper.getMetaLanguage(value.getContext());
           return GsonInstance.GSON.fromJson(value.getContext().eval(metaLanguage.languageId(), switch (metaLanguage) {
             case JAVASCRIPT -> "JSON.stringify";
             case PYTHON -> "json.dumps";
@@ -305,7 +263,7 @@ public class ScriptManager {
       .currentWorkingDirectory(script.dataPath().toAbsolutePath())
       .build();
 
-    var scriptAPI = new ScriptAPI(script, instanceManager);
+    var scriptAPI = new ScriptAPI(context, script, instanceManager);
     context.getBindings(script.language().metaLanguage().languageId())
       .putMember("api", scriptAPI);
 
