@@ -21,6 +21,7 @@ import com.soulfiremc.server.data.TranslationMapper;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.ansi.ColorLevel;
 
@@ -31,6 +32,16 @@ public final class SoulFireAdventure {
       .build();
   public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
     PlainTextComponentSerializer.builder()
+      .flattener(FLATTENER)
+      .build();
+  public static final LegacyComponentSerializer LEGACY_SECTION_MESSAGE_SERIALIZER =
+    LegacyComponentSerializer.legacySection()
+      .toBuilder()
+      .flattener(FLATTENER)
+      .build();
+  public static final LegacyComponentSerializer LEGACY_AMPERSAND_MESSAGE_SERIALIZER =
+    LegacyComponentSerializer.legacyAmpersand()
+      .toBuilder()
       .flattener(FLATTENER)
       .build();
   public static final ANSIComponentSerializer ANSI_SERIALIZER =

@@ -18,11 +18,10 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.script.ScriptHelper;
 import com.soulfiremc.server.script.ScriptManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
@@ -54,31 +53,31 @@ public class ScriptAPI {
 
   @HostAccess.Export
   public String componentToLegacySection(Component component) {
-    return LegacyComponentSerializer.legacySection().serialize(component);
+    return SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(component);
   }
 
   @HostAccess.Export
   public Value componentFromLegacySection(String legacy) {
-    return ScriptHelper.componentToValue(LegacyComponentSerializer.legacySection().deserialize(legacy));
+    return ScriptHelper.componentToValue(SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.deserialize(legacy));
   }
 
   @HostAccess.Export
   public String componentToLegacyAmpersand(Component component) {
-    return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+    return SoulFireAdventure.LEGACY_AMPERSAND_MESSAGE_SERIALIZER.serialize(component);
   }
 
   @HostAccess.Export
   public Value componentFromLegacyAmpersand(String legacy) {
-    return ScriptHelper.componentToValue(LegacyComponentSerializer.legacyAmpersand().deserialize(legacy));
+    return ScriptHelper.componentToValue(SoulFireAdventure.LEGACY_AMPERSAND_MESSAGE_SERIALIZER.deserialize(legacy));
   }
 
   @HostAccess.Export
   public String componentToPlain(Component component) {
-    return PlainTextComponentSerializer.plainText().serialize(component);
+    return SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(component);
   }
 
   @HostAccess.Export
   public Value componentFromPlain(String plain) {
-    return ScriptHelper.componentToValue(PlainTextComponentSerializer.plainText().deserialize(plain));
+    return ScriptHelper.componentToValue(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.deserialize(plain));
   }
 }
