@@ -192,7 +192,7 @@ public final class CLIManager {
                 .initialValue(comboEntry.getDef())
                 .hasInitialValue(true)
                 .completionCandidates(
-                  comboEntry.getOptionsList().stream().map(ComboOption::getId)
+                  comboEntry.getOptionsList().stream().map(ComboSetting.Option::getId)
                     ::iterator)
                 .setter(
                   new CommandLine.Model.ISetter() {
