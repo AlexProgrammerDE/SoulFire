@@ -15,6 +15,7 @@ dependencies {
     }
 
     subproject.plugins.withId("java") {
+      javadocClasspath(subproject)
       javadoc(subproject)
     }
   }
