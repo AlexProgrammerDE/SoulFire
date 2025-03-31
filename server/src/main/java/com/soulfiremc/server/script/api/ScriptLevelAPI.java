@@ -20,6 +20,9 @@ package com.soulfiremc.server.script.api;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
+import com.soulfiremc.server.script.api.entity.ScriptEntityAPI;
+import com.soulfiremc.server.script.api.entity.ScriptLivingEntityAPI;
+import com.soulfiremc.server.script.api.entity.ScriptPlayerAPI;
 import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;

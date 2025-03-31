@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.script.api.entity.ScriptPlayerAPI;
 import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.api;
+package com.soulfiremc.server.script.api.entity;
 
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import org.graalvm.polyglot.HostAccess;
