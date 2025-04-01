@@ -113,6 +113,30 @@ dependencies {
   testImplementation(libs.junit)
 }
 
+tasks.register<Javadoc>("generateTSDoc") {
+  group = "documentation"
+  description = "Generates the typescript documentation for the project"
+
+  source = tasks.javadoc.get().source
+  classpath = tasks.javadoc.get().classpath
+  setDestinationDir(rootProject.layout.buildDirectory.asFile.get().resolve("docs/typescript/headers"))
+  options.doclet = "com.soulfiremc.doclet.TSDoclet"
+  options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
+  (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
+}
+
+tasks.register<Javadoc>("generatePyDoc") {
+  group = "documentation"
+  description = "Generates the python documentation for the project"
+
+  source = tasks.javadoc.get().source
+  classpath = tasks.javadoc.get().classpath
+  setDestinationDir(rootProject.layout.buildDirectory.asFile.get().resolve("docs/python/headers"))
+  options.doclet = "com.soulfiremc.doclet.PyDoclet"
+  options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
+  (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
+}
+
 tasks {
   withType<Checkstyle> {
     exclude("**/com/soulfiremc/server/data**")
