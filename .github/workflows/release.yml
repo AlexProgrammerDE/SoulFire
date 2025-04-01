@@ -38,7 +38,7 @@ jobs:
         with:
           body: ${{ steps.github_release.outputs.changelog }}
           tag_name: ${{ steps.set-version.outputs.version }}
-          generate_release_notes: true
+          generate_release_notes: false
           draft: false
           prerelease: false
           target_commitish: main
