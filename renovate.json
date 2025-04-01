@@ -1,5 +1,5 @@
 {
-  "extends": ["config:base", "group:allNonMajor"],
+  "extends": ["config:base", "group:allNonMajor", ":semanticCommits"],
   "ignoreDeps": [
     "com.github.GeyserMC:MCProtocolLib",
     "com.github.GeyserMC:mcauthlib",
