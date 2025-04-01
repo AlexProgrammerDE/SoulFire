@@ -39,7 +39,7 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
-          target_commitish: dev
+          target_commitish: main
           token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_unmatched_files: true
           name: SoulFire ${{ steps.set-version.outputs.version }}
