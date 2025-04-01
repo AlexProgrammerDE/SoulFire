@@ -45,10 +45,8 @@ jobs:
           name: SoulFire ${{ steps.set-version.outputs.version }}
           preserve_order: true
           files: |
-            dedicated/build/libs/SoulFireDedicated-*.jar
-            !dedicated/build/libs/SoulFireDedicated-*-*.jar
-            client/build/libs/SoulFireCLI-*.jar
-            !client/build/libs/SoulFireCLI-*-*.jar
+            dedicated/build/libs/SoulFireDedicated-${{ steps.set-version.outputs.version }}.jar
+            client/build/libs/SoulFireCLI-${{ steps.set-version.outputs.version }}.jar
       - name: Discord Webhook Action
         uses: tsickert/discord-webhook@v7.0.0
         with:
