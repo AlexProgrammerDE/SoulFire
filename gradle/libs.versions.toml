@@ -12,13 +12,13 @@ via-loader = "4.0.2"
 mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.19.0"
 reactor = "1.2.4"
-classtransform = "1.14.0"
+classtransform = "1.14.1"
 armeria = "1.32.3"
 graalvm-polyglot = "24.2.0"
 
 [plugins]
 blossom = "net.kyori.blossom:2.1.0"
-protobuf = "com.google.protobuf:0.9.4"
+protobuf = "com.google.protobuf:0.9.5"
 jmh = "me.champeau.jmh:0.7.3"
 license-report = "com.github.jk1.dependency-license-report:2.9"
 
@@ -90,7 +90,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.40.1"
+openai = "com.openai:openai-java:0.41.0"
 immutables-value = "org.immutables:value:2.10.1"
 immutables-gson = "org.immutables:gson:2.10.1"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta5"
