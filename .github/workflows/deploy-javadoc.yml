@@ -36,4 +36,5 @@ jobs:
         with:
           commit_message: 'Deploy SoulFire Javadoc'
           branch: 'gh-pages'
+          create_branch: true
           push_options: '--force'
