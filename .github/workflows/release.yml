@@ -1,9 +1,24 @@
 name: Publish Release
 
-on: [ workflow_dispatch ]
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+      after-version:
+        description: 'Snapshot version after release'
+        required: true
 
 jobs:
+  set-release-version:
+    uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
+    with:
+      version: ${{ github.event.inputs.version }}
+    secrets: inherit
+
   build:
+    needs: set-release-version
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -58,3 +73,20 @@ jobs:
           embed-description: SoulFire ${{ steps.set-version.outputs.version }} has been released! Changelog and download can be found at https://github.com/AlexProgrammerDE/SoulFire/releases/tag/${{ steps.set-version.outputs.version }}
           embed-color: 3312063
           embed-thumbnail-url: https://soulfiremc.com/logo.png
+
+  deploy-javadoc:
+    needs: build
+    uses: AlexProgrammerDE/SoulFire/.github/workflows/deploy-javadoc.yml@main
+    secrets: inherit
+
+  deploy-docker:
+    needs: build
+    uses: AlexProgrammerDE/SoulFire/.github/workflows/docker-deploy.yml@main
+    secrets: inherit
+
+  set-after-version:
+    needs: [ deploy-javadoc, deploy-docker ]
+    uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
+    with:
+      version: ${{ github.event.inputs.after-version }}
+    secrets: inherit

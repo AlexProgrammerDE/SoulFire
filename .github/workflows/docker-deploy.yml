@@ -1,5 +1,5 @@
 name: Docker Deploy
-on: [ release, workflow_dispatch ]
+on: [ workflow_dispatch, workflow_call ]
 
 jobs:
   build:
