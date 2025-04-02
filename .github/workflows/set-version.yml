@@ -12,7 +12,6 @@ on:
         required: true
         type: string
 
-
 jobs:
   set-version:
     name: Set Version
