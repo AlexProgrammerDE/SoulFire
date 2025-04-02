@@ -1,0 +1,31 @@
+name: set-version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to set'
+        required: true
+
+jobs:
+  set-version:
+    name: Set Version
+
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 'Shared: Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: 'Set Version'
+        run: |
+          sed -i 's/^maven_version=.*/maven_version='"${{ github.event.inputs.version }}"'/g' gradle.properties
+
+      - name: 'Commit Version'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Bump version to ${{ github.event.inputs.version }}'
