@@ -12,8 +12,8 @@ jobs:
           persist-credentials: false
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Set version
-        id: set-version
+      - name: Get version
+        id: get-version
         run: |
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
           echo "version=$projectVersion" >> $GITHUB_OUTPUT
@@ -40,7 +40,7 @@ jobs:
           push: true
           tags: |
             alexprogrammerde/soulfire:latest
-            alexprogrammerde/soulfire:${{ steps.set-version.outputs.version }}
+            alexprogrammerde/soulfire:${{ steps.get-version.outputs.version }}
       - name: Push README.md to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
         env:
