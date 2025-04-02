@@ -6,6 +6,12 @@ on:
       version:
         description: 'Version to set'
         required: true
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
 
 jobs:
   set-version:
