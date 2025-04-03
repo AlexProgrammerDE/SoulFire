@@ -14,7 +14,7 @@ jobs:
   set-release-version:
     uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
     with:
-      version: ${{ github.event.inputs.version }}
+      version: ${{ inputs.version }}
     secrets: inherit
 
   build:
@@ -88,5 +88,5 @@ jobs:
     needs: [ deploy-javadoc, deploy-docker ]
     uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
     with:
-      version: ${{ github.event.inputs.after-version }}
+      version: ${{ inputs.after-version }}
     secrets: inherit

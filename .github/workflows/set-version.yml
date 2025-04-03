@@ -28,9 +28,9 @@ jobs:
 
       - name: 'Set Version'
         run: |
-          sed -i 's/^maven_version=.*/maven_version='"${{ github.event.inputs.version }}"'/g' gradle.properties
+          sed -i 's/^maven_version=.*/maven_version='"${{ inputs.version }}"'/g' gradle.properties
 
       - name: 'Commit Version'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'Bump version to ${{ github.event.inputs.version }}'
+          commit_message: 'Bump version to ${{ inputs.version }}'
