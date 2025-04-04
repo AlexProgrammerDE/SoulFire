@@ -29,7 +29,8 @@ public enum EquipmentSlot {
   LEGS(Type.HUMANOID_ARMOR, 1, 2),
   CHEST(Type.HUMANOID_ARMOR, 2, 3),
   HEAD(Type.HUMANOID_ARMOR, 3, 4),
-  BODY(Type.ANIMAL_ARMOR, 0, 6);
+  BODY(Type.ANIMAL_ARMOR, 0, 6),
+  SADDLE(Type.ANIMAL_ARMOR, 0, 7);
 
   public static final EquipmentSlot[] VALUES = values();
 
@@ -46,6 +47,7 @@ public enum EquipmentSlot {
       case CHESTPLATE -> CHEST;
       case HELMET -> HEAD;
       case BODY -> BODY;
+      case SADDLE -> SADDLE;
     };
   }
 
@@ -70,6 +72,7 @@ public enum EquipmentSlot {
       case CHEST -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.CHESTPLATE;
       case HEAD -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.HELMET;
       case BODY -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.BODY;
+      case SADDLE -> org.geysermc.mcprotocollib.protocol.data.game.entity.EquipmentSlot.SADDLE;
     };
   }
 

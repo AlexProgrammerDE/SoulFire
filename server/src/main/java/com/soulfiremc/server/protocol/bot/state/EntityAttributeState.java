@@ -47,6 +47,7 @@ public final class EntityAttributeState {
       case HEAD -> comparedTo == EquipmentSlot.HEAD;
       case ARMOR -> comparedTo.isArmor();
       case BODY -> comparedTo == EquipmentSlot.BODY;
+      case SADDLE -> comparedTo == EquipmentSlot.SADDLE;
     };
   }
 

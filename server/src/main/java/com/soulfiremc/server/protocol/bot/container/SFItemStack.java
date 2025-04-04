@@ -23,6 +23,7 @@ import com.soulfiremc.server.util.MathHelper;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.mcprotocollib.protocol.data.game.item.HashedStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponent;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentType;
@@ -30,8 +31,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponen
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponents;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public final class SFItemStack {
   public static final SFItemStack EMPTY = new SFItemStack(ItemType.AIR, 0);
@@ -103,6 +103,28 @@ public final class SFItemStack {
     }
 
     return new ItemStack(type.id(), count, dataComponentsPatch);
+  }
+
+  public @Nullable HashedStack toMCPLHashed() {
+    if (this.isEmpty()) {
+      return null;
+    }
+
+    Map<DataComponentType<?>, Integer> addedComponents = new HashMap<>();
+    Set<DataComponentType<?>> removedComponents = new HashSet<>();
+
+    if (dataComponentsPatch != null) {
+      for (var entry : dataComponentsPatch.getDataComponents().entrySet()) {
+        if (entry.getValue().getValue() == null) {
+          removedComponents.add(entry.getKey());
+        } else {
+          // TODO: Implement component hashing
+          addedComponents.put(entry.getKey(), 0);
+        }
+      }
+    }
+
+    return new HashedStack(type.id(), count, addedComponents, removedComponents);
   }
 
   public boolean isEmpty() {

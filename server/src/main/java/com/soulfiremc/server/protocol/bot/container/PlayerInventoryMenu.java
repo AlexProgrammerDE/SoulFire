@@ -72,6 +72,7 @@ public class PlayerInventoryMenu extends ViewableContainer {
       case CHEST -> armor[1];
       case HEAD -> armor[0];
       case BODY -> throw new IllegalArgumentException("Cannot get body slot on player");
+      case SADDLE -> throw new IllegalArgumentException("Cannot get saddle slot on player");
     };
   }
 

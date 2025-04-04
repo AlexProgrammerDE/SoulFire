@@ -21,7 +21,6 @@ import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.*;
 import org.geysermc.mcprotocollib.protocol.data.game.item.HashedStack;
-import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 
 import java.util.HashMap;
@@ -125,12 +124,11 @@ public class ViewableContainer extends Container {
   }
 
   private void sendAction(ContainerActionType mode, ContainerAction button, int slot, List<ContainerSlot> changedSlots) {
-    var changeMap = new HashMap<Integer, ItemStack>();
+    var changeMap = new HashMap<Integer, HashedStack>();
     for (var changedSlot : changedSlots) {
-      HashedStack
-      changeMap.put(changedSlot.slot(), changedSlot.item().toMCPL());
+      changeMap.put(changedSlot.slot(), changedSlot.item().toMCPLHashed());
     }
 
-    player.level().connection().sendPacket(new ServerboundContainerClickPacket(containerId, getStateId(), slot, mode, button, getCarried().toMCPL(), changeMap));
+    player.level().connection().sendPacket(new ServerboundContainerClickPacket(containerId, getStateId(), slot, mode, button, getCarried().toMCPLHashed(), changeMap));
   }
 }
