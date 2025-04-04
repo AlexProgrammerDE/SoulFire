@@ -20,6 +20,7 @@ package com.soulfiremc.server.protocol.bot.container;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import lombok.Getter;
 import org.geysermc.mcprotocollib.protocol.data.game.inventory.*;
+import org.geysermc.mcprotocollib.protocol.data.game.item.HashedStack;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClickPacket;
 
@@ -126,6 +127,7 @@ public class ViewableContainer extends Container {
   private void sendAction(ContainerActionType mode, ContainerAction button, int slot, List<ContainerSlot> changedSlots) {
     var changeMap = new HashMap<Integer, ItemStack>();
     for (var changedSlot : changedSlots) {
+      HashedStack
       changeMap.put(changedSlot.slot(), changedSlot.item().toMCPL());
     }
 

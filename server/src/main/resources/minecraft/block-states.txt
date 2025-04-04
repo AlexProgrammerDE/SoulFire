@@ -131,6 +131,9 @@ minecraft:cobweb|0|0
 minecraft:short_grass|0|0
 minecraft:fern|0|0
 minecraft:dead_bush|0|0
+minecraft:bush|0|0
+minecraft:short_dry_grass|0|0
+minecraft:tall_dry_grass|0|0
 minecraft:seagrass|0|0
 minecraft:tall_seagrass|0|0
 minecraft:piston|6,7,8,9,10,11,1,1,1,1,1,1|6,7,8,9,10,11,1,1,1,1,1,1
@@ -262,6 +265,7 @@ minecraft:snow|0,65,66,67,68,69,10,70|65,66,67,68,69,10,70,1
 minecraft:ice|1|1
 minecraft:snow_block|1|1
 minecraft:cactus|71|71
+minecraft:cactus_flower|0|0
 minecraft:clay|1|1
 minecraft:sugar_cane|0|0
 minecraft:jukebox|1|1
@@ -625,7 +629,7 @@ minecraft:purpur_pillar|1|1
 minecraft:purpur_stairs|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42|24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43,44,44,36,36,25,25,38,38,27,27,45,45,41,41,30,30,43,43,32,32,46,46,26,26,35,35,28,28,37,37,47,47,31,31,40,40,33,33,42,42
 minecraft:end_stone_bricks|1|1
 minecraft:torchflower_crop|0|0
-minecraft:pitcher_crop|253,253,0,254,0,254,0,254,0,254|253,253,0,254,0,254,0,254,0,254
+minecraft:pitcher_crop|0,253,0,254,0,254,0,254,0,254|0,253,0,254,0,254,0,254,0,254
 minecraft:pitcher_plant|0|0
 minecraft:beetroots|0|0
 minecraft:dirt_path|53|53
@@ -860,6 +864,8 @@ minecraft:crimson_wall_sign|0|0
 minecraft:warped_wall_sign|0|0
 minecraft:structure_block|1|1
 minecraft:jigsaw|1|1
+minecraft:test_block|1|1
+minecraft:test_instance_block|1|1
 minecraft:composter|286|286
 minecraft:target|1|1
 minecraft:bee_nest|1|1
@@ -1042,6 +1048,8 @@ minecraft:azalea|321|321
 minecraft:flowering_azalea|321|321
 minecraft:moss_carpet|186|186
 minecraft:pink_petals|0|0
+minecraft:wildflowers|0|0
+minecraft:leaf_litter|0|0
 minecraft:moss_block|1|1
 minecraft:big_dripleaf|322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0|322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0,322,322,322,322,323,323,0,0
 minecraft:big_dripleaf_stem|0|0
@@ -1093,3 +1101,4 @@ minecraft:open_eyeblossom|0|0
 minecraft:closed_eyeblossom|0|0
 minecraft:potted_open_eyeblossom|168|168
 minecraft:potted_closed_eyeblossom|168|168
+minecraft:firefly_bush|0|0

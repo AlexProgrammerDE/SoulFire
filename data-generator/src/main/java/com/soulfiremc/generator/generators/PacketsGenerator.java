@@ -84,7 +84,6 @@ public final class PacketsGenerator {
     net.minecraft.network.protocol.game.ClientboundSetExperiencePacket.class,
     net.minecraft.network.protocol.game.ClientboundSetHealthPacket.class,
     net.minecraft.network.protocol.game.ClientboundAddEntityPacket.class,
-    net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket.class,
     net.minecraft.network.protocol.game.ClientboundContainerClosePacket.class,
     net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket.class,
     net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket.class,

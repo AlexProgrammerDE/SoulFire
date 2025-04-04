@@ -406,7 +406,7 @@ public abstract class Display extends Entity {
     }
 
     private SFItemStack getItemStack() {
-      return SFItemStack.from(this.entityData.get(NamedEntityData.ITEM_DISPLAY__ITEM_STACK, MetadataTypes.ITEM));
+      return SFItemStack.from(this.entityData.get(NamedEntityData.ITEM_DISPLAY__ITEM_STACK, MetadataTypes.ITEM_STACK));
     }
 
     private ItemDisplayContext getItemTransform() {
@@ -512,7 +512,7 @@ public abstract class Display extends Entity {
     }
 
     private Component getText() {
-      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__TEXT, MetadataTypes.CHAT);
+      return this.entityData.get(NamedEntityData.TEXT_DISPLAY__TEXT, MetadataTypes.COMPONENT);
     }
 
     private int getLineWidth() {

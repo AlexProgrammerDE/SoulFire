@@ -231,9 +231,13 @@ public record ItemType(
   public static final ItemType COBWEB = register("minecraft:cobweb");
   public static final ItemType SHORT_GRASS = register("minecraft:short_grass");
   public static final ItemType FERN = register("minecraft:fern");
+  public static final ItemType BUSH = register("minecraft:bush");
   public static final ItemType AZALEA = register("minecraft:azalea");
   public static final ItemType FLOWERING_AZALEA = register("minecraft:flowering_azalea");
   public static final ItemType DEAD_BUSH = register("minecraft:dead_bush");
+  public static final ItemType FIREFLY_BUSH = register("minecraft:firefly_bush");
+  public static final ItemType DRY_SHORT_GRASS = register("minecraft:short_dry_grass");
+  public static final ItemType DRY_TALL_GRASS = register("minecraft:tall_dry_grass");
   public static final ItemType SEAGRASS = register("minecraft:seagrass");
   public static final ItemType SEA_PICKLE = register("minecraft:sea_pickle");
   public static final ItemType WHITE_WOOL = register("minecraft:white_wool");
@@ -282,6 +286,8 @@ public record ItemType(
   public static final ItemType SUGAR_CANE = register("minecraft:sugar_cane");
   public static final ItemType KELP = register("minecraft:kelp");
   public static final ItemType PINK_PETALS = register("minecraft:pink_petals");
+  public static final ItemType WILDFLOWERS = register("minecraft:wildflowers");
+  public static final ItemType LEAF_LITTER = register("minecraft:leaf_litter");
   public static final ItemType MOSS_CARPET = register("minecraft:moss_carpet");
   public static final ItemType MOSS_BLOCK = register("minecraft:moss_block");
   public static final ItemType PALE_MOSS_CARPET = register("minecraft:pale_moss_carpet");
@@ -350,6 +356,7 @@ public record ItemType(
   public static final ItemType ICE = register("minecraft:ice");
   public static final ItemType SNOW_BLOCK = register("minecraft:snow_block");
   public static final ItemType CACTUS = register("minecraft:cactus");
+  public static final ItemType CACTUS_FLOWER = register("minecraft:cactus_flower");
   public static final ItemType CLAY = register("minecraft:clay");
   public static final ItemType JUKEBOX = register("minecraft:jukebox");
   public static final ItemType OAK_FENCE = register("minecraft:oak_fence");
@@ -852,6 +859,8 @@ public record ItemType(
   public static final ItemType BAMBOO_CHEST_RAFT = register("minecraft:bamboo_chest_raft");
   public static final ItemType STRUCTURE_BLOCK = register("minecraft:structure_block");
   public static final ItemType JIGSAW = register("minecraft:jigsaw");
+  public static final ItemType TEST_BLOCK = register("minecraft:test_block");
+  public static final ItemType TEST_INSTANCE_BLOCK = register("minecraft:test_instance_block");
   public static final ItemType TURTLE_HELMET = register("minecraft:turtle_helmet");
   public static final ItemType TURTLE_SCUTE = register("minecraft:turtle_scute");
   public static final ItemType ARMADILLO_SCUTE = register("minecraft:armadillo_scute");
@@ -988,6 +997,8 @@ public record ItemType(
   public static final ItemType BOOK = register("minecraft:book");
   public static final ItemType SLIME_BALL = register("minecraft:slime_ball");
   public static final ItemType EGG = register("minecraft:egg");
+  public static final ItemType BLUE_EGG = register("minecraft:blue_egg");
+  public static final ItemType BROWN_EGG = register("minecraft:brown_egg");
   public static final ItemType COMPASS = register("minecraft:compass");
   public static final ItemType RECOVERY_COMPASS = register("minecraft:recovery_compass");
   public static final ItemType BUNDLE = register("minecraft:bundle");

@@ -40,7 +40,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.FloatEntityMetadata;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.HandPreference;
 import org.geysermc.mcprotocollib.protocol.data.game.item.component.DataComponentTypes;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundAddEntityPacket;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -558,7 +558,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public Optional<Vector3i> getSleepingPos() {
-    return this.entityData.get(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_POSITION);
+    return this.entityData.get(NamedEntityData.LIVING_ENTITY__SLEEPING_POS, MetadataTypes.OPTIONAL_BLOCK_POS);
   }
 
   public boolean isSleeping() {
@@ -688,7 +688,7 @@ public abstract class LivingEntity extends Entity {
   }
 
   public float getJumpBoostPower() {
-    return this.effectState().hasEffect(EffectType.JUMP) ? 0.1F * ((float) this.effectState.getEffect(EffectType.JUMP).orElseThrow().amplifier() + 1.0F) : 0.0F;
+    return this.effectState().hasEffect(EffectType.JUMP_BOOST) ? 0.1F * ((float) this.effectState.getEffect(EffectType.JUMP_BOOST).orElseThrow().amplifier() + 1.0F) : 0.0F;
   }
 
   public void jumpFromGround() {

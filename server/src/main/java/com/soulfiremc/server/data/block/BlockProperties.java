@@ -20,7 +20,6 @@ package com.soulfiremc.server.data.block;
 @SuppressWarnings("unused")
 public final class BlockProperties {
   //@formatter:off
-  public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
   public static final BooleanProperty ATTACHED = BooleanProperty.create("attached");
   public static final BooleanProperty BERRIES = BooleanProperty.create("berries");
   public static final BooleanProperty BLOOM = BooleanProperty.create("bloom");
@@ -68,6 +67,7 @@ public final class BlockProperties {
   public static final EnumProperty FACING_HOPPER = EnumProperty.create("facing");
   public static final EnumProperty HORIZONTAL_FACING = EnumProperty.create("facing");
   public static final IntegerProperty FLOWER_AMOUNT = IntegerProperty.create("flower_amount");
+  public static final IntegerProperty SEGMENT_AMOUNT = IntegerProperty.create("segment_amount");
   public static final EnumProperty ORIENTATION = EnumProperty.create("orientation");
   public static final EnumProperty ATTACH_FACE = EnumProperty.create("face");
   public static final EnumProperty BELL_ATTACHMENT = EnumProperty.create("attachment");
@@ -136,7 +136,10 @@ public final class BlockProperties {
   public static final BooleanProperty CRAFTING = BooleanProperty.create("crafting");
   public static final EnumProperty TRIAL_SPAWNER_STATE = EnumProperty.create("trial_spawner_state");
   public static final EnumProperty VAULT_STATE = EnumProperty.create("vault_state");
+  public static final EnumProperty CREAKING_HEART_STATE = EnumProperty.create("creaking_heart_state");
   public static final BooleanProperty OMINOUS = BooleanProperty.create("ominous");
+  public static final EnumProperty TEST_BLOCK_MODE = EnumProperty.create("mode");
+  public static final BooleanProperty MAP = BooleanProperty.create("map");
   //@formatter:on
 
   private BlockProperties() {}

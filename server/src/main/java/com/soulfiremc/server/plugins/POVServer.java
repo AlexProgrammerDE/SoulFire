@@ -33,8 +33,6 @@ import com.soulfiremc.server.protocol.bot.container.SFItemStack;
 import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.state.LevelHeightAccessor;
-import com.soulfiremc.server.protocol.bot.state.entity.Entity;
-import com.soulfiremc.server.protocol.bot.state.entity.ExperienceOrbEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
 import com.soulfiremc.server.protocol.bot.state.entity.Player;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
@@ -63,7 +61,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.lenni0451.lambdaevents.EventHandler;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.cloudburstmc.nbt.NbtMap;
 import org.geysermc.mcprotocollib.auth.GameProfile;
 import org.geysermc.mcprotocollib.network.Server;
 import org.geysermc.mcprotocollib.network.Session;
@@ -118,13 +115,8 @@ import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.Clie
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundFinishConfigurationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundSelectKnownPacks;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundEntityEventPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundSetEntityDataPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateMobEffectPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetContentPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundContainerSetDataPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.ClientboundOpenScreenPacket;
@@ -289,24 +281,24 @@ public final class POVServer extends InternalPlugin {
     clientSession.send(
       new ClientboundGameEventPacket(
         dataManager.currentLevel().levelData().raining()
-          ? GameEvent.START_RAIN
-          : GameEvent.STOP_RAIN,
+          ? GameEvent.START_RAINING
+          : GameEvent.STOP_RAINING,
         null));
     clientSession.send(
       new ClientboundGameEventPacket(
-        GameEvent.RAIN_STRENGTH,
+        GameEvent.RAIN_LEVEL_CHANGE,
         new RainStrengthValue(
           dataManager.currentLevel().rainLevel())));
     clientSession.send(
       new ClientboundGameEventPacket(
-        GameEvent.THUNDER_STRENGTH,
+        GameEvent.THUNDER_LEVEL_CHANGE,
         new ThunderStrengthValue(
           dataManager.currentLevel().thunderLevel())));
     clientSession.send(
       new ClientboundGameEventPacket(
-        GameEvent.CHANGE_GAMEMODE, dataManager.gameModeState().localPlayerMode()));
+        GameEvent.CHANGE_GAME_MODE, dataManager.gameModeState().localPlayerMode()));
 
-    // Should be after change CHANGE_GAMEMODE because setting GameMode overrides abilities
+    // Should be after change CHANGE_GAME_MODE because setting GameMode overrides abilities
     var abilitiesData = dataManager.localPlayer().abilitiesState();
     clientSession.send(
       new ClientboundPlayerAbilitiesPacket(
@@ -456,7 +448,7 @@ public final class POVServer extends InternalPlugin {
           chunkKey.chunkX(),
           chunkKey.chunkZ(),
           chunkBytes,
-          NbtMap.EMPTY,
+          Map.of(),
           new BlockEntityInfo[0],
           lightUpdateData));
     }
@@ -493,21 +485,13 @@ public final class POVServer extends InternalPlugin {
     });
 
     for (var entity : dataManager.currentLevel().getEntities()) {
-      if (entity instanceof ExperienceOrbEntity experienceOrbEntity) {
-        clientSession.send(
-          new ClientboundAddExperienceOrbPacket(
-            entity.entityId(),
-            entity.x(),
-            entity.y(),
-            entity.z(),
-            experienceOrbEntity.expValue()));
-      } else if (entity instanceof Entity rawEntity && rawEntity.entityId() != dataManager.localPlayer().entityId()) {
+      if (entity.entityId() != dataManager.localPlayer().entityId()) {
         clientSession.send(
           new ClientboundAddEntityPacket(
             entity.entityId(),
             entity.uuid(),
             EntityType.from(entity.entityType().id()),
-            rawEntity.data(),
+            entity.data(),
             entity.x(),
             entity.y(),
             entity.z(),
@@ -737,7 +721,7 @@ public final class POVServer extends InternalPlugin {
           0,
           0,
           chunkBytes,
-          NbtMap.EMPTY,
+          Map.of(),
           new BlockEntityInfo[0],
           lightUpdateData));
 

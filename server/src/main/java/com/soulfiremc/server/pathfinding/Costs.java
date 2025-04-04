@@ -261,7 +261,7 @@ public final class Costs {
   }
 
   private static OptionalInt getDigSpeedAmplifier(EntityEffectState effectState) {
-    var hasteEffect = effectState.getEffect(EffectType.DIG_SPEED);
+    var hasteEffect = effectState.getEffect(EffectType.HASTE);
     var conduitPowerEffect = effectState.getEffect(EffectType.CONDUIT_POWER);
 
     if (hasteEffect.isPresent() && conduitPowerEffect.isPresent()) {
@@ -279,7 +279,7 @@ public final class Costs {
   }
 
   private static OptionalInt getDigSlowdownAmplifier(EntityEffectState effectState) {
-    var miningFatigueEffect = effectState.getEffect(EffectType.DIG_SLOWDOWN);
+    var miningFatigueEffect = effectState.getEffect(EffectType.MINING_FATIGUE);
 
     return miningFatigueEffect
       .map(effectData -> OptionalInt.of(effectData.amplifier()))

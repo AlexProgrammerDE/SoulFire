@@ -195,6 +195,9 @@ public record BlockType(
   public static final BlockType SHORT_GRASS = register("minecraft:short_grass");
   public static final BlockType FERN = register("minecraft:fern");
   public static final BlockType DEAD_BUSH = register("minecraft:dead_bush");
+  public static final BlockType BUSH = register("minecraft:bush");
+  public static final BlockType SHORT_DRY_GRASS = register("minecraft:short_dry_grass");
+  public static final BlockType TALL_DRY_GRASS = register("minecraft:tall_dry_grass");
   public static final BlockType SEAGRASS = register("minecraft:seagrass");
   public static final BlockType TALL_SEAGRASS = register("minecraft:tall_seagrass");
   public static final BlockType PISTON = register("minecraft:piston");
@@ -326,6 +329,7 @@ public record BlockType(
   public static final BlockType ICE = register("minecraft:ice");
   public static final BlockType SNOW_BLOCK = register("minecraft:snow_block");
   public static final BlockType CACTUS = register("minecraft:cactus");
+  public static final BlockType CACTUS_FLOWER = register("minecraft:cactus_flower");
   public static final BlockType CLAY = register("minecraft:clay");
   public static final BlockType SUGAR_CANE = register("minecraft:sugar_cane");
   public static final BlockType JUKEBOX = register("minecraft:jukebox");
@@ -924,6 +928,8 @@ public record BlockType(
   public static final BlockType WARPED_WALL_SIGN = register("minecraft:warped_wall_sign");
   public static final BlockType STRUCTURE_BLOCK = register("minecraft:structure_block");
   public static final BlockType JIGSAW = register("minecraft:jigsaw");
+  public static final BlockType TEST_BLOCK = register("minecraft:test_block");
+  public static final BlockType TEST_INSTANCE_BLOCK = register("minecraft:test_instance_block");
   public static final BlockType COMPOSTER = register("minecraft:composter");
   public static final BlockType TARGET = register("minecraft:target");
   public static final BlockType BEE_NEST = register("minecraft:bee_nest");
@@ -1106,6 +1112,8 @@ public record BlockType(
   public static final BlockType FLOWERING_AZALEA = register("minecraft:flowering_azalea");
   public static final BlockType MOSS_CARPET = register("minecraft:moss_carpet");
   public static final BlockType PINK_PETALS = register("minecraft:pink_petals");
+  public static final BlockType WILDFLOWERS = register("minecraft:wildflowers");
+  public static final BlockType LEAF_LITTER = register("minecraft:leaf_litter");
   public static final BlockType MOSS_BLOCK = register("minecraft:moss_block");
   public static final BlockType BIG_DRIPLEAF = register("minecraft:big_dripleaf");
   public static final BlockType BIG_DRIPLEAF_STEM = register("minecraft:big_dripleaf_stem");
@@ -1157,6 +1165,7 @@ public record BlockType(
   public static final BlockType CLOSED_EYEBLOSSOM = register("minecraft:closed_eyeblossom");
   public static final BlockType POTTED_OPEN_EYEBLOSSOM = register("minecraft:potted_open_eyeblossom");
   public static final BlockType POTTED_CLOSED_EYEBLOSSOM = register("minecraft:potted_closed_eyeblossom");
+  public static final BlockType FIREFLY_BUSH = register("minecraft:firefly_bush");
   //@formatter:on
 
   public BlockType {

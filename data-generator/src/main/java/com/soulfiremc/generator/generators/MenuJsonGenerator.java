@@ -24,6 +24,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.PlayerEquipment;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -40,7 +41,8 @@ public final class MenuJsonGenerator implements IDataGenerator {
     menuDesc.addProperty("id", BuiltInRegistries.MENU.getId(menuType));
     menuDesc.addProperty("key", Objects.requireNonNull(BuiltInRegistries.MENU.getKey(menuType)).toString());
 
-    var playerInventory = new Inventory(MCHelper.createPlayer());
+    var player = MCHelper.createPlayer();
+    var playerInventory = new Inventory(player, new PlayerEquipment(player));
     var menuInstance = menuType.create(0, playerInventory);
     fillMenuData(playerInventory, menuInstance, menuDesc);
 
@@ -81,7 +83,7 @@ public final class MenuJsonGenerator implements IDataGenerator {
       inventoryMenuDesc.addProperty("id", -1);
       inventoryMenuDesc.addProperty("key", "soulfire:inventory_menu");
       var player = MCHelper.createPlayer();
-      var playerInventory = new Inventory(player);
+      var playerInventory = new Inventory(player, new PlayerEquipment(player));
       var menuInstance = new InventoryMenu(playerInventory, true, player);
       fillMenuData(playerInventory, menuInstance, inventoryMenuDesc);
       resultArray.add(inventoryMenuDesc);

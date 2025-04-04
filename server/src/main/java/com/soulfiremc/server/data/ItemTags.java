@@ -69,6 +69,7 @@ public final class ItemTags {
   public static final TagKey<ItemType> LEAVES = register("minecraft:leaves");
   public static final TagKey<ItemType> TRAPDOORS = register("minecraft:trapdoors");
   public static final TagKey<ItemType> SMALL_FLOWERS = register("minecraft:small_flowers");
+  public static final TagKey<ItemType> FLOWERS = register("minecraft:flowers");
   public static final TagKey<ItemType> BEDS = register("minecraft:beds");
   public static final TagKey<ItemType> FENCES = register("minecraft:fences");
   public static final TagKey<ItemType> PIGLIN_REPELLENTS = register("minecraft:piglin_repellents");
@@ -78,6 +79,7 @@ public final class ItemTags {
   public static final TagKey<ItemType> DUPLICATES_ALLAYS = register("minecraft:duplicates_allays");
   public static final TagKey<ItemType> BREWING_FUEL = register("minecraft:brewing_fuel");
   public static final TagKey<ItemType> SHULKER_BOXES = register("minecraft:shulker_boxes");
+  public static final TagKey<ItemType> EGGS = register("minecraft:eggs");
   public static final TagKey<ItemType> MEAT = register("minecraft:meat");
   public static final TagKey<ItemType> SNIFFER_FOOD = register("minecraft:sniffer_food");
   public static final TagKey<ItemType> PIGLIN_FOOD = register("minecraft:piglin_food");
@@ -174,6 +176,7 @@ public final class ItemTags {
   public static final TagKey<ItemType> DYEABLE = register("minecraft:dyeable");
   public static final TagKey<ItemType> FURNACE_MINECART_FUEL = register("minecraft:furnace_minecart_fuel");
   public static final TagKey<ItemType> BUNDLES = register("minecraft:bundles");
+  public static final TagKey<ItemType> BOOK_CLONING_TARGET = register("minecraft:book_cloning_target");
   public static final TagKey<ItemType> SKELETON_PREFERRED_WEAPONS = register("minecraft:skeleton_preferred_weapons");
   public static final TagKey<ItemType> DROWNED_PREFERRED_WEAPONS = register("minecraft:drowned_preferred_weapons");
   public static final TagKey<ItemType> PIGLIN_PREFERRED_WEAPONS = register("minecraft:piglin_preferred_weapons");

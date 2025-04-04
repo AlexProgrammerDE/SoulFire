@@ -31,7 +31,10 @@ import com.soulfiremc.server.protocol.bot.container.WindowContainer;
 import com.soulfiremc.server.protocol.bot.model.ChunkKey;
 import com.soulfiremc.server.protocol.bot.model.ServerPlayData;
 import com.soulfiremc.server.protocol.bot.state.*;
-import com.soulfiremc.server.protocol.bot.state.entity.*;
+import com.soulfiremc.server.protocol.bot.state.entity.Entity;
+import com.soulfiremc.server.protocol.bot.state.entity.EntityFactory;
+import com.soulfiremc.server.protocol.bot.state.entity.LivingEntity;
+import com.soulfiremc.server.protocol.bot.state.entity.LocalPlayer;
 import com.soulfiremc.server.protocol.bot.state.registry.Biome;
 import com.soulfiremc.server.protocol.bot.state.registry.DimensionType;
 import com.soulfiremc.server.protocol.bot.state.registry.SFChatType;
@@ -83,8 +86,6 @@ import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.Clie
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddExperienceOrbPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.*;
@@ -743,28 +744,28 @@ public final class SessionDataManager {
   @EventHandler
   public void onGameEvent(ClientboundGameEventPacket packet) {
     SFHelpers.mustSupply(() -> switch (packet.getNotification()) {
-      case INVALID_BED -> () -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
-      case START_RAIN -> () -> {
+      case NO_RESPAWN_BLOCK_AVAILABLE -> () -> log.info("Bot had no bed/respawn anchor to respawn at (was maybe obstructed)");
+      case START_RAINING -> () -> {
         level.levelData().raining(true);
         level.setRainLevel(1.0F);
       };
-      case STOP_RAIN -> () -> {
+      case STOP_RAINING -> () -> {
         level.levelData().raining(false);
         level.setRainLevel(0.0F);
       };
-      case CHANGE_GAMEMODE -> () -> gameModeState.setLocalMode(localPlayer, (GameMode) packet.getValue());
-      case ENTER_CREDITS -> () -> {
+      case CHANGE_GAME_MODE -> () -> gameModeState.setLocalMode(localPlayer, (GameMode) packet.getValue());
+      case WIN_GAME -> () -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
         connection.sendPacket(
           new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
       };
-      case DEMO_MESSAGE -> () -> log.debug("Demo event: {}", packet.getValue());
-      case ARROW_HIT_PLAYER -> () -> log.debug("Arrow hit player");
-      case RAIN_STRENGTH -> () -> level.setRainLevel(((RainStrengthValue) packet.getValue()).getStrength());
-      case THUNDER_STRENGTH -> () -> level.setThunderLevel(((ThunderStrengthValue) packet.getValue()).getStrength());
-      case PUFFERFISH_STING_SOUND -> () -> log.debug("Pufferfish sting sound");
-      case AFFECTED_BY_ELDER_GUARDIAN -> () -> log.debug("Affected by elder guardian");
-      case ENABLE_RESPAWN_SCREEN -> () -> localPlayer.setShowDeathScreen(packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN);
+      case DEMO_EVENT -> () -> log.debug("Demo event: {}", packet.getValue());
+      case PLAY_ARROW_HIT_SOUND -> () -> log.debug("Arrow hit player");
+      case RAIN_LEVEL_CHANGE -> () -> level.setRainLevel(((RainStrengthValue) packet.getValue()).getStrength());
+      case THUNDER_LEVEL_CHANGE -> () -> level.setThunderLevel(((ThunderStrengthValue) packet.getValue()).getStrength());
+      case PUFFER_FISH_STING -> () -> log.debug("Pufferfish sting sound");
+      case GUARDIAN_ELDER_EFFECT -> () -> log.debug("Affected by elder guardian");
+      case IMMEDIATE_RESPAWN -> () -> localPlayer.setShowDeathScreen(packet.getValue() == RespawnScreenValue.ENABLE_RESPAWN_SCREEN);
       case LIMITED_CRAFTING -> () -> localPlayer.setDoLimitedCrafting(packet.getValue() == LimitedCraftingValue.LIMITED_CRAFTING);
       case LEVEL_CHUNKS_LOAD_START -> () -> {
         log.debug("Level chunks load start");
@@ -918,24 +919,6 @@ public final class SessionDataManager {
         entityState.fromAddEntityPacket(packet);
         level.entityTracker().addEntity(entityState);
       });
-  }
-
-  @EventHandler
-  public void onExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet) {
-    var level = currentLevel();
-    var x = packet.getX();
-    var y = packet.getY();
-    var z = packet.getZ();
-    var orb =
-      new ExperienceOrbEntity(level, packet.getExp());
-    orb.setPos(x, y, z);
-    orb.syncPacketPositionCodec(x, y, z);
-    orb.setYRot(0.0F);
-    orb.setXRot(0.0F);
-    orb.entityId(packet.getEntityId());
-    orb.setPos(packet.getX(), packet.getY(), packet.getZ());
-
-    level.entityTracker().addEntity(orb);
   }
 
   @EventHandler

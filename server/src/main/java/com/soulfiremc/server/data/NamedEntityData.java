@@ -43,10 +43,8 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData ABSTRACT_FISH__FROM_BUCKET = register("from_bucket", 16, "abstract_fish");
   /** Type: BYTE **/
   public static final NamedEntityData ABSTRACT_HORSE__ID_FLAGS = register("id_flags", 17, "abstract_horse");
-  /** Type: BOOLEAN **/
-  public static final NamedEntityData ABSTRACT_MINECART__ID_CUSTOM_DISPLAY = register("id_custom_display", 13, "abstract_minecart");
-  /** Type: INT **/
-  public static final NamedEntityData ABSTRACT_MINECART__ID_DISPLAY_BLOCK = register("id_display_block", 11, "abstract_minecart");
+  /** Type: OPTIONAL_BLOCK_STATE **/
+  public static final NamedEntityData ABSTRACT_MINECART__ID_CUSTOM_DISPLAY_BLOCK = register("id_custom_display_block", 11, "abstract_minecart");
   /** Type: INT **/
   public static final NamedEntityData ABSTRACT_MINECART__ID_DISPLAY_OFFSET = register("id_display_offset", 12, "abstract_minecart");
   /** Type: BOOLEAN **/
@@ -113,6 +111,10 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData CAT__RELAX_STATE_ONE = register("relax_state_one", 21, "cat");
   /** Type: CAT_VARIANT **/
   public static final NamedEntityData CAT__VARIANT = register("variant", 19, "cat");
+  /** Type: CHICKEN_VARIANT **/
+  public static final NamedEntityData CHICKEN__VARIANT = register("variant", 17, "chicken");
+  /** Type: COW_VARIANT **/
+  public static final NamedEntityData COW__VARIANT = register("variant", 17, "cow");
   /** Type: BOOLEAN **/
   public static final NamedEntityData CREAKING__CAN_MOVE = register("can_move", 16, "creaking");
   /** Type: OPTIONAL_BLOCK_POS **/
@@ -158,11 +160,9 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   /** Type: FLOAT **/
   public static final NamedEntityData DISPLAY__WIDTH = register("width", 20, "display");
   /** Type: BOOLEAN **/
-  public static final NamedEntityData DOLPHIN__GOT_FISH = register("got_fish", 18, "dolphin");
+  public static final NamedEntityData DOLPHIN__GOT_FISH = register("got_fish", 17, "dolphin");
   /** Type: INT **/
-  public static final NamedEntityData DOLPHIN__MOISTNESS_LEVEL = register("moistness_level", 19, "dolphin");
-  /** Type: BLOCK_POS **/
-  public static final NamedEntityData DOLPHIN__TREASURE_POS = register("treasure_pos", 17, "dolphin");
+  public static final NamedEntityData DOLPHIN__MOISTNESS_LEVEL = register("moistness_level", 18, "dolphin");
   /** Type: INT **/
   public static final NamedEntityData ENDER_DRAGON__PHASE = register("phase", 16, "ender_dragon");
   /** Type: OPTIONAL_BLOCK_STATE **/
@@ -191,6 +191,8 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData ENTITY__SILENT = register("silent", 4, "entity");
   /** Type: INT **/
   public static final NamedEntityData ENTITY__TICKS_FROZEN = register("ticks_frozen", 7, "entity");
+  /** Type: INT **/
+  public static final NamedEntityData EXPERIENCE_ORB__VALUE = register("value", 8, "experience_orb");
   /** Type: ITEM_STACK **/
   public static final NamedEntityData EYE_OF_ENDER__ITEM_STACK = register("item_stack", 8, "eye_of_ender");
   /** Type: BLOCK_POS **/
@@ -209,9 +211,9 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData FISHING_HOOK__HOOKED_ENTITY = register("hooked_entity", 8, "fishing_hook");
   /** Type: BYTE **/
   public static final NamedEntityData FOX__FLAGS = register("flags", 18, "fox");
-  /** Type: OPTIONAL_UUID **/
+  /** Type: OPTIONAL_LIVING_ENTITY_REFERENCE **/
   public static final NamedEntityData FOX__TRUSTED_ID_0 = register("trusted_id_0", 19, "fox");
-  /** Type: OPTIONAL_UUID **/
+  /** Type: OPTIONAL_LIVING_ENTITY_REFERENCE **/
   public static final NamedEntityData FOX__TRUSTED_ID_1 = register("trusted_id_1", 20, "fox");
   /** Type: INT **/
   public static final NamedEntityData FOX__TYPE = register("type", 17, "fox");
@@ -274,14 +276,14 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   /** Type: INT **/
   public static final NamedEntityData LLAMA__VARIANT = register("variant", 20, "llama");
   /** Type: STRING **/
-  public static final NamedEntityData MINECART_COMMAND_BLOCK__ID_COMMAND_NAME = register("id_command_name", 14, "minecart_command_block");
+  public static final NamedEntityData MINECART_COMMAND_BLOCK__ID_COMMAND_NAME = register("id_command_name", 13, "minecart_command_block");
   /** Type: COMPONENT **/
-  public static final NamedEntityData MINECART_COMMAND_BLOCK__ID_LAST_OUTPUT = register("id_last_output", 15, "minecart_command_block");
+  public static final NamedEntityData MINECART_COMMAND_BLOCK__ID_LAST_OUTPUT = register("id_last_output", 14, "minecart_command_block");
   /** Type: BOOLEAN **/
-  public static final NamedEntityData MINECART_FURNACE__ID_FUEL = register("id_fuel", 14, "minecart_furnace");
+  public static final NamedEntityData MINECART_FURNACE__ID_FUEL = register("id_fuel", 13, "minecart_furnace");
   /** Type: BYTE **/
   public static final NamedEntityData MOB__MOB_FLAGS = register("mob_flags", 15, "mob");
-  /** Type: STRING **/
+  /** Type: INT **/
   public static final NamedEntityData MUSHROOM_COW__TYPE = register("type", 17, "mushroom_cow");
   /** Type: BOOLEAN **/
   public static final NamedEntityData OCELOT__TRUSTING = register("trusting", 17, "ocelot");
@@ -312,9 +314,9 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   /** Type: BOOLEAN **/
   public static final NamedEntityData PIGLIN__IS_DANCING = register("is_dancing", 19, "piglin");
   /** Type: INT **/
-  public static final NamedEntityData PIG__BOOST_TIME = register("boost_time", 18, "pig");
-  /** Type: BOOLEAN **/
-  public static final NamedEntityData PIG__SADDLE = register("saddle", 17, "pig");
+  public static final NamedEntityData PIG__BOOST_TIME = register("boost_time", 17, "pig");
+  /** Type: PIG_VARIANT **/
+  public static final NamedEntityData PIG__VARIANT = register("variant", 18, "pig");
   /** Type: BOOLEAN **/
   public static final NamedEntityData PILLAGER__IS_CHARGING_CROSSBOW = register("is_charging_crossbow", 17, "pillager");
   /** Type: FLOAT **/
@@ -368,12 +370,10 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   /** Type: INT **/
   public static final NamedEntityData STRIDER__BOOST_TIME = register("boost_time", 17, "strider");
   /** Type: BOOLEAN **/
-  public static final NamedEntityData STRIDER__SADDLE = register("saddle", 19, "strider");
-  /** Type: BOOLEAN **/
   public static final NamedEntityData STRIDER__SUFFOCATING = register("suffocating", 18, "strider");
   /** Type: BYTE **/
   public static final NamedEntityData TAMABLE_ANIMAL__FLAGS = register("flags", 17, "tamable_animal");
-  /** Type: OPTIONAL_UUID **/
+  /** Type: OPTIONAL_LIVING_ENTITY_REFERENCE **/
   public static final NamedEntityData TAMABLE_ANIMAL__OWNERUUID = register("owneruuid", 18, "tamable_animal");
   /** Type: INT **/
   public static final NamedEntityData TEXT_DISPLAY__BACKGROUND_COLOR = register("background_color", 25, "text_display");
@@ -394,17 +394,9 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   /** Type: INT **/
   public static final NamedEntityData TROPICAL_FISH__ID_TYPE_VARIANT = register("id_type_variant", 17, "tropical_fish");
   /** Type: BOOLEAN **/
-  public static final NamedEntityData TURTLE__GOING_HOME = register("going_home", 21, "turtle");
+  public static final NamedEntityData TURTLE__HAS_EGG = register("has_egg", 17, "turtle");
   /** Type: BOOLEAN **/
-  public static final NamedEntityData TURTLE__HAS_EGG = register("has_egg", 18, "turtle");
-  /** Type: BLOCK_POS **/
-  public static final NamedEntityData TURTLE__HOME_POS = register("home_pos", 17, "turtle");
-  /** Type: BOOLEAN **/
-  public static final NamedEntityData TURTLE__LAYING_EGG = register("laying_egg", 19, "turtle");
-  /** Type: BOOLEAN **/
-  public static final NamedEntityData TURTLE__TRAVELLING = register("travelling", 22, "turtle");
-  /** Type: BLOCK_POS **/
-  public static final NamedEntityData TURTLE__TRAVEL_POS = register("travel_pos", 20, "turtle");
+  public static final NamedEntityData TURTLE__LAYING_EGG = register("laying_egg", 18, "turtle");
   /** Type: FLOAT **/
   public static final NamedEntityData VEHICLE_ENTITY__ID_DAMAGE = register("id_damage", 10, "vehicle_entity");
   /** Type: INT **/
@@ -435,11 +427,11 @@ public record NamedEntityData(String key, int networkId, String entityClass) {
   public static final NamedEntityData WOLF__INTERESTED = register("interested", 19, "wolf");
   /** Type: INT **/
   public static final NamedEntityData WOLF__REMAINING_ANGER_TIME = register("remaining_anger_time", 21, "wolf");
+  /** Type: WOLF_SOUND_VARIANT **/
+  public static final NamedEntityData WOLF__SOUND_VARIANT = register("sound_variant", 23, "wolf");
   /** Type: WOLF_VARIANT **/
   public static final NamedEntityData WOLF__VARIANT = register("variant", 22, "wolf");
-  /**
-   * Type: BOOLEAN
-   **/
+  /** Type: BOOLEAN **/
   public static final NamedEntityData ZOGLIN__BABY = register("baby", 16, "zoglin");
   /** Type: BOOLEAN **/
   public static final NamedEntityData ZOMBIE_VILLAGER__CONVERTING = register("converting", 19, "zombie_villager");

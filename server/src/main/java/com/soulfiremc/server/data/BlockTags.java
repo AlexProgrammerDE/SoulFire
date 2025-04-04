@@ -134,6 +134,7 @@ public final class BlockTags {
   public static final TagKey<BlockType> FENCE_GATES = register("minecraft:fence_gates");
   public static final TagKey<BlockType> UNSTABLE_BOTTOM_CENTER = register("minecraft:unstable_bottom_center");
   public static final TagKey<BlockType> MUSHROOM_GROW_BLOCK = register("minecraft:mushroom_grow_block");
+  public static final TagKey<BlockType> EDIBLE_FOR_SHEEP = register("minecraft:edible_for_sheep");
   public static final TagKey<BlockType> INFINIBURN_OVERWORLD = register("minecraft:infiniburn_overworld");
   public static final TagKey<BlockType> INFINIBURN_NETHER = register("minecraft:infiniburn_nether");
   public static final TagKey<BlockType> INFINIBURN_END = register("minecraft:infiniburn_end");
@@ -164,6 +165,7 @@ public final class BlockTags {
   public static final TagKey<BlockType> MINEABLE_WITH_PICKAXE = register("minecraft:mineable/pickaxe");
   public static final TagKey<BlockType> MINEABLE_WITH_SHOVEL = register("minecraft:mineable/shovel");
   public static final TagKey<BlockType> SWORD_EFFICIENT = register("minecraft:sword_efficient");
+  public static final TagKey<BlockType> SWORD_INSTANTLY_MINES = register("minecraft:sword_instantly_mines");
   public static final TagKey<BlockType> NEEDS_DIAMOND_TOOL = register("minecraft:needs_diamond_tool");
   public static final TagKey<BlockType> NEEDS_IRON_TOOL = register("minecraft:needs_iron_tool");
   public static final TagKey<BlockType> NEEDS_STONE_TOOL = register("minecraft:needs_stone_tool");
@@ -193,13 +195,15 @@ public final class BlockTags {
   public static final TagKey<BlockType> WOLVES_SPAWNABLE_ON = register("minecraft:wolves_spawnable_on");
   public static final TagKey<BlockType> FROGS_SPAWNABLE_ON = register("minecraft:frogs_spawnable_on");
   public static final TagKey<BlockType> BATS_SPAWNABLE_ON = register("minecraft:bats_spawnable_on");
+  public static final TagKey<BlockType> CAMELS_SPAWNABLE_ON = register("minecraft:camels_spawnable_on");
   public static final TagKey<BlockType> AZALEA_GROWS_ON = register("minecraft:azalea_grows_on");
   public static final TagKey<BlockType> CONVERTABLE_TO_MUD = register("minecraft:convertable_to_mud");
   public static final TagKey<BlockType> MANGROVE_LOGS_CAN_GROW_THROUGH = register("minecraft:mangrove_logs_can_grow_through");
   public static final TagKey<BlockType> MANGROVE_ROOTS_CAN_GROW_THROUGH = register("minecraft:mangrove_roots_can_grow_through");
-  public static final TagKey<BlockType> DEAD_BUSH_MAY_PLACE_ON = register("minecraft:dead_bush_may_place_on");
+  public static final TagKey<BlockType> DRY_VEGETATION_MAY_PLACE_ON = register("minecraft:dry_vegetation_may_place_on");
   public static final TagKey<BlockType> SNAPS_GOAT_HORN = register("minecraft:snaps_goat_horn");
   public static final TagKey<BlockType> REPLACEABLE_BY_TREES = register("minecraft:replaceable_by_trees");
+  public static final TagKey<BlockType> REPLACEABLE_BY_MUSHROOMS = register("minecraft:replaceable_by_mushrooms");
   public static final TagKey<BlockType> SNOW_LAYER_CANNOT_SURVIVE_ON = register("minecraft:snow_layer_cannot_survive_on");
   public static final TagKey<BlockType> SNOW_LAYER_CAN_SURVIVE_ON = register("minecraft:snow_layer_can_survive_on");
   public static final TagKey<BlockType> INVALID_SPAWN_INSIDE = register("minecraft:invalid_spawn_inside");
@@ -212,6 +216,7 @@ public final class BlockTags {
   public static final TagKey<BlockType> MAINTAINS_FARMLAND = register("minecraft:maintains_farmland");
   public static final TagKey<BlockType> BLOCKS_WIND_CHARGE_EXPLOSIONS = register("minecraft:blocks_wind_charge_explosions");
   public static final TagKey<BlockType> DOES_NOT_BLOCK_HOPPERS = register("minecraft:does_not_block_hoppers");
+  public static final TagKey<BlockType> PLAYS_AMBIENT_DESERT_BLOCK_SOUNDS = register("minecraft:plays_ambient_desert_block_sounds");
   public static final TagKey<BlockType> AIR = register("minecraft:air");
   //@formatter:on
 

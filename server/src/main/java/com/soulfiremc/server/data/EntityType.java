@@ -147,7 +147,8 @@ public record EntityType(
   public static final EntityType PIGLIN_BRUTE = register("minecraft:piglin_brute");
   public static final EntityType PILLAGER = register("minecraft:pillager");
   public static final EntityType POLAR_BEAR = register("minecraft:polar_bear");
-  public static final EntityType POTION = register("minecraft:potion");
+  public static final EntityType SPLASH_POTION = register("minecraft:splash_potion");
+  public static final EntityType LINGERING_POTION = register("minecraft:lingering_potion");
   public static final EntityType PUFFERFISH = register("minecraft:pufferfish");
   public static final EntityType RABBIT = register("minecraft:rabbit");
   public static final EntityType RAVAGER = register("minecraft:ravager");

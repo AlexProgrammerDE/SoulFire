@@ -27,17 +27,17 @@ public record EffectType(int id, Key key, EffectCategory category, boolean benef
   public static final Registry<EffectType> REGISTRY = new Registry<>(RegistryKeys.MOB_EFFECT);
 
   //@formatter:off
-  public static final EffectType MOVEMENT_SPEED = register("minecraft:speed");
-  public static final EffectType MOVEMENT_SLOWDOWN = register("minecraft:slowness");
-  public static final EffectType DIG_SPEED = register("minecraft:haste");
-  public static final EffectType DIG_SLOWDOWN = register("minecraft:mining_fatigue");
-  public static final EffectType DAMAGE_BOOST = register("minecraft:strength");
-  public static final EffectType HEAL = register("minecraft:instant_health");
-  public static final EffectType HARM = register("minecraft:instant_damage");
-  public static final EffectType JUMP = register("minecraft:jump_boost");
-  public static final EffectType CONFUSION = register("minecraft:nausea");
+  public static final EffectType SPEED = register("minecraft:speed");
+  public static final EffectType SLOWNESS = register("minecraft:slowness");
+  public static final EffectType HASTE = register("minecraft:haste");
+  public static final EffectType MINING_FATIGUE = register("minecraft:mining_fatigue");
+  public static final EffectType STRENGTH = register("minecraft:strength");
+  public static final EffectType INSTANT_HEALTH = register("minecraft:instant_health");
+  public static final EffectType INSTANT_DAMAGE = register("minecraft:instant_damage");
+  public static final EffectType JUMP_BOOST = register("minecraft:jump_boost");
+  public static final EffectType NAUSEA = register("minecraft:nausea");
   public static final EffectType REGENERATION = register("minecraft:regeneration");
-  public static final EffectType DAMAGE_RESISTANCE = register("minecraft:resistance");
+  public static final EffectType RESISTANCE = register("minecraft:resistance");
   public static final EffectType FIRE_RESISTANCE = register("minecraft:fire_resistance");
   public static final EffectType WATER_BREATHING = register("minecraft:water_breathing");
   public static final EffectType INVISIBILITY = register("minecraft:invisibility");

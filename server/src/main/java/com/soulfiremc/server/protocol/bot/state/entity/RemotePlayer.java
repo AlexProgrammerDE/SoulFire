@@ -21,7 +21,7 @@ import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.bot.state.Level;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.geysermc.mcprotocollib.auth.GameProfile;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spawn.ClientboundAddEntityPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundAddEntityPacket;
 
 public final class RemotePlayer extends AbstractClientPlayer {
   private Vector3d lerpDeltaMovement = Vector3d.ZERO;

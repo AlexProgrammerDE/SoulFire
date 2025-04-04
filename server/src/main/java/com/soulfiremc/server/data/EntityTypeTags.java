@@ -62,6 +62,8 @@ public final class EntityTypeTags {
   public static final TagKey<EntityType> IMMUNE_TO_INFESTED = register("minecraft:immune_to_infested");
   public static final TagKey<EntityType> REDIRECTABLE_PROJECTILE = register("minecraft:redirectable_projectile");
   public static final TagKey<EntityType> BOAT = register("minecraft:boat");
+  public static final TagKey<EntityType> CAN_EQUIP_SADDLE = register("minecraft:can_equip_saddle");
+  public static final TagKey<EntityType> CAN_WEAR_HORSE_ARMOR = register("minecraft:can_wear_horse_armor");
   //@formatter:on
 
   private EntityTypeTags() {}

@@ -184,7 +184,7 @@ public final class BotControlAPI {
     } else {
       var salt = secureRandom.nextLong();
       connection.sendPacket(
-        new ServerboundChatPacket(message, now.toEpochMilli(), salt, null, 0, new BitSet()));
+        new ServerboundChatPacket(message, now.toEpochMilli(), salt, null, 0, new BitSet(), 0));
     }
   }
 

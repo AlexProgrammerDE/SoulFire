@@ -26,11 +26,8 @@ import org.cloudburstmc.math.vector.Vector3i;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public final class ExperienceOrbEntity extends Entity {
-  private final int expValue;
-
-  public ExperienceOrbEntity(Level level, int expValue) {
+  public ExperienceOrbEntity(Level level) {
     super(EntityType.EXPERIENCE_ORB, level);
-    this.expValue = expValue;
   }
 
   @Override

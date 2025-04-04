@@ -19,12 +19,11 @@ dependencies {
 }
 
 unimined.minecraft {
-  version("1.21.4")
+  version("1.21.5")
 
   mappings {
     intermediary()
     mojmap()
-    parchment("1.21.4", "2025.02.16")
 
     devFallbackNamespace("intermediary")
   }
@@ -39,7 +38,7 @@ unimined.minecraft {
   }
 
   fabric {
-    loader("0.16.10")
+    loader("0.16.12")
   }
 
   defaultRemapJar = true
