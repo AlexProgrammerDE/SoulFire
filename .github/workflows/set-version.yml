@@ -33,4 +33,4 @@ jobs:
       - name: 'Commit Version'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'Bump version to ${{ inputs.version }}'
+          commit_message: 'chore(release): bump version to ${{ inputs.version }}'
