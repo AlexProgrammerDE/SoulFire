@@ -38,16 +38,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
         run: ./gradlew build test --stacktrace --scan
-      - name: Set version
-        id: get-version
-        run: |
-          projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
-          echo "version=$projectVersion" >> $GITHUB_OUTPUT
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v5
         with:
           mode: COMMIT
+          toTag: ${{ github.ref }}
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}",
@@ -103,25 +99,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body: ${{ steps.github_release.outputs.changelog }}
-          tag_name: ${{ steps.get-version.outputs.version }}
+          tag_name: ${{ inputs.version }}
           generate_release_notes: false
           draft: false
           prerelease: false
           target_commitish: main
           token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_unmatched_files: true
-          name: SoulFire ${{ steps.get-version.outputs.version }}
+          name: SoulFire ${{ inputs.version }}
           preserve_order: true
           files: |
-            dedicated/build/libs/SoulFireDedicated-${{ steps.get-version.outputs.version }}.jar
-            client/build/libs/SoulFireCLI-${{ steps.get-version.outputs.version }}.jar
+            dedicated/build/libs/SoulFireDedicated-${{ inputs.version }}.jar
+            client/build/libs/SoulFireCLI-${{ inputs.version }}.jar
       - name: Discord Webhook Action
         uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           content: <@&850705047938793503> New SoulFire version released!
-          embed-title: SoulFire ${{ steps.get-version.outputs.version }}
-          embed-description: SoulFire ${{ steps.get-version.outputs.version }} has been released! Changelog and download can be found at https://github.com/AlexProgrammerDE/SoulFire/releases/tag/${{ steps.get-version.outputs.version }}
+          embed-title: SoulFire ${{ inputs.version }}
+          embed-description: SoulFire ${{ inputs.version }} has been released! Changelog and download can be found at https://github.com/AlexProgrammerDE/SoulFire/releases/tag/${{ inputs.version }}
           embed-color: 3312063
           embed-thumbnail-url: https://soulfiremc.com/logo.png
 
