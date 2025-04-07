@@ -89,7 +89,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               proxyCheckEventLoopGroup
             );
             return instance.scheduler().supplyAsync(() -> {
-              var future = new CompletableFuture<ProxyCheckResponseSingle>();
+              var future = cancellationCollector.add(new CompletableFuture<ProxyCheckResponseSingle>());
               var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
 
               connection.session().addListener(new SessionAdapter() {
