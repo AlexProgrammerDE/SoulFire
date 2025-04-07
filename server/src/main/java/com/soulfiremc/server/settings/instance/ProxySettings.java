@@ -43,14 +43,13 @@ public final class ProxySettings implements SettingsObject {
       .description("Should the proxy order be random when connecting bots?")
       .defaultValue(false)
       .build();
-  public static final ComboProperty PROXY_CHECK_SERVICE =
-    ImmutableComboProperty.builder()
+  public static final StringProperty PROXY_CHECK_ADDRESS =
+    ImmutableStringProperty.builder()
       .namespace(NAMESPACE)
-      .key("proxy-check-service")
-      .uiName("Proxy check service")
-      .description("What service to use to check if a proxy is working")
-      .defaultValue(ProxyCheckService.IPIFY.name())
-      .addOptions(ComboProperty.optionsFromEnum(ProxyCheckService.values(), Enum::name, e -> "cloud"))
+      .key("proxy-check-address")
+      .uiName("Proxy check address")
+      .description("What Minecraft server address to use to check if a proxy is working")
+      .defaultValue("mc.hypixel.net")
       .build();
   public static final IntProperty PROXY_CHECK_CONCURRENCY =
     ImmutableIntProperty.builder()
@@ -62,9 +61,4 @@ public final class ProxySettings implements SettingsObject {
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
       .build();
-
-  public enum ProxyCheckService {
-    IPIFY,
-    AWS
-  }
 }

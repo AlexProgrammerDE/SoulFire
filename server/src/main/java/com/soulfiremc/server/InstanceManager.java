@@ -377,7 +377,7 @@ public final class InstanceManager {
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
-    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsSource)
+    var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsSource, BotSettings.ADDRESS)
       .orElseThrow(() -> new IllegalStateException("Could not resolve address"));
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);

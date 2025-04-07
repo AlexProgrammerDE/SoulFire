@@ -20,31 +20,38 @@ package com.soulfiremc.server.grpc;
 import com.google.common.base.Stopwatch;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.protocol.BotConnectionFactory;
+import com.soulfiremc.server.protocol.netty.ResolveUtil;
+import com.soulfiremc.server.protocol.netty.SFNettyHelper;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.user.PermissionContext;
-import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.CancellationCollector;
+import com.soulfiremc.server.viaversion.SFVersionConstants;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+import org.geysermc.mcprotocollib.network.Session;
+import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
+import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
+import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
+import org.geysermc.mcprotocollib.network.packet.Packet;
+import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.packet.ping.clientbound.ClientboundPongResponsePacket;
 
-import java.net.URL;
-import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
 public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
-  private static final URL IPIFY_URL = ReactorHttpHelper.createURL("https://api.ipify.org");
-  private static final URL AWS_URL = ReactorHttpHelper.createURL("https://checkip.amazonaws.com");
   private final SoulFireServer soulFireServer;
 
   @Override
@@ -59,44 +66,79 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
     }
 
     var instance = optionalInstance.get();
-    var settings = instance.settingsSource();
+    var settingsSource = instance.settingsSource();
 
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
-      var url = switch (settings.get(ProxySettings.PROXY_CHECK_SERVICE, ProxySettings.ProxyCheckService.class)) {
-        case IPIFY -> IPIFY_URL;
-        case AWS -> AWS_URL;
-      };
-
+      var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+      var isBedrock = SFVersionConstants.isBedrock(protocolVersion);
+      var targetAddress = ResolveUtil.resolveAddress(isBedrock, settingsSource, ProxySettings.PROXY_CHECK_ADDRESS)
+        .orElseThrow(() -> new IllegalStateException("Could not resolve address"));
+      var proxyCheckEventLoopGroup =
+        SFNettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().runAsync(() -> {
-        var results = SFHelpers.maxFutures(settings.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
-            var client = ReactorHttpHelper.createReactorClient(SFProxy.fromProto(payload), false);
+        var results = SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
             var stopWatch = Stopwatch.createStarted();
-            return cancellationCollector.add(client
-              .get()
-              .uri(url.toString())
-              .responseSingle(
-                (r, b) -> {
-                  if (r.status().codeClass() == HttpStatusClass.SUCCESS) {
-                    return b.asString();
+            var factory = new BotConnectionFactory(
+              instance,
+              targetAddress,
+              settingsSource,
+              MinecraftAccount.forProxyCheck(),
+              protocolVersion,
+              SFProxy.fromProto(payload),
+              proxyCheckEventLoopGroup
+            );
+            return instance.scheduler().supplyAsync(() -> {
+              var future = new CompletableFuture<ProxyCheckResponseSingle>();
+              var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
+
+              connection.session().addListener(new SessionAdapter() {
+                @Override
+                public void packetReceived(Session session, Packet packet) {
+                  if (future.isDone()) {
+                    return;
                   }
 
-                  return Mono.empty();
-                })
-              .timeout(Duration.ofSeconds(15))
-              .onErrorResume(t -> Mono.empty())
-              .map(response -> ProxyCheckResponseSingle.newBuilder()
-                .setProxy(payload)
-                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                .setValid(true)
-                .setRealIp(response)
-                .build())
-              .switchIfEmpty(Mono.fromSupplier(() -> ProxyCheckResponseSingle.newBuilder()
-                .setProxy(payload)
-                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                .setValid(false)
-                .build()))
-              .toFuture());
+                  if (packet instanceof ClientboundPongResponsePacket) {
+                    future.complete(ProxyCheckResponseSingle.newBuilder()
+                      .setProxy(payload)
+                      .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                      .setValid(true)
+                      .build());
+                  }
+                }
+
+                @Override
+                public void packetError(PacketErrorEvent event) {
+                  if (future.isDone()) {
+                    return;
+                  }
+
+                  future.complete(ProxyCheckResponseSingle.newBuilder()
+                    .setProxy(payload)
+                    .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                    .setValid(false)
+                    .build());
+                }
+
+                @Override
+                public void disconnected(DisconnectedEvent event) {
+                  if (future.isDone()) {
+                    return;
+                  }
+
+                  future.complete(ProxyCheckResponseSingle.newBuilder()
+                    .setProxy(payload)
+                    .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                    .setValid(false)
+                    .build());
+                }
+              });
+
+              connection.connect().join();
+
+              return future.join();
+            });
           }, result -> {
             if (responseObserver.isCancelled()) {
               return;

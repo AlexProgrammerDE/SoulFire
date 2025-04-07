@@ -52,6 +52,14 @@ public record MinecraftAccount(
       });
   }
 
+  public static MinecraftAccount forProxyCheck() {
+    return new MinecraftAccount(
+      AuthType.OFFLINE,
+      UUID.randomUUID(),
+      "ProxyCheck",
+      new OfflineJavaData());
+  }
+
   @Override
   public String toString() {
     return "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)"

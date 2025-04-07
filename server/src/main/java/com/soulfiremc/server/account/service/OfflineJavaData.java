@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public record OfflineJavaData() implements AccountData {
-  public static OfflineJavaData fromProto(MinecraftAccountProto.OfflineJavaData data) {
+  public static OfflineJavaData fromProto(MinecraftAccountProto.OfflineJavaData ignored) {
     return new OfflineJavaData();
   }
 
