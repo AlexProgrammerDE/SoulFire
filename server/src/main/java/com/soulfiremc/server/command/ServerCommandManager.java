@@ -74,6 +74,7 @@ public final class ServerCommandManager {
     // Utility commands
     OnlineCommand.register(dispatcher);
     SayCommand.register(dispatcher);
+    RespawnCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
     HealthCommand.register(dispatcher);
     StatsCommand.register(dispatcher);
