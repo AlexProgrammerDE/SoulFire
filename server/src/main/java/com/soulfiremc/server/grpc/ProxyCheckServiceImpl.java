@@ -89,7 +89,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               proxyCheckEventLoopGroup
             );
             return instance.scheduler().supplyAsync(() -> {
-              var future = cancellationCollector.add(new CompletableFuture<ProxyCheckResponseSingle>());
+              var future = cancellationCollector.add(new CompletableFuture<Void>());
               var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
 
               connection.session().addListener(new SessionAdapter() {
@@ -100,11 +100,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                   }
 
                   if (packet instanceof ClientboundStatusResponsePacket) {
-                    future.complete(ProxyCheckResponseSingle.newBuilder()
-                      .setProxy(payload)
-                      .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                      .setValid(true)
-                      .build());
+                    future.complete(null);
                   }
                 }
 
@@ -114,11 +110,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                     return;
                   }
 
-                  future.complete(ProxyCheckResponseSingle.newBuilder()
-                    .setProxy(payload)
-                    .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                    .setValid(false)
-                    .build());
+                  future.completeExceptionally(event.getCause());
                 }
 
                 @Override
@@ -127,18 +119,18 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                     return;
                   }
 
-                  future.complete(ProxyCheckResponseSingle.newBuilder()
-                    .setProxy(payload)
-                    .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                    .setValid(false)
-                    .build());
+                  future.completeExceptionally(event.getCause());
                 }
               });
 
               connection.connect().join();
 
               return future.join();
-            });
+            }).handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
+              .setProxy(payload)
+              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+              .setValid(throwable == null)
+              .build());
           }, result -> {
             if (responseObserver.isCancelled()) {
               return;
