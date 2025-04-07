@@ -10,7 +10,7 @@ via-aprilfools = "4.0.1"
 via-bedrock = "0.0.16-20250331.164510-3"
 via-loader = "4.0.2"
 mcprotocollib = "1.21.4-SNAPSHOT"
-kyori = "4.19.0"
+kyori = "4.20.0"
 reactor = "1.2.4"
 classtransform = "1.14.1"
 armeria = "1.32.3"
@@ -90,7 +90,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:0.44.2"
+openai = "com.openai:openai-java:0.44.3"
 immutables-value = "org.immutables:value:2.10.1"
 immutables-gson = "org.immutables:gson:2.10.1"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.Beta5"

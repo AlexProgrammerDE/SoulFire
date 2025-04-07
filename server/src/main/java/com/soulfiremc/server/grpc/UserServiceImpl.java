@@ -53,6 +53,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     try {
       soulFireServer.sessionFactory().inTransaction(session -> {
         var userEntity = new UserEntity();
+        userEntity.id(UUID.randomUUID());
         userEntity.username(request.getUsername());
         userEntity.email(request.getEmail());
         userEntity.role(switch (request.getRole()) {
