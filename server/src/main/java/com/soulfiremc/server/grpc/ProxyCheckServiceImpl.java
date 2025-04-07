@@ -89,48 +89,49 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               proxyCheckEventLoopGroup
             );
             return instance.scheduler().supplyAsync(() -> {
-              var future = cancellationCollector.add(new CompletableFuture<Void>());
-              var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
+                var future = cancellationCollector.add(new CompletableFuture<Void>());
+                var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
 
-              connection.session().addListener(new SessionAdapter() {
-                @Override
-                public void packetReceived(Session session, Packet packet) {
-                  if (future.isDone()) {
-                    return;
+                connection.session().addListener(new SessionAdapter() {
+                  @Override
+                  public void packetReceived(Session session, Packet packet) {
+                    if (future.isDone()) {
+                      return;
+                    }
+
+                    if (packet instanceof ClientboundStatusResponsePacket) {
+                      future.complete(null);
+                    }
                   }
 
-                  if (packet instanceof ClientboundStatusResponsePacket) {
-                    future.complete(null);
-                  }
-                }
+                  @Override
+                  public void packetError(PacketErrorEvent event) {
+                    if (future.isDone()) {
+                      return;
+                    }
 
-                @Override
-                public void packetError(PacketErrorEvent event) {
-                  if (future.isDone()) {
-                    return;
+                    future.completeExceptionally(event.getCause());
                   }
 
-                  future.completeExceptionally(event.getCause());
-                }
+                  @Override
+                  public void disconnected(DisconnectedEvent event) {
+                    if (future.isDone()) {
+                      return;
+                    }
 
-                @Override
-                public void disconnected(DisconnectedEvent event) {
-                  if (future.isDone()) {
-                    return;
+                    future.completeExceptionally(event.getCause());
                   }
+                });
 
-                  future.completeExceptionally(event.getCause());
-                }
-              });
+                connection.connect().join();
 
-              connection.connect().join();
-
-              return future.join();
-            }).handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
-              .setProxy(payload)
-              .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-              .setValid(throwable == null)
-              .build());
+                return future.join();
+              })
+              .handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
+                .setProxy(payload)
+                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                .setValid(throwable == null)
+                .build());
           }, result -> {
             if (responseObserver.isCancelled()) {
               return;
