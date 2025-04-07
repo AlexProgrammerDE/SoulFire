@@ -43,7 +43,7 @@ import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
-import org.geysermc.mcprotocollib.protocol.packet.ping.clientbound.ClientboundPongResponsePacket;
+import org.geysermc.mcprotocollib.protocol.packet.status.clientbound.ClientboundStatusResponsePacket;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -99,7 +99,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                     return;
                   }
 
-                  if (packet instanceof ClientboundPongResponsePacket) {
+                  if (packet instanceof ClientboundStatusResponsePacket) {
                     future.complete(ProxyCheckResponseSingle.newBuilder()
                       .setProxy(payload)
                       .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
