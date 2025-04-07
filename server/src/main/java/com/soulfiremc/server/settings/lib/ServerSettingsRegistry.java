@@ -152,8 +152,8 @@ public final class ServerSettingsRegistry {
    */
   @This
   @ApiStatus.Internal
-  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz) {
-    return addPage(clazz, "Built-in Page", null, "triangle-alert", null);
+  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
+    return addPage(clazz, pageName, null, "triangle-alert", null);
   }
 
   /**
