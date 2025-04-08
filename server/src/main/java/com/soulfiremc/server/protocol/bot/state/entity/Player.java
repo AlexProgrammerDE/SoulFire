@@ -560,4 +560,7 @@ public abstract class Player extends LivingEntity {
       }
     }
   }
+
+  public void respawn() {
+  }
 }

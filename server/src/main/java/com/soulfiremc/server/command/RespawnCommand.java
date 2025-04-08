@@ -19,8 +19,6 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -35,9 +33,7 @@ public final class RespawnCommand {
               forEveryBot(
                 c,
                 bot -> {
-                  bot
-                    .session()
-                    .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+                  bot.dataManager().localPlayer().respawn();
                   return Command.SINGLE_SUCCESS;
                 }))));
   }

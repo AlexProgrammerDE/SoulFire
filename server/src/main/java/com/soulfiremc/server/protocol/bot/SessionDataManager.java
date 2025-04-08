@@ -88,7 +88,6 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.spaw
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.inventory.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.border.*;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundPlayerLoadedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosRotPacket;
@@ -456,7 +455,7 @@ public final class SessionDataManager {
         log.info("Died");
       } else {
         log.info("Died, respawning due to game rule");
-        connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
+        localPlayer.respawn();
       }
     }
   }
@@ -755,8 +754,7 @@ public final class SessionDataManager {
       case CHANGE_GAMEMODE -> () -> gameModeState.setLocalMode(localPlayer, (GameMode) packet.getValue());
       case ENTER_CREDITS -> () -> {
         log.info("Entered credits {} (Respawning now)", packet.getValue());
-        connection.sendPacket(
-          new ServerboundClientCommandPacket(ClientCommand.RESPAWN)); // Respawns the player
+        this.localPlayer.respawn(); // Respawns the player
       };
       case DEMO_MESSAGE -> () -> log.debug("Demo event: {}", packet.getValue());
       case ARROW_HIT_PLAYER -> () -> log.debug("Arrow hit player");

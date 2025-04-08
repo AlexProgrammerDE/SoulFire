@@ -38,11 +38,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.cloudburstmc.math.vector.Vector3d;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.auth.GameProfile;
+import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.EntityEvent;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.Pose;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.GameMode;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.Hand;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.inventory.ServerboundContainerClosePacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.*;
 
@@ -617,5 +619,10 @@ public final class LocalPlayer extends AbstractClientPlayer {
       var deltaMovement = this.getDeltaMovement();
       this.setDeltaMovement(Vector3d.from(deltaMovement.getX(), 0.0, deltaMovement.getZ()));
     }
+  }
+
+  @Override
+  public void respawn() {
+    this.connection.sendPacket(new ServerboundClientCommandPacket(ClientCommand.RESPAWN));
   }
 }

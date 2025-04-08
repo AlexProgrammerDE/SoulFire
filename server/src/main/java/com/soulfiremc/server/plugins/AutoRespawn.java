@@ -20,6 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.bot.SFPacketReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
@@ -28,9 +29,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
-import org.geysermc.mcprotocollib.protocol.data.game.ClientCommand;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.player.ClientboundPlayerCombatKillPacket;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientCommandPacket;
 import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
@@ -58,7 +57,12 @@ public final class AutoRespawn extends InternalPlugin {
         return;
       }
 
-      if (combatKillPacket.getPlayerId() != connection.dataManager().localPlayer().entityId()) {
+      var localPlayer = connection.dataManager().localPlayer();
+      if (combatKillPacket.getPlayerId() != localPlayer.entityId()) {
+        return;
+      }
+
+      if (!localPlayer.shouldShowDeathScreen()) {
         return;
       }
 
@@ -69,12 +73,28 @@ public final class AutoRespawn extends InternalPlugin {
       connection
         .scheduler()
         .schedule(
-          () ->
-            connection
-              .session()
-              .send(new ServerboundClientCommandPacket(ClientCommand.RESPAWN)),
+          localPlayer::respawn,
           settingsSource.getRandom(AutoRespawnSettings.DELAY).getAsLong(),
           TimeUnit.SECONDS);
+    }
+  }
+
+  @EventHandler
+  public static void onTick(BotPreTickEvent event) {
+    var connection = event.connection();
+    var settingsSource = connection.settingsSource();
+    if (!settingsSource.get(AutoRespawnSettings.ENABLED)) {
+      return;
+    }
+
+    var dataManager = connection.dataManager();
+    if (!dataManager.joinedWorld()) {
+      return;
+    }
+
+    var localPlayer = connection.dataManager().localPlayer();
+    if (localPlayer.isDeadOrDying()) {
+      localPlayer.respawn();
     }
   }
 
