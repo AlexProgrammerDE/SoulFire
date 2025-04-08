@@ -46,6 +46,7 @@ import java.security.Security;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Stream;
@@ -98,6 +99,18 @@ public abstract class SoulFireAbstractBootstrap {
 
   public static String getRPCHost(String defaultHost) {
     return System.getProperty("sf.grpc.host", defaultHost);
+  }
+
+  private static void sendFlagsInfo() {
+    if (Boolean.getBoolean("sf.flags.v1")) {
+      return;
+    }
+
+    log.warn("We detected you are not using the recommended flags for SoulFire!");
+    log.warn("Please add the following flags to your JVM arguments:");
+    log.warn("-XX:+EnableDynamicAgentLoading -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysActAsServerClassMachine -XX:+UseNUMA -XX:+UseFastUnorderedTimeStamps -XX:+UseVectorCmov -XX:+UseCriticalJavaThreadPriority -Dsf.flags.v1=true");
+    log.warn("The startup command should look like: 'java -Xmx<ram> <flags> -jar <jarfile>'");
+    log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
   }
 
   public static void injectExceptionHandler() {
@@ -177,6 +190,8 @@ public abstract class SoulFireAbstractBootstrap {
 
       sendFlagsInfo();
 
+      injectFileProperties();
+
       injectExceptionHandler();
 
       initPlugins();
@@ -190,16 +205,40 @@ public abstract class SoulFireAbstractBootstrap {
     }
   }
 
-  private void sendFlagsInfo() {
-    if (Boolean.getBoolean("sf.flags.v1")) {
+  private void injectFileProperties() {
+    var optionsFile = getBaseDirectory().resolve("soulfire.properties");
+    if (!Files.exists(optionsFile)) {
       return;
     }
 
-    log.warn("We detected you are not using the recommended flags for SoulFire!");
-    log.warn("Please add the following flags to your JVM arguments:");
-    log.warn("-XX:+EnableDynamicAgentLoading -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysActAsServerClassMachine -XX:+UseNUMA -XX:+UseFastUnorderedTimeStamps -XX:+UseVectorCmov -XX:+UseCriticalJavaThreadPriority -Dsf.flags.v1=true");
-    log.warn("The startup command should look like: 'java -Xmx<ram> <flags> -jar <jarfile>'");
-    log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
+    log.info("Loading options from {}", optionsFile);
+    try (var scanner = new Scanner(optionsFile)) {
+      var lineNumber = 0;
+      while (scanner.hasNextLine()) {
+        lineNumber++;
+        var line = scanner.nextLine();
+        if (line.startsWith("#") || line.isBlank()) {
+          continue;
+        }
+
+        var parts = line.split("=", 2);
+        if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) {
+          log.warn("Invalid line in options file at line {}: {}", lineNumber, line);
+          continue;
+        }
+
+        var parsedKey = parts[0].strip();
+        var parsedValue = parts[1].strip();
+        if (!parsedKey.startsWith("sf.")) {
+          log.warn("Invalid key in options file at line {}: {}", lineNumber, parsedKey);
+          continue;
+        }
+
+        System.setProperty(parsedKey, parsedValue);
+      }
+    } catch (IOException e) {
+      log.error("Failed to read options file", e);
+    }
   }
 
   public void injectMixinsAndRun(String[] args) {
