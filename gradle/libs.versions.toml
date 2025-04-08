@@ -13,7 +13,7 @@ mcprotocollib = "1.21.4-SNAPSHOT"
 kyori = "4.20.0"
 reactor = "1.2.4"
 classtransform = "1.14.1"
-armeria = "1.32.3"
+armeria = "1.32.4"
 graalvm-polyglot = "24.2.0"
 
 [plugins]
