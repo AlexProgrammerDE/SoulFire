@@ -127,6 +127,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
 
                 return future.join();
               })
+              .orTimeout(30, TimeUnit.SECONDS)
               .handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
                 .setProxy(payload)
                 .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
@@ -150,6 +151,9 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             }
           },
           cancellationCollector);
+
+        proxyCheckEventLoopGroup.shutdownGracefully()
+          .awaitUninterruptibly(5, TimeUnit.SECONDS);
 
         if (responseObserver.isCancelled()) {
           return;
