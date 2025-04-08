@@ -24,7 +24,7 @@ jobs:
       - name: 'Shared: Checkout repository'
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref }}
 
       - name: 'Set Version'
         run: |
