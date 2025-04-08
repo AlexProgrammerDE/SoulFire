@@ -33,6 +33,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,8 +72,8 @@ public final class InstanceEntity {
   private String icon;
 
   @NotNull(message = "Owner cannot be null")
-  @ManyToOne(cascade = CascadeType.ALL)
-  @JoinColumn(nullable = false)
+  @ManyToOne
+  @JoinColumn(nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private UserEntity owner;
 
   @NotNull(message = "Attack lifecycle cannot be null")
@@ -85,6 +86,12 @@ public final class InstanceEntity {
   @Convert(converter = InstanceSettingsConverter.class)
   @Column(nullable = false)
   private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
+
+  @OneToMany(mappedBy = "instance", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<ScriptEntity> scripts = new ArrayList<>();
+
+  @OneToMany(mappedBy = "instance", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<InstanceAuditLogEntity> auditLogs = new ArrayList<>();
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)

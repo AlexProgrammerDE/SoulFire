@@ -44,8 +44,8 @@ public final class ScriptEntity {
   @Column(nullable = false)
   private ScriptEntity.ScriptType type;
 
-  @ManyToOne(cascade = CascadeType.ALL)
-  @JoinColumn
+  @ManyToOne
+  @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private InstanceEntity instance;
 
   @NotBlank(message = "Script names cannot be blank")

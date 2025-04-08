@@ -26,6 +26,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -52,6 +54,12 @@ public final class UserEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
+
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<InstanceEntity> ownedInstances = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<InstanceAuditLogEntity> auditLogs = new ArrayList<>();
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)

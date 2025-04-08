@@ -49,13 +49,13 @@ public final class InstanceAuditLogEntity {
   private String data;
 
   @NotNull(message = "Instance cannot be null")
-  @ManyToOne(cascade = CascadeType.ALL)
-  @JoinColumn(nullable = false)
+  @ManyToOne
+  @JoinColumn(nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private InstanceEntity instance;
 
   @NotNull(message = "User cannot be null")
-  @ManyToOne(cascade = CascadeType.ALL)
-  @JoinColumn(nullable = false)
+  @ManyToOne
+  @JoinColumn(nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private UserEntity user;
 
   @CreationTimestamp
