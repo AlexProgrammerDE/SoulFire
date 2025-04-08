@@ -465,7 +465,7 @@ public final class InstanceManager {
         } catch (IOException e) {
           log.error("Error while deleting instance storage", e);
         }
-      }, scheduler);
+      }, soulFireServer.scheduler());
   }
 
   public CompletableFuture<?> shutdownHook() {
