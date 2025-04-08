@@ -102,11 +102,7 @@ public abstract class SoulFireAbstractBootstrap {
 
   public static void injectExceptionHandler() {
     Thread.setDefaultUncaughtExceptionHandler(
-      (thread, throwable) -> {
-        log.error("Exception in thread {}", thread.getName());
-        //noinspection CallToPrintStackTrace
-        throwable.printStackTrace();
-      });
+      (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
   }
 
   public static void injectMixins(@Nullable PluginManager pluginManager) {
