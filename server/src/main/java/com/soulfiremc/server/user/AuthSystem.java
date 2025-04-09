@@ -165,9 +165,14 @@ public final class AuthSystem {
       throw new IllegalArgumentException("Cannot delete root user");
     }
 
-    sessionFactory.fromTransaction(s -> s.createMutationQuery("DELETE FROM UserEntity WHERE id = :id")
-      .setParameter("id", uuid)
-      .executeUpdate());
+    sessionFactory.inTransaction(s -> {
+      var userEntity = s.find(UserEntity.class, uuid);
+      if (userEntity == null) {
+        return;
+      }
+
+      s.remove(userEntity);
+    });
 
     logService.disconnect(uuid);
   }

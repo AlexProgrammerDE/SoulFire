@@ -55,10 +55,10 @@ public final class UserEntity {
   @Column(nullable = false)
   private Role role;
 
-  @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<InstanceEntity> ownedInstances = new ArrayList<>();
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<InstanceAuditLogEntity> auditLogs = new ArrayList<>();
 
   @CreationTimestamp

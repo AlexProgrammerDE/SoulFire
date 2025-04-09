@@ -314,9 +314,14 @@ public final class SoulFireServer {
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
-    sessionFactory.inTransaction(s -> s.createMutationQuery("DELETE FROM InstanceEntity WHERE id = :id")
-      .setParameter("id", id)
-      .executeUpdate());
+    sessionFactory.inTransaction(s -> {
+      var userEntity = s.find(InstanceEntity.class, id);
+      if (userEntity == null) {
+        return;
+      }
+
+      s.remove(userEntity);
+    });
 
     return Optional.ofNullable(instances.remove(id)).map(InstanceManager::deleteInstance);
   }

@@ -87,10 +87,10 @@ public final class InstanceEntity {
   @Column(nullable = false)
   private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
 
-  @OneToMany(mappedBy = "instance", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "instance", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ScriptEntity> scripts = new ArrayList<>();
 
-  @OneToMany(mappedBy = "instance", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "instance", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<InstanceAuditLogEntity> auditLogs = new ArrayList<>();
 
   @CreationTimestamp
