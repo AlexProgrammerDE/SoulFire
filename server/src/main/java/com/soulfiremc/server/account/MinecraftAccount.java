@@ -44,7 +44,6 @@ public record MinecraftAccount(
       UUID.fromString(account.getProfileId()),
       account.getLastKnownName(),
       switch (account.getAccountDataCase()) {
-        case ONLINE_SIMPLE_JAVA_DATA -> OnlineSimpleJavaData.fromProto(account.getOnlineSimpleJavaData());
         case ONLINE_CHAIN_JAVA_DATA -> OnlineChainJavaData.fromProto(account.getOnlineChainJavaData());
         case OFFLINE_JAVA_DATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
         case BEDROCK_DATA -> BedrockData.fromProto(account.getBedrockData());
@@ -84,7 +83,6 @@ public record MinecraftAccount(
     SFHelpers.mustSupply(() -> switch (accountData) {
       case BedrockData bedrockData -> () -> builder.setBedrockData(bedrockData.toProto());
       case OfflineJavaData offlineJavaData -> () -> builder.setOfflineJavaData(offlineJavaData.toProto());
-      case OnlineSimpleJavaData onlineSimpleJavaData -> () -> builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
       case OnlineChainJavaData onlineChainJavaData -> () -> builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
     });
 

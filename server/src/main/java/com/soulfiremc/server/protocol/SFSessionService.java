@@ -35,10 +35,6 @@ public final class SFSessionService {
   private static final URI MOJANG_JOIN_URI =
     URI.create("https://sessionserver.mojang.com/session/minecraft/join");
 
-  @SuppressWarnings("HttpUrlsUsage")
-  private static final URI THE_ALTENING_JOIN_URI =
-    URI.create("http://sessionserver.thealtening.com/session/minecraft/join");
-
   private final URI joinEndpoint;
   @Nullable
   private final SFProxy proxyData;
@@ -47,7 +43,6 @@ public final class SFSessionService {
     this.joinEndpoint =
       switch (authType) {
         case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
-        case THE_ALTENING -> THE_ALTENING_JOIN_URI;
         case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Invalid auth type");
       };
     this.proxyData = proxyData;

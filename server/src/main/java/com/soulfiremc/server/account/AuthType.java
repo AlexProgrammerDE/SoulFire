@@ -17,7 +17,10 @@
  */
 package com.soulfiremc.server.account;
 
-import com.soulfiremc.server.account.service.*;
+import com.soulfiremc.server.account.service.AccountData;
+import com.soulfiremc.server.account.service.BedrockData;
+import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +32,6 @@ public enum AuthType {
   MICROSOFT_JAVA_DEVICE_CODE("Microsoft Java Device Code", OnlineChainJavaData.class),
   MICROSOFT_BEDROCK_DEVICE_CODE("Microsoft Bedrock Device Code", BedrockData.class),
   MICROSOFT_JAVA_REFRESH_TOKEN("Microsoft Java Refresh Token", OnlineChainJavaData.class),
-  THE_ALTENING("The Altening", OnlineSimpleJavaData.class),
   OFFLINE("Offline", OfflineJavaData.class);
 
   private final String displayName;

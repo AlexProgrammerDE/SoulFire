@@ -23,7 +23,6 @@ message ProxyProto {
 enum AccountTypeCredentials {
   MICROSOFT_JAVA_CREDENTIALS = 0;
   MICROSOFT_BEDROCK_CREDENTIALS = 1;
-  THE_ALTENING = 3;
   OFFLINE = 4;
   MICROSOFT_JAVA_REFRESH_TOKEN = 5;
 }
@@ -37,16 +36,10 @@ message MinecraftAccountProto {
   enum AccountTypeProto {
     MICROSOFT_JAVA_CREDENTIALS = 0;
     MICROSOFT_BEDROCK_CREDENTIALS = 1;
-    THE_ALTENING = 3;
     OFFLINE = 4;
     MICROSOFT_JAVA_DEVICE_CODE = 5;
     MICROSOFT_BEDROCK_DEVICE_CODE = 6;
     MICROSOFT_JAVA_REFRESH_TOKEN = 7;
-  }
-
-  message OnlineSimpleJavaData {
-    string auth_token = 1;
-    int64 token_expire_at = 2;
   }
 
   message OnlineChainJavaData {
@@ -72,7 +65,6 @@ message MinecraftAccountProto {
   string profile_id = 2;
   string last_known_name = 3;
   oneof account_data {
-    OnlineSimpleJavaData online_simple_java_data = 4;
     OnlineChainJavaData online_chain_java_data = 5;
     OfflineJavaData offline_java_data = 6;
     BedrockData bedrock_data = 7;
