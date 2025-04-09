@@ -98,7 +98,15 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.github_release.outputs.changelog }}
+          body: |
+            ---
+            > [!IMPORTANT]
+            > These downloads are for users who want to host Dedicated Servers for SoulFire clients or use the CLI client of SoulFire.
+            > This is not the right download if you want to use the GUI client for SoulFire, which is recommended for most users.
+            > Instead you should look at the [SoulFireClient releases page](https://github.com/AlexProgrammerDE/SoulFireClient/releases).
+            ---
+
+            ${{ steps.github_release.outputs.changelog }}
           tag_name: ${{ inputs.version }}
           generate_release_notes: false
           draft: false
