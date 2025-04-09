@@ -62,7 +62,7 @@ kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref 
 commons-validator = "commons-validator:commons-validator:1.9.0"
 commons-io = "commons-io:commons-io:2.18.0"
 oshi = "com.github.oshi:oshi-core:6.8.0"
-guava = "com.google.guava:guava:33.4.6-jre"
+guava = "com.google.guava:guava:33.4.7-android"
 gson = "com.google.code.gson:gson:2.12.1"
 pf4j = "org.pf4j:pf4j:3.13.0"
 fastutil = "it.unimi.dsi:fastutil:8.5.15"
