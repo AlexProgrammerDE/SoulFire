@@ -60,7 +60,7 @@ kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.re
 kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "kyori" }
 kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
 commons-validator = "commons-validator:commons-validator:1.9.0"
-commons-io = "commons-io:commons-io:2.18.0"
+commons-io = "commons-io:commons-io:2.19.0"
 oshi = "com.github.oshi:oshi-core:6.8.0"
 guava = "com.google.guava:guava:33.4.7-jre"
 gson = "com.google.code.gson:gson:2.13.0"
