@@ -23,12 +23,10 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 
@@ -63,14 +61,6 @@ public record BotConnectionFactory(
         protocolVersion,
         proxyData,
         eventLoopGroup);
-
-    var session = botConnection.session();
-    session.setFlag(BuiltinFlags.CLIENT_CONNECT_TIMEOUT, settingsSource.get(BotSettings.CONNECT_TIMEOUT));
-    session.setFlag(BuiltinFlags.READ_TIMEOUT, settingsSource.get(BotSettings.READ_TIMEOUT));
-    session.setFlag(BuiltinFlags.WRITE_TIMEOUT, settingsSource.get(BotSettings.WRITE_TIMEOUT));
-
-    session.addListener(new SFBaseListener(botConnection, targetState));
-    session.addListener(new SFSessionListener(botConnection));
 
     SoulFireAPI.postEvent(new BotConnectionInitEvent(botConnection));
 

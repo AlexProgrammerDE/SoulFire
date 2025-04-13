@@ -32,6 +32,7 @@ import com.soulfiremc.server.protocol.bot.state.ControlState;
 import com.soulfiremc.server.protocol.netty.ResolveUtil;
 import com.soulfiremc.server.protocol.netty.ViaClientSession;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
@@ -43,6 +44,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.mcprotocollib.network.BuiltinFlags;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
@@ -72,6 +74,8 @@ public final class BotConnection {
   private final InstanceSettingsSource settingsSource;
   private final MinecraftProtocol protocol;
   private final ViaClientSession session;
+  private final SFBaseListener baseListener;
+  private final SFSessionListener sessionListener;
   private final ResolveUtil.ResolvedAddress resolvedAddress;
   private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
@@ -116,10 +120,22 @@ public final class BotConnection {
       minecraftAccount.isPremiumJava()
         ? new SFSessionService(minecraftAccount.authType(), proxyData)
         : null;
-    this.session = new ViaClientSession(
-      resolvedAddress.resolvedAddress(), protocol, proxyData, eventLoopGroup, this);
     this.dataManager = new SessionDataManager(this);
     this.botControl = new BotControlAPI(this);
+
+    this.session = new ViaClientSession(
+      resolvedAddress.resolvedAddress(), protocol, proxyData, eventLoopGroup, this);
+    this.baseListener = new SFBaseListener(this, targetState);
+    this.sessionListener = new SFSessionListener(this);
+
+    this.session.setFlag(BuiltinFlags.CLIENT_CONNECT_TIMEOUT, settingsSource.get(BotSettings.CONNECT_TIMEOUT));
+    this.session.setFlag(BuiltinFlags.READ_TIMEOUT, settingsSource.get(BotSettings.READ_TIMEOUT));
+    this.session.setFlag(BuiltinFlags.WRITE_TIMEOUT, settingsSource.get(BotSettings.WRITE_TIMEOUT));
+
+    this.session.addListener(this.baseListener);
+    this.session.addListener(this.sessionListener);
+
+    this.sessionListener.registerDataManager();
 
     // Start the tick loop
     scheduler.scheduleWithFixedDelay(this::tickLoop, 0, 1, TimeUnit.MILLISECONDS);
@@ -189,7 +205,9 @@ public final class BotConnection {
   public void clearClientLevel() {
     this.dataManager.clearLevelAndPlayer();
     this.runTick(false);
+    this.sessionListener.unregisterDataManager();
     this.dataManager = SessionDataManager.toCommon(this.dataManager);
+    this.sessionListener.registerDataManager();
   }
 
   @Nullable

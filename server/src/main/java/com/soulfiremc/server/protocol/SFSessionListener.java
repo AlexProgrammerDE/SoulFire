@@ -40,7 +40,14 @@ public final class SFSessionListener extends SessionAdapter {
   public SFSessionListener(BotConnection botConnection) {
     this.botConnection = botConnection;
     this.busInvoker = LambdaManager.basic(new ASMGenerator());
+  }
+
+  public void registerDataManager() {
     busInvoker.register(botConnection.dataManager());
+  }
+
+  public void unregisterDataManager() {
+    busInvoker.unregister(botConnection.dataManager());
   }
 
   @Override
