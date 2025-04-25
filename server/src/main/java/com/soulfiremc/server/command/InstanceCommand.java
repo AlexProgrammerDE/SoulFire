@@ -19,9 +19,14 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.soulfiremc.server.InstanceManager;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
@@ -32,12 +37,7 @@ public final class InstanceCommand {
       literal("instance")
         .then(
           argument("instance_names", StringArgumentType.string())
-            .suggests(
-              (c, b) -> {
-                getVisibleInstances(c).forEach(instance -> b.suggest(instance.friendlyNameCache().get()));
-
-                return b.buildFuture();
-              })
+            .suggests(InstanceNamesSuggester.INSTANCE)
             .forward(
               dispatcher.getRoot(),
               helpSingleRedirect(
@@ -54,5 +54,16 @@ public final class InstanceCommand {
               ),
               false
             )));
+  }
+
+  private static class InstanceNamesSuggester implements SuggestionProvider<CommandSourceStack> {
+    private static final InstanceNamesSuggester INSTANCE = new InstanceNamesSuggester();
+
+    @Override
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> c, SuggestionsBuilder b) {
+      getVisibleInstances(c).forEach(instance -> b.suggest(instance.friendlyNameCache().get()));
+
+      return b.buildFuture();
+    }
   }
 }
