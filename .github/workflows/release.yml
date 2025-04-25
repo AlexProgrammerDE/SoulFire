@@ -38,6 +38,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
         run: ./gradlew build test --stacktrace --scan
+
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v5
@@ -47,42 +48,47 @@ jobs:
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}",
+              "commit_template": "- [`#{{SHORT_MERGE_SHA}}`](https://github.com/AlexProgrammerDE/SoulFire/commit/#{{MERGE_SHA}}) #{{TITLE}} by @#{{AUTHOR}}",
               "categories": [
                 {
-                    "title": "## Feature",
+                    "title": "## 🚀 Features",
                     "labels": ["feat", "feature"]
                 },
                 {
-                    "title": "## Fix",
+                    "title": "## 🐛 Fixes",
                     "labels": ["fix", "bug"]
                 },
                 {
-                    "title": "## Performance",
+                    "title": "## 🏎️ Performance",
                     "labels": ["perf"]
                 },
                 {
-                    "title": "## Refactor",
+                    "title": "## 🏗 Refactor",
                     "labels": ["refactor"]
                 },
                 {
-                    "title": "## Documentation",
+                    "title": "## 📝 Documentation",
                     "labels": ["docs"]
                 },
                 {
-                    "title": "## Build",
+                    "title": "## 🔨 Build",
                     "labels": ["build", "chore", "ci"]
                 },
                 {
-                    "title": "## Style",
+                    "title": "## 💅 Style",
                     "labels": ["style"]
                 },
                 {
-                    "title": "## Test",
+                    "title": "## 🧪 Tests",
                     "labels": ["test"]
                 },
                 {
-                    "title": "## Other",
+                    "title": "## 💬 Other",
                     "labels": []
+                },
+                {
+                  "title": "## 📦 Dependencies",
+                  "labels": ["dependencies"]
                 }
               ],
               "label_extractor": [
@@ -91,10 +97,21 @@ jobs:
                   "on_property": "title",
                   "target": "$1"
                 }
+              ],
+              "custom_placeholders": [
+                {
+                  "name": "SHORT_MERGE_SHA",
+                  "source": "MERGE_SHA",
+                  "transformer": {
+                    "pattern": "^([0-9a-f]{7})[0-9a-f]*$",
+                    "target": "$1"
+                  }
+                }
               ]
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
