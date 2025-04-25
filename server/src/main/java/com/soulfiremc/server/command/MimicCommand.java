@@ -20,7 +20,7 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.soulfiremc.server.command.brigadier.ArgumentTypeHelper;
+import com.soulfiremc.server.command.brigadier.EntityArgumentType;
 import com.soulfiremc.server.protocol.bot.ControllingTask;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
@@ -34,7 +34,7 @@ public final class MimicCommand {
             help(
               "Makes selected bots mimic the movement of other entities",
               c -> {
-                var entityName = StringArgumentType.getString(c, "entity");
+                var entityMatcher = EntityArgumentType.getEntityMatcher(c, "entity");
 
                 return forEveryBot(
                   c,
@@ -42,7 +42,7 @@ public final class MimicCommand {
                     var entity = bot.dataManager().currentLevel().entityTracker()
                       .getEntities()
                       .stream()
-                      .filter(ArgumentTypeHelper.parseEntityMatch(bot, entityName))
+                      .filter(entityMatcher)
                       .findAny();
                     if (entity.isEmpty()) {
                       c.getSource().source().sendWarn("Entity not found!");

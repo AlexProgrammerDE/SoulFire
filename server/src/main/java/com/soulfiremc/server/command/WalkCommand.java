@@ -23,8 +23,8 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.soulfiremc.server.command.brigadier.ArgumentTypeHelper;
 import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
+import com.soulfiremc.server.command.brigadier.EntityArgumentType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
@@ -48,9 +48,9 @@ public final class WalkCommand {
         .then(argument("entity", StringArgumentType.string())
           .executes(
             help(
-              "Makes selected bots walk to a entity",
+              "Makes selected bots walk to an entity",
               c -> {
-                var entityName = StringArgumentType.getString(c, "entity");
+                var entityMatcher = EntityArgumentType.getEntityMatcher(c, "entity");
 
                 return forEveryBot(
                   c,
@@ -58,7 +58,7 @@ public final class WalkCommand {
                     var entity = bot.dataManager().currentLevel().entityTracker()
                       .getEntities()
                       .stream()
-                      .filter(ArgumentTypeHelper.parseEntityMatch(bot, entityName))
+                      .filter(entityMatcher)
                       .findAny();
                     if (entity.isEmpty()) {
                       c.getSource().source().sendWarn("Entity not found!");

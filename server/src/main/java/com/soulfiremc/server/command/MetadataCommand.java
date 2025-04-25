@@ -20,7 +20,7 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.soulfiremc.server.command.brigadier.ArgumentTypeHelper;
+import com.soulfiremc.server.command.brigadier.EntityArgumentType;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -31,9 +31,9 @@ public final class MetadataCommand {
         .then(argument("entity", StringArgumentType.string())
           .executes(
             help(
-              "Makes selected bots follow an entity by id",
+              "Makes selected bots follow an entity",
               c -> {
-                var entityName = StringArgumentType.getString(c, "entity");
+                var entityMatcher = EntityArgumentType.getEntityMatcher(c, "entity");
 
                 return forEveryBot(
                   c,
@@ -41,7 +41,7 @@ public final class MetadataCommand {
                     var entity = bot.dataManager().currentLevel().entityTracker()
                       .getEntities()
                       .stream()
-                      .filter(ArgumentTypeHelper.parseEntityMatch(bot, entityName))
+                      .filter(entityMatcher)
                       .findAny();
                     if (entity.isEmpty()) {
                       c.getSource().source().sendWarn("Entity not found!");

@@ -17,24 +17,46 @@
  */
 package com.soulfiremc.server.command.brigadier;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.soulfiremc.server.protocol.bot.state.entity.Entity;
 import com.soulfiremc.server.util.UUIDHelper;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
-public final class ArgumentTypeHelper {
-  private ArgumentTypeHelper() {
+public final class EntityArgumentType implements ArgumentType<EntityArgumentType.EntityPredicate> {
+  public static final EntityArgumentType INSTANCE = new EntityArgumentType();
+
+  private EntityArgumentType() {}
+
+  public static EntityPredicate getEntityMatcher(CommandContext<?> c, String argument) {
+    return c.getArgument(argument, EntityPredicate.class);
   }
 
-  public static Predicate<Entity> parseEntityMatch(BotConnection bot, String input) {
+  @Override
+  public Collection<String> getExamples() {
+    return List.of(
+      "Pistonmaster",
+      "b1ae0778-4817-436c-96a3-a72c67cda060",
+      "b1ae07784817436c96a3a72c67cda060"
+    );
+  }
+
+  @Override
+  public EntityPredicate parse(StringReader stringReader) throws CommandSyntaxException {
+    var input = stringReader.readString();
     var parsedUniqueId = UUIDHelper.tryParseUniqueId(input);
+
     return entity -> {
       if (parsedUniqueId.isPresent() && entity.uuid().equals(parsedUniqueId.get())) {
         return true;
       }
 
-      var entityProfile = bot.getEntityProfile(entity.uuid());
+      var entityProfile = entity.level().connection().getEntityProfile(entity.uuid());
       if (entityProfile.isEmpty()) {
         return false;
       }
@@ -42,5 +64,8 @@ public final class ArgumentTypeHelper {
       var gameProfile = entityProfile.get().getProfile();
       return gameProfile != null && gameProfile.getName().equalsIgnoreCase(input);
     };
+  }
+
+  public interface EntityPredicate extends Predicate<Entity> {
   }
 }

@@ -20,8 +20,7 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.soulfiremc.server.command.brigadier.ArgumentTypeHelper;
+import com.soulfiremc.server.command.brigadier.EntityArgumentType;
 import com.soulfiremc.server.pathfinding.controller.FollowEntityController;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
@@ -30,19 +29,18 @@ public final class FollowCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("follow")
-        .then(argument("entity", StringArgumentType.string())
+        .then(argument("entity", EntityArgumentType.INSTANCE)
           .then(argument("maxRadius", IntegerArgumentType.integer(1))
             .executes(
               help(
-                "Makes selected bots follow an entity by id",
+                "Makes selected bots follow an entity",
                 c -> {
-                  var entityName = StringArgumentType.getString(c, "entity");
+                  var entityMatcher = EntityArgumentType.getEntityMatcher(c, "entity");
                   var maxRadius = IntegerArgumentType.getInteger(c, "maxRadius");
 
                   return forEveryBot(
                     c,
                     bot -> {
-                      var entityMatcher = ArgumentTypeHelper.parseEntityMatch(bot, entityName);
                       bot.scheduler().schedule(() -> new FollowEntityController(
                         entityMatcher,
                         maxRadius
