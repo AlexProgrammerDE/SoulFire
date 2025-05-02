@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.viaversion.SFVersionConstants;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +69,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public final class SFBaseListener extends SessionAdapter {
   private final BotConnection botConnection;
-  private final @NonNull ProtocolState targetState;
+  private final @NonNull HandshakeIntent targetState;
 
   @SneakyThrows
   @Override
@@ -182,21 +183,23 @@ public final class SFBaseListener extends SessionAdapter {
     var resolvedAddress = botConnection.resolvedAddress().resolvedAddress();
     var session = event.getSession();
     var protocol = session.getPacketProtocol();
-    var intention = new ClientIntentionPacket(protocol.getCodec().getProtocolVersion(),
+    var intention = new ClientIntentionPacket(
+      protocol.getCodec().getProtocolVersion(),
       resolvedAddress.getHostName(),
       resolvedAddress.getPort(),
-      switch (targetState) {
-        case LOGIN -> HandshakeIntent.LOGIN;
-        case STATUS -> HandshakeIntent.STATUS;
-        default -> throw new IllegalStateException("Unexpected value: " + targetState);
-      });
+      targetState
+    );
 
-    session.switchInboundState(() -> protocol.setInboundState(this.targetState));
+    var protocolState = switch (this.targetState) {
+      case STATUS -> ProtocolState.STATUS;
+      case LOGIN, TRANSFER -> ProtocolState.LOGIN;
+    };
+    session.switchInboundState(() -> protocol.setInboundState(protocolState));
     session.send(intention);
-    session.switchOutboundState(() -> protocol.setOutboundState(this.targetState));
-    switch (this.targetState) {
-      case LOGIN -> session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
-      case STATUS -> session.send(new ServerboundStatusRequestPacket());
-    }
+    session.switchOutboundState(() -> protocol.setOutboundState(protocolState));
+    SFHelpers.mustSupply(() -> switch (this.targetState) {
+      case LOGIN, TRANSFER -> () -> session.send(new ServerboundHelloPacket(botConnection.accountName(), botConnection.accountProfileId()));
+      case STATUS -> () -> session.send(new ServerboundStatusRequestPacket());
+    });
   }
 }

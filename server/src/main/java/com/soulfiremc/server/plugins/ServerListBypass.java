@@ -27,7 +27,7 @@ import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
-import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 import org.pf4j.Extension;
 
 import java.util.concurrent.TimeUnit;
@@ -48,7 +48,7 @@ public final class ServerListBypass extends InternalPlugin {
   @EventHandler
   public static void onPreConnect(PreBotConnectEvent event) {
     var connection = event.connection();
-    if (connection.targetState() == ProtocolState.STATUS) {
+    if (connection.targetState() == HandshakeIntent.STATUS) {
       return;
     }
 
@@ -58,7 +58,7 @@ public final class ServerListBypass extends InternalPlugin {
       return;
     }
 
-    factory.prepareConnectionInternal(ProtocolState.STATUS).connect().join();
+    factory.prepareConnectionInternal(HandshakeIntent.STATUS).connect().join();
     TimeUtil.waitTime(
       settingsSource.getRandom(ServerListBypassSettings.DELAY).getAsLong(),
       TimeUnit.SECONDS);

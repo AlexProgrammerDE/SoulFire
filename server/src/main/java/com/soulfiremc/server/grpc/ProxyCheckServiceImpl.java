@@ -42,7 +42,7 @@ import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
 import org.geysermc.mcprotocollib.network.event.session.SessionAdapter;
 import org.geysermc.mcprotocollib.network.packet.Packet;
-import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 import org.geysermc.mcprotocollib.protocol.packet.status.clientbound.ClientboundStatusResponsePacket;
 
 import java.util.UUID;
@@ -90,7 +90,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             );
             return instance.scheduler().supplyAsync(() -> {
                 var future = cancellationCollector.add(new CompletableFuture<Void>());
-                var connection = factory.prepareConnectionInternal(ProtocolState.STATUS);
+                var connection = factory.prepareConnectionInternal(HandshakeIntent.STATUS);
 
                 connection.session().addListener(new SessionAdapter() {
                   @Override

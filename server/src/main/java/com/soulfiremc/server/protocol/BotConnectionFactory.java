@@ -28,7 +28,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
-import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
+import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 
 public record BotConnectionFactory(
   InstanceManager instanceManager,
@@ -40,10 +40,10 @@ public record BotConnectionFactory(
   SFProxy proxyData,
   EventLoopGroup eventLoopGroup) {
   public BotConnection prepareConnection() {
-    return prepareConnectionInternal(ProtocolState.LOGIN);
+    return prepareConnectionInternal(HandshakeIntent.LOGIN);
   }
 
-  public BotConnection prepareConnectionInternal(ProtocolState targetState) {
+  public BotConnection prepareConnectionInternal(HandshakeIntent targetState) {
     var protocol = new MinecraftProtocol();
 
     // Make sure this options is set to false, we have our own listeners

@@ -49,6 +49,7 @@ import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
 import org.geysermc.mcprotocollib.protocol.data.ProtocolState;
 import org.geysermc.mcprotocollib.protocol.data.game.PlayerListEntry;
+import org.geysermc.mcprotocollib.protocol.data.handshake.HandshakeIntent;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundClientTickEndPacket;
 
 import java.util.List;
@@ -80,7 +81,7 @@ public final class BotConnection {
   private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
   private final String accountName;
-  private final ProtocolState targetState;
+  private final HandshakeIntent targetState;
   private final ProtocolVersion protocolVersion;
   private final SFSessionService sessionService;
   private final BotControlAPI botControl;
@@ -99,7 +100,7 @@ public final class BotConnection {
     MinecraftProtocol protocol,
     ResolveUtil.ResolvedAddress resolvedAddress,
     MinecraftAccount minecraftAccount,
-    ProtocolState targetState,
+    HandshakeIntent targetState,
     ProtocolVersion protocolVersion,
     @Nullable
     SFProxy proxyData,
