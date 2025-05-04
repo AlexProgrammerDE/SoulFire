@@ -71,7 +71,7 @@ jetbrains-annotations = "org.jetbrains:annotations:26.0.2"
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
 classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdummy", version.ref = "classtransform" }
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
-reflect = "net.lenni0451:Reflect:1.4.0"
+reflect = "net.lenni0451:Reflect:1.5.0"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
 minecraftauth = "net.raphimc:MinecraftAuth:4.1.2-SNAPSHOT"
 grpc-proto = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
