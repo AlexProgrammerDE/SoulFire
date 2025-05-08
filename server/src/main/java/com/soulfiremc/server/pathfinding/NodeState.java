@@ -37,7 +37,7 @@ public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
       return false;
     }
 
-    return usableBlockItems == otherUsableBlockItems && blockPosition.minecraftEquals(otherBlockPosition);
+    return usableBlockItems == otherUsableBlockItems && blockPosition.equals(otherBlockPosition);
   }
 
   @Override

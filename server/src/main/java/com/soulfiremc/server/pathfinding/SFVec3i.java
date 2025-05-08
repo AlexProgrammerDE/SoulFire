@@ -61,6 +61,10 @@ public final class SFVec3i {
     return hash;
   }
 
+  public boolean equals(SFVec3i other) {
+    return x == other.x && y == other.y && z == other.z;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof SFVec3i other)) {
@@ -68,10 +72,6 @@ public final class SFVec3i {
     }
 
     return this.x == other.x && this.y == other.y && this.z == other.z;
-  }
-
-  public boolean minecraftEquals(SFVec3i vec) {
-    return asMinecraftLong() == vec.asMinecraftLong();
   }
 
   @Override
