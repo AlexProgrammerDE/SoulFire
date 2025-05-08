@@ -41,13 +41,14 @@ public final class BotCommand {
             .forward(
               dispatcher.getRoot(),
               helpSingleRedirect(
-                "Instead of running a command for all possible bots, run it for a specific list of bots. Use a comma to separate the names",
+                "Instead of running a command for all possible bots, run it for a specific list of bots. Use a comma to separate the names. Use all for using all available bots",
                 c -> {
                   var botNames = Set.of(StringArgumentType.getString(c, "bot_names").split(","));
+                  boolean allCondition = botNames.size() == 1 && botNames.iterator().next().equalsIgnoreCase("all");
                   return c.getSource()
                     .withBotIds(getVisibleBots(c)
                       .stream()
-                      .filter(bot -> botNames.contains(bot.accountName()))
+                      .filter(bot -> allCondition || botNames.contains(bot.accountName()))
                       .map(BotConnection::accountProfileId)
                       .collect(Collectors.toSet()));
                 }
