@@ -71,7 +71,7 @@ jetbrains-annotations = "org.jetbrains:annotations:26.0.2"
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
 classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdummy", version.ref = "classtransform" }
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
-reflect = "net.lenni0451:Reflect:1.4.0"
+reflect = "net.lenni0451:Reflect:1.5.0"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
 minecraftauth = "net.raphimc:MinecraftAuth:4.1.2-SNAPSHOT"
 grpc-proto = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
@@ -80,7 +80,7 @@ grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 protobuf-bom = { module = "com.google.protobuf:protobuf-bom", version.ref = "protobuf" }
 protobuf-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf" }
-netty-bom = "io.netty:netty-bom:4.2.0.Final"
+netty-bom = "io.netty:netty-bom:4.2.1.Final"
 armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
 armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
@@ -90,7 +90,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.119-SNAPSHOT"
-openai = "com.openai:openai-java:1.5.1"
+openai = "com.openai:openai-java:1.6.0"
 immutables-value = "org.immutables:value:2.10.1"
 immutables-gson = "org.immutables:gson:2.10.1"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.0.0.CR1"
