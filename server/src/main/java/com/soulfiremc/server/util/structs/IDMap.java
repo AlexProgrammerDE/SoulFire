@@ -28,9 +28,9 @@ public final class IDMap<K extends IDValue, V> {
   public IDMap(Collection<K> collection, Function<K, V> valueFunction) {
     values = new Object[collection.size()];
 
-    collection
-      .parallelStream()
-      .forEach(key -> values[key.id()] = valueFunction.apply(key));
+    for (var key : collection) {
+      values[key.id()] = valueFunction.apply(key);
+    }
   }
 
   @SuppressWarnings("unchecked")
