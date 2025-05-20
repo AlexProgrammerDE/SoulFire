@@ -5,8 +5,7 @@
   "name": "SoulFire Data Generator",
   "description": "",
   "authors": [
-    "Archengius",
-    "U9G"
+    "Pistonmaster"
   ],
   "contact": {},
   "license": "MIT",
@@ -20,7 +19,7 @@
     "soulfire-data-generator.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.4",
+    "fabricloader": "*",
     "minecraft": "*"
   }
 }

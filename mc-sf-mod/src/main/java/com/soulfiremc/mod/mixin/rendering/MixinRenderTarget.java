@@ -8,18 +8,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RenderTarget.class)
 public class MixinRenderTarget {
-  @Inject(method = "bindWrite", at = @At("HEAD"), cancellable = true)
-  private void bindWriteHook(boolean bl, CallbackInfo ci) {
-    ci.cancel();
-  }
 
-  @Inject(method = "unbindWrite", at = @At("HEAD"), cancellable = true)
-  private void unbindWriteHook(CallbackInfo ci) {
-    ci.cancel();
-  }
-
-  @Inject(method = "blitToScreen(II)V", at = @At("HEAD"), cancellable = true)
+  @Inject(method = "blitToScreen", at = @At("HEAD"), cancellable = true)
   private void blitToScreenHook(CallbackInfo ci) {
+    ci.cancel();
+  }
+
+  @Inject(method = "blitAndBlendToTexture", at = @At("HEAD"), cancellable = true)
+  private void blitAndBlendToTextureHook(CallbackInfo ci) {
     ci.cancel();
   }
 

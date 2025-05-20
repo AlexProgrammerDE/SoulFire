@@ -65,7 +65,7 @@ public final class MixinMain {
   @SneakyThrows
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
   private static void init(Minecraft old) {
-    IntStream.range(1, 2).forEach(i -> tryConnect(createMinecraftCopy(old, "Bot_" + i)));
+    IntStream.range(1, 100).forEach(i -> tryConnect(createMinecraftCopy(old, "Bot_" + i)));
 
     while (true) {
       TimeUnit.SECONDS.sleep(1);
