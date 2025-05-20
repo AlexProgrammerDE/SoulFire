@@ -34,6 +34,7 @@ develocity {
 
 include(
   "data-generator",
+  "mc-sf-mod",
   "build-data",
   "j8-launcher",
   "proto",

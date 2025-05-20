@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "soulfire-data-generator",
+  "version": "${version}",
+  "name": "SoulFire Data Generator",
+  "description": "",
+  "authors": [
+    "Archengius",
+    "U9G"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "com.soulfiremc.mod.Main"
+    ]
+  },
+  "mixins": [
+    "soulfire-data-generator.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.4",
+    "minecraft": "*"
+  }
+}

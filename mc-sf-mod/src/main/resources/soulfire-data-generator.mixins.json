@@ -1,0 +1,37 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.soulfiremc.mod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinMain",
+    "fixes.MixinReloadableResourceManager"
+  ],
+  "client": [
+    "MixinMinecraft",
+    "bloat.MixinDataFetcherSubscription",
+    "bloat.MixinQuickPlayLog",
+    "bloat.MixinRealmsAvailability",
+    "bloat.MixinRealmsPersistence",
+    "bloat.MixinWorldSessionTelemetryManager",
+    "fixes.MixinResourceManagerReloadListener",
+    "fixes.MixinServerList",
+    "rendering.MixinClientChunkCache",
+    "rendering.MixinClientLevel",
+    "rendering.MixinGameRenderer",
+    "rendering.MixinLevelRenderer",
+    "rendering.MixinMouseHandler",
+    "rendering.MixinParticleEngine",
+    "rendering.MixinRenderSystem",
+    "rendering.MixinRenderTarget",
+    "rendering.MixinScreen",
+    "rendering.MixinWindow",
+    "sound.MixinMusicManager",
+    "sound.MixinSoundBufferLibrary",
+    "sound.MixinSoundEngine",
+    "sound.MixinSoundManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
