@@ -1,22 +1,17 @@
 package com.soulfiremc.mod.mixin.fixes;
 
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 @Mixin(ResourceManagerReloadListener.class)
 public interface MixinResourceManagerReloadListener {
-  /**
-   * @author SoulFireMC
-   * @reason Disable resource pack reloads
-   */
-  @Overwrite
-  default CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
-    return CompletableFuture.completedFuture(null);
+  @Inject(method = "reload", at = @At("HEAD"), cancellable = true)
+  default void reload(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+    cir.setReturnValue(CompletableFuture.completedFuture(null));
   }
 }
