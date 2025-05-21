@@ -26,10 +26,6 @@ public final class SFPathConstants {
 
   private SFPathConstants() {}
 
-  public static Path getPluginsDirectory(Path baseFolder) {
-    return baseFolder.resolve("plugins");
-  }
-
   public static Path getConfigDirectory(Path baseFolder) {
     return baseFolder.resolve("config");
   }
@@ -44,9 +40,5 @@ public final class SFPathConstants {
 
   public static Path getStateDirectory(Path baseFolder) {
     return baseFolder.resolve("state");
-  }
-
-  public static Path getLibrariesDirectory(Path baseFolder) {
-    return baseFolder.resolve("libraries");
   }
 }

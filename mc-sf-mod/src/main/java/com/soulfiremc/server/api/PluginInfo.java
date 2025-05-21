@@ -18,11 +18,6 @@
 package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.ServerPlugin;
-import com.soulfiremc.server.util.pf4j.SFPluginDescriptor;
-import lombok.SneakyThrows;
-import org.pf4j.PluginClassLoader;
-
-import java.lang.reflect.Field;
 
 /**
  * Represents information about a plugin.
@@ -35,42 +30,6 @@ import java.lang.reflect.Field;
  * @param license     The plugin license
  */
 public record PluginInfo(String id, String version, String description, String author, String license, String website) {
-  private static final Field PLUGIN_DESCRIPTOR_FIELD;
-
-  static {
-    try {
-      PLUGIN_DESCRIPTOR_FIELD = PluginClassLoader.class.getDeclaredField("pluginDescriptor");
-      PLUGIN_DESCRIPTOR_FIELD.setAccessible(true);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Creates a new PluginInfo instance from the given plugin class.
-   *
-   * @param clazz The plugin class
-   *              (must be loaded by a {@link PluginClassLoader})
-   * @return The PluginInfo instance
-   */
-  @SneakyThrows
-  public static PluginInfo fromClassLoader(Class<?> clazz) {
-    var plugin = (PluginClassLoader) clazz.getClassLoader();
-    if (plugin == null) {
-      throw new IllegalArgumentException("Class is not a plugin");
-    }
-
-    var descriptor = (SFPluginDescriptor) PLUGIN_DESCRIPTOR_FIELD.get(plugin);
-    return new PluginInfo(
-      descriptor.getPluginId(),
-      descriptor.getVersion(),
-      descriptor.getPluginDescription(),
-      descriptor.getProvider(),
-      descriptor.getLicense(),
-      descriptor.website()
-    );
-  }
-
   public ServerPlugin toProto() {
     return ServerPlugin.newBuilder()
       .setId(id)

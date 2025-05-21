@@ -78,7 +78,6 @@ dependencies {
 
   api(libs.guava)
   api(libs.gson)
-  api(libs.pf4j)
   annotationProcessor(libs.pf4j)
   api(libs.fastutil)
   api(libs.caffeine)

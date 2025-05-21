@@ -19,8 +19,6 @@ package com.soulfiremc.dedicated;
 
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.api.Plugin;
-import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.ConsoleCommandSource;
 import com.soulfiremc.server.user.AuthSystem;
@@ -44,14 +42,12 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
 
   @Override
   protected void postMixinMain(String[] args) {
-    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
-
     var host = SoulFireAbstractBootstrap.getRPCHost("0.0.0.0");
     var port = SoulFireAbstractBootstrap.getRPCPort(PortHelper.SF_DEFAULT_PORT);
 
     GenericTerminalConsole.setupStreams();
     var soulFire =
-      new SoulFireServer(host, port, pluginManager, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
+      new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
 
     if (soulFire.authSystem().rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
       log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);

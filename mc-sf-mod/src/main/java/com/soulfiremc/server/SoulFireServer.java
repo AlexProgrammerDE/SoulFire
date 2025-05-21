@@ -47,7 +47,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.SessionFactory;
-import org.pf4j.PluginManager;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
@@ -84,7 +83,6 @@ public final class SoulFireServer {
   private final AuthSystem authSystem;
   private final ServerSettingsRegistry serverSettingsRegistry;
   private final ServerCommandManager serverCommandManager;
-  private final PluginManager pluginManager;
   private final ShutdownManager shutdownManager;
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
@@ -96,13 +94,11 @@ public final class SoulFireServer {
   public SoulFireServer(
     String host,
     int port,
-    PluginManager pluginManager,
     Instant startTime,
     Path baseDirectory) {
     log.info("Starting SoulFire v{} ({} @ {})", BuildData.VERSION, BuildData.BRANCH_NAME, BuildData.COMMIT_HASH.substring(0, 6));
 
-    this.pluginManager = pluginManager;
-    this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
+    this.shutdownManager = new ShutdownManager(this::shutdownHook);
     this.baseDirectory = baseDirectory;
 
     this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));

@@ -21,8 +21,6 @@ import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.api.Plugin;
-import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.RPCConstants;
 import com.soulfiremc.server.util.SFPathConstants;
@@ -54,14 +52,12 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
       new RPCClient(address.host(), address.port(), jwt);
 
     log.info("Starting CLI");
-    var cliManager = new CLIManager(rpcClient, pluginManager);
+    var cliManager = new CLIManager(rpcClient);
     cliManager.initCLI(args);
   }
 
   @Override
   protected void postMixinMain(String[] args) {
-    pluginManager.getExtensions(Plugin.class).forEach(SoulFireAPI::registerServerExtension);
-
     Runnable runIntegratedServer =
       () -> {
         var host = SoulFireAbstractBootstrap.getRPCHost("localhost");
@@ -69,7 +65,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
         log.info("Starting integrated server on {}:{}", host, port);
         var soulFire =
-          new SoulFireServer(host, port, pluginManager, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
+          new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
 
         var jwtToken = soulFire.authSystem().generateJWT(
           soulFire.authSystem().rootUserData(),

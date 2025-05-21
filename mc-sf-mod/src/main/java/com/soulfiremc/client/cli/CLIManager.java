@@ -30,7 +30,6 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.pf4j.PluginManager;
 import picocli.CommandLine;
 
 import java.util.UUID;
@@ -49,8 +48,8 @@ public final class CLIManager {
   private final ClientSettingsManager clientSettingsManager;
   private UUID cliInstanceId;
 
-  public CLIManager(RPCClient rpcClient, PluginManager pluginManager) {
-    this.shutdownManager = new ShutdownManager(this::shutdownHook, pluginManager);
+  public CLIManager(RPCClient rpcClient) {
+    this.shutdownManager = new ShutdownManager(this::shutdownHook);
 
     this.rpcClient = rpcClient;
     this.clientSettingsManager = new ClientSettingsManager(this.rpcClient);

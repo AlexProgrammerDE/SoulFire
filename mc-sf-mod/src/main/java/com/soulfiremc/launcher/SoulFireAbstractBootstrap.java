@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
-import com.soulfiremc.server.util.pf4j.SFManifestPluginDescriptorFinder;
 import io.netty.util.ResourceLeakDetector;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +26,6 @@ import net.lenni0451.reflect.Fields;
 import org.apache.logging.log4j.LogManager;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fusesource.jansi.AnsiConsole;
-import org.pf4j.JarPluginManager;
-import org.pf4j.PluginManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,14 +62,6 @@ public abstract class SoulFireAbstractBootstrap {
     Security.addProvider(new BouncyCastleProvider());
   }
 
-  protected final Path pluginsDirectory = SFPathConstants.getPluginsDirectory(getBaseDirectory());
-  protected final PluginManager pluginManager = new JarPluginManager(pluginsDirectory) {
-    @Override
-    protected SFManifestPluginDescriptorFinder createPluginDescriptorFinder() {
-      return new SFManifestPluginDescriptorFinder();
-    }
-  };
-
   protected SoulFireAbstractBootstrap() {}
 
   public static int getRPCPort(int defaultPort) {
@@ -108,25 +95,6 @@ public abstract class SoulFireAbstractBootstrap {
       (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
   }
 
-  private void initPlugins() {
-    try {
-      Files.createDirectories(pluginsDirectory);
-    } catch (IOException e) {
-      log.error("Failed to create plugins directory", e);
-    }
-
-    // Prepare the plugin manager
-    pluginManager.setSystemVersion(BuildData.VERSION);
-
-    // Load all plugins available
-    pluginManager.loadPlugins();
-    pluginManager.startPlugins();
-
-    for (var plugin : pluginManager.getPlugins()) {
-      SoulFireClassloaderConstants.CHILD_CLASSLOADER_CONSUMER.accept(plugin.getPluginClassLoader());
-    }
-  }
-
   @SneakyThrows
   protected void internalBootstrap(String[] args) {
     try {
@@ -144,8 +112,6 @@ public abstract class SoulFireAbstractBootstrap {
       injectFileProperties();
 
       injectExceptionHandler();
-
-      initPlugins();
 
       injectMixinsAndRun(args);
     } catch (Throwable t) {
