@@ -31,7 +31,7 @@ dependencies {
   annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2")
   implementation("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2")
 
-  // modImplementation("com.viaversion:viafabricplus:4.1.3")
+  modImplementation("com.viaversion:viafabricplus:4.1.3")
 }
 
 unimined.minecraft {
@@ -56,6 +56,15 @@ unimined.minecraft {
 
   fabric {
     loader("0.16.14")
+  }
+
+  mods.modImplementation {
+    mixinRemap {
+      @Suppress("UnstableApiUsage")
+      reset()
+      enableBaseMixin()
+      enableMixinExtra()
+    }
   }
 
   defaultRemapJar = true

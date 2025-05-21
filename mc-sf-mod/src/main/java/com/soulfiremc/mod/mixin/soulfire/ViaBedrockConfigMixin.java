@@ -15,26 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.injection.mixins;
+package com.soulfiremc.mod.mixin.soulfire;
 
 import net.raphimc.viabedrock.ViaBedrockConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ViaBedrockConfig.class)
 public final class ViaBedrockConfigMixin {
-  @Overwrite
-  public boolean shouldTranslateResourcePacks() {
-    return false;
+  @Inject(method = "shouldTranslateResourcePacks", at = @At("HEAD"), cancellable = true)
+  public void shouldTranslateResourcePacks(CallbackInfoReturnable<Boolean> cir) {
+    cir.setReturnValue(false);
   }
 
-  @Overwrite
-  public ViaBedrockConfig.BlobCacheMode getBlobCacheMode() {
-    return ViaBedrockConfig.BlobCacheMode.MEMORY;
+  @Inject(method = "getBlobCacheMode", at = @At("HEAD"), cancellable = true)
+  public void getBlobCacheMode(CallbackInfoReturnable<ViaBedrockConfig.BlobCacheMode> cir) {
+    cir.setReturnValue(ViaBedrockConfig.BlobCacheMode.MEMORY);
   }
 
-  @Overwrite
-  public ViaBedrockConfig.PackCacheMode getPackCacheMode() {
-    return ViaBedrockConfig.PackCacheMode.MEMORY;
+  @Inject(method = "getPackCacheMode", at = @At("HEAD"), cancellable = true)
+  public void getPackCacheMode(CallbackInfoReturnable<ViaBedrockConfig.PackCacheMode> cir) {
+    cir.setReturnValue(ViaBedrockConfig.PackCacheMode.MEMORY);
   }
 }

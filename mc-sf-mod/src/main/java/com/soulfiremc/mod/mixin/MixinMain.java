@@ -24,6 +24,7 @@ import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.Fields;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -60,26 +61,20 @@ public final class MixinMain {
   @Inject(method = "main([Ljava/lang/String;)V", at = @At("HEAD"))
   private static void init(CallbackInfo cir) {
     Agents.getInstrumentation().addTransformer(new LwjglAgent());
+    SharedConstants.CHECK_DATA_FIXER_SCHEMA = false;
   }
 
   @SneakyThrows
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
   private static void init(Minecraft old) {
-    IntStream.range(1, 100).forEach(i -> tryConnect(createMinecraftCopy(old, "Bot_" + i)));
+    // We want this to not inject anywhere else
+    SFModThreadLocals.MINECRAFT_INSTANCE.remove();
+
+    IntStream.range(1, 3).forEach(i -> tryConnect(createMinecraftCopy(old, "Bot_" + i)));
 
     while (true) {
       TimeUnit.SECONDS.sleep(1);
     }
-  }
-
-  @SneakyThrows
-  @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;destroy()V"))
-  private static void preventDestroy(Minecraft instance) {
-  }
-
-  @SneakyThrows
-  @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
-  private static void preventStop(Minecraft instance) {
   }
 
   @Unique
@@ -87,13 +82,13 @@ public final class MixinMain {
   @SuppressWarnings("ResultOfMethodCallIgnored")
   private static Thread tryConnect(Minecraft minecraft) {
     minecraft.submit(() -> {
-      var ip = "127.0.0.1:25565";
+      var ip = "localhost:25565";
       var serverAddress = ServerAddress.parseString(ip);
       ConnectScreen.startConnecting(
         new JoinMultiplayerScreen(new TitleScreen()),
         minecraft,
         serverAddress,
-        new ServerData("test", ip, ServerData.Type.OTHER),
+        new ServerData("soulfire", ip, ServerData.Type.OTHER),
         false,
         null
       );

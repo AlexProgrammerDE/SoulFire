@@ -5,18 +5,23 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MixinMain",
-    "fixes.MixinReloadableResourceManager"
+    "fixes.MixinReloadableResourceManager",
+    "optimization.MixinDataFixers",
+    "soulfire.MixinProtocolTranslator",
+    "soulfire.ViaBedrockConfigMixin"
   ],
   "client": [
     "MixinMinecraft",
     "bloat.MixinDataFetcherSubscription",
     "bloat.MixinQuickPlayLog",
     "bloat.MixinRealmsAvailability",
+    "bloat.MixinRealmsClient",
     "bloat.MixinRealmsPersistence",
     "bloat.MixinWorldSessionTelemetryManager",
     "fixes.MixinChatComponent",
     "fixes.MixinResourceManagerReloadListener",
     "fixes.MixinServerList",
+    "optimization.MixinClientPacketListener",
     "rendering.MixinClientChunkCache",
     "rendering.MixinClientLevel",
     "rendering.MixinGameRenderer",
