@@ -17,18 +17,10 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.server.util.structs.SFContextClassLoader;
-
-import java.nio.file.Path;
-
 public abstract class SoulFireAbstractLauncher {
-  @SuppressWarnings("resource")
   public void run(String[] args) {
-    var contextClassLoader = new SFContextClassLoader(getLibrariesDirectory());
-
     try {
-      contextClassLoader
-        .loadClass(getBootstrapClassName())
+      Class.forName(getBootstrapClassName())
         .getDeclaredMethod("bootstrap", String[].class)
         .invoke(null, (Object) args);
     } catch (ReflectiveOperationException e) {
@@ -37,6 +29,4 @@ public abstract class SoulFireAbstractLauncher {
   }
 
   protected abstract String getBootstrapClassName();
-
-  protected abstract Path getLibrariesDirectory();
 }

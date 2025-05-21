@@ -18,9 +18,6 @@
 package com.soulfiremc.dedicated;
 
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
-import com.soulfiremc.server.util.SFPathConstants;
-
-import java.nio.file.Path;
 
 public final class SoulFireDedicatedLauncher extends SoulFireAbstractLauncher {
   public static void main(String[] args) {
@@ -30,10 +27,5 @@ public final class SoulFireDedicatedLauncher extends SoulFireAbstractLauncher {
   @Override
   protected String getBootstrapClassName() {
     return "com.soulfiremc.dedicated.SoulFireDedicatedBootstrap";
-  }
-
-  @Override
-  protected Path getLibrariesDirectory() {
-    return SFPathConstants.getLibrariesDirectory(SFPathConstants.WORKING_DIRECTORY);
   }
 }
