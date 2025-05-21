@@ -18,6 +18,7 @@
 package com.soulfiremc.mod.mixin;
 
 import com.google.common.collect.Queues;
+import com.soulfiremc.dedicated.SoulFireDedicatedLauncher;
 import com.soulfiremc.mod.util.SFModHelpers;
 import com.soulfiremc.mod.util.SFModThreadLocals;
 import lombok.SneakyThrows;
@@ -52,8 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 @Mixin(Main.class)
 public final class MixinMain {
@@ -66,15 +65,13 @@ public final class MixinMain {
 
   @SneakyThrows
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
-  private static void init(Minecraft old) {
+  private static void init(Minecraft instance, String[] args) {
     // We want this to not inject anywhere else
     SFModThreadLocals.MINECRAFT_INSTANCE.remove();
 
-    IntStream.range(1, 3).forEach(i -> tryConnect(createMinecraftCopy(old, "Bot_" + i)));
+    SFModThreadLocals.BASE_MC_INSTANCE = instance;
 
-    while (true) {
-      TimeUnit.SECONDS.sleep(1);
-    }
+    SoulFireDedicatedLauncher.main(args);
   }
 
   @Unique
@@ -82,7 +79,7 @@ public final class MixinMain {
   @SuppressWarnings("ResultOfMethodCallIgnored")
   private static Thread tryConnect(Minecraft minecraft) {
     minecraft.submit(() -> {
-      var ip = "localhost:25565";
+      var ip = "127.0.0.1:25565";
       var serverAddress = ServerAddress.parseString(ip);
       ConnectScreen.startConnecting(
         new JoinMultiplayerScreen(new TitleScreen()),

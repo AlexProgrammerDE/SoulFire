@@ -9,9 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ProtocolTranslator.class)
 public class MixinProtocolTranslator {
-  @Inject(method = "getTargetVersion()Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;",
-    at = @At("HEAD"), cancellable = true)
+  @Inject(method = "getTargetVersion()Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;", at = @At("HEAD"), cancellable = true)
   private static void getTargetVersion(CallbackInfoReturnable<ProtocolVersion> cir) {
-    cir.setReturnValue(ProtocolVersion.v1_7_6);
+    cir.setReturnValue(ProtocolVersion.v1_21_5);
   }
 }
