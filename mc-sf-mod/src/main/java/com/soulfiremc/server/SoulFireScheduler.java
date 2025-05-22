@@ -119,6 +119,7 @@ public final class SoulFireScheduler implements Executor {
     blockNewTasks = true;
     isShutdown = true;
     drainQueue();
+    executor.shutdownNow();
   }
 
   public CompletableFuture<?> runAsync(Runnable command) {

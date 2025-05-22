@@ -511,7 +511,7 @@ public final class InstanceManager {
         botConnections.entrySet().removeIf(entry -> {
           var botConnection = entry.getValue();
           disconnectFuture.add(scheduler.runAsync(botConnection::gracefulDisconnect));
-          // eventLoopGroups.add(botConnection.eventLoopGroup()); // TODO
+          eventLoopGroups.add(botConnection.eventLoopGroup());
           return true;
         });
 
