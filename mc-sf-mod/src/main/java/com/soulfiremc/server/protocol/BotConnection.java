@@ -86,6 +86,7 @@ public final class BotConnection {
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
   private final Minecraft minecraft;
+  private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
   private boolean explicitlyShutdown = false;
   private boolean running = true;
@@ -113,6 +114,7 @@ public final class BotConnection {
     this.protocolVersion = protocolVersion;
     this.serverAddress = serverAddress;
     this.minecraft = createMinecraftCopy();
+    this.proxy = proxyData;
     this.eventLoopGroup = eventLoopGroup;
   }
 

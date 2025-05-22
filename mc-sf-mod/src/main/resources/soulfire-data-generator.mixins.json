@@ -9,6 +9,7 @@
     "optimization.MixinDataFixers",
     "soulfire.MixinAggregatedClassLoader",
     "soulfire.MixinConnection",
+    "soulfire.MixinConnection$1",
     "soulfire.MixinFontCacheReload",
     "soulfire.MixinProtocolTranslator",
     "soulfire.ViaBedrockConfigMixin"
