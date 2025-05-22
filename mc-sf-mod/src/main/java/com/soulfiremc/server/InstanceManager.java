@@ -47,10 +47,12 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
+import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 
@@ -369,10 +371,11 @@ public final class InstanceManager {
     }
 
     // Prepare an event loop group for the attack
-    // var attackEventLoopGroup =
-    //   SFNettyHelper.createEventLoopGroup("Attack-%s".formatted(id), runnableWrapper);
+    var attackEventLoopGroup =
+      NettyHelper.createEventLoopGroup("Attack-%s".formatted(id), runnableWrapper);
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+    var serverAddress = ServerAddress.parseString(settingsSource.get(BotSettings.ADDRESS));
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
@@ -384,9 +387,9 @@ public final class InstanceManager {
           settingsSource,
           minecraftAccount,
           protocolVersion,
+          serverAddress,
           proxyData,
-          // attackEventLoopGroup, // TODO
-          null
+          attackEventLoopGroup
         ));
     }
 

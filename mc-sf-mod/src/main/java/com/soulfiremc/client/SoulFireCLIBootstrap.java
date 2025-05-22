@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.client;
 
+import com.google.common.net.HostAndPort;
 import com.soulfiremc.client.cli.CLIManager;
 import com.soulfiremc.client.grpc.RPCClient;
 import com.soulfiremc.launcher.SoulFireAbstractBootstrap;
@@ -24,8 +25,8 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.RPCConstants;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.ServerAddress;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -49,7 +50,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
   private void startCLI(ServerAddress address, String jwt, String[] args) {
     var rpcClient =
-      new RPCClient(address.host(), address.port(), jwt);
+      new RPCClient(address.getHost(), address.getPort(), jwt);
 
     log.info("Starting CLI");
     var cliManager = new CLIManager(rpcClient);
@@ -72,7 +73,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
           RPCConstants.API_AUDIENCE
         );
         startCLI(
-          ServerAddress.fromStringAndPort(host, port),
+          new ServerAddress(host, port),
           jwtToken,
           args
         );
@@ -89,7 +90,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
       log.info("Using remote server on {}", address);
 
       startCLI(
-        ServerAddress.fromStringDefaultPort(address, PortHelper.SF_DEFAULT_PORT),
+        new ServerAddress(HostAndPort.fromString(address).withDefaultPort(PortHelper.SF_DEFAULT_PORT)),
         jwtToken,
         args
       );

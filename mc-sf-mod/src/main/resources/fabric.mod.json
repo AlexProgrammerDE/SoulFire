@@ -18,6 +18,7 @@
   "mixins": [
     "soulfire-data-generator.mixins.json"
   ],
+  "accessWidener": "soulfire.accesswidener",
   "depends": {
     "fabricloader": "*",
     "minecraft": "*"

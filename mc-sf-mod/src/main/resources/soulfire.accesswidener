@@ -1,0 +1,3 @@
+accessWidener v1 named
+
+accessible method net/minecraft/client/multiplayer/resolver/ServerAddress <init> (Lcom/google/common/net/HostAndPort;)V

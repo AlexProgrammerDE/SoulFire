@@ -1,7 +1,9 @@
 package com.soulfiremc.mod.mixin;
 
 import com.mojang.authlib.minecraft.UserApiService;
+import com.soulfiremc.mod.mixin.soulfire.IMinecraft;
 import com.soulfiremc.mod.util.SFModThreadLocals;
+import com.soulfiremc.server.protocol.BotConnection;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.SystemReport;
@@ -12,15 +14,20 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.server.Bootstrap;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.File;
+import java.util.Objects;
 
 @Mixin(Minecraft.class)
-public class MixinMinecraft {
+public class MixinMinecraft implements IMinecraft {
+  @Unique
+  public BotConnection soulfire$botConnection;
+
   @Inject(method = "getInstance", at = @At("HEAD"), cancellable = true)
   private static void getInstance(CallbackInfoReturnable<Minecraft> cir) {
     var currentInstance = SFModThreadLocals.MINECRAFT_INSTANCE.get();
@@ -65,5 +72,19 @@ public class MixinMinecraft {
   @Inject(method = "stop", at = @At("HEAD"), cancellable = true)
   private void preventStop(CallbackInfo ci) {
     ci.cancel();
+  }
+
+  @Override
+  public BotConnection soulfire$getConnection() {
+    return Objects.requireNonNull(soulfire$botConnection, "BotConnection is null");
+  }
+
+  @Override
+  public void soulfire$setConnection(BotConnection connection) {
+    if (soulfire$botConnection != null) {
+      throw new IllegalStateException("BotConnection is already set");
+    }
+
+    this.soulfire$botConnection = connection;
   }
 }

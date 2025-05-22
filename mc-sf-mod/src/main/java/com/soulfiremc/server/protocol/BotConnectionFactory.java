@@ -25,6 +25,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record BotConnectionFactory(
@@ -32,6 +33,7 @@ public record BotConnectionFactory(
   InstanceSettingsSource settingsSource,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
+  ServerAddress serverAddress,
   @Nullable
   SFProxy proxyData,
   EventLoopGroup eventLoopGroup) {
@@ -43,6 +45,7 @@ public record BotConnectionFactory(
         settingsSource,
         minecraftAccount,
         protocolVersion,
+        serverAddress,
         proxyData,
         eventLoopGroup);
 

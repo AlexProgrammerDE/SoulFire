@@ -17,42 +17,20 @@
  */
 package com.soulfiremc.mod.mixin;
 
-import com.google.common.collect.Queues;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.soulfiremc.dedicated.SoulFireDedicatedLauncher;
-import com.soulfiremc.mod.util.SFModHelpers;
 import com.soulfiremc.mod.util.SFModThreadLocals;
 import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
 import net.lenni0451.reflect.Agents;
-import net.lenni0451.reflect.Fields;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.User;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.main.Main;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.util.thread.BlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.UUID;
 
 @Mixin(Main.class)
 public final class MixinMain {
@@ -65,81 +43,12 @@ public final class MixinMain {
 
   @SneakyThrows
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
-  private static void init(Minecraft instance, String[] args) {
+  private static void init(Minecraft instance, @Local(argsOnly = true) String[] args) {
     // We want this to not inject anywhere else
     SFModThreadLocals.MINECRAFT_INSTANCE.remove();
 
     SFModThreadLocals.BASE_MC_INSTANCE = instance;
 
     SoulFireDedicatedLauncher.main(args);
-  }
-
-  @Unique
-  @SneakyThrows
-  @SuppressWarnings("ResultOfMethodCallIgnored")
-  private static Thread tryConnect(Minecraft minecraft) {
-    minecraft.submit(() -> {
-      var ip = "127.0.0.1:25565";
-      var serverAddress = ServerAddress.parseString(ip);
-      ConnectScreen.startConnecting(
-        new JoinMultiplayerScreen(new TitleScreen()),
-        minecraft,
-        serverAddress,
-        new ServerData("soulfire", ip, ServerData.Type.OTHER),
-        false,
-        null
-      );
-      var connection = new Connection(PacketFlow.CLIENTBOUND);
-      Connection.connect(
-        ServerNameResolver.DEFAULT.resolveAddress(serverAddress)
-          .map(ResolvedServerAddress::asInetSocketAddress)
-          .orElseThrow(),
-        true,
-        connection
-      );
-    });
-
-    return Thread.ofVirtual().start(() -> {
-      try {
-        SFModThreadLocals.MINECRAFT_INSTANCE.set(minecraft);
-        minecraft.run();
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
-    });
-  }
-
-  @Unique
-  @SneakyThrows
-  private static Minecraft createMinecraftCopy(Minecraft old, String username) {
-    var newInstance = SFModHelpers.deepCopy(old);
-
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("progressTasks"), Queues.newConcurrentLinkedQueue());
-    Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance));
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("gui"), new Gui(newInstance));
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("user"), new User(
-      username,
-      UUID.nameUUIDFromBytes(username.getBytes(StandardCharsets.UTF_8)),
-      "offline",
-      Optional.empty(),
-      Optional.empty(),
-      User.Type.MSA
-    ));
-
-    {
-      var getTickTargetMillis = Minecraft.class.getDeclaredMethod("getTickTargetMillis", float.class);
-      getTickTargetMillis.setAccessible(true);
-
-      Fields.set(newInstance, Minecraft.class.getDeclaredField("deltaTracker"), new DeltaTracker.Timer(20.0F, 0L, (f) -> {
-        try {
-          return (float) getTickTargetMillis.invoke(newInstance, f);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-          throw new RuntimeException(e);
-        }
-      }));
-    }
-
-    return newInstance;
   }
 }

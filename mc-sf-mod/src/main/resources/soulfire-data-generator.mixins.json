@@ -8,6 +8,8 @@
     "fixes.MixinReloadableResourceManager",
     "optimization.MixinDataFixers",
     "soulfire.MixinAggregatedClassLoader",
+    "soulfire.MixinConnection",
+    "soulfire.MixinFontCacheReload",
     "soulfire.MixinProtocolTranslator",
     "soulfire.ViaBedrockConfigMixin"
   ],

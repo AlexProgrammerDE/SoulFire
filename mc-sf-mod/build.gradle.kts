@@ -45,10 +45,8 @@ dependencies {
   // Main protocol library
   api(libs.bundles.kyori)
 
-  // Netty raknet support for ViaBedrock
-  api(libs.netty.raknet) {
-    isTransitive = false
-  }
+  // Newest netty
+  implementation("io.netty:netty-all:4.2.1.Final")
 
   // For microsoft account authentication
   api(libs.minecraftauth) {
@@ -136,6 +134,7 @@ unimined.minecraft {
 
   fabric {
     loader("0.16.14")
+    accessWidener(project.projectDir.resolve("src/main/resources/soulfire.accesswidener"))
   }
 
   mods.modImplementation {

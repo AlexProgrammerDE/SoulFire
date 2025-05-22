@@ -17,9 +17,16 @@
  */
 package com.soulfiremc.server.protocol;
 
+import com.google.common.collect.Queues;
+import com.soulfiremc.mod.mixin.soulfire.IMinecraft;
+import com.soulfiremc.mod.util.SFModHelpers;
+import com.soulfiremc.mod.util.SFModThreadLocals;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.account.service.BedrockData;
+import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
@@ -31,10 +38,29 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.lenni0451.reflect.Fields;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.User;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -56,9 +82,11 @@ public final class BotConnection {
   private final UUID accountProfileId;
   private final String accountName;
   private final ProtocolVersion protocolVersion;
-  private final SFSessionService sessionService;
+  private final ServerAddress serverAddress;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
+  private final Minecraft minecraft;
+  private final EventLoopGroup eventLoopGroup;
   private boolean explicitlyShutdown = false;
   private boolean running = true;
   @Setter
@@ -70,6 +98,7 @@ public final class BotConnection {
     InstanceSettingsSource settingsSource,
     MinecraftAccount minecraftAccount,
     ProtocolVersion protocolVersion,
+    ServerAddress serverAddress,
     @Nullable
     SFProxy proxyData,
     EventLoopGroup eventLoopGroup) {
@@ -82,17 +111,79 @@ public final class BotConnection {
     this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.protocolVersion = protocolVersion;
-    this.sessionService =
-      minecraftAccount.isPremiumJava()
-        ? new SFSessionService(minecraftAccount.authType(), proxyData)
-        : null;
+    this.serverAddress = serverAddress;
+    this.minecraft = createMinecraftCopy();
+    this.eventLoopGroup = eventLoopGroup;
+  }
+
+  @SneakyThrows
+  private Minecraft createMinecraftCopy() {
+    var newInstance = SFModHelpers.deepCopy(SFModThreadLocals.BASE_MC_INSTANCE);
+
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("progressTasks"), Queues.newConcurrentLinkedQueue());
+    Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance));
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("gui"), new Gui(newInstance));
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("user"), new User(
+      minecraftAccount.lastKnownName(),
+      minecraftAccount.profileId(),
+      switch (minecraftAccount.accountData()) {
+        case BedrockData ignored -> "bedrock";
+        case OfflineJavaData ignored -> "offline";
+        case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.authToken();
+      },
+      Optional.empty(),
+      Optional.empty(),
+      User.Type.MSA
+    ));
+
+    {
+      var getTickTargetMillis = Minecraft.class.getDeclaredMethod("getTickTargetMillis", float.class);
+      getTickTargetMillis.setAccessible(true);
+
+      Fields.set(newInstance, Minecraft.class.getDeclaredField("deltaTracker"), new DeltaTracker.Timer(20.0F, 0L, (f) -> {
+        try {
+          return (float) getTickTargetMillis.invoke(newInstance, f);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      }));
+    }
+
+    ((IMinecraft) newInstance).soulfire$setConnection(this);
+
+    return newInstance;
   }
 
   public CompletableFuture<?> connect() {
     return scheduler.runAsync(
       () -> {
         SoulFireAPI.postEvent(new PreBotConnectEvent(this));
+        minecraft.execute(runnableWrapper.wrap(() -> {
+          ConnectScreen.startConnecting(
+            new JoinMultiplayerScreen(new TitleScreen()),
+            minecraft,
+            serverAddress,
+            new ServerData("soulfire", "foo", ServerData.Type.OTHER),
+            false,
+            null
+          );
+          var connection = new Connection(PacketFlow.CLIENTBOUND);
+          Connection.connect(
+            ServerNameResolver.DEFAULT.resolveAddress(serverAddress)
+              .map(ResolvedServerAddress::asInetSocketAddress)
+              .orElseThrow(),
+            true,
+            connection
+          );
+        }));
 
+        try {
+          SFModThreadLocals.MINECRAFT_INSTANCE.set(minecraft);
+          minecraft.run();
+        } catch (Throwable t) {
+          log.error("Error while running Minecraft", t);
+        }
       });
   }
 
