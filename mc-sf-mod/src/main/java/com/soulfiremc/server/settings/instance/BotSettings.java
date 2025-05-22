@@ -167,6 +167,8 @@ public final class BotSettings implements SettingsObject {
               yield "ghost";
             } else if (LegacyProtocolVersion.PROTOCOLS.contains(version)) {
               yield "archive";
+            } else if (version == ProtocolTranslator.AUTO_DETECT_PROTOCOL) {
+              yield "radar";
             } else {
               throw new RuntimeException("Unknown version: " + version);
             }
@@ -181,6 +183,6 @@ public final class BotSettings implements SettingsObject {
   }
 
   private static String getLatestProtocolVersionId() {
-    return formatVersion(ProtocolTranslator.NATIVE_VERSION);
+    return formatVersion(ProtocolTranslator.AUTO_DETECT_PROTOCOL);
   }
 }

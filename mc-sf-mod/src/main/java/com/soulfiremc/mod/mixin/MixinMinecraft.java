@@ -1,8 +1,8 @@
 package com.soulfiremc.mod.mixin;
 
 import com.mojang.authlib.minecraft.UserApiService;
-import com.soulfiremc.mod.mixin.soulfire.IMinecraft;
-import com.soulfiremc.mod.util.SFModThreadLocals;
+import com.soulfiremc.mod.access.IMinecraft;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.protocol.BotConnection;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
@@ -30,7 +30,7 @@ public class MixinMinecraft implements IMinecraft {
 
   @Inject(method = "getInstance", at = @At("HEAD"), cancellable = true)
   private static void getInstance(CallbackInfoReturnable<Minecraft> cir) {
-    var currentInstance = SFModThreadLocals.MINECRAFT_INSTANCE.get();
+    var currentInstance = SFConstants.MINECRAFT_INSTANCE.get();
     if (currentInstance == null) {
       // new RuntimeException().printStackTrace();
     } else {
@@ -61,7 +61,7 @@ public class MixinMinecraft implements IMinecraft {
 
   @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/ReentrantBlockableEventLoop;<init>(Ljava/lang/String;)V", shift = At.Shift.AFTER))
   private void injectLocalHook(GameConfig arg, CallbackInfo ci) {
-    SFModThreadLocals.MINECRAFT_INSTANCE.set((Minecraft) (Object) this);
+    SFConstants.MINECRAFT_INSTANCE.set((Minecraft) (Object) this);
   }
 
   @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)

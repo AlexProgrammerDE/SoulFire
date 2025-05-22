@@ -18,9 +18,9 @@
 package com.soulfiremc.server.protocol;
 
 import com.google.common.collect.Queues;
-import com.soulfiremc.mod.mixin.soulfire.IMinecraft;
+import com.soulfiremc.mod.access.IMinecraft;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.mod.util.SFModHelpers;
-import com.soulfiremc.mod.util.SFModThreadLocals;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.account.MinecraftAccount;
@@ -70,7 +70,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 @Getter
 public final class BotConnection {
-  public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
+  public static final ThreadLocal<BotConnection> CURRENT = new InheritableThreadLocal<>();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder metadata = new MetadataHolder();
@@ -86,6 +86,7 @@ public final class BotConnection {
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
   private final Minecraft minecraft;
+  @Nullable
   private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
   private boolean explicitlyShutdown = false;
@@ -120,7 +121,7 @@ public final class BotConnection {
 
   @SneakyThrows
   private Minecraft createMinecraftCopy() {
-    var newInstance = SFModHelpers.deepCopy(SFModThreadLocals.BASE_MC_INSTANCE);
+    var newInstance = SFModHelpers.deepCopy(SFConstants.BASE_MC_INSTANCE);
 
     Fields.set(newInstance, Minecraft.class.getDeclaredField("progressTasks"), Queues.newConcurrentLinkedQueue());
     Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
@@ -181,7 +182,7 @@ public final class BotConnection {
         }));
 
         try {
-          SFModThreadLocals.MINECRAFT_INSTANCE.set(minecraft);
+          SFConstants.MINECRAFT_INSTANCE.set(minecraft);
           minecraft.run();
         } catch (Throwable t) {
           log.error("Error while running Minecraft", t);

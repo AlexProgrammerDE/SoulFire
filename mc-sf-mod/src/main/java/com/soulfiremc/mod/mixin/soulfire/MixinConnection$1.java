@@ -1,6 +1,6 @@
 package com.soulfiremc.mod.mixin.soulfire;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.util.netty.NettyHelper;
 import io.netty.channel.Channel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinConnection$1 {
   @Inject(method = "initChannel", at = @At(value = "HEAD"))
   private void injectProxy(Channel channel, CallbackInfo ci) {
-    var proxyData = BotConnection.CURRENT.get().factory().proxyData();
+    var proxyData = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get().proxy();
     if (proxyData == null) {
       return;
     }

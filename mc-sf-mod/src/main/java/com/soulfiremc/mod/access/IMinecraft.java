@@ -1,4 +1,4 @@
-package com.soulfiremc.mod.mixin.soulfire;
+package com.soulfiremc.mod.access;
 
 import com.soulfiremc.server.protocol.BotConnection;
 

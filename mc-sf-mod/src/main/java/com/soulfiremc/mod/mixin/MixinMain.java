@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.soulfiremc.dedicated.SoulFireDedicatedLauncher;
-import com.soulfiremc.mod.util.SFModThreadLocals;
+import com.soulfiremc.mod.util.SFConstants;
 import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
 import net.lenni0451.reflect.Agents;
@@ -45,9 +45,9 @@ public final class MixinMain {
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
   private static void init(Minecraft instance, @Local(argsOnly = true) String[] args) {
     // We want this to not inject anywhere else
-    SFModThreadLocals.MINECRAFT_INSTANCE.remove();
+    SFConstants.MINECRAFT_INSTANCE.remove();
 
-    SFModThreadLocals.BASE_MC_INSTANCE = instance;
+    SFConstants.BASE_MC_INSTANCE = instance;
 
     SoulFireDedicatedLauncher.main(args);
   }
