@@ -144,10 +144,11 @@ public final class InstanceManager {
     this.scheduler.scheduleWithFixedDelay(this::tick, 0, 500, TimeUnit.MILLISECONDS);
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
+    // Resync stopped state to DB
+    this.attackLifecycle(AttackLifecycle.STOPPED);
+
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
       switchToState(null, lastState);
-    } else {
-      attackLifecycle(AttackLifecycle.STOPPED);
     }
   }
 

@@ -90,7 +90,6 @@ public final class BotConnection {
   private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
   private boolean explicitlyShutdown = false;
-  private boolean running = true;
   @Setter
   private boolean pause = false;
 
@@ -127,6 +126,7 @@ public final class BotConnection {
     Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
     Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance));
     Fields.set(newInstance, Minecraft.class.getDeclaredField("gui"), new Gui(newInstance));
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("running"), true);
     Fields.set(newInstance, Minecraft.class.getDeclaredField("user"), new User(
       minecraftAccount.lastKnownName(),
       minecraftAccount.profileId(),
@@ -192,11 +192,19 @@ public final class BotConnection {
 
   public void gracefulDisconnect() {
     synchronized (shutdownLock) {
-      if (!running) {
+      if (!minecraft.isRunning()) {
         return;
       }
 
-      running = false;
+      minecraft.executeBlocking(() -> {
+        if (minecraft.level != null) {
+          minecraft.level.disconnect();
+        }
+
+        minecraft.disconnect();
+      });
+
+      minecraft.stop();
 
       explicitlyShutdown = true;
 
@@ -210,11 +218,19 @@ public final class BotConnection {
 
   public void wasDisconnected() {
     synchronized (shutdownLock) {
-      if (!running) {
+      if (!minecraft.isRunning()) {
         return;
       }
 
-      running = false;
+      minecraft.executeBlocking(() -> {
+        if (minecraft.level != null) {
+          minecraft.level.disconnect();
+        }
+
+        minecraft.disconnect();
+      });
+
+      minecraft.stop();
 
       // Run all shutdown hooks
       shutdownHooks.forEach(Runnable::run);

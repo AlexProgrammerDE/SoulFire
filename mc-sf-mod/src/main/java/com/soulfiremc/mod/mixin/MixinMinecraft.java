@@ -69,11 +69,6 @@ public class MixinMinecraft implements IMinecraft {
     ci.cancel();
   }
 
-  @Inject(method = "stop", at = @At("HEAD"), cancellable = true)
-  private void preventStop(CallbackInfo ci) {
-    ci.cancel();
-  }
-
   @Override
   public BotConnection soulfire$getConnection() {
     return Objects.requireNonNull(soulfire$botConnection, "BotConnection is null");
