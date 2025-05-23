@@ -50,11 +50,7 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -162,24 +158,14 @@ public final class BotConnection {
     return scheduler.runAsync(
       () -> {
         SoulFireAPI.postEvent(new PreBotConnectEvent(this));
-        minecraft.execute(runnableWrapper.wrap(() -> {
-          ConnectScreen.startConnecting(
-            new JoinMultiplayerScreen(new TitleScreen()),
-            minecraft,
-            serverAddress,
-            new ServerData("soulfire", "foo", ServerData.Type.OTHER),
-            false,
-            null
-          );
-          var connection = new Connection(PacketFlow.CLIENTBOUND);
-          Connection.connect(
-            ServerNameResolver.DEFAULT.resolveAddress(serverAddress)
-              .map(ResolvedServerAddress::asInetSocketAddress)
-              .orElseThrow(),
-            true,
-            connection
-          );
-        }));
+        minecraft.execute(runnableWrapper.wrap(() -> ConnectScreen.startConnecting(
+          new JoinMultiplayerScreen(new TitleScreen()),
+          minecraft,
+          serverAddress,
+          new ServerData("soulfire", "foo", ServerData.Type.OTHER),
+          false,
+          null
+        )));
 
         try {
           SFConstants.MINECRAFT_INSTANCE.set(minecraft);

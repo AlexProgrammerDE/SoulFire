@@ -39,6 +39,7 @@
     "sound.MixinMusicManager",
     "sound.MixinSoundBufferLibrary",
     "sound.MixinSoundEngine",
+    "sound.MixinSoundEngineExecutor",
     "sound.MixinSoundManager"
   ],
   "injectors": {
