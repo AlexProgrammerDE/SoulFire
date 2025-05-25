@@ -109,7 +109,7 @@ graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
 graalvm-lsp = "org.graalvm.tools:lsp:23.0.8"
-swc4j = "com.caoccao.javet:swc4j:1.5.0"
+swc4j = "com.caoccao.javet:swc4j:1.6.0"
 angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
