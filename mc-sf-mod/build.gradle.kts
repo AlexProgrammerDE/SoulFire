@@ -26,9 +26,9 @@ val modImplementation: Configuration by configurations.creating
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
-  implementation("org.checkerframework:checker-qual:3.49.3")
+  api("org.checkerframework:checker-qual:3.49.3")
 
-  implementation("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
+  api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
 
   annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2")
   implementation("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2")
@@ -46,7 +46,7 @@ dependencies {
   api(libs.bundles.kyori)
 
   // Newest netty
-  implementation("io.netty:netty-all:4.2.1.Final")
+  api("io.netty:netty-all:4.2.1.Final")
 
   // For microsoft account authentication
   api(libs.minecraftauth) {

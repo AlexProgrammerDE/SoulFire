@@ -502,6 +502,9 @@ public final class InstanceManager {
     });
   }
 
+  // Doesn't shut down properly unless #shutdown() is called
+  // Not sure why, netty moment...
+  @SuppressWarnings("deprecation")
   public CompletableFuture<?> stopAttackSession() {
     return scheduler.runAsync(() -> {
       allBotsConnected.set(false);
@@ -528,6 +531,7 @@ public final class InstanceManager {
         log.info("Shutting down attack event loop groups");
         for (var eventLoopGroup : eventLoopGroups) {
           try {
+            eventLoopGroup.shutdown();
             eventLoopGroup.shutdownGracefully().get();
           } catch (InterruptedException | ExecutionException e) {
             log.error("Error while shutting down", e);
