@@ -167,12 +167,10 @@ public final class BotConnection {
           null
         )));
 
-        try {
+        scheduler.runAsync(() -> {
           SFConstants.MINECRAFT_INSTANCE.set(minecraft);
           minecraft.run();
-        } catch (Throwable t) {
-          log.error("Error while running Minecraft", t);
-        }
+        });
       });
   }
 
