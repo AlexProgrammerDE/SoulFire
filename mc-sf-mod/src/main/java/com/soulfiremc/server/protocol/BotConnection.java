@@ -77,7 +77,6 @@ public final class BotConnection {
   private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
   private final String accountName;
-  private final ProtocolVersion protocolVersion;
   private final ServerAddress serverAddress;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final Object shutdownLock = new Object();
@@ -85,6 +84,8 @@ public final class BotConnection {
   @Nullable
   private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
+  @Setter
+  private ProtocolVersion currentProtocolVersion;
   private boolean explicitlyShutdown = false;
   @Setter
   private boolean pause = false;
@@ -94,7 +95,7 @@ public final class BotConnection {
     InstanceManager instanceManager,
     InstanceSettingsSource settingsSource,
     MinecraftAccount minecraftAccount,
-    ProtocolVersion protocolVersion,
+    ProtocolVersion currentProtocolVersion,
     ServerAddress serverAddress,
     @Nullable
     SFProxy proxyData,
@@ -107,11 +108,11 @@ public final class BotConnection {
     this.accountName = minecraftAccount.lastKnownName();
     this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
-    this.protocolVersion = protocolVersion;
     this.serverAddress = serverAddress;
     this.minecraft = createMinecraftCopy();
     this.proxy = proxyData;
     this.eventLoopGroup = eventLoopGroup;
+    this.currentProtocolVersion = currentProtocolVersion;
   }
 
   @SneakyThrows

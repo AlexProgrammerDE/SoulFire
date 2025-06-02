@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.adventure;
 
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -26,7 +27,7 @@ import net.kyori.ansi.ColorLevel;
 public final class SoulFireAdventure {
   public static final ComponentFlattener FLATTENER =
     ComponentFlattener.basic().toBuilder()
-      // TODO: Map i18n
+      .mapper(TranslatableComponent.class, TranslationMapper.INSTANCE)
       .build();
   public static final PlainTextComponentSerializer PLAIN_MESSAGE_SERIALIZER =
     PlainTextComponentSerializer.builder()
