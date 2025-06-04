@@ -17,8 +17,11 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.log4j.SFLogAppender;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
 import io.netty.util.ResourceLeakDetector;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +98,36 @@ public abstract class SoulFireAbstractBootstrap {
       (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
   }
 
+  private void initPlugins() {
+    try (var scanResult =
+           new ClassGraph()
+             .verbose()
+             .enableAllInfo()
+             .acceptPackages("com.soulfiremc.server.plugins")
+             .scan()) {
+      scanResult.getClassesWithAnnotation(InternalPluginClass.class)
+        .stream()
+        .sorted((a, b) -> {
+          var aPriority = (InternalPluginClass) a.getAnnotationInfo(InternalPluginClass.class).loadClassAndInstantiate();
+          var bPriority = (InternalPluginClass) b.getAnnotationInfo(InternalPluginClass.class).loadClassAndInstantiate();
+          return Integer.compare(aPriority.order(), bPriority.order());
+        })
+        .forEach(this::processRouteClass);
+    } catch (Throwable t) {
+      log.error("Failed to initialize plugins", t);
+      throw new RuntimeException("Failed to initialize plugins", t);
+    }
+  }
+
+  private void processRouteClass(ClassInfo classInfo) {
+    try {
+      var clazz = classInfo.loadClass();
+      clazz.getConstructor().newInstance();
+    } catch (Throwable t) {
+      log.error("Failed to load plugin class {}", classInfo.getName(), t);
+    }
+  }
+
   @SneakyThrows
   protected void internalBootstrap(String[] args) {
     try {
@@ -112,6 +145,8 @@ public abstract class SoulFireAbstractBootstrap {
       injectFileProperties();
 
       injectExceptionHandler();
+
+      initPlugins();
 
       injectMixinsAndRun(args);
     } catch (Throwable t) {

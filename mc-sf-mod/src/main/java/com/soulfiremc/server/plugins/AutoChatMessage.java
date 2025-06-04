@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -31,6 +32,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@InternalPluginClass
 public final class AutoChatMessage extends InternalPlugin {
   public AutoChatMessage() {
     super(new PluginInfo(

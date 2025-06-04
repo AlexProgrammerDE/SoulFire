@@ -22,6 +22,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -42,6 +43,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@InternalPluginClass
 public final class ChatLogger extends InternalPlugin {
   private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_logger", "chat_messages", Cache.class);
 

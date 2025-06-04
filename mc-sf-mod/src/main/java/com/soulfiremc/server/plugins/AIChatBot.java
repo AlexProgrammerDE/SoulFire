@@ -20,6 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.openai.models.chat.completions.*;
 import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -36,6 +37,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 import java.util.ArrayList;
 
 @Slf4j
+@InternalPluginClass
 public final class AIChatBot extends InternalPlugin {
   private static final MetadataKey<ChatCompletionCreateParams> PLAYER_CONVERSATIONS = MetadataKey.of("ai_chat_bot", "conversations", ChatCompletionCreateParams.class);
 

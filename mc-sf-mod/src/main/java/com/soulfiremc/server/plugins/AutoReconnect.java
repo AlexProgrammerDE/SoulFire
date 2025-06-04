@@ -18,6 +18,7 @@
 package com.soulfiremc.server.plugins;
 
 import com.soulfiremc.server.api.InternalPlugin;
+import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
@@ -30,6 +31,7 @@ import net.lenni0451.lambdaevents.EventHandler;
 
 import java.util.concurrent.TimeUnit;
 
+@InternalPluginClass
 public final class AutoReconnect extends InternalPlugin {
   public AutoReconnect() {
     super(new PluginInfo(
