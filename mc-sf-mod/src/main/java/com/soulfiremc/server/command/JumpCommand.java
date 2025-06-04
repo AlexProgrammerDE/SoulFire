@@ -37,7 +37,7 @@ public final class JumpCommand {
                   bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
                     var controlState = bot.controlState();
 
-                    controlState.jumping(!controlState.jumping());
+                    controlState.jump(!controlState.jump());
                   }));
                   return Command.SINGLE_SUCCESS;
                 }))));

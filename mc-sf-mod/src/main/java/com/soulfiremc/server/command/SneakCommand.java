@@ -37,7 +37,7 @@ public final class SneakCommand {
                   bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
                     var controlState = bot.controlState();
 
-                    controlState.sneaking(!controlState.sneaking());
+                    controlState.shift(!controlState.shift());
                   }));
                   return Command.SINGLE_SUCCESS;
                 }))));

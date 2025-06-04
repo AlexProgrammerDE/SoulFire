@@ -36,6 +36,7 @@
     "rendering.MixinRenderTarget",
     "rendering.MixinScreen",
     "rendering.MixinWindow",
+    "soulfire.MixinKeyboardInput",
     "sound.MixinMusicManager",
     "sound.MixinSoundBufferLibrary",
     "sound.MixinSoundEngine",
