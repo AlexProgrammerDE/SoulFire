@@ -46,6 +46,11 @@ public final class ServerCommandManager {
     WhoAmICommand.register(dispatcher);
     PluginsCommand.register(dispatcher);
 
+    // Movement controls
+    JumpCommand.register(dispatcher);
+    SneakCommand.register(dispatcher);
+    ResetCommand.register(dispatcher);
+
     // Attack controls
     StartAttackCommand.register(dispatcher);
     PauseAttackCommand.register(dispatcher);
@@ -53,6 +58,13 @@ public final class ServerCommandManager {
 
     // Spark
     SparkCommand.register(dispatcher);
+
+    // Utility commands
+    OnlineCommand.register(dispatcher);
+    SayCommand.register(dispatcher);
+    RespawnCommand.register(dispatcher);
+    InventoryCommand.register(dispatcher);
+    HealthCommand.register(dispatcher);
 
     // Documentation commands
     PrintVersionsCommand.register(dispatcher);

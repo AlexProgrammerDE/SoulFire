@@ -70,6 +70,8 @@ public final class BotConnection {
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder metadata = new MetadataHolder();
+  private final ControlState controlState = new ControlState();
+  private final BotControlAPI botControl = new BotControlAPI();
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;

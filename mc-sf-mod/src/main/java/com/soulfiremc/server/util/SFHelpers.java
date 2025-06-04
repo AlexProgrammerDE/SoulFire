@@ -20,6 +20,8 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import com.soulfiremc.server.util.structs.SafeCloseable;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.shredzone.acme4j.exception.AcmeProtocolException;
 import org.slf4j.MDC;
@@ -291,5 +293,15 @@ public final class SFHelpers {
     var dotIndex = filename.lastIndexOf('.');
     if (dotIndex == -1) return filename + "." + newExt; // No extension found
     return filename.substring(0, dotIndex) + "." + newExt;
+  }
+
+  public static void sendChatMessage(Minecraft minecraft, String message) {
+    if (minecraft.player == null) {
+      return;
+    }
+
+    var chatScreen = new ChatScreen("");
+    chatScreen.init(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+    chatScreen.handleChatInput(message, false);
   }
 }

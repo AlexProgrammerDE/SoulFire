@@ -15,30 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test;
+package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.server.util.log4j.SFLogAppender;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.nio.file.Path;
-import java.time.Instant;
+@Setter
+@Getter
+@ToString
+public final class ControlState {
+  private boolean forward;
+  private boolean backward;
+  private boolean left;
+  private boolean right;
+  private boolean jumping;
+  private boolean sneaking;
+  private boolean sprinting;
+  private boolean flying;
 
-public final class LoadTest {
-  @TempDir
-  public Path tempDir;
+  public void resetWasd() {
+    forward = false;
+    backward = false;
+    left = false;
+    right = false;
+  }
 
-  @Test
-  public void testLoad() {
-    System.setProperty("sf.unit.test", "true");
-
-    SFLogAppender.INSTANCE.start();
-
-    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now(), tempDir);
-
-    server.shutdownManager().shutdownSoftware(false);
-    server.shutdownManager().awaitShutdown();
+  public void resetAll() {
+    resetWasd();
+    sprinting = false;
+    jumping = false;
+    sneaking = false;
+    flying = false;
   }
 }
