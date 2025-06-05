@@ -12,7 +12,7 @@
     "soulfire.MixinConnection$1",
     "soulfire.MixinFontCacheReload",
     "soulfire.MixinProtocolTranslator",
-    "soulfire.ViaBedrockConfigMixin"
+    "soulfire.MixinViaBedrockConfig"
   ],
   "client": [
     "MixinMinecraft",

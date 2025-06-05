@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ViaBedrockConfig.class)
-public final class ViaBedrockConfigMixin {
+public final class MixinViaBedrockConfig {
   @Inject(method = "shouldTranslateResourcePacks", at = @At("HEAD"), cancellable = true)
   public void shouldTranslateResourcePacks(CallbackInfoReturnable<Boolean> cir) {
     cir.setReturnValue(false);
