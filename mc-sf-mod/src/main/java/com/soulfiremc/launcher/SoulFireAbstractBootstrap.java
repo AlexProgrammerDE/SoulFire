@@ -108,9 +108,9 @@ public abstract class SoulFireAbstractBootstrap {
       scanResult.getClassesWithAnnotation(InternalPluginClass.class)
         .stream()
         .sorted((a, b) -> {
-          var aPriority = (InternalPluginClass) a.getAnnotationInfo(InternalPluginClass.class).loadClassAndInstantiate();
-          var bPriority = (InternalPluginClass) b.getAnnotationInfo(InternalPluginClass.class).loadClassAndInstantiate();
-          return Integer.compare(aPriority.order(), bPriority.order());
+          var aOrder = (int) a.getAnnotationInfo(InternalPluginClass.class).getParameterValues().getValue("order");
+          var bOrder = (int) b.getAnnotationInfo(InternalPluginClass.class).getParameterValues().getValue("order");
+          return Integer.compare(aOrder, bOrder);
         })
         .forEach(this::processRouteClass);
     } catch (Throwable t) {
