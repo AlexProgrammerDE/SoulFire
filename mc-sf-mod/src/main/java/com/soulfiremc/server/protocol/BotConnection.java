@@ -87,6 +87,7 @@ public final class BotConnection {
   @Nullable
   private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
+  private final SFSessionService sessionService;
   @Setter
   private ProtocolVersion currentProtocolVersion;
   private boolean explicitlyShutdown = false;
@@ -115,6 +116,7 @@ public final class BotConnection {
     this.minecraft = createMinecraftCopy();
     this.proxy = proxyData;
     this.eventLoopGroup = eventLoopGroup;
+    this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
   }
 

@@ -17,39 +17,39 @@
  */
 package com.soulfiremc.server.protocol;
 
-import com.soulfiremc.server.account.AuthType;
-import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.account.service.BedrockData;
+import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.UUIDHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.AllArgsConstructor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.netty.ByteBufFlux;
 
 import java.net.URI;
-import java.util.UUID;
 
+@RequiredArgsConstructor
 public final class SFSessionService {
   private static final URI MOJANG_JOIN_URI =
     URI.create("https://sessionserver.mojang.com/session/minecraft/join");
+  private final BotConnection botConnection;
 
-  private final URI joinEndpoint;
-  @Nullable
-  private final SFProxy proxyData;
+  public void joinServer(String serverId) {
+    var account = botConnection.minecraftAccount();
+    var joinEndpoint = switch (account.authType()) {
+      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
+      case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Invalid auth type");
+    };
+    var authenticationToken = switch (account.accountData()) {
+      case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.authToken();
+      case OfflineJavaData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
+      case BedrockData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
+    };
 
-  public SFSessionService(AuthType authType, @Nullable SFProxy proxyData) {
-    this.joinEndpoint =
-      switch (authType) {
-        case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
-        case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Invalid auth type");
-      };
-    this.proxyData = proxyData;
-  }
-
-  public void joinServer(UUID profileId, String authenticationToken, String serverId) {
-    ReactorHttpHelper.createReactorClient(proxyData, true)
+    ReactorHttpHelper.createReactorClient(botConnection.proxy(), true)
       .post()
       .uri(joinEndpoint)
       .send(
@@ -58,7 +58,7 @@ public final class SFSessionService {
             GsonInstance.GSON.toJson(
               new JoinServerRequest(
                 authenticationToken,
-                UUIDHelper.convertToNoDashes(profileId),
+                UUIDHelper.convertToNoDashes(botConnection.accountProfileId()),
                 serverId)))))
       .responseSingle(
         (res, content) -> {
