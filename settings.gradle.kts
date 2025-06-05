@@ -33,13 +33,9 @@ develocity {
 }
 
 include(
-  "data-generator",
   "build-data",
-  "j8-launcher",
   "proto",
-  "server",
-  "dedicated",
-  "client"
+  "mc-sf-mod",
 )
 
 rootProject.name = "soulfire"
