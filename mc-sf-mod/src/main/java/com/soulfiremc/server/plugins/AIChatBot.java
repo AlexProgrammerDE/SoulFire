@@ -122,7 +122,7 @@ public final class AIChatBot extends InternalPlugin {
       }
 
       log.debug("AI response: {}", response);
-      SFHelpers.sendChatMessage(event.connection().minecraft(), response);
+      event.connection().sendChatMessage(response);
     } catch (Exception e) {
       log.error("Failed to chat with AI", e);
     }

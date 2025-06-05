@@ -46,6 +46,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -225,6 +226,16 @@ public final class BotConnection {
       // Shut down all executors
       scheduler.shutdown();
     }
+  }
+
+  public void sendChatMessage(String message) {
+    if (minecraft.player == null) {
+      return;
+    }
+
+    var chatScreen = new ChatScreen("");
+    chatScreen.init(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+    chatScreen.handleChatInput(message, false);
   }
 
   private record BotRunnableWrapper(BotConnection botConnection) implements SoulFireScheduler.RunnableWrapper {

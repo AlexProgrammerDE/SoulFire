@@ -20,7 +20,6 @@ package com.soulfiremc.server.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.soulfiremc.server.util.SFHelpers;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -39,7 +38,7 @@ public final class SayCommand {
                   return forEveryBot(
                     c,
                     bot -> {
-                      SFHelpers.sendChatMessage(bot.minecraft(), message);
+                      bot.sendChatMessage(message);
 
                       return Command.SINGLE_SUCCESS;
                     });

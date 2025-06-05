@@ -55,7 +55,7 @@ public final class AutoChatMessage extends InternalPlugin {
           return;
         }
 
-        SFHelpers.sendChatMessage(connection.minecraft(), SFHelpers.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
+        connection.sendChatMessage(SFHelpers.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },
       settingsSource.getRandom(AutoChatMessageSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);

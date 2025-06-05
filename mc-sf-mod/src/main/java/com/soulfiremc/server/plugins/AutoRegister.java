@@ -27,7 +27,6 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.StringProperty;
-import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -59,17 +58,18 @@ public final class AutoRegister extends InternalPlugin {
     // TODO: Add more password options
     if (plainMessage.contains("/register")) {
       var registerCommand = settingsSource.get(AutoRegisterSettings.REGISTER_COMMAND);
-      SFHelpers.sendChatMessage(connection.minecraft(), registerCommand.replace("%password%", password));
+      connection.sendChatMessage(registerCommand.replace("%password%", password));
     } else if (plainMessage.contains("/login")) {
       var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
-      SFHelpers.sendChatMessage(connection.minecraft(), loginCommand.replace("%password%", password));
+      connection.sendChatMessage(loginCommand.replace("%password%", password));
     } else if (plainMessage.contains("/captcha")) {
       var captchaCommand = settingsSource.get(AutoRegisterSettings.CAPTCHA_COMMAND);
       var split = plainMessage.split(" ");
 
       for (var i = 0; i < split.length; i++) {
         if (split[i].equals("/captcha")) {
-          SFHelpers.sendChatMessage(connection.minecraft(), captchaCommand.replace("%captcha%", split[i + 1]));
+          connection.sendChatMessage(captchaCommand.replace("%captcha%", split[i + 1]));
+          break;
         }
       }
     }
