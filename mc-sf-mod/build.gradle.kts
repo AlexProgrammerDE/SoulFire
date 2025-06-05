@@ -34,6 +34,7 @@ dependencies {
   implementation("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2")
 
   modImplementation("com.viaversion:viafabricplus:4.1.4")
+  modImplementation("net.kyori:adventure-platform-fabric:6.4.0")
 
   // For CLI support
   api(libs.picoli)
