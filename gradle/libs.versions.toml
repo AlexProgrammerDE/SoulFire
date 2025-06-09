@@ -66,7 +66,7 @@ guava = "com.google.guava:guava:33.4.8-jre"
 gson = "com.google.code.gson:gson:2.13.1"
 pf4j = "org.pf4j:pf4j:3.13.0"
 fastutil = "it.unimi.dsi:fastutil:8.5.15"
-caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.0"
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.1"
 jetbrains-annotations = "org.jetbrains:annotations:26.0.2"
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
 classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdummy", version.ref = "classtransform" }
@@ -101,7 +101,7 @@ hibernate-validator-cdi = "org.hibernate.validator:hibernate-validator-cdi:9.0.0
 expressly = "org.glassfish.expressly:expressly:6.0.0"
 hikaricp = "com.zaxxer:HikariCP:6.3.0"
 mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.3"
-sqlite = "org.xerial:sqlite-jdbc:3.49.1.0"
+sqlite = "org.xerial:sqlite-jdbc:3.50.1.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.5.1"
 joml = "org.joml:joml:1.10.8"
 kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.1.21"
