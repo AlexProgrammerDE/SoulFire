@@ -17,14 +17,14 @@
  */
 package com.soulfiremc.server.viaversion.providers;
 
-import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.model.GameProfile;
+import com.viaversion.viaversion.api.minecraft.GameProfile;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
 
 import java.util.UUID;
 
 public final class SFViaGameProfileFetcher extends GameProfileFetcher {
   @Override
-  public UUID loadMojangUUID(String playerName) {
+  public UUID loadMojangUuid(String playerName) {
     throw new UnsupportedOperationException("This is not supported!");
   }
 
