@@ -93,7 +93,8 @@ swc4j-linux-x86_64 = { module = "com.caoccao.javet:swc4j-linux-x86_64", version.
 swc4j-macos-arm64 = { module = "com.caoccao.javet:swc4j-macos-arm64", version.ref = "swc4j" }
 swc4j-macos-x86_64 = { module = "com.caoccao.javet:swc4j-macos-x86_64", version.ref = "swc4j" }
 swc4j-windows-arm64 = { module = "com.caoccao.javet:swc4j-windows-arm64", version.ref = "swc4j" }
-swc4j-windows-x86_64 = { module = "com.caoccao.javet:swc4j-windows-x86_64", version.ref = "swc4j" }angus = "org.eclipse.angus:angus-mail:2.0.3"
+swc4j-windows-x86_64 = { module = "com.caoccao.javet:swc4j-windows-x86_64", version.ref = "swc4j" }
+angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit = "org.junit.jupiter:junit-jupiter:5.12.2"

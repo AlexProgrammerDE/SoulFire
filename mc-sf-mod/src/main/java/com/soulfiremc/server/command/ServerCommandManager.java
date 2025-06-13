@@ -56,6 +56,8 @@ public final class ServerCommandManager {
     MimicCommand.register(dispatcher);
 
     // Inventory controls
+    UseItemCommand.register(dispatcher);
+    UseItemOnCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
 
     // Attack controls
