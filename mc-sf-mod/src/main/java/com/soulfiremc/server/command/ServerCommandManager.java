@@ -53,6 +53,7 @@ public final class ServerCommandManager {
     SneakCommand.register(dispatcher);
     SprintCommand.register(dispatcher);
     ResetCommand.register(dispatcher);
+    MimicCommand.register(dispatcher);
 
     // Inventory controls
     InventoryCommand.register(dispatcher);
