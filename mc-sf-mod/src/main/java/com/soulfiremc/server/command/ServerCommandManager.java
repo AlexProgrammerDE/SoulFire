@@ -54,6 +54,9 @@ public final class ServerCommandManager {
     SprintCommand.register(dispatcher);
     ResetCommand.register(dispatcher);
 
+    // Inventory controls
+    InventoryCommand.register(dispatcher);
+
     // Attack controls
     StartAttackCommand.register(dispatcher);
     PauseAttackCommand.register(dispatcher);
@@ -66,7 +69,6 @@ public final class ServerCommandManager {
     OnlineCommand.register(dispatcher);
     SayCommand.register(dispatcher);
     RespawnCommand.register(dispatcher);
-    InventoryCommand.register(dispatcher);
     HealthCommand.register(dispatcher);
     StopTaskCommand.register(dispatcher);
 
