@@ -59,6 +59,7 @@ public final class ServerCommandManager {
     UseItemCommand.register(dispatcher);
     UseItemOnCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
+    InteractCommand.register(dispatcher);
 
     // Attack controls
     StartAttackCommand.register(dispatcher);
