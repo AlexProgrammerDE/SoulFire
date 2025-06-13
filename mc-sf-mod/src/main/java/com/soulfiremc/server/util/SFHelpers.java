@@ -20,10 +20,13 @@ package com.soulfiremc.server.util;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import com.soulfiremc.server.util.structs.SafeCloseable;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.shredzone.acme4j.exception.AcmeProtocolException;
 import org.slf4j.MDC;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -291,5 +294,16 @@ public final class SFHelpers {
     var dotIndex = filename.lastIndexOf('.');
     if (dotIndex == -1) return filename + "." + newExt; // No extension found
     return filename.substring(0, dotIndex) + "." + newExt;
+  }
+
+  public static BufferedImage toBufferedImage(MapItemSavedData map) {
+    var image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+    for (var x = 0; x < 128; ++x) {
+      for (var y = 0; y < 128; ++y) {
+        image.setRGB(x, y, MapColor.getColorFromPackedId(map.colors[x + y * 128]));
+      }
+    }
+
+    return image;
   }
 }

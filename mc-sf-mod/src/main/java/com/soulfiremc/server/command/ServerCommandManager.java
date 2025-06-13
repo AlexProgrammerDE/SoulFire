@@ -74,6 +74,7 @@ public final class ServerCommandManager {
     SayCommand.register(dispatcher);
     RespawnCommand.register(dispatcher);
     HealthCommand.register(dispatcher);
+    ExportMapCommand.register(dispatcher);
     StopTaskCommand.register(dispatcher);
 
     // Documentation commands
