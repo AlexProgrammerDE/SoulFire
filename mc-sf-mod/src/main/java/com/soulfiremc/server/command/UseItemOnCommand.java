@@ -67,10 +67,6 @@ public final class UseItemOnCommand {
                                     return;
                                   }
 
-                                  if (itemStack.isEmpty()) {
-                                    return;
-                                  }
-
                                   var targetBlockPos = BlockPos.containing(DoubleAxisArgumentType.forXYZAxis(blockX, blockY, blockZ, player.position()));
                                   if (gameMode.useItemOn(
                                     player,
