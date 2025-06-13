@@ -47,8 +47,11 @@ public final class ServerCommandManager {
     PluginsCommand.register(dispatcher);
 
     // Movement controls
+    LookAtCommand.register(dispatcher);
+    MoveCommand.register(dispatcher);
     JumpCommand.register(dispatcher);
     SneakCommand.register(dispatcher);
+    SprintCommand.register(dispatcher);
     ResetCommand.register(dispatcher);
 
     // Attack controls
@@ -65,6 +68,7 @@ public final class ServerCommandManager {
     RespawnCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
     HealthCommand.register(dispatcher);
+    StopTaskCommand.register(dispatcher);
 
     // Documentation commands
     PrintVersionsCommand.register(dispatcher);
