@@ -20,7 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.bot.BotJoinedEvent;
+import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
@@ -46,7 +46,7 @@ public final class AutoJump extends InternalPlugin {
   }
 
   @EventHandler
-  public static void onJoined(BotJoinedEvent event) {
+  public static void onJoined(BotConnectionInitEvent event) {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
     connection.scheduler().scheduleWithDynamicDelay(

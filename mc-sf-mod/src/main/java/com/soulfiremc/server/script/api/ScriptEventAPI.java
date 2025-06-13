@@ -57,8 +57,6 @@ public class ScriptEventAPI {
       var botApi = new ScriptBotAPI(botEvent.connection());
       switch (event) {
         case BotConnectionInitEvent ignored -> forwardEvent("connectionInit", botApi);
-        case BotDisconnectedEvent ignored -> forwardEvent("disconnected", botApi);
-        case BotJoinedEvent ignored -> forwardEvent("joined", botApi);
         case BotPostEntityTickEvent ignored -> forwardEvent("postEntityTick", botApi);
         case BotPostTickEvent ignored -> forwardEvent("postTick", botApi);
         case BotPreEntityTickEvent ignored -> forwardEvent("preEntityTick", botApi);
