@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
   implementation("org.vineflower:vineflower:1.11.1")
-  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.26.4")
+  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.27.0")
   implementation(libs.reflect)
 }
 
