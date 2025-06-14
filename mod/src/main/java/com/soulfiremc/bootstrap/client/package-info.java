@@ -17,8 +17,6 @@
  */
 /**
  * The bootstrap package for java SoulFire clients.
- *
- * @see com.soulfiremc.bootstrap.client.cli
  */
 @DefaultQualifier(value = NonNull.class, locations = {TypeUseLocation.PARAMETER, TypeUseLocation.RETURN})
 package com.soulfiremc.bootstrap.client;

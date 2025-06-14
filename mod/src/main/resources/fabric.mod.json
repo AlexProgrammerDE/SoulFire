@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "soulfire-data-generator",
+  "id": "soulfire",
   "version": "${version}",
-  "name": "SoulFire Data Generator",
+  "name": "SoulFire Mod",
   "description": "",
   "authors": [
     "Pistonmaster"
@@ -16,7 +16,7 @@
     ]
   },
   "mixins": [
-    "soulfire-data-generator.mixins.json"
+    "soulfire.mixins.json"
   ],
   "accessWidener": "soulfire.accesswidener",
   "depends": {
