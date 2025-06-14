@@ -33,13 +33,14 @@ develocity {
 }
 
 include(
-  "data-generator",
   "build-data",
-  "j8-launcher",
   "proto",
-  "server",
-  "dedicated",
-  "client"
+  "shared",
+  "mod",
+  "launcher",
+  "j8-launcher",
+  "client-launcher",
+  "dedicated-launcher",
 )
 
 rootProject.name = "soulfire"

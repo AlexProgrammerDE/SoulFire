@@ -1,0 +1,53 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.soulfiremc.mod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinMain",
+    "fixes.MixinReloadableResourceManager",
+    "optimization.MixinDataFixers",
+    "soulfire.MixinAggregatedClassLoader",
+    "soulfire.MixinConnection",
+    "soulfire.MixinConnection$1",
+    "soulfire.MixinFontCacheReload",
+    "soulfire.MixinProtocolTranslator",
+    "soulfire.MixinViaBedrockConfig"
+  ],
+  "client": [
+    "MixinMinecraft",
+    "bloat.MixinDataFetcherSubscription",
+    "bloat.MixinQuickPlayLog",
+    "bloat.MixinRealmsAvailability",
+    "bloat.MixinRealmsClient",
+    "bloat.MixinRealmsPersistence",
+    "bloat.MixinWorldSessionTelemetryManager",
+    "fixes.MixinChatComponent",
+    "fixes.MixinResourceManagerReloadListener",
+    "fixes.MixinServerList",
+    "optimization.MixinClientPacketListener",
+    "rendering.MixinClientChunkCache",
+    "rendering.MixinClientLevel",
+    "rendering.MixinGameRenderer",
+    "rendering.MixinLevelRenderer",
+    "rendering.MixinMouseHandler",
+    "rendering.MixinParticleEngine",
+    "rendering.MixinRenderSystem",
+    "rendering.MixinRenderTarget",
+    "rendering.MixinScreen",
+    "rendering.MixinWindow",
+    "soulfire.MixinClientHandshakePacketListenerImpl",
+    "soulfire.MixinClientLevel",
+    "soulfire.MixinConnectScreen",
+    "soulfire.MixinKeyboardInput",
+    "soulfire.MixinMinecraft",
+    "sound.MixinMusicManager",
+    "sound.MixinSoundBufferLibrary",
+    "sound.MixinSoundEngine",
+    "sound.MixinSoundEngineExecutor",
+    "sound.MixinSoundManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
