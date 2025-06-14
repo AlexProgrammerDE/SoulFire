@@ -41,14 +41,6 @@ dependencies {
   api("commons-codec:commons-codec:1.17.1")
   api("commons-io:commons-io:2.17.0")
   api("commons-logging:commons-logging:1.3.4")
-  api("io.netty:netty-buffer:4.1.118.Final")
-  api("io.netty:netty-codec:4.1.118.Final")
-  api("io.netty:netty-common:4.1.118.Final")
-  api("io.netty:netty-handler:4.1.118.Final")
-  api("io.netty:netty-resolver:4.1.118.Final")
-  api("io.netty:netty-transport-classes-epoll:4.1.118.Final")
-  api("io.netty:netty-transport-native-unix-common:4.1.118.Final")
-  api("io.netty:netty-transport:4.1.118.Final")
   api("it.unimi.dsi:fastutil:8.5.15")
   api("net.java.dev.jna:jna-platform:5.15.0")
   api("net.java.dev.jna:jna:5.15.0")
@@ -142,7 +134,15 @@ dependencies {
   api(libs.mariadb)
 
   // For script support
-  api(libs.bundles.graalvm.polyglot)
+  api(
+    files(
+    configurations.detachedConfiguration(
+      *libs.bundles.graalvm.polyglot.get()
+        .map { it -> dependencies.create(it) }
+        .toTypedArray())
+      .resolve()
+      .filter { file -> file.name.endsWith(".jar") }
+  ))
   api(libs.bundles.swc4j)
 
   // For mail support
