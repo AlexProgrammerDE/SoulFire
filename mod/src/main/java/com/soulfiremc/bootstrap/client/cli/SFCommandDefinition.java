@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.bootstrap.client.cli;
 
-import com.soulfiremc.bootstrap.client.cli.CLIManager;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
@@ -128,9 +127,6 @@ public final class SFCommandDefinition implements Callable<Integer> {
       cliManager.shutdown();
       return 0;
     }
-
-    // Delayed to here, so help and version do not get cut off
-    GenericTerminalConsole.setupStreams();
 
     cliManager.clientSettingsManager().commandDefinition(this);
 

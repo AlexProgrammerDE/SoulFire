@@ -19,25 +19,17 @@ package com.soulfiremc.bootstrap;
 
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.shared.SFLogAppender;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
-import io.netty.util.ResourceLeakDetector;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.reflect.Fields;
 import org.apache.logging.log4j.LogManager;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.Security;
 import java.time.Instant;
 import java.util.Scanner;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinWorkerThread;
 
 /**
  * This class prepares the earliest work possible, such as loading mixins and setting up logging.
@@ -45,25 +37,6 @@ import java.util.concurrent.ForkJoinWorkerThread;
 @Slf4j
 public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();
-
-  static {
-    // Install the Log4J JUL bridge
-    org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
-
-    // If Velocity's natives are being extracted to a different temporary directory, make sure the
-    // Netty natives are extracted there as well
-    if (System.getProperty("velocity.natives-tmpdir") != null) {
-      System.setProperty("io.netty.native.workdir", System.getProperty("velocity.natives-tmpdir"));
-    }
-
-    // Disable the resource leak detector by default as it reduces performance. Allow the user to
-    // override this if desired.
-    if (System.getProperty("io.netty.leakDetection.level") == null) {
-      ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
-    }
-
-    Security.addProvider(new BouncyCastleProvider());
-  }
 
   protected SoulFireAbstractBootstrap() {}
 
@@ -79,23 +52,6 @@ public abstract class SoulFireAbstractBootstrap {
 
   public static String getRPCHost(String defaultHost) {
     return System.getProperty("sf.grpc.host", defaultHost);
-  }
-
-  private static void sendFlagsInfo() {
-    if (Boolean.getBoolean("sf.flags.v1")) {
-      return;
-    }
-
-    log.warn("We detected you are not using the recommended flags for SoulFire!");
-    log.warn("Please add the following flags to your JVM arguments:");
-    log.warn("-XX:+EnableDynamicAgentLoading -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysActAsServerClassMachine -XX:+UseNUMA -XX:+UseFastUnorderedTimeStamps -XX:+UseVectorCmov -XX:+UseCriticalJavaThreadPriority -Dsf.flags.v1=true");
-    log.warn("The startup command should look like: 'java -Xmx<ram> <flags> -jar <jarfile>'");
-    log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
-  }
-
-  public static void injectExceptionHandler() {
-    Thread.setDefaultUncaughtExceptionHandler(
-      (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
   }
 
   private void initPlugins() {
@@ -131,20 +87,7 @@ public abstract class SoulFireAbstractBootstrap {
   @SneakyThrows
   protected void internalBootstrap(String[] args) {
     try {
-      var forkJoinPoolFactory = new CustomThreadFactory();
-      // Ensure the ForkJoinPool uses our custom thread factory
-      Fields.set(ForkJoinPool.commonPool(), ForkJoinPool.class.getDeclaredField("factory"), forkJoinPoolFactory);
-      Fields.set(null, ForkJoinPool.class.getDeclaredField("defaultForkJoinWorkerThreadFactory"), forkJoinPoolFactory);
-
-      SFLogAppender.INSTANCE.start();
-
-      AnsiConsole.systemInstall();
-
-      sendFlagsInfo();
-
       injectFileProperties();
-
-      injectExceptionHandler();
 
       initPlugins();
 
@@ -200,19 +143,4 @@ public abstract class SoulFireAbstractBootstrap {
   protected abstract void postMixinMain(String[] args);
 
   protected abstract Path getBaseDirectory();
-
-  private static class CustomThreadFactory implements ForkJoinPool.ForkJoinWorkerThreadFactory {
-    @Override
-    public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-      var thread = new CustomForkJoinWorkerThread(pool);
-      thread.setContextClassLoader(Thread.currentThread().getContextClassLoader());
-      return thread;
-    }
-  }
-
-  private static class CustomForkJoinWorkerThread extends ForkJoinWorkerThread {
-    protected CustomForkJoinWorkerThread(ForkJoinPool pool) {
-      super(pool);
-    }
-  }
 }

@@ -102,6 +102,10 @@ public abstract class SoulFireAbstractLauncher {
   private static void loadLibs() {
     var librariesPath = Path.of("libraries");
     var extractedLibs = createLibClassLoader(librariesPath);
+    if (extractedLibs.length == 0) {
+      System.out.println("No libraries found in META-INF/dependency-list.txt, skipping library loading.");
+      return;
+    }
 
     var reflectLibPath = Arrays.stream(extractedLibs).filter(path -> path.getFileName().toString().startsWith("Reflect-"))
       .findFirst()
@@ -149,9 +153,10 @@ public abstract class SoulFireAbstractLauncher {
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.DEBUG_DISABLE_CLASS_PATH_ISOLATION, "true");
     System.setProperty(SystemProperties.DEBUG_DEOBFUSCATE_WITH_CLASSPATH, "true");
-    System.setProperty("sf.boostrap.class", getBootstrapClassName());
+    System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
     loadLibs();
+    SoulFireEarlyBootstrap.preFabricBootstrap();
     loadAndInjectMinecraftJar();
     setupManagedMods();
 

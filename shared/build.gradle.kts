@@ -62,7 +62,6 @@ dependencies {
   api("org.lwjgl:lwjgl-tinyfd:3.3.3")
   api("org.lwjgl:lwjgl:3.3.3")
   api("org.lz4:lz4-java:1.8.0")
-  api("org.ow2.asm:asm:9.6")
   api("org.slf4j:slf4j-api:2.0.16")
 
   api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
