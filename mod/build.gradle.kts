@@ -42,15 +42,6 @@ unimined.minecraft {
     devFallbackNamespace("intermediary")
   }
 
-  runs.config("server") {
-    javaVersion = JavaVersion.VERSION_21
-  }
-
-  runs.config("client") {
-    javaVersion = JavaVersion.VERSION_21
-    standardInput = System.`in`
-  }
-
   fabric {
     loader("0.16.14")
     accessWidener(project.projectDir.resolve("src/main/resources/soulfire.accesswidener"))
@@ -66,6 +57,7 @@ unimined.minecraft {
   }
 
   defaultRemapJar = true
+  runs.off = true
 }
 
 tasks {
