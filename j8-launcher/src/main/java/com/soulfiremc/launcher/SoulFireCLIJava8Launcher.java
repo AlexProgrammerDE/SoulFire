@@ -7,6 +7,6 @@ public final class SoulFireCLIJava8Launcher extends SoulFireAbstractJava8Launche
 
   @Override
   protected String getLauncherClassName() {
-    return "com.soulfiremc.client.SoulFireCLILauncher";
+    return "com.soulfiremc.launcher.client.SoulFireCLILauncher";
   }
 }

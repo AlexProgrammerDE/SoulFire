@@ -48,7 +48,12 @@ public final class MixinMain {
 
     SFConstants.BASE_MC_INSTANCE = instance;
 
-    // TODO
-    // SoulFireDedicatedLauncher.main(args);
+    try {
+      Class.forName(System.getProperty("sf.bootstrap.class"))
+        .getDeclaredMethod("bootstrap", String[].class)
+        .invoke(null, (Object) args);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

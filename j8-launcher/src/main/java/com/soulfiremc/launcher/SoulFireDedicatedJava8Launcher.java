@@ -7,6 +7,6 @@ public final class SoulFireDedicatedJava8Launcher extends SoulFireAbstractJava8L
 
   @Override
   protected String getLauncherClassName() {
-    return "com.soulfiremc.dedicated.SoulFireDedicatedLauncher";
+    return "com.soulfiremc.launcher.dedicated.SoulFireDedicatedLauncher";
   }
 }
