@@ -17,9 +17,13 @@
  */
 package com.soulfiremc.launcher;
 
+import net.fabricmc.loader.impl.launch.knot.KnotClient;
+
 public abstract class SoulFireAbstractLauncher {
   public void run(String[] args) {
     System.setProperty("sf.boostrap.class", getBootstrapClassName());
+
+    KnotClient.main(args);
   }
 
   protected abstract String getBootstrapClassName();

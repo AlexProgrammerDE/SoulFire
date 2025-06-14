@@ -80,6 +80,9 @@ allprojects {
     maven("https://maven.parchmentmc.org") {
       name = "ParchmentMC"
     }
+    maven("https://maven.fabricmc.net") {
+      name = "FabricMC"
+    }
     ivy("https://github.com/3arthqu4ke") {
       patternLayout {
         artifact("/[organisation]/releases/download/[revision]/[artifact]-[revision](-[classifier])(.[ext])")
