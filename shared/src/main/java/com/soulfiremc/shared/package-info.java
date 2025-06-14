@@ -15,30 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test;
-
-import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.shared.SFLogAppender;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Path;
-import java.time.Instant;
-
-public final class LoadTest {
-  @TempDir
-  public Path tempDir;
-
-  @Test
-  public void testLoad() {
-    System.setProperty("sf.unit.test", "true");
-
-    SFLogAppender.INSTANCE.start();
-
-    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now(), tempDir);
-
-    server.shutdownManager().shutdownSoftware(false);
-    server.shutdownManager().awaitShutdown();
-  }
-}
+/**
+ * Shared SoulFire classes.
+ */
+package com.soulfiremc.shared;

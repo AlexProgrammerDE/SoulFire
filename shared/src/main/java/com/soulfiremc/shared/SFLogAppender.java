@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util.log4j;
+package com.soulfiremc.shared;
 
-import com.soulfiremc.server.util.UUIDHelper;
 import lombok.Getter;
 import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
 import org.apache.logging.log4j.LogManager;

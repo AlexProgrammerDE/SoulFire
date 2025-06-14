@@ -19,7 +19,7 @@ package com.soulfiremc.bootstrap;
 
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.util.PortHelper;
-import com.soulfiremc.server.util.log4j.SFLogAppender;
+import com.soulfiremc.shared.SFLogAppender;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.netty.util.ResourceLeakDetector;

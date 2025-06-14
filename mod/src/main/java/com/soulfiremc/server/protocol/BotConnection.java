@@ -33,7 +33,7 @@ import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.log4j.SFLogAppender;
+import com.soulfiremc.shared.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
