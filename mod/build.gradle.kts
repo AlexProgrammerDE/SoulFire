@@ -48,7 +48,6 @@ unimined.minecraft {
 
   runs.config("client") {
     javaVersion = JavaVersion.VERSION_21
-    jvmArgs("-Djoml.nounsafe=true")
     standardInput = System.`in`
   }
 
