@@ -21,6 +21,12 @@ dependencies {
   }
 }
 
+tasks {
+  javadoc {
+    classpath += project.project("mod").sourceSets["main"].compileClasspath
+  }
+}
+
 tasks.register<Javadoc>("generateTSDoc") {
   group = "documentation"
   description = "Generates the typescript documentation for the project"
@@ -70,6 +76,17 @@ allprojects {
     }
     maven("https://repo.pistonmaster.net/extras") {
       name = "PistonDev Extras Repository"
+    }
+    maven("https://maven.parchmentmc.org") {
+      name = "ParchmentMC"
+    }
+    ivy("https://github.com/3arthqu4ke") {
+      patternLayout {
+        artifact("/[organisation]/releases/download/[revision]/[artifact]-[revision](-[classifier])(.[ext])")
+      }
+      metadataSources {
+        artifact()
+      }
     }
   }
 }

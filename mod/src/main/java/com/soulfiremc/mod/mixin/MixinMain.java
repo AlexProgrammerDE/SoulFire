@@ -18,7 +18,6 @@
 package com.soulfiremc.mod.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.soulfiremc.dedicated.SoulFireDedicatedLauncher;
 import com.soulfiremc.mod.util.SFConstants;
 import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
@@ -49,6 +48,7 @@ public final class MixinMain {
 
     SFConstants.BASE_MC_INSTANCE = instance;
 
-    SoulFireDedicatedLauncher.main(args);
+    // TODO
+    // SoulFireDedicatedLauncher.main(args);
   }
 }

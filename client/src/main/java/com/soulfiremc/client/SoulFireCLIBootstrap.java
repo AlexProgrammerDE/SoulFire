@@ -26,7 +26,6 @@ import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.RPCConstants;
 import com.soulfiremc.server.util.SFPathConstants;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -48,9 +47,8 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
     new SoulFireCLIBootstrap().internalBootstrap(args);
   }
 
-  private void startCLI(ServerAddress address, String jwt, String[] args) {
-    var rpcClient =
-      new RPCClient(address.getHost(), address.getPort(), jwt);
+  private void startCLI(String host, int port, String jwt, String[] args) {
+    var rpcClient = new RPCClient(host, port, jwt);
 
     log.info("Starting CLI");
     var cliManager = new CLIManager(rpcClient);
@@ -73,7 +71,8 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
           RPCConstants.API_AUDIENCE
         );
         startCLI(
-          new ServerAddress(host, port),
+          host,
+          port,
           jwtToken,
           args
         );
@@ -89,8 +88,10 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
       log.info("Using remote server on {}", address);
 
+      var hostAndPort = HostAndPort.fromString(address).withDefaultPort(PortHelper.SF_DEFAULT_PORT);
       startCLI(
-        new ServerAddress(HostAndPort.fromString(address).withDefaultPort(PortHelper.SF_DEFAULT_PORT)),
+        hostAndPort.getHost(),
+        hostAndPort.getPort(),
         jwtToken,
         args
       );

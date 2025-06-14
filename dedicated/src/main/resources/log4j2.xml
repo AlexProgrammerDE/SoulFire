@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SoulFire
+    Copyright (C) 2024  AlexProgrammerDE
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<!-- Disable shutdown hook, because we have our own -->
+<Configuration status="warn" shutdownHook="disable">
+  <Appenders>
+    <TerminalConsole name="TerminalConsole">
+      <PatternLayout>
+        <LoggerNamePatternSelector
+          disableAnsi="false"
+          defaultPattern="%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1.*}]: %minecraftFormatting{%msg}%n%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}">
+          <!-- SoulFire doesn't need a prefix -->
+          <PatternMatch key="com.soulfiremc."
+                        pattern="%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1}]: %minecraftFormatting{%msg}%n%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"/>
+        </LoggerNamePatternSelector>
+      </PatternLayout>
+      <Filters>
+        <ContextMapFilter operator="AND" onMatch="DENY" onMismatch="ACCEPT">
+          <KeyValuePair key="sf-skip-local-appenders" value="true"/>
+        </ContextMapFilter>
+      </Filters>
+    </TerminalConsole>
+    <RollingRandomAccessFile name="File" fileName="logs/latest.log"
+                             filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz"
+                             immediateFlush="false">
+      <PatternLayout
+        pattern="[%d{HH:mm:ss}] [%t/%level]${soulfire:context_info} [%logger]: %msg%n%xEx"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <OnStartupTriggeringPolicy/>
+      </Policies>
+      <Filters>
+        <ContextMapFilter operator="AND" onMatch="DENY" onMismatch="ACCEPT">
+          <KeyValuePair key="sf-skip-local-appenders" value="true"/>
+        </ContextMapFilter>
+      </Filters>
+    </RollingRandomAccessFile>
+  </Appenders>
+
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="TerminalConsole"/>
+      <AppenderRef ref="File"/>
+    </Root>
+  </Loggers>
+</Configuration>

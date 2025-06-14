@@ -6,21 +6,6 @@ plugins {
   alias(libs.plugins.jmh)
 }
 
-repositories {
-  maven("https://maven.parchmentmc.org") {
-    name = "ParchmentMC"
-  }
-  ivy("https://github.com/3arthqu4ke") {
-    patternLayout {
-      artifact("/[organisation]/releases/download/[revision]/[artifact]-[revision](-[classifier])(.[ext])")
-    }
-    metadataSources {
-      artifact()
-    }
-  }
-  mavenCentral()
-}
-
 val modImplementation: Configuration by configurations.creating
 
 dependencies {
@@ -113,6 +98,12 @@ dependencies {
 
   testRuntimeOnly(libs.junit.launcher)
   testImplementation(libs.junit)
+}
+
+tasks {
+  test {
+    classpath += sourceSets.main.get().compileClasspath
+  }
 }
 
 unimined.minecraft {
