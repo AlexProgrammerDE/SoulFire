@@ -147,6 +147,4 @@ dependencies {
 
   // For tls cert provisioning
   api(libs.acme4j)
-
-  api(files(project.projectDir.resolve("1.21.5.jar")))
 }

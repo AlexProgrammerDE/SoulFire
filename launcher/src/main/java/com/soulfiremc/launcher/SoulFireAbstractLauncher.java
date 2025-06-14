@@ -17,17 +17,54 @@
  */
 package com.soulfiremc.launcher;
 
+import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
 
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public abstract class SoulFireAbstractLauncher {
+  private static final String JAR_NAME = "minecraft-1.21.5.jar";
+  private static final String JAR_URL = "https://piston-data.mojang.com/v1/objects/b88808bbb3da8d9f453694b5d8f74a3396f1a533/client.jar";
+
   public void run(String[] args) {
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.DEBUG_DISABLE_CLASS_PATH_ISOLATION, "true");
     System.setProperty("sf.boostrap.class", getBootstrapClassName());
 
+    loadAndInjectMinecraftJar();
     KnotClient.main(args);
   }
 
   protected abstract String getBootstrapClassName();
+
+  @SneakyThrows
+  private void loadAndInjectMinecraftJar() {
+    var jarsPath = Path.of("jars");
+    if (!Files.exists(jarsPath)) {
+      Files.createDirectories(jarsPath);
+    }
+
+    var minecraftJarPath = jarsPath.resolve(JAR_NAME);
+    if (!Files.exists(minecraftJarPath)) {
+      System.out.println("Downloading Minecraft jar...");
+      var tempJarPath = Files.createTempFile("sf-mc-jar-download-", "-" + JAR_NAME);
+      try (var in = URI.create(JAR_URL).toURL().openStream()) {
+        Files.copy(in, tempJarPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+      } catch (Exception e) {
+        Files.deleteIfExists(tempJarPath);
+        throw new RuntimeException("Failed to download Minecraft jar from " + JAR_URL, e);
+      }
+
+      Files.copy(tempJarPath, minecraftJarPath);
+      Files.deleteIfExists(tempJarPath);
+      System.out.println("Minecraft jar downloaded and saved to: " + minecraftJarPath);
+    } else {
+      System.out.println("Minecraft jar already exists, skipping download.");
+    }
+
+    System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
+  }
 }
