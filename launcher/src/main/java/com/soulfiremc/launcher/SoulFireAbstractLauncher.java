@@ -35,8 +35,8 @@ import java.util.Objects;
 import java.util.jar.JarFile;
 
 public abstract class SoulFireAbstractLauncher {
-  private static final String JAR_NAME = "minecraft-client-1.21.5.jar";
-  private static final String JAR_URL = "https://piston-data.mojang.com/v1/objects/b88808bbb3da8d9f453694b5d8f74a3396f1a533/client.jar";
+  private static final String JAR_NAME = "minecraft-client-1.21.6.jar";
+  private static final String JAR_URL = "https://piston-data.mojang.com/v1/objects/740a125b83dd3447feaa3c5e891ead7fbb21ae28/client.jar";
 
   @SneakyThrows
   private static void loadAndInjectMinecraftJar() {
