@@ -50,6 +50,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.util.thread.BlockableEventLoop;
@@ -126,7 +127,7 @@ public final class BotConnection {
 
     Fields.set(newInstance, Minecraft.class.getDeclaredField("progressTasks"), Queues.newConcurrentLinkedQueue());
     Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance));
+    Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance, newInstance.options));
     Fields.set(newInstance, Minecraft.class.getDeclaredField("gui"), new Gui(newInstance));
     Fields.set(newInstance, Minecraft.class.getDeclaredField("running"), true);
     Fields.set(newInstance, Minecraft.class.getDeclaredField("user"), new User(
@@ -188,10 +189,10 @@ public final class BotConnection {
 
       minecraft.executeBlocking(() -> {
         if (minecraft.level != null) {
-          minecraft.level.disconnect();
+          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         }
 
-        minecraft.disconnect();
+        minecraft.disconnectWithProgressScreen();
       });
 
       minecraft.stop();
@@ -214,10 +215,10 @@ public final class BotConnection {
 
       minecraft.executeBlocking(() -> {
         if (minecraft.level != null) {
-          minecraft.level.disconnect();
+          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         }
 
-        minecraft.disconnect();
+        minecraft.disconnectWithProgressScreen();
       });
 
       minecraft.stop();
