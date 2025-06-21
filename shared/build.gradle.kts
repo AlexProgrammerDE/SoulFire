@@ -13,7 +13,7 @@ dependencies {
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
   api("net.fabricmc:sponge-mixin:0.15.5+mixin.0.8.7")
-  api("net.fabricmc:intermediary:1.21.6-pre4")
+  api("net.fabricmc:intermediary:1.21.6")
   api("net.fabricmc:fabric-loader:0.16.14")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.19.1")
@@ -37,7 +37,7 @@ dependencies {
   api("com.nimbusds:content-type:2.3")
   api("com.nimbusds:lang-tag:1.7")
   api("com.nimbusds:nimbus-jose-jwt:10.3")
-  api("com.nimbusds:oauth2-oidc-sdk:11.25")
+  api("com.nimbusds:oauth2-oidc-sdk:11.26")
   api("commons-codec:commons-codec:1.18.0")
   api("commons-io:commons-io:2.19.0")
   api("commons-logging:commons-logging:1.3.5")
