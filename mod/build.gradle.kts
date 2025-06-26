@@ -4,7 +4,6 @@ import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 plugins {
   `sf-java-conventions`
   id("xyz.wagyourtail.unimined")
-  alias(libs.plugins.jmh)
 }
 
 val modImplementation: Configuration by configurations.creating
@@ -15,7 +14,10 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  modImplementation("com.viaversion:viafabricplus:4.1.4")
+  modImplementation("com.viaversion:viafabricplus:4.1.4") {
+    isTransitive = false
+  }
+  implementation("com.viaversion:viafabricplus:4.1.4")
   include("com.viaversion:viafabricplus:4.1.4") {
     isTransitive = false
   }
