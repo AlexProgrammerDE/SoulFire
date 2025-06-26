@@ -78,7 +78,7 @@ through [nightly.link](https://nightly.link/AlexProgrammerDE/SoulFire/workflows/
 1. Install Java 21+
 2. Download the latest source code from GitHub
 3. Run `./gradlew build` in the project directory
-4. Get the jar file from `client/build/libs`
+4. Get the jar file from `client-launcher/build/libs` or `dedicated-launcher/build/libs`
 
 ## 👨‍💻 Developer API
 

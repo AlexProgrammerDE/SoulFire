@@ -23,26 +23,22 @@ jobs:
           check-latest: true
       - name: Execute Gradle Build
         run: ./gradlew build test --stacktrace
-      - name: Prepare Upload
+      - name: Get version
+        id: get-version
         run: |
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
-
-          mkdir client/build/upload
-          cp client/build/libs/SoulFireCLI-$projectVersion.jar client/build/upload
-
-          mkdir dedicated/build/upload
-          cp dedicated/build/libs/SoulFireDedicated-$projectVersion.jar dedicated/build/upload
+          echo "version=$projectVersion" >> $GITHUB_OUTPUT
       - name: Upload Client Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SoulFireCLI
           if-no-files-found: error
           path: |
-            client/build/upload/*.jar
+            client/build/libs/SoulFireCLI-${{ steps.get-version.outputs.version }}.jar
       - name: Upload Dedicated Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SoulFireDedicated
           if-no-files-found: error
           path: |
-            dedicated/build/upload/*.jar
+            dedicated/build/libs/SoulFireDedicated-${{ steps.get-version.outputs.version }}.jar
