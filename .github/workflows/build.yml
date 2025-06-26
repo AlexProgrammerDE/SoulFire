@@ -34,11 +34,11 @@ jobs:
           name: SoulFireCLI
           if-no-files-found: error
           path: |
-            client/build/libs/SoulFireCLI-${{ steps.get-version.outputs.version }}.jar
+            client-launcher/build/libs/SoulFireCLI-${{ steps.get-version.outputs.version }}.jar
       - name: Upload Dedicated Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SoulFireDedicated
           if-no-files-found: error
           path: |
-            dedicated/build/libs/SoulFireDedicated-${{ steps.get-version.outputs.version }}.jar
+            dedicated-launcher/build/libs/SoulFireDedicated-${{ steps.get-version.outputs.version }}.jar
