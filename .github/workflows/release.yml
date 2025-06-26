@@ -134,8 +134,8 @@ jobs:
           name: SoulFire ${{ inputs.version }}
           preserve_order: true
           files: |
-            dedicated/build/libs/SoulFireDedicated-${{ inputs.version }}.jar
-            client/build/libs/SoulFireCLI-${{ inputs.version }}.jar
+            dedicated-launcher/build/libs/SoulFireDedicated-${{ inputs.version }}.jar
+            client-launcher/build/libs/SoulFireCLI-${{ inputs.version }}.jar
       - name: Discord Webhook Action
         uses: tsickert/discord-webhook@v7.0.0
         with:

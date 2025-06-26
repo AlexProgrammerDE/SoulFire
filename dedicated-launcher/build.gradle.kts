@@ -2,11 +2,8 @@ plugins {
   `sf-project-conventions`
 }
 
-// Rename all artifacts
-tasks.withType<AbstractArchiveTask> {
-  if (archiveBaseName.isPresent && archiveBaseName.get() == "dedicated") {
-    archiveBaseName.set("SoulFireDedicated")
-  }
+base {
+  archivesName = "SoulFireDedicated"
 }
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireDedicatedJava8Launcher"

@@ -19,7 +19,7 @@ RUN addgroup --gid 1001 soulfire && \
     apk add --update --no-progress --no-cache dumb-init libstdc++
 
 # Copy over JAR
-COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/dedicated/build/libs/SoulFireDedicated-*.jar /soulfire/soulfire.jar
+COPY --from=soulfire-builder --chown=soulfire:soulfire /soulfire/dedicated-launcher/build/libs/SoulFireDedicated-*.jar /soulfire/soulfire.jar
 
 # Use the soulfire's home directory as our work directory
 WORKDIR /soulfire/data
