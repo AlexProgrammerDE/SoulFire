@@ -131,7 +131,8 @@ public abstract class SoulFireAbstractLauncher {
       Files.createDirectories(libDir);
 
       var urls = new ArrayList<Path>();
-      for (var fileName : new String(dependencyListInput.readAllBytes(), StandardCharsets.UTF_8).split("\n")) {
+      var bytes = dependencyListInput.readAllBytes();
+      for (var fileName : new String(bytes, StandardCharsets.UTF_8).lines().toList()) {
         var libFile = libDir.resolve(fileName);
         try (var libInput = Objects.requireNonNull(
           ClassLoader.getSystemClassLoader().getResourceAsStream(
