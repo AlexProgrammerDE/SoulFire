@@ -18,6 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SFPathConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.shredzone.acme4j.*;
 import org.shredzone.acme4j.challenge.Challenge;
@@ -36,7 +37,7 @@ import java.util.Scanner;
 
 @Slf4j
 public final class AcmeClient {
-  private static final Path TLS_DIR = Path.of("tls");
+  private static final Path TLS_DIR = SFPathConstants.BASE_DIR.resolve("tls");
   public static final Path USER_KEY_FILE = TLS_DIR.resolve("acme-user.key");
   public static final Path DOMAIN_KEY_FILE = TLS_DIR.resolve("acme-domain.key");
   public static final Path DOMAIN_CHAIN_FILE = TLS_DIR.resolve("acme-domain-chain.crt");

@@ -86,7 +86,6 @@ public final class SoulFireServer {
   private final ShutdownManager shutdownManager;
   private final SessionFactory sessionFactory;
   private final SecretKey jwtSecretKey;
-  private final Path baseDirectory;
   private final SFSparkPlugin sparkPlugin;
   @Getter
   private final LogServiceImpl logService = new LogServiceImpl(this);
@@ -94,14 +93,12 @@ public final class SoulFireServer {
   public SoulFireServer(
     String host,
     int port,
-    Instant startTime,
-    Path baseDirectory) {
+    Instant startTime) {
     log.info("Starting SoulFire v{} ({} @ {})", BuildData.VERSION, BuildData.BRANCH_NAME, BuildData.COMMIT_HASH.substring(0, 6));
 
     this.shutdownManager = new ShutdownManager(this::shutdownHook);
-    this.baseDirectory = baseDirectory;
 
-    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.getSecretKeyFile(baseDirectory));
+    this.jwtSecretKey = KeyHelper.getOrCreateJWTSecretKey(SFPathConstants.BASE_DIR.resolve("secret-key.bin"));
 
     try {
       Files.createDirectories(getObjectStoragePath());
@@ -110,11 +107,11 @@ public final class SoulFireServer {
     }
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
-    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.select(baseDirectory));
+    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.select());
     var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
-    var configDirectory = SFPathConstants.getConfigDirectory(baseDirectory);
+    var configDirectory = SFPathConstants.getConfigDirectory();
     var sparkStart =
       scheduler.supplyAsync(
         () -> {
@@ -200,7 +197,7 @@ public final class SoulFireServer {
   }
 
   public Path getObjectStoragePath() {
-    return baseDirectory.resolve("object-storage");
+    return SFPathConstants.BASE_DIR.resolve("object-storage");
   }
 
   public Path getScriptCodePath(UUID id) {

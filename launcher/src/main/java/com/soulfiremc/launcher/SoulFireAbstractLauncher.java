@@ -30,6 +30,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -40,18 +41,18 @@ public abstract class SoulFireAbstractLauncher {
   private static final String JAR_URL = "https://piston-data.mojang.com/v1/objects/b88808bbb3da8d9f453694b5d8f74a3396f1a533/client.jar";
 
   @SneakyThrows
-  private static void loadAndInjectMinecraftJar() {
-    var librariesPath = Path.of("libraries");
-    if (!Files.exists(librariesPath)) {
-      Files.createDirectories(librariesPath);
+  private static void loadAndInjectMinecraftJar(Path baseDir) {
+    var mcJarsPath = baseDir.resolve("mc-jars");
+    if (!Files.exists(mcJarsPath)) {
+      Files.createDirectories(mcJarsPath);
     }
 
-    var minecraftJarPath = librariesPath.resolve(JAR_NAME);
+    var minecraftJarPath = mcJarsPath.resolve(JAR_NAME);
     if (!Files.exists(minecraftJarPath)) {
       System.out.println("Downloading Minecraft jar...");
       var tempJarPath = Files.createTempFile("sf-mc-jar-download-", "-" + JAR_NAME);
       try (var in = URI.create(JAR_URL).toURL().openStream()) {
-        Files.copy(in, tempJarPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(in, tempJarPath, StandardCopyOption.REPLACE_EXISTING);
       } catch (Exception e) {
         Files.deleteIfExists(tempJarPath);
         throw new RuntimeException("Failed to download Minecraft jar from " + JAR_URL, e);
@@ -70,8 +71,8 @@ public abstract class SoulFireAbstractLauncher {
   protected abstract String getBootstrapClassName();
 
   @SneakyThrows
-  private static void setupManagedMods() {
-    var modsPath = Path.of("mods");
+  private static void setupManagedMods(Path baseDir) {
+    var modsPath = baseDir.resolve("minecraft").resolve("mods");
     if (!Files.exists(modsPath)) {
       Files.createDirectories(modsPath);
     }
@@ -99,8 +100,8 @@ public abstract class SoulFireAbstractLauncher {
   }
 
   @SneakyThrows
-  private static void loadLibs() {
-    var librariesPath = Path.of("libraries");
+  private static void loadLibs(Path baseDir) {
+    var librariesPath = baseDir.resolve("libraries");
     var extractedLibs = createLibClassLoader(librariesPath);
     if (extractedLibs.length == 0) {
       System.out.println("No libraries found in META-INF/dependency-list.txt, skipping library loading.");
@@ -149,15 +150,16 @@ public abstract class SoulFireAbstractLauncher {
     }
   }
 
-  public void run(String[] args) {
+  public void run(Path basePath, String[] args) {
+    System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
+    System.setProperty("java.awt.headless", "true");
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
-    System.setProperty(SystemProperties.DEBUG_DEOBFUSCATE_WITH_CLASSPATH, "true");
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
-    loadLibs();
-    loadAndInjectMinecraftJar();
-    setupManagedMods();
+    loadLibs(basePath);
+    loadAndInjectMinecraftJar(basePath);
+    setupManagedMods(basePath);
 
     KnotClient.main(args);
   }

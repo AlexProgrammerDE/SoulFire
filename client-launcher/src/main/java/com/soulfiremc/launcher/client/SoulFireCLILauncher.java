@@ -19,9 +19,11 @@ package com.soulfiremc.launcher.client;
 
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 
+import java.nio.file.Path;
+
 public final class SoulFireCLILauncher extends SoulFireAbstractLauncher {
   public static void main(String[] args) {
-    new SoulFireCLILauncher().run(args);
+    new SoulFireCLILauncher().run(Path.of(System.getProperty("user.home")).resolve(".soulfire"), args);
   }
 
   @Override

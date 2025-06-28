@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.game.LibClassifier;
 import net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
+import net.fabricmc.loader.impl.util.Arguments;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -41,7 +42,19 @@ public class SFGameProvider extends MinecraftGameProvider {
       logJars.add(Objects.requireNonNull(classifier.getOrigin(lib)));
     }
 
-    return super.locateGame(launcher, args);
+    var result = super.locateGame(launcher, args);
+
+    var argumentsField = MinecraftGameProvider.class.getDeclaredField("arguments");
+    argumentsField.setAccessible(true);
+    var arguments = (Arguments) argumentsField.get(this);
+    arguments.put("gameDir", getLaunchDirectory().toAbsolutePath().toString());
+
+    return result;
+  }
+
+  @Override
+  public Path getLaunchDirectory() {
+    return Path.of(System.getProperty("sf.baseDir")).resolve("minecraft");
   }
 
   @Override

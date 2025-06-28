@@ -46,7 +46,7 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
     var port = SoulFireAbstractBootstrap.getRPCPort(PortHelper.SF_DEFAULT_PORT);
 
     var soulFire =
-      new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
+      new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME);
 
     if (soulFire.authSystem().rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
       log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);
@@ -58,14 +58,9 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
       soulFire.shutdownManager(),
       command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
       (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
-      SFPathConstants.WORKING_DIRECTORY
+      SFPathConstants.BASE_DIR
     ).start();
 
     soulFire.shutdownManager().awaitShutdown();
-  }
-
-  @Override
-  protected Path getBaseDirectory() {
-    return SFPathConstants.WORKING_DIRECTORY;
   }
 }

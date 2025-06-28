@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.database;
 
+import com.soulfiremc.server.util.SFPathConstants;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -25,9 +26,9 @@ import org.hibernate.cfg.Configuration;
 import java.nio.file.Path;
 
 public final class DatabaseManager {
-  public static SessionFactory select(Path baseDirectory) {
+  public static SessionFactory select() {
     return switch (System.getProperty("database", "sqlite")) {
-      case "sqlite" -> forSqlite(baseDirectory.resolve("soulfire.sqlite"));
+      case "sqlite" -> forSqlite(SFPathConstants.BASE_DIR.resolve("soulfire.sqlite"));
       case "mysql" -> forMysql();
       default -> throw new IllegalArgumentException("Invalid database type");
     };

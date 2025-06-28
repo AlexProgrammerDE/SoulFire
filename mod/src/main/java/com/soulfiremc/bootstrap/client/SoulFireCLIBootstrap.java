@@ -64,7 +64,7 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
         log.info("Starting integrated server on {}:{}", host, port);
         var soulFire =
-          new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME, getBaseDirectory());
+          new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME);
 
         var jwtToken = soulFire.authSystem().generateJWT(
           soulFire.authSystem().rootUserData(),
@@ -96,10 +96,5 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
         args
       );
     }
-  }
-
-  @Override
-  protected Path getBaseDirectory() {
-    return SFPathConstants.INTEGRATED_SERVER_DIRECTORY;
   }
 }

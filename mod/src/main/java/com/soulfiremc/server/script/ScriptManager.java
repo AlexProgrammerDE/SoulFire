@@ -31,6 +31,7 @@ import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.script.api.ScriptAPI;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
 import com.soulfiremc.shared.UUIDHelper;
@@ -67,7 +68,7 @@ public class ScriptManager {
 
   public ScriptManager(InstanceManager instanceManager) {
     this.instanceManager = instanceManager;
-    this.graalResourceCache = instanceManager.soulFireServer().baseDirectory().resolve(".graal-resource-cache");
+    this.graalResourceCache = SFPathConstants.BASE_DIR.resolve(".graal-resource-cache");
     System.setProperty("polyglot.engine.userResourceCache", graalResourceCache.toString());
     SoulFireAPI.registerListenersOfObject(this);
   }

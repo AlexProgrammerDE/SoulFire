@@ -19,6 +19,7 @@ package com.soulfiremc.bootstrap;
 
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.util.PortHelper;
+import com.soulfiremc.server.util.SFPathConstants;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import lombok.SneakyThrows;
@@ -101,7 +102,7 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   private void injectFileProperties() {
-    var optionsFile = getBaseDirectory().resolve("soulfire.properties");
+    var optionsFile = SFPathConstants.BASE_DIR.resolve("soulfire.properties");
     if (!Files.exists(optionsFile)) {
       return;
     }
@@ -141,6 +142,4 @@ public abstract class SoulFireAbstractBootstrap {
   }
 
   protected abstract void postMixinMain(String[] args);
-
-  protected abstract Path getBaseDirectory();
 }

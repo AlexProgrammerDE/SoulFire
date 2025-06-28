@@ -20,25 +20,15 @@ package com.soulfiremc.server.util;
 import java.nio.file.Path;
 
 public final class SFPathConstants {
-  public static final Path WORKING_DIRECTORY = Path.of(System.getProperty("user.dir"));
-  public static final Path CLIENT_DATA_DIRECTORY = Path.of(System.getProperty("user.home")).resolve(".soulfire");
-  public static final Path INTEGRATED_SERVER_DIRECTORY = CLIENT_DATA_DIRECTORY.resolve("integrated-server");
+  public static final Path BASE_DIR = Path.of(System.getProperty("sf.baseDir"));
 
   private SFPathConstants() {}
 
-  public static Path getConfigDirectory(Path baseFolder) {
-    return baseFolder.resolve("config");
+  public static Path getConfigDirectory() {
+    return SFPathConstants.BASE_DIR.resolve("config");
   }
 
-  public static Path getSecretKeyFile(Path baseFolder) {
-    return baseFolder.resolve("secret-key.bin");
-  }
-
-  public static Path getMapsDirectory(Path baseFolder) {
-    return baseFolder.resolve("maps");
-  }
-
-  public static Path getStateDirectory(Path baseFolder) {
-    return baseFolder.resolve("state");
+  public static Path getMapsDirectory(Path baseDir) {
+    return baseDir.resolve("maps");
   }
 }
