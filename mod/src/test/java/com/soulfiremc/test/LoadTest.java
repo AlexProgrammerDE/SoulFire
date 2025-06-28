@@ -32,11 +32,12 @@ public final class LoadTest {
 
   @Test
   public void testLoad() {
+    System.setProperty("sf.baseDir", tempDir.toAbsolutePath().toString());
     System.setProperty("sf.unit.test", "true");
 
     SFLogAppender.INSTANCE.start();
 
-    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now(), tempDir);
+    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now());
 
     server.shutdownManager().shutdownSoftware(false);
     server.shutdownManager().awaitShutdown();
