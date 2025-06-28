@@ -16,7 +16,7 @@ tasks.register("runSFDedicated", JavaExec::class) {
   classpath = sourceSets["main"].runtimeClasspath
 
   val argsMutable = mutableListOf(
-    "-Xmx2G",
+    "-Xmx4G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseZGC",
