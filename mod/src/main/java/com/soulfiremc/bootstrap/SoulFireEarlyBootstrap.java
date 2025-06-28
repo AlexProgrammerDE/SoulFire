@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.launcher;
+package com.soulfiremc.bootstrap;
 
 import com.soulfiremc.shared.SFLogAppender;
 import io.netty.util.ResourceLeakDetector;
@@ -27,7 +27,7 @@ import java.security.Security;
 
 @Slf4j
 public class SoulFireEarlyBootstrap {
-  public static void preFabricBootstrap() {
+  public static void preMainBootstrap() {
     // Install the Log4J JUL bridge
     org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
 
@@ -66,7 +66,7 @@ public class SoulFireEarlyBootstrap {
     log.warn("If you already have those flags or want to disable this warning, only add the '-Dsf.flags.v1=true' to your JVM arguments");
   }
 
-  public static void injectExceptionHandler() {
+  private static void injectExceptionHandler() {
     Thread.setDefaultUncaughtExceptionHandler(
       (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
   }

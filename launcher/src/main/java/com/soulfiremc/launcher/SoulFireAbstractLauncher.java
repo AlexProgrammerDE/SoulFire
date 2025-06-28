@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.builddata.BuildData;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
@@ -86,16 +87,15 @@ public abstract class SoulFireAbstractLauncher {
         });
     }
 
-    FileSystemUtil.getFilesInDirectory("META-INF/jars")
-      .forEach((filePath, fileBytes) -> {
-        try {
-          var targetPath = modsPath.resolve("managed-" + filePath.getFileName());
-          Files.write(targetPath, fileBytes);
-          System.out.println("Copied managed mod: " + targetPath);
-        } catch (Exception e) {
-          System.err.println("Failed to copy managed mod: " + filePath + " - " + e.getMessage());
-        }
-      });
+    var fileName = "mod-%s.jar".formatted(BuildData.VERSION);
+    try (var filePath = SoulFireAbstractLauncher.class.getResourceAsStream("/META-INF/jars/" + fileName)) {
+      var fileBytes = Objects.requireNonNull(filePath, "Managed mod file not found: %s".formatted(fileName)).readAllBytes();
+      var targetPath = modsPath.resolve("managed-" + fileName);
+      Files.write(targetPath, fileBytes);
+      System.out.printf("Copied managed mod: %s%n", targetPath);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to copy managed mod: " + fileName, e);
+    }
   }
 
   @SneakyThrows
@@ -156,7 +156,6 @@ public abstract class SoulFireAbstractLauncher {
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
     loadLibs();
-    SoulFireEarlyBootstrap.preFabricBootstrap();
     loadAndInjectMinecraftJar();
     setupManagedMods();
 
