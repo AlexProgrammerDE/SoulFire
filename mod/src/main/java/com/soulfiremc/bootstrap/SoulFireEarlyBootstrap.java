@@ -17,9 +17,14 @@
  */
 package com.soulfiremc.bootstrap;
 
+import com.soulfiremc.shared.SFInfoPlaceholder;
 import com.soulfiremc.shared.SFLogAppender;
 import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.lookup.Interpolator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -28,6 +33,10 @@ import java.security.Security;
 @Slf4j
 public class SoulFireEarlyBootstrap {
   public static void preMainBootstrap() {
+    LoggerContext context = (LoggerContext) LogManager.getContext(false);
+    Configuration config = context.getConfiguration();
+    ((Interpolator) config.getStrSubstitutor().getVariableResolver()).getStrLookupMap().put("soulfire", new SFInfoPlaceholder());
+
     // Install the Log4J JUL bridge
     org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
 
