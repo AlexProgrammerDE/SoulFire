@@ -28,12 +28,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.server.Bootstrap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -53,6 +55,11 @@ public class MixinMinecraft implements IMinecraft {
     } else {
       cir.setReturnValue(currentInstance);
     }
+  }
+
+  @Inject(method = "<init>", at = @At("RETURN"))
+  private void init(GameConfig arg, CallbackInfo ci) {
+    ((Minecraft) (Object) this).gameRenderer.close();
   }
 
   @Inject(method = "crash", at = @At("HEAD"), cancellable = true)
@@ -84,6 +91,11 @@ public class MixinMinecraft implements IMinecraft {
   @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)
   private void preventDestroy(CallbackInfo ci) {
     ci.cancel();
+  }
+
+  @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
+  private void preventResetData(GameRenderer instance) {
+    // Prevent resetting because it causes race conditions
   }
 
   @Override
