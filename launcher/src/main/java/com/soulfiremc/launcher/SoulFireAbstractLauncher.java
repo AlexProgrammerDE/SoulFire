@@ -151,7 +151,7 @@ public abstract class SoulFireAbstractLauncher {
 
   public void run(String[] args) {
     System.setProperty("joml.nounsafe", "true");
-    System.setProperty(SystemProperties.DEBUG_DISABLE_CLASS_PATH_ISOLATION, "true");
+    System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
     System.setProperty(SystemProperties.DEBUG_DEOBFUSCATE_WITH_CLASSPATH, "true");
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
