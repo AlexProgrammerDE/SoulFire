@@ -7,6 +7,7 @@
     "MixinMain",
     "fixes.MixinReloadableResourceManager",
     "optimization.MixinDataFixers",
+    "rendering.MixinNarrator",
     "soulfire.MixinAggregatedClassLoader",
     "soulfire.MixinConnection",
     "soulfire.MixinConnection$1",
