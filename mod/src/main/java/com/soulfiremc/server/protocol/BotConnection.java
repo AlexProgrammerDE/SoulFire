@@ -124,12 +124,12 @@ public final class BotConnection {
   private Minecraft createMinecraftCopy() {
     var newInstance = SFModHelpers.deepCopy(SFConstants.BASE_MC_INSTANCE);
 
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("progressTasks"), Queues.newConcurrentLinkedQueue());
-    Fields.set(newInstance, BlockableEventLoop.class.getDeclaredField("pendingRunnables"), Queues.newConcurrentLinkedQueue());
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("toastManager"), new ToastManager(newInstance));
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("gui"), new Gui(newInstance));
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("running"), true);
-    Fields.set(newInstance, Minecraft.class.getDeclaredField("user"), new User(
+    newInstance.progressTasks = Queues.newConcurrentLinkedQueue();
+    newInstance.pendingRunnables = Queues.newConcurrentLinkedQueue();
+    newInstance.toastManager = new ToastManager(newInstance);
+    newInstance.gui = new Gui(newInstance);
+    newInstance.running = true;
+    newInstance.user = new User(
       minecraftAccount.lastKnownName(),
       minecraftAccount.profileId(),
       switch (minecraftAccount.accountData()) {
@@ -140,20 +140,8 @@ public final class BotConnection {
       Optional.empty(),
       Optional.empty(),
       User.Type.MSA
-    ));
-
-    {
-      var getTickTargetMillis = Minecraft.class.getDeclaredMethod("getTickTargetMillis", float.class);
-      getTickTargetMillis.setAccessible(true);
-
-      Fields.set(newInstance, Minecraft.class.getDeclaredField("deltaTracker"), new DeltaTracker.Timer(20.0F, 0L, (f) -> {
-        try {
-          return (float) getTickTargetMillis.invoke(newInstance, f);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-          throw new RuntimeException(e);
-        }
-      }));
-    }
+    );
+    newInstance.deltaTracker = new DeltaTracker.Timer(20.0F, 0L, newInstance::getTickTargetMillis);
 
     ((IMinecraft) newInstance).soulfire$setConnection(this);
 

@@ -2,3 +2,21 @@ accessWidener v2 named
 
 accessible method net/minecraft/client/multiplayer/resolver/ServerAddress <init> (Lcom/google/common/net/HostAndPort;)V
 accessible method net/minecraft/client/multiplayer/ClientLevel getAllMapData ()Ljava/util/Map;
+
+accessible method net/minecraft/client/Minecraft getTickTargetMillis (F)F
+
+accessible field net/minecraft/client/Minecraft progressTasks Ljava/util/Queue;
+accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
+accessible field net/minecraft/client/Minecraft toastManager Lnet/minecraft/client/gui/components/toasts/ToastManager;
+accessible field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
+accessible field net/minecraft/client/Minecraft running Z
+accessible field net/minecraft/client/Minecraft user Lnet/minecraft/client/User;
+accessible field net/minecraft/client/Minecraft deltaTracker Lnet/minecraft/client/DeltaTracker$Timer;
+
+mutable field net/minecraft/client/Minecraft progressTasks Ljava/util/Queue;
+mutable field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
+mutable field net/minecraft/client/Minecraft toastManager Lnet/minecraft/client/gui/components/toasts/ToastManager;
+mutable field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
+mutable field net/minecraft/client/Minecraft running Z
+mutable field net/minecraft/client/Minecraft user Lnet/minecraft/client/User;
+mutable field net/minecraft/client/Minecraft deltaTracker Lnet/minecraft/client/DeltaTracker$Timer;
