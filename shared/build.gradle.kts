@@ -145,4 +145,7 @@ dependencies {
 
   // For tls cert provisioning
   api(libs.acme4j)
+
+  // For early mixins
+  api(libs.bundles.classtransform)
 }

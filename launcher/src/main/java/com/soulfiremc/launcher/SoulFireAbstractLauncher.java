@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.builddata.BuildData;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
+import net.lenni0451.classtransform.TransformerManager;
+import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
+import net.lenni0451.reflect.Agents;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.jar.JarFile;
 
@@ -69,35 +72,6 @@ public abstract class SoulFireAbstractLauncher {
   }
 
   protected abstract String getBootstrapClassName();
-
-  @SneakyThrows
-  private static void setupManagedMods(Path baseDir) {
-    var modsPath = baseDir.resolve("minecraft").resolve("mods");
-    if (!Files.exists(modsPath)) {
-      Files.createDirectories(modsPath);
-    }
-
-    try (var stream = Files.list(modsPath)) {
-      stream.filter(path -> path.getFileName().toString().startsWith("managed-"))
-        .forEach(path -> {
-          try {
-            Files.deleteIfExists(path);
-          } catch (Exception e) {
-            System.err.println("Failed to delete managed mod: " + path + " - " + e.getMessage());
-          }
-        });
-    }
-
-    var fileName = "mod-%s.jar".formatted(BuildData.VERSION);
-    try (var filePath = SoulFireAbstractLauncher.class.getResourceAsStream("/META-INF/jars/" + fileName)) {
-      var fileBytes = Objects.requireNonNull(filePath, "Managed mod file not found: %s".formatted(fileName)).readAllBytes();
-      var targetPath = modsPath.resolve("managed-" + fileName);
-      Files.write(targetPath, fileBytes);
-      System.out.printf("Copied managed mod: %s%n", targetPath);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to copy managed mod: " + fileName, e);
-    }
-  }
 
   @SneakyThrows
   private static void loadLibs(Path baseDir) {
@@ -151,6 +125,20 @@ public abstract class SoulFireAbstractLauncher {
     }
   }
 
+  private static void injectEarlyMixins() {
+    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
+    var transformerManager = new TransformerManager(classProvider);
+    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
+    transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");
+
+    try {
+      transformerManager.hookInstrumentation(Agents.getInstrumentation());
+      System.out.println("Used Runtime Agent to inject mixins");
+    } catch (IOException t) {
+      throw new IllegalStateException("Failed to inject mixins", t);
+    }
+  }
+
   public void run(Path basePath, String[] args) {
     System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
     System.setProperty("java.awt.headless", "true");
@@ -159,8 +147,8 @@ public abstract class SoulFireAbstractLauncher {
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
     loadLibs(basePath);
+    injectEarlyMixins();
     loadAndInjectMinecraftJar(basePath);
-    setupManagedMods(basePath);
 
     KnotClient.main(args);
   }
