@@ -74,9 +74,6 @@ dependencies {
   api(projects.buildData)
   api(projects.proto)
 
-  // Main protocol library
-  api(libs.bundles.kyori)
-
   // Newest netty
   api("io.netty:netty-all:4.2.2.Final")
 

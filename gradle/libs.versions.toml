@@ -2,7 +2,6 @@
 log4j = "2.25.0"
 grpc = "1.73.0"
 protobuf = "4.31.1"
-kyori = "4.23.0"
 reactor = "1.2.7"
 armeria = "1.32.5"
 graalvm-polyglot = "24.2.1"
@@ -36,9 +35,6 @@ slf4j = "org.slf4j:slf4j-api:2.0.17"
 disruptor = "com.lmax:disruptor:4.0.0"
 picoli = "info.picocli:picocli:4.7.7"
 picoli-codegen = "info.picocli:picocli-codegen:4.7.7"
-kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyori" }
-kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "kyori" }
-kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
 commons-validator = "commons-validator:commons-validator:1.9.0"
 commons-io = "commons-io:commons-io:2.19.0"
 guava = "com.google.guava:guava:33.4.8-jre"
@@ -105,7 +101,6 @@ junit = "org.junit.jupiter:junit-jupiter:5.13.2"
 bom = ["netty-bom", "armeria-bom", "protobuf-bom", "kotlin-bom"]
 log4j = ["log4j-api", "log4j-core", "log4j-slf4j2-impl", "log4j-iostreams", "log4j-jul"]
 grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty", "protobuf-util"]
-kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1", "armeria-tomcat10"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]

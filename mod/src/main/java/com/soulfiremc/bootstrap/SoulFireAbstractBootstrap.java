@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Scanner;
 
@@ -78,7 +77,7 @@ public abstract class SoulFireAbstractBootstrap {
 
   private void processRouteClass(ClassInfo classInfo) {
     try {
-      var clazz = classInfo.loadClass();
+      var clazz = Class.forName(classInfo.getName());
       clazz.getConstructor().newInstance();
     } catch (Throwable t) {
       log.error("Failed to load plugin class {}", classInfo.getName(), t);
