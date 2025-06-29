@@ -95,7 +95,6 @@ swc4j-macos-x86_64 = { module = "com.caoccao.javet:swc4j-macos-x86_64", version.
 swc4j-windows-arm64 = { module = "com.caoccao.javet:swc4j-windows-arm64", version.ref = "swc4j" }
 swc4j-windows-x86_64 = { module = "com.caoccao.javet:swc4j-windows-x86_64", version.ref = "swc4j" }
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
-classtransform-mixinsdummy = { module = "net.lenni0451.classtransform:mixinsdummy", version.ref = "classtransform" }
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
 angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
@@ -113,4 +112,4 @@ reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
 hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-hikaricp", "hibernate-validator", "hibernate-validator-cdi"]
 graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-python", "graalvm-lsp"]
 swc4j = ["swc4j", "swc4j-android-arm", "swc4j-android-arm64", "swc4j-android-x86", "swc4j-android-x86_64", "swc4j-linux-arm64", "swc4j-linux-x86_64", "swc4j-macos-arm64", "swc4j-macos-x86_64", "swc4j-windows-arm64", "swc4j-windows-x86_64"]
-classtransform = ["classtransform-mixinstranslator", "classtransform-mixinsdummy", "classtransform-additionalclassprovider"]
+classtransform = ["classtransform-mixinstranslator", "classtransform-additionalclassprovider"]
