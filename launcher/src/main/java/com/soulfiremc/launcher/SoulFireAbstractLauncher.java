@@ -21,10 +21,8 @@ import com.soulfiremc.shared.SFInfoPlaceholder;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
-import net.lenni0451.classtransform.TransformerManager;
-import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
-import net.lenni0451.reflect.Agents;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.URI;
@@ -36,9 +34,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class SoulFireAbstractLauncher {
   private static final String JAR_NAME = "minecraft-client-1.21.6.jar";
@@ -92,6 +91,11 @@ public abstract class SoulFireAbstractLauncher {
         .invoke(null);
 
       for (var lib : extractedLibs) {
+        System.setProperty("java.class.path",
+          Stream.concat(Arrays.stream(System.getProperty("java.class.path").split(File.pathSeparator)),
+              Stream.of(lib.toAbsolutePath().toString()))
+            .collect(Collectors.joining(File.pathSeparator)));
+
         instrumentationClass.appendToSystemClassLoaderSearch(new JarFile(lib.toFile()));
       }
     }
@@ -126,20 +130,7 @@ public abstract class SoulFireAbstractLauncher {
     }
   }
 
-  private static void injectEarlyMixins() {
-    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
-    var transformerManager = new TransformerManager(classProvider);
-    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-    transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");
-
-    try {
-      transformerManager.hookInstrumentation(Agents.getInstrumentation());
-      System.out.println("Used Runtime Agent to inject mixins");
-    } catch (IOException t) {
-      throw new IllegalStateException("Failed to inject mixins", t);
-    }
-  }
-
+  @SneakyThrows
   public void run(Path basePath, String[] args) {
     System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
     System.setProperty("java.awt.headless", "true");
@@ -148,7 +139,9 @@ public abstract class SoulFireAbstractLauncher {
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
 
     loadLibs(basePath);
-    injectEarlyMixins();
+    Class.forName(SoulFireEarlyMixinsLoader.class.getName())
+      .getMethod("injectEarlyMixins")
+      .invoke(null);
     SFInfoPlaceholder.register();
     loadAndInjectMinecraftJar(basePath);
 

@@ -24,7 +24,6 @@ import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.util.Arguments;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Set;
 
 public class SFGameProvider extends MinecraftGameProvider {
@@ -39,7 +38,12 @@ public class SFGameProvider extends MinecraftGameProvider {
     classifier.process(launcher.getClassPath());
 
     for (var lib : SFLibrary.LOGGING) {
-      logJars.add(Objects.requireNonNull(classifier.getOrigin(lib)));
+      var origin = classifier.getOrigin(lib);
+      if (origin == null) {
+        continue;
+      }
+
+      logJars.add(origin);
     }
 
     var result = super.locateGame(launcher, args);
