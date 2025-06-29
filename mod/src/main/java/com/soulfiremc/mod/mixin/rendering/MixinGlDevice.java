@@ -28,6 +28,6 @@ public class MixinGlDevice {
   @Inject(method = "getUniformOffsetAlignment", at = @At("HEAD"), cancellable = true)
   private static void getUniformOffsetAlignmentHook(CallbackInfoReturnable<Integer> cir) {
     // Return a fixed value for uniform offset alignment
-    cir.setReturnValue(16);
+    cir.setReturnValue(1);
   }
 }
