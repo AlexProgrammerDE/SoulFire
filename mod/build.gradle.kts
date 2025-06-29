@@ -14,11 +14,11 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  modImplementation("com.viaversion:viafabricplus:4.1.4") {
+  modImplementation("com.viaversion:viafabricplus:4.2.1") {
     isTransitive = false
   }
-  implementation("com.viaversion:viafabricplus:4.1.4")
-  include("com.viaversion:viafabricplus:4.1.4") {
+  implementation("com.viaversion:viafabricplus:4.2.1")
+  include("com.viaversion:viafabricplus:4.2.1") {
     isTransitive = false
   }
   modImplementation("net.kyori:adventure-platform-fabric:6.4.0")
