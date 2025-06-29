@@ -40,7 +40,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.lenni0451.reflect.Fields;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -50,12 +49,11 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -126,7 +124,7 @@ public final class BotConnection {
 
     newInstance.progressTasks = Queues.newConcurrentLinkedQueue();
     newInstance.pendingRunnables = Queues.newConcurrentLinkedQueue();
-    newInstance.toastManager = new ToastManager(newInstance);
+    newInstance.toastManager = new ToastManager(newInstance, newInstance.options);
     newInstance.gui = new Gui(newInstance);
     newInstance.running = true;
     newInstance.user = new User(
@@ -176,10 +174,10 @@ public final class BotConnection {
 
       minecraft.executeBlocking(() -> {
         if (minecraft.level != null) {
-          minecraft.level.disconnect();
+          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         }
 
-        minecraft.disconnect();
+        minecraft.disconnectWithProgressScreen();
       });
 
       minecraft.stop();
@@ -202,10 +200,10 @@ public final class BotConnection {
 
       minecraft.executeBlocking(() -> {
         if (minecraft.level != null) {
-          minecraft.level.disconnect();
+          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         }
 
-        minecraft.disconnect();
+        minecraft.disconnectWithProgressScreen();
       });
 
       minecraft.stop();

@@ -21,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.lookup.Interpolator;
 import org.apache.logging.log4j.core.lookup.StrLookup;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,7 +29,6 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Plugin(name = "soulfire", category = StrLookup.CATEGORY)
 public class SFInfoPlaceholder implements StrLookup {
   public static void register() {
     LoggerContext context = (LoggerContext) LogManager.getContext(false);
