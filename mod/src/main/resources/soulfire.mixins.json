@@ -24,6 +24,7 @@
     "bloat.MixinRealmsPersistence",
     "bloat.MixinWorldSessionTelemetryManager",
     "fixes.MixinChatComponent",
+    "fixes.MixinOptions",
     "fixes.MixinResourceManagerReloadListener",
     "fixes.MixinServerList",
     "optimization.MixinClientPacketListener",
