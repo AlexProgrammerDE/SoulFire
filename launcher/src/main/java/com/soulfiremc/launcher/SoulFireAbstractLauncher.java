@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.shared.SFInfoPlaceholder;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
@@ -148,6 +149,7 @@ public abstract class SoulFireAbstractLauncher {
 
     loadLibs(basePath);
     injectEarlyMixins();
+    SFInfoPlaceholder.register();
     loadAndInjectMinecraftJar(basePath);
 
     KnotClient.main(args);
