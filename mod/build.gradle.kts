@@ -48,7 +48,7 @@ unimined.minecraft {
   mappings {
     intermediary()
     mojmap()
-    parchment("1.21.5", "2025.06.15")
+    parchment("1.21.6", "2025.06.29")
 
     devFallbackNamespace("intermediary")
   }
