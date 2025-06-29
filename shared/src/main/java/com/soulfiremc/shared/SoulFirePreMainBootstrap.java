@@ -15,10 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.bootstrap;
+package com.soulfiremc.shared;
 
-import com.soulfiremc.shared.SFInfoPlaceholder;
-import com.soulfiremc.shared.SFLogAppender;
 import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -27,13 +25,8 @@ import org.fusesource.jansi.AnsiConsole;
 import java.security.Security;
 
 @Slf4j
-public class SoulFireEarlyBootstrap {
+public class SoulFirePreMainBootstrap {
   public static void preMainBootstrap() {
-    SFInfoPlaceholder.register();
-
-    // Install the Log4J JUL bridge
-    org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
-
     // If Velocity's natives are being extracted to a different temporary directory, make sure the
     // Netty natives are extracted there as well
     if (System.getProperty("velocity.natives-tmpdir") != null) {
@@ -47,8 +40,6 @@ public class SoulFireEarlyBootstrap {
     }
 
     Security.addProvider(new BouncyCastleProvider());
-
-    SFLogAppender.INSTANCE.start();
 
     AnsiConsole.systemInstall();
 

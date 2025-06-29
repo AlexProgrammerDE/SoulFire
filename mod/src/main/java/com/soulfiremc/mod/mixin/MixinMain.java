@@ -18,9 +18,9 @@
 package com.soulfiremc.mod.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.soulfiremc.bootstrap.SoulFireEarlyBootstrap;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
+import com.soulfiremc.shared.SoulFirePreMainBootstrap;
 import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
 import net.lenni0451.reflect.Agents;
@@ -38,7 +38,7 @@ public final class MixinMain {
   @SneakyThrows
   @Inject(method = "main([Ljava/lang/String;)V", at = @At("HEAD"))
   private static void init(CallbackInfo cir) {
-    SoulFireEarlyBootstrap.preMainBootstrap();
+    SoulFirePreMainBootstrap.preMainBootstrap();
     Agents.getInstrumentation().addTransformer(new LwjglAgent());
     GenericTerminalConsole.setupStreams();
     SharedConstants.CHECK_DATA_FIXER_SCHEMA = false;

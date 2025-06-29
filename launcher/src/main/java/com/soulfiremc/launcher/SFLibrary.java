@@ -22,11 +22,17 @@ import net.fabricmc.loader.impl.game.LibClassifier;
 
 public enum SFLibrary implements LibClassifier.LibraryType {
   JLINE_TERMINAL("org/jline/terminal/Terminal.class"),
-  JLINE_READER("org/jline/reader/LineReader.class");
+  JLINE_READER("org/jline/reader/LineReader.class"),
+  SF_SHARED("com/soulfiremc/shared/SoulFireEarlyBootstrap.class"),
+  JUL("org/apache/logging/log4j/jul/LogManager.class"),
+  JANSI("org/fusesource/jansi/AnsiConsole.class");
 
   public static final SFLibrary[] LOGGING = {
     JLINE_TERMINAL,
-    JLINE_READER
+    JLINE_READER,
+    SF_SHARED,
+    JUL,
+    JANSI
   };
 
   private final EnvType env;
