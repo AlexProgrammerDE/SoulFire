@@ -58,7 +58,7 @@ public class MixinMinecraft implements IMinecraft {
   }
 
   @Inject(method = "<init>", at = @At("RETURN"))
-  private void init(GameConfig arg, CallbackInfo ci) {
+  private void closeRenderer(GameConfig arg, CallbackInfo ci) {
     ((Minecraft) (Object) this).gameRenderer.close();
   }
 

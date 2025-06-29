@@ -31,6 +31,7 @@
     "rendering.MixinClientChunkCache",
     "rendering.MixinClientLevel",
     "rendering.MixinGameRenderer",
+    "rendering.MixinGlDevice",
     "rendering.MixinLevelRenderer",
     "rendering.MixinMouseHandler",
     "rendering.MixinParticleEngine",

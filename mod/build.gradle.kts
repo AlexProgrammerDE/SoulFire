@@ -21,8 +21,8 @@ dependencies {
   include("com.viaversion:viafabricplus:4.2.1") {
     isTransitive = false
   }
-  modImplementation("net.kyori:adventure-platform-fabric:6.4.0")
-  include("net.kyori:adventure-platform-fabric:6.4.0") {
+  modImplementation("net.kyori:adventure-platform-fabric:6.5.0-SNAPSHOT")
+  include("net.kyori:adventure-platform-fabric:6.5.0-SNAPSHOT") {
     isTransitive = false
   }
 
