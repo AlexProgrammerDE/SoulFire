@@ -121,7 +121,8 @@ public final class SFCommandDefinition implements Callable<Integer> {
               option.description() == null
                 ? ""
                 : String.join(", ", option.description())
-                .replace("|", "\\|");
+                .replace("|", "\\|")
+                .replace("\n", " ");
             System.out.printf("| %s | %s | %s |%n", name, defaultValue, description);
           });
       cliManager.shutdown();
