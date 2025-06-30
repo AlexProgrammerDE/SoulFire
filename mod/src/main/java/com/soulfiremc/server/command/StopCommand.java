@@ -33,7 +33,7 @@ public final class StopCommand {
             "Shut down the SoulFire server.",
             c -> {
               c.getSource().source().sendInfo("SoulFire server is shutting down.");
-              System.exit(0);
+              c.getSource().soulFire().shutdownManager().shutdownSoftware(true);
 
               return Command.SINGLE_SUCCESS;
             })));
