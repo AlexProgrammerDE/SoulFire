@@ -35,6 +35,7 @@ import org.slf4j.event.Level;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
@@ -145,7 +146,8 @@ public final class AuthSystem {
       }
 
       // Used to prevent old/stolen JWTs from being used
-      if (issuedAt.isBefore(userEntity.minIssuedAt())) {
+      // Truncate to seconds because JWTs only have second precision
+      if (issuedAt.isBefore(userEntity.minIssuedAt().truncatedTo(ChronoUnit.SECONDS))) {
         return Optional.empty();
       }
 
