@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.mod.mixin;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
+import com.soulfiremc.shared.Base64Helpers;
 import com.soulfiremc.shared.SoulFirePreMainBootstrap;
 import lombok.SneakyThrows;
 import me.earth.headlessmc.lwjgl.agent.LwjglAgent;
@@ -46,13 +46,14 @@ public final class MixinMain {
 
   @SneakyThrows
   @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;run()V"))
-  private static void init(Minecraft instance, @Local(argsOnly = true) String[] args) {
+  private static void init(Minecraft instance) {
     // We want this to not inject anywhere else
     SFConstants.MINECRAFT_INSTANCE.remove();
 
     SFConstants.BASE_MC_INSTANCE = instance;
 
     try {
+      var args = Base64Helpers.splitBase64(System.getProperty("sf.initial.arguments"));
       Class.forName(System.getProperty("sf.bootstrap.class"))
         .getDeclaredMethod("bootstrap", String[].class)
         .invoke(null, (Object) args);

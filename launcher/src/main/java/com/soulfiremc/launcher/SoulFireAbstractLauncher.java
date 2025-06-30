@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.shared.Base64Helpers;
 import com.soulfiremc.shared.SFInfoPlaceholder;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
@@ -137,6 +138,7 @@ public abstract class SoulFireAbstractLauncher {
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
     System.setProperty("sf.bootstrap.class", getBootstrapClassName());
+    System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
     loadLibs(basePath);
     Class.forName(SoulFireEarlyMixinsLoader.class.getName())
@@ -145,6 +147,6 @@ public abstract class SoulFireAbstractLauncher {
     SFInfoPlaceholder.register();
     loadAndInjectMinecraftJar(basePath);
 
-    KnotClient.main(args);
+    KnotClient.main(new String[0]);
   }
 }
