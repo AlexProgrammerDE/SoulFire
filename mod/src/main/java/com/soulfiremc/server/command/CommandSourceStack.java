@@ -25,6 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public record CommandSourceStack(
   SoulFireServer soulFire,
@@ -34,6 +35,8 @@ public record CommandSourceStack(
   @Nullable
   Set<UUID> botIds
 ) {
+  public static final Predicate<CommandSourceStack> IS_ADMIN = stack -> stack.source.getRole() == UserEntity.Role.ADMIN;
+
   public static CommandSourceStack ofUnrestricted(SoulFireServer soulFire, SoulFireUser source) {
     return new CommandSourceStack(soulFire, source, null, null);
   }

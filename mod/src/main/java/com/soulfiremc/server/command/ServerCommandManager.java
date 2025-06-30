@@ -45,6 +45,7 @@ public final class ServerCommandManager {
     SetEmailCommand.register(dispatcher);
     WhoAmICommand.register(dispatcher);
     PluginsCommand.register(dispatcher);
+    StopCommand.register(dispatcher);
 
     // Movement controls
     LookAtCommand.register(dispatcher);
