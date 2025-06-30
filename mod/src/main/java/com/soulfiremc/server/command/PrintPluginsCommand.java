@@ -29,6 +29,7 @@ public final class PrintPluginsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-plugins")
+        .requires(CommandSourceStack.IS_ADMIN)
         .executes(
           privateCommand(
             c -> {

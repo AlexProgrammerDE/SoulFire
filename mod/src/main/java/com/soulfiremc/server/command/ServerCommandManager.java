@@ -40,12 +40,18 @@ public final class ServerCommandManager {
     // Help
     HelpCommand.register(dispatcher);
 
-    // Administration
+    // User management
     GenerateTokenCommand.register(dispatcher);
     SetEmailCommand.register(dispatcher);
     WhoAmICommand.register(dispatcher);
+
+    // Administration
     PluginsCommand.register(dispatcher);
     StopCommand.register(dispatcher);
+    SparkCommand.register(dispatcher);
+    PrintVersionsCommand.register(dispatcher);
+    PrintCommandsCommand.register(dispatcher);
+    PrintPluginsCommand.register(dispatcher);
 
     // Movement controls
     LookAtCommand.register(dispatcher);
@@ -67,9 +73,6 @@ public final class ServerCommandManager {
     PauseAttackCommand.register(dispatcher);
     StopAttackCommand.register(dispatcher);
 
-    // Spark
-    SparkCommand.register(dispatcher);
-
     // Utility commands
     OnlineCommand.register(dispatcher);
     SayCommand.register(dispatcher);
@@ -77,11 +80,6 @@ public final class ServerCommandManager {
     HealthCommand.register(dispatcher);
     ExportMapCommand.register(dispatcher);
     StopTaskCommand.register(dispatcher);
-
-    // Documentation commands
-    PrintVersionsCommand.register(dispatcher);
-    PrintCommandsCommand.register(dispatcher);
-    PrintPluginsCommand.register(dispatcher);
 
     // Context commands
     BotCommand.register(dispatcher);

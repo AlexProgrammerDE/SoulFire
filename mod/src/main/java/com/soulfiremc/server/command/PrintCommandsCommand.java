@@ -28,6 +28,7 @@ public final class PrintCommandsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-commands")
+        .requires(CommandSourceStack.IS_ADMIN)
         .executes(
           privateCommand(
             c -> {

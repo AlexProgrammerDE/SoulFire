@@ -68,8 +68,4 @@ public record CommandSourceStack(
 
     return new CommandSourceStack(soulFire, source, instanceIds, botIds);
   }
-
-  public boolean isAdmin() {
-    return source.getRole() == UserEntity.Role.ADMIN;
-  }
 }

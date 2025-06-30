@@ -32,6 +32,7 @@ public final class PrintVersionsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-versions")
+        .requires(CommandSourceStack.IS_ADMIN)
         .executes(
           privateCommand(
             c -> {

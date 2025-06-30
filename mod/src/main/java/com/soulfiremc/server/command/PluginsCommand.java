@@ -28,6 +28,7 @@ public final class PluginsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("plugins")
+        .requires(CommandSourceStack.IS_ADMIN)
         .executes(
           help(
             "Show all installed plugins",
