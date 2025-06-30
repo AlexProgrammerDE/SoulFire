@@ -22,8 +22,8 @@ import net.minecrell.terminalconsole.util.LoggerNamePatternSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.NullConfiguration;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternMatch;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,7 +58,7 @@ public final class SFLogAppender extends AbstractAppender {
     true,
     false,
     false,
-    new NullConfiguration()
+    ((LoggerContext) LogManager.getContext(false)).getConfiguration()
   );
   private final List<Consumer<SFLogEvent>> logConsumers = new CopyOnWriteArrayList<>();
   private final QueueWithMaxSize<SFLogEvent> logs = new QueueWithMaxSize<>(300); // Keep max 300 logs
