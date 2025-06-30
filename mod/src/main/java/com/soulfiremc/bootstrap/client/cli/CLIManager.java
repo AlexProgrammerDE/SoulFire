@@ -65,14 +65,14 @@ public final class CLIManager {
       .listInstances(InstanceListRequest.newBuilder().build())
       .getInstancesList()
       .stream()
-      .filter(instance -> instance.getFriendlyName().equals("cli-attack"))
+      .filter(instance -> instance.getFriendlyName().equals("CLI Attack"))
       .map(InstanceListResponse.Instance::getId)
       .map(UUID::fromString)
       .findFirst();
 
     cliInstanceId = cliInstance.orElseGet(() -> UUID.fromString(rpcClient.instanceStubBlocking()
       .createInstance(
-        InstanceCreateRequest.newBuilder().setFriendlyName("cli-attack").build())
+        InstanceCreateRequest.newBuilder().setFriendlyName("CLI Attack").build())
       .getId()));
 
     var soulFireCommand = new SFCommandDefinition(this);
