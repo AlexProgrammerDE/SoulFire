@@ -13,7 +13,7 @@ dependencies {
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
   api("net.fabricmc:sponge-mixin:0.15.5+mixin.0.8.7")
-  api("net.fabricmc:intermediary:1.21.6")
+  api("net.fabricmc:intermediary:1.21.7")
   api("net.fabricmc:fabric-loader:0.16.14")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.19.1")
@@ -66,7 +66,7 @@ dependencies {
 
   api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
   api("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.3")
-  api("org.checkerframework:checker-qual:3.49.4")
+  api("org.checkerframework:checker-qual:3.49.5")
 
   // For CLI support
   api(libs.picoli)
