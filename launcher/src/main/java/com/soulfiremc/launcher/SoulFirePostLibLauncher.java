@@ -17,16 +17,20 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.shared.Base64Helpers;
+import com.soulfiremc.shared.SFInfoPlaceholder;
+import net.fabricmc.loader.impl.launch.knot.KnotClient;
+import net.fabricmc.loader.impl.util.SystemProperties;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
-@SuppressWarnings("unused")
-public class SoulFireEarlyMixinsLoader {
-  public static void injectEarlyMixins() {
+public class SoulFirePostLibLauncher {
+  private static void injectEarlyMixins() {
     var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
     var transformerManager = new TransformerManager(classProvider);
     transformerManager.addTransformerPreprocessor(new MixinsTranslator());
@@ -38,5 +42,21 @@ public class SoulFireEarlyMixinsLoader {
     } catch (IOException t) {
       throw new IllegalStateException("Failed to inject mixins", t);
     }
+  }
+
+  @SuppressWarnings("unused")
+  public static void runPostLib(Path basePath, String bootstrapClassName, String[] args) {
+    System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
+    System.setProperty("java.awt.headless", "true");
+    System.setProperty("joml.nounsafe", "true");
+    System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
+    System.setProperty("sf.bootstrap.class", bootstrapClassName);
+    System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
+
+    injectEarlyMixins();
+    SFInfoPlaceholder.register();
+    SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
+
+    KnotClient.main(new String[0]);
   }
 }

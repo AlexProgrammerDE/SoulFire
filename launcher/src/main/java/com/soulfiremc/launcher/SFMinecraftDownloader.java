@@ -31,8 +31,8 @@ public class SFMinecraftDownloader {
 
   @SuppressWarnings("unused")
   @SneakyThrows
-  public static void loadAndInjectMinecraftJar(Path baseDir) {
-    var mcJarsPath = baseDir.resolve("mc-jars");
+  public static void loadAndInjectMinecraftJar(Path basePath) {
+    var mcJarsPath = basePath.resolve("mc-jars");
     if (!Files.exists(mcJarsPath)) {
       Files.createDirectories(mcJarsPath);
     }

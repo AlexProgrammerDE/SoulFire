@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.shared.Base64Helpers;
-import com.soulfiremc.shared.SFInfoPlaceholder;
 import lombok.SneakyThrows;
-import net.fabricmc.loader.impl.launch.knot.KnotClient;
-import net.fabricmc.loader.impl.util.SystemProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,12 +34,10 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class SoulFireAbstractLauncher {
-  protected abstract String getBootstrapClassName();
-
+public final class SoulFireAbstractLauncher {
   @SneakyThrows
-  private static void loadLibs(Path baseDir) {
-    var librariesPath = baseDir.resolve("libraries");
+  private static void loadLibs(Path basePath) {
+    var librariesPath = basePath.resolve("libraries");
     var extractedLibs = createLibClassLoader(librariesPath);
     if (extractedLibs.length == 0) {
       System.out.println("No libraries found in META-INF/dependency-list.txt, skipping library loading.");
@@ -99,23 +93,10 @@ public abstract class SoulFireAbstractLauncher {
   }
 
   @SneakyThrows
-  public void run(Path basePath, String[] args) {
-    System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
-    System.setProperty("java.awt.headless", "true");
-    System.setProperty("joml.nounsafe", "true");
-    System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
-    System.setProperty("sf.bootstrap.class", getBootstrapClassName());
-    System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
-
+  public static void run(Path basePath, String bootstrapClassName, String[] args) {
     loadLibs(basePath);
-    Class.forName(SoulFireEarlyMixinsLoader.class.getName())
-      .getMethod("injectEarlyMixins")
-      .invoke(null);
-    SFInfoPlaceholder.register();
-    Class.forName(SFMinecraftDownloader.class.getName())
-      .getMethod("loadAndInjectMinecraftJar", Path.class)
-      .invoke(null, basePath);
-
-    KnotClient.main(new String[0]);
+    Class.forName(SoulFirePostLibLauncher.class.getName())
+      .getMethod("runPostLib", Path.class, String.class, String[].class)
+      .invoke(null, basePath, bootstrapClassName, args);
   }
 }

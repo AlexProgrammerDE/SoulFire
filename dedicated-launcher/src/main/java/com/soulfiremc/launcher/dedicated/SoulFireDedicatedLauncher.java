@@ -21,13 +21,12 @@ import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 
 import java.nio.file.Path;
 
-public final class SoulFireDedicatedLauncher extends SoulFireAbstractLauncher {
+public final class SoulFireDedicatedLauncher {
   public static void main(String[] args) {
-    new SoulFireDedicatedLauncher().run(Path.of(System.getProperty("user.dir")), args);
-  }
-
-  @Override
-  protected String getBootstrapClassName() {
-    return "com.soulfiremc.bootstrap.dedicated.SoulFireDedicatedBootstrap";
+    SoulFireAbstractLauncher.run(
+      Path.of(System.getProperty("user.dir")),
+      "com.soulfiremc.bootstrap.dedicated.SoulFireDedicatedBootstrap",
+      args
+    );
   }
 }
