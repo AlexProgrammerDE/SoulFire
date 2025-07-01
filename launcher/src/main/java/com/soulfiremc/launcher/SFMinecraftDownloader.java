@@ -69,7 +69,7 @@ public class SFMinecraftDownloader {
     if (Files.exists(getMinecraftClientJarPath(basePath))) {
       System.out.println("Minecraft already downloaded, continuing");
     } else {
-      System.out.println("Downloading Minecraft jar...");
+      System.out.println("Downloading Minecraft...");
       var versionUrl = getUrl(MANIFEST_URL)
         .getAsJsonArray("versions")
         .asList()
@@ -92,12 +92,12 @@ public class SFMinecraftDownloader {
         Files.copy(in, tempJarPath, StandardCopyOption.REPLACE_EXISTING);
       } catch (Exception e) {
         Files.deleteIfExists(tempJarPath);
-        throw new RuntimeException("Failed to download Minecraft jar from " + clientUrl, e);
+        throw new RuntimeException("Failed to download Minecraft client jar from " + clientUrl, e);
       }
 
       Files.copy(tempJarPath, minecraftJarPath);
       Files.deleteIfExists(tempJarPath);
-      System.out.println("Minecraft jar downloaded and saved to: " + minecraftJarPath);
+      System.out.println("Minecraft client jar downloaded and saved to: " + minecraftJarPath);
     }
 
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
