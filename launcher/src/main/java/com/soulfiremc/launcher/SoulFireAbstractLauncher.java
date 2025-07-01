@@ -26,13 +26,11 @@ import net.fabricmc.loader.impl.util.SystemProperties;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -41,37 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class SoulFireAbstractLauncher {
-  private static final String JAR_NAME = "minecraft-client-1.21.6.jar";
-  private static final String JAR_URL = "https://piston-data.mojang.com/v1/objects/740a125b83dd3447feaa3c5e891ead7fbb21ae28/client.jar";
-
-  @SneakyThrows
-  private static void loadAndInjectMinecraftJar(Path baseDir) {
-    var mcJarsPath = baseDir.resolve("mc-jars");
-    if (!Files.exists(mcJarsPath)) {
-      Files.createDirectories(mcJarsPath);
-    }
-
-    var minecraftJarPath = mcJarsPath.resolve(JAR_NAME);
-    if (!Files.exists(minecraftJarPath)) {
-      System.out.println("Downloading Minecraft jar...");
-      var tempJarPath = Files.createTempFile("sf-mc-jar-download-", "-" + JAR_NAME);
-      try (var in = URI.create(JAR_URL).toURL().openStream()) {
-        Files.copy(in, tempJarPath, StandardCopyOption.REPLACE_EXISTING);
-      } catch (Exception e) {
-        Files.deleteIfExists(tempJarPath);
-        throw new RuntimeException("Failed to download Minecraft jar from " + JAR_URL, e);
-      }
-
-      Files.copy(tempJarPath, minecraftJarPath);
-      Files.deleteIfExists(tempJarPath);
-      System.out.println("Minecraft jar downloaded and saved to: " + minecraftJarPath);
-    } else {
-      System.out.println("Minecraft jar already exists, skipping download.");
-    }
-
-    System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
-  }
-
   protected abstract String getBootstrapClassName();
 
   @SneakyThrows
@@ -145,7 +112,9 @@ public abstract class SoulFireAbstractLauncher {
       .getMethod("injectEarlyMixins")
       .invoke(null);
     SFInfoPlaceholder.register();
-    loadAndInjectMinecraftJar(basePath);
+    Class.forName(SFMinecraftDownloader.class.getName())
+      .getMethod("loadAndInjectMinecraftJar", Path.class)
+      .invoke(null, basePath);
 
     KnotClient.main(new String[0]);
   }
