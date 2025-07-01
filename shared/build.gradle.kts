@@ -12,7 +12,7 @@ dependencies {
   api("org.ow2.asm:asm-commons:9.8")
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
-  api("net.fabricmc:sponge-mixin:0.15.5+mixin.0.8.7")
+  api("net.fabricmc:sponge-mixin:0.16.1+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.7")
   api("net.fabricmc:fabric-loader:0.16.14")
 
@@ -36,7 +36,7 @@ dependencies {
   api("com.mojang:text2speech:1.18.11")
   api("com.nimbusds:content-type:2.3")
   api("com.nimbusds:lang-tag:1.7")
-  api("com.nimbusds:nimbus-jose-jwt:10.3")
+  api("com.nimbusds:nimbus-jose-jwt:10.3.1")
   api("com.nimbusds:oauth2-oidc-sdk:11.26")
   api("commons-codec:commons-codec:1.18.0")
   api("commons-io:commons-io:2.19.0")
