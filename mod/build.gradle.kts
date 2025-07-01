@@ -43,7 +43,7 @@ tasks {
 }
 
 unimined.minecraft {
-  version("1.21.6")
+  version("1.21.7")
 
   mappings {
     intermediary()
