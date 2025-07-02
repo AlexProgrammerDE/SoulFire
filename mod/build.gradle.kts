@@ -49,8 +49,6 @@ unimined.minecraft {
     intermediary()
     mojmap()
     parchment("1.21.6", "2025.06.29")
-
-    devFallbackNamespace("intermediary")
   }
 
   fabric {
@@ -58,12 +56,15 @@ unimined.minecraft {
     accessWidener(project.projectDir.resolve("src/main/resources/soulfire.accesswidener"))
   }
 
-  mods.modImplementation {
-    mixinRemap {
-      @Suppress("UnstableApiUsage")
-      reset()
-      enableBaseMixin()
-      enableMixinExtra()
+  mods {
+    remap(include)
+    modImplementation {
+      mixinRemap {
+        @Suppress("UnstableApiUsage")
+        reset()
+        enableBaseMixin()
+        enableMixinExtra()
+      }
     }
   }
 
@@ -90,5 +91,6 @@ tasks {
   }
   withType<AbstractRemapJarTask> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    prodNamespace("mojmap")
   }
 }

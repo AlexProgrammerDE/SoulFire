@@ -16,7 +16,7 @@ tasks.register("runSFCLI", JavaExec::class) {
   classpath = sourceSets["main"].runtimeClasspath
 
   val argsMutable = mutableListOf(
-    "-Xmx4G",
+    "-Xmx8G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseZGC",

@@ -15,6 +15,8 @@ dependencies {
   api("net.fabricmc:sponge-mixin:0.16.1+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.7")
   api("net.fabricmc:fabric-loader:0.16.14")
+  api("net.fabricmc:mapping-io:0.7.1")
+  api("net.fabricmc:tiny-remapper:0.11.1")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.19.1")
   api("com.fasterxml.jackson.core:jackson-core:2.19.1")
