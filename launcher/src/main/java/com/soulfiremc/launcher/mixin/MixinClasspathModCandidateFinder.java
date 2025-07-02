@@ -27,13 +27,13 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class MixinClasspathModCandidateFinder {
   @ModifyArg(method = "findCandidates", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/discovery/ModCandidateFinder$ModCandidateConsumer;accept(Ljava/nio/file/Path;Z)V"), index = 1, remap = false)
   private boolean alwaysTrueAccept1(final boolean remap) {
-    // Always return true to force classpath loading
+    // Always return true to force remapping
     return true;
   }
 
   @ModifyArg(method = "findCandidates", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/discovery/ModCandidateFinder$ModCandidateConsumer;accept(Ljava/util/List;Z)V"), index = 1, remap = false)
   private boolean alwaysTrueAccept2(final boolean remap) {
-    // Always return true to force classpath loading
+    // Always return true to force remapping
     return true;
   }
 }
