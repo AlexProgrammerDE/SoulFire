@@ -27,3 +27,4 @@ accessible class net/minecraft/client/resources/server/ServerPackManager$PackDow
 
 accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData downloadStatus Lnet/minecraft/client/resources/server/ServerPackManager$PackDownloadStatus;
 accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData activationStatus Lnet/minecraft/client/resources/server/ServerPackManager$ActivationStatus;
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData promptAccepted Z

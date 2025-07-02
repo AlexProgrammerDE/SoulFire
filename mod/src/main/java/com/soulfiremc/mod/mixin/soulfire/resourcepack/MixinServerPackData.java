@@ -34,5 +34,6 @@ public class MixinServerPackData {
     var packDataThis = (ServerPackManager.ServerPackData) (Object) this;
     packDataThis.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;
     packDataThis.activationStatus = ServerPackManager.ActivationStatus.ACTIVE;
+    packDataThis.promptAccepted = true;
   }
 }
