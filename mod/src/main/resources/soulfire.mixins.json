@@ -44,6 +44,8 @@
     "soulfire.MixinConnectScreen",
     "soulfire.MixinKeyboardInput",
     "soulfire.MixinMinecraft",
+    "soulfire.resourcepack.MixinMinecraft",
+    "soulfire.resourcepack.MixinServerPackData",
     "sound.MixinMusicManager",
     "sound.MixinSoundBufferLibrary",
     "sound.MixinSoundEngine",

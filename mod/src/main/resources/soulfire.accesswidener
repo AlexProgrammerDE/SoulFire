@@ -20,3 +20,10 @@ mutable field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
 mutable field net/minecraft/client/Minecraft running Z
 mutable field net/minecraft/client/Minecraft user Lnet/minecraft/client/User;
 mutable field net/minecraft/client/Minecraft deltaTracker Lnet/minecraft/client/DeltaTracker$Timer;
+
+accessible class net/minecraft/client/resources/server/ServerPackManager$ServerPackData
+accessible class net/minecraft/client/resources/server/ServerPackManager$ActivationStatus
+accessible class net/minecraft/client/resources/server/ServerPackManager$PackDownloadStatus
+
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData downloadStatus Lnet/minecraft/client/resources/server/ServerPackManager$PackDownloadStatus;
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData activationStatus Lnet/minecraft/client/resources/server/ServerPackManager$ActivationStatus;

@@ -150,11 +150,13 @@ public final class BotConnection {
     return scheduler.runAsync(
       () -> {
         SoulFireAPI.postEvent(new PreBotConnectEvent(this));
+        var serverData = new ServerData("soulfire-target", serverAddress.toString(), ServerData.Type.OTHER);
+        serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
         minecraft.execute(runnableWrapper.wrap(() -> ConnectScreen.startConnecting(
           new JoinMultiplayerScreen(new TitleScreen()),
           minecraft,
           serverAddress,
-          new ServerData("soulfire", "foo", ServerData.Type.OTHER),
+          serverData,
           false,
           null
         )));
