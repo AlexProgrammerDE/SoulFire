@@ -23,6 +23,7 @@ import net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.util.Arguments;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -68,9 +69,12 @@ public class SFGameProvider extends MinecraftGameProvider {
     Thread.currentThread().setContextClassLoader(prevCl);
   }
 
+  @SneakyThrows
   @Override
   public Path getLaunchDirectory() {
-    return Path.of(System.getProperty("sf.baseDir")).resolve("minecraft");
+    var launchDir = Path.of(System.getProperty("sf.baseDir")).resolve("minecraft");
+    Files.createDirectories(launchDir);
+    return launchDir;
   }
 
   @Override

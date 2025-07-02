@@ -18,16 +18,21 @@
 package com.soulfiremc.launcher.mixin;
 
 import net.fabricmc.loader.impl.discovery.ClasspathModCandidateFinder;
-import net.fabricmc.loader.impl.launch.FabricLauncher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @SuppressWarnings("UnusedMixin")
 @Mixin(ClasspathModCandidateFinder.class)
 public class MixinClasspathModCandidateFinder {
-  @Redirect(method = "findCandidates", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/launch/FabricLauncher;isDevelopment()Z"), remap = false)
-  private boolean isDevelopment(final FabricLauncher instance) {
+  @ModifyArg(method = "findCandidates", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/discovery/ModCandidateFinder$ModCandidateConsumer;accept(Ljava/nio/file/Path;Z)V"), index = 1, remap = false)
+  private boolean alwaysTrueAccept1(final boolean remap) {
+    // Always return true to force classpath loading
+    return true;
+  }
+
+  @ModifyArg(method = "findCandidates", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/discovery/ModCandidateFinder$ModCandidateConsumer;accept(Ljava/util/List;Z)V"), index = 1, remap = false)
+  private boolean alwaysTrueAccept2(final boolean remap) {
     // Always return true to force classpath loading
     return true;
   }

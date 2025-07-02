@@ -50,6 +50,7 @@ public class SoulFirePostLibLauncher {
     System.setProperty("java.awt.headless", "true");
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
+    System.setProperty(SystemProperties.DEVELOPMENT, "true");
     System.setProperty("sf.bootstrap.class", bootstrapClassName);
     System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
