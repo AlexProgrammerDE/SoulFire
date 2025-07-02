@@ -17,23 +17,20 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.resourcepack;
 
-import com.google.common.hash.HashCode;
-import net.minecraft.client.resources.server.ServerPackManager;
+import net.minecraft.client.resources.server.DownloadedPackSource;
+import net.minecraft.client.resources.server.PackReloadConfig;
+import net.minecraft.server.packs.repository.Pack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.net.URL;
-import java.util.UUID;
+import java.util.List;
 
-@Mixin(ServerPackManager.ServerPackData.class)
-public class MixinServerPackData {
-  @Inject(method = "<init>", at = @At(value = "RETURN"))
-  private void onInit(UUID id, URL url, HashCode hash, CallbackInfo ci) {
-    var packDataThis = (ServerPackManager.ServerPackData) (Object) this;
-    packDataThis.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;
-    packDataThis.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
-    packDataThis.promptAccepted = true;
+@Mixin(DownloadedPackSource.class)
+public class MixinDownloadedPackSource {
+  @Inject(method = "loadRequestedPacks", at = @At("HEAD"), cancellable = true)
+  private void soulfire$loadRequestedPacks(List<PackReloadConfig.IdAndPath> packs, CallbackInfoReturnable<List<Pack>> cir) {
+    cir.setReturnValue(List.of());
   }
 }

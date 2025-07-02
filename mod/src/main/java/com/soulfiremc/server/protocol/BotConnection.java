@@ -42,6 +42,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.User;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.toasts.ToastManager;
@@ -52,6 +53,7 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.resources.server.DownloadedPackSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -140,6 +142,12 @@ public final class BotConnection {
       User.Type.MSA
     );
     newInstance.deltaTracker = new DeltaTracker.Timer(20.0F, 0L, newInstance::getTickTargetMillis);
+    newInstance.reloadStateTracker = new ResourceLoadStateTracker();
+    newInstance.downloadedPackSource = new DownloadedPackSource(
+      newInstance,
+      newInstance.gameDirectory.toPath().resolve("downloads"),
+      ((IMinecraft) newInstance).soulfire$getGameConfig().user
+    );
 
     ((IMinecraft) newInstance).soulfire$setConnection(this);
 

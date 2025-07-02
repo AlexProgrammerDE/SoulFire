@@ -12,6 +12,8 @@ accessible field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gu
 accessible field net/minecraft/client/Minecraft running Z
 accessible field net/minecraft/client/Minecraft user Lnet/minecraft/client/User;
 accessible field net/minecraft/client/Minecraft deltaTracker Lnet/minecraft/client/DeltaTracker$Timer;
+accessible field net/minecraft/client/Minecraft reloadStateTracker Lnet/minecraft/client/ResourceLoadStateTracker;
+accessible field net/minecraft/client/Minecraft downloadedPackSource Lnet/minecraft/client/resources/server/DownloadedPackSource;
 
 mutable field net/minecraft/client/Minecraft progressTasks Ljava/util/Queue;
 mutable field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
@@ -20,6 +22,8 @@ mutable field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
 mutable field net/minecraft/client/Minecraft running Z
 mutable field net/minecraft/client/Minecraft user Lnet/minecraft/client/User;
 mutable field net/minecraft/client/Minecraft deltaTracker Lnet/minecraft/client/DeltaTracker$Timer;
+mutable field net/minecraft/client/Minecraft reloadStateTracker Lnet/minecraft/client/ResourceLoadStateTracker;
+mutable field net/minecraft/client/Minecraft downloadedPackSource Lnet/minecraft/client/resources/server/DownloadedPackSource;
 
 accessible class net/minecraft/client/resources/server/ServerPackManager$ServerPackData
 accessible class net/minecraft/client/resources/server/ServerPackManager$ActivationStatus

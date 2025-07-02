@@ -46,6 +46,13 @@ import java.util.Objects;
 public class MixinMinecraft implements IMinecraft {
   @Unique
   public BotConnection soulfire$botConnection;
+  @Unique
+  public GameConfig soulfire$gameConfig;
+
+  @Inject(method = "<init>", at = @At("RETURN"))
+  private void getInstance(GameConfig gameConfig, CallbackInfo ci) {
+    soulfire$setGameConfig(gameConfig);
+  }
 
   @Inject(method = "getInstance", at = @At("HEAD"), cancellable = true)
   private static void getInstance(CallbackInfoReturnable<Minecraft> cir) {
@@ -110,5 +117,22 @@ public class MixinMinecraft implements IMinecraft {
     }
 
     this.soulfire$botConnection = connection;
+  }
+
+  @Override
+  public GameConfig soulfire$getGameConfig() {
+    if (soulfire$gameConfig == null) {
+      throw new IllegalStateException("GameConfig is not set");
+    }
+    return soulfire$gameConfig;
+  }
+
+  @Override
+  public void soulfire$setGameConfig(GameConfig gameConfig) {
+    if (soulfire$gameConfig != null) {
+      throw new IllegalStateException("GameConfig is already set");
+    }
+
+    this.soulfire$gameConfig = gameConfig;
   }
 }

@@ -18,9 +18,14 @@
 package com.soulfiremc.mod.access;
 
 import com.soulfiremc.server.protocol.BotConnection;
+import net.minecraft.client.main.GameConfig;
 
 public interface IMinecraft {
   BotConnection soulfire$getConnection();
 
   void soulfire$setConnection(BotConnection connection);
+
+  GameConfig soulfire$getGameConfig();
+
+  void soulfire$setGameConfig(GameConfig gameConfig);
 }

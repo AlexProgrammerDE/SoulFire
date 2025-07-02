@@ -48,7 +48,7 @@ public class MixinMinecraft {
     return new ReloadInstance() {
       @Override
       public @NotNull CompletableFuture<?> done() {
-        return CompletableFuture.completedFuture(Unit.INSTANCE);
+        return CompletableFuture.completedFuture(null);
       }
 
       @Override
@@ -60,7 +60,7 @@ public class MixinMinecraft {
 
   @Redirect(method = "reloadResourcePacks(ZLnet/minecraft/client/Minecraft$GameLoadCookie;)Ljava/util/concurrent/CompletableFuture;",
     at = @At(value = "NEW", target = "(Lnet/minecraft/client/Minecraft;Lnet/minecraft/server/packs/resources/ReloadInstance;Ljava/util/function/Consumer;Z)Lnet/minecraft/client/gui/screens/LoadingOverlay;"))
-  private LoadingOverlay setOverlay(Minecraft minecraft, ReloadInstance reload, Consumer<Optional<Throwable>> onFinish, boolean fadeIn) {
+  private LoadingOverlay createOverlay(Minecraft minecraft, ReloadInstance reload, Consumer<Optional<Throwable>> onFinish, boolean fadeIn) {
     onFinish.accept(Optional.empty());
     return null;
   }
