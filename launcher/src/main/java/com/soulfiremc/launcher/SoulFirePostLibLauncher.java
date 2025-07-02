@@ -19,7 +19,6 @@ package com.soulfiremc.launcher;
 
 import com.soulfiremc.shared.Base64Helpers;
 import com.soulfiremc.shared.SFInfoPlaceholder;
-import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.lenni0451.classtransform.TransformerManager;
@@ -27,7 +26,6 @@ import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -46,28 +44,15 @@ public class SoulFirePostLibLauncher {
     }
   }
 
-  @SneakyThrows
-  private static void setRemapClasspath() {
-    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
-    remapPathFile.toFile().deleteOnExit();
-
-    Files.writeString(remapPathFile, System.getProperty("java.class.path"));
-
-    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
-  }
-
   @SuppressWarnings("unused")
   public static void runPostLib(Path basePath, String bootstrapClassName, String[] args) {
     System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
     System.setProperty("java.awt.headless", "true");
     System.setProperty("joml.nounsafe", "true");
     System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
-    System.setProperty(SystemProperties.DEVELOPMENT, "true");
-    System.setProperty(SystemProperties.DEBUG_DISABLE_MOD_SHUFFLE, "true");
     System.setProperty("sf.bootstrap.class", bootstrapClassName);
     System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
-    setRemapClasspath();
     injectEarlyMixins();
     SFInfoPlaceholder.register();
     SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);

@@ -57,7 +57,6 @@ unimined.minecraft {
   }
 
   mods {
-    remap(include)
     modImplementation {
       mixinRemap {
         @Suppress("UnstableApiUsage")
@@ -91,6 +90,5 @@ tasks {
   }
   withType<AbstractRemapJarTask> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    prodNamespace("mojmap")
   }
 }

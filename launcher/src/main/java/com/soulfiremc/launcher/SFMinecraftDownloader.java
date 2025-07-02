@@ -22,31 +22,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.util.SystemProperties;
-import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
-import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
-import net.fabricmc.tinyremapper.NonClassCopyMode;
-import net.fabricmc.tinyremapper.OutputConsumerPath;
-import net.fabricmc.tinyremapper.TinyRemapper;
-import net.fabricmc.tinyremapper.TinyUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 
 public class SFMinecraftDownloader {
   private static final String MINECRAFT_VERSION = "1.21.7";
   private static final String MINECRAFT_CLIENT_JAR_NAME = "minecraft-%s-client.jar".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME = "minecraft-%s-client-mappings.txt".formatted(MINECRAFT_VERSION);
-  private static final String MINECRAFT_CLIENT_MAPPINGS_TINY_NAME = "minecraft-%s-client-mappings.tiny".formatted(MINECRAFT_VERSION);
-  private static final String MINECRAFT_CLIENT_JAR_REMAPPED_NAME = "minecraft-%s-client-remapped.jar".formatted(MINECRAFT_VERSION);
   private static final String MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
   private static Path getAndCreateDownloadDirectory(Path basePath) {
@@ -67,14 +55,6 @@ public class SFMinecraftDownloader {
 
   private static Path getMinecraftClientMappingsProguardPath(Path basePath) {
     return getAndCreateDownloadDirectory(basePath).resolve(MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME);
-  }
-
-  private static Path getMinecraftClientMappingsTinyPath(Path basePath) {
-    return getAndCreateDownloadDirectory(basePath).resolve(MINECRAFT_CLIENT_MAPPINGS_TINY_NAME);
-  }
-
-  private static Path getMinecraftClientJarRemappedPath(Path basePath) {
-    return getAndCreateDownloadDirectory(basePath).resolve(MINECRAFT_CLIENT_JAR_REMAPPED_NAME);
   }
 
   private static JsonObject getUrl(String url) {
@@ -152,40 +132,6 @@ public class SFMinecraftDownloader {
       }
     }
 
-    var minecraftMappingsTinyPath = getMinecraftClientMappingsTinyPath(basePath);
-    if (!Files.exists(minecraftMappingsTinyPath)) {
-      try (var reader = Files.newBufferedReader(minecraftMappingsProguardPath);
-           var writer = Files.newBufferedWriter(minecraftMappingsTinyPath)) {
-        ProGuardFileReader.read(reader, new Tiny2FileWriter(writer, false));
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to read or write ProGuard mappings", e);
-      }
-    }
-
-    var minecraftJarRemappedPath = getMinecraftClientJarRemappedPath(basePath);
-    if (!Files.exists(minecraftJarRemappedPath)) {
-      TinyRemapper remapper = TinyRemapper.newRemapper()
-        .withMappings(TinyUtils.createTinyMappingProvider(minecraftMappingsTinyPath, "target", "source"))
-        .rebuildSourceFilenames(true)
-        .build();
-
-      try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(minecraftJarRemappedPath).build()) {
-        outputConsumer.addNonClassFiles(minecraftJarPath, NonClassCopyMode.FIX_META_INF, remapper);
-
-        remapper.readInputs(minecraftJarPath);
-        remapper.readClassPath(Arrays.stream(System.getProperty("java.class.path")
-            .split(File.pathSeparator))
-          .map(Paths::get)
-          .toArray(Path[]::new));
-
-        remapper.apply(outputConsumer);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      } finally {
-        remapper.finish();
-      }
-    }
-
-    System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarRemappedPath.toString());
+    System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
   }
 }
