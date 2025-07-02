@@ -58,12 +58,12 @@ public final class DevSettings implements SettingsObject {
       .description("Enable gRPC debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty MCPROTOCOLLIB_DEBUG =
+  public static final BooleanProperty MINECRAFT_DEBUG =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)
-      .key("mcprotocollib-debug")
-      .uiName("MCProtocolLib debug")
-      .description("Enable MCProtocolLib debug logging")
+      .key("minecraft-debug")
+      .uiName("Minecraft debug")
+      .description("Enable Minecraft debug logging")
       .defaultValue(false)
       .build();
 }

@@ -212,6 +212,7 @@ public final class SoulFireServer {
     Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("net.minecraft", settingsSource.get(DevSettings.MINECRAFT_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
   private void loadInstances() {
