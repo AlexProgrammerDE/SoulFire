@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.launcher;
 
+import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.shared.Base64Helpers;
 import com.soulfiremc.shared.SFInfoPlaceholder;
+import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.lenni0451.classtransform.TransformerManager;
@@ -26,8 +28,10 @@ import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 public class SoulFirePostLibLauncher {
   private static void injectEarlyMixins() {
@@ -44,6 +48,45 @@ public class SoulFirePostLibLauncher {
     }
   }
 
+  @SneakyThrows
+  private static void setupManagedMods(Path baseDir) {
+    var modsPath = baseDir.resolve("minecraft").resolve("mods");
+    if (!Files.exists(modsPath)) {
+      Files.createDirectories(modsPath);
+    }
+
+    try (var stream = Files.list(modsPath)) {
+      stream.filter(path -> path.getFileName().toString().startsWith("managed-"))
+        .forEach(path -> {
+          try {
+            Files.deleteIfExists(path);
+          } catch (Exception e) {
+            System.err.println("Failed to delete managed mod: " + path + " - " + e.getMessage());
+          }
+        });
+    }
+
+    var fileName = "mod-%s.jar".formatted(BuildData.VERSION);
+    try (var filePath = SoulFireAbstractLauncher.class.getResourceAsStream("/META-INF/jars/" + fileName)) {
+      var fileBytes = Objects.requireNonNull(filePath, "Managed mod file not found: %s".formatted(fileName)).readAllBytes();
+      var targetPath = modsPath.resolve("managed-" + fileName);
+      Files.write(targetPath, fileBytes);
+      System.out.printf("Copied managed mod: %s%n", targetPath);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to copy managed mod: " + fileName, e);
+    }
+  }
+
+  @SneakyThrows
+  private static void setRemapClasspath() {
+    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
+    remapPathFile.toFile().deleteOnExit();
+
+    Files.writeString(remapPathFile, System.getProperty("java.class.path"));
+
+    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
+  }
+
   @SuppressWarnings("unused")
   public static void runPostLib(Path basePath, String bootstrapClassName, String[] args) {
     System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
@@ -54,6 +97,8 @@ public class SoulFirePostLibLauncher {
     System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
     injectEarlyMixins();
+    setRemapClasspath();
+    setupManagedMods(basePath);
     SFInfoPlaceholder.register();
     SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
 

@@ -24,7 +24,9 @@ import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
+import net.fabricmc.mappingio.format.tiny.Tiny1FileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -153,13 +155,20 @@ public class SFMinecraftDownloader {
              )
            );
            var writer = Files.newBufferedWriter(minecraftMappingsTinyPath)) {
+        var mappingTree = new MemoryMappingTree();
+        ProGuardFileReader.read(proguardReader, "named", "official", mappingTree);
+        Tiny1FileReader.read(intermediaryReader, mappingTree);
+
         var tiny2Writer = new Tiny2FileWriter(writer, false);
-        ProGuardFileReader.read(proguardReader, tiny2Writer);
+        mappingTree.accept(tiny2Writer);
       } catch (Exception e) {
         throw new RuntimeException("Failed to read/write mappings", e);
       }
     }
 
+    System.setProperty(SystemProperties.MAPPING_PATH, minecraftMappingsTinyPath.toAbsolutePath().toString());
+    System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
+    System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
   }
 }
