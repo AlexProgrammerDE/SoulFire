@@ -14,7 +14,7 @@ dependencies {
   api("org.ow2.asm:asm-util:9.8")
   api("net.fabricmc:sponge-mixin:0.16.1+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.7")
-  api("com.github.Player3324:fabric-loader:explicitNs-SNAPSHOT")
+  api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
   api("net.fabricmc:tiny-remapper:0.11.1")
 
