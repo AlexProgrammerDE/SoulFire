@@ -30,7 +30,7 @@ import java.util.List;
 @Mixin(DownloadedPackSource.class)
 public class MixinDownloadedPackSource {
   @Inject(method = "loadRequestedPacks", at = @At("HEAD"), cancellable = true)
-  private void soulfire$loadRequestedPacks(List<PackReloadConfig.IdAndPath> packs, CallbackInfoReturnable<List<Pack>> cir) {
+  private void loadRequestedPacks(List<PackReloadConfig.IdAndPath> packs, CallbackInfoReturnable<List<Pack>> cir) {
     cir.setReturnValue(List.of());
   }
 }

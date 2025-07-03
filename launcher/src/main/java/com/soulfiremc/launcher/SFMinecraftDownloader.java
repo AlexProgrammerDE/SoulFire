@@ -21,8 +21,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
+import net.fabricmc.loader.impl.launch.MappingConfiguration;
 import net.fabricmc.loader.impl.util.SystemProperties;
+import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
+import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
 
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,11 +34,13 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 public class SFMinecraftDownloader {
   private static final String MINECRAFT_VERSION = "1.21.7";
   private static final String MINECRAFT_CLIENT_JAR_NAME = "minecraft-%s-client.jar".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME = "minecraft-%s-client-mappings.txt".formatted(MINECRAFT_VERSION);
+  private static final String MINECRAFT_CLIENT_MAPPINGS_TINY_NAME = "minecraft-%s-client-mappings.tiny".formatted(MINECRAFT_VERSION);
   private static final String MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
   private static Path getAndCreateDownloadDirectory(Path basePath) {
@@ -55,6 +61,10 @@ public class SFMinecraftDownloader {
 
   private static Path getMinecraftClientMappingsProguardPath(Path basePath) {
     return getAndCreateDownloadDirectory(basePath).resolve(MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME);
+  }
+
+  private static Path getMinecraftClientMappingsTinyPath(Path basePath) {
+    return getAndCreateDownloadDirectory(basePath).resolve(MINECRAFT_CLIENT_MAPPINGS_TINY_NAME);
   }
 
   private static JsonObject getUrl(String url) {
@@ -129,6 +139,24 @@ public class SFMinecraftDownloader {
         Files.copy(tempMappingsPath, minecraftMappingsProguardPath);
         Files.deleteIfExists(tempMappingsPath);
         System.out.println("Minecraft client mappings downloaded and saved to: " + minecraftMappingsProguardPath);
+      }
+    }
+
+    var minecraftMappingsTinyPath = getMinecraftClientMappingsTinyPath(basePath);
+    if (!Files.exists(minecraftMappingsTinyPath)) {
+      try (var proguardReader = Files.newBufferedReader(minecraftMappingsProguardPath);
+           var intermediaryReader = new InputStreamReader(
+             Objects.requireNonNull(
+               MappingConfiguration.class.getClassLoader().getResourceAsStream(
+                 "mappings/mappings.tiny"
+               )
+             )
+           );
+           var writer = Files.newBufferedWriter(minecraftMappingsTinyPath)) {
+        var tiny2Writer = new Tiny2FileWriter(writer, false);
+        ProGuardFileReader.read(proguardReader, tiny2Writer);
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to read/write mappings", e);
       }
     }
 
