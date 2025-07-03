@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinFabricLoaderImpl {
   @Redirect(method = "setup", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/FabricLoaderImpl;isDevelopmentEnvironment()Z"))
   private boolean redirectIsDevelopmentEnvironment(FabricLoaderImpl instance) {
+    // Trigger mod remapping at runtime
     return true;
   }
 }

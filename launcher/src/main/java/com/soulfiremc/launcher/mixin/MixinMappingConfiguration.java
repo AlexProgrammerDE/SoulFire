@@ -32,6 +32,7 @@ public class MixinMappingConfiguration {
     remap = false)
   public void getRuntimeNamespace(CallbackInfoReturnable<String> cir) {
     if (Boolean.getBoolean("sf.customIntermediaryDeobfuscation")) {
+      // Temporarily remap to intermediary
       cir.setReturnValue("intermediary");
     }
   }

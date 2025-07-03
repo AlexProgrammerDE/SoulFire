@@ -30,6 +30,7 @@ public class MixinFabricMixinBootstrap {
     at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/launch/FabricLauncher;isDevelopment()Z"),
     remap = false)
   private static boolean isDevelopment(FabricLauncher instance) {
+    // Trigger refmap remapping at runtime
     return true;
   }
 }
