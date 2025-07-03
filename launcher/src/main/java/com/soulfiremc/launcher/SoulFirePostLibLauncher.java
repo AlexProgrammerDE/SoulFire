@@ -77,16 +77,6 @@ public class SoulFirePostLibLauncher {
     }
   }
 
-  @SneakyThrows
-  private static void setRemapClasspath() {
-    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
-    remapPathFile.toFile().deleteOnExit();
-
-    Files.writeString(remapPathFile, System.getProperty("java.class.path"));
-
-    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
-  }
-
   @SuppressWarnings("unused")
   public static void runPostLib(Path basePath, String bootstrapClassName, String[] args) {
     System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
@@ -97,7 +87,6 @@ public class SoulFirePostLibLauncher {
     System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
     injectEarlyMixins();
-    setRemapClasspath();
     setupManagedMods(basePath);
     SFInfoPlaceholder.register();
     SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);

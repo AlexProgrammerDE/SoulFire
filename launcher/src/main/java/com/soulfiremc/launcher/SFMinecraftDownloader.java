@@ -21,6 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
+import net.fabricmc.loader.impl.game.GameProviderHelper;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
@@ -28,6 +29,7 @@ import net.fabricmc.mappingio.format.tiny.Tiny1FileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -36,7 +38,10 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SFMinecraftDownloader {
   private static final String MINECRAFT_VERSION = "1.21.7";
@@ -170,5 +175,29 @@ public class SFMinecraftDownloader {
     System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
     System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
+    setRemapClasspath(basePath);
+  }
+
+  @SneakyThrows
+  private static void setRemapClasspath(Path basePath) {
+    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
+    remapPathFile.toFile().deleteOnExit();
+
+    var getDeobfJarDir = GameProviderHelper.class.getDeclaredMethod("getDeobfJarDir", Path.class, String.class, String.class);
+    getDeobfJarDir.setAccessible(true);
+    var deobfJarDir = (Path) getDeobfJarDir.invoke(null, basePath.resolve("minecraft"), "minecraft", MINECRAFT_VERSION);
+
+    Files.writeString(remapPathFile, Stream.concat(Arrays.stream(System.getProperty("java.class.path")
+          .split(File.pathSeparator)),
+        Stream.of(
+          deobfJarDir
+            .resolve("client-intermediary.jar")
+            .toAbsolutePath()
+            .toString()
+        )
+      )
+      .collect(Collectors.joining(File.pathSeparator)));
+
+    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
   }
 }
