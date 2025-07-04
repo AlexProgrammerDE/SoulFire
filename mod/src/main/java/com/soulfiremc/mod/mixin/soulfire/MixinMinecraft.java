@@ -17,26 +17,97 @@
  */
 package com.soulfiremc.mod.mixin.soulfire;
 
-import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
-import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
+import com.soulfiremc.mod.access.IMinecraft;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.protocol.BotConnection;
+import net.minecraft.CrashReport;
+import net.minecraft.ReportType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.server.Bootstrap;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.io.File;
+import java.util.Objects;
 
 @Mixin(Minecraft.class)
-public class MixinMinecraft {
-  @Inject(method = "tick", at = @At("HEAD"))
-  private void onTickPre(CallbackInfo ci) {
-    BotConnection.CURRENT.get().botControl().tick();
-    SoulFireAPI.postEvent(new BotPreTickEvent(BotConnection.CURRENT.get()));
+public class MixinMinecraft implements IMinecraft {
+  @Unique
+  public BotConnection soulfire$botConnection;
+  @Unique
+  public GameConfig soulfire$gameConfig;
+
+  @Inject(method = "getInstance", at = @At("HEAD"), cancellable = true)
+  private static void getInstance(CallbackInfoReturnable<Minecraft> cir) {
+    var currentInstance = SFConstants.MINECRAFT_INSTANCE.get();
+    if (currentInstance == null) {
+      // new RuntimeException().printStackTrace();
+    } else {
+      cir.setReturnValue(currentInstance);
+    }
   }
 
-  @Inject(method = "tick", at = @At("RETURN"))
-  private void onTickPost(CallbackInfo ci) {
-    SoulFireAPI.postEvent(new BotPostTickEvent(BotConnection.CURRENT.get()));
+  @Inject(method = "crash", at = @At("HEAD"), cancellable = true)
+  private static void preventCrash(Minecraft minecraft, File gameDirectory, CrashReport crashReport, CallbackInfo ci) {
+    Bootstrap.realStdoutPrintln(crashReport.getFriendlyReport(ReportType.CRASH));
+    ci.cancel();
+  }
+
+  @Inject(method = "<init>", at = @At("RETURN"))
+  private void getInstance(GameConfig gameConfig, CallbackInfo ci) {
+    soulfire$setGameConfig(gameConfig);
+  }
+
+  @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/ReentrantBlockableEventLoop;<init>(Ljava/lang/String;)V", shift = At.Shift.AFTER))
+  private void injectLocalHook(GameConfig arg, CallbackInfo ci) {
+    SFConstants.MINECRAFT_INSTANCE.set((Minecraft) (Object) this);
+  }
+
+  @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)
+  private void preventDestroy(CallbackInfo ci) {
+    ci.cancel();
+  }
+
+  @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
+  private void preventResetData(GameRenderer instance) {
+    // Prevent resetting because it causes race conditions
+  }
+
+  @Override
+  public BotConnection soulfire$getConnection() {
+    return Objects.requireNonNull(soulfire$botConnection, "BotConnection is null");
+  }
+
+  @Override
+  public void soulfire$setConnection(BotConnection connection) {
+    if (soulfire$botConnection != null) {
+      throw new IllegalStateException("BotConnection is already set");
+    }
+
+    this.soulfire$botConnection = connection;
+  }
+
+  @Override
+  public GameConfig soulfire$getGameConfig() {
+    if (soulfire$gameConfig == null) {
+      throw new IllegalStateException("GameConfig is not set");
+    }
+    return soulfire$gameConfig;
+  }
+
+  @Override
+  public void soulfire$setGameConfig(GameConfig gameConfig) {
+    if (soulfire$gameConfig != null) {
+      throw new IllegalStateException("GameConfig is already set");
+    }
+
+    this.soulfire$gameConfig = gameConfig;
   }
 }
