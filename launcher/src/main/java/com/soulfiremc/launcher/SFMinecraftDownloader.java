@@ -25,7 +25,7 @@ import net.fabricmc.loader.impl.game.GameProviderHelper;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
-import net.fabricmc.mappingio.format.tiny.Tiny1FileReader;
+import net.fabricmc.mappingio.format.tiny.Tiny2FileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
@@ -162,7 +162,7 @@ public class SFMinecraftDownloader {
            var writer = Files.newBufferedWriter(minecraftMappingsTinyPath)) {
         var mappingTree = new MemoryMappingTree();
         ProGuardFileReader.read(proguardReader, "named", "official", mappingTree);
-        Tiny1FileReader.read(intermediaryReader, mappingTree);
+        Tiny2FileReader.read(intermediaryReader, mappingTree);
 
         var tiny2Writer = new Tiny2FileWriter(writer, false);
         mappingTree.accept(tiny2Writer);
@@ -173,7 +173,7 @@ public class SFMinecraftDownloader {
 
     System.setProperty(SystemProperties.MAPPING_PATH, minecraftMappingsTinyPath.toAbsolutePath().toString());
     System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
-    System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "intermediary");
+    System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
     setRemapClasspath(basePath);
   }
