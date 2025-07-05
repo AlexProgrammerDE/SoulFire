@@ -25,15 +25,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.apache.commons.compress.utils.Lists;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -51,20 +49,20 @@ public final class ProjectedInventory {
   @Getter
   @ToString.Include
   private final ItemStack[] usableToolsAndEmpty;
-  private final IDMap<Block, Costs.BlockMiningCosts> sharedMiningCosts;
+  private final IDMap<BlockState, Costs.BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
   public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
-      Arrays.stream(playerInventory.storage())
-        .map(ContainerSlot::item)
+      Lists.newArrayList(playerInventory.iterator())
+        .stream()
         .filter(item -> !item.isEmpty())
         .toList(),
       entity,
       pathConstraint);
   }
 
-  public ProjectedInventory(List<ItemStack> items, @Nullable LocalPlayer entity, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<ItemStack> items, LocalPlayer entity, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndEmpty = new HashSet<ItemStack>();
 
@@ -81,15 +79,14 @@ public final class ProjectedInventory {
 
     this.usableBlockItems = blockItems;
     this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new ItemStack[0]);
-    this.sharedMiningCosts = new IDMap<>(BuiltInRegistries.BLOCK,
-      BuiltInRegistries.BLOCK::getId,
-      blockType -> Costs.calculateBlockBreakCost(entity, blockType));
+    this.sharedMiningCosts = new IDMap<>(Block.BLOCK_STATE_REGISTRY,
+      blockType -> Costs.calculateBlockBreakCost(entity, this, blockType));
     this.stairsBlockToStandOn = new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
 
   public Costs.BlockMiningCosts getMiningCosts(BlockState blockState) {
-    return Objects.requireNonNull(sharedMiningCosts.get(blockState.getBlock()), "Block not destructible");
+    return Objects.requireNonNull(sharedMiningCosts.get(blockState), "Block not destructible");
   }
 
   public boolean isStairsBlockToStandOn(BlockState blockState) {

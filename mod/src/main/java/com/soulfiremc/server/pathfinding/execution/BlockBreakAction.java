@@ -73,7 +73,7 @@ public final class BlockBreakAction implements WorldAction {
     }
 
     if (!putInHand) {
-      if (ItemPlaceHelper.placeBestToolInHand(dataManager, blockPosition)) {
+      if (ItemPlaceHelper.placeBestToolInHand(clientEntity, level, blockPosition)) {
         putInHand = true;
       }
 
