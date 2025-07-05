@@ -47,7 +47,12 @@ public final class DiagonalCollisionCalculator {
 
           for (var step : STEPS) {
             var currentPosition = START_POSITION.add(step.mul(baseOffset.toVector3d()));
-            collides = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
+            var collisionShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+            if (collisionShape.isEmpty()) {
+              continue;
+            }
+
+            collides = collisionShape
               .bounds()
               .move(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toBlockPos())
               .intersects(Player.STANDING_DIMENSIONS.makeBoundingBox(VectorHelper.fromVector3d(currentPosition)));
