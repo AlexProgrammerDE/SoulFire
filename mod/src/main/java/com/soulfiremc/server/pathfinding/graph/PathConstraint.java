@@ -24,6 +24,8 @@ import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
@@ -32,6 +34,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
@@ -116,13 +120,14 @@ public class PathConstraint {
       return List.of();
     }
 
-    return entity.level().getEntities()
-      .stream()
+    return StreamSupport.stream(entity.clientLevel.entitiesForRendering().spliterator(), false)
       .filter(e -> e != entity)
-      .filter(e -> !entity.entityType().friendly())
-      .filter(e -> e.entityType().defaultFollowRange() > 0)
+      .filter(e -> !entity.getType().getCategory().isFriendly())
+      .flatMap(e -> e instanceof LivingEntity livingEntity
+        && livingEntity.getAttributeValue(Attributes.FOLLOW_RANGE) > 0 ?
+        Stream.of(livingEntity) : Stream.empty())
       .map(e -> new EntityRangeData(
-        e.entityType().defaultFollowRange(),
+        e.getAttributeValue(Attributes.FOLLOW_RANGE),
         SFVec3i.fromInt(e.blockPosition())
       ))
       .toList();

@@ -25,6 +25,7 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.ClipContext;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -78,7 +79,14 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
       connection.controlState().jump(false);
     }
 
-    connection.minecraft().gameMode.useItemOn(clientEntity, InteractionHand.MAIN_HAND, blockPlaceAgainstData);
+    connection.minecraft().gameMode.useItemOn(clientEntity, InteractionHand.MAIN_HAND, clientEntity.level().clipIncludingBorder(new ClipContext(
+      clientEntity.getEyePosition(),
+      blockPlaceAgainstData.againstPos().toBlockPos().getCenter().add(
+        blockPlaceAgainstData.blockFace().toDirection().getUnitVec3().multiply(0.5, 0.5, 0.5)),
+      ClipContext.Block.COLLIDER,
+      ClipContext.Fluid.NONE,
+      clientEntity
+    )));
     finishedPlacing = true;
   }
 

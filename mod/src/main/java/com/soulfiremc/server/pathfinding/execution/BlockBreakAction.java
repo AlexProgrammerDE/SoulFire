@@ -23,10 +23,13 @@ import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.VectorHelper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Blocks;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,7 +37,6 @@ public final class BlockBreakAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockFace blockBreakSideHint;
-  private boolean finishedDigging = false;
   private boolean didLook = false;
   private boolean putInHand = false;
   private int remainingTicks = -1;
@@ -67,8 +69,7 @@ public final class BlockBreakAction implements WorldAction {
       didLook = true;
       clientEntity.lookAt(
         EntityAnchorArgument.Anchor.EYES,
-        blockBreakSideHint.getMiddleOfFace(blockPosition));
-      clientEntity.sendPositionChanges();
+        VectorHelper.fromVector3d(blockBreakSideHint.getMiddleOfFace(blockPosition)));
     }
 
     if (!putInHand) {
@@ -79,43 +80,23 @@ public final class BlockBreakAction implements WorldAction {
       return;
     }
 
-    if (finishedDigging) {
+    var optionalBlock = level.getBlockState(blockPosition.toBlockPos()).getBlock();
+    if (optionalBlock == Blocks.VOID_AIR) {
+      log.warn("Block at {} is not loaded!", blockPosition);
       return;
     }
 
     if (remainingTicks == -1) {
-      var optionalBlock = level.getBlockState(blockPosition).getBlock();
-      if (optionalBlock == Blocks.VOID_AIR) {
-        log.warn("Block at {} is not loaded!", blockPosition);
-        return;
-      }
-
       remainingTicks = totalTicks =
         Costs.getRequiredMiningTicks(
-            dataManager.tagsState(),
-            dataManager.localPlayer(),
-            clientEntity.onGround(),
+            clientEntity,
             connection.dataManager().localPlayer().inventory().getCarried(),
             optionalBlock)
           .ticks();
-      connection.dataManager().gameModeState()
-        .sendStartBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
+    }
 
-      // We instamine or are in creative mode
-      // In that case don't send finish and no swing animation
-      if (remainingTicks == 0) {
-        finishedDigging = true;
-
-        // Predict state change
-        // This only happens with instamine
-        dataManager.currentLevel().setBlock(blockPosition.toVector3i(), BlockState.forDefaultBlock(Block.AIR));
-      }
-    } else if (--remainingTicks == 0) {
-      connection.dataManager().gameModeState()
-        .sendEndBreakBlock(blockPosition.toVector3i(), blockBreakSideHint.toDirection());
-      finishedDigging = true;
-    } else {
-      connection.dataManager().gameModeState().sendBreakBlockAnimation();
+    if (connection.minecraft().gameMode.continueDestroyBlock(blockPosition.toBlockPos(), blockBreakSideHint.toDirection())) {
+      connection.minecraft().player.swing(InteractionHand.MAIN_HAND);
     }
   }
 

@@ -32,14 +32,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-
-import static com.caoccao.javet.swc4j.comments.Swc4jCommentKind.Block;
 
 /**
  * An immutable representation of a player inventory. This takes an inventory and projects places/breaks
@@ -85,12 +82,10 @@ public final class ProjectedInventory {
     this.usableBlockItems = blockItems;
     this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new ItemStack[0]);
     this.sharedMiningCosts = new IDMap<>(BuiltInRegistries.BLOCK,
-      blockType -> Costs.calculateBlockBreakCost(tagsState, entity, this, blockType));
-    this.stairsBlockToStandOn = new IDBooleanMap<>(BuiltInRegistries.BLOCK
-      .stream()
-      .flatMap(blockType -> blockType.statesData().possibleStates().stream())
-      .toList(),
-      state -> tagsState.is(state.getBlock(), BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
+      BuiltInRegistries.BLOCK::getId,
+      blockType -> Costs.calculateBlockBreakCost(entity, blockType));
+    this.stairsBlockToStandOn = new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
+      state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
 
   public Costs.BlockMiningCosts getMiningCosts(BlockState blockState) {

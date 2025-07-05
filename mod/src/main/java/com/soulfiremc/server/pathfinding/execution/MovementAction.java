@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.world.phys.AABB;
 import org.cloudburstmc.math.vector.Vector2d;
 import org.cloudburstmc.math.vector.Vector3d;
 
@@ -41,6 +42,12 @@ public final class MovementAction implements WorldAction {
   private boolean wasStill = false;
   private int noJumpTicks = 0;
 
+  public static double minXZ(AABB bb) {
+    var x = bb.maxX - bb.minX;
+    var z = bb.maxZ - bb.minZ;
+    return Math.min(x, z);
+  }
+
   @Override
   public boolean isCompleted(BotConnection connection) {
     var clientEntity = connection.minecraft().player;
@@ -53,12 +60,12 @@ public final class MovementAction implements WorldAction {
       // We want to be on the same Y level
       return false;
     } else {
-      return isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock);
+      return isAtTargetXZ(clientEntity, VectorHelper.fromVec3(botPosition), targetMiddleBlock);
     }
   }
 
   private boolean isAtTargetXZ(LocalPlayer clientEntity, Vector3d botPosition, Vector3d targetMiddleBlock) {
-    var halfDiagonal = clientEntity.getBoundingBox().minXZ() / 2;
+    var halfDiagonal = minXZ(clientEntity.getBoundingBox()) / 2;
 
     // Leave more space to allow falling
     var adjustedHalfDiagonal = halfDiagonal - 0.1;
@@ -77,11 +84,11 @@ public final class MovementAction implements WorldAction {
 
     var level = connection.minecraft().level;
 
-    var blockMeta = level.getBlockState(blockPosition);
+    var blockMeta = level.getBlockState(blockPosition.toBlockPos());
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
 
     var previousYRot = clientEntity.getYRot();
-    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, targetMiddleBlock);
+    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, VectorHelper.fromVector3d(targetMiddleBlock));
     clientEntity.setXRot(0);
     var newYRot = clientEntity.getYRot();
 
@@ -93,7 +100,7 @@ public final class MovementAction implements WorldAction {
       didLook = true;
     } else if (yRotDifference > 5 || lockYRot) {
       lockYRot = true;
-      clientEntity.lastYRot(newYRot);
+      clientEntity.yRotLast = newYRot;
     }
 
     var botPosition = clientEntity.position();
@@ -101,11 +108,11 @@ public final class MovementAction implements WorldAction {
     if (needsJump) {
       // Make sure not to move if we have still other motion going on
       if (!wasStill) {
-        var deltaMovementXZ = VectorHelper.toVector2dXZ(clientEntity.getDeltaMovement());
+        var deltaMovementXZ = VectorHelper.toVector2dXZ(VectorHelper.fromVec3(clientEntity.getDeltaMovement()));
         var isBaseGravity = DoubleMath.fuzzyEquals(clientEntity.getDeltaMovement().y, -clientEntity.getGravity(), 0.1);
         var isStill = deltaMovementXZ.equals(Vector2d.ZERO);
         var isMovingRoughlyTowardsBlock = !deltaMovementXZ.equals(Vector2d.ZERO)
-          && deltaMovementXZ.normalize().dot(VectorHelper.toVector2dXZ(targetMiddleBlock.sub(clientEntity.pos())).normalize()) > 0.8;
+          && deltaMovementXZ.normalize().dot(VectorHelper.toVector2dXZ(targetMiddleBlock.sub(VectorHelper.fromVec3(clientEntity.position()))).normalize()) > 0.8;
         if (isBaseGravity && (isStill || isMovingRoughlyTowardsBlock)) {
           wasStill = true;
         } else {
@@ -118,7 +125,7 @@ public final class MovementAction implements WorldAction {
       }
     }
 
-    if (!isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock)) {
+    if (!isAtTargetXZ(clientEntity, VectorHelper.fromVec3(botPosition), targetMiddleBlock)) {
       connection.controlState().up(true);
     }
   }

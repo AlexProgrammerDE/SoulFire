@@ -24,12 +24,14 @@ import com.soulfiremc.server.pathfinding.goals.DynamicGoalScorer;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
+import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.entity.Entity;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,9 +41,7 @@ public final class FollowEntityController {
 
   public void start(BotConnection bot) {
     while (true) {
-      var entity = bot.minecraft().level.entityTracker()
-        .getEntities()
-        .stream()
+      var entity = StreamSupport.stream(bot.minecraft().level.entitiesForRendering().spliterator(), false)
         .filter(entityMatcher)
         .findAny();
       if (entity.isEmpty()) {
@@ -49,13 +49,13 @@ public final class FollowEntityController {
         return;
       }
 
-      if (entity.get().blockPos().distance(bot.minecraft().player.blockPosition()) <= maxRadius) {
+      if (VectorHelper.fromBlockPos(entity.get().blockPosition()).distance(VectorHelper.fromBlockPos(bot.minecraft().player.blockPosition())) <= maxRadius) {
         TimeUtil.waitTime(1, TimeUnit.SECONDS);
         continue;
       }
 
       try {
-        PathExecutor.executePathfinding(bot, (DynamicGoalScorer) () -> new CloseToPosGoal(SFVec3i.fromInt(entity.get().blockPos()), maxRadius), new PathConstraint(bot)).get();
+        PathExecutor.executePathfinding(bot, (DynamicGoalScorer) () -> new CloseToPosGoal(SFVec3i.fromInt(entity.get().blockPosition()), maxRadius), new PathConstraint(bot)).get();
       } catch (Exception e) {
         log.error("Got exception while executing path, aborting", e);
         return;

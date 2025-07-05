@@ -1,3 +1,20 @@
+/*
+ * SoulFire
+ * Copyright (C) 2024  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -34,7 +51,15 @@ public class VectorHelper {
     return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
   }
 
+  public static Vector3i fromBlockPos(BlockPos vector) {
+    return Vector3i.from(vector.getX(), vector.getY(), vector.getZ());
+  }
+
   public static Vec3 fromVector3d(Vector3d vector) {
     return new Vec3(vector.getX(), vector.getY(), vector.getZ());
+  }
+
+  public static Vector3d fromVec3(Vec3 vector) {
+    return Vector3d.from(vector.x, vector.y, vector.z);
   }
 }

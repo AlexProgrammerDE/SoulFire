@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.execution;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.util.BlockItems;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.multiplayer.ClientLevel;

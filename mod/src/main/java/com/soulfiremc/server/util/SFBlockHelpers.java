@@ -105,7 +105,7 @@ public final class SFBlockHelpers {
   }
 
   public static boolean isUsableBlockItem(Block blockType) {
-    return BlockItems.hasItemType(blockType);
+    return BlockItems.hasItem(blockType);
   }
 
   public static boolean isEmptyBlock(Block type) {

@@ -21,6 +21,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.level.block.FallingBlock;
 
 import java.util.Optional;
 
@@ -28,8 +29,8 @@ public final class SFItemHelpers {
   private SFItemHelpers() {}
 
   public static boolean isSafeFullBlockItem(ItemStack itemStack) {
-    var blockType = BlockItems.getBlockType(itemStack.type());
-    return blockType.isPresent() && !blockType.get().fallingBlock();
+    var blockType = BlockItems.getBlock(itemStack.getItem());
+    return blockType.isPresent() && !(blockType.get() instanceof FallingBlock);
   }
 
   public static boolean isTool(ItemStack itemStack) {

@@ -41,11 +41,11 @@ public final class GapJumpAction implements WorldAction {
 
     var blockMeta = level.getBlockState(blockPosition.toBlockPos());
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
-    if (MathHelper.isOutsideTolerance(botPosition.y, targetMiddleBlock.y, 0.2)) {
+    if (MathHelper.isOutsideTolerance(botPosition.y, targetMiddleBlock.getY(), 0.2)) {
       // We want to be on the same Y level
       return false;
     } else {
-      var distance = botPosition.distance(targetMiddleBlock);
+      var distance = VectorHelper.fromVec3(botPosition).distance(targetMiddleBlock);
       return distance <= 0.3;
     }
   }
@@ -66,7 +66,7 @@ public final class GapJumpAction implements WorldAction {
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
 
     var previousYRot = clientEntity.getYRot();
-    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, targetMiddleBlock);
+    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, VectorHelper.fromVector3d(targetMiddleBlock));
     clientEntity.setXRot(0);
     var newYRot = clientEntity.getYRot();
 
@@ -78,7 +78,7 @@ public final class GapJumpAction implements WorldAction {
       didLook = true;
     } else if (yRotDifference > 5 || lockYRot) {
       lockYRot = true;
-      clientEntity.lastYRot(newYRot);
+      clientEntity.yRotLast = newYRot;
     }
 
     connection.controlState().up(true);
