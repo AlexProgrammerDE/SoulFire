@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.botfixes;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -27,8 +28,10 @@ import com.viaversion.viafabricplus.injection.access.base.IClientConnection;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,5 +54,10 @@ public class MixinConnection {
     } else {
       return instance.channel(TransportHelper.TRANSPORT_TYPE.socketChannelClass());
     }
+  }
+
+  @WrapMethod(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V")
+  private void injectLogIntoPacketHandler(ChannelHandlerContext context, Packet<?> packet, Operation<Void> original) {
+    BotConnection.CURRENT.get().runnableWrapper().runWrapped(() -> original.call(context, packet));
   }
 }
