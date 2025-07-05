@@ -18,7 +18,7 @@
 package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
-import com.soulfiremc.server.data.BlockType;
+import com.soulfiremc.server.data.Block;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -75,7 +75,7 @@ public class PathfindingBenchmark {
       for (var x = 0; x < data.length; x++) {
         for (var y = 0; y < data[0].length; y++) {
           for (var z = 0; z < data[0][0].length; z++) {
-            var blockType = BlockType.REGISTRY.getByKey(blockDefinitions[data[x][y][z]]);
+            var blockType = Block.REGISTRY.getByKey(blockDefinitions[data[x][y][z]]);
             if (blockType.air()) {
               continue;
             }

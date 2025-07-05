@@ -53,6 +53,9 @@ public final class ServerCommandManager {
     PrintCommandsCommand.register(dispatcher);
     PrintPluginsCommand.register(dispatcher);
 
+    // Pathfinding
+    WalkCommand.register(dispatcher);
+
     // Movement controls
     LookAtCommand.register(dispatcher);
     MoveCommand.register(dispatcher);

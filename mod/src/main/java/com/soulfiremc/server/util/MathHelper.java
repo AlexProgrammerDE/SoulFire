@@ -54,4 +54,17 @@ public final class MathHelper {
   public static int sumCapOverflow(IntStream stream) {
     return stream.reduce(0, MathHelper::sumCapOverflow);
   }
+
+  public static float wrapDegrees(float value) {
+    var g = value % 360.0F;
+    if (g >= 180.0F) {
+      g -= 360.0F;
+    }
+
+    if (g < -180.0F) {
+      g += 360.0F;
+    }
+
+    return g;
+  }
 }
