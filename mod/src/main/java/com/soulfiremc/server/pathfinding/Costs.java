@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * in ticks to break a block and then converted to a relative heuristic.
  */
 public final class Costs {
+  public static final ThreadLocal<ItemStack> SELECTED_ITEM_MIXIN_OVERRIDE = new ThreadLocal<>();
   /**
    * The distance in blocks between two points that are directly next to each other.
    */
@@ -126,11 +127,11 @@ public final class Costs {
     LocalPlayer entity,
     ItemStack itemStack,
     BlockState blockState) {
+    SELECTED_ITEM_MIXIN_OVERRIDE.set(itemStack);
     var correctToolUsed = entity.hasCorrectToolForDrops(blockState);
-
-    // TODO: Inject tool into calculations
     // If this value adds up over all ticks to 1, the block is fully mined
     var damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
+    SELECTED_ITEM_MIXIN_OVERRIDE.remove();
 
     var creativeMode = entity.getAbilities().instabuild;
     var willDropUsableBlockItem = correctToolUsed && !creativeMode && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());
