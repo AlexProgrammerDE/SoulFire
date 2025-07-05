@@ -22,6 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Options.class)
@@ -29,5 +30,10 @@ public class MixinOptions {
   @Inject(method = "dataFix", at = @At("HEAD"), cancellable = true)
   public void preventDataFix(CompoundTag nbt, CallbackInfoReturnable<CompoundTag> cir) {
     cir.setReturnValue(nbt);
+  }
+
+  @Inject(method = "save", at = @At("HEAD"), cancellable = true)
+  public void preventSave(CallbackInfo ci) {
+    ci.cancel();
   }
 }
