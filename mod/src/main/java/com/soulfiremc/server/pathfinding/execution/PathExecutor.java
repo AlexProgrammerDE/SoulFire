@@ -64,10 +64,10 @@ public final class PathExecutor implements ControllingTask {
       requiresRepositioning -> {
         var level = bot.minecraft().player.level();
         var inventory =
-          new ProjectedInventory(bot.dataManager().localPlayer().inventory(), dataManager.localPlayer(), dataManager.tagsState(), pathConstraint);
+          new ProjectedInventory(clientEntity.getInventory(), clientEntity, pathConstraint);
         var start =
-          SFVec3i.fromDouble(clientEntity.pos());
-        var startBlockState = level.getBlockState(start);
+          SFVec3i.fromInt(clientEntity.blockPosition());
+        var startBlockState = level.getBlockState(start.toBlockPos());
         if (SFBlockHelpers.isTopFullBlock(startBlockState)) {
           // If the player is inside a block, move them up
           start = start.add(0, 1, 0);

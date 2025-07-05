@@ -22,13 +22,13 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.DiagonalDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.util.VectorHelper;
+import com.soulfiremc.server.util.structs.EmptyBlockGetter;
 import com.soulfiremc.server.util.structs.IDMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.GlobalPalette;
 import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
 
 public final class DiagonalCollisionCalculator {
   private static final Vector3d START_POSITION = Vector3d.from(0.5, 0, 0.5);
@@ -47,10 +47,10 @@ public final class DiagonalCollisionCalculator {
 
           for (var step : STEPS) {
             var currentPosition = START_POSITION.add(step.mul(baseOffset.toVector3d()));
-            collides = blockState.hasCollision(
-              bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toVector3i(),
-              Player.STANDING_DIMENSIONS.makeBoundingBox(VectorHelper.fromVector3d(currentPosition))
-            );
+            collides = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)
+              .bounds()
+              .move(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toBlockPos())
+              .intersects(Player.STANDING_DIMENSIONS.makeBoundingBox(VectorHelper.fromVector3d(currentPosition)));
 
             if (collides) {
               break;
