@@ -47,6 +47,7 @@
     "soulfire.api.event.MixinClientHandshakePacketListenerImpl",
     "soulfire.api.event.MixinClientLevel",
     "soulfire.api.event.MixinMinecraft",
+    "soulfire.api.event.MixinOptions",
     "soulfire.botfixes.MixinChatComponent",
     "soulfire.botfixes.MixinConnectScreen",
     "soulfire.botfixes.MixinOptions",
