@@ -18,22 +18,20 @@
 package com.soulfiremc.mod.mixin.soulfire.resourcepack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Overlay;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.server.packs.resources.ReloadInstance;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Minecraft.class)
-public class MixinMinecraft {
-  @Shadow
-  @Nullable
-  private Overlay overlay;
+import java.util.Optional;
+import java.util.function.Consumer;
 
-  @Inject(method = "setOverlay", at = @At("RETURN"))
-  private void createOverlay(Overlay overlay, CallbackInfo ci) {
-    this.overlay = null;
-  }
+@Mixin(LoadingOverlay.class)
+public class MixinLoadingOverlay {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onInit(Minecraft minecraft, ReloadInstance reload, Consumer<Optional<Throwable>> onFinish, boolean fadeIn, CallbackInfo ci) {
+        onFinish.accept(Optional.empty());
+    }
 }

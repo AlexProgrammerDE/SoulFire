@@ -17,23 +17,30 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.resourcepack;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Overlay;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.packs.resources.ReloadInstance;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Minecraft.class)
-public class MixinMinecraft {
-  @Shadow
-  @Nullable
-  private Overlay overlay;
+import java.util.concurrent.CompletableFuture;
 
-  @Inject(method = "setOverlay", at = @At("RETURN"))
-  private void createOverlay(Overlay overlay, CallbackInfo ci) {
-    this.overlay = null;
+@Mixin(ReloadableResourceManager.class)
+public class MixinReloadableResourceManager {
+  @Inject(method = "createReload", at = @At("HEAD"), cancellable = true)
+  private void onCreateReload(CallbackInfoReturnable<ReloadInstance> cir) {
+    cir.setReturnValue(new ReloadInstance() {
+      @Override
+      public @NotNull CompletableFuture<?> done() {
+        return CompletableFuture.completedFuture(null);
+      }
+
+      @Override
+      public float getActualProgress() {
+        return 1.0f;
+      }
+    });
   }
 }

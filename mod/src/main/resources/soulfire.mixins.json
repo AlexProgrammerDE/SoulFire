@@ -12,6 +12,7 @@
     "soulfire.lifecycle.MixinMain",
     "soulfire.optimization.MixinDataFixers",
     "soulfire.optimization.MixinFontCacheReload",
+    "soulfire.resourcepack.MixinReloadableResourceManager",
     "soulfire.viaversion.MixinProtocolTranslator",
     "soulfire.viaversion.MixinViaBedrockConfig"
   ],
@@ -51,6 +52,7 @@
     "soulfire.botfixes.MixinServerList",
     "soulfire.optimization.MixinClientPacketListener",
     "soulfire.resourcepack.MixinDownloadedPackSource",
+    "soulfire.resourcepack.MixinLoadingOverlay",
     "soulfire.resourcepack.MixinMinecraft",
     "soulfire.resourcepack.MixinServerPackData"
   ],
