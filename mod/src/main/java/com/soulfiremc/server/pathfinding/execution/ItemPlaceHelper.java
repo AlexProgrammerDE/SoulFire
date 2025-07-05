@@ -89,16 +89,13 @@ public final class ItemPlaceHelper {
         sawEmpty = true;
       }
 
-      var optionalBlock = level.getBlockState(blockPosition.toBlockPos()).getBlock();
-      if (optionalBlock == Blocks.VOID_AIR) {
+      var optionalBlock = level.getBlockState(blockPosition.toBlockPos());
+      if (optionalBlock.getBlock() == Blocks.VOID_AIR) {
         throw new IllegalStateException("Block at %s is not loaded".formatted(blockPosition));
       }
 
       var cost =
-        Costs.getRequiredMiningTicks(
-          player,
-            slotItem,
-            optionalBlock)
+        Costs.getRequiredMiningTicks(player, slotItem, optionalBlock)
           .ticks();
 
       if (cost < bestCost || (slotItem.isEmpty() && cost == bestCost)) {
@@ -128,11 +125,11 @@ public final class ItemPlaceHelper {
 
     if (playerInventory.isHeldItem(slot)) {
       return true;
-    } else if (PlayerInventoryMenu.isHotbarSlot(slot)) {
-      player.inventory().selected = PlayerInventoryMenu.toHotbarIndex(slot);
+    } else if (InventoryMenu.isHotbarSlot(slot)) {
+      player.getInventory().getSelectedSlot() = PlayerInventoryMenu.toHotbarIndex(slot);
       return true;
     } else {
-      player.openPlayerInventory();
+      player.sendOpenInventory();
       player.inventoryMenu.leftClick(slot);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
       player.inventoryMenu.leftClick(playerInventory.getSelectedSlot());

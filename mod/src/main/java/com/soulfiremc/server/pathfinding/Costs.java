@@ -105,7 +105,7 @@ public final class Costs {
     ItemStack bestItem = null;
     var willDropUsableBlockItem = false;
     for (var slot : inventory.usableToolsAndEmpty()) {
-      var miningTicks = getRequiredMiningTicks(entity, blockState);
+      var miningTicks = getRequiredMiningTicks(entity, slot, blockState);
       if (miningTicks.ticks() < lowestMiningTicks) {
         lowestMiningTicks = miningTicks.ticks();
         bestItem = slot;
@@ -124,9 +124,11 @@ public final class Costs {
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     LocalPlayer entity,
+    ItemStack itemStack,
     BlockState blockState) {
     var correctToolUsed = entity.hasCorrectToolForDrops(blockState);
 
+    // TODO: Inject tool into calculations
     // If this value adds up over all ticks to 1, the block is fully mined
     var damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
 

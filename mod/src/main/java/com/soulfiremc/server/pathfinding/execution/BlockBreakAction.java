@@ -80,8 +80,8 @@ public final class BlockBreakAction implements WorldAction {
       return;
     }
 
-    var optionalBlock = level.getBlockState(blockPosition.toBlockPos()).getBlock();
-    if (optionalBlock == Blocks.VOID_AIR) {
+    var optionalBlock = level.getBlockState(blockPosition.toBlockPos());
+    if (optionalBlock.getBlock() == Blocks.VOID_AIR) {
       log.warn("Block at {} is not loaded!", blockPosition);
       return;
     }
@@ -90,7 +90,7 @@ public final class BlockBreakAction implements WorldAction {
       remainingTicks = totalTicks =
         Costs.getRequiredMiningTicks(
             clientEntity,
-            connection.dataManager().localPlayer().inventory().getCarried(),
+            clientEntity.getInventory().getSelectedItem(),
             optionalBlock)
           .ticks();
     }
