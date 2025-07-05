@@ -66,7 +66,7 @@ If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](htt
 
 SoulFire has a built-in GUI for easy usage. Try a SoulFire demo yourself at the [demo page](https://demo.soulfiremc.com).
 
-https://github.com/user-attachments/assets/81fbf91b-1aae-49ca-a101-bc3467e048e6
+https://github.com/user-attachments/assets/6244d54c-a1e5-4467-a705-c929b9de2b57
 
 ## ✨ Nightly builds
 
