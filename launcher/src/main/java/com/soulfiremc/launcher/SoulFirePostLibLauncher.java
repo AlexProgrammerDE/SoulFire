@@ -91,6 +91,6 @@ public class SoulFirePostLibLauncher {
     SFInfoPlaceholder.register();
     SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
 
-    KnotClient.main(new String[0]);
+    KnotClient.main(new String[]{"--username", "SoulFire"});
   }
 }
