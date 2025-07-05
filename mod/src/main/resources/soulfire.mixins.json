@@ -41,6 +41,7 @@
     "headless.sound.MixinSoundEngineExecutor",
     "headless.sound.MixinSoundManager",
     "soulfire.MixinMinecraft",
+    "soulfire.api.MixinChatComponent",
     "soulfire.api.MixinClientHandshakePacketListenerImpl",
     "soulfire.api.MixinClientLevel",
     "soulfire.api.MixinKeyboardInput",
