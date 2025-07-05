@@ -24,6 +24,7 @@ import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
+import com.soulfiremc.server.api.event.bot.BotPacketReceiveEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
@@ -38,6 +39,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +70,24 @@ public final class ChatLogger extends InternalPlugin {
     // usage of synchronized method so that the chatMessages set is not modified while being
     // iterated
     logChatMessage(event.connection().instanceManager(), event.message());
+  }
+
+  @EventHandler
+  public static void onDeathPacket(BotPacketReceiveEvent event) {
+    if (!(event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket)) {
+      return;
+    }
+
+    var settingsSource = event.connection().settingsSource();
+    if (!settingsSource.get(ChatLoggerSettings.ENABLED)
+      || !settingsSource.get(ChatLoggerSettings.LOG_DEATH_MESSAGES)) {
+      return;
+    }
+
+    // usage of synchronized method so that the chatMessages set is not modified while being
+    // iterated
+    logChatMessage(event.connection().instanceManager(), Component.text("[Death] ")
+      .append((Component) combatKillPacket.message()));
   }
 
   private static synchronized void logChatMessage(InstanceManager instanceManager, Component message) {
@@ -105,6 +125,14 @@ public final class ChatLogger extends InternalPlugin {
         .key("enabled")
         .uiName("Log chat to terminal")
         .description("Log all received chat messages to the terminal")
+        .defaultValue(true)
+        .build();
+    public static final BooleanProperty LOG_DEATH_MESSAGES =
+      ImmutableBooleanProperty.builder()
+        .namespace(NAMESPACE)
+        .key("log-death-messages")
+        .uiName("Additionally log death messages to terminal")
+        .description("Log all death messages to the terminal")
         .defaultValue(true)
         .build();
     public static final IntProperty DEDUPLICATE_AMOUNT =

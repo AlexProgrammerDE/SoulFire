@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "headless.sound.MixinNarrator",
+    "soulfire.api.event.MixinConnection",
     "soulfire.botfixes.MixinConnection",
     "soulfire.botfixes.MixinConnection$1",
     "soulfire.botfixes.MixinReloadableResourceManager",
@@ -46,6 +47,7 @@
     "soulfire.api.event.MixinChatComponent",
     "soulfire.api.event.MixinClientHandshakePacketListenerImpl",
     "soulfire.api.event.MixinClientLevel",
+    "soulfire.api.event.MixinClientPacketListener",
     "soulfire.api.event.MixinMinecraft",
     "soulfire.api.event.MixinOptions",
     "soulfire.botfixes.MixinChatComponent",
