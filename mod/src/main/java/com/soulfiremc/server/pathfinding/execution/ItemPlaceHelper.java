@@ -46,7 +46,7 @@ public final class ItemPlaceHelper {
   }
 
   public static OptionalInt findMatchingSlotForAction(Inventory inventory, InventoryMenu menu, Predicate<ItemStack> predicate) {
-    var intPredicate = (IntPredicate) i -> menu.getSlot(i).hasItem() && predicate.test(menu.getSlot(i).getItem());
+    var intPredicate = (IntPredicate) i -> predicate.test(menu.getSlot(i).getItem());
     int selectedIndex = HOTBAR_START + inventory.getSelectedSlot();
 
     // 1. Held item
