@@ -65,6 +65,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Getter
@@ -84,7 +86,7 @@ public final class BotConnection {
   private final String accountName;
   private final ServerAddress serverAddress;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
-  private final Object shutdownLock = new Object();
+  private final AtomicBoolean shutdownExecuting = new AtomicBoolean(false);
   private final Minecraft minecraft;
   @Nullable
   private final SFProxy proxy;
@@ -199,6 +201,7 @@ public final class BotConnection {
             }
           } catch (Throwable t) {
             log.error("Error while running bot connection", t);
+          } finally {
             this.wasDisconnected();
           }
         });
@@ -206,20 +209,21 @@ public final class BotConnection {
   }
 
   public void gracefulDisconnect() {
-    synchronized (shutdownLock) {
-      if (!minecraft.isRunning()) {
-        return;
-      }
+    if (!shutdownExecuting.getAndSet(true)) {
+      if (minecraft.isRunning()) {
+        try {
+          minecraft.submit(() -> {
+            if (minecraft.level != null) {
+              minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
+            }
 
-      minecraft.executeBlocking(() -> {
-        if (minecraft.level != null) {
-          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
+            minecraft.disconnectWithProgressScreen();
+          }).orTimeout(5, TimeUnit.SECONDS).join();
+        } catch (Throwable ignored) {
         }
 
-        minecraft.disconnectWithProgressScreen();
-      });
-
-      minecraft.stop();
+        minecraft.stop();
+      }
 
       explicitlyShutdown = true;
 
@@ -232,20 +236,21 @@ public final class BotConnection {
   }
 
   public void wasDisconnected() {
-    synchronized (shutdownLock) {
-      if (!minecraft.isRunning()) {
-        return;
-      }
+    if (!shutdownExecuting.getAndSet(true)) {
+      if (minecraft.isRunning()) {
+        try {
+          minecraft.submit(() -> {
+            if (minecraft.level != null) {
+              minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
+            }
 
-      minecraft.executeBlocking(() -> {
-        if (minecraft.level != null) {
-          minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
+            minecraft.disconnectWithProgressScreen();
+          }).orTimeout(5, TimeUnit.SECONDS).join();
+        } catch (Throwable ignored) {
         }
 
-        minecraft.disconnectWithProgressScreen();
-      });
-
-      minecraft.stop();
+        minecraft.stop();
+      }
 
       // Run all shutdown hooks
       shutdownHooks.forEach(Runnable::run);
