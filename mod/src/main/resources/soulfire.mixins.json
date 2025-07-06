@@ -54,6 +54,7 @@
     "soulfire.api.event.MixinOptions",
     "soulfire.botfixes.MixinChatComponent",
     "soulfire.botfixes.MixinConnectScreen",
+    "soulfire.botfixes.MixinLocalPlayer",
     "soulfire.botfixes.MixinOptions",
     "soulfire.botfixes.MixinResourceManagerReloadListener",
     "soulfire.botfixes.MixinServerList",
