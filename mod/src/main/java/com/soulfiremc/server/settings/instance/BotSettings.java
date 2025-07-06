@@ -151,7 +151,9 @@ public final class BotSettings implements SettingsObject {
   }
 
   private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
-    return ProtocolVersionList.getProtocolsNewToOld().stream()
+    return ProtocolVersionList.getProtocolsNewToOld()
+      .stream()
+      .filter(version -> version != ProtocolTranslator.AUTO_DETECT_PROTOCOL)
       .map(version -> new ComboProperty.ComboOption(
         formatVersion(version),
         version.getName(),
@@ -167,8 +169,6 @@ public final class BotSettings implements SettingsObject {
               yield "ghost";
             } else if (LegacyProtocolVersion.PROTOCOLS.contains(version)) {
               yield "archive";
-            } else if (version == ProtocolTranslator.AUTO_DETECT_PROTOCOL) {
-              yield "radar";
             } else {
               throw new RuntimeException("Unknown version: " + version);
             }
@@ -183,6 +183,6 @@ public final class BotSettings implements SettingsObject {
   }
 
   private static String getLatestProtocolVersionId() {
-    return formatVersion(ProtocolTranslator.AUTO_DETECT_PROTOCOL);
+    return formatVersion(ProtocolTranslator.NATIVE_VERSION);
   }
 }
