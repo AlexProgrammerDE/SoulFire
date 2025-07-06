@@ -55,6 +55,9 @@ public final class ServerCommandManager {
 
     // Pathfinding
     WalkCommand.register(dispatcher);
+    CollectCommand.register(dispatcher);
+    FollowCommand.register(dispatcher);
+    ExcavateCommand.register(dispatcher);
 
     // Movement controls
     LookAtCommand.register(dispatcher);
