@@ -42,7 +42,7 @@ public class VectorHelper {
   public static Vector3d topMiddleOfBlock(SFVec3i vector, VoxelShape blockShapeGroup) {
     return Vector3d.from(
       vector.x + 0.5,
-      vector.y + blockShapeGroup.max(Direction.Axis.Y),
+      vector.y + Math.max(blockShapeGroup.max(Direction.Axis.Y), 0),
       vector.z + 0.5
     );
   }
