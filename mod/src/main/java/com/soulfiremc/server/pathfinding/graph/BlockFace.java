@@ -18,9 +18,9 @@
 package com.soulfiremc.server.pathfinding.graph;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.minecraft.world.phys.Vec3;
 
 public enum BlockFace {
   NORTH,
@@ -32,19 +32,19 @@ public enum BlockFace {
 
   public static final BlockFace[] VALUES = values();
 
-  public Vector3i offset(Vector3i vector) {
+  public BlockPos offset(BlockPos vector) {
     return switch (this) {
-      case NORTH -> vector.add(0, 0, -1);
-      case SOUTH -> vector.add(0, 0, 1);
-      case EAST -> vector.add(1, 0, 0);
-      case WEST -> vector.add(-1, 0, 0);
-      case TOP -> vector.add(0, 1, 0);
-      case BOTTOM -> vector.add(0, -1, 0);
+      case NORTH -> vector.offset(0, 0, -1);
+      case SOUTH -> vector.offset(0, 0, 1);
+      case EAST -> vector.offset(1, 0, 0);
+      case WEST -> vector.offset(-1, 0, 0);
+      case TOP -> vector.offset(0, 1, 0);
+      case BOTTOM -> vector.offset(0, -1, 0);
     };
   }
 
-  public Vector3d getMiddleOfFace(SFVec3i block) {
-    var doubleBlock = block.toVector3d();
+  public Vec3 getMiddleOfFace(SFVec3i block) {
+    var doubleBlock = block.toVec3();
     return switch (this) {
       case NORTH -> doubleBlock.add(0.5, 0.5, 0);
       case SOUTH -> doubleBlock.add(0.5, 0.5, 1);

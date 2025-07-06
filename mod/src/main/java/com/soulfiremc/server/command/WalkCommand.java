@@ -32,9 +32,8 @@ import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
-import com.soulfiremc.server.util.VectorHelper;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
-import org.cloudburstmc.math.GenericMath;
+import net.minecraft.util.Mth;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -66,7 +65,7 @@ public final class WalkCommand {
 
                     PathExecutor.executePathfinding(
                       bot,
-                      new PosGoal(SFVec3i.fromDouble(VectorHelper.fromVec3(entity.get().position()))),
+                      new PosGoal(SFVec3i.fromDouble(entity.get().position())),
                       new PathConstraint(bot)
                     );
 
@@ -86,12 +85,12 @@ public final class WalkCommand {
                     var pos = bot.minecraft().player.position();
                     var x =
                       random.nextInt(
-                        GenericMath.floor(pos.x) - radius,
-                        GenericMath.floor(pos.x) + radius);
+                        Mth.floor(pos.x) - radius,
+                        Mth.floor(pos.x) + radius);
                     var z =
                       random.nextInt(
-                        GenericMath.floor(pos.z) - radius,
-                        GenericMath.floor(pos.z) + radius);
+                        Mth.floor(pos.z) - radius,
+                        Mth.floor(pos.z) + radius);
 
                     return new XZGoal(x, z);
                   });
@@ -102,7 +101,7 @@ public final class WalkCommand {
               "Makes selected bots walk to the y coordinates",
               c -> {
                 var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
-                return executePathfinding(c, bot -> new YGoal(GenericMath.floor(
+                return executePathfinding(c, bot -> new YGoal(Mth.floor(
                   DoubleAxisArgumentType.forYAxis(y, bot.minecraft().player.getY())
                 )));
               })))
@@ -119,7 +118,7 @@ public final class WalkCommand {
                       bot.minecraft().player.getX(),
                       bot.minecraft().player.getZ()
                     ));
-                    return new XZGoal(GenericMath.floor(xzGoal.firstDouble()), GenericMath.floor(xzGoal.secondDouble()));
+                    return new XZGoal(Mth.floor(xzGoal.firstDouble()), Mth.floor(xzGoal.secondDouble()));
                   });
                 }))))
         .then(argument("x", DoubleAxisArgumentType.INSTANCE)
@@ -133,7 +132,7 @@ public final class WalkCommand {
                     var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
                     var z = DoubleAxisArgumentType.getDoubleAxisData(c, "z");
                     return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
-                      VectorHelper.fromVec3(DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.minecraft().player.position()))
+                      DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.minecraft().player.position())
                     )));
                   }))))));
   }

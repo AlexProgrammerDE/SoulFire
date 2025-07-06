@@ -21,18 +21,17 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.DiagonalDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
-import com.soulfiremc.server.util.VectorHelper;
 import com.soulfiremc.server.util.structs.EmptyBlockGetter;
 import com.soulfiremc.server.util.structs.IDMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.cloudburstmc.math.vector.Vector3d;
+import net.minecraft.world.phys.Vec3;
 
 public final class DiagonalCollisionCalculator {
-  private static final Vector3d START_POSITION = Vector3d.from(0.5, 0, 0.5);
-  private static final Vector3d[] STEPS = new Vector3d[]{Vector3d.from(0.25, 0, 0.25), Vector3d.from(0.5, 0, 0.5), Vector3d.from(0.75, 0, 0.75)};
+  private static final Vec3 START_POSITION = new Vec3(0.5, 0, 0.5);
+  private static final Vec3[] STEPS = new Vec3[]{new Vec3(0.25, 0, 0.25), new Vec3(0.5, 0, 0.5), new Vec3(0.75, 0, 0.75)};
   private static final IDMap<BlockState, boolean[][][]> COLLISIONS = new IDMap<>(Block.BLOCK_STATE_REGISTRY, blockState -> {
     var diagonalsArray = new boolean[DiagonalDirection.VALUES.length][][];
 
@@ -46,7 +45,7 @@ public final class DiagonalCollisionCalculator {
           var collides = false;
 
           for (var step : STEPS) {
-            var currentPosition = START_POSITION.add(step.mul(baseOffset.toVector3d()));
+            var currentPosition = START_POSITION.add(step.multiply(baseOffset.toVec3()));
             var collisionShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
             if (collisionShape.isEmpty()) {
               continue;
@@ -55,7 +54,7 @@ public final class DiagonalCollisionCalculator {
             collides = collisionShape
               .bounds()
               .move(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toBlockPos())
-              .intersects(Player.STANDING_DIMENSIONS.makeBoundingBox(VectorHelper.fromVector3d(currentPosition)));
+              .intersects(Player.STANDING_DIMENSIONS.makeBoundingBox(currentPosition));
 
             if (collides) {
               break;

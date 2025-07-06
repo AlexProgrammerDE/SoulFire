@@ -146,6 +146,4 @@ dependencies {
 
   // For early mixins
   api(libs.bundles.classtransform)
-
-  api("org.cloudburstmc.math:immutable:2.0")
 }

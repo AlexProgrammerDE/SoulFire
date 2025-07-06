@@ -28,7 +28,6 @@ import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
-import com.soulfiremc.server.util.VectorHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,10 +64,10 @@ public final class AntiAFK extends InternalPlugin {
           PathExecutor.executePathfinding(
             connection,
             new AwayFromPosGoal(
-              SFVec3i.fromDouble(VectorHelper.fromVec3(connection
+              SFVec3i.fromDouble(connection
                 .minecraft()
                 .player
-                .position())),
+                .position()),
               settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
             new PathConstraint(connection));
         },

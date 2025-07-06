@@ -23,7 +23,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
-import com.soulfiremc.server.util.VectorHelper;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -54,8 +53,8 @@ public final class ExcavateCommand {
                               bot -> {
                                 bot.scheduler().schedule(() -> new ExcavateAreaController(
                                   ExcavateAreaController.getRectangleFromTo(
-                                    SFVec3i.fromDouble(VectorHelper.fromVec3(DoubleAxisArgumentType.forXYZAxis(fromX, fromY, fromZ, bot.minecraft().player.position()))),
-                                    SFVec3i.fromDouble(VectorHelper.fromVec3(DoubleAxisArgumentType.forXYZAxis(toX, toY, toZ, bot.minecraft().player.position())))
+                                    SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(fromX, fromY, fromZ, bot.minecraft().player.position())),
+                                    SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(toX, toY, toZ, bot.minecraft().player.position()))
                                   )
                                 ).start(bot));
 
@@ -82,7 +81,7 @@ public final class ExcavateCommand {
                           bot -> {
                             bot.scheduler().schedule(() -> new ExcavateAreaController(
                               ExcavateAreaController.getSphereRadius(
-                                SFVec3i.fromDouble(VectorHelper.fromVec3(DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.minecraft().player.position()))),
+                                SFVec3i.fromDouble(DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.minecraft().player.position())),
                                 radius
                               )
                             ).start(bot));

@@ -20,21 +20,21 @@ package com.soulfiremc.server.pathfinding.controller;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
-import org.cloudburstmc.math.vector.Vector3i;
 
 import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
 public final class BuildSchematicController {
-  private final Map<Vector3i, Block> absoluteBlocks;
+  private final Map<BlockPos, Block> absoluteBlocks;
 
-  public BuildSchematicController(Map<Vector3i, Block> relativeBlocks, Vector3i base) {
+  public BuildSchematicController(Map<BlockPos, Block> relativeBlocks, BlockPos base) {
     this(new Object2ObjectOpenHashMap<>());
 
     for (var entry : relativeBlocks.entrySet()) {
-      this.absoluteBlocks.put(entry.getKey().add(base), entry.getValue());
+      this.absoluteBlocks.put(entry.getKey().offset(base), entry.getValue());
     }
   }
 }

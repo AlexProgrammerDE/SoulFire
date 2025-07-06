@@ -20,11 +20,10 @@ package com.soulfiremc.server.pathfinding;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import org.cloudburstmc.math.vector.Vector3d;
-import org.cloudburstmc.math.vector.Vector3i;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * A simple 3D integer vector. This class is used instead of Vector3i because this uses direct field
+ * A simple 3D integer vector. This class is used instead of BlockPos because this uses direct field
  * access instead of getters. Even though the JIT compiler could optimize this, it's still faster to
  * use this class.
  */
@@ -40,12 +39,8 @@ public final class SFVec3i {
   private long minecraftLong;
   private boolean minecraftLongSet;
 
-  public static SFVec3i fromDouble(Vector3d vec) {
-    return fromInt(vec.toInt());
-  }
-
-  public static SFVec3i fromInt(Vector3i vec) {
-    return from(vec.getX(), vec.getY(), vec.getZ());
+  public static SFVec3i fromDouble(Vec3 vec) {
+    return fromInt(BlockPos.containing(vec));
   }
 
   public static SFVec3i fromInt(BlockPos vec) {
@@ -113,12 +108,8 @@ public final class SFVec3i {
     return sub(other.x, other.y, other.z);
   }
 
-  public Vector3i toVector3i() {
-    return Vector3i.from(x, y, z);
-  }
-
-  public Vector3d toVector3d() {
-    return Vector3d.from(x, y, z);
+  public Vec3 toVec3() {
+    return new Vec3(x, y, z);
   }
 
   public BlockPos toBlockPos() {

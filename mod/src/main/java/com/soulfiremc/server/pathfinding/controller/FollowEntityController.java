@@ -24,7 +24,6 @@ import com.soulfiremc.server.pathfinding.goals.DynamicGoalScorer;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.VectorHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.entity.Entity;
@@ -49,7 +48,7 @@ public final class FollowEntityController {
         return;
       }
 
-      if (VectorHelper.fromBlockPos(entity.get().blockPosition()).distance(VectorHelper.fromBlockPos(bot.minecraft().player.blockPosition())) <= maxRadius) {
+      if (entity.get().blockPosition().distSqr(bot.minecraft().player.blockPosition()) <= maxRadius) {
         TimeUtil.waitTime(1, TimeUnit.SECONDS);
         continue;
       }

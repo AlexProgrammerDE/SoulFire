@@ -27,8 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.phys.AABB;
-import org.cloudburstmc.math.vector.Vector2d;
-import org.cloudburstmc.math.vector.Vector3d;
+import net.minecraft.world.phys.Vec3;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,20 +55,20 @@ public final class MovementAction implements WorldAction {
 
     var blockMeta = level.getBlockState(blockPosition.toBlockPos());
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
-    if (MathHelper.isOutsideTolerance(botPosition.y, targetMiddleBlock.getY(), 0.25)) {
+    if (MathHelper.isOutsideTolerance(botPosition.y, targetMiddleBlock.y, 0.25)) {
       // We want to be on the same Y level
       return false;
     } else {
-      return isAtTargetXZ(clientEntity, VectorHelper.fromVec3(botPosition), targetMiddleBlock);
+      return isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock);
     }
   }
 
-  private boolean isAtTargetXZ(LocalPlayer clientEntity, Vector3d botPosition, Vector3d targetMiddleBlock) {
+  private boolean isAtTargetXZ(LocalPlayer clientEntity, Vec3 botPosition, Vec3 targetMiddleBlock) {
     var halfDiagonal = minXZ(clientEntity.getBoundingBox()) / 2;
 
     // Leave more space to allow falling
     var adjustedHalfDiagonal = halfDiagonal - 0.1;
-    return botPosition.distance(targetMiddleBlock) < adjustedHalfDiagonal;
+    return botPosition.distanceTo(targetMiddleBlock) < adjustedHalfDiagonal;
   }
 
   @Override
@@ -88,7 +87,7 @@ public final class MovementAction implements WorldAction {
     var targetMiddleBlock = VectorHelper.topMiddleOfBlock(blockPosition, blockMeta);
 
     var previousYRot = clientEntity.getYRot();
-    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, VectorHelper.fromVector3d(targetMiddleBlock));
+    clientEntity.lookAt(EntityAnchorArgument.Anchor.EYES, targetMiddleBlock);
     clientEntity.setXRot(0);
     var newYRot = clientEntity.getYRot();
 
@@ -104,15 +103,15 @@ public final class MovementAction implements WorldAction {
     }
 
     var botPosition = clientEntity.position();
-    var needsJump = targetMiddleBlock.getY() - STEP_HEIGHT > botPosition.y;
+    var needsJump = targetMiddleBlock.y - STEP_HEIGHT > botPosition.y;
     if (needsJump) {
       // Make sure not to move if we have still other motion going on
       if (!wasStill) {
-        var deltaMovementXZ = VectorHelper.toVector2dXZ(VectorHelper.fromVec3(clientEntity.getDeltaMovement()));
+        var deltaMovementXZ = VectorHelper.toVector2dXZ(clientEntity.getDeltaMovement());
         var isBaseGravity = DoubleMath.fuzzyEquals(clientEntity.getDeltaMovement().y, -clientEntity.getGravity(), 0.1);
-        var isStill = deltaMovementXZ.equals(Vector2d.ZERO);
-        var isMovingRoughlyTowardsBlock = !deltaMovementXZ.equals(Vector2d.ZERO)
-          && deltaMovementXZ.normalize().dot(VectorHelper.toVector2dXZ(targetMiddleBlock.sub(VectorHelper.fromVec3(clientEntity.position()))).normalize()) > 0.8;
+        var isStill = deltaMovementXZ.equals(0, 0);
+        var isMovingRoughlyTowardsBlock = !deltaMovementXZ.equals(0, 0)
+          && deltaMovementXZ.normalize().dot(VectorHelper.toVector2dXZ(targetMiddleBlock.subtract(clientEntity.position())).normalize()) > 0.8;
         if (isBaseGravity && (isStill || isMovingRoughlyTowardsBlock)) {
           wasStill = true;
         } else {
@@ -125,7 +124,7 @@ public final class MovementAction implements WorldAction {
       }
     }
 
-    if (!isAtTargetXZ(clientEntity, VectorHelper.fromVec3(botPosition), targetMiddleBlock)) {
+    if (!isAtTargetXZ(clientEntity, botPosition, targetMiddleBlock)) {
       connection.controlState().up(true);
     }
   }
