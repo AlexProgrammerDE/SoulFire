@@ -92,8 +92,9 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
       if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
         clientEntity.swing(hand);
       }
+
+      finishedPlacing = true;
     }
-    finishedPlacing = true;
   }
 
   @Override
