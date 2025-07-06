@@ -10,6 +10,7 @@
     "soulfire.botfixes.MixinConnection",
     "soulfire.botfixes.MixinConnection$1",
     "soulfire.botfixes.MixinReloadableResourceManager",
+    "soulfire.debug.MixinUtil",
     "soulfire.libfixes.MixinAggregatedClassLoader",
     "soulfire.lifecycle.MixinMain",
     "soulfire.optimization.MixinDataFixers",
