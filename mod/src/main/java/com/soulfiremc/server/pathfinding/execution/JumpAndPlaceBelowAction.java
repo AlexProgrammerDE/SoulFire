@@ -53,6 +53,9 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
     var clientEntity = connection.minecraft().player;
     connection.controlState().resetAll();
 
+    // Look down
+    clientEntity.setYRot(90);
+
     if (!putOnHotbar) {
       if (ItemPlaceHelper.placeBestBlockInHand(connection)) {
         putOnHotbar = true;
