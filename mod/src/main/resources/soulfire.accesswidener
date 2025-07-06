@@ -4,7 +4,9 @@ accessible method net/minecraft/client/multiplayer/resolver/ServerAddress <init>
 accessible method net/minecraft/client/multiplayer/ClientLevel getAllMapData ()Ljava/util/Map;
 
 accessible method net/minecraft/client/Minecraft getTickTargetMillis (F)F
+accessible method net/minecraft/client/Minecraft runTick (Z)V
 
+accessible field net/minecraft/client/Minecraft gameThread Ljava/lang/Thread;
 accessible field net/minecraft/client/Minecraft progressTasks Ljava/util/Queue;
 accessible field net/minecraft/util/thread/BlockableEventLoop pendingRunnables Ljava/util/Queue;
 accessible field net/minecraft/client/Minecraft toastManager Lnet/minecraft/client/gui/components/toasts/ToastManager;

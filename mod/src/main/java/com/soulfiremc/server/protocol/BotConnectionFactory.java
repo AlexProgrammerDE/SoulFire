@@ -37,7 +37,7 @@ public record BotConnectionFactory(
   @Nullable
   SFProxy proxyData,
   EventLoopGroup eventLoopGroup) {
-  public BotConnection prepareConnection() {
+  public BotConnection prepareConnection(boolean isStatusPing) {
     var botConnection =
       new BotConnection(
         this,
@@ -47,7 +47,8 @@ public record BotConnectionFactory(
         protocolVersion,
         serverAddress,
         proxyData,
-        eventLoopGroup);
+        eventLoopGroup,
+        isStatusPing);
 
     SoulFireAPI.postEvent(new BotConnectionInitEvent(botConnection));
 

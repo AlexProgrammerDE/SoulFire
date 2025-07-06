@@ -54,7 +54,7 @@ public final class AutoReconnect extends InternalPlugin {
     var instanceManager = event.instanceManager();
     var bot = event.botConnection();
     var settingsSource = bot.settingsSource();
-    if (!settingsSource.get(AutoReconnectSettings.ENABLED)) {
+    if (!settingsSource.get(AutoReconnectSettings.ENABLED) || bot.isStatusPing()) {
       return;
     }
 
@@ -76,7 +76,7 @@ public final class AutoReconnect extends InternalPlugin {
           }
 
           bot.gracefulDisconnect();
-          var newConnection = bot.factory().prepareConnection();
+          var newConnection = bot.factory().prepareConnection(false);
 
           instanceManager.storeNewBot(newConnection);
 

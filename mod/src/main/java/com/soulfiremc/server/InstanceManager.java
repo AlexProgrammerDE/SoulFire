@@ -430,7 +430,7 @@ public final class InstanceManager {
               TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
 
               log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
-              var botConnection = factory.prepareConnection();
+              var botConnection = factory.prepareConnection(false);
               storeNewBot(botConnection);
 
               try {

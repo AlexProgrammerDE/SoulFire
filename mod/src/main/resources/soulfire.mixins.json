@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "headless.sound.MixinNarrator",
+    "soulfire.api.MixinConnection",
     "soulfire.api.MixinPlayer",
     "soulfire.api.event.MixinConnection",
     "soulfire.botfixes.MixinConnection",

@@ -52,10 +52,12 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.ServerStatusPinger;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -88,6 +90,7 @@ public final class BotConnection {
   private final SFProxy proxy;
   private final EventLoopGroup eventLoopGroup;
   private final SFSessionService sessionService;
+  private final boolean isStatusPing;
   @Setter
   private ProtocolVersion currentProtocolVersion;
   private boolean explicitlyShutdown = false;
@@ -103,7 +106,8 @@ public final class BotConnection {
     ServerAddress serverAddress,
     @Nullable
     SFProxy proxyData,
-    EventLoopGroup eventLoopGroup) {
+    EventLoopGroup eventLoopGroup,
+    boolean isStatusPing) {
     this.factory = factory;
     this.instanceManager = instanceManager;
     this.settingsSource = settingsSource;
@@ -118,6 +122,7 @@ public final class BotConnection {
     this.eventLoopGroup = eventLoopGroup;
     this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
+    this.isStatusPing = isStatusPing;
   }
 
   @SneakyThrows
@@ -160,18 +165,42 @@ public final class BotConnection {
         SoulFireAPI.postEvent(new PreBotConnectEvent(this));
         var serverData = new ServerData("soulfire-target", serverAddress.toString(), ServerData.Type.OTHER);
         serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
-        minecraft.execute(runnableWrapper.wrap(() -> ConnectScreen.startConnecting(
-          new JoinMultiplayerScreen(new TitleScreen()),
-          minecraft,
-          serverAddress,
-          serverData,
-          false,
-          null
-        )));
+
+        if (isStatusPing) {
+          minecraft.execute(runnableWrapper.wrap(() -> {
+            try {
+              new ServerStatusPinger().pingServer(
+                serverData,
+                () -> {},
+                () -> {}
+              );
+            } catch (UnknownHostException e) {
+              log.error("Failed to ping server {}: {}", serverAddress, e.getMessage());
+              this.wasDisconnected();
+            }
+          }));
+        } else {
+          minecraft.execute(runnableWrapper.wrap(() -> ConnectScreen.startConnecting(
+            new JoinMultiplayerScreen(new TitleScreen()),
+            minecraft,
+            serverAddress,
+            serverData,
+            false,
+            null
+          )));
+        }
 
         scheduler.runAsync(() -> {
           SFConstants.MINECRAFT_INSTANCE.set(minecraft);
-          minecraft.run();
+          try {
+            minecraft.gameThread = Thread.currentThread();
+            while (minecraft.running && !explicitlyShutdown && !Thread.currentThread().isInterrupted()) {
+              minecraft.runTick(true);
+            }
+          } catch (Throwable t) {
+            log.error("Error while running bot connection", t);
+            this.wasDisconnected();
+          }
         });
       });
   }

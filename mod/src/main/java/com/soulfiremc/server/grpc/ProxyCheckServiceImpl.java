@@ -17,12 +17,19 @@
  */
 package com.soulfiremc.server.grpc;
 
-import com.soulfiremc.grpc.generated.InstancePermission;
-import com.soulfiremc.grpc.generated.ProxyCheckRequest;
-import com.soulfiremc.grpc.generated.ProxyCheckResponse;
-import com.soulfiremc.grpc.generated.ProxyCheckServiceGrpc;
+import com.google.common.base.Stopwatch;
+import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotPacketReceiveEvent;
+import com.soulfiremc.server.protocol.BotConnectionFactory;
+import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.instance.BotSettings;
+import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -30,8 +37,12 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -54,7 +65,75 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
 
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
-      // TODO
+      var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+      var serverAddress = ServerAddress.parseString(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS));
+      var proxyCheckEventLoopGroup =
+        NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
+      instance.scheduler().runAsync(() -> {
+        var results = SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
+            var stopWatch = Stopwatch.createStarted();
+            var factory = new BotConnectionFactory(
+              instance,
+              settingsSource,
+              MinecraftAccount.forProxyCheck(),
+              protocolVersion,
+              serverAddress,
+              SFProxy.fromProto(payload),
+              proxyCheckEventLoopGroup
+            );
+            return instance.scheduler().supplyAsync(() -> {
+                var future = cancellationCollector.add(new CompletableFuture<Void>());
+                var connection = factory.prepareConnection(true);
+
+                SoulFireAPI.registerListener(BotPacketReceiveEvent.class, event -> {
+                  if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
+                    future.complete(null);
+                  }
+                });
+
+                connection.connect().join();
+
+                return future.join();
+              })
+              .orTimeout(30, TimeUnit.SECONDS)
+              .handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
+                .setProxy(payload)
+                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                .setValid(throwable == null)
+                .build());
+          }, result -> {
+            if (responseObserver.isCancelled()) {
+              return;
+            }
+
+            if (result.getValid()) {
+              responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
+                  .build())
+                .build());
+            } else {
+              responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                .setOneFailure(ProxyCheckOneFailure.newBuilder()
+                  .build())
+                .build());
+            }
+          },
+          cancellationCollector);
+
+        proxyCheckEventLoopGroup.shutdownGracefully()
+          .awaitUninterruptibly(5, TimeUnit.SECONDS);
+
+        if (responseObserver.isCancelled()) {
+          return;
+        }
+
+        responseObserver.onNext(ProxyCheckResponse.newBuilder()
+          .setFullList(ProxyCheckFullList.newBuilder()
+            .addAllResponse(results)
+            .build())
+          .build());
+        responseObserver.onCompleted();
+      });
     } catch (Throwable t) {
       log.error("Error checking proxy", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
