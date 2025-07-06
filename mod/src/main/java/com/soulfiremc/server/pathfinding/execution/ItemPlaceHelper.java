@@ -163,6 +163,10 @@ public final class ItemPlaceHelper {
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
+  public static boolean isSelectableHotbarSlot(int slot) {
+    return slot >= 36 && slot < 45;
+  }
+
   public static int toHotbarIndex(int slot) {
     return slot - HOTBAR_START;
   }
@@ -179,7 +183,7 @@ public final class ItemPlaceHelper {
 
     if (getSelectedSlot(player.getInventory()) == slot) {
       return true;
-    } else if (InventoryMenu.isHotbarSlot(slot)) {
+    } else if (isSelectableHotbarSlot(slot)) {
       player.getInventory().setSelectedSlot(toHotbarIndex(slot));
       return true;
     } else {
