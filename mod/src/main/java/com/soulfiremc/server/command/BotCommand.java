@@ -45,7 +45,8 @@ public final class BotCommand {
                 c -> {
                   var botNames = Set.of(StringArgumentType.getString(c, "bot_names").split(","));
                   return c.getSource()
-                    .withBotIds(getVisibleBots(c)
+                    .withBotIds(c.getSource()
+                      .getGlobalVisibleBots()
                       .stream()
                       .filter(bot -> botNames.contains(bot.accountName()))
                       .map(BotConnection::accountProfileId)
@@ -61,7 +62,7 @@ public final class BotCommand {
 
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> c, SuggestionsBuilder b) {
-      getVisibleBots(c).forEach(bot -> b.suggest(bot.accountName()));
+      c.getSource().getGlobalVisibleBots().forEach(bot -> b.suggest(bot.accountName()));
 
       return b.buildFuture();
     }

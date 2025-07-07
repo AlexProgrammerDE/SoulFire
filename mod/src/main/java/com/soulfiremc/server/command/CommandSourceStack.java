@@ -17,11 +17,14 @@
  */
 package com.soulfiremc.server.command;
 
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.user.SoulFireUser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -67,5 +70,31 @@ public record CommandSourceStack(
     }
 
     return new CommandSourceStack(soulFire, source, instanceIds, botIds);
+  }
+
+  public List<InstanceManager> getVisibleInstances() {
+    return soulFire.instances()
+      .values()
+      .stream()
+      .filter(instance -> instanceIds == null || instanceIds
+        .stream()
+        .anyMatch(instance.id()::equals))
+      .toList();
+  }
+
+  public List<BotConnection> getInstanceVisibleBots(InstanceManager instance) {
+    return instance.getConnectedBots()
+      .stream()
+      .filter(bot -> botIds == null || botIds
+        .stream()
+        .anyMatch(bot.accountProfileId()::equals))
+      .toList();
+  }
+
+  public List<BotConnection> getGlobalVisibleBots() {
+    return getVisibleInstances()
+      .stream()
+      .flatMap(instance -> getInstanceVisibleBots(instance).stream())
+      .toList();
   }
 }

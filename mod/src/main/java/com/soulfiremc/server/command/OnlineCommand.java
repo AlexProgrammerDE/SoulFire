@@ -36,7 +36,7 @@ public final class OnlineCommand {
                 c,
                 instanceManager -> {
                   var online = new ArrayList<String>();
-                  for (var bot : getVisibleBots(instanceManager, c)) {
+                  for (var bot : c.getSource().getInstanceVisibleBots(instanceManager)) {
                     if (bot.minecraft().player != null) {
                       online.add(bot.accountName());
                     }

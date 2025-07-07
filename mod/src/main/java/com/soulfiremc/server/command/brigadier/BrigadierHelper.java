@@ -35,7 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 
@@ -126,36 +125,10 @@ public final class BrigadierHelper {
     }
   }
 
-  public static List<InstanceManager> getVisibleInstances(CommandContext<CommandSourceStack> context) {
-    return context.getSource().soulFire().instances()
-      .values()
-      .stream()
-      .filter(instance -> context.getSource().instanceIds() == null || context.getSource().instanceIds()
-        .stream()
-        .anyMatch(instance.id()::equals))
-      .toList();
-  }
-
-  public static List<BotConnection> getVisibleBots(InstanceManager instance, CommandContext<CommandSourceStack> context) {
-    return instance.getConnectedBots()
-      .stream()
-      .filter(bot -> context.getSource().botIds() == null || context.getSource().botIds()
-        .stream()
-        .anyMatch(bot.accountProfileId()::equals))
-      .toList();
-  }
-
-  public static List<BotConnection> getVisibleBots(CommandContext<CommandSourceStack> context) {
-    return getVisibleInstances(context)
-      .stream()
-      .flatMap(instance -> getVisibleBots(instance, context).stream())
-      .toList();
-  }
-
   public static int forEveryInstance(
     CommandContext<CommandSourceStack> context,
     CommandFunction<InstanceManager> consumer) throws CommandSyntaxException {
-    var instances = getVisibleInstances(context);
+    var instances = context.getSource().getVisibleInstances();
     if (instances.isEmpty()) {
       context.getSource().source().sendWarn("No instances found!");
       return 0;
@@ -178,7 +151,7 @@ public final class BrigadierHelper {
     return forEveryInstance(
       context,
       instance -> {
-        if (getVisibleBots(instance, context).isEmpty()) {
+        if (context.getSource().getInstanceVisibleBots(instance).isEmpty()) {
           context.getSource().source().sendWarn("Instance %s has no connected bots!".formatted(instance.friendlyNameCache().get()));
           return 0;
         }
@@ -194,7 +167,7 @@ public final class BrigadierHelper {
       context,
       instance -> {
         var resultSum = 0;
-        for (var bot : getVisibleBots(instance, context)) {
+        for (var bot : context.getSource().getInstanceVisibleBots(instance)) {
           context.getSource().source().sendInfo("--- Running command for bot %s ---".formatted(bot.accountName()));
           resultSum += consumer.run(bot);
         }
