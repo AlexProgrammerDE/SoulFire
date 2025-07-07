@@ -74,10 +74,8 @@ public final class ServerCommandManager {
     InventoryCommand.register(dispatcher);
     InteractCommand.register(dispatcher);
 
-    // Attack controls
-    StartAttackCommand.register(dispatcher);
-    PauseAttackCommand.register(dispatcher);
-    StopAttackCommand.register(dispatcher);
+    // Instance commands
+    AttackCommand.register(dispatcher);
 
     // Utility commands
     OnlineCommand.register(dispatcher);
