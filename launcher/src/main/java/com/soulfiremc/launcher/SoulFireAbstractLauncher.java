@@ -21,7 +21,6 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +29,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,13 +42,13 @@ public final class SoulFireAbstractLauncher {
       return;
     }
 
-    var reflectLibPath = Arrays.stream(extractedLibs).filter(path -> path.getFileName().toString().startsWith("Reflect-"))
+    var reflectLibPath = Arrays.stream(extractedLibs)
+      .filter(path -> path.getFileName().toString().startsWith("Reflect-"))
       .findFirst()
       .orElseThrow(() -> new RuntimeException("Reflect library not found in extracted libs"));
     try (var reflectLib = new URLClassLoader(new URL[]{reflectLibPath.toUri().toURL()})) {
-      var instrumentationClass = (Instrumentation) reflectLib.loadClass("net.lenni0451.reflect.Agents")
-        .getDeclaredMethod("getInstrumentation")
-        .invoke(null);
+      var addToSystemClassPath = reflectLib.loadClass("net.lenni0451.reflect.ClassLoaders")
+        .getDeclaredMethod("addToSystemClassPath", URL.class);
 
       for (var lib : extractedLibs) {
         System.setProperty("java.class.path",
@@ -58,7 +56,7 @@ public final class SoulFireAbstractLauncher {
               Stream.of(lib.toAbsolutePath().toString()))
             .collect(Collectors.joining(File.pathSeparator)));
 
-        instrumentationClass.appendToSystemClassLoaderSearch(new JarFile(lib.toFile()));
+        addToSystemClassPath.invoke(null, lib.toUri().toURL());
       }
     }
   }
