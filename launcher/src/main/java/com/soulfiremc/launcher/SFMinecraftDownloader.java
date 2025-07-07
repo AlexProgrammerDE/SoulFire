@@ -173,9 +173,13 @@ public class SFMinecraftDownloader {
 
     System.setProperty(SystemProperties.MAPPING_PATH, minecraftMappingsTinyPath.toAbsolutePath().toString());
     System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
-    System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
-    setRemapClasspath(basePath);
+    if (Boolean.getBoolean("sf.remapToNamed")) {
+      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
+      setRemapClasspath(basePath);
+    } else {
+      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "intermediary");
+    }
   }
 
   @SneakyThrows
