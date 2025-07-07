@@ -1,3 +1,4 @@
+import org.gradle.api.internal.catalog.DelegatingProjectDependency
 import xyz.wagyourtail.unimined.api.minecraft.task.AbstractRemapJarTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
@@ -30,6 +31,31 @@ dependencies {
   annotationProcessor(libs.immutables.value)
 
   annotationProcessor(libs.picoli.codegen)
+
+  val excludeConf: ModuleDependency.() -> Unit = {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+
+  fun apiInclude(dependencyNotation: String) {
+    api(dependencyNotation, excludeConf)
+    include(dependencyNotation, excludeConf)
+  }
+
+  fun apiInclude(dependencyNotation: ProviderConvertible<*>) {
+    api(dependencyNotation, excludeConf)
+    include(dependencyNotation, excludeConf)
+  }
+
+  fun apiInclude(dependencyNotation: DelegatingProjectDependency) {
+    api(dependencyNotation, excludeConf)
+    include(dependencyNotation, excludeConf)
+  }
+
+  // For CLI support
+  apiInclude(libs.picoli)
+  apiInclude(projects.proto)
+  apiInclude("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
 
   testRuntimeOnly(libs.junit.launcher)
   testImplementation(libs.junit)

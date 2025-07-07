@@ -66,15 +66,10 @@ dependencies {
   api("org.lz4:lz4-java:1.8.0")
   api("org.slf4j:slf4j-api:2.0.17")
 
-  api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
   api("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.3")
   api("org.checkerframework:checker-qual:3.49.5")
 
-  // For CLI support
-  api(libs.picoli)
-
   api(projects.buildData)
-  api(projects.proto)
 
   // Newest netty
   api("io.netty:netty-all:4.2.2.Final")
