@@ -54,18 +54,14 @@ public final class ServerCommandManager {
     PrintPluginsCommand.register(dispatcher);
 
     // Pathfinding
-    WalkCommand.register(dispatcher);
+    MoveCommand.register(dispatcher);
     CollectCommand.register(dispatcher);
     FollowCommand.register(dispatcher);
     ExcavateCommand.register(dispatcher);
 
     // Movement controls
     LookAtCommand.register(dispatcher);
-    MoveCommand.register(dispatcher);
-    JumpCommand.register(dispatcher);
-    SneakCommand.register(dispatcher);
-    SprintCommand.register(dispatcher);
-    ResetCommand.register(dispatcher);
+    ControlCommand.register(dispatcher);
     MimicCommand.register(dispatcher);
 
     // Inventory controls

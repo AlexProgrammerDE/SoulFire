@@ -19,7 +19,25 @@ package com.soulfiremc.server.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.protocol.ControllingTask;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
+import com.soulfiremc.server.command.brigadier.EntityArgumentType;
+import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.PathExecutor;
+import com.soulfiremc.server.pathfinding.goals.GoalScorer;
+import com.soulfiremc.server.pathfinding.goals.PosGoal;
+import com.soulfiremc.server.pathfinding.goals.XZGoal;
+import com.soulfiremc.server.pathfinding.goals.YGoal;
+import com.soulfiremc.server.pathfinding.graph.PathConstraint;
+import com.soulfiremc.server.protocol.BotConnection;
+import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
+import net.minecraft.util.Mth;
+
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -27,73 +45,105 @@ public final class MoveCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("move")
-        .then(
-          literal("forward")
+        .then(argument("entity", EntityArgumentType.INSTANCE)
+          .executes(
+            help(
+              "Makes selected bots move to an entity",
+              c -> {
+                var entityMatcher = EntityArgumentType.getEntityMatcher(c, "entity");
+
+                return forEveryBot(
+                  c,
+                  bot -> {
+                    var entity = StreamSupport.stream(bot.minecraft().level.entitiesForRendering().spliterator(), false)
+                      .filter(entityMatcher)
+                      .findAny();
+                    if (entity.isEmpty()) {
+                      c.getSource().source().sendWarn("Entity not found!");
+                      return Command.SINGLE_SUCCESS;
+                    }
+
+                    PathExecutor.executePathfinding(
+                      bot,
+                      new PosGoal(SFVec3i.fromDouble(entity.get().position())),
+                      new PathConstraint(bot)
+                    );
+
+                    return Command.SINGLE_SUCCESS;
+                  });
+              })))
+        .then(literal("radius")
+          .then(argument("radius", IntegerArgumentType.integer())
             .executes(
               help(
-                "Toggle walking forward for selected bots",
-                c ->
-                  forEveryBot(
-                    c,
-                    bot -> {
-                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-                        var controlState = bot.controlState();
+                "Makes selected bots move to a random xz position within the radius",
+                c -> {
+                  var radius = IntegerArgumentType.getInteger(c, "radius");
 
-                        controlState.up(!controlState.up());
-                        controlState.down(false);
-                      }));
-                      return Command.SINGLE_SUCCESS;
-                    }))))
-        .then(
-          literal("backward")
+                  return executePathfinding(c, bot -> {
+                    var random = ThreadLocalRandom.current();
+                    var pos = bot.minecraft().player.position();
+                    var x =
+                      random.nextInt(
+                        Mth.floor(pos.x) - radius,
+                        Mth.floor(pos.x) + radius);
+                    var z =
+                      random.nextInt(
+                        Mth.floor(pos.z) - radius,
+                        Mth.floor(pos.z) + radius);
+
+                    return new XZGoal(x, z);
+                  });
+                }))))
+        .then(argument("y", DoubleAxisArgumentType.INSTANCE)
+          .executes(
+            help(
+              "Makes selected bots move to the y coordinates",
+              c -> {
+                var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
+                return executePathfinding(c, bot -> new YGoal(Mth.floor(
+                  DoubleAxisArgumentType.forYAxis(y, bot.minecraft().player.getY())
+                )));
+              })))
+        .then(argument("x", DoubleAxisArgumentType.INSTANCE)
+          .then(argument("z", DoubleAxisArgumentType.INSTANCE)
             .executes(
               help(
-                "Toggle walking backward for selected bots",
-                c ->
-                  forEveryBot(
-                    c,
-                    bot -> {
-                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-                        var controlState = bot.controlState();
+                "Makes selected bots move to the xz coordinates",
+                c -> {
+                  var x = DoubleAxisArgumentType.getDoubleAxisData(c, "x");
+                  var z = DoubleAxisArgumentType.getDoubleAxisData(c, "z");
+                  return executePathfinding(c, bot -> {
+                    var xzGoal = DoubleAxisArgumentType.forXZAxis(x, z, DoubleDoublePair.of(
+                      bot.minecraft().player.getX(),
+                      bot.minecraft().player.getZ()
+                    ));
+                    return new XZGoal(Mth.floor(xzGoal.firstDouble()), Mth.floor(xzGoal.secondDouble()));
+                  });
+                }))))
+        .then(argument("x", DoubleAxisArgumentType.INSTANCE)
+          .then(argument("y", DoubleAxisArgumentType.INSTANCE)
+            .then(argument("z", DoubleAxisArgumentType.INSTANCE)
+              .executes(
+                help(
+                  "Makes selected bots move to the xyz coordinates",
+                  c -> {
+                    var x = DoubleAxisArgumentType.getDoubleAxisData(c, "x");
+                    var y = DoubleAxisArgumentType.getDoubleAxisData(c, "y");
+                    var z = DoubleAxisArgumentType.getDoubleAxisData(c, "z");
+                    return executePathfinding(c, bot -> new PosGoal(SFVec3i.fromDouble(
+                      DoubleAxisArgumentType.forXYZAxis(x, y, z, bot.minecraft().player.position())
+                    )));
+                  }))))));
+  }
 
-                        controlState.down(!controlState.down());
-                        controlState.up(false);
-                      }));
-                      return Command.SINGLE_SUCCESS;
-                    }))))
-        .then(
-          literal("left")
-            .executes(
-              help(
-                "Toggle walking left for selected bots",
-                c ->
-                  forEveryBot(
-                    c,
-                    bot -> {
-                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-                        var controlState = bot.controlState();
-
-                        controlState.left(!controlState.left());
-                        controlState.right(false);
-                      }));
-                      return Command.SINGLE_SUCCESS;
-                    }))))
-        .then(
-          literal("right")
-            .executes(
-              help(
-                "Toggle walking right for selected bots",
-                c ->
-                  forEveryBot(
-                    c,
-                    bot -> {
-                      bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-                        var controlState = bot.controlState();
-
-                        controlState.right(!controlState.right());
-                        controlState.left(false);
-                      }));
-                      return Command.SINGLE_SUCCESS;
-                    })))));
+  public static int executePathfinding(CommandContext<CommandSourceStack> context,
+                                       Function<BotConnection, GoalScorer> goalScorerFactory) throws CommandSyntaxException {
+    return forEveryBot(
+      context,
+      bot -> {
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraint(bot));
+        return Command.SINGLE_SUCCESS;
+      });
   }
 }
