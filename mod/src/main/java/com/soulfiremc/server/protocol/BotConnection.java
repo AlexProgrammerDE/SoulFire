@@ -95,9 +95,7 @@ public final class BotConnection {
   private final boolean isStatusPing;
   @Setter
   private ProtocolVersion currentProtocolVersion;
-  private boolean explicitlyShutdown = false;
-  @Setter
-  private boolean pause = false;
+  private boolean isDisconnected = false;
 
   public BotConnection(
     BotConnectionFactory factory,
@@ -178,7 +176,7 @@ public final class BotConnection {
               );
             } catch (UnknownHostException e) {
               log.error("Failed to ping server {}: {}", serverAddress, e.getMessage());
-              this.wasDisconnected();
+              this.disconnect();
             }
           }));
         } else {
@@ -196,19 +194,19 @@ public final class BotConnection {
           SFConstants.MINECRAFT_INSTANCE.set(minecraft);
           try {
             minecraft.gameThread = Thread.currentThread();
-            while (minecraft.running && !explicitlyShutdown && !Thread.currentThread().isInterrupted()) {
+            while (minecraft.running && !isDisconnected && !Thread.currentThread().isInterrupted()) {
               minecraft.runTick(true);
             }
           } catch (Throwable t) {
             log.error("Error while running bot connection", t);
           } finally {
-            this.wasDisconnected();
+            this.disconnect();
           }
         });
       });
   }
 
-  public void gracefulDisconnect() {
+  public void disconnect() {
     if (!shutdownExecuting.getAndSet(true)) {
       if (minecraft.isRunning()) {
         try {
@@ -225,32 +223,7 @@ public final class BotConnection {
         minecraft.stop();
       }
 
-      explicitlyShutdown = true;
-
-      // Run all shutdown hooks
-      shutdownHooks.forEach(Runnable::run);
-
-      // Shut down all executors
-      scheduler.shutdown();
-    }
-  }
-
-  public void wasDisconnected() {
-    if (!shutdownExecuting.getAndSet(true)) {
-      if (minecraft.isRunning()) {
-        try {
-          minecraft.submit(() -> {
-            if (minecraft.level != null) {
-              minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
-            }
-
-            minecraft.disconnectWithProgressScreen();
-          }).orTimeout(5, TimeUnit.SECONDS).join();
-        } catch (Throwable ignored) {
-        }
-
-        minecraft.stop();
-      }
+      isDisconnected = true;
 
       // Run all shutdown hooks
       shutdownHooks.forEach(Runnable::run);

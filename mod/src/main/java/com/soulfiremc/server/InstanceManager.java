@@ -181,7 +181,7 @@ public final class InstanceManager {
     // Remove botConnections from the map that are closed
     botConnections.entrySet().removeIf(entry -> {
       var bot = entry.getValue();
-      if (bot.explicitlyShutdown()) {
+      if (bot.isDisconnected()) {
         log.debug("Removing bot {}", bot.accountName());
         SoulFireAPI.postEvent(new AttackBotRemoveEvent(this, bot));
         return true;
@@ -514,7 +514,7 @@ public final class InstanceManager {
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         botConnections.entrySet().removeIf(entry -> {
           var botConnection = entry.getValue();
-          disconnectFuture.add(scheduler.runAsync(botConnection::gracefulDisconnect));
+          disconnectFuture.add(scheduler.runAsync(botConnection::disconnect));
           eventLoopGroups.add(botConnection.eventLoopGroup());
           return true;
         });

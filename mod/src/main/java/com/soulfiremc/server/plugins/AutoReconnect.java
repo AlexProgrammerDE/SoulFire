@@ -75,7 +75,7 @@ public final class AutoReconnect extends InternalPlugin {
             return;
           }
 
-          bot.gracefulDisconnect();
+          bot.disconnect();
           var newConnection = bot.factory().prepareConnection(false);
 
           instanceManager.storeNewBot(newConnection);
