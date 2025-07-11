@@ -15,31 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.command.CommandSourceStack;
 
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
-public final class StopTaskCommand {
+public final class StopCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("stop-task")
+      literal("stop")
+        .requires(CommandSourceStack.IS_ADMIN)
         .executes(
           help(
-            "Makes selected bots stop their current task",
-            c ->
-              forEveryBot(
-                c,
-                bot -> {
-                  if (bot.botControl().stopControllingTask()) {
-                    c.getSource().source().sendInfo("Stopped current task for " + bot.accountName());
-                  } else {
-                    c.getSource().source().sendWarn("No task was running!");
-                  }
+            "Shut down the SoulFire server.",
+            c -> {
+              c.getSource().source().sendInfo("SoulFire server is shutting down.");
+              c.getSource().soulFire().shutdownManager().shutdownSoftware(true);
 
-                  return Command.SINGLE_SUCCESS;
-                }))));
+              return Command.SINGLE_SUCCESS;
+            })));
   }
 }

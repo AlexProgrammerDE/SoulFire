@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -23,7 +23,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -31,25 +32,24 @@ import java.util.stream.Collectors;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class BotCommand {
+public final class InstanceCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("bot")
+      literal("instance")
         .then(
-          argument("bot_names", StringArgumentType.string())
-            .suggests(BotNamesSuggester.INSTANCE)
+          argument("instance_names", StringArgumentType.string())
+            .suggests(InstanceNamesSuggester.INSTANCE)
             .forward(
               dispatcher.getRoot(),
               helpSingleRedirect(
-                "Instead of running a command for all possible bots, run it for a specific list of bots. Use a comma to separate the names",
+                "Instead of running a command for all possible instances, run it for a specific list of instances. Use a comma to separate the names",
                 c -> {
-                  var botNames = Set.of(StringArgumentType.getString(c, "bot_names").split(","));
+                  var instanceNames = Set.of(StringArgumentType.getString(c, "instance_names").split(","));
                   return c.getSource()
-                    .withBotIds(c.getSource()
-                      .getGlobalVisibleBots()
+                    .withInstanceIds(c.getSource().getVisibleInstances()
                       .stream()
-                      .filter(bot -> botNames.contains(bot.accountName()))
-                      .map(BotConnection::accountProfileId)
+                      .filter(instance -> instanceNames.contains(instance.friendlyNameCache().get()))
+                      .map(InstanceManager::id)
                       .collect(Collectors.toSet()));
                 }
               ),
@@ -57,12 +57,12 @@ public final class BotCommand {
             )));
   }
 
-  private static class BotNamesSuggester implements SuggestionProvider<CommandSourceStack> {
-    private static final BotNamesSuggester INSTANCE = new BotNamesSuggester();
+  private static class InstanceNamesSuggester implements SuggestionProvider<CommandSourceStack> {
+    private static final InstanceNamesSuggester INSTANCE = new InstanceNamesSuggester();
 
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> c, SuggestionsBuilder b) {
-      c.getSource().getGlobalVisibleBots().forEach(bot -> b.suggest(bot.accountName()));
+      c.getSource().getVisibleInstances().forEach(instance -> b.suggest(instance.friendlyNameCache().get()));
 
       return b.buildFuture();
     }

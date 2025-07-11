@@ -24,6 +24,7 @@ import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.CommandManagerInitEvent;
 import com.soulfiremc.server.command.brigadier.BrigadierHelper;
+import com.soulfiremc.server.command.builtin.*;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.Getter;
 

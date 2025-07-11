@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import net.minecraft.client.multiplayer.ClientLevel;

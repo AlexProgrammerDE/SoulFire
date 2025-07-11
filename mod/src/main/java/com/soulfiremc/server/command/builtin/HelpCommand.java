@@ -15,30 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.command.CommandSourceStack;
+import com.soulfiremc.server.command.brigadier.BrigadierHelper;
 
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
-public final class RespawnCommand {
+public final class HelpCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("respawn")
+      literal("help")
         .executes(
           help(
-            "Respawn selected bots",
-            c ->
-              forEveryBot(
-                c,
-                bot -> {
-                  var player = bot.minecraft().player;
-                  if (player != null) {
-                    player.respawn();
-                  }
+            "Prints a list of all available commands",
+            c -> {
+              c.getSource().source().sendInfo("Available commands:");
+              for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
+                c.getSource().source().sendInfo("{} -> {}", command.command(), command.helpMeta().help());
+              }
 
-                  return Command.SINGLE_SUCCESS;
-                }))));
+              return Command.SINGLE_SUCCESS;
+            })));
   }
 }

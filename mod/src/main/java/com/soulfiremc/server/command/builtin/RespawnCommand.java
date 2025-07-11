@@ -15,25 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.command.CommandSourceStack;
 
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class WhoAmICommand {
+public final class RespawnCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("whoami")
+      literal("respawn")
         .executes(
           help(
-            "See who you are",
-            c -> {
-              c.getSource().source().sendInfo("Your are: {}", c.getSource().source().getUsername());
+            "Respawn selected bots",
+            c ->
+              forEveryBot(
+                c,
+                bot -> {
+                  var player = bot.minecraft().player;
+                  if (player != null) {
+                    player.respawn();
+                  }
 
-              return Command.SINGLE_SUCCESS;
-            })));
+                  return Command.SINGLE_SUCCESS;
+                }))));
   }
 }

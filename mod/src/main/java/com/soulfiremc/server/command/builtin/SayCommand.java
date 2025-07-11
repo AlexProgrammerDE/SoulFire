@@ -15,30 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.command.brigadier.BrigadierHelper;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.soulfiremc.server.command.CommandSourceStack;
 
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class PrintCommandsCommand {
+public final class SayCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("print-commands")
-        .requires(CommandSourceStack.IS_ADMIN)
-        .executes(
-          privateCommand(
-            c -> {
-              var builder = new StringBuilder("\n");
-              for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
-                builder.append("| `%s{:bash}` | %s |\n".formatted(command.command(), command.help()));
-              }
-              c.getSource().source().sendInfo(builder.toString());
+      literal("say")
+        .then(
+          argument("message", StringArgumentType.greedyString())
+            .executes(
+              help(
+                "Makes selected bots send a message in chat or execute a command",
+                c -> {
+                  var message = StringArgumentType.getString(c, "message");
 
-              return Command.SINGLE_SUCCESS;
-            })));
+                  return forEveryBot(
+                    c,
+                    bot -> {
+                      bot.sendChatMessage(message);
+
+                      return Command.SINGLE_SUCCESS;
+                    });
+                }))));
   }
 }

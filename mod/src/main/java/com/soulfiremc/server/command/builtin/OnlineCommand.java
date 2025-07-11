@@ -15,35 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import java.util.ArrayList;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class RepeatCommand {
+public final class OnlineCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("repeat")
-        .then(
-          argument("amount", IntegerArgumentType.integer(1))
-            .forward(
-              dispatcher.getRoot(),
-              helpRedirect(
-                "Repeat the command for the specified amount of times",
-                c -> {
-                  var amount = IntegerArgumentType.getInteger(c, "amount");
-                  var list = new ArrayList<CommandSourceStack>();
-                  for (var i = 0; i < amount; i++) {
-                    list.add(c.getSource());
+      literal("online")
+        .executes(
+          help(
+            "Shows connected bots in attacks",
+            c ->
+              forEveryInstanceEnsureHasBots(
+                c,
+                instanceManager -> {
+                  var online = new ArrayList<String>();
+                  for (var bot : c.getSource().getInstanceVisibleBots(instanceManager)) {
+                    if (bot.minecraft().player != null) {
+                      online.add(bot.accountName());
+                    }
                   }
 
-                  return list;
-                }),
-              true
-            )));
+                  c.getSource().source()
+                    .sendInfo(
+                      online.size() + " bots online: " + String.join(", ", online));
+                  return Command.SINGLE_SUCCESS;
+                }))));
   }
 }

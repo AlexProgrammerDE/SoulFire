@@ -15,27 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.command.brigadier.BrigadierHelper;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
-public final class HelpCommand {
+public final class WhoAmICommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("help")
+      literal("whoami")
         .executes(
           help(
-            "Prints a list of all available commands",
+            "See who you are",
             c -> {
-              c.getSource().source().sendInfo("Available commands:");
-              for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
-                c.getSource().source().sendInfo("{} -> {}", command.command(), command.help());
-              }
+              c.getSource().source().sendInfo("Your are: {}", c.getSource().source().getUsername());
 
               return Command.SINGLE_SUCCESS;
             })));

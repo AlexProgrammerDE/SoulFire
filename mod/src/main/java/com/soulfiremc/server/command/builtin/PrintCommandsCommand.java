@@ -15,36 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.soulfiremc.server.spark.SFSparkCommandSender;
+import com.soulfiremc.server.command.CommandSourceStack;
+import com.soulfiremc.server.command.brigadier.BrigadierHelper;
 
-import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
-import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
+import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
-public final class SparkCommand {
+public final class PrintCommandsCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("spark")
+      literal("print-commands")
         .requires(CommandSourceStack.IS_ADMIN)
-        .then(argument("command", StringArgumentType.greedyString())
-          .executes(
-            help(
-              "Runs a spark subcommand",
-              c -> {
-                var command = StringArgumentType.getString(c, "command");
-                c.getSource().soulFire().sparkPlugin().platform()
-                  .executeCommand(new SFSparkCommandSender(c.getSource().source()), command.split(ARGUMENT_SEPARATOR));
-                return Command.SINGLE_SUCCESS;
-              })))
         .executes(
-          help(
-            "Get spark help",
+          privateCommand(
             c -> {
-              c.getSource().soulFire().sparkPlugin().platform().executeCommand(new SFSparkCommandSender(c.getSource().source()), new String[]{});
+              var builder = new StringBuilder("\n");
+              for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
+                builder.append("| `%s{:bash}` | %s |\n".formatted(command.command(), command.helpMeta().help()));
+              }
+              c.getSource().source().sendInfo(builder.toString());
+
               return Command.SINGLE_SUCCESS;
             })));
   }

@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;

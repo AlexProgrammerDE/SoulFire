@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.brigadier.EnumArgumentType;
 import com.soulfiremc.server.protocol.ControllingTask;
 import net.minecraft.world.InteractionHand;

@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.protocol.ControllingTask;
 import net.kyori.adventure.text.Component;
@@ -208,7 +209,7 @@ public final class InventoryCommand {
     var player = bot.minecraft().player;
     var gameMode = bot.minecraft().gameMode;
     if (player == null || gameMode == null) {
-      return Command.SINGLE_SUCCESS;
+      return 0;
     }
 
     var container = player.containerMenu;

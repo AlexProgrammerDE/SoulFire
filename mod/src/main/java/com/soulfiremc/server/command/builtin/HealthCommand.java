@@ -15,33 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.command;
+package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.soulfiremc.server.command.CommandSourceStack;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class SayCommand {
+public final class HealthCommand {
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("say")
-        .then(
-          argument("message", StringArgumentType.greedyString())
-            .executes(
-              help(
-                "Makes selected bots send a message in chat or execute a command",
-                c -> {
-                  var message = StringArgumentType.getString(c, "message");
+      literal("health")
+        .executes(
+          help(
+            "Print the health of selected bots.",
+            c -> forEveryBot(
+              c,
+              bot -> {
+                if (bot.minecraft().player == null) {
+                  return Command.SINGLE_SUCCESS;
+                }
 
-                  return forEveryBot(
-                    c,
-                    bot -> {
-                      bot.sendChatMessage(message);
+                c.getSource().source().sendInfo("Info for " + bot.accountName() + ":");
+                c.getSource().source().sendInfo("Health: " + bot.minecraft().player.getHealth() + " / " + bot.minecraft().player.getMaxHealth());
+                c.getSource().source().sendInfo("Food: " + bot.minecraft().player.getFoodData().getFoodLevel());
+                c.getSource().source().sendInfo("Saturation: " + bot.minecraft().player.getFoodData().getSaturationLevel());
 
-                      return Command.SINGLE_SUCCESS;
-                    });
-                }))));
+                return Command.SINGLE_SUCCESS;
+              }))));
   }
 }

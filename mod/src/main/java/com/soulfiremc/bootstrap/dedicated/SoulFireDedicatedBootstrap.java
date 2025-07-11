@@ -27,8 +27,6 @@ import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.extern.slf4j.Slf4j;
 
-import java.nio.file.Path;
-
 @Slf4j
 public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
   private SoulFireDedicatedBootstrap() {
