@@ -42,6 +42,7 @@ import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.SFUpdateChecker;
 import com.soulfiremc.server.util.structs.ShutdownManager;
+import com.viaversion.viaversion.api.Via;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
@@ -209,10 +210,13 @@ public final class SoulFireServer {
   }
 
   public void setupLogging() {
-    Configurator.setRootLevel(settingsSource.get(DevSettings.CORE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("com.soulfiremc", settingsSource.get(DevSettings.SOULFIRE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("net.minecraft", settingsSource.get(DevSettings.MINECRAFT_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("net.minecraft", settingsSource.get(DevSettings.MINECRAFT_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("org.hibernate", settingsSource.get(DevSettings.HIBERNATE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+    Configurator.setRootLevel(settingsSource.get(DevSettings.OTHER_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
   private void loadInstances() {

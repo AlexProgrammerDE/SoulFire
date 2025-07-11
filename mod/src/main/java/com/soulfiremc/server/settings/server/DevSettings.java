@@ -26,20 +26,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DevSettings implements SettingsObject {
   private static final String NAMESPACE = "dev";
-  public static final BooleanProperty CORE_DEBUG =
+  public static final BooleanProperty SOULFIRE_DEBUG =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)
-      .key("core-debug")
-      .uiName("Core debug")
-      .description("Enable core code debug logging")
+      .key("soulfire-debug")
+      .uiName("SoulFire debug")
+      .description("Enable SoulFire debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty VIA_DEBUG =
+  public static final BooleanProperty MINECRAFT_DEBUG =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)
-      .key("via-debug")
-      .uiName("Via debug")
-      .description("Enable Via* code debug logging")
+      .key("minecraft-debug")
+      .uiName("Minecraft debug")
+      .description("Enable Minecraft debug logging")
       .defaultValue(false)
       .build();
   public static final BooleanProperty NETTY_DEBUG =
@@ -58,12 +58,28 @@ public final class DevSettings implements SettingsObject {
       .description("Enable gRPC debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty MINECRAFT_DEBUG =
+  public static final BooleanProperty HIBERNATE_DEBUG =
     ImmutableBooleanProperty.builder()
       .namespace(NAMESPACE)
-      .key("minecraft-debug")
-      .uiName("Minecraft debug")
-      .description("Enable Minecraft debug logging")
+      .key("hibernate-debug")
+      .uiName("Hibernate debug")
+      .description("Enable Hibernate debug logging")
+      .defaultValue(false)
+      .build();
+  public static final BooleanProperty VIA_DEBUG =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("via-debug")
+      .uiName("Via debug")
+      .description("Enable Via* debug logging")
+      .defaultValue(false)
+      .build();
+  public static final BooleanProperty OTHER_DEBUG =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("other-debug")
+      .uiName("Other debug")
+      .description("Enable other debug logging")
       .defaultValue(false)
       .build();
 }
