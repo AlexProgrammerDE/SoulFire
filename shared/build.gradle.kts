@@ -50,7 +50,7 @@ dependencies {
   api("net.minidev:json-smart:2.5.2")
   api("net.sf.jopt-simple:jopt-simple:5.0.4")
   api("org.apache.commons:commons-compress:1.27.1")
-  api("org.apache.commons:commons-lang3:3.17.0")
+  api("org.apache.commons:commons-lang3:3.18.0")
   api("org.apache.httpcomponents:httpclient:4.5.14")
   api("org.apache.httpcomponents:httpcore:4.4.16")
   api("org.jcraft:jorbis:0.0.17")
