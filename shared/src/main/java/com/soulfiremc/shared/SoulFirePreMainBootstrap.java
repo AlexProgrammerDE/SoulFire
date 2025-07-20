@@ -20,7 +20,6 @@ package com.soulfiremc.shared;
 import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.security.Security;
 
@@ -41,8 +40,6 @@ public class SoulFirePreMainBootstrap {
 
     Security.addProvider(new BouncyCastleProvider());
 
-    AnsiConsole.systemInstall();
-
     sendFlagsInfo();
 
     injectExceptionHandler();
@@ -62,6 +59,6 @@ public class SoulFirePreMainBootstrap {
 
   private static void injectExceptionHandler() {
     Thread.setDefaultUncaughtExceptionHandler(
-      (thread, throwable) -> log.atError().setCause(throwable).log("Exception in thread {}", thread.getName()));
+      (thread, throwable) -> log.atError().setCause(throwable).log("Uncaught exception in thread {}", thread.getName()));
   }
 }
