@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.test;
 
+import com.soulfiremc.bootstrap.TestBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.shared.SFLogAppender;
@@ -34,6 +35,8 @@ public final class LoadTest {
   public void testLoad() {
     System.setProperty("sf.baseDir", tempDir.toAbsolutePath().toString());
     System.setProperty("sf.unit.test", "true");
+
+    TestBootstrap.bootstrapForTest();
 
     SFLogAppender.INSTANCE.start();
 
