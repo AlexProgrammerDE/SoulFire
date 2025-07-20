@@ -9,6 +9,18 @@ plugins {
 }
 
 tasks {
+  // Variable replacements
+  processResources {
+    filesMatching(listOf("soulfire-build-data.properties")) {
+      expand(
+        "version" to project.version,
+        "description" to project.description,
+        "url" to "https://soulfiremc.com",
+        "commit" to (indraGit.commit()?.name ?: "unknown"),
+        "branch" to (indraGit.branch()?.name ?: "unknown"),
+      )
+    }
+  }
   javadoc {
     title = "SoulFire Javadocs"
     (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")

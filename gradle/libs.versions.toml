@@ -9,7 +9,6 @@ swc4j = "1.6.0"
 classtransform = "1.14.1"
 
 [plugins]
-blossom = "net.kyori.blossom:2.1.0"
 protobuf = "com.google.protobuf:0.9.5"
 jmh = "me.champeau.jmh:0.7.3"
 

@@ -95,7 +95,7 @@ public final class SoulFireServer {
     String host,
     int port,
     Instant startTime) {
-    log.info("Starting SoulFire v{} ({} @ {})", BuildData.VERSION, BuildData.BRANCH_NAME, BuildData.COMMIT_HASH.substring(0, 6));
+    log.info("Starting SoulFire v{} ({} @ {})", BuildData.VERSION, BuildData.BRANCH, BuildData.COMMIT_SHORT);
 
     this.shutdownManager = new ShutdownManager(this::shutdownHook);
 
@@ -108,7 +108,7 @@ public final class SoulFireServer {
     }
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
-    var sessionFactoryFuture = scheduler.supplyAsync(() -> DatabaseManager.select());
+    var sessionFactoryFuture = scheduler.supplyAsync(DatabaseManager::select);
     var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
