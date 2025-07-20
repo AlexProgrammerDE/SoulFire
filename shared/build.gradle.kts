@@ -108,9 +108,6 @@ dependencies {
   api(libs.jetbrains.annotations)
   api(libs.immutables.gson)
 
-  api(libs.bundles.armeria)
-  api(libs.bundles.reactor.netty)
-
   api(libs.reflect)
   api(libs.lambdaevents)
 
