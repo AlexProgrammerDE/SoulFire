@@ -215,7 +215,9 @@ public final class SoulFireServer {
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("org.hibernate", settingsSource.get(DevSettings.HIBERNATE_DEBUG) ? Level.DEBUG : Level.INFO);
-    Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+    if (!Boolean.getBoolean("sf.unit.test")) {
+      Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
+    }
     Configurator.setRootLevel(settingsSource.get(DevSettings.OTHER_DEBUG) ? Level.DEBUG : Level.INFO);
   }
 
