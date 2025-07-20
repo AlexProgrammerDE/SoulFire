@@ -13,21 +13,21 @@ dependencies {
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
   api("net.fabricmc:sponge-mixin:0.16.1+mixin.0.8.7")
-  api("net.fabricmc:intermediary:1.21.7:v2@jar")
+  api("net.fabricmc:intermediary:1.21.8:v2@jar")
   api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
   api("net.fabricmc:tiny-remapper:0.11.1")
 
-  api("com.fasterxml.jackson.core:jackson-annotations:2.19.1")
-  api("com.fasterxml.jackson.core:jackson-core:2.19.1")
-  api("com.fasterxml.jackson.core:jackson-databind:2.19.1")
+  api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
+  api("com.fasterxml.jackson.core:jackson-core:2.19.2")
+  api("com.fasterxml.jackson.core:jackson-databind:2.19.2")
   api("com.github.oshi:oshi-core:6.8.2")
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
   api("com.google.code.gson:gson:2.13.1")
   api("com.google.guava:failureaccess:1.0.3")
   api("com.google.guava:guava:33.4.8-jre")
   api("com.ibm.icu:icu4j:77.1")
-  api("com.microsoft.azure:msal4j:1.21.0")
+  api("com.microsoft.azure:msal4j:1.22.0")
   api("com.mojang:authlib:6.0.58")
   api("com.mojang:blocklist:1.0.10")
   api("com.mojang:brigadier:1.3.10")
@@ -38,10 +38,10 @@ dependencies {
   api("com.mojang:text2speech:1.18.11")
   api("com.nimbusds:content-type:2.3")
   api("com.nimbusds:lang-tag:1.7")
-  api("com.nimbusds:nimbus-jose-jwt:10.3.1")
+  api("com.nimbusds:nimbus-jose-jwt:10.4")
   api("com.nimbusds:oauth2-oidc-sdk:11.26")
   api("commons-codec:commons-codec:1.18.0")
-  api("commons-io:commons-io:2.19.0")
+  api("commons-io:commons-io:2.20.0")
   api("commons-logging:commons-logging:1.3.5")
   api("it.unimi.dsi:fastutil:8.5.16")
   api("net.java.dev.jna:jna-platform:5.17.0")
@@ -50,7 +50,7 @@ dependencies {
   api("net.minidev:json-smart:2.5.2")
   api("net.sf.jopt-simple:jopt-simple:5.0.4")
   api("org.apache.commons:commons-compress:1.27.1")
-  api("org.apache.commons:commons-lang3:3.17.0")
+  api("org.apache.commons:commons-lang3:3.18.0")
   api("org.apache.httpcomponents:httpclient:4.5.14")
   api("org.apache.httpcomponents:httpcore:4.4.16")
   api("org.jcraft:jorbis:0.0.17")
@@ -66,15 +66,15 @@ dependencies {
   api("org.lz4:lz4-java:1.8.0")
   api("org.slf4j:slf4j-api:2.0.17")
 
-  api("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.3")
+  api("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.4")
   api("org.checkerframework:checker-qual:3.49.5")
 
   api(projects.buildData)
 
   // Newest netty
-  api("io.netty:netty-all:4.2.2.Final")
+  api("io.netty:netty-all:4.2.3.Final")
 
-  api("io.github.classgraph:classgraph:4.8.180")
+  api("io.github.classgraph:classgraph:4.8.181")
 
   // For microsoft account authentication
   api(libs.minecraftauth) {
