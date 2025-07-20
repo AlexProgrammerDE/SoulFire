@@ -11,7 +11,7 @@ plugins {
 tasks {
   // Variable replacements
   processResources {
-    filesMatching(listOf("soulfire-build-data.properties")) {
+    filesMatching(listOf("fabric.mod.json", "soulfire-build-data.properties")) {
       expand(
         "version" to project.version,
         "description" to project.description,

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "soulfire",
   "version": "${version}",
-  "name": "SoulFire Mod",
-  "description": "",
+  "name": "SoulFire",
+  "description": "${description}",
   "authors": [
     "Pistonmaster"
   ],
