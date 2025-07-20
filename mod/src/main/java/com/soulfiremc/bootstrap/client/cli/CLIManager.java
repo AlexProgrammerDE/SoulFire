@@ -26,13 +26,14 @@ import com.soulfiremc.bootstrap.client.ClientCommandManager;
 import com.soulfiremc.bootstrap.client.grpc.RPCClient;
 import com.soulfiremc.bootstrap.client.settings.ClientSettingsManager;
 import com.soulfiremc.bootstrap.client.settings.PropertyKey;
+import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,6 +79,12 @@ public final class CLIManager {
     var soulFireCommand = new SFCommandDefinition(this);
     var commandLine = new CommandLine(soulFireCommand);
     soulFireCommand.commandLine(commandLine);
+    commandLine.setResourceBundle(new MapResourceBundle(
+      Map.of(
+        "usage.description.0",
+        BuildData.DESCRIPTION
+      )
+    ));
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.setUsageHelpAutoWidth(true);
     commandLine.setUsageHelpLongOptionsMaxWidth(30);
@@ -371,5 +378,23 @@ public final class CLIManager {
 
   public void shutdown() {
     shutdownManager.shutdownSoftware(true);
+  }
+
+  public static class MapResourceBundle extends ResourceBundle {
+    private final Map<String, Object> lookup;
+
+    public MapResourceBundle(Map<String, Object> values) {
+      this.lookup = Map.copyOf(values);
+    }
+
+    @Override
+    protected Object handleGetObject(String key) {
+      return lookup.get(key);
+    }
+
+    @Override
+    public Enumeration<String> getKeys() {
+      return Collections.enumeration(lookup.keySet());
+    }
   }
 }

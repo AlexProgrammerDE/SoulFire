@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.bootstrap.client.cli;
 
-import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.InstanceUpdateConfigRequest;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.proxy.ProxyType;
@@ -43,9 +42,8 @@ import java.util.stream.Collectors;
 @Command(
   name = "soulfire",
   mixinStandardHelpOptions = true,
-  version = "SoulFire v" + BuildData.VERSION,
+  versionProvider = SFPicolciVersionProvider.class,
   showDefaultValues = true,
-  description = BuildData.DESCRIPTION,
   sortOptions = false,
   showAtFileInUsageHelp = true)
 public final class SFCommandDefinition implements Callable<Integer> {
