@@ -62,7 +62,7 @@ public final class MixinMain {
     }
   }
 
-  @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;setName(Ljava/lang/String;)V"))
+  @Redirect(method = "main([Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;setName(Ljava/lang/String;)V", remap = false))
   private static void init(Thread instance, String name) {
     // Prevent changing main thread name
   }
