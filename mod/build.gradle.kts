@@ -77,12 +77,12 @@ tasks {
 }
 
 unimined.minecraft {
-  version("1.21.7")
+  version("1.21.8")
 
   mappings {
     intermediary()
     mojmap()
-    parchment("1.21.6", "2025.06.29")
+    parchment("1.21.8", "2025.07.20")
   }
 
   fabric {
