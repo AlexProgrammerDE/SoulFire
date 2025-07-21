@@ -62,7 +62,7 @@ public final class SoulFireAbstractLauncher {
   }
 
   private static Path[] createLibClassLoader(Path libDir) {
-    try (var dependencyListInput = ClassLoader.getSystemClassLoader().getResourceAsStream("META-INF/dependency-list.txt")) {
+    try (var dependencyListInput = SoulFireAbstractLauncher.class.getResourceAsStream("/META-INF/dependency-list.txt")) {
       if (dependencyListInput == null) {
         return new Path[0];
       }
@@ -74,8 +74,8 @@ public final class SoulFireAbstractLauncher {
       for (var fileName : new String(bytes, StandardCharsets.UTF_8).lines().toList()) {
         var libFile = libDir.resolve(fileName);
         try (var libInput = Objects.requireNonNull(
-          ClassLoader.getSystemClassLoader().getResourceAsStream(
-            "META-INF/lib/" + fileName
+          SoulFireAbstractLauncher.class.getResourceAsStream(
+            "/META-INF/lib/" + fileName
           ),
           "File not found: " + fileName
         )) {
