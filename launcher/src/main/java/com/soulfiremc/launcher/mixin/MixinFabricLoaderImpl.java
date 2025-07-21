@@ -18,6 +18,7 @@
 package com.soulfiremc.launcher.mixin;
 
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -27,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinFabricLoaderImpl {
   @Redirect(method = "setup", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/FabricLoaderImpl;isDevelopmentEnvironment()Z"))
   private boolean redirectIsDevelopmentEnvironment(FabricLoaderImpl instance) {
-    // Trigger mod remapping at runtime
-    return true;
+    // Trigger mod remapping at runtime if not running in intermediary
+    return !FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace().equals("intermediary");
   }
 }

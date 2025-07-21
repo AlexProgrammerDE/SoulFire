@@ -18,6 +18,7 @@
 package com.soulfiremc.launcher.mixin;
 
 import net.fabricmc.loader.impl.launch.FabricLauncher;
+import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.launch.FabricMixinBootstrap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,7 +31,7 @@ public class MixinFabricMixinBootstrap {
     at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/launch/FabricLauncher;isDevelopment()Z"),
     remap = false)
   private static boolean isDevelopment(FabricLauncher instance) {
-    // Trigger refmap remapping at runtime
-    return true;
+    // Trigger refmap remapping at runtime if not running in intermediary
+    return !FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace().equals("intermediary");
   }
 }
