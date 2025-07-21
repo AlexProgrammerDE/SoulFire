@@ -102,7 +102,7 @@ fun File.isJar(): Boolean {
 }
 
 fun File.shouldShadow(): Boolean {
-  return toString().contains("build" + File.separator + "libs")
+  return toString().contains("launcher" + File.separator + "build" + File.separator + "libs")
 }
 
 tasks {
