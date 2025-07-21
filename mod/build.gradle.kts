@@ -15,8 +15,8 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  modImplementation("com.viaversion:viafabricplus:4.2.2")
-  include("com.viaversion:viafabricplus:4.2.2") {
+  modImplementation("com.viaversion:viafabricplus:4.2.3")
+  include("com.viaversion:viafabricplus:4.2.3") {
     isTransitive = false
   }
   modImplementation("net.kyori:adventure-platform-fabric:6.5.0-SNAPSHOT")
@@ -24,7 +24,7 @@ dependencies {
     isTransitive = false
   }
 
-  annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.3")
+  annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.4")
 
   annotationProcessor(libs.immutables.gson)
   compileOnly(libs.immutables.value)
