@@ -25,17 +25,17 @@ import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
+import net.lenni0451.classtransform.utils.tree.BasicClassProvider;
 import net.lenni0451.reflect.Agents;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 public class SoulFirePostLibLauncher {
   private static void injectEarlyMixins() {
-    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
+    var classProvider = new BasicClassProvider();
     var transformerManager = new TransformerManager(classProvider);
     transformerManager.addTransformerPreprocessor(new MixinsTranslator());
     transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");
