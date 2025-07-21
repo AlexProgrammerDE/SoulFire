@@ -38,7 +38,7 @@ public final class SoulFireAbstractLauncher {
     var librariesPath = basePath.resolve("libraries");
     var extractedLibs = createLibClassLoader(librariesPath);
     if (extractedLibs.length == 0) {
-      System.out.println("No libraries found in META-INF/dependency-list.txt, skipping library loading.");
+      System.out.println("No libraries found in /META-INF/dependency-list.txt, skipping library loading.");
       return;
     }
 

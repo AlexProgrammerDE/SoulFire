@@ -66,6 +66,14 @@ fun Manifest.applySFAttributes() {
   attributes["Multi-Release"] = "true"
 }
 
+fun File.isJar(): Boolean {
+  return name.endsWith(".jar")
+}
+
+fun File.shouldShadow(): Boolean {
+  return toString().contains("build" + File.separator + "libs")
+}
+
 tasks {
   val generateDependencyList = register("generateDependencyList") {
     dependsOn(configurations.runtimeClasspath)
@@ -76,23 +84,14 @@ tasks {
 
     doLast {
       val dependencies = configurations.runtimeClasspath.get().files
-        .filter { it.name.endsWith("jar") }
-        .filter { !it.toString().contains("build" + File.separator + "libs") }
+        .filter { it.isJar() }
+        .filter { !it.shouldShadow() }
         .joinToString("\n") { it.name }
       outputFile.get().asFile.writeText(dependencies)
     }
   }
   jar {
     archiveClassifier = "unshaded"
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn(configurations.runtimeClasspath)
-    from({
-      configurations.runtimeClasspath.get()
-        .filter { it.name.endsWith("jar") }
-        .filter { it.toString().contains("build" + File.separator + "libs") }
-        .map { zipTree(it) }
-    })
 
     manifest.applySFAttributes()
   }
@@ -104,10 +103,17 @@ tasks {
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn(configurations.runtimeClasspath)
+
     from({
       configurations.runtimeClasspath.get()
-        .filter { it.name.endsWith("jar") }
-        .filter { !it.toString().contains("build" + File.separator + "libs") }
+        .filter { it.isJar() }
+        .filter { it.shouldShadow() }
+        .map { zipTree(it) }
+    })
+    from({
+      configurations.runtimeClasspath.get()
+        .filter { it.isJar() }
+        .filter { !it.shouldShadow() }
     }) {
       into("META-INF/lib")
     }
