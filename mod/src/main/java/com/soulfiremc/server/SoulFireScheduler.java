@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -122,14 +123,22 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public CompletableFuture<?> runAsync(Runnable command) {
-    return CompletableFuture.runAsync(wrapFuture(command), this);
+    return runAsync(command, Level.ERROR);
   }
 
   public <T> CompletableFuture<T> supplyAsync(Supplier<T> command) {
-    return CompletableFuture.supplyAsync(wrapFuture(command), this);
+    return supplyAsync(command, Level.ERROR);
   }
 
-  private Runnable wrapFuture(Runnable command) {
+  public CompletableFuture<?> runAsync(Runnable command, Level errorLevel) {
+    return CompletableFuture.runAsync(wrapFuture(command, errorLevel), this);
+  }
+
+  public <T> CompletableFuture<T> supplyAsync(Supplier<T> command, Level errorLevel) {
+    return CompletableFuture.supplyAsync(wrapFuture(command, errorLevel), this);
+  }
+
+  private Runnable wrapFuture(Runnable command, Level errorLevel) {
     return () -> {
       if (blockNewTasks) {
         return;
@@ -138,13 +147,13 @@ public final class SoulFireScheduler implements Executor {
       try {
         runnableWrapper.runWrapped(command);
       } catch (Throwable t) {
-        runnableWrapper.runWrapped(() -> log.error("Error in async executor", t));
+        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).log("Error in async executor", t));
         throw new CompletionException(t);
       }
     };
   }
 
-  private <T> Supplier<T> wrapFuture(Supplier<T> command) {
+  private <T> Supplier<T> wrapFuture(Supplier<T> command, Level errorLevel) {
     return () -> {
       if (blockNewTasks) {
         return null;
@@ -153,7 +162,7 @@ public final class SoulFireScheduler implements Executor {
       try {
         return command.get();
       } catch (Throwable t) {
-        runnableWrapper.runWrapped(() -> log.error("Error in async executor", t));
+        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).log("Error in async executor", t));
         throw new CompletionException(t);
       }
     };

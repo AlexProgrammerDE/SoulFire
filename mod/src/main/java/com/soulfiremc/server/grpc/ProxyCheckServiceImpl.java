@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
+import org.slf4j.event.Level;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -85,6 +86,10 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 var future = cancellationCollector.add(new CompletableFuture<Void>());
                 var connection = factory.prepareConnection(true);
 
+                connection.shutdownHooks().add(() -> {
+                  future.completeExceptionally(new RuntimeException("Connection closed"));
+                });
+
                 SoulFireAPI.registerListener(BotPacketReceiveEvent.class, event -> {
                   if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
                     future.complete(null);
@@ -94,7 +99,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 connection.connect().join();
 
                 return future.join();
-              })
+              }, Level.TRACE)
               .orTimeout(30, TimeUnit.SECONDS)
               .handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
                 .setProxy(payload)

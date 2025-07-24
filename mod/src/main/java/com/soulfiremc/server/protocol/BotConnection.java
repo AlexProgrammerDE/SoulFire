@@ -57,7 +57,6 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -174,8 +173,7 @@ public final class BotConnection {
                 () -> {},
                 () -> {}
               );
-            } catch (UnknownHostException e) {
-              log.error("Failed to ping server {}: {}", serverAddress, e.getMessage());
+            } catch (Throwable t) {
               this.disconnect();
             }
           }));
