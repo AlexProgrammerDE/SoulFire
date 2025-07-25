@@ -70,7 +70,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
       var serverAddress = ServerAddress.parseString(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS));
       var proxyCheckEventLoopGroup =
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
-      instance.scheduler().runAsync(() -> {
+      instance.scheduler().execute(() -> {
         SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
             var proxy = SFProxy.fromProto(payload);
             var stopWatch = Stopwatch.createStarted();
@@ -111,10 +111,11 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               return;
             }
 
+            var proxy = SFProxy.fromProto(result.getProxy());
             if (result.getValid()) {
-              log.debug("Proxy check successful for {}: {}ms", result.getProxy(), result.getLatency());
+              log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
             } else {
-              log.debug("Proxy check failed for {}", result.getProxy());
+              log.debug("Proxy check failed for {}", proxy);
             }
 
             responseObserver.onNext(ProxyCheckResponse.newBuilder()

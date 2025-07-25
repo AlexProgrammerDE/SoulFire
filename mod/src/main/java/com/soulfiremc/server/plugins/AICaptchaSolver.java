@@ -148,7 +148,7 @@ public final class AICaptchaSolver extends InternalPlugin {
       return;
     }
 
-    event.connection().scheduler().runAsync(() -> {
+    event.connection().scheduler().execute(() -> {
       try {
         var plainMessage = event.parseToPlainText();
         var textTrigger = settingsSource.get(AICaptchaSolverSettings.TEXT_TRIGGER);

@@ -188,7 +188,7 @@ public final class BotConnection {
           )));
         }
 
-        scheduler.runAsync(() -> {
+        scheduler.execute(() -> {
           SFConstants.MINECRAFT_INSTANCE.set(minecraft);
           try {
             minecraft.gameThread = Thread.currentThread();

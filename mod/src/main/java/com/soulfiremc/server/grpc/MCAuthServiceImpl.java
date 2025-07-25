@@ -56,7 +56,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
 
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
-      instance.scheduler().runAsync(() -> {
+      instance.scheduler().execute(() -> {
         var service = MCAuthService.convertService(request.getService());
         var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
               cancellationCollector.add(service.createDataAndLogin(

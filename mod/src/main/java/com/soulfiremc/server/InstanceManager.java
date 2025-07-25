@@ -112,7 +112,7 @@ public final class InstanceManager {
       throw new RuntimeException(e);
     }
 
-    scheduler.runAsync(() -> {
+    try {
       for (var script : sessionFactory.fromTransaction(session -> {
         var instance = session.find(InstanceEntity.class, id);
         if (instance == null) {
@@ -125,8 +125,9 @@ public final class InstanceManager {
       })) {
         scriptManager.registerScript(script);
       }
-    }).join();
-
+    } catch (Throwable t) {
+      log.error("Error while loading scripts for instance {}", id, t);
+    }
 
     this.instanceSettingsRegistry = scheduler.supplyAsync(() -> {
       var registry = new ServerSettingsRegistry()
@@ -545,7 +546,7 @@ public final class InstanceManager {
   }
 
   public void addAuditLog(SoulFireUser source, InstanceAuditLogEntity.AuditLogType logType, @Nullable String data) {
-    scheduler.runAsync(() -> sessionFactory.inTransaction(session -> {
+    scheduler.execute(() -> sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
       if (instanceEntity == null) {
         return;
