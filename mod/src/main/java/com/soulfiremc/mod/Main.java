@@ -17,11 +17,14 @@
  */
 package com.soulfiremc.mod;
 
+import com.viaversion.viafabricplus.settings.impl.DebugSettings;
 import net.fabricmc.api.ModInitializer;
 
 public final class Main implements ModInitializer {
   @Override
   public void onInitialize() {
+    DebugSettings.INSTANCE.printNetworkingErrorsToLogs.setValue(false);
+
     // Entity.class;
     // LivingEntity.class;
     // Player.class;
