@@ -72,6 +72,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().runAsync(() -> {
         var results = SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
+            var proxy = SFProxy.fromProto(payload);
             var stopWatch = Stopwatch.createStarted();
             var factory = new BotConnectionFactory(
               instance,
@@ -79,16 +80,14 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               MinecraftAccount.forProxyCheck(),
               protocolVersion,
               serverAddress,
-              SFProxy.fromProto(payload),
+              proxy,
               proxyCheckEventLoopGroup
             );
             return instance.scheduler().supplyAsync(() -> {
                 var future = cancellationCollector.add(new CompletableFuture<Void>());
                 var connection = factory.prepareConnection(true);
 
-                connection.shutdownHooks().add(() -> {
-                  future.completeExceptionally(new RuntimeException("Connection closed"));
-                });
+                connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
 
                 SoulFireAPI.registerListener(BotPacketReceiveEvent.class, event -> {
                   if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
@@ -96,6 +95,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                   }
                 });
 
+                log.debug("Checking proxy: {}", proxy);
                 connection.connect().join();
 
                 return future.join();
@@ -112,11 +112,13 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             }
 
             if (result.getValid()) {
+              log.debug("Proxy check successful for {}: {}ms", result.getProxy(), result.getLatency());
               responseObserver.onNext(ProxyCheckResponse.newBuilder()
                 .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
                   .build())
                 .build());
             } else {
+              log.debug("Proxy check failed for {}", result.getProxy());
               responseObserver.onNext(ProxyCheckResponse.newBuilder()
                 .setOneFailure(ProxyCheckOneFailure.newBuilder()
                   .build())
