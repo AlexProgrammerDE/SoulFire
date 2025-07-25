@@ -71,7 +71,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
       var proxyCheckEventLoopGroup =
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().runAsync(() -> {
-        var results = SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
+        SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
             var proxy = SFProxy.fromProto(payload);
             var stopWatch = Stopwatch.createStarted();
             var factory = new BotConnectionFactory(
@@ -113,17 +113,13 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
 
             if (result.getValid()) {
               log.debug("Proxy check successful for {}: {}ms", result.getProxy(), result.getLatency());
-              responseObserver.onNext(ProxyCheckResponse.newBuilder()
-                .setOneSuccess(ProxyCheckOneSuccess.newBuilder()
-                  .build())
-                .build());
             } else {
               log.debug("Proxy check failed for {}", result.getProxy());
-              responseObserver.onNext(ProxyCheckResponse.newBuilder()
-                .setOneFailure(ProxyCheckOneFailure.newBuilder()
-                  .build())
-                .build());
             }
+
+            responseObserver.onNext(ProxyCheckResponse.newBuilder()
+              .setSingle(result)
+              .build());
           },
           cancellationCollector);
 
@@ -135,9 +131,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
         }
 
         responseObserver.onNext(ProxyCheckResponse.newBuilder()
-          .setFullList(ProxyCheckFullList.newBuilder()
-            .addAllResponse(results)
-            .build())
+          .setEnd(ProxyCheckEnd.getDefaultInstance())
           .build());
         responseObserver.onCompleted();
       });

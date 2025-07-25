@@ -19,24 +19,14 @@ message ProxyCheckResponseSingle {
   string real_ip = 4;
 }
 
-// Full response of all proxies that were checked
-message ProxyCheckFullList {
-  repeated ProxyCheckResponseSingle response = 1;
-}
-
-// Used when a proxy is successfully checked
-message ProxyCheckOneSuccess {
-}
-
-// Used when a proxy is not successfully checked
-message ProxyCheckOneFailure {
+// Marks the end of a proxy check stream
+message ProxyCheckEnd {
 }
 
 message ProxyCheckResponse {
   oneof data {
-    ProxyCheckFullList full_list = 1;
-    ProxyCheckOneSuccess one_success = 2;
-    ProxyCheckOneFailure one_failure = 3;
+    ProxyCheckResponseSingle single = 4;
+    ProxyCheckEnd end = 5;
   }
 }
 
