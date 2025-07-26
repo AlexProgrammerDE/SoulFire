@@ -17,9 +17,13 @@
  */
 package com.soulfiremc.server.util;
 
+import com.mojang.serialization.JsonOps;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import com.soulfiremc.server.util.structs.SafeCloseable;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -305,5 +309,11 @@ public final class SFHelpers {
     }
 
     return image;
+  }
+
+  public static net.kyori.adventure.text.Component nativeToAdventure(Component component) {
+    return GsonComponentSerializer.gson()
+      .deserializeFromTree(ComponentSerialization.CODEC
+        .encodeStart(JsonOps.INSTANCE, component).getOrThrow());
   }
 }

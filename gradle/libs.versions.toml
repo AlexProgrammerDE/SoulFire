@@ -7,6 +7,7 @@ armeria = "1.32.5"
 graalvm-polyglot = "24.2.2"
 swc4j = "1.6.0"
 classtransform = "1.14.1"
+kyori = "4.21.0"
 
 [plugins]
 protobuf = "com.google.protobuf:0.9.5"
@@ -91,6 +92,9 @@ swc4j-windows-arm64 = { module = "com.caoccao.javet:swc4j-windows-arm64", versio
 swc4j-windows-x86_64 = { module = "com.caoccao.javet:swc4j-windows-x86_64", version.ref = "swc4j" }
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
+kyori-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyori" }
+kyori-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "kyori" }
+kyori-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "kyori" }
 angus = "org.eclipse.angus:angus-mail:2.0.3"
 javax-annotations = "javax.annotation:javax.annotation-api:1.3.2"
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -107,3 +111,4 @@ hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-hikari
 graalvm-polyglot = ["graalvm-polyglot-polyglot", "graalvm-polyglot-js", "graalvm-polyglot-python", "graalvm-lsp"]
 swc4j = ["swc4j", "swc4j-android-arm", "swc4j-android-arm64", "swc4j-android-x86", "swc4j-android-x86_64", "swc4j-linux-arm64", "swc4j-linux-x86_64", "swc4j-macos-arm64", "swc4j-macos-x86_64", "swc4j-windows-arm64", "swc4j-windows-x86_64"]
 classtransform = ["classtransform-mixinstranslator", "classtransform-additionalclassprovider"]
+kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]

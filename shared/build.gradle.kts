@@ -96,6 +96,7 @@ dependencies {
   api(libs.slf4j)
   api(libs.disruptor)
 
+  api(libs.bundles.kyori)
   api(libs.commons.validator)
   api(libs.commons.io)
 

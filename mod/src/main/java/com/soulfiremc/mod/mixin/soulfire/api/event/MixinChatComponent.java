@@ -20,7 +20,7 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.protocol.BotConnection;
-import net.kyori.adventure.platform.modcommon.impl.NonWrappingComponentSerializer;
+import com.soulfiremc.server.util.SFHelpers;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinChatComponent {
   @Inject(method = "logChatMessage", at = @At("HEAD"), cancellable = true)
   public void logChatMessage(GuiMessage message, CallbackInfo ci) {
-    SoulFireAPI.postEvent(new ChatMessageReceiveEvent(BotConnection.CURRENT.get(), System.currentTimeMillis(), NonWrappingComponentSerializer.INSTANCE.deserialize(message.content())));
+    SoulFireAPI.postEvent(new ChatMessageReceiveEvent(BotConnection.CURRENT.get(), System.currentTimeMillis(), SFHelpers.nativeToAdventure(message.content())));
     ci.cancel();
   }
 }

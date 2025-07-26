@@ -19,10 +19,6 @@ dependencies {
   include("com.viaversion:viafabricplus:4.2.3") {
     isTransitive = false
   }
-  modImplementation("net.kyori:adventure-platform-fabric:6.5.1")
-  include("net.kyori:adventure-platform-fabric:6.5.1") {
-    isTransitive = false
-  }
 
   annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.4")
 

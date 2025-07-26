@@ -33,11 +33,11 @@ import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.shared.SFLogAppender;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.platform.modcommon.impl.NonWrappingComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
@@ -88,7 +88,7 @@ public final class ChatLogger extends InternalPlugin {
     // usage of synchronized method so that the chatMessages set is not modified while being
     // iterated
     logChatMessage(event.connection().instanceManager(), Component.text("[Death] ")
-      .append(NonWrappingComponentSerializer.INSTANCE.deserialize(combatKillPacket.message())));
+      .append(SFHelpers.nativeToAdventure(combatKillPacket.message())));
   }
 
   private static synchronized void logChatMessage(InstanceManager instanceManager, Component message) {
