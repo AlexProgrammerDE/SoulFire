@@ -22,7 +22,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.BotPacketReceiveEvent;
+import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.protocol.BotConnectionFactory;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.BotSettings;
@@ -89,7 +89,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
 
                 connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
 
-                SoulFireAPI.registerListener(BotPacketReceiveEvent.class, event -> {
+                SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, event -> {
                   if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
                     future.complete(null);
                   }

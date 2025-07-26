@@ -18,28 +18,47 @@
 package com.soulfiremc.mod.mixin.soulfire.api.event;
 
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.bot.BotPacketReceiveEvent;
+import com.soulfiremc.server.api.event.DummyPacket;
+import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.protocol.BotConnection;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.BundlePacket;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+import java.util.ArrayList;
 
 @Mixin(Connection.class)
 public class MixinConnection {
-  @Inject(method = "genericsFtw", at = @At("HEAD"))
-  private static void handlePacket(Packet<?> parentPacket, PacketListener listener, CallbackInfo ci) {
+  @SuppressWarnings("unchecked")
+  @ModifyVariable(method = "genericsFtw", at = @At("HEAD"), argsOnly = true)
+  private static Packet<?> handlePacket(Packet<?> parentPacket) {
     var connection = BotConnection.CURRENT.get();
-    if (parentPacket instanceof BundlePacket<?> bundlePacket) {
-      for (var packet : bundlePacket.subPackets()) {
-        SoulFireAPI.postEvent(new BotPacketReceiveEvent(connection, packet));
+    if (parentPacket instanceof ClientboundBundlePacket bundlePacket) {
+      var subPackets = new ArrayList<Packet<? super ClientGamePacketListener>>();
+
+      for (var subPacket : bundlePacket.subPackets()) {
+        var event = new BotPacketPreReceiveEvent(connection, subPacket);
+        SoulFireAPI.postEvent(event);
+
+        if (event.packet() != null) {
+          subPackets.add((Packet<? super ClientGamePacketListener>) event.packet());
+        }
       }
+
+      return new ClientboundBundlePacket(subPackets);
     } else {
-      SoulFireAPI.postEvent(new BotPacketReceiveEvent(connection, parentPacket));
+      var event = new BotPacketPreReceiveEvent(connection, parentPacket);
+      SoulFireAPI.postEvent(event);
+
+      if (event.packet() != null) {
+        return event.packet();
+      } else {
+        return new DummyPacket();
+      }
     }
   }
 }

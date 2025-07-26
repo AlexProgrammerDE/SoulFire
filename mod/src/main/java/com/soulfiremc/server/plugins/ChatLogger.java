@@ -24,7 +24,7 @@ import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.bot.BotPacketReceiveEvent;
+import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
@@ -74,7 +74,7 @@ public final class ChatLogger extends InternalPlugin {
   }
 
   @EventHandler
-  public static void onDeathPacket(BotPacketReceiveEvent event) {
+  public static void onDeathPacket(BotPacketPreReceiveEvent event) {
     if (!(event.packet() instanceof ClientboundPlayerCombatKillPacket combatKillPacket)) {
       return;
     }

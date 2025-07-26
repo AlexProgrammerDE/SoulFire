@@ -15,11 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event.bot;
+package com.soulfiremc.mod.mixin.soulfire.libfixes;
 
-import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.protocol.BotConnection;
-import net.minecraft.network.protocol.Packet;
+import net.kyori.adventure.platform.fabric.impl.client.AdventureFabricClient;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public record BotPacketReceiveEvent(BotConnection connection, Packet<?> packet) implements SoulFireBotEvent {
+@SuppressWarnings("UnstableApiUsage")
+@Mixin(AdventureFabricClient.class)
+public class MixinAdventureFabricClient {
+  @Inject(method = "setupCustomArgumentTypes",
+    at = @At("HEAD"),
+    remap = false,
+    cancellable = true)
+  public void setupCustomArgumentTypes(final CallbackInfo ci) {
+    ci.cancel();
+  }
 }
