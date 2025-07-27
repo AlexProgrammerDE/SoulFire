@@ -12,7 +12,7 @@ dependencies {
   api("org.ow2.asm:asm-commons:9.8")
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
-  api("net.fabricmc:sponge-mixin:0.16.2+mixin.0.8.7")
+  api("net.fabricmc:sponge-mixin:0.16.3+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.8:v2@jar")
   api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
@@ -66,7 +66,7 @@ dependencies {
   api("org.lz4:lz4-java:1.8.0")
   api("org.slf4j:slf4j-api:2.0.17")
 
-  api("io.github.llamalad7:mixinextras-fabric:0.5.0-rc.4")
+  api("io.github.llamalad7:mixinextras-fabric:0.5.0")
   api("org.checkerframework:checker-qual:3.49.5")
 
   api(projects.buildData)
