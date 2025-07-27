@@ -91,6 +91,9 @@ allprojects {
       metadataSources {
         artifact()
       }
+      content {
+        includeGroup("headlessmc")
+      }
     }
   }
 }
