@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 
@@ -134,15 +135,16 @@ public final class BrigadierHelper {
       return 0;
     }
 
-    var resultSum = 0;
+    var resultSum = new AtomicInteger();
     for (var instance : instances) {
       context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyNameCache().get()));
 
       instance.addAuditLog(context.getSource().source(), InstanceAuditLogEntity.AuditLogType.EXECUTE_COMMAND, context.getInput());
-      resultSum += consumer.run(instance);
+      instance.runnableWrapper().runWrapped(() ->
+        resultSum.addAndGet(consumer.run(instance)));
     }
 
-    return resultSum;
+    return resultSum.get();
   }
 
   public static int forEveryInstanceEnsureHasBots(
@@ -166,13 +168,14 @@ public final class BrigadierHelper {
     return forEveryInstanceEnsureHasBots(
       context,
       instance -> {
-        var resultSum = 0;
+        var resultSum = new AtomicInteger();
         for (var bot : context.getSource().getInstanceVisibleBots(instance)) {
           context.getSource().source().sendInfo("--- Running command for bot %s ---".formatted(bot.accountName()));
-          resultSum += consumer.run(bot);
+          bot.runnableWrapper().runWrapped(
+            () -> resultSum.addAndGet(consumer.run(bot)));
         }
 
-        return resultSum;
+        return resultSum.get();
       });
   }
 
@@ -185,7 +188,7 @@ public final class BrigadierHelper {
   }
 
   public interface CommandFunction<S> {
-    int run(S subject) throws CommandSyntaxException;
+    int run(S subject);
   }
 
   public sealed interface HelpCarrier permits SingleRedirectHelpWrapper, CommandHelpWrapper, RedirectHelpWrapper {
