@@ -65,11 +65,8 @@ allprojects {
 
   repositories {
     mavenCentral()
-    maven("https://oss.sonatype.org/content/repositories/snapshots/") {
-      name = "Sonatype Repository"
-    }
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-      name = "sonatype-oss-snapshots1"
+    maven("https://central.sonatype.com/repository/maven-snapshots/") {
+      name = "Sonatype Snapshot Repository"
       mavenContent { snapshotsOnly() }
     }
     maven("https://repo.pistonmaster.net/releases") {
