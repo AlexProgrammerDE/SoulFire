@@ -1,9 +1,7 @@
 {
   "extends": ["config:base", "group:allNonMajor", ":semanticCommits"],
   "ignoreDeps": [
-    "com.github.GeyserMC:MCProtocolLib",
-    "com.github.GeyserMC:mcauthlib",
-    "org.cloudburstmc.netty:netty-transport-raknet",
+    "net.fabricmc:intermediary",
     "eclipse-temurin"
   ],
   "packageRules": [
