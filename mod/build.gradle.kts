@@ -113,5 +113,6 @@ artifacts {
 tasks {
   withType<AbstractRemapJarTask> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn(":proto:jar")
   }
 }
