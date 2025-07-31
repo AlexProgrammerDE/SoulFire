@@ -16,7 +16,7 @@ dependencies {
   api("net.fabricmc:intermediary:1.21.8:v2@jar")
   api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
-  api("net.fabricmc:tiny-remapper:0.11.1")
+  api("net.fabricmc:tiny-remapper:0.11.2")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
   api("com.fasterxml.jackson.core:jackson-core:2.19.2")
@@ -49,7 +49,7 @@ dependencies {
   api("net.minidev:accessors-smart:2.5.2")
   api("net.minidev:json-smart:2.5.2")
   api("net.sf.jopt-simple:jopt-simple:5.0.4")
-  api("org.apache.commons:commons-compress:1.27.1")
+  api("org.apache.commons:commons-compress:1.28.0")
   api("org.apache.commons:commons-lang3:3.18.0")
   api("org.apache.httpcomponents:httpclient:4.5.14")
   api("org.apache.httpcomponents:httpcore:4.4.16")
