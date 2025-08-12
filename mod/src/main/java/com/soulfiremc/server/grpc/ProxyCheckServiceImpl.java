@@ -37,7 +37,6 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import org.slf4j.event.Level;
 
@@ -67,7 +66,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
       var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
-      var serverAddress = ServerAddress.parseString(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS));
+      var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS), protocolVersion);
       var proxyCheckEventLoopGroup =
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().execute(() -> {

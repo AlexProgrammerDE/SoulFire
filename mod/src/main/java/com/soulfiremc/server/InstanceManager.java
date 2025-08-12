@@ -52,7 +52,6 @@ import com.soulfiremc.shared.SFLogAppender;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 
@@ -377,7 +376,7 @@ public final class InstanceManager {
       NettyHelper.createEventLoopGroup("Attack-%s".formatted(id), runnableWrapper);
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
-    var serverAddress = ServerAddress.parseString(settingsSource.get(BotSettings.ADDRESS));
+    var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(BotSettings.ADDRESS), protocolVersion);
 
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
