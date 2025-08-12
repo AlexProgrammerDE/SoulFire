@@ -25,8 +25,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-// Ensure we run before VFP
-@Mixin(value = ClientHandshakePacketListenerImpl.class, priority = 500)
+// Inject actions to run before VFP
+@Mixin(value = ClientHandshakePacketListenerImpl.class, priority = 2000)
 public class MixinClientHandshakePacketListenerImpl {
   @Inject(method = "authenticateServer", at = @At("HEAD"), cancellable = true)
   public void onAuthenticateServer(String serverHash, CallbackInfoReturnable<Component> cir) {

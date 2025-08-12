@@ -37,8 +37,8 @@ import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-// Inject before VFP
-@Mixin(value = Connection.class, priority = 500)
+// Inject actions to run before VFP
+@Mixin(value = Connection.class, priority = 2000)
 public class MixinConnection {
   @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/AbstractBootstrap;"))
   private static AbstractBootstrap<?, ?> useCustomGroup(Bootstrap instance, EventLoopGroup eventExecutors, Operation<AbstractBootstrap<Bootstrap, Channel>> original, @Local(argsOnly = true) Connection clientConnection) {
