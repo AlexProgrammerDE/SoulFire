@@ -75,14 +75,45 @@ allprojects {
     maven("https://repo.pistonmaster.net/snapshots") {
       name = "PistonDev Snapshots Repository"
     }
-    maven("https://repo.pistonmaster.net/extras") {
-      name = "PistonDev Extras Repository"
+    maven("https://repo.viaversion.com") {
+      name = "ViaVersion Repository"
+      content {
+        includeGroup("com.viaversion")
+        includeGroup("com.viaversion.mcstructs")
+        includeGroup("net.raphimc")
+      }
+    }
+    maven("https://jitpack.io") {
+      name = "Jitpack Repository"
+      content {
+        includeGroupByRegex("com\\.github\\..*")
+      }
+    }
+    maven("https://libraries.minecraft.net") {
+      name = "Minecraft Repository"
+      content {
+        includeGroup("net.minecraft")
+        includeGroup("com.mojang")
+      }
+    }
+    maven("https://nexus.lucko.me/repository/hosted/") {
+      name = "Lucko Nexus"
+      content {
+        includeGroup("me.lucko")
+        includeModule("net.kyori", "adventure-text-feature-pagination")
+      }
     }
     maven("https://maven.parchmentmc.org") {
       name = "ParchmentMC"
+      content {
+        includeGroup("org.parchmentmc")
+      }
     }
     maven("https://maven.fabricmc.net") {
       name = "FabricMC"
+      content {
+        includeGroup("net.fabricmc")
+      }
     }
     ivy("https://github.com/3arthqu4ke") {
       patternLayout {
