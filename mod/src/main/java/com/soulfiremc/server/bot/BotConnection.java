@@ -40,6 +40,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ResourceLoadStateTracker;
@@ -174,7 +176,7 @@ public final class BotConnection {
                 () -> {}
               );
             } catch (Throwable t) {
-              this.disconnect();
+              this.disconnect(Component.text("Failed to ping server: " + t.getMessage()));
             }
           }));
         } else {
@@ -198,14 +200,15 @@ public final class BotConnection {
           } catch (Throwable t) {
             log.error("Error while running bot connection", t);
           } finally {
-            this.disconnect();
+            this.disconnect(Component.text("Tick loop ended"));
           }
         });
       });
   }
 
-  public void disconnect() {
+  public void disconnect(Component reason) {
     if (!shutdownExecuting.getAndSet(true)) {
+      log.debug("Got Disconnected with reason: {}", PlainTextComponentSerializer.plainText().serialize(reason));
       if (minecraft.isRunning()) {
         try {
           minecraft.submit(() -> {

@@ -27,6 +27,7 @@ import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,7 @@ public final class AutoReconnect extends InternalPlugin {
             return;
           }
 
-          bot.disconnect();
+          bot.disconnect(Component.text("Reconnecting..."));
           var newConnection = bot.factory().prepareConnection(false);
 
           instanceManager.storeNewBot(newConnection);

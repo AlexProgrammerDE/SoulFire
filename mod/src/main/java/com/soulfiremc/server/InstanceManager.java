@@ -52,6 +52,7 @@ import com.soulfiremc.shared.SFLogAppender;
 import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 
@@ -514,7 +515,7 @@ public final class InstanceManager {
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         botConnections.entrySet().removeIf(entry -> {
           var botConnection = entry.getValue();
-          disconnectFuture.add(scheduler.runAsync(botConnection::disconnect));
+          disconnectFuture.add(scheduler.runAsync(() -> botConnection.disconnect(Component.text("Attack stopped"))));
           eventLoopGroups.add(botConnection.eventLoopGroup());
           return true;
         });

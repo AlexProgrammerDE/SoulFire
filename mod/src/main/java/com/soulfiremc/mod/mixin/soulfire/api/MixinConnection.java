@@ -18,7 +18,9 @@
 package com.soulfiremc.mod.mixin.soulfire.api;
 
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.util.SFHelpers;
 import io.netty.channel.Channel;
+import net.kyori.adventure.text.Component;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
@@ -46,7 +48,10 @@ public class MixinConnection {
         return;
       }
 
-      BotConnection.CURRENT.get().disconnect();
+      var thisConnection = (Connection) (Object) this;
+      var disconnectionDetails = thisConnection.getDisconnectionDetails();
+      BotConnection.CURRENT.get().disconnect(disconnectionDetails == null ?
+        Component.translatable("multiplayer.disconnect.generic") : SFHelpers.nativeToAdventure(disconnectionDetails.reason()));
     }
   }
 }
