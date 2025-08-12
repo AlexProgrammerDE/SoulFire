@@ -121,9 +121,11 @@ allprojects {
     }
     maven("https://repo.pistonmaster.net/releases") {
       name = "PistonDev Release Repository"
+      mavenContent { releasesOnly() }
     }
     maven("https://repo.pistonmaster.net/snapshots") {
       name = "PistonDev Snapshots Repository"
+      mavenContent { snapshotsOnly() }
     }
     mavenCentral()
   }
