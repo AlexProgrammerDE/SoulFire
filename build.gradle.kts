@@ -64,17 +64,6 @@ allprojects {
   description = "Advanced Minecraft Server-Stresser Tool."
 
   repositories {
-    mavenCentral()
-    maven("https://central.sonatype.com/repository/maven-snapshots/") {
-      name = "Sonatype Snapshot Repository"
-      mavenContent { snapshotsOnly() }
-    }
-    maven("https://repo.pistonmaster.net/releases") {
-      name = "PistonDev Release Repository"
-    }
-    maven("https://repo.pistonmaster.net/snapshots") {
-      name = "PistonDev Snapshots Repository"
-    }
     maven("https://repo.viaversion.com") {
       name = "ViaVersion Repository"
       content {
@@ -126,5 +115,16 @@ allprojects {
         includeGroup("headlessmc")
       }
     }
+    maven("https://central.sonatype.com/repository/maven-snapshots/") {
+      name = "Sonatype Snapshot Repository"
+      mavenContent { snapshotsOnly() }
+    }
+    maven("https://repo.pistonmaster.net/releases") {
+      name = "PistonDev Release Repository"
+    }
+    maven("https://repo.pistonmaster.net/snapshots") {
+      name = "PistonDev Snapshots Repository"
+    }
+    mavenCentral()
   }
 }
