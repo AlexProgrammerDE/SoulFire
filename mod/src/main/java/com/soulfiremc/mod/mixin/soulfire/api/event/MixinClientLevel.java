@@ -20,7 +20,7 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

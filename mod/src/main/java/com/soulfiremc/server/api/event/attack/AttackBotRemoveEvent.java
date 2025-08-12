@@ -19,7 +19,7 @@ package com.soulfiremc.server.api.event.attack;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 
 /**
  * When a bot is not active anymore and gets removed from the list of active bots.

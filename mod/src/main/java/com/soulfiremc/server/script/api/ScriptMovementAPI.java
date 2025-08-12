@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 
 public record ScriptMovementAPI(BotConnection connection) {
 }

@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.pathfinding.controller;
 
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.CloseToPosGoal;
 import com.soulfiremc.server.pathfinding.goals.DynamicGoalScorer;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
-import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

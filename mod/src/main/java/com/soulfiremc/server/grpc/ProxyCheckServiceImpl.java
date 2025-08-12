@@ -23,7 +23,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
-import com.soulfiremc.server.protocol.BotConnectionFactory;
+import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;

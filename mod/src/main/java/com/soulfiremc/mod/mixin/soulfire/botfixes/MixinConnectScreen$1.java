@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin.soulfire.botfixes;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(targets = "net.minecraft.client.gui.screens.ConnectScreen$1")

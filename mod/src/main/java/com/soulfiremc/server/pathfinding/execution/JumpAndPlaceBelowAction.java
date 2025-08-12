@@ -18,9 +18,9 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.google.common.math.DoubleMath;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.BlockPlaceAgainstData;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

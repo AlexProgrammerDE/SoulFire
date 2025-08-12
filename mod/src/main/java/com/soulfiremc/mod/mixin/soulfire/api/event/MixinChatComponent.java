@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.util.SFHelpers;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;

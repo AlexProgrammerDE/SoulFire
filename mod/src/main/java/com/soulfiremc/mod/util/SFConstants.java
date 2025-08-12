@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.mod.util;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import io.netty.util.AttributeKey;
 import net.minecraft.client.Minecraft;
 

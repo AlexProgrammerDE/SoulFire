@@ -18,4 +18,4 @@
 /**
  * Main Minecraft protocol classes that handle all Minecraft packets and data.
  */
-package com.soulfiremc.server.protocol;
+package com.soulfiremc.server.bot;

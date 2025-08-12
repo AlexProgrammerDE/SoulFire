@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.script.api;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import org.graalvm.polyglot.HostAccess;
 
 public record ScriptBotAPI(BotConnection connection) {

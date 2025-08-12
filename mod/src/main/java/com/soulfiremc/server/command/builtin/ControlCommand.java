@@ -19,8 +19,8 @@ package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.protocol.ControllingTask;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 

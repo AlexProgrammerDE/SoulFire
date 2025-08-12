@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.mod.access;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.client.main.GameConfig;
 
 public interface IMinecraft {

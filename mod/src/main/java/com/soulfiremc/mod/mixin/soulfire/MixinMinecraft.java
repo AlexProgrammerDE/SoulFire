@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin.soulfire;
 
 import com.soulfiremc.mod.access.IMinecraft;
 import com.soulfiremc.mod.util.SFConstants;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportType;
 import net.minecraft.client.Minecraft;

@@ -21,7 +21,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotClientSettingsEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.client.Options;
 import net.minecraft.server.level.ClientInformation;
 import org.spongepowered.asm.mixin.Mixin;

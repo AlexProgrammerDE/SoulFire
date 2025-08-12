@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.structs.CachedLazyObject;

@@ -20,7 +20,7 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.DummyPacket;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;

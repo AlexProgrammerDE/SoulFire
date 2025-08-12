@@ -19,9 +19,9 @@ package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.brigadier.EnumArgumentType;
-import com.soulfiremc.server.protocol.ControllingTask;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 

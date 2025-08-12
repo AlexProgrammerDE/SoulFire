@@ -18,7 +18,7 @@
 package com.soulfiremc.server.api.event.bot;
 
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

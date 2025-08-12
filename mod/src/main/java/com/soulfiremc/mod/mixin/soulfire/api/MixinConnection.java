@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.api;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import io.netty.channel.Channel;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.Connection;

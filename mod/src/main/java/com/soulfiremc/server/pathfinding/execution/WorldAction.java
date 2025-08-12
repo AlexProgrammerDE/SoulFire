@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.execution;
 
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
-import com.soulfiremc.server.protocol.BotConnection;
 
 public sealed interface WorldAction
   permits BlockBreakAction,

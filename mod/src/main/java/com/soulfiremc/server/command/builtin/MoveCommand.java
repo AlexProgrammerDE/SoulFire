@@ -22,6 +22,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.command.brigadier.DoubleAxisArgumentType;
 import com.soulfiremc.server.command.brigadier.EntityArgumentType;
@@ -32,7 +33,6 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
 import com.soulfiremc.server.pathfinding.graph.PathConstraint;
-import com.soulfiremc.server.protocol.BotConnection;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.util.Mth;
 

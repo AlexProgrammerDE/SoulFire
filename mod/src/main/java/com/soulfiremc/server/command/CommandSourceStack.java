@@ -19,8 +19,8 @@ package com.soulfiremc.server.command;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.database.UserEntity;
-import com.soulfiremc.server.protocol.BotConnection;
 import com.soulfiremc.server.user.SoulFireUser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

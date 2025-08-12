@@ -18,7 +18,7 @@
 package com.soulfiremc.server.api.event.bot;
 
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 
 /**
  * Called when the bot has ticked. This event is called inside the tick loop.

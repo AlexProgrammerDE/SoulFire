@@ -22,7 +22,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.soulfiremc.mod.util.SFConstants;
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.util.netty.TransportHelper;
 import com.viaversion.viafabricplus.injection.access.base.IClientConnection;
 import io.netty.bootstrap.AbstractBootstrap;

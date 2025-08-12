@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.api;
 
-import com.soulfiremc.server.protocol.BotConnection;
+import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;

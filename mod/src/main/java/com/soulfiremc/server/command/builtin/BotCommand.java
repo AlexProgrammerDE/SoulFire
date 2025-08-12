@@ -23,8 +23,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.protocol.BotConnection;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
