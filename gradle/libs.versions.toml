@@ -51,7 +51,7 @@ grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 protobuf-bom = { module = "com.google.protobuf:protobuf-bom", version.ref = "protobuf" }
 protobuf-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf" }
-netty-bom = "io.netty:netty-bom:4.2.3.Final"
+netty-bom = "io.netty:netty-bom:4.2.4.Final"
 armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
 armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-grpc = { module = "com.linecorp.armeria:armeria-grpc" }
@@ -61,7 +61,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
-openai = "com.openai:openai-java:3.0.2"
+openai = "com.openai:openai-java:3.0.3"
 immutables-value = "org.immutables:value:2.11.3"
 immutables-gson = "org.immutables:gson:2.11.3"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.1.0.Final"
