@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @InternalPluginClass
 public final class ChatLogger extends InternalPlugin {
-  private static final MetadataKey<Cache<String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_logger", "chat_messages", Cache.class);
+  private static final MetadataKey<Cache<@NotNull String, Integer>> CHAT_MESSAGES = MetadataKey.of("chat_logger", "chat_messages", Cache.class);
 
   public ChatLogger() {
     super(new PluginInfo(

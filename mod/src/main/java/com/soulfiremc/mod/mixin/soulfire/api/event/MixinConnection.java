@@ -17,15 +17,22 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.api.event;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.DummyPacket;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
+import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.bot.BotConnection;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
@@ -33,6 +40,9 @@ import java.util.ArrayList;
 
 @Mixin(Connection.class)
 public class MixinConnection {
+  @Shadow
+  private Channel channel;
+
   @SuppressWarnings("unchecked")
   @ModifyVariable(method = "genericsFtw", at = @At("HEAD"), argsOnly = true)
   private static Packet<?> handlePacket(Packet<?> parentPacket) {
@@ -58,6 +68,29 @@ public class MixinConnection {
         return event.packet();
       } else {
         return new DummyPacket();
+      }
+    }
+  }
+
+  @WrapMethod(method = "doSendPacket")
+  public void wrapDoSendPacket(Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush, Operation<Void> original) {
+    var connection = BotConnection.CURRENT.get();
+    var event = new BotPacketPreSendEvent(connection, packet);
+    SoulFireAPI.postEvent(event);
+
+    if (event.packet() != null) {
+      original.call(event.packet(), sendListener, flush);
+    } else {
+      if (sendListener != null) {
+        try {
+          sendListener.operationComplete(channel.newSucceededFuture());
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      if (flush) {
+        channel.flush();
       }
     }
   }
