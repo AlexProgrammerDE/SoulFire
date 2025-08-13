@@ -62,8 +62,8 @@ reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", ve
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
 openai = "com.openai:openai-java:3.0.2"
-immutables-value = "org.immutables:value:2.11.2"
-immutables-gson = "org.immutables:gson:2.11.2"
+immutables-value = "org.immutables:value:2.11.3"
+immutables-gson = "org.immutables:gson:2.11.3"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.1.0.Final"
 hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.1.0.Final"
 hibernate-hikaricp = "org.hibernate.orm:hibernate-hikaricp:7.1.0.Final"
