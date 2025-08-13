@@ -55,6 +55,11 @@ public final class AutoChatMessage extends InternalPlugin {
           return;
         }
 
+        var player = connection.minecraft().player;
+        if (player == null) {
+          return;
+        }
+
         connection.sendChatMessage(SFHelpers.getRandomEntry(settingsSource.get(AutoChatMessageSettings.MESSAGES)));
       },
       settingsSource.getRandom(AutoChatMessageSettings.DELAY).asLongSupplier(),

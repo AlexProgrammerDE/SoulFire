@@ -60,6 +60,11 @@ public final class AntiAFK extends InternalPlugin {
             return;
           }
 
+          var player = connection.minecraft().player;
+          if (player == null) {
+            return;
+          }
+
           log.info("Moving bot to prevent AFK");
           PathExecutor.executePathfinding(
             connection,
