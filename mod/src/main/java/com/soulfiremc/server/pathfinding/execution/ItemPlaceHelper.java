@@ -21,65 +21,21 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.util.BlockItems;
+import com.soulfiremc.server.util.SFInventoryHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 @Slf4j
 public final class ItemPlaceHelper {
-  private static final int HOTBAR_START = 36;
-
   private ItemPlaceHelper() {
-  }
-
-  public static OptionalInt findMatchingSlotForAction(Inventory inventory, InventoryMenu menu, Predicate<ItemStack> predicate) {
-    var intPredicate = (IntPredicate) i -> predicate.test(menu.getSlot(i).getItem());
-    int selectedIndex = HOTBAR_START + inventory.getSelectedSlot();
-
-    // 1. Held item
-    if (intPredicate.test(selectedIndex)) {
-      return OptionalInt.of(selectedIndex);
-    }
-
-    // 2. Offhand
-    if (intPredicate.test(45)) {
-      return OptionalInt.of(45);
-    }
-
-    // 3. Remaining hotbar slots (36–44) except the selected slot
-    var hotbarMatch = IntStream.range(HOTBAR_START, HOTBAR_START + 9)
-      .filter(i -> i != selectedIndex)
-      .filter(intPredicate)
-      .findFirst();
-    if (hotbarMatch.isPresent()) {
-      return hotbarMatch;
-    }
-
-    // 4. Main inventory slots (9–35)
-    var mainMatch = IntStream.range(9, 36)
-      .filter(intPredicate)
-      .findFirst();
-    if (mainMatch.isPresent()) {
-      return mainMatch;
-    }
-
-    // 5. Armor slots (5–8)
-    return IntStream.range(5, 9)
-      .filter(intPredicate)
-      .findFirst();
   }
 
   public static boolean placeBestBlockInHand(BotConnection connection) {
@@ -113,8 +69,8 @@ public final class ItemPlaceHelper {
 
     var finalLeastHardItem = leastHardItem;
     return placeInHand(connection.minecraft().gameMode, player,
-      findMatchingSlotForAction(player.getInventory(), playerInventory,
-        slot -> slot.getItem() == finalLeastHardItem)
+      SFInventoryHelpers.findMatchingSlotForAction(player.getInventory(), playerInventory,
+          slot -> slot.getItem() == finalLeastHardItem)
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
   }
 
@@ -158,21 +114,9 @@ public final class ItemPlaceHelper {
 
     var finalBestItemStack = bestItemStack;
     return placeInHand(connection.minecraft().gameMode, player,
-      findMatchingSlotForAction(player.getInventory(), playerInventory,
-        slot -> ItemStack.isSameItemSameComponents(slot, finalBestItemStack))
+      SFInventoryHelpers.findMatchingSlotForAction(player.getInventory(), playerInventory,
+          slot -> ItemStack.isSameItemSameComponents(slot, finalBestItemStack))
         .orElseThrow(() -> new IllegalStateException("Failed to find item stack to use")));
-  }
-
-  public static boolean isSelectableHotbarSlot(int slot) {
-    return slot >= 36 && slot < 45;
-  }
-
-  public static int toHotbarIndex(int slot) {
-    return slot - HOTBAR_START;
-  }
-
-  public static int getSelectedSlot(Inventory inventory) {
-    return inventory.getSelectedSlot() + HOTBAR_START;
   }
 
   private static boolean placeInHand(MultiPlayerGameMode gameMode, LocalPlayer player, int slot) {
@@ -181,16 +125,16 @@ public final class ItemPlaceHelper {
       return false;
     }
 
-    if (getSelectedSlot(player.getInventory()) == slot) {
+    if (SFInventoryHelpers.getSelectedSlot(player.getInventory()) == slot) {
       return true;
-    } else if (isSelectableHotbarSlot(slot)) {
-      player.getInventory().setSelectedSlot(toHotbarIndex(slot));
+    } else if (SFInventoryHelpers.isSelectableHotbarSlot(slot)) {
+      player.getInventory().setSelectedSlot(SFInventoryHelpers.toHotbarIndex(slot));
       return true;
     } else {
       player.sendOpenInventory();
       gameMode.handleInventoryMouseClick(player.inventoryMenu.containerId, slot, 0, ClickType.PICKUP, player);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
-      gameMode.handleInventoryMouseClick(player.inventoryMenu.containerId, getSelectedSlot(player.getInventory()), 0, ClickType.PICKUP, player);
+      gameMode.handleInventoryMouseClick(player.inventoryMenu.containerId, SFInventoryHelpers.getSelectedSlot(player.getInventory()), 0, ClickType.PICKUP, player);
       TimeUtil.waitTime(50, TimeUnit.MILLISECONDS);
 
       if (!player.inventoryMenu.getCarried().isEmpty()) {
