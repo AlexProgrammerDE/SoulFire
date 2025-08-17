@@ -57,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 @Slf4j
@@ -172,7 +173,7 @@ public final class ForwardingBypass extends InternalPlugin {
         requestedForwardingVersion);
 
     var response = new ServerboundCustomQueryAnswerPacket(transactionId, new PacketByteBufLoginQueryResponse(new FriendlyByteBuf(forwardingData)));
-    connection.minecraft().getConnection().send(response);
+    Objects.requireNonNull(connection.minecraft().getConnection()).send(response);
   }
 
   private static class PlayerDataForwarding {
@@ -188,12 +189,6 @@ public final class ForwardingBypass extends InternalPlugin {
     private static final String BUNGEE_GUARD_TOKEN_PROPERTY_NAME = "bungeeguard-token";
 
     private PlayerDataForwarding() {
-    }
-
-    public static void writePlayerKey(ByteBuf buf, ProfileKeyPair playerKey) {
-      ByteBufCodecs.LONG.encode(buf, playerKey.publicKey().data().expiresAt().toEpochMilli());
-      ByteBufCodecs.BYTE_ARRAY.encode(buf, playerKey.publicKey().data().key().getEncoded());
-      ByteBufCodecs.BYTE_ARRAY.encode(buf, playerKey.publicKey().data().keySignature());
     }
 
     @SuppressWarnings("NonStrictComparisonCanBeEquality")
