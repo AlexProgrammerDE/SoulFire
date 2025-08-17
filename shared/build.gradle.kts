@@ -21,7 +21,7 @@ dependencies {
   api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
   api("com.fasterxml.jackson.core:jackson-core:2.19.2")
   api("com.fasterxml.jackson.core:jackson-databind:2.19.2")
-  api("com.github.oshi:oshi-core:6.8.2")
+  api("com.github.oshi:oshi-core:6.8.3")
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
   api("com.google.code.gson:gson:2.13.1")
   api("com.google.guava:failureaccess:1.0.3")
