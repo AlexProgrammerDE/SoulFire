@@ -30,15 +30,16 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -49,20 +50,6 @@ public final class AutoArmor extends InternalPlugin {
     EquipmentSlot.CHEST, InventoryMenu.ARMOR_SLOT_START + 1,
     EquipmentSlot.LEGS, InventoryMenu.ARMOR_SLOT_START + 2,
     EquipmentSlot.FEET, InventoryMenu.ARMOR_SLOT_START + 3
-  );
-  private static final Map<EquipmentSlot, List<Item>> SLOT_ITEMS_MAP = Map.of(
-    EquipmentSlot.HEAD, List.of(
-      Items.DIAMOND_HELMET, Items.GOLDEN_HELMET, Items.IRON_HELMET, Items.CHAINMAIL_HELMET, Items.LEATHER_HELMET
-    ),
-    EquipmentSlot.CHEST, List.of(
-      Items.DIAMOND_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.IRON_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.LEATHER_CHESTPLATE
-    ),
-    EquipmentSlot.LEGS, List.of(
-      Items.DIAMOND_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.IRON_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.LEATHER_LEGGINGS
-    ),
-    EquipmentSlot.FEET, List.of(
-      Items.DIAMOND_BOOTS, Items.GOLDEN_BOOTS, Items.IRON_BOOTS, Items.CHAINMAIL_BOOTS, Items.LEATHER_BOOTS
-    )
   );
 
   public AutoArmor() {
@@ -86,7 +73,6 @@ public final class AutoArmor extends InternalPlugin {
     EquipmentSlot equipmentSlotEnum) {
     var inventory = player.inventoryMenu;
     var equipmentSlotInt = SLOT_VIEW_MAP.get(equipmentSlotEnum);
-    var itemTypes = SLOT_ITEMS_MAP.get(equipmentSlotEnum);
 
     var bestItemSlotOptional =
       storageSlots()
@@ -97,14 +83,21 @@ public final class AutoArmor extends InternalPlugin {
               return false;
             }
 
-            return itemTypes.contains(s.getItem().getItem());
+            var equippable = s.getItem().get(DataComponents.EQUIPPABLE);
+            if (equippable == null) {
+              return false;
+            }
+
+            return equippable.slot() == equipmentSlotEnum;
           })
         .reduce(
           (first, second) -> {
-            var firstIndex = itemTypes.indexOf(first.getItem().getItem());
-            var secondIndex = itemTypes.indexOf(second.getItem().getItem());
+            var firstArmor = Objects.requireNonNullElse(first.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
+              .compute(1, equipmentSlotEnum);
+            var secondArmor = Objects.requireNonNullElse(second.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
+              .compute(1, equipmentSlotEnum);
 
-            return firstIndex > secondIndex ? first : second;
+            return firstArmor > secondArmor ? first : second;
           });
 
     if (bestItemSlotOptional.isEmpty()) {
@@ -120,10 +113,14 @@ public final class AutoArmor extends InternalPlugin {
     var equipmentSlot = inventory.getSlot(equipmentSlotInt);
     var equipmentSlotItem = equipmentSlot.getItem();
     if (!equipmentSlotItem.isEmpty()) {
-      var targetIndex = itemTypes.indexOf(equipmentSlotItem.getItem());
-      var bestIndex = itemTypes.indexOf(bestItem.getItem());
+      var targetItemArmor = Objects.requireNonNullElse(
+          equipmentSlotItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
+        .compute(1, equipmentSlotEnum);
+      var bestItemArmor = Objects.requireNonNullElse(
+          bestItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
+        .compute(1, equipmentSlotEnum);
 
-      if (targetIndex >= bestIndex) {
+      if (targetItemArmor >= bestItemArmor) {
         return;
       }
     }
