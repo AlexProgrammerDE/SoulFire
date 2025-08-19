@@ -29,6 +29,8 @@ import com.viaversion.viafabricplus.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
+import java.util.Objects;
+
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
@@ -43,7 +45,12 @@ public final class PrintDocsCommand {
               c -> {
                 var builder = new StringBuilder("\n");
                 for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
-                  builder.append("| `%s{:bash}` | %s |\n".formatted(command.command(), command.helpMeta().help()));
+                  builder.append("| `%s{:bash}` | %s |\n".formatted(
+                    command.command(),
+                    Objects.requireNonNullElse(command.helpMeta().help(), "")
+                      .replace("|", "\\|")
+                      .replace("\n", " ")
+                  ));
                 }
                 c.getSource().source().sendInfo(builder.toString());
 
@@ -60,7 +67,14 @@ public final class PrintDocsCommand {
                   }
 
                   var pluginInfo = plugin.pluginInfo();
-                  builder.append("| `%s` | %s | %s | %s |\n".formatted(pluginInfo.id(), pluginInfo.description(), pluginInfo.author(), pluginInfo.license()));
+                  builder.append("| `%s` | %s | %s | %s |\n".formatted(
+                    pluginInfo.id(),
+                    pluginInfo.description()
+                      .replace("|", "\\|")
+                      .replace("\n", " "),
+                    pluginInfo.author(),
+                    pluginInfo.license()
+                  ));
                 }
                 c.getSource().source().sendInfo(builder.toString());
 
@@ -87,8 +101,12 @@ public final class PrintDocsCommand {
                       }
 
                       builder.append(
-                        "| `%s`%s | `%s` | `%s` |\n".formatted(version.getName(), ProtocolTranslator.NATIVE_VERSION == version
-                          ? " (native)" : "", versionId, type));
+                        "| `%s`%s | `%s` | `%s` |\n".formatted(
+                          version.getName(),
+                          ProtocolTranslator.NATIVE_VERSION == version ? " (native)" : "",
+                          versionId,
+                          type
+                        ));
                     });
                 c.getSource().source().sendInfo(builder.toString());
 
