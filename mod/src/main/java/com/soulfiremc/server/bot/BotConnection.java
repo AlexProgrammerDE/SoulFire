@@ -191,7 +191,6 @@ public final class BotConnection {
         }
 
         scheduler.execute(() -> {
-          SFConstants.MINECRAFT_INSTANCE.set(minecraft);
           try {
             minecraft.gameThread = Thread.currentThread();
             while (minecraft.running && !isDisconnected && !Thread.currentThread().isInterrupted()) {
@@ -251,7 +250,8 @@ public final class BotConnection {
         try (
           var ignored1 = SFHelpers.smartThreadLocalCloseable(CURRENT, botConnection);
           var ignored2 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
-          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName())) {
+          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName());
+          var ignored4 = SFHelpers.smartThreadLocalCloseable(SFConstants.MINECRAFT_INSTANCE, botConnection.minecraft)) {
           runnable.run();
         }
       };
