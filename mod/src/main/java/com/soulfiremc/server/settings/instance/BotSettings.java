@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -150,10 +151,16 @@ public final class BotSettings implements SettingsObject {
     return "%s|%d".formatted(version.getVersionType().name(), version.getOriginalVersion());
   }
 
-  private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
+  public static List<ProtocolVersion> getAvailableProtocolVersions() {
     return ProtocolVersionList.getProtocolsNewToOld()
       .stream()
       .filter(version -> version != ProtocolTranslator.AUTO_DETECT_PROTOCOL)
+      .toList();
+  }
+
+  private static ComboProperty.ComboOption[] getProtocolVersionOptions() {
+    return getAvailableProtocolVersions()
+      .stream()
       .map(version -> new ComboProperty.ComboOption(
         formatVersion(version),
         version.getName(),

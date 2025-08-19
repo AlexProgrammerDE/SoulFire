@@ -50,9 +50,7 @@ public final class ServerCommandManager {
     PluginsCommand.register(dispatcher);
     StopCommand.register(dispatcher);
     SparkCommand.register(dispatcher);
-    PrintVersionsCommand.register(dispatcher);
-    PrintCommandsCommand.register(dispatcher);
-    PrintPluginsCommand.register(dispatcher);
+    PrintDocsCommand.register(dispatcher);
 
     // Pathfinding
     MoveCommand.register(dispatcher);
