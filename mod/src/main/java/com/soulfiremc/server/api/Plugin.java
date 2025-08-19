@@ -41,6 +41,7 @@ public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
 
     SoulFireAPI.registerListenersOfClass(getClass());
     SoulFireAPI.registerListenersOfObject(this);
+    SoulFireAPI.registerServerExtension(this);
   }
 
   public boolean isAvailable() {
