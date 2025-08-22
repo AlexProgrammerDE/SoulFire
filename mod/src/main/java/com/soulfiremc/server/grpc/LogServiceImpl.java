@@ -47,7 +47,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private static LogString fromEvent(SFLogAppender.SFLogEvent event) {
     var builder = LogString.newBuilder()
       .setId(event.id())
-      .setMessage(event.message());
+      .setMessage(event.message())
+      .setPersonal(false);
 
     if (event.instanceId() != null) {
       builder.setInstanceId(event.instanceId().toString());
@@ -76,9 +77,11 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     var messageId = UUID.randomUUID();
     subscribers.values().stream()
       .filter(sender -> sender.userId().equals(uuid))
+      .filter(ConnectionMessageSender::personal)
       .forEach(sender -> sender.sendMessage(LogString.newBuilder()
         .setId(messageId.toString())
         .setMessage(message)
+        .setPersonal(true)
         .build()));
   }
 
@@ -124,7 +127,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(),
         (ServerCallStreamObserver<LogResponse>) responseObserver,
         event -> user.get().filter(soulFireUser -> hasScopeAccess(soulFireUser, request.getScope())
-          && predicate.test(event)).isPresent()
+          && predicate.test(event)).isPresent(),
+        request.getScope().getScopeCase() == LogScope.ScopeCase.PERSONAL
       );
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
@@ -151,6 +155,7 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
         yield user.hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
       }
+      case PERSONAL -> true;
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };
   }
@@ -176,6 +181,7 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         var scriptId = UUID.fromString(scope.getInstanceScript().getScriptId());
         yield event -> instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
       }
+      case PERSONAL -> event -> false; // Personal logs are not broadcasted
       case SCOPE_NOT_SET -> event -> false;
     };
   }
@@ -183,7 +189,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private record ConnectionMessageSender(Map<UUID, ConnectionMessageSender> subscribers,
                                          UUID userId,
                                          ServerCallStreamObserver<LogResponse> responseObserver,
-                                         EventPredicate eventPredicate) {
+                                         EventPredicate eventPredicate,
+                                         boolean personal) {
     public ConnectionMessageSender {
       var responseId = UUID.randomUUID();
       subscribers.put(responseId, this);

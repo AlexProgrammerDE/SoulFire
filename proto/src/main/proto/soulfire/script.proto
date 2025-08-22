@@ -5,7 +5,6 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
-import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 
 message GlobalScriptScope {

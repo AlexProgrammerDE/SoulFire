@@ -11,6 +11,7 @@ message LogString {
   optional string instance_id = 3;
   optional string bot_id = 4;
   optional string script_id = 5;
+  bool personal = 6;
 }
 
 message GlobalLogScope {
@@ -34,6 +35,9 @@ message InstanceScriptLogScope {
   string script_id = 2;
 }
 
+message PersonalLogScope {
+}
+
 message LogScope {
   oneof scope {
     GlobalLogScope global = 1;
@@ -41,6 +45,7 @@ message LogScope {
     BotLogScope bot = 3;
     GlobalScriptLogScope global_script = 4;
     InstanceScriptLogScope instance_script = 5;
+    PersonalLogScope personal = 6;
   }
 }
 
