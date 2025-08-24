@@ -276,7 +276,7 @@ public final class AuthSystem {
 
     @Override
     public void sendMessage(Level level, Component message) {
-      logService.sendMessage(userData.id(), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
+      logService.sendPersonalMessage(userData.id(), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
     }
 
     private boolean isOwnerOfInstance(UUID instanceId) {

@@ -41,14 +41,14 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   public LogServiceImpl(SoulFireServer soulFireServer) {
     this.soulFireServer = soulFireServer;
-    SFLogAppender.INSTANCE.logConsumers().add(this::broadcastMessage);
+    SFLogAppender.INSTANCE.logConsumers().add(this::broadcastLogMessage);
   }
 
-  private static LogString fromEvent(SFLogAppender.SFLogEvent event) {
+  private static LogString fromEvent(SFLogAppender.SFLogEvent event, boolean personal) {
     var builder = LogString.newBuilder()
       .setId(event.id())
       .setMessage(event.message())
-      .setPersonal(false);
+      .setPersonal(personal);
 
     if (event.instanceId() != null) {
       builder.setInstanceId(event.instanceId().toString());
@@ -65,24 +65,26 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     return builder.build();
   }
 
-  public void broadcastMessage(SFLogAppender.SFLogEvent message) {
+  public void broadcastLogMessage(SFLogAppender.SFLogEvent message) {
     for (var sender : subscribers.values()) {
-      if (sender.eventPredicate().test(message)) {
-        sender.sendMessage(fromEvent(message));
+      if (sender.eventPredicate().test(message, false)) {
+        sender.sendMessage(fromEvent(message, false));
       }
     }
   }
 
-  public void sendMessage(UUID uuid, String message) {
-    var messageId = UUID.randomUUID();
+  public void sendPersonalMessage(UUID uuid, String message) {
+    var messageEvent = new SFLogAppender.SFLogEvent(
+      UUID.randomUUID().toString(),
+      message,
+      null,
+      null,
+      null
+    );
     subscribers.values().stream()
       .filter(sender -> sender.userId().equals(uuid))
-      .filter(ConnectionMessageSender::personal)
-      .forEach(sender -> sender.sendMessage(LogString.newBuilder()
-        .setId(messageId.toString())
-        .setMessage(message)
-        .setPersonal(true)
-        .build()));
+      .filter(sender -> sender.eventPredicate().test(messageEvent, true))
+      .forEach(sender -> sender.sendMessage(fromEvent(messageEvent, true)));
   }
 
   public void disconnect(UUID uuid) {
@@ -102,8 +104,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       responseObserver.onNext(PreviousLogResponse.newBuilder()
         .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
           .stream()
-          .filter(predicate::test)
-          .map(LogServiceImpl::fromEvent)
+          .filter(log -> predicate.test(log, false))
+          .map(e -> fromEvent(e, false))
           .toList())
         .build());
       responseObserver.onCompleted();
@@ -126,19 +128,13 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         subscribers,
         ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(),
         (ServerCallStreamObserver<LogResponse>) responseObserver,
-        event -> user.get().filter(soulFireUser -> hasScopeAccess(soulFireUser, request.getScope())
-          && predicate.test(event)).isPresent(),
-        request.getScope().getScopeCase() == LogScope.ScopeCase.PERSONAL
+        (event, personal) -> user.get().filter(soulFireUser -> hasScopeAccess(soulFireUser, request.getScope())
+          && predicate.test(event, personal)).isPresent()
       );
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
-  }
-
-  @FunctionalInterface
-  public interface EventPredicate {
-    boolean test(SFLogAppender.SFLogEvent event);
   }
 
   private void validateScopeAccess(LogScope scope) {
@@ -162,35 +158,39 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   private EventPredicate eventPredicate(LogScope scope) {
     return switch (scope.getScopeCase()) {
-      case GLOBAL -> event -> true;
+      case GLOBAL -> (event, personal) -> !personal;
       case GLOBAL_SCRIPT -> {
         var scriptId = UUID.fromString(scope.getGlobalScript().getScriptId());
-        yield event -> scriptId.equals(event.scriptId());
+        yield (event, personal) -> !personal && scriptId.equals(event.scriptId());
       }
       case INSTANCE -> {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
-        yield event -> instanceId.equals(event.instanceId());
+        yield (event, personal) -> !personal && instanceId.equals(event.instanceId());
       }
       case BOT -> {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
         var botId = UUID.fromString(scope.getBot().getBotId());
-        yield event -> instanceId.equals(event.instanceId()) && botId.equals(event.botAccountId());
+        yield (event, personal) -> !personal && instanceId.equals(event.instanceId()) && botId.equals(event.botAccountId());
       }
       case INSTANCE_SCRIPT -> {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
         var scriptId = UUID.fromString(scope.getInstanceScript().getScriptId());
-        yield event -> instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
+        yield (event, personal) -> !personal && instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
       }
-      case PERSONAL -> event -> false; // Personal logs are not broadcasted
-      case SCOPE_NOT_SET -> event -> false;
+      case PERSONAL -> (event, personal) -> personal;
+      case SCOPE_NOT_SET -> (event, personal) -> false;
     };
+  }
+
+  @FunctionalInterface
+  public interface EventPredicate {
+    boolean test(SFLogAppender.SFLogEvent event, boolean personal);
   }
 
   private record ConnectionMessageSender(Map<UUID, ConnectionMessageSender> subscribers,
                                          UUID userId,
                                          ServerCallStreamObserver<LogResponse> responseObserver,
-                                         EventPredicate eventPredicate,
-                                         boolean personal) {
+                                         EventPredicate eventPredicate) {
     public ConnectionMessageSender {
       var responseId = UUID.randomUUID();
       subscribers.put(responseId, this);
