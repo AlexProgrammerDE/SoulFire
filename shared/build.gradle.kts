@@ -12,7 +12,7 @@ dependencies {
   api("org.ow2.asm:asm-commons:9.8")
   api("org.ow2.asm:asm-tree:9.8")
   api("org.ow2.asm:asm-util:9.8")
-  api("net.fabricmc:sponge-mixin:0.16.3+mixin.0.8.7")
+  api("net.fabricmc:sponge-mixin:0.16.4+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.8:v2@jar")
   api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
