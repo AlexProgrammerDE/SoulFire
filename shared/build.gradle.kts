@@ -18,16 +18,16 @@ dependencies {
   api("net.fabricmc:mapping-io:0.7.1")
   api("net.fabricmc:tiny-remapper:0.11.2")
 
-  api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
-  api("com.fasterxml.jackson.core:jackson-core:2.19.2")
-  api("com.fasterxml.jackson.core:jackson-databind:2.19.2")
+  api("com.fasterxml.jackson.core:jackson-annotations:2.20")
+  api("com.fasterxml.jackson.core:jackson-core:2.20.0")
+  api("com.fasterxml.jackson.core:jackson-databind:2.20.0")
   api("com.github.oshi:oshi-core:6.8.3")
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
   api("com.google.code.gson:gson:2.13.1")
   api("com.google.guava:failureaccess:1.0.3")
   api("com.google.guava:guava:33.4.8-jre")
   api("com.ibm.icu:icu4j:77.1")
-  api("com.microsoft.azure:msal4j:1.22.0")
+  api("com.microsoft.azure:msal4j:1.23.0")
   api("com.mojang:authlib:6.0.58")
   api("com.mojang:blocklist:1.0.10")
   api("com.mojang:brigadier:1.3.10")
@@ -39,7 +39,7 @@ dependencies {
   api("com.nimbusds:content-type:2.3")
   api("com.nimbusds:lang-tag:1.7")
   api("com.nimbusds:nimbus-jose-jwt:10.4.2")
-  api("com.nimbusds:oauth2-oidc-sdk:11.27.1")
+  api("com.nimbusds:oauth2-oidc-sdk:11.28")
   api("commons-codec:commons-codec:1.19.0")
   api("commons-io:commons-io:2.20.0")
   api("commons-logging:commons-logging:1.3.5")
@@ -67,7 +67,7 @@ dependencies {
   api("org.slf4j:slf4j-api:2.0.17")
 
   api("io.github.llamalad7:mixinextras-fabric:0.5.0")
-  api("org.checkerframework:checker-qual:3.49.5")
+  api("org.checkerframework:checker-qual:3.50.0")
 
   api(projects.buildData)
 
