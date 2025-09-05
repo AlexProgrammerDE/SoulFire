@@ -38,7 +38,7 @@ dependencies {
   api("com.mojang:text2speech:1.18.11")
   api("com.nimbusds:content-type:2.3")
   api("com.nimbusds:lang-tag:1.7")
-  api("com.nimbusds:nimbus-jose-jwt:10.4.2")
+  api("com.nimbusds:nimbus-jose-jwt:10.5")
   api("com.nimbusds:oauth2-oidc-sdk:11.28")
   api("commons-codec:commons-codec:1.19.0")
   api("commons-io:commons-io:2.20.0")
