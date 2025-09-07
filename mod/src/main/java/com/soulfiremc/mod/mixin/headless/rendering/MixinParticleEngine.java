@@ -42,6 +42,16 @@ public class MixinParticleEngine {
     cir.setReturnValue(null);
   }
 
+  @Inject(method = "createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;)V", at = @At("HEAD"), cancellable = true)
+  private void createTrackingEmitter1(CallbackInfo ci) {
+    ci.cancel();
+  }
+
+  @Inject(method = "createTrackingEmitter(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/particles/ParticleOptions;I)V", at = @At("HEAD"), cancellable = true)
+  private void createTrackingEmitter2(CallbackInfo ci) {
+    ci.cancel();
+  }
+
   @Inject(method = "crack", at = @At("HEAD"), cancellable = true)
   private void crackHook(CallbackInfo cir) {
     cir.cancel();
