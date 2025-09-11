@@ -23,7 +23,7 @@ dependencies {
   api("com.fasterxml.jackson.core:jackson-databind:2.20.0")
   api("com.github.oshi:oshi-core:6.8.3")
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
-  api("com.google.code.gson:gson:2.13.1")
+  api("com.google.code.gson:gson:2.13.2")
   api("com.google.guava:failureaccess:1.0.3")
   api("com.google.guava:guava:33.4.8-jre")
   api("com.ibm.icu:icu4j:77.1")
@@ -67,7 +67,7 @@ dependencies {
   api("org.slf4j:slf4j-api:2.0.17")
 
   api("io.github.llamalad7:mixinextras-fabric:0.5.0")
-  api("org.checkerframework:checker-qual:3.50.0")
+  api("org.checkerframework:checker-qual:3.51.0")
 
   api(projects.buildData)
 
