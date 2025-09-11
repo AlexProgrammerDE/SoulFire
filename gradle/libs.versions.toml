@@ -26,7 +26,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-iostreams = { module = "org.apache.logging.log4j:log4j-iostreams", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-jline = "org.jline:jline-terminal-jansi:3.30.5"
+jline = "org.jline:jline-terminal-jansi:3.30.6"
 jansi = "org.fusesource.jansi:jansi:2.4.2"
 ansi4j-core-api = "com.github.PavelKastornyy.ansi4j:ansi4j-core-api:ansi4j-1.1.0"
 ansi4j-core-impl = "com.github.PavelKastornyy.ansi4j:ansi4j-core-impl:ansi4j-1.1.0"
@@ -38,7 +38,7 @@ picoli-codegen = "info.picocli:picocli-codegen:4.7.7"
 commons-validator = "commons-validator:commons-validator:1.10.0"
 commons-io = "commons-io:commons-io:2.20.0"
 guava = "com.google.guava:guava:33.4.8-jre"
-gson = "com.google.code.gson:gson:2.13.1"
+gson = "com.google.code.gson:gson:2.13.2"
 fastutil = "it.unimi.dsi:fastutil:8.5.16"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.2"
 jetbrains-annotations = "org.jetbrains:annotations:26.0.2-1"
@@ -61,7 +61,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
-openai = "com.openai:openai-java:3.5.0"
+openai = "com.openai:openai-java:3.5.1"
 immutables-value = "org.immutables:value:2.11.3"
 immutables-gson = "org.immutables:gson:2.11.3"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.1.0.Final"
@@ -74,7 +74,7 @@ hikaricp = "com.zaxxer:HikariCP:7.0.2"
 mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.5"
 sqlite = "org.xerial:sqlite-jdbc:3.50.3.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.5.1"
-kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.2.10"
+kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.2.20"
 graalvm-polyglot-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
 graalvm-polyglot-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm-polyglot" }
