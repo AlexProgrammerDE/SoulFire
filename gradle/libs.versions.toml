@@ -1,7 +1,7 @@
 [versions]
 log4j = "2.25.1"
 grpc = "1.75.0"
-protobuf = "4.32.0"
+protobuf = "4.32.1"
 reactor = "1.2.10"
 armeria = "1.33.2"
 graalvm-polyglot = "24.2.2"
@@ -60,7 +60,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
-openai = "com.openai:openai-java:3.5.1"
+openai = "com.openai:openai-java:3.5.2"
 immutables-value = "org.immutables:value:2.11.3"
 immutables-gson = "org.immutables:gson:2.11.3"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.1.0.Final"
@@ -70,7 +70,7 @@ hibernate-validator = "org.hibernate.validator:hibernate-validator:9.0.1.Final"
 hibernate-validator-cdi = "org.hibernate.validator:hibernate-validator-cdi:9.0.1.Final"
 expressly = "org.glassfish.expressly:expressly:6.0.0"
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
-mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.5"
+mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.6"
 sqlite = "org.xerial:sqlite-jdbc:3.50.3.0"
 acme4j = "org.shredzone.acme4j:acme4j-client:3.5.1"
 kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.2.20"
