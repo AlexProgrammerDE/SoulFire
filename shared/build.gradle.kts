@@ -25,7 +25,7 @@ dependencies {
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
   api("com.google.code.gson:gson:2.13.2")
   api("com.google.guava:failureaccess:1.0.3")
-  api("com.google.guava:guava:33.4.8-jre")
+  api("com.google.guava:guava:33.5.0-jre")
   api("com.ibm.icu:icu4j:77.1")
   api("com.microsoft.azure:msal4j:1.23.1")
   api("com.mojang:authlib:6.0.58")

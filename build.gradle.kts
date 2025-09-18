@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-  javadocClasspath("org.projectlombok:lombok:1.18.40")
+  javadocClasspath("org.projectlombok:lombok:1.18.42")
   javadocClasspath(libs.immutables.value)
   javadocClasspath(libs.immutables.gson)
 
