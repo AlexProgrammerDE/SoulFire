@@ -1,17 +1,17 @@
-FROM eclipse-temurin:25-jdk AS soulfire-builder
+FROM azul/zulu-openjdk-alpine:25 AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
 
 # Install git
-RUN apt-get update && apt-get install -y git
+RUN apk add git
 
 # Build soulfire
 WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
     ./gradlew :dedicated:build --stacktrace
 
-FROM eclipse-temurin:25-jre-alpine AS soulfire-runner
+FROM azul/zulu-openjdk-alpine:25-jre-headless AS soulfire-runner
 
 # Setup groups and install dumb init
 RUN addgroup --gid 1001 soulfire && \
