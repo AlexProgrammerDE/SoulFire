@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '25'
-          distribution: 'temurin'
+          distribution: 'zulu'
           check-latest: true
       - name: Execute Gradle Build
         run: ./gradlew build test --stacktrace

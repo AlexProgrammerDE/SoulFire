@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '25'
-          distribution: 'temurin'
+          distribution: 'zulu'
           check-latest: true
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
