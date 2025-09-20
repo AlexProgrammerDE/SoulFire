@@ -1,10 +1,10 @@
-FROM azul/zulu-openjdk-alpine:25 AS soulfire-builder
+FROM azul/zulu-openjdk-debian:25 AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
 
 # Install git
-RUN apk add git
+RUN apt-get update && apt-get install -y git
 
 # Build soulfire
 WORKDIR /soulfire
