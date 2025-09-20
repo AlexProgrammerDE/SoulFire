@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk AS soulfire-builder
+FROM eclipse-temurin:25-jdk AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
@@ -11,7 +11,7 @@ WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
     ./gradlew :dedicated:build --stacktrace
 
-FROM eclipse-temurin:21-jre-alpine AS soulfire-runner
+FROM eclipse-temurin:25-jre-alpine AS soulfire-runner
 
 # Setup groups and install dumb init
 RUN addgroup --gid 1001 soulfire && \

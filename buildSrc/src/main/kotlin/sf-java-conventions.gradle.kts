@@ -50,10 +50,14 @@ tasks {
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
   }
   withJavadocJar()
   withSourcesJar()
+}
+
+lombok {
+  version = "1.18.42"
 }
 
 afterEvaluate {

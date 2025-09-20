@@ -12,6 +12,10 @@ tasks.register("runSFDedicated", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire dedicated server"
 
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
+
   mainClass = projectMainClass
   classpath = sourceSets["main"].runtimeClasspath
 
@@ -20,13 +24,13 @@ tasks.register("runSFDedicated", JavaExec::class) {
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
     "-XX:+UseZGC",
-    "-XX:+ZGenerational",
+    "-XX:+UseCompactObjectHeaders",
     "-XX:+AlwaysActAsServerClassMachine",
     "-XX:+UseNUMA",
     "-XX:+UseFastUnorderedTimeStamps",
     "-XX:+UseVectorCmov",
     "-XX:+UseCriticalJavaThreadPriority",
-    "-Dsf.flags.v1=true",
+    "-Dsf.flags.v2=true",
     "-Dsf.remapToNamed=true"
   )
 
