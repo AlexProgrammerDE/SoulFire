@@ -20,6 +20,7 @@ tasks.register("runSFDedicated", JavaExec::class) {
   classpath = sourceSets["main"].runtimeClasspath
 
   val argsMutable = mutableListOf(
+    "--enable-native-access=ALL-UNNAMED", // Needed for JavaExec
     "-Xmx8G",
     "-XX:+EnableDynamicAgentLoading",
     "-XX:+UnlockExperimentalVMOptions",
@@ -68,6 +69,7 @@ fun Manifest.applySFAttributes() {
   attributes["Implementation-Version"] = version.toString()
   attributes["Implementation-Vendor"] = "AlexProgrammerDE"
   attributes["Multi-Release"] = "true"
+  attributes["Enable-Native-Access"] = "ALL-UNNAMED"
 }
 
 fun File.isJar(): Boolean {
