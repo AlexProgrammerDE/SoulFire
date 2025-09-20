@@ -12,11 +12,13 @@ tasks {
   processResources {
     filesMatching(listOf("fabric.mod.json", "soulfire-build-data.properties")) {
       expand(
-        "version" to project.version,
-        "description" to project.description,
-        "url" to "https://soulfiremc.com",
-        "commit" to (indraGit.commit()?.name ?: "unknown"),
-        "branch" to (indraGit.branch()?.name ?: "unknown"),
+        mapOf(
+          "version" to project.version,
+          "description" to project.description,
+          "url" to "https://soulfiremc.com",
+          "commit" to (indraGit.commit()?.name ?: "unknown"),
+          "branch" to (indraGit.branch()?.name ?: "unknown"),
+        )
       )
     }
   }
