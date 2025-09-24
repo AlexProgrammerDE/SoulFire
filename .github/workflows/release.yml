@@ -13,6 +13,8 @@ on:
 jobs:
   set-release-version:
     uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
+    permissions:
+      contents: write
     with:
       version: ${{ inputs.version }}
     secrets: inherit
@@ -149,6 +151,8 @@ jobs:
   deploy-javadoc:
     needs: build
     uses: AlexProgrammerDE/SoulFire/.github/workflows/deploy-javadoc.yml@main
+    permissions:
+      contents: write
     secrets: inherit
 
   deploy-docker:
@@ -159,6 +163,8 @@ jobs:
   set-after-version:
     needs: [ deploy-javadoc, deploy-docker ]
     uses: AlexProgrammerDE/SoulFire/.github/workflows/set-version.yml@main
+    permissions:
+      contents: write
     with:
       version: ${{ inputs.after-version }}
     secrets: inherit
