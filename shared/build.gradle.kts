@@ -16,7 +16,7 @@ dependencies {
   api("net.fabricmc:intermediary:1.21.8:v2@jar")
   api("com.github.Player3324.fabric-loader:fabric-loader:explicitNs-SNAPSHOT")
   api("net.fabricmc:mapping-io:0.7.1")
-  api("net.fabricmc:tiny-remapper:0.11.2")
+  api("net.fabricmc:tiny-remapper:0.12.0")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.20")
   api("com.fasterxml.jackson.core:jackson-core:2.20.0")
