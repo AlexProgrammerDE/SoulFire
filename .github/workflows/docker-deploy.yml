@@ -12,7 +12,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.ref }}
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Get version
         id: get-version
         run: |
