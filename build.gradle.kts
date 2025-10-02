@@ -25,6 +25,9 @@ tasks {
   javadoc {
     classpath += project.project("mod").sourceSets["main"].compileClasspath
   }
+  build {
+    dependsOn("javadoc")
+  }
 }
 
 tasks.register<Javadoc>("generateTSDoc") {
@@ -33,7 +36,7 @@ tasks.register<Javadoc>("generateTSDoc") {
 
   source = tasks.javadoc.get().source
   classpath = tasks.javadoc.get().classpath
-  setDestinationDir(rootProject.layout.buildDirectory.asFile.get().resolve("docs/typescript/headers"))
+  destinationDir = rootProject.layout.buildDirectory.asFile.get().resolve("docs/typescript/headers")
   options.doclet = "com.soulfiremc.doclet.TSDoclet"
   options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
   (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
@@ -45,7 +48,7 @@ tasks.register<Javadoc>("generatePyDoc") {
 
   source = tasks.javadoc.get().source
   classpath = tasks.javadoc.get().classpath
-  setDestinationDir(rootProject.layout.buildDirectory.asFile.get().resolve("docs/python/headers"))
+  destinationDir = rootProject.layout.buildDirectory.asFile.get().resolve("docs/python/headers")
   options.doclet = "com.soulfiremc.doclet.PyDoclet"
   options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
   (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
