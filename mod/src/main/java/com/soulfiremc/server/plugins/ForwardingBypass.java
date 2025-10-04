@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufLoginQueryRequestPayload;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufLoginQueryResponse;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -206,9 +207,9 @@ public final class ForwardingBypass extends InternalPlugin {
 
         ByteBufCodecs.VAR_INT.encode(forwarded, actualVersion);
         ByteBufCodecs.STRING_UTF8.encode(forwarded, address);
-        UUIDUtil.STREAM_CODEC.encode(forwarded, profile.getId());
-        ByteBufCodecs.STRING_UTF8.encode(forwarded, profile.getName());
-        ByteBufCodecs.GAME_PROFILE_PROPERTIES.encode(forwarded, profile.getProperties());
+        UUIDUtil.STREAM_CODEC.encode(forwarded, profile.id());
+        ByteBufCodecs.STRING_UTF8.encode(forwarded, profile.name());
+        ByteBufCodecs.GAME_PROFILE_PROPERTIES.encode(forwarded, profile.properties());
 
         // This serves as additional redundancy. The key normally is stored in the
         // login start to the server, but some setups require this.
@@ -222,9 +223,9 @@ public final class ForwardingBypass extends InternalPlugin {
           // should be able to verify the key independently.
           if (actualVersion >= MODERN_WITH_KEY_V2) {
             // We might not want to do it this way in SF. Should work for now.
-            if (profile.getId() != null) {
+            if (profile.id() != Util.NIL_UUID) {
               forwarded.writeBoolean(true);
-              UUIDUtil.STREAM_CODEC.encode(forwarded, profile.getId());
+              UUIDUtil.STREAM_CODEC.encode(forwarded, profile.id());
             } else {
               // Should only not be provided if the player was connected
               // as offline-mode and the signer UUID was not backfilled
@@ -309,9 +310,9 @@ public final class ForwardingBypass extends InternalPlugin {
         .append(LEGACY_SEPARATOR)
         .append(playerAddress)
         .append(LEGACY_SEPARATOR)
-        .append(UUIDHelper.convertToNoDashes(profile.getId()))
+        .append(UUIDHelper.convertToNoDashes(profile.id()))
         .append(LEGACY_SEPARATOR);
-      GsonInstance.GSON.toJson(propertiesTransform.apply(profile.getProperties().values().stream().toList()), data);
+      GsonInstance.GSON.toJson(propertiesTransform.apply(profile.properties().values().stream().toList()), data);
       return data.toString();
     }
 

@@ -51,14 +51,4 @@ public class MixinParticleEngine {
   private void createTrackingEmitter2(CallbackInfo ci) {
     ci.cancel();
   }
-
-  @Inject(method = "crack", at = @At("HEAD"), cancellable = true)
-  private void crackHook(CallbackInfo cir) {
-    cir.cancel();
-  }
-
-  @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)
-  private void destroyHook(CallbackInfo cir) {
-    cir.cancel();
-  }
 }

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.mod.mixin.headless.rendering;
 
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,10 +45,5 @@ public class MixinLevelRenderer {
   @Inject(method = "isSectionCompiled", at = @At("HEAD"), cancellable = true)
   private void isSectionCompiledHook(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
     cir.setReturnValue(true);
-  }
-
-  @Inject(method = "addParticleInternal(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
-  private void isSectionCompiledHook(CallbackInfoReturnable<Particle> cir) {
-    cir.setReturnValue(null);
   }
 }

@@ -236,7 +236,7 @@ public final class KillAura extends InternalPlugin {
         && entity.getType() == EntityType.PLAYER) {
         var playerListEntry = connection.minecraft().player.connection.getPlayerInfo(entity.getUUID());
         if (playerListEntry != null && whitelistedUsers.stream()
-          .anyMatch(whitelistedUser -> playerListEntry.getProfile().getName().equalsIgnoreCase(whitelistedUser))) {
+          .anyMatch(whitelistedUser -> playerListEntry.getProfile().name().equalsIgnoreCase(whitelistedUser))) {
           continue;
         }
       }

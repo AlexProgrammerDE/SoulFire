@@ -23,6 +23,7 @@ import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -120,7 +121,7 @@ public class PathConstraint {
       return List.of();
     }
 
-    return StreamSupport.stream(entity.clientLevel.entitiesForRendering().spliterator(), false)
+    return StreamSupport.stream(((ClientLevel) entity.level()).entitiesForRendering().spliterator(), false)
       .filter(e -> e != entity)
       .filter(e -> !entity.getType().getCategory().isFriendly())
       .flatMap(e -> e instanceof LivingEntity livingEntity

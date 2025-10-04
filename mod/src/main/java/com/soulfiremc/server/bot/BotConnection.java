@@ -57,6 +57,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerStatusPinger;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
+import net.minecraft.network.PacketProcessor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -130,7 +131,8 @@ public final class BotConnection {
   private Minecraft createMinecraftCopy() {
     var newInstance = SFModHelpers.deepCopy(SFConstants.BASE_MC_INSTANCE);
 
-    newInstance.progressTasks = Queues.newConcurrentLinkedQueue();
+    //noinspection DataFlowIssue
+    newInstance.packetProcessor = new PacketProcessor(null); // Null until we spawn game thread
     newInstance.pendingRunnables = Queues.newConcurrentLinkedQueue();
     newInstance.toastManager = new ToastManager(newInstance, newInstance.options);
     newInstance.gui = new Gui(newInstance);
@@ -144,8 +146,7 @@ public final class BotConnection {
         case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.authToken();
       },
       Optional.empty(),
-      Optional.empty(),
-      User.Type.MSA
+      Optional.empty()
     );
     newInstance.deltaTracker = new DeltaTracker.Timer(20.0F, 0L, newInstance::getTickTargetMillis);
     newInstance.reloadStateTracker = new ResourceLoadStateTracker();
@@ -193,6 +194,7 @@ public final class BotConnection {
         scheduler.execute(() -> {
           try {
             minecraft.gameThread = Thread.currentThread();
+            minecraft.packetProcessor.runningThread = minecraft.gameThread;
             while (minecraft.running && !isDisconnected && !Thread.currentThread().isInterrupted()) {
               minecraft.runTick(true);
             }
@@ -238,7 +240,7 @@ public final class BotConnection {
       return;
     }
 
-    var chatScreen = new ChatScreen("");
+    var chatScreen = new ChatScreen("", false);
     chatScreen.init(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
     chatScreen.handleChatInput(message, false);
   }

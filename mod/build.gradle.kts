@@ -73,16 +73,16 @@ tasks {
 }
 
 unimined.minecraft {
-  version("1.21.8")
+  version("1.21.9")
 
   mappings {
     intermediary()
     mojmap()
-    parchment("1.21.8", "2025.07.20")
+    parchment("1.21.8", "2025.09.14")
   }
 
   fabric {
-    loader("0.16.14")
+    loader("0.17.2")
     accessWidener(project.projectDir.resolve("src/main/resources/soulfire.accesswidener"))
   }
 

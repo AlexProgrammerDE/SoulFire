@@ -61,7 +61,7 @@ public final class EntityArgumentType implements ArgumentType<EntityArgumentType
         return false;
       }
 
-      return player.getGameProfile().getName().equalsIgnoreCase(input);
+      return player.getGameProfile().name().equalsIgnoreCase(input);
     };
   }
 

@@ -24,7 +24,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
 import com.soulfiremc.server.util.structs.EmptyBlockGetter;
 import com.soulfiremc.server.util.structs.IDMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -54,7 +54,7 @@ public final class DiagonalCollisionCalculator {
             collides = collisionShape
               .bounds()
               .move(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toBlockPos())
-              .intersects(Player.STANDING_DIMENSIONS.makeBoundingBox(currentPosition));
+              .intersects(Avatar.STANDING_DIMENSIONS.makeBoundingBox(currentPosition));
 
             if (collides) {
               break;
