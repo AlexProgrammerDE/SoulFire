@@ -46,7 +46,7 @@ tasks.register("runSFCLI", JavaExec::class) {
   outputs.upToDateWhen { false }
 }
 
-tasks.register("printSFCliFlags", JavaExec::class) {
+tasks.register("printSFCLIFlags", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
 

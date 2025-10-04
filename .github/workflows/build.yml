@@ -23,6 +23,8 @@ jobs:
           check-latest: true
       - name: Execute Gradle Build
         run: ./gradlew build test --stacktrace
+      - name: Print CLI Flags
+        run: ./gradlew printSFCLIFlags --stacktrace
       - name: Get version
         id: get-version
         run: |
