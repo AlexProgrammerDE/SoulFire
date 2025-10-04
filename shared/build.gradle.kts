@@ -26,7 +26,7 @@ dependencies {
   api("com.google.code.gson:gson:2.11.0")
   api("com.google.guava:failureaccess:1.0.2")
   api("com.google.guava:guava:33.3.1-jre")
-  api("com.ibm.icu:icu4j:76.1")
+  api("com.ibm.icu:icu4j:77.1")
   api("com.microsoft.azure:msal4j:1.17.2")
   api("com.mojang:authlib:7.0.61")
   api("com.mojang:blocklist:1.0.10")
