@@ -98,7 +98,8 @@ public class ScriptManager {
     for (var script : scripts.values()) {
       var runtime = script.runtime().get();
       if (runtime != null) {
-        runtime.scriptAPI().event.forwardEvent(event);
+        runtime.runInContext(() ->
+          runtime.scriptAPI().event.forwardEvent(event));
       }
     }
   }
@@ -334,6 +335,14 @@ public class ScriptManager {
   }
 
   public record RuntimeComponents(Context context, ScriptAPI scriptAPI) {
+    public synchronized void runInContext(Runnable runnable) {
+      context.enter();
+      try {
+        runnable.run();
+      } finally {
+        context.leave();
+      }
+    }
   }
 
   @RequiredArgsConstructor
