@@ -22,9 +22,7 @@ jobs:
           distribution: 'zulu'
           check-latest: true
       - name: Execute Gradle Build
-        run: ./gradlew build test --stacktrace
-      - name: Print CLI Flags
-        run: ./gradlew printSFCLIFlags --stacktrace
+        run: ./gradlew build test printSFCLIFlags --stacktrace
       - name: Get version
         id: get-version
         run: |
