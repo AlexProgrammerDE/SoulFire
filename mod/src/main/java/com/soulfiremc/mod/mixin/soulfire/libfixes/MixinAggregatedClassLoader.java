@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AggregatedClassLoader.class)
 public class MixinAggregatedClassLoader {
-  @Inject(method = "locateSystemClassLoader", at = @At("HEAD"), cancellable = true)
+  @Inject(method = "locateSystemClassLoader", at = @At("HEAD"), cancellable = true, remap = false)
   private static void locateSystemClassLoader(CallbackInfoReturnable<ClassLoader> cir) {
     cir.setReturnValue(null);
   }
