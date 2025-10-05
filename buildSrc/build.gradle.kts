@@ -23,5 +23,5 @@ dependencies {
   implementation(libs.gradle.plugin.unimined)
   implementation(libs.gradle.plugin.spotless)
   implementation(libs.gradle.plugin.freefair)
-  implementation("org.ow2.asm:asm:9.8")
+  implementation("org.ow2.asm:asm:9.9")
 }
