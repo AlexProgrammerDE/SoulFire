@@ -27,6 +27,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinRenderSystem {
   @Inject(method = "isOnRenderThread", at = @At("HEAD"), cancellable = true)
   private static void isOnRenderThreadHook(CallbackInfoReturnable<Boolean> cir) {
+    // There is no render thread with SoulFire
     cir.setReturnValue(true);
+  }
+
+  @Inject(method = "isFrozenAtPollEvents", at = @At("HEAD"), cancellable = true)
+  private static void isFrozenAtPollEventsHook(CallbackInfoReturnable<Boolean> cir) {
+    // Used by keepalive to determine whether to reply
+    cir.setReturnValue(false);
   }
 }
