@@ -62,17 +62,8 @@ public final class AutoRegister extends InternalPlugin {
     } else if (plainMessage.contains("/login")) {
       var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
       connection.sendChatMessage(loginCommand.replace("%password%", password));
-    } else if (plainMessage.contains("/captcha")) {
-      var captchaCommand = settingsSource.get(AutoRegisterSettings.CAPTCHA_COMMAND);
-      var split = plainMessage.split(" ");
-
-      for (var i = 0; i < split.length; i++) {
-        if (split[i].equals("/captcha")) {
-          connection.sendChatMessage(captchaCommand.replace("%captcha%", split[i + 1]));
-          break;
-        }
-      }
     }
+
   }
 
   @EventHandler
@@ -107,14 +98,7 @@ public final class AutoRegister extends InternalPlugin {
         .description("Command to be executed to log in")
         .defaultValue("/login %password%")
         .build();
-    public static final StringProperty CAPTCHA_COMMAND =
-      ImmutableStringProperty.builder()
-        .namespace(NAMESPACE)
-        .key("captcha-command")
-        .uiName("Captcha Command")
-        .description("Command to be executed to confirm a captcha")
-        .defaultValue("/captcha %captcha%")
-        .build();
+
     public static final StringProperty PASSWORD_FORMAT =
       ImmutableStringProperty.builder()
         .namespace(NAMESPACE)

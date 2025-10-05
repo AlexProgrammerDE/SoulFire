@@ -42,31 +42,39 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @InternalPluginClass
-public final class AICaptchaSolver extends InternalPlugin {
-  public AICaptchaSolver() {
+public final class CaptchaSolver extends InternalPlugin {
+  public CaptchaSolver() {
     super(new PluginInfo(
-      "ai-captcha-solver",
+      "captcha-solver",
       "1.0.0",
-      "Solve captcha images using AI",
+      "Solve captchas",
       "AlexProgrammerDE",
       "GPL-3.0",
       "https://soulfiremc.com"
     ));
   }
 
+  private static void handleTextInput(BotConnection connection, String captchaText) {
+    var settingsSource = connection.settingsSource();
+    var response = String.format(settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND), captchaText);
+    log.debug("Extracted captcha text: {}", captchaText);
+    connection.sendChatMessage(response);
+  }
+
   private static void handleImageInput(BotConnection connection, String img) {
     var settingsSource = connection.settingsSource();
     var api = AISettings.create(settingsSource);
-    var model = settingsSource.get(AICaptchaSolverSettings.MODEL);
+    var model = settingsSource.get(CaptchaSolverSettings.MODEL);
 
     var requestModel = ChatCompletionCreateParams.builder()
       .model(model)
       .maxCompletionTokens(64)
       .addMessage(ChatCompletionMessageParam.ofSystem(ChatCompletionSystemMessageParam.builder()
-        .content(ChatCompletionSystemMessageParam.Content.ofText(settingsSource.get(AICaptchaSolverSettings.PROMPT)))
+        .content(ChatCompletionSystemMessageParam.Content.ofText(settingsSource.get(CaptchaSolverSettings.PROMPT)))
         .build()))
       .addMessage(ChatCompletionMessageParam.ofUser(ChatCompletionUserMessageParam.builder()
         .content(ChatCompletionUserMessageParam.Content.ofArrayOfContentParts(List.of(
@@ -97,7 +105,7 @@ public final class AICaptchaSolver extends InternalPlugin {
 
     response = SFHelpers.stripForChat(response);
 
-    response = String.format(settingsSource.get(AICaptchaSolverSettings.RESPONSE_COMMAND), response);
+    response = String.format(settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND), response);
 
     log.debug("AI response: {}", response);
     connection.sendChatMessage(response);
@@ -114,7 +122,7 @@ public final class AICaptchaSolver extends InternalPlugin {
 
   private static String getImageFromSource(BotConnection connection) {
     var settingsSource = connection.settingsSource();
-    var imageSource = settingsSource.get(AICaptchaSolverSettings.IMAGE_SOURCE, AICaptchaSolverSettings.ImageSource.class);
+    var imageSource = settingsSource.get(CaptchaSolverSettings.IMAGE_SOURCE, CaptchaSolverSettings.ImageSource.class);
 
     return switch (imageSource) {
       case MAP_IN_HAND -> {
@@ -143,18 +151,32 @@ public final class AICaptchaSolver extends InternalPlugin {
   @EventHandler
   public static void onMessage(ChatMessageReceiveEvent event) {
     var settingsSource = event.connection().settingsSource();
-    if (!settingsSource.get(AICaptchaSolverSettings.ENABLED)
-      || settingsSource.get(AICaptchaSolverSettings.CAPTCHA_TRIGGER, AICaptchaSolverSettings.CaptchaTrigger.class) != AICaptchaSolverSettings.CaptchaTrigger.CHAT_MESSAGE) {
+    if (!settingsSource.get(CaptchaSolverSettings.ENABLED)) {
       return;
     }
+
+    var trigger = settingsSource.get(CaptchaSolverSettings.CAPTCHA_TRIGGER, CaptchaSolverSettings.CaptchaTrigger.class);
 
     event.connection().scheduler().execute(() -> {
       try {
         var plainMessage = event.parseToPlainText();
-        var textTrigger = settingsSource.get(AICaptchaSolverSettings.TEXT_TRIGGER);
 
-        if (plainMessage.contains(textTrigger)) {
-          handleImageInput(event.connection(), getImageFromSource(event.connection()));
+        switch (trigger) {
+          case CHAT_MESSAGE -> {
+            var textTrigger = settingsSource.get(CaptchaSolverSettings.TEXT_TRIGGER);
+            if (plainMessage.contains(textTrigger)) {
+              handleImageInput(event.connection(), getImageFromSource(event.connection()));
+            }
+          }
+          case TEXT_BASED -> {
+            var regex = settingsSource.get(CaptchaSolverSettings.CAPTCHA_REGEX);
+            var pattern = Pattern.compile(regex);
+            var matcher = pattern.matcher(plainMessage);
+            if (matcher.find() && matcher.groupCount() >= 1) {
+              var captchaText = matcher.group(1);
+              handleTextInput(event.connection(), captchaText);
+            }
+          }
         }
       } catch (Exception e) {
         log.error("Failed to detect captcha", e);
@@ -164,18 +186,18 @@ public final class AICaptchaSolver extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AICaptchaSolverSettings.class, "AI Captcha Solver", this, "eye", AICaptchaSolverSettings.ENABLED);
+    event.settingsRegistry().addPluginPage(CaptchaSolverSettings.class, "Captcha Solver", this, "eye", CaptchaSolverSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  private static class AICaptchaSolverSettings implements SettingsObject {
-    private static final String NAMESPACE = "ai-captcha-solver";
+  private static class CaptchaSolverSettings implements SettingsObject {
+    private static final String NAMESPACE = "captcha-solver";
     public static final BooleanProperty ENABLED =
       ImmutableBooleanProperty.builder()
         .namespace(NAMESPACE)
         .key("enabled")
-        .uiName("Enable AI Captcha Solver")
-        .description("Enable the AI Captcha Solver")
+        .uiName("Enable Captcha Solver")
+        .description("Enable the Captcha Solver")
         .defaultValue(false)
         .build();
     public static final StringProperty PROMPT =
@@ -226,6 +248,7 @@ public final class AICaptchaSolver extends InternalPlugin {
         .defaultValue(CaptchaTrigger.CHAT_MESSAGE.name())
         .addOptions(ComboProperty.optionsFromEnum(CaptchaTrigger.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
           case CHAT_MESSAGE -> "message-circle";
+          case TEXT_BASED -> "type";
         }))
         .build();
     public static final StringProperty TEXT_TRIGGER =
@@ -233,8 +256,16 @@ public final class AICaptchaSolver extends InternalPlugin {
         .namespace(NAMESPACE)
         .key("text-trigger")
         .uiName("Text Trigger")
-        .description("What text triggers the captcha solver")
+        .description("Text that must be contained in the message to trigger image-based captcha solving")
         .defaultValue("/captcha")
+        .build();
+    public static final StringProperty CAPTCHA_REGEX =
+      ImmutableStringProperty.builder()
+        .namespace(NAMESPACE)
+        .key("captcha-regex")
+        .uiName("Captcha Regex")
+        .description("Regex pattern with a capturing group to extract the captcha text from the message")
+        .defaultValue("/captcha (\\w+)")
         .build();
 
     enum ImageSource {
@@ -242,7 +273,8 @@ public final class AICaptchaSolver extends InternalPlugin {
     }
 
     enum CaptchaTrigger {
-      CHAT_MESSAGE
+      CHAT_MESSAGE,
+      TEXT_BASED
     }
   }
 }
