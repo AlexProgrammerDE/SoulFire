@@ -43,7 +43,7 @@ dependencies {
   api("commons-codec:commons-codec:1.19.0")
   api("commons-io:commons-io:2.20.0")
   api("commons-logging:commons-logging:1.3.5")
-  api("it.unimi.dsi:fastutil:8.5.17")
+  api("it.unimi.dsi:fastutil:8.5.18")
   api("net.java.dev.jna:jna-platform:5.18.1")
   api("net.java.dev.jna:jna:5.18.1")
   api("net.minidev:accessors-smart:2.6.0")
