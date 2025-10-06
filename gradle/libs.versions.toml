@@ -7,7 +7,7 @@ armeria = "1.33.4"
 graalvm-polyglot = "25.0.0"
 swc4j = "1.7.0"
 classtransform = "1.14.1"
-kyori = "4.24.0"
+kyori = "4.25.0"
 
 [plugins]
 protobuf = "com.google.protobuf:0.9.5"
