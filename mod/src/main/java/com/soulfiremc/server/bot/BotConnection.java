@@ -28,6 +28,7 @@ import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.proxy.SFProxy;
@@ -210,6 +211,8 @@ public final class BotConnection {
   public void disconnect(Component reason) {
     if (!shutdownExecuting.getAndSet(true)) {
       log.debug("Got Disconnected with reason: {}", PlainTextComponentSerializer.plainText().serialize(reason));
+      SoulFireAPI.postEvent(new BotDisconnectedEvent(this, reason));
+
       if (minecraft.isRunning()) {
         try {
           minecraft.submit(() -> {
