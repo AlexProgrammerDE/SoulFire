@@ -74,7 +74,7 @@ dependencies {
   // Newest netty
   api("io.netty:netty-all:4.2.6.Final")
 
-  api("io.github.classgraph:classgraph:4.8.181")
+  api("io.github.classgraph:classgraph:4.8.184")
 
   // For microsoft account authentication
   api(libs.minecraftauth) {
