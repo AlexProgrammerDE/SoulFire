@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SFMinecraftDownloader {
-  private static final String MINECRAFT_VERSION = "1.21.9";
+  private static final String MINECRAFT_VERSION = "1.21.10";
   private static final String MINECRAFT_CLIENT_JAR_NAME = "minecraft-%s-client.jar".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME = "minecraft-%s-client-mappings.txt".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_TINY_NAME = "minecraft-%s-client-mappings.tiny".formatted(MINECRAFT_VERSION);
