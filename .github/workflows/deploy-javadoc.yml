@@ -32,7 +32,7 @@ jobs:
           echo "jd.soulfiremc.com" > ./docs/CNAME
 
       - name: 'Push changes'
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'Deploy SoulFire Javadoc'
           branch: 'gh-pages'
