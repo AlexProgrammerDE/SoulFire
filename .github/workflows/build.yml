@@ -22,7 +22,7 @@ jobs:
           distribution: 'zulu'
           check-latest: true
       - name: Execute Gradle Build
-        run: ./gradlew build test printSFCLIFlags --stacktrace | grep -q '--bot-amount' || exit 1
+        run: ./gradlew build test printSFCLIFlags --stacktrace | grep -q -- "--bot-amount" || exit 1
       - name: Get version
         id: get-version
         run: |
