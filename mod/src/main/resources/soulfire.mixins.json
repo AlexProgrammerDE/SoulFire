@@ -6,6 +6,7 @@
   "mixins": [
     "headless.sound.MixinNarrator",
     "soulfire.api.MixinConnection",
+    "soulfire.api.MixinPacketListener$ListenerAndPacket",
     "soulfire.api.MixinPlayer",
     "soulfire.api.event.MixinConnection",
     "soulfire.botfixes.MixinConnection",

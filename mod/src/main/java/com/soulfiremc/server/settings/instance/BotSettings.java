@@ -146,6 +146,17 @@ public final class BotSettings implements SettingsObject {
         If turned off, the attack will not be restored after a reboot.""")
       .defaultValue(true)
       .build();
+  public static final BooleanProperty IGNORE_PACKET_HANDLING_ERRORS =
+    ImmutableBooleanProperty.builder()
+      .namespace(NAMESPACE)
+      .key("ignore-packet-handling-errors")
+      .uiName("Ignore Packet Handling Errors")
+      .description("""
+        Sometimes a bot fails to process a packet. When that happens it disconnects due to "packet errors".
+        When this option is turned on, SoulFire will ignore errors during the packet handling process and keep bots connected.
+        This might cause bots to have inconsistent world state though, so it could be detected by the server.""")
+      .defaultValue(false)
+      .build();
 
   private static String formatVersion(ProtocolVersion version) {
     return "%s|%d".formatted(version.getVersionType().name(), version.getOriginalVersion());
