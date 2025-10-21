@@ -16,8 +16,8 @@ tasks {
           "version" to project.version,
           "description" to project.description,
           "url" to "https://soulfiremc.com",
-          "commit" to (indraGit.commit()?.name ?: "unknown"),
-          "branch" to (indraGit.branch()?.name ?: "unknown"),
+          "commit" to (indraGit.commit().orNull?.name ?: "unknown"),
+          "branch" to (indraGit.branchName().orNull ?: "unknown"),
         )
       )
     }
