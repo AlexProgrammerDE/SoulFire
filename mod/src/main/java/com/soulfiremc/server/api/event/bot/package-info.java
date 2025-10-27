@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Events triggered by bots.
- */
+/// Events triggered by bots.
 package com.soulfiremc.server.api.event.bot;

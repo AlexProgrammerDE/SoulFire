@@ -33,20 +33,18 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-/**
- * Minecraft world, but observed as a graph of actions between blocks.
- * A node would be a block and the edges would be the actions that can be performed on that block.
- * An action MUST lead to another block in the "graph".
- * If you know graph theory this may sound familiar.
- * All checks are predefined "subscriptions" of a block relative to the foot position of a bot.
- * This way we can most efficiently calculate the actions that can be performed on a blocks by immediately running multiple actions per block.
- * Traditionally an action would dynamically check if it is possible and a block would be considered multiple times across multiple actions.
- * However, with subscriptions multiple actions can "opt-in" to a block and perform their checks on a block a single time.
- *
- * @param blockAccessor  The block accessor
- * @param inventory      The inventory of the bot
- * @param pathConstraint The path constraint
- */
+/// Minecraft world, but observed as a graph of actions between blocks.
+/// A node would be a block and the edges would be the actions that can be performed on that block.
+/// An action MUST lead to another block in the "graph".
+/// If you know graph theory this may sound familiar.
+/// All checks are predefined "subscriptions" of a block relative to the foot position of a bot.
+/// This way we can most efficiently calculate the actions that can be performed on a blocks by immediately running multiple actions per block.
+/// Traditionally an action would dynamically check if it is possible and a block would be considered multiple times across multiple actions.
+/// However, with subscriptions multiple actions can "opt-in" to a block and perform their checks on a block a single time.
+///
+/// @param blockAccessor  The block accessor
+/// @param inventory      The inventory of the bot
+/// @param pathConstraint The path constraint
 @Slf4j
 public record MinecraftGraph(BlockGetter blockAccessor,
                              ProjectedInventory inventory,

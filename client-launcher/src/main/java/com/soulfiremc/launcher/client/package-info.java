@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * The launcher package for java SoulFire clients.
- */
+/// The launcher package for java SoulFire clients.
 package com.soulfiremc.launcher.client;

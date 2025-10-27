@@ -30,39 +30,25 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public final class MinecraftRouteNode implements Comparable<MinecraftRouteNode> {
-  /**
-   * The world state of this node.
-   */
+  /// The world state of this node.
   private final NodeState node;
 
-  /**
-   * The currently best known node to this node.
-   */
+  /// The currently best known node to this node.
   private @Nullable MinecraftRouteNode parent;
 
-  /**
-   * The direction from the parent to this node.
-   */
+  /// The direction from the parent to this node.
   private @Nullable ActionDirection parentToNodeDirection;
 
-  /**
-   * The actions from the previous node to this node that were used to get to this node.
-   */
+  /// The actions from the previous node to this node that were used to get to this node.
   private List<WorldAction> actions;
 
-  /**
-   * The cost of the route from the start node to this node.
-   */
+  /// The cost of the route from the start node to this node.
   private double sourceCost;
 
-  /**
-   * The cost of the route from this node to the target.
-   */
+  /// The cost of the route from this node to the target.
   private double targetCost;
 
-  /**
-   * The estimated cost of the route from this node to the target + the source cost.
-   */
+  /// The estimated cost of the route from this node to the target + the source cost.
   private double totalRouteScore;
 
   public MinecraftRouteNode(NodeState node, List<WorldAction> actions,

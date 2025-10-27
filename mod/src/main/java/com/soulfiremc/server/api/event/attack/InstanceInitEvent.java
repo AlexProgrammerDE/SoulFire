@@ -20,10 +20,8 @@ package com.soulfiremc.server.api.event.attack;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 
-/**
- * This event is called right after an InstanceManager is created and before any attack is scheduled.
- * This is intentionally in a global scope for any listener to subscribe to this InstanceManager.
- *
- * @param instanceManager The instance manager instance.
- */
+/// This event is called right after an InstanceManager is created and before any attack is scheduled.
+/// This is intentionally in a global scope for any listener to subscribe to this InstanceManager.
+///
+/// @param instanceManager The instance manager instance.
 public record InstanceInitEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}

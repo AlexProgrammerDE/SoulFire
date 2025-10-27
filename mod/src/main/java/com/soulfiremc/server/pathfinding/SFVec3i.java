@@ -22,11 +22,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-/**
- * A simple 3D integer vector. This class is used instead of BlockPos because this uses direct field
- * access instead of getters. Even though the JIT compiler could optimize this, it's still faster to
- * use this class.
- */
+/// A simple 3D integer vector. This class is used instead of BlockPos because this uses direct field
+/// access instead of getters. Even though the JIT compiler could optimize this, it's still faster to
+/// use this class.
 @RequiredArgsConstructor
 public final class SFVec3i {
   public static final SFVec3i ZERO = new SFVec3i(0, 0, 0);

@@ -36,10 +36,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * An immutable representation of a player inventory. This takes an inventory and projects places/breaks
- * onto it. This way we calculate the way we can do actions after a block was broken/placed.
- */
+/// An immutable representation of a player inventory. This takes an inventory and projects places/breaks
+/// onto it. This way we calculate the way we can do actions after a block was broken/placed.
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 public final class ProjectedInventory {

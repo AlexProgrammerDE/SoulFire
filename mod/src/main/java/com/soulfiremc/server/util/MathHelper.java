@@ -30,13 +30,11 @@ public final class MathHelper {
     return Math.abs(a - b) > tolerance;
   }
 
-  /**
-   * Sums two integers, returning Integer.MAX_VALUE if the sum overflows.
-   *
-   * @param a The first integer to sum
-   * @param b The second integer to sum
-   * @return The sum of the two integers, or Integer.MAX_VALUE if the sum overflows
-   */
+  /// Sums two integers, returning Integer.MAX_VALUE if the sum overflows.
+  ///
+  /// @param a The first integer to sum
+  /// @param b The second integer to sum
+  /// @return The sum of the two integers, or Integer.MAX_VALUE if the sum overflows
   public static int sumCapOverflow(int a, int b) {
     if (a > Integer.MAX_VALUE - b) {
       return Integer.MAX_VALUE;
@@ -45,12 +43,10 @@ public final class MathHelper {
     return a + b;
   }
 
-  /**
-   * Sums the values of the stream, returning Integer.MAX_VALUE if the sum overflows.
-   *
-   * @param stream The stream to sum
-   * @return The sum of the stream, or Integer.MAX_VALUE if the sum overflows
-   */
+  /// Sums the values of the stream, returning Integer.MAX_VALUE if the sum overflows.
+  ///
+  /// @param stream The stream to sum
+  /// @return The sum of the stream, or Integer.MAX_VALUE if the sum overflows
   public static int sumCapOverflow(IntStream stream) {
     return stream.reduce(0, MathHelper::sumCapOverflow);
   }

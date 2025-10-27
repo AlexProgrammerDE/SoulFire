@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Authentication and permission systems for SoulFire.
- * May be used to offer limited permissions for users on SoulFire.
- */
+/// Authentication and permission systems for SoulFire.
+/// May be used to offer limited permissions for users on SoulFire.
 package com.soulfiremc.server.user;

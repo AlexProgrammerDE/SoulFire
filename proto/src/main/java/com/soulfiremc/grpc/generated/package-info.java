@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Automatically generated gRPC classes. They defined the protocol between client and server.
- */
+/// Automatically generated gRPC classes. They defined the protocol between client and server.
 package com.soulfiremc.grpc.generated;

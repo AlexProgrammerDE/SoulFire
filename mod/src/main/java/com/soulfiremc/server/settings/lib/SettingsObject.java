@@ -17,7 +17,5 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-/**
- * Represents a settings object. A settings object has to be json serializable.
- */
+/// Represents a settings object. A settings object has to be json serializable.
 public interface SettingsObject {}

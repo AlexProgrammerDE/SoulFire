@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Contains the goals that the pathfinding algorithm can use to determine the best path to a target/goal.
- * What the goal actually is can be defined by the implementation of the goal.
- */
+/// Contains the goals that the pathfinding algorithm can use to determine the best path to a target/goal.
+/// What the goal actually is can be defined by the implementation of the goal.
 package com.soulfiremc.server.pathfinding.goals;

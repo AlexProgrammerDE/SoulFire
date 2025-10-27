@@ -30,11 +30,9 @@ public final class ShutdownManager {
   private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
   private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
-  /**
-   * Shuts down the software if it is running.
-   *
-   * @param explicitExit whether the user explicitly shut down the software
-   */
+  /// Shuts down the software if it is running.
+  ///
+  /// @param explicitExit whether the user explicitly shut down the software
   public void shutdownSoftware(boolean explicitExit) {
     if (!shutdownInProgress.compareAndSet(false, true)) {
       return;

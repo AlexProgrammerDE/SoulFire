@@ -94,14 +94,12 @@ public enum ActionDirection {
 
   public static final ActionDirection[] VALUES = values();
 
-  /**
-   * Checks if the given direction is the opposite of this direction.
-   * This also includes that the opposite of UP is DOWN and vice versa.
-   * It also includes diagonals, so NORTH_EAST is the opposite of SOUTH_WEST,
-   * but also the opposite of SOUTH and WEST.
-   *
-   * @param direction The direction to check
-   * @return If the given direction is the opposite of this direction
-   */
+  /// Checks if the given direction is the opposite of this direction.
+  /// This also includes that the opposite of UP is DOWN and vice versa.
+  /// It also includes diagonals, so NORTH_EAST is the opposite of SOUTH_WEST,
+  /// but also the opposite of SOUTH and WEST.
+  ///
+  /// @param direction The direction to check
+  /// @return If the given direction is the opposite of this direction
   public abstract boolean isOpposite(ActionDirection direction);
 }

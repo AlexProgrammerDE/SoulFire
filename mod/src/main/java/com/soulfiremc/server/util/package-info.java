@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Utils used by SoulFire to do various things.
- */
+/// Utils used by SoulFire to do various things.
 package com.soulfiremc.server.util;

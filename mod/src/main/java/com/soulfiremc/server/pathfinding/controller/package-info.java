@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Higher-level implementations that use the pathfinding system to execute more complex tasks that require multiple paths.
- */
+/// Higher-level implementations that use the pathfinding system to execute more complex tasks that require multiple paths.
 package com.soulfiremc.server.pathfinding.controller;

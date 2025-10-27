@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Definitions for the types of settings that can be exchanged with the server.
- */
+/// Definitions for the types of settings that can be exchanged with the server.
 package com.soulfiremc.server.settings.property;

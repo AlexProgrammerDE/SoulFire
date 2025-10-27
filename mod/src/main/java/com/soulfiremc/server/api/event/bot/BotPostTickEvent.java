@@ -20,9 +20,7 @@ package com.soulfiremc.server.api.event.bot;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.bot.BotConnection;
 
-/**
- * Called when the bot has ticked. This event is called inside the tick loop.
- *
- * @param connection The bot connection instance.
- */
+/// Called when the bot has ticked. This event is called inside the tick loop.
+///
+/// @param connection The bot connection instance.
 public record BotPostTickEvent(BotConnection connection) implements SoulFireBotEvent {}

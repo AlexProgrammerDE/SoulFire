@@ -22,13 +22,11 @@ import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import net.kyori.adventure.text.Component;
 
-/**
- * This event is called when a chat message is received from the server.
- *
- * @param connection The bot connection instance.
- * @param timestamp  The timestamp when the message was received.
- * @param message    The message that was received.
- */
+/// This event is called when a chat message is received from the server.
+///
+/// @param connection The bot connection instance.
+/// @param timestamp  The timestamp when the message was received.
+/// @param message    The message that was received.
 public record ChatMessageReceiveEvent(BotConnection connection, long timestamp, Component message)
   implements SoulFireBotEvent {
   public String parseToPlainText() {

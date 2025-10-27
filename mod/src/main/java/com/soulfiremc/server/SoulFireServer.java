@@ -63,13 +63,11 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-/**
- * The main class of the SoulFire server.
- * A SoulFire server can hold and manage multiple instances.
- * It also provides an RPC server to communicate with the SoulFire client.
- * More than one SoulFireServer can be running at the same time, but on different ports.
- * Usually there is only one SoulFireServer running on a jvm, but it is possible to run multiple.
- */
+/// The main class of the SoulFire server.
+/// A SoulFire server can hold and manage multiple instances.
+/// It also provides an RPC server to communicate with the SoulFire client.
+/// More than one SoulFireServer can be running at the same time, but on different ports.
+/// Usually there is only one SoulFireServer running on a jvm, but it is possible to run multiple.
 @Slf4j
 @Getter
 public final class SoulFireServer {

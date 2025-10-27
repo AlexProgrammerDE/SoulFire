@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * JVM startup logic for SoulFire.
- */
+/// JVM startup logic for SoulFire.
 package com.soulfiremc.launcher;

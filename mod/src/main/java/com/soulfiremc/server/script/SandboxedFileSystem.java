@@ -31,11 +31,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Sandboxed file system for scripts.
- * Scripts can only access files within their own directory or subdirectories.
- * The scheme is forced to be UNIX, and the root is the script's directory.
- */
+/// Sandboxed file system for scripts.
+/// Scripts can only access files within their own directory or subdirectories.
+/// The scheme is forced to be UNIX, and the root is the script's directory.
 public class SandboxedFileSystem implements FileSystem {
   private final Set<Path> writableDirs;
   private final Set<Path> readableDirs;

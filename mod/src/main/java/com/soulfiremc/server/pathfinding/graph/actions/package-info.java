@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Actions (like movement/block actions/jumping/etc.) that can be performed on a graph.
- */
+/// Actions (like movement/block actions/jumping/etc.) that can be performed on a graph.
 package com.soulfiremc.server.pathfinding.graph.actions;

@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Structs used by the actions to calculate specific movements.
- */
+/// Structs used by the actions to calculate specific movements.
 package com.soulfiremc.server.pathfinding.graph.actions.movement;

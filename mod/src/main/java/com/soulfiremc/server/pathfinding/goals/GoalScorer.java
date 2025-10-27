@@ -24,26 +24,20 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
 import java.util.List;
 
-/**
- * A goal represents something that the user wants the bot to achieve.
- */
+/// A goal represents something that the user wants the bot to achieve.
 public interface GoalScorer {
-  /**
-   * Calculates the estimated score for a given block position to the goal. Usually this means the
-   * distance from achieving the goal.
-   *
-   * @param graph         the graph to calculate the score for
-   * @param blockPosition the block position to calculate the score for
-   * @param actions       the actions that have been executed to reach the current state
-   * @return the score for the given world state
-   */
+  /// Calculates the estimated score for a given block position to the goal. Usually this means the
+  /// distance from achieving the goal.
+  ///
+  /// @param graph         the graph to calculate the score for
+  /// @param blockPosition the block position to calculate the score for
+  /// @param actions       the actions that have been executed to reach the current state
+  /// @return the score for the given world state
   double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions);
 
-  /**
-   * Checks if the given world state indicates that the goal is reached.
-   *
-   * @param current the node to check
-   * @return true if the goal is reached, false otherwise
-   */
+  /// Checks if the given world state indicates that the goal is reached.
+  ///
+  /// @param current the node to check
+  /// @return true if the goal is reached, false otherwise
   boolean isFinished(MinecraftRouteNode current);
 }

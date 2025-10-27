@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Log4j utility classes SoulFire uses.
- */
+/// Log4j utility classes SoulFire uses.
 package com.soulfiremc.server.util.log4j;

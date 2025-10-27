@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * The launcher package for the SoulFire dedicated server platform.
- */
+/// The launcher package for the SoulFire dedicated server platform.
 package com.soulfiremc.launcher.dedicated;

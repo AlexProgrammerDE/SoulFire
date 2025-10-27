@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * General events from instances and attacks, not specific to any bots.
- */
+/// General events from instances and attacks, not specific to any bots.
 package com.soulfiremc.server.api.event.attack;

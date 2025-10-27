@@ -38,9 +38,7 @@ public final class GenericTerminalConsole extends SimpleTerminalConsole {
   private final CommandCompleter commandCompleter;
   private final Path historyDirectory;
 
-  /**
-   * Sets up {@code System.out} and {@code System.err} to redirect to log4j.
-   */
+  /// Sets up `System.out` and `System.err` to redirect to log4j.
   public static void setupStreams() {
     System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
     System.setErr(IoBuilder.forLogger(logger).setLevel(Level.ERROR).buildPrintStream());

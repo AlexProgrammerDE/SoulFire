@@ -27,11 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Holds all instances of plugins running in this JVM.
- * The SoulFire server accesses this class on startup and advertises itself to all plugins.
- * It also holds the event manager for all events in this JVM.
- */
+/// Holds all instances of plugins running in this JVM.
+/// The SoulFire server accesses this class on startup and advertises itself to all plugins.
+/// It also holds the event manager for all events in this JVM.
 public final class SoulFireAPI {
   private static final List<Plugin> SERVER_EXTENSIONS = new ArrayList<>();
   private static final LambdaManager EVENT_BUS =

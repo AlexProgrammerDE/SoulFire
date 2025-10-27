@@ -26,9 +26,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * A calculated action that the bot can take on a graph world representation.
- */
+/// A calculated action that the bot can take on a graph world representation.
 @Setter
 @RequiredArgsConstructor
 public abstract sealed class GraphAction

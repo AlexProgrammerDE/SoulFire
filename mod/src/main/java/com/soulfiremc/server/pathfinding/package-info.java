@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Pathfinding implementation for SoulFire.
- */
+/// Pathfinding implementation for SoulFire.
 package com.soulfiremc.server.pathfinding;

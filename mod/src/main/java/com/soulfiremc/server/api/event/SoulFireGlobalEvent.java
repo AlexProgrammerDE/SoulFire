@@ -19,10 +19,8 @@ package com.soulfiremc.server.api.event;
 
 import com.soulfiremc.server.SoulFireServer;
 
-/**
- * Represents events that are on a global software level. No attack/bot specific events should be a
- * part of this.
- */
+/// Represents events that are on a global software level. No attack/bot specific events should be a
+/// part of this.
 public non-sealed interface SoulFireGlobalEvent extends SoulFireEvent {
   SoulFireServer soulFireServer();
 }

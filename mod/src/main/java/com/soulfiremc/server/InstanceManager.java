@@ -64,10 +64,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Represents a single instance.
- * An instance persists settings over restarts and managed attack session and attack state.
- */
+/// Represents a single instance.
+/// An instance persists settings over restarts and managed attack session and attack state.
 @Slf4j
 @Getter
 public final class InstanceManager {

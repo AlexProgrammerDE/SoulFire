@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Settings system for SoulFire.
- */
+/// Settings system for SoulFire.
 package com.soulfiremc.server.settings;

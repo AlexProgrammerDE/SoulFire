@@ -19,16 +19,14 @@ package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.ServerPlugin;
 
-/**
- * Represents information about a plugin.
- * All data can be shown to the user.
- *
- * @param id          The plugin ID
- * @param version     The plugin version
- * @param description The plugin description
- * @param author      The plugin author
- * @param license     The plugin license
- */
+/// Represents information about a plugin.
+/// All data can be shown to the user.
+///
+/// @param id          The plugin ID
+/// @param version     The plugin version
+/// @param description The plugin description
+/// @param author      The plugin author
+/// @param license     The plugin license
 public record PluginInfo(String id, String version, String description, String author, String license, String website) {
   public ServerPlugin toProto() {
     return ServerPlugin.newBuilder()

@@ -21,10 +21,8 @@ import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 import com.soulfiremc.server.bot.BotConnection;
 
-/**
- * When a bot is not active anymore and gets removed from the list of active bots.
- *
- * @param instanceManager the instance manager
- * @param botConnection   the bot connection
- */
+/// When a bot is not active anymore and gets removed from the list of active bots.
+///
+/// @param instanceManager the instance manager
+/// @param botConnection   the bot connection
 public record AttackBotRemoveEvent(InstanceManager instanceManager, BotConnection botConnection) implements SoulFireInstanceEvent {}

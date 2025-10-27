@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Main Minecraft protocol classes that handle all Minecraft packets and data.
- */
+/// Main Minecraft protocol classes that handle all Minecraft packets and data.
 package com.soulfiremc.server.bot;

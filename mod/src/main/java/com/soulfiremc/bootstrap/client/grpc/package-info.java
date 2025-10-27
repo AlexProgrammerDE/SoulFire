@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * gRPC client classes for communication with the SoulFire server.
- */
+/// gRPC client classes for communication with the SoulFire server.
 package com.soulfiremc.bootstrap.client.grpc;

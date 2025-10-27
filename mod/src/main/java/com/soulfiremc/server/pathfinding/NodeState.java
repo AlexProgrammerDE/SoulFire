@@ -19,9 +19,7 @@ package com.soulfiremc.server.pathfinding;
 
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 
-/**
- * Represents the minimal state we are in the Minecraft world.
- */
+/// Represents the minimal state we are in the Minecraft world.
 public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
   public static NodeState forInfo(SFVec3i blockPosition, ProjectedInventory inventory) {
     return new NodeState(blockPosition, inventory.usableBlockItems());

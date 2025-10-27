@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Contains classes that represent data structures or other utilities that are instantiated.
- */
+/// Contains classes that represent data structures or other utilities that are instantiated.
 package com.soulfiremc.server.util.structs;

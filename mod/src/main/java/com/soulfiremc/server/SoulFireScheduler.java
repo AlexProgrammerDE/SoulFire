@@ -28,10 +28,8 @@ import java.util.concurrent.*;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-/**
- * Lightweight scheduler for async tasks.
- * Used for most of the async tasks in the server, bots and plugins.
- */
+/// Lightweight scheduler for async tasks.
+/// Used for most of the async tasks in the server, bots and plugins.
 @Slf4j
 public final class SoulFireScheduler implements Executor {
   private static final ScheduledExecutorService MANAGEMENT_SERVICE = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual()
@@ -260,12 +258,10 @@ public final class SoulFireScheduler implements Executor {
       }
     }
 
-    /**
-     * We run this method either when the task is finished or when the scheduler is shutting down.
-     * <p>
-     * This should be used to clean up resources used by the task.
-     * e.g. locks or file handles.
-     */
+    /// We run this method either when the task is finished or when the scheduler is shutting down.
+    ///
+    /// This should be used to clean up resources used by the task.
+    /// e.g. locks or file handles.
     void finalizeTask();
   }
 

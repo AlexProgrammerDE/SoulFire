@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Minecraft world, but observed as a graph of actions between blocks.
- * If you know graph theory this may sound familiar.
- * Read more about this in {@link com.soulfiremc.server.pathfinding.graph.MinecraftGraph} and {@link com.soulfiremc.server.pathfinding.graph.actions}.
- */
+/// Minecraft world, but observed as a graph of actions between blocks.
+/// If you know graph theory this may sound familiar.
+/// Read more about this in [com.soulfiremc.server.pathfinding.graph.MinecraftGraph] and [com.soulfiremc.server.pathfinding.graph.actions].
 package com.soulfiremc.server.pathfinding.graph;

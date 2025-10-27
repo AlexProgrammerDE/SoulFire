@@ -31,9 +31,7 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Scanner;
 
-/**
- * This class prepares the earliest work possible, such as loading mixins and setting up logging.
- */
+/// This class prepares the earliest work possible, such as loading mixins and setting up logging.
 @Slf4j
 public abstract class SoulFireAbstractBootstrap {
   public static final Instant START_TIME = Instant.now();

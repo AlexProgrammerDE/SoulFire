@@ -142,31 +142,27 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  /**
-   * Registers an internal class with the settings registry.
-   * This is for classes associated to internal settings.
-   * They need to be handled explicitly by the client.
-   *
-   * @param clazz The class to register
-   * @return The registry
-   */
+  /// Registers an internal class with the settings registry.
+  /// This is for classes associated to internal settings.
+  /// They need to be handled explicitly by the client.
+  ///
+  /// @param clazz The class to register
+  /// @return The registry
   @This
   @ApiStatus.Internal
   public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
     return addPage(clazz, pageName, null, "triangle-alert", null);
   }
 
-  /**
-   * Registers an internal class with the settings registry.
-   * This is normally used for plugins, provide your plugin info to register the settings to your plugin.
-   *
-   * @param clazz        The class to register
-   * @param pageName     The name of the page
-   * @param owningPlugin The owning plugin
-   * @param iconId       The icon id
-   *                     Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
-   * @return The registry
-   */
+  /// Registers an internal class with the settings registry.
+  /// This is normally used for plugins, provide your plugin info to register the settings to your plugin.
+  ///
+  /// @param clazz        The class to register
+  /// @param pageName     The name of the page
+  /// @param owningPlugin The owning plugin
+  /// @param iconId       The icon id
+  ///                     Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
+  /// @return The registry
   @This
   public ServerSettingsRegistry addPluginPage(
     Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty enabledProperty) {

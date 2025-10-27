@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Client settings management classes.
- */
+/// Client settings management classes.
 package com.soulfiremc.bootstrap.client.settings;

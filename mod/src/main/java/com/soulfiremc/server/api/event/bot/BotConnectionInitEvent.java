@@ -20,13 +20,11 @@ package com.soulfiremc.server.api.event.bot;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.bot.BotConnection;
 
-/**
- * The event is called the moment after a bot connection object was created. The BotConnection
- * instance has all fields filled, but most methods are unusable as the bot is not connected yet.
- * <br>
- * This event is recommended for when you want to add a plugin listener to the bot connection.
- *
- * @param connection The bot connection instance.
- */
+/// The event is called the moment after a bot connection object was created. The BotConnection
+/// instance has all fields filled, but most methods are unusable as the bot is not connected yet.
+///
+/// This event is recommended for when you want to add a plugin listener to the bot connection.
+///
+/// @param connection The bot connection instance.
 public record BotConnectionInitEvent(BotConnection connection) implements SoulFireBotEvent {
 }

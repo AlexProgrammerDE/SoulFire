@@ -20,9 +20,7 @@ package com.soulfiremc.server.api;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * This interface is for any plugin that hooks into the server.
- */
+/// This interface is for any plugin that hooks into the server.
 @Slf4j
 @Getter
 public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {

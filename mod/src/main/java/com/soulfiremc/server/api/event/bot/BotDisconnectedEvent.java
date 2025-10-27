@@ -21,12 +21,10 @@ import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import net.kyori.adventure.text.Component;
 
-/**
- * This event is called when a bot is disconnected from the server.
- *
- * @param connection The bot connection instance.
- * @param message    The disconnect message that was received.
- */
+/// This event is called when a bot is disconnected from the server.
+///
+/// @param connection The bot connection instance.
+/// @param message    The disconnect message that was received.
 public record BotDisconnectedEvent(BotConnection connection, Component message)
   implements SoulFireBotEvent {
 }

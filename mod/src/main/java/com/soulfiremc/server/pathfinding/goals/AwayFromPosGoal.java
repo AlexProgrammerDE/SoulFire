@@ -24,13 +24,11 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 
 import java.util.List;
 
-/**
- * Goal to get minRadius away from the origin.
- * Usually used for anti-afk where a player should move x blocks away from where they are.
- *
- * @param origin    the origin to move away from
- * @param minRadius the minimum radius to move away from the origin
- */
+/// Goal to get minRadius away from the origin.
+/// Usually used for anti-afk where a player should move x blocks away from where they are.
+///
+/// @param origin    the origin to move away from
+/// @param minRadius the minimum radius to move away from the origin
 public record AwayFromPosGoal(SFVec3i origin, int minRadius) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {

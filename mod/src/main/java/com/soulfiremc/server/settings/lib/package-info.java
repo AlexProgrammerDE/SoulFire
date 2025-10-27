@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Library code for settings management and exchange.
- */
+/// Library code for settings management and exchange.
 package com.soulfiremc.server.settings.lib;

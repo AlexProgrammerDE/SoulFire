@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * Implementations for Minecraft account auth.
- */
+/// Implementations for Minecraft account auth.
 package com.soulfiremc.server.account.service;

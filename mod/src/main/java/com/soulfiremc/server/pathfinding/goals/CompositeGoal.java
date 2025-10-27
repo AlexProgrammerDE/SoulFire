@@ -25,13 +25,11 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Goal that is a composite of multiple goals.
- * This goal is completed if any of the goals are completed.
- * The closest goal is always chosen as the current goal.
- *
- * @param goals the goals to composite
- */
+/// Goal that is a composite of multiple goals.
+/// This goal is completed if any of the goals are completed.
+/// The closest goal is always chosen as the current goal.
+///
+/// @param goals the goals to composite
 public record CompositeGoal(Set<GoalScorer> goals) implements GoalScorer {
   @Override
   public double computeScore(MinecraftGraph graph, SFVec3i blockPosition, List<WorldAction> actions) {

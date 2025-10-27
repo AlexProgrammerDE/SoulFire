@@ -15,7 +15,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- * The bootstrap package for the SoulFire dedicated server platform.
- */
+/// The bootstrap package for the SoulFire dedicated server platform.
 package com.soulfiremc.bootstrap.dedicated;

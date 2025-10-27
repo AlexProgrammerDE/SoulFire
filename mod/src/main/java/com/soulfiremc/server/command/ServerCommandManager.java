@@ -30,9 +30,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-/**
- * Holds and configures all server-side text commands of SoulFire itself.
- */
+/// Holds and configures all server-side text commands of SoulFire itself.
 @Getter
 public final class ServerCommandManager {
   private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
