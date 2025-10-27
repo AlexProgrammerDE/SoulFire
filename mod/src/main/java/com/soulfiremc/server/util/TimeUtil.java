@@ -34,6 +34,10 @@ public final class TimeUtil {
   private TimeUtil() {}
 
   public static void waitTime(long time, TimeUnit unit) {
+    if (time <= 0) {
+      return;
+    }
+
     try {
       ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker() {
         private final long endTime = System.nanoTime() + unit.toNanos(time);
