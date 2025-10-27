@@ -424,20 +424,22 @@ public final class InstanceManager {
           log.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             () -> {
-              if (attackLifecycle().isStoppedOrStopping()) {
-                return;
-              }
-
-              TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
-
-              log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
-              var botConnection = factory.prepareConnection(false);
-              storeNewBot(botConnection);
-
               try {
-                botConnection.connect().get();
-              } catch (Throwable e) {
-                log.error("Error while connecting", e);
+                if (attackLifecycle().isStoppedOrStopping()) {
+                  return;
+                }
+
+                TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
+
+                log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
+                var botConnection = factory.prepareConnection(false);
+                storeNewBot(botConnection);
+
+                try {
+                  botConnection.connect().get();
+                } catch (Throwable e) {
+                  log.error("Error while connecting", e);
+                }
               } finally {
                 connectSemaphore.release();
               }
