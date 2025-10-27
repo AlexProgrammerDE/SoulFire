@@ -22,6 +22,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -29,7 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public final class LoginRateLimitingInterceptor implements ServerInterceptor {
-  private final Cache<UUID, Integer> callCache = Caffeine.newBuilder()
+  private final Cache<@NotNull UUID, Integer> callCache = Caffeine.newBuilder()
     .expireAfterWrite(10, TimeUnit.MINUTES)
     .build();
 

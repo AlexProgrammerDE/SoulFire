@@ -40,7 +40,7 @@ public class MixinConnection {
   private Channel channel;
 
   @Inject(method = "handleDisconnection", at = @At("RETURN"))
-  public void onDisconnect(CallbackInfo ci) {
+  public void handleDisconnection(CallbackInfo ci) {
     if (this.channel != null && !this.channel.isOpen()) {
       if (packetListener instanceof ClientCommonPacketListenerImpl commonListener
         && commonListener.isTransferring) {

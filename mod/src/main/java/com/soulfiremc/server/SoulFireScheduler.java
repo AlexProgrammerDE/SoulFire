@@ -20,7 +20,6 @@ package com.soulfiremc.server;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
@@ -59,8 +58,7 @@ public final class SoulFireScheduler implements Executor {
 
     synchronized (executionQueue) {
       while (!blockNewTasks && !executionQueue.isEmpty() && executionQueue.first().isReady()) {
-        var timedRunnable = executionQueue.dequeue();
-        schedule(() -> runCommand(timedRunnable.runnable()));
+        schedule(executionQueue.dequeue().runnable());
       }
     }
 
@@ -69,6 +67,7 @@ public final class SoulFireScheduler implements Executor {
 
   public void schedule(Runnable command) {
     if (blockNewTasks) {
+      FinalizableRunnable.finalize(command);
       return;
     }
 
@@ -77,11 +76,13 @@ public final class SoulFireScheduler implements Executor {
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
     if (blockNewTasks) {
+      FinalizableRunnable.finalize(command);
       return;
     }
 
     synchronized (executionQueue) {
       if (blockNewTasks) {
+        FinalizableRunnable.finalize(command);
         return;
       }
 
@@ -90,29 +91,31 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public void scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
-    schedule(() -> {
+    schedule(FinalizableRunnable.chainFinalizers(() -> {
       scheduleAtFixedRate(command, period, period, unit);
       runCommand(command);
-    }, delay, unit);
+    }, command), delay, unit);
   }
 
   public void scheduleWithFixedDelay(Runnable command, long delay, long period, TimeUnit unit) {
-    schedule(() -> {
+    schedule(FinalizableRunnable.chainFinalizers(() -> {
       runCommand(command);
       scheduleWithFixedDelay(command, period, period, unit);
-    }, delay, unit);
+    }, command), delay, unit);
   }
 
   public void scheduleWithDynamicDelay(Runnable command, LongSupplier delay, TimeUnit unit) {
-    schedule(() -> {
+    schedule(FinalizableRunnable.chainFinalizers(() -> {
       runCommand(command);
       scheduleWithDynamicDelay(command, delay, unit);
-    }, delay.getAsLong(), unit);
+    }, command), delay.getAsLong(), unit);
   }
 
   public void drainQueue() {
     synchronized (executionQueue) {
-      executionQueue.clear();
+      while (!executionQueue.isEmpty()) {
+        FinalizableRunnable.finalize(executionQueue.dequeue().runnable());
+      }
     }
   }
 
@@ -141,7 +144,8 @@ public final class SoulFireScheduler implements Executor {
   private Runnable wrapFuture(Runnable command, Level errorLevel) {
     return () -> {
       if (blockNewTasks) {
-        return;
+        FinalizableRunnable.finalize(command);
+        throw new CompletionException(new CancellationException("Scheduler is shutting down"));
       }
 
       try {
@@ -170,6 +174,7 @@ public final class SoulFireScheduler implements Executor {
 
   private void runCommand(Runnable command) {
     if (blockNewTasks) {
+      FinalizableRunnable.finalize(command);
       return;
     }
 
@@ -177,15 +182,13 @@ public final class SoulFireScheduler implements Executor {
       runnableWrapper.runWrapped(command);
     } catch (Throwable t) {
       runnableWrapper.runWrapped(() -> log.error("Error in async executor", t));
+    } finally {
+      FinalizableRunnable.finalize(command);
     }
   }
 
-  public void blockNewTasks() {
-    blockNewTasks = true;
-  }
-
   @Override
-  public void execute(@NonNull Runnable command) {
+  public void execute(Runnable command) {
     schedule(command);
   }
 
@@ -219,6 +222,51 @@ public final class SoulFireScheduler implements Executor {
   @FunctionalInterface
   public interface RunnableIOException {
     void run() throws IOException;
+  }
+
+  public interface FinalizableRunnable extends Runnable {
+    static FinalizableRunnable withFinalizer(Runnable runnable, Runnable finalizer) {
+      return new FinalizableRunnable() {
+        @Override
+        public void run() {
+          runnable.run();
+        }
+
+        @Override
+        public void finalizeTask() {
+          finalizer.run();
+        }
+      };
+    }
+
+    static FinalizableRunnable chainFinalizers(Runnable runnable, Runnable other) {
+      return new FinalizableRunnable() {
+        @Override
+        public void run() {
+          runnable.run();
+        }
+
+        @Override
+        public void finalizeTask() {
+          FinalizableRunnable.finalize(runnable);
+          FinalizableRunnable.finalize(other);
+        }
+      };
+    }
+
+    static void finalize(Runnable runnable) {
+      if (runnable instanceof FinalizableRunnable finalizableRunnable) {
+        finalizableRunnable.finalizeTask();
+      }
+    }
+
+    /**
+     * We run this method either when the task is finished or when the scheduler is shutting down.
+     * <p>
+     * This should be used to clean up resources used by the task.
+     * e.g. locks or file handles.
+     */
+    void finalizeTask();
   }
 
   private record TimedRunnable(Runnable runnable, long time) implements Comparable<TimedRunnable> {

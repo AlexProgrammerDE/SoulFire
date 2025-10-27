@@ -29,7 +29,6 @@ import net.lenni0451.commons.httpclient.requests.HttpRequest;
 import net.lenni0451.commons.httpclient.utils.HttpRequestUtils;
 import net.lenni0451.commons.httpclient.utils.URLWrapper;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -67,9 +66,8 @@ public final class LenniHttpHelper {
       this.proxyData = proxyData;
     }
 
-    @NonNull
     @Override
-    public HttpResponse execute(@NonNull HttpRequest httpRequest) throws IOException {
+    public HttpResponse execute(HttpRequest httpRequest) throws IOException {
       var cookieManager = getCookieManager(httpRequest);
       try {
         log.debug("Executing request: {}", httpRequest.getURL());

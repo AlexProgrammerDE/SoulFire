@@ -31,6 +31,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RequiredArgsConstructor
 public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBase {
-  private final Cache<UUID, FlowStage> authFlows = Caffeine.newBuilder()
+  private final Cache<@NotNull UUID, FlowStage> authFlows = Caffeine.newBuilder()
     .expireAfterWrite(15, TimeUnit.MINUTES)
     .build();
   private final SoulFireServer soulFireServer;

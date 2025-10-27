@@ -20,14 +20,13 @@ package com.soulfiremc.server.api.event;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.AHandler;
 import net.lenni0451.lambdaevents.IExceptionHandler;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Slf4j
 public final class EventExceptionHandler implements IExceptionHandler {
   public static final EventExceptionHandler INSTANCE = new EventExceptionHandler();
 
   @Override
-  public void handle(@NonNull AHandler handler, @NonNull Object event, @NonNull Throwable t) {
+  public void handle(AHandler handler, Object event, Throwable t) {
     log.error(
       "Exception while handling event {} in handler {}",
       event.getClass().getName(),
