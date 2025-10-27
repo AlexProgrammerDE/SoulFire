@@ -28,10 +28,7 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternMatch;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,9 +48,9 @@ public final class SFLogAppender extends AbstractAppender {
   public static final SFLogAppender INSTANCE = new SFLogAppender();
   private static final AtomicInteger LOG_COUNTER = new AtomicInteger(0);
   private static final LoggerNamePatternSelector SELECTOR = LoggerNamePatternSelector.createSelector(
-    "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1.*}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
+    "%highlight{%minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}",
     new PatternMatch[]{
-      new PatternMatch("com.soulfiremc.", "%highlight{[%d{HH:mm:ss} %level]${soulfire:context_info} [%logger{1}]: %minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
+      new PatternMatch("com.soulfiremc.", "%highlight{%minecraftFormatting{%msg}%xEx}{FATAL=red, ERROR=red, WARN=yellow, INFO=normal, DEBUG=cyan, TRACE=black}"),
     },
     true,
     false,
@@ -96,14 +93,30 @@ public final class SFLogAppender extends AbstractAppender {
     logs.add(event);
   }
 
-  public record SFLogEvent(String id, String message, @Nullable UUID instanceId, @Nullable UUID botAccountId, @Nullable UUID scriptId) {
+  public record SFLogEvent(
+    String id,
+    String message,
+    long timestamp,
+    @Nullable String level,
+    @Nullable String loggerName,
+    @Nullable UUID instanceId,
+    @Nullable UUID botAccountId,
+    @Nullable UUID scriptId,
+    @Nullable String instanceName,
+    @Nullable String botAccountName
+  ) {
     public static SFLogEvent fromEvent(LogEvent event, String formatted) {
       return new SFLogEvent(
         event.getTimeMillis() + "-" + LOG_COUNTER.getAndIncrement(),
         formatted,
+        event.getTimeMillis(),
+        event.getLevel().name(),
+        Objects.requireNonNullElse(event.getLoggerName(), event.getLoggerFqcn()),
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)),
-        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_SCRIPT_ID))
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_SCRIPT_ID)),
+        event.getContextData().getValue(SF_INSTANCE_NAME),
+        event.getContextData().getValue(SF_BOT_ACCOUNT_NAME)
       );
     }
   }

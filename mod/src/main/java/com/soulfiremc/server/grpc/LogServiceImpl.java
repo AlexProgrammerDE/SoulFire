@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.user.PermissionContext;
@@ -48,18 +49,35 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     var builder = LogString.newBuilder()
       .setId(event.id())
       .setMessage(event.message())
-      .setPersonal(personal);
+      .setPersonal(personal)
+      .setTimestamp(Timestamps.fromMillis(event.timestamp()));
 
     if (event.instanceId() != null) {
       builder.setInstanceId(event.instanceId().toString());
     }
 
+    if (event.instanceName() != null) {
+      builder.setInstanceName(event.instanceName());
+    }
+
     if (event.botAccountId() != null) {
-      builder.setBotId(event.botAccountId().toString());
+      builder.setBotAccountId(event.botAccountId().toString());
+    }
+
+    if (event.botAccountName() != null) {
+      builder.setBotAccountName(event.botAccountName());
     }
 
     if (event.scriptId() != null) {
       builder.setScriptId(event.scriptId().toString());
+    }
+
+    if (event.loggerName() != null) {
+      builder.setLoggerName(event.loggerName());
+    }
+
+    if (event.level() != null) {
+      builder.setLevel(event.level());
     }
 
     return builder.build();
@@ -77,6 +95,11 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     var messageEvent = new SFLogAppender.SFLogEvent(
       UUID.randomUUID().toString(),
       message,
+      System.currentTimeMillis(),
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null

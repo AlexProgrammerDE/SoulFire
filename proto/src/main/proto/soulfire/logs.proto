@@ -5,13 +5,20 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
+import "google/protobuf/timestamp.proto";
+
 message LogString {
   string id = 1;
   string message = 2;
   optional string instance_id = 3;
-  optional string bot_id = 4;
+  optional string bot_account_id = 4;
   optional string script_id = 5;
   bool personal = 6;
+  optional string instance_name = 7;
+  optional string bot_account_name = 8;
+  google.protobuf.Timestamp timestamp = 9;
+  optional string logger_name = 10;
+  optional string level = 11;
 }
 
 message GlobalLogScope {
