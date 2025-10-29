@@ -3,7 +3,7 @@ import xyz.wagyourtail.unimined.api.minecraft.task.AbstractRemapJarTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
 plugins {
-  `sf-java-conventions`
+  `sf-project-conventions`
   id("xyz.wagyourtail.unimined")
 }
 
@@ -103,10 +103,16 @@ unimined.minecraft {
 
 configurations.create("remapped")
 
+val remapJarTask = tasks.getByName<RemapJarTask>("remapJar")
 artifacts {
-  val remapJarTask = tasks.getByName<RemapJarTask>("remapJar")
   add("remapped", remapJarTask.outputs.files.singleFile) {
     builtBy(remapJarTask)
+  }
+}
+
+publishing {
+  (publications["mavenJava"] as MavenPublication).apply {
+    artifact(remapJarTask)
   }
 }
 
