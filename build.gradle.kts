@@ -122,11 +122,17 @@ allprojects {
       name = "Sonatype Snapshot Repository"
       mavenContent { snapshotsOnly() }
     }
-    maven("https://repo.pistonmaster.net/releases") {
-      name = "PistonDev Release Repository"
+    maven("https://maven.lenni0451.net/everything") {
+      name = "Lenni0451 Repository"
+      content {
+        includeGroup("net.raphimc")
+      }
     }
-    maven("https://repo.pistonmaster.net/snapshots") {
-      name = "PistonDev Snapshots Repository"
+    maven("https://repo.opencollab.dev/maven-snapshots") {
+      name = "OpenCollab Snapshot Repository"
+      content {
+        includeGroup("org.cloudburstmc.netty")
+      }
     }
     mavenCentral()
   }
