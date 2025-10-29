@@ -149,7 +149,7 @@ public final class SoulFireScheduler implements Executor {
       try {
         runnableWrapper.runWrapped(command);
       } catch (Throwable t) {
-        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).log("Error in async executor", t));
+        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).setCause(t).log("Error in async runnable future executor"));
         throw new CompletionException(t);
       }
     };
@@ -164,7 +164,7 @@ public final class SoulFireScheduler implements Executor {
       try {
         return command.get();
       } catch (Throwable t) {
-        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).log("Error in async executor", t));
+        runnableWrapper.runWrapped(() -> log.atLevel(errorLevel).setCause(t).log("Error in async supplier future executor"));
         throw new CompletionException(t);
       }
     };
