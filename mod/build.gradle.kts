@@ -3,7 +3,7 @@ import xyz.wagyourtail.unimined.api.minecraft.task.AbstractRemapJarTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
 plugins {
-  `sf-project-conventions`
+  `sf-special-publish-conventions`
   id("xyz.wagyourtail.unimined")
 }
 
@@ -111,8 +111,10 @@ artifacts {
 }
 
 publishing {
-  (publications["mavenJava"] as MavenPublication).apply {
-    artifact(remapJarTask)
+  publications {
+    getByName<MavenPublication>("mavenJava") {
+      artifact(remapJarTask)
+    }
   }
 }
 

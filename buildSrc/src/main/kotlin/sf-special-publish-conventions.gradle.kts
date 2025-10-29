@@ -5,9 +5,4 @@ plugins {
 
 publishing {
   applyMainPublishing(project)
-  publications {
-    getByName<MavenPublication>("mavenJava") {
-      from(components["java"])
-    }
-  }
 }
