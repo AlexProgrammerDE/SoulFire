@@ -19,8 +19,8 @@ dependencies {
   api("net.fabricmc:tiny-remapper:0.12.0")
 
   api("com.fasterxml.jackson.core:jackson-annotations:2.20")
-  api("com.fasterxml.jackson.core:jackson-core:2.20.0")
-  api("com.fasterxml.jackson.core:jackson-databind:2.20.0")
+  api("com.fasterxml.jackson.core:jackson-core:2.20.1")
+  api("com.fasterxml.jackson.core:jackson-databind:2.20.1")
   api("com.github.oshi:oshi-core:6.9.1")
   api("com.github.stephenc.jcip:jcip-annotations:1.0-1")
   api("com.google.code.gson:gson:2.13.2")
