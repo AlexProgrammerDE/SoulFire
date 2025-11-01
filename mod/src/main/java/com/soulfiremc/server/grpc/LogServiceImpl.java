@@ -191,12 +191,12 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         yield (event, personal) -> !personal && instanceId.equals(event.instanceId());
       }
       case BOT -> {
-        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        var instanceId = UUID.fromString(scope.getBot().getInstanceId());
         var botId = UUID.fromString(scope.getBot().getBotId());
         yield (event, personal) -> !personal && instanceId.equals(event.instanceId()) && botId.equals(event.botAccountId());
       }
       case INSTANCE_SCRIPT -> {
-        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        var instanceId = UUID.fromString(scope.getInstanceScript().getInstanceId());
         var scriptId = UUID.fromString(scope.getInstanceScript().getScriptId());
         yield (event, personal) -> !personal && instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
       }

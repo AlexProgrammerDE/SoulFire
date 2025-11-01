@@ -19,7 +19,7 @@ package com.soulfiremc.server.proxy;
 
 import com.soulfiremc.grpc.generated.ProxyProto;
 import com.soulfiremc.server.util.SocketAddressHelper;
-import lombok.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.InetSocketAddress;

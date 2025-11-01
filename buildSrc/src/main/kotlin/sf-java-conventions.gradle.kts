@@ -5,6 +5,11 @@ plugins {
   id("io.freefair.lombok")
   id("net.kyori.indra.git")
   id("io.freefair.javadoc-utf-8")
+  id("net.ltgt.errorprone")
+}
+
+dependencies {
+  errorprone("com.google.errorprone:error_prone_core:2.43.0")
 }
 
 tasks {
