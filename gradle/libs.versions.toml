@@ -5,7 +5,7 @@ protobuf = "4.33.0"
 reactor = "1.2.11"
 armeria = "1.33.4"
 graalvm-polyglot = "25.0.1"
-swc4j = "1.7.1"
+swc4j = "1.8.0"
 classtransform = "1.14.1"
 kyori = "4.25.0"
 
