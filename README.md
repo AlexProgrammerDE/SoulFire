@@ -26,7 +26,7 @@ This repository only contains the CLI and server implementation. The official GU
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Supports [almost every Minecraft version](#-version-support)
-* Use `Microsoft` (Credentials & Device Code supported), `The Altening` or `Offline` accounts
+* Use `Microsoft` (Credentials & Device Code supported) and `Offline` accounts for both Java Edition and Bedrock Edition
 * Use `HTTP`, `SOCKS4` and `SOCKS5` proxies
 * Multiple [built-in plugins](#-plugins) like `AutoRespawn`, `AutoJump`, `ClientSettings` and more
 * Console command support
