@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  errorprone("com.google.errorprone:error_prone_core:2.43.0")
+  errorprone("com.google.errorprone:error_prone_core:2.44.0")
 }
 
 tasks {
