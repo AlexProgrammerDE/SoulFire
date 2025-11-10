@@ -2,12 +2,16 @@ plugins {
   base
   id("io.freefair.javadoc-utf-8")
   id("io.freefair.aggregate-javadoc")
+  id("org.openrewrite.rewrite") version "latest.release"
 }
 
 dependencies {
   javadocClasspath("org.projectlombok:lombok:1.18.42")
   javadocClasspath(libs.immutables.value)
   javadocClasspath(libs.immutables.gson)
+
+  rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release"))
+  rewrite("org.openrewrite.recipe:rewrite-java")
 
   rootProject.subprojects.forEach { subproject ->
     if (subproject.name == "data-generator") {
@@ -19,6 +23,10 @@ dependencies {
       javadoc(subproject)
     }
   }
+}
+
+rewrite {
+  activeRecipe("org.openrewrite.java.ShortenFullyQualifiedTypeReferences")
 }
 
 tasks {
