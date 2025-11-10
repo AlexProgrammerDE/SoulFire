@@ -41,7 +41,7 @@ dependencies {
   api("com.nimbusds:nimbus-jose-jwt:10.6")
   api("com.nimbusds:oauth2-oidc-sdk:11.30.1")
   api("commons-codec:commons-codec:1.20.0")
-  api("commons-io:commons-io:2.21.0")
+  api("commons-io:commons-io:20030203.000550")
   api("commons-logging:commons-logging:1.3.5")
   api("it.unimi.dsi:fastutil:8.5.18")
   api("net.java.dev.jna:jna-platform:5.18.1")
