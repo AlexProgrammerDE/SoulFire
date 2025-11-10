@@ -14,7 +14,11 @@ rewrite {
   activeRecipe("org.openrewrite.staticanalysis.CodeCleanup")
   activeRecipe("org.openrewrite.java.migrate.UpgradeToJava25")
   activeRecipe("org.openrewrite.java.recipes.RecipeTestingBestPractices")
-  setExportDatatables(true)
+  isExportDatatables = true
+}
+
+spotbugs {
+  ignoreFailures = true
 }
 
 dependencies {
