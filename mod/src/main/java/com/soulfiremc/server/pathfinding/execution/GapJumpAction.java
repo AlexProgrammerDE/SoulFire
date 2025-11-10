@@ -29,9 +29,9 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 @RequiredArgsConstructor
 public final class GapJumpAction implements WorldAction {
   private final SFVec3i blockPosition;
-  private boolean didLook = false;
-  private boolean lockYRot = false;
-  private int noJumpTicks = 0;
+  private boolean didLook;
+  private boolean lockYRot;
+  private int noJumpTicks;
 
   @Override
   public boolean isCompleted(BotConnection connection) {

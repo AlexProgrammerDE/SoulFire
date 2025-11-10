@@ -31,4 +31,7 @@ public class SFModHelpers {
       .forEach(field -> field.copy(newObject));
     return newObject;
   }
+
+  private SFModHelpers() {
+  }
 }

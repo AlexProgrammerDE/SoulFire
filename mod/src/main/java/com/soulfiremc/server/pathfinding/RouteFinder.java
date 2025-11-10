@@ -161,7 +161,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       try {
-        instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (k, v) -> {
+        instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (_, v) -> {
           if (v == null) {
             var counter = new IntReference();
             var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
@@ -187,7 +187,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
           return v;
         });
-      } catch (OutOfLevelException e) {
+      } catch (OutOfLevelException _) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
         log.info(
@@ -234,7 +234,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Pre-check if we can reach this node with the current amount of items
     // We don't want to consider nodes again where we have even less usable items
-    var bestUsableItems = blockItemsIndex.compute(instructionNode.blockPosition().asMinecraftLong(), (k, v) -> {
+    var bestUsableItems = blockItemsIndex.compute(instructionNode.blockPosition().asMinecraftLong(), (_, v) -> {
       if (v == null || instructionNode.usableBlockItems() > v) {
         return instructionNode.usableBlockItems();
       }
@@ -257,7 +257,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     routeIndex.compute(
       instructionNode,
-      (k, v) -> {
+            (_, v) -> {
         // The first time we see this node
         if (v == null) {
           var node =

@@ -105,7 +105,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
   public ParkourMovement clone() {
     try {
       return (ParkourMovement) super.clone();
-    } catch (CloneNotSupportedException cantHappen) {
+    } catch (CloneNotSupportedException _) {
       throw new InternalError();
     }
   }

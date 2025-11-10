@@ -359,7 +359,7 @@ public final class InstanceManager {
       } else {
         log.info("No custom accounts provided, generating offline accounts based on name format");
         for (var i = 0; i < botAmount; i++) {
-          accounts.add(OfflineAuthService.createAccount(String.format(settingsSource.get(AccountSettings.NAME_FORMAT), i + 1)));
+          accounts.add(OfflineAuthService.createAccount(settingsSource.get(AccountSettings.NAME_FORMAT).formatted(i + 1)));
         }
       }
 
@@ -414,7 +414,7 @@ public final class InstanceManager {
 
           try {
             connectSemaphore.acquire();
-          } catch (InterruptedException e) {
+          } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             break;
           }
@@ -581,8 +581,12 @@ public final class InstanceManager {
 
   @Override
   public boolean equals(Object object) {
-    if (this == object) return true;
-    if (!(object instanceof InstanceManager that)) return false;
+    if (this == object) {
+      return true;
+    }
+    if (!(object instanceof InstanceManager that)) {
+      return false;
+    }
 
     return Objects.equals(id, that.id);
   }

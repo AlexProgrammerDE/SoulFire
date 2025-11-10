@@ -47,4 +47,7 @@ public final class RepeatCommand {
               true
             )));
   }
+
+  private RepeatCommand() {
+  }
 }

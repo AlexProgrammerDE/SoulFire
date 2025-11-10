@@ -22,7 +22,6 @@ import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
 import com.soulfiremc.bootstrap.client.cli.SFCommandDefinition;
 import com.soulfiremc.bootstrap.client.grpc.RPCClient;
-import com.soulfiremc.bootstrap.client.settings.ProxyParser;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
 import com.soulfiremc.grpc.generated.CredentialsAuthResponse;
@@ -55,7 +54,7 @@ public final class ClientSettingsManager {
 
   public void registerProvider(PropertyKey property, Supplier<JsonElement> provider) {
     providers
-      .computeIfAbsent(property.namespace(), k -> new LinkedHashMap<>())
+      .computeIfAbsent(property.namespace(), _ -> new LinkedHashMap<>())
       .put(property.key(), provider);
   }
 

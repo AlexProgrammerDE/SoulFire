@@ -29,6 +29,6 @@ public class MixinFabricLoaderImpl {
   @Redirect(method = "setup", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/FabricLoaderImpl;isDevelopmentEnvironment()Z"))
   private boolean redirectIsDevelopmentEnvironment(FabricLoaderImpl instance) {
     // Trigger mod remapping at runtime if not running in intermediary
-    return !FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace().equals("intermediary");
+    return !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
   }
 }

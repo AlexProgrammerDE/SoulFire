@@ -82,7 +82,7 @@ public final class SFHelpers {
   public static OptionalInt parseInt(String s) {
     try {
       return OptionalInt.of(Integer.parseInt(s));
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException _) {
       return OptionalInt.empty();
     }
   }
@@ -296,14 +296,16 @@ public final class SFHelpers {
 
   public static String changeExtension(String filename, String newExt) {
     var dotIndex = filename.lastIndexOf('.');
-    if (dotIndex == -1) return filename + "." + newExt; // No extension found
+    if (dotIndex == -1) {
+      return filename + "." + newExt; // No extension found
+    }
     return filename.substring(0, dotIndex) + "." + newExt;
   }
 
   public static BufferedImage toBufferedImage(MapItemSavedData map) {
     var image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-    for (var x = 0; x < 128; ++x) {
-      for (var y = 0; y < 128; ++y) {
+    for (var x = 0; x < 128; x++) {
+      for (var y = 0; y < 128; y++) {
         image.setRGB(x, y, MapColor.getColorFromPackedId(map.colors[x + y * 128]));
       }
     }

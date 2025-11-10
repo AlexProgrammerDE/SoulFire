@@ -60,7 +60,7 @@ public final class CaptchaSolver extends InternalPlugin {
 
   private static void handleTextInput(BotConnection connection, String captchaText) {
     var settingsSource = connection.settingsSource();
-    var response = String.format(settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND), captchaText);
+    var response = settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND).formatted(captchaText);
     log.debug("Extracted captcha text: {}", captchaText);
     connection.sendChatMessage(response);
   }
@@ -105,7 +105,7 @@ public final class CaptchaSolver extends InternalPlugin {
 
     response = SFHelpers.stripForChat(response);
 
-    response = String.format(settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND), response);
+    response = settingsSource.get(CaptchaSolverSettings.RESPONSE_COMMAND).formatted(response);
 
     log.debug("AI response: {}", response);
     connection.sendChatMessage(response);

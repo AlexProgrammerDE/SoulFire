@@ -42,4 +42,7 @@ public final class RespawnCommand {
                   return Command.SINGLE_SUCCESS;
                 }))));
   }
+
+  private RespawnCommand() {
+  }
 }

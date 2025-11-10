@@ -66,7 +66,7 @@ public final class CLIManager {
       .listInstances(InstanceListRequest.newBuilder().build())
       .getInstancesList()
       .stream()
-      .filter(instance -> instance.getFriendlyName().equals("CLI Attack"))
+      .filter(instance -> "CLI Attack".equals(instance.getFriendlyName()))
       .map(InstanceListResponse.Instance::getId)
       .map(UUID::fromString)
       .findFirst();
@@ -89,7 +89,7 @@ public final class CLIManager {
     commandLine.setUsageHelpAutoWidth(true);
     commandLine.setUsageHelpLongOptionsMaxWidth(30);
     commandLine.setExecutionExceptionHandler(
-      (ex, cmdLine, parseResult) -> {
+      (ex, _, _) -> {
         log.error("Exception while executing command", ex);
         return 1;
       });

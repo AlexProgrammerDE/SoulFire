@@ -56,4 +56,7 @@ public final class PluginsCommand {
               return Command.SINGLE_SUCCESS;
             })));
   }
+
+  private PluginsCommand() {
+  }
 }

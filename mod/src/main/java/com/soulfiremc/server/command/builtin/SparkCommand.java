@@ -49,4 +49,7 @@ public final class SparkCommand {
               return Command.SINGLE_SUCCESS;
             })));
   }
+
+  private SparkCommand() {
+  }
 }

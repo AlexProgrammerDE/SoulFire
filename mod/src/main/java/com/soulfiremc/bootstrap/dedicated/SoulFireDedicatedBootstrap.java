@@ -46,7 +46,7 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
     var soulFire =
       new SoulFireServer(host, port, SoulFireAbstractBootstrap.START_TIME);
 
-    if (soulFire.authSystem().rootUserData().email().equals(AuthSystem.ROOT_DEFAULT_EMAIL)) {
+    if (AuthSystem.ROOT_DEFAULT_EMAIL.equals(soulFire.authSystem().rootUserData().email())) {
       log.info("The root users email is '{}', please change it using the command 'set-email <email>', you can login with the client using that email", AuthSystem.ROOT_DEFAULT_EMAIL);
     }
 

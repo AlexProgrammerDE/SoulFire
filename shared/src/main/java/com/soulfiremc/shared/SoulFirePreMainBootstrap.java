@@ -61,4 +61,7 @@ public class SoulFirePreMainBootstrap {
     Thread.setDefaultUncaughtExceptionHandler(
       (thread, throwable) -> log.atError().setCause(throwable).log("Uncaught exception in thread {}", thread.getName()));
   }
+
+  private SoulFirePreMainBootstrap() {
+  }
 }

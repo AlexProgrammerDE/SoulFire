@@ -42,13 +42,13 @@ public class ScriptEventAPI {
 
   @HostAccess.Export
   public void on(String event, Value callback) {
-    eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
+    eventListeners.computeIfAbsent(event, _ -> new CopyOnWriteArrayList<>())
       .add(new EventListener(false, callback));
   }
 
   @HostAccess.Export
   public void once(String event, Value callback) {
-    eventListeners.computeIfAbsent(event, key -> new CopyOnWriteArrayList<>())
+    eventListeners.computeIfAbsent(event, _ -> new CopyOnWriteArrayList<>())
       .add(new EventListener(true, callback));
   }
 

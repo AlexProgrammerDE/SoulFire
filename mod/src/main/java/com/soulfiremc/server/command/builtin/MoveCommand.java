@@ -147,4 +147,7 @@ public final class MoveCommand {
         return Command.SINGLE_SUCCESS;
       });
   }
+
+  private MoveCommand() {
+  }
 }

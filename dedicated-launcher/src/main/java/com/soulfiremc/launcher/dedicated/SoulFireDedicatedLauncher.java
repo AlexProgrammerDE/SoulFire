@@ -22,7 +22,7 @@ import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 import java.nio.file.Path;
 
 public final class SoulFireDedicatedLauncher {
-  public static void main(String[] args) {
+  void main(String[] args) {
     SoulFireAbstractLauncher.run(
       Path.of(System.getProperty("user.dir")),
       "com.soulfiremc.bootstrap.dedicated.SoulFireDedicatedBootstrap",

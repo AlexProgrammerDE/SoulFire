@@ -32,6 +32,6 @@ public class MixinFabricMixinBootstrap {
     remap = false)
   private static boolean isDevelopment(FabricLauncher instance) {
     // Trigger refmap remapping at runtime if not running in intermediary
-    return !FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace().equals("intermediary");
+    return !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
   }
 }

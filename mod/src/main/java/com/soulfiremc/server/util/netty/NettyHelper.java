@@ -65,4 +65,7 @@ public class NettyHelper {
 
     return group;
   }
+
+  private NettyHelper() {
+  }
 }

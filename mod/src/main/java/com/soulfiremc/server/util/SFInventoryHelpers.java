@@ -77,4 +77,7 @@ public final class SFInventoryHelpers {
       .filter(intPredicate)
       .findFirst();
   }
+
+  private SFInventoryHelpers() {
+  }
 }

@@ -60,7 +60,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   // Mutable
   private double cost;
   // Mutable
-  private boolean requiresAgainstBlock = false;
+  private boolean requiresAgainstBlock;
 
   private SimpleMovement(MovementDirection direction, MovementModifier modifier, SubscriptionConsumer blockSubscribers) {
     super(modifier == MovementModifier.NORMAL ? direction.actionDirection() : ActionDirection.SPECIAL);
@@ -327,7 +327,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       c.noNeedToBreak = this.noNeedToBreak == null ? null : new boolean[this.noNeedToBreak.length];
 
       return c;
-    } catch (CloneNotSupportedException cantHappen) {
+    } catch (CloneNotSupportedException _) {
       throw new InternalError();
     }
   }

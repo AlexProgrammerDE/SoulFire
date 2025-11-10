@@ -123,10 +123,10 @@ public class PathConstraint {
 
     return StreamSupport.stream(((ClientLevel) entity.level()).entitiesForRendering().spliterator(), false)
       .filter(e -> e != entity)
-      .filter(e -> !entity.getType().getCategory().isFriendly())
+      .filter(_ -> !entity.getType().getCategory().isFriendly())
       .flatMap(e -> e instanceof LivingEntity livingEntity
-        && livingEntity.getAttributeValue(Attributes.FOLLOW_RANGE) > 0 ?
-        Stream.of(livingEntity) : Stream.empty())
+        && livingEntity.getAttributeValue(Attributes.FOLLOW_RANGE) > 0
+        ? Stream.of(livingEntity) : Stream.empty())
       .map(e -> new EntityRangeData(
         e.getAttributeValue(Attributes.FOLLOW_RANGE),
         SFVec3i.fromInt(e.blockPosition())

@@ -112,4 +112,7 @@ public class TransportHelper {
                               boolean supportsTcpFastOpenServer,
                               boolean supportsTcpFastOpenClient) {
   }
+
+  private TransportHelper() {
+  }
 }

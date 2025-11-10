@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // Inject actions to run after VFP
 @Mixin(targets = "net.minecraft.network.Connection$1", priority = 500)
 public class MixinConnection$1 {
-  @Inject(method = "initChannel", at = @At(value = "HEAD"))
+  @Inject(method = "initChannel", at = @At("HEAD"))
   private void injectProxy(Channel channel, CallbackInfo ci) {
     var proxyData = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get().proxy();
     if (proxyData == null) {

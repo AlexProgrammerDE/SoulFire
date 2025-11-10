@@ -59,4 +59,7 @@ public final class LookAtCommand {
                       });
                   }))))));
   }
+
+  private LookAtCommand() {
+  }
 }

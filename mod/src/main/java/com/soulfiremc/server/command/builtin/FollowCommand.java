@@ -51,4 +51,7 @@ public final class FollowCommand {
                     });
                 })))));
   }
+
+  private FollowCommand() {
+  }
 }

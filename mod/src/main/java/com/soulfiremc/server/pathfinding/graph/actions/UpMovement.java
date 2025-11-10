@@ -154,7 +154,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       c.noNeedToBreak = new boolean[this.noNeedToBreak.length];
 
       return c;
-    } catch (CloneNotSupportedException cantHappen) {
+    } catch (CloneNotSupportedException _) {
       throw new InternalError();
     }
   }

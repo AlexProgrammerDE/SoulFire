@@ -148,7 +148,7 @@ public final class RPCServer {
               return null;
             })
             .logFormatter(LogFormatter.builderForText()
-              .contentSanitizer((requestContext, o) -> "****")
+              .contentSanitizer((_, _) -> "****")
               .build())
             .build())
           .newDecorator())

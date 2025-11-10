@@ -100,7 +100,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 return future.join();
               }, Level.TRACE)
               .orTimeout(30, TimeUnit.SECONDS)
-              .handle((result, throwable) -> ProxyCheckResponseSingle.newBuilder()
+              .handle((_, throwable) -> ProxyCheckResponseSingle.newBuilder()
                 .setProxy(payload)
                 .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
                 .setValid(throwable == null)

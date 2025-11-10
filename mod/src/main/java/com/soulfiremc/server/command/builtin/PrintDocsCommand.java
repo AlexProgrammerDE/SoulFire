@@ -35,6 +35,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.privateCommand;
 
 public final class PrintDocsCommand {
+  private PrintDocsCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("print-docs")
@@ -100,8 +103,7 @@ public final class PrintDocsCommand {
                         type = "JAVA";
                       }
 
-                      builder.append(
-                        "| `%s`%s | `%s` | `%s` |\n".formatted(
+                      builder.append("| `%s`%s | `%s` | `%s` |\n".formatted(
                           version.getName(),
                           ProtocolTranslator.NATIVE_VERSION == version ? " (native)" : "",
                           versionId,

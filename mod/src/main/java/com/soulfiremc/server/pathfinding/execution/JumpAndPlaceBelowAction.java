@@ -33,8 +33,8 @@ import net.minecraft.world.level.ClipContext;
 public final class JumpAndPlaceBelowAction implements WorldAction {
   private final SFVec3i blockPlacePosition;
   private final BlockPlaceAgainstData blockPlaceAgainstData;
-  private boolean putOnHotbar = false;
-  private boolean finishedPlacing = false;
+  private boolean putOnHotbar;
+  private boolean finishedPlacing;
 
   @Override
   public boolean isCompleted(BotConnection connection) {

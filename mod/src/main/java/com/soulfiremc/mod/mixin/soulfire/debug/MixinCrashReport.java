@@ -29,7 +29,7 @@ public class MixinCrashReport {
   @Shadow
   private boolean trackingStackTrace;
 
-  @Inject(method = "<init>", at = @At(value = "RETURN"))
+  @Inject(method = "<init>", at = @At("RETURN"))
   public void addCategory(CallbackInfo ci) {
     this.trackingStackTrace = false;
   }

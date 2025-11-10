@@ -60,4 +60,7 @@ public final class GenerateTokenCommand {
                 return Command.SINGLE_SUCCESS;
               }))));
   }
+
+  private GenerateTokenCommand() {
+  }
 }

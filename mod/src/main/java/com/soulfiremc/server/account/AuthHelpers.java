@@ -55,4 +55,7 @@ public final class AuthHelpers {
         mcToken.getExpireTimeMs(),
         flow.toJson(fullJavaSession)));
   }
+
+  private AuthHelpers() {
+  }
 }

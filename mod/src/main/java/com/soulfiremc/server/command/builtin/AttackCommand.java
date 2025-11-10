@@ -70,4 +70,7 @@ public final class AttackCommand {
         )
     );
   }
+
+  private AttackCommand() {
+  }
 }

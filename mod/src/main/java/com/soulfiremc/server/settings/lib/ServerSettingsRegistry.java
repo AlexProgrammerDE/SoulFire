@@ -185,7 +185,7 @@ public final class ServerSettingsRegistry {
             throw new IllegalStateException("Property is null!");
           }
 
-          var registry = namespaceMap.computeIfAbsent(property.namespace(), k -> {
+          var registry = namespaceMap.computeIfAbsent(property.namespace(), _ -> {
             var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
             return new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId, enabledProperty);
           });

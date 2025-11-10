@@ -260,7 +260,7 @@ public final class AcmeClient {
     var scanner = new Scanner(System.in);
     log.info(message);
     log.info("Enter 'yes' to continue...");
-    if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+    if (!"yes".equalsIgnoreCase(scanner.nextLine())) {
       log.error("User did not confirm action, exiting...");
       throw new IllegalStateException("User did not confirm action");
     }

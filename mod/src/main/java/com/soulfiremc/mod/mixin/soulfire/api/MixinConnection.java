@@ -50,8 +50,8 @@ public class MixinConnection {
 
       var thisConnection = (Connection) (Object) this;
       var disconnectionDetails = thisConnection.getDisconnectionDetails();
-      BotConnection.CURRENT.get().disconnect(disconnectionDetails == null ?
-        Component.translatable("multiplayer.disconnect.generic") : SFHelpers.nativeToAdventure(disconnectionDetails.reason()));
+      BotConnection.CURRENT.get().disconnect(disconnectionDetails == null
+        ? Component.translatable("multiplayer.disconnect.generic") : SFHelpers.nativeToAdventure(disconnectionDetails.reason()));
     }
   }
 }

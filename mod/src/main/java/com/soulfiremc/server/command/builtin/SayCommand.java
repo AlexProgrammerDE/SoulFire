@@ -45,4 +45,7 @@ public final class SayCommand {
                     });
                 }))));
   }
+
+  private SayCommand() {
+  }
 }

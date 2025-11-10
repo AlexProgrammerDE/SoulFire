@@ -72,7 +72,7 @@ public final class CustomClassProvider implements IClassProvider {
         baos.write(buf, 0, len);
       }
       return baos.toByteArray();
-    } catch (Throwable t) {
+    } catch (Throwable _) {
       return null;
     }
   }

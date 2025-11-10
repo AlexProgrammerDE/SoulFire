@@ -55,4 +55,7 @@ public final class GsonInstance {
 
     GSON = builder.create();
   }
+
+  private GsonInstance() {
+  }
 }

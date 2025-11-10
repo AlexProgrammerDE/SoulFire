@@ -45,7 +45,7 @@ public final class PathExecutor implements ControllingTask {
   private final Boolean2ObjectFunction<List<WorldAction>> findPath;
   private final CompletableFuture<Void> pathCompletionFuture;
   private int totalMovements;
-  private int ticks = 0;
+  private int ticks;
   private int movementNumber = 1;
 
   public PathExecutor(

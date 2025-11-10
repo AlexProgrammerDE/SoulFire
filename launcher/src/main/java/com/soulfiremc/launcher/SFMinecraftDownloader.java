@@ -84,6 +84,32 @@ public class SFMinecraftDownloader {
     }
   }
 
+  private SFMinecraftDownloader() {
+  }
+
+  @SneakyThrows
+  private static void setRemapClasspath(Path basePath) {
+    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
+    remapPathFile.toFile().deleteOnExit();
+
+    var getDeobfJarDir = GameProviderHelper.class.getDeclaredMethod("getDeobfJarDir", Path.class, String.class, String.class);
+    getDeobfJarDir.setAccessible(true);
+    var deobfJarDir = (Path) getDeobfJarDir.invoke(null, basePath.resolve("minecraft"), "minecraft", MINECRAFT_VERSION);
+
+    Files.writeString(remapPathFile, Stream.concat(Arrays.stream(System.getProperty("java.class.path")
+          .split(File.pathSeparator)),
+        Stream.of(
+          deobfJarDir
+            .resolve("client-intermediary.jar")
+            .toAbsolutePath()
+            .toString()
+        )
+      )
+      .collect(Collectors.joining(File.pathSeparator)));
+
+    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
+  }
+
   @SuppressWarnings("unused")
   @SneakyThrows
   public static void loadAndInjectMinecraftJar(Path basePath) {
@@ -91,15 +117,15 @@ public class SFMinecraftDownloader {
     var minecraftMappingsProguardPath = getMinecraftClientMappingsProguardPath(basePath);
     if (Files.exists(minecraftJarPath)
       && Files.exists(minecraftMappingsProguardPath)) {
-      System.out.println("Minecraft already downloaded, continuing");
+      IO.println("Minecraft already downloaded, continuing");
     } else {
-      System.out.println("Downloading Minecraft...");
+      IO.println("Downloading Minecraft...");
       var versionUrl = getUrl(MANIFEST_URL)
         .getAsJsonArray("versions")
         .asList()
         .stream()
         .map(JsonElement::getAsJsonObject)
-        .filter(v -> v.get("id").getAsString().equals(MINECRAFT_VERSION))
+        .filter(v -> MINECRAFT_VERSION.equals(v.get("id").getAsString()))
         .map(v -> v.get("url").getAsString())
         .findFirst()
         .orElseThrow(() -> new RuntimeException("Minecraft version " + MINECRAFT_VERSION + " not found in manifest"));
@@ -113,7 +139,7 @@ public class SFMinecraftDownloader {
           .get("url")
           .getAsString();
 
-        System.out.println("Downloading Minecraft client jar from: " + clientUrl);
+        IO.println("Downloading Minecraft client jar from: " + clientUrl);
         var tempJarPath = Files.createTempFile("sf-mc-jar-download-", "-" + MINECRAFT_CLIENT_JAR_NAME);
         try (var in = URI.create(clientUrl).toURL().openStream()) {
           Files.copy(in, tempJarPath, StandardCopyOption.REPLACE_EXISTING);
@@ -124,7 +150,7 @@ public class SFMinecraftDownloader {
 
         Files.copy(tempJarPath, minecraftJarPath);
         Files.deleteIfExists(tempJarPath);
-        System.out.println("Minecraft client jar downloaded and saved to: " + minecraftJarPath);
+        IO.println("Minecraft client jar downloaded and saved to: " + minecraftJarPath);
       }
 
       if (!Files.exists(minecraftMappingsProguardPath)) {
@@ -134,7 +160,7 @@ public class SFMinecraftDownloader {
           .get("url")
           .getAsString();
 
-        System.out.println("Downloading Minecraft client mappings from: " + clientMappingsUrl);
+        IO.println("Downloading Minecraft client mappings from: " + clientMappingsUrl);
         var tempMappingsPath = Files.createTempFile("sf-mc-mappings-download-", ".txt");
         try (var in = URI.create(clientMappingsUrl).toURL().openStream()) {
           Files.copy(in, tempMappingsPath, StandardCopyOption.REPLACE_EXISTING);
@@ -145,7 +171,7 @@ public class SFMinecraftDownloader {
 
         Files.copy(tempMappingsPath, minecraftMappingsProguardPath);
         Files.deleteIfExists(tempMappingsPath);
-        System.out.println("Minecraft client mappings downloaded and saved to: " + minecraftMappingsProguardPath);
+        IO.println("Minecraft client mappings downloaded and saved to: " + minecraftMappingsProguardPath);
       }
     }
 
@@ -180,28 +206,5 @@ public class SFMinecraftDownloader {
     } else {
       System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "intermediary");
     }
-  }
-
-  @SneakyThrows
-  private static void setRemapClasspath(Path basePath) {
-    var remapPathFile = Files.createTempFile("soulfire-mc-remap-", ".txt");
-    remapPathFile.toFile().deleteOnExit();
-
-    var getDeobfJarDir = GameProviderHelper.class.getDeclaredMethod("getDeobfJarDir", Path.class, String.class, String.class);
-    getDeobfJarDir.setAccessible(true);
-    var deobfJarDir = (Path) getDeobfJarDir.invoke(null, basePath.resolve("minecraft"), "minecraft", MINECRAFT_VERSION);
-
-    Files.writeString(remapPathFile, Stream.concat(Arrays.stream(System.getProperty("java.class.path")
-          .split(File.pathSeparator)),
-        Stream.of(
-          deobfJarDir
-            .resolve("client-intermediary.jar")
-            .toAbsolutePath()
-            .toString()
-        )
-      )
-      .collect(Collectors.joining(File.pathSeparator)));
-
-    System.setProperty(SystemProperties.REMAP_CLASSPATH_FILE, remapPathFile.toString());
   }
 }

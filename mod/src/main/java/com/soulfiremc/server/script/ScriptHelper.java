@@ -45,4 +45,7 @@ public class ScriptHelper {
   public static Value componentToValue(Context context, Component component) {
     return jsonToValue(context, GsonComponentSerializer.gson().serializeToTree(component));
   }
+
+  private ScriptHelper() {
+  }
 }

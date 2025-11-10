@@ -137,7 +137,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       documentBuilderFactory.setExpandEntityReferences(false);
       documentBuilder = documentBuilderFactory.newDocumentBuilder();
       documentBuilder.setEntityResolver(new WebdavResolver(this.getServletContext()));
-    } catch (ParserConfigurationException e) {
+    } catch (ParserConfigurationException _) {
       throw new ServletException(sm.getString("webdavservlet.jaxpfailed"));
     }
     return documentBuilder;
@@ -337,7 +337,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             }
           }
         }
-      } catch (SAXException | IOException e) {
+      } catch (SAXException | IOException _) {
         // Something went wrong - bad request
         resp.sendError(WebdavStatus.SC_BAD_REQUEST);
         return;
@@ -432,7 +432,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
           var entries = resources.list(currentPath);
           for (var entry : entries) {
             var newPath = currentPath;
-            if (!(newPath.endsWith("/"))) {
+            if (!newPath.endsWith("/")) {
               newPath += "/";
             }
             newPath += entry;
@@ -517,7 +517,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         resp.sendError(WebdavStatus.SC_NOT_IMPLEMENTED);
         return;
 
-      } catch (SAXException saxe) {
+      } catch (SAXException _) {
         // Parse error - assume invalid content
         resp.sendError(WebdavStatus.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
@@ -622,7 +622,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     if (depthStr == null) {
       lock.depth = maxDepth;
     } else {
-      if (depthStr.equals("0")) {
+      if ("0".equals(depthStr)) {
         lock.depth = 0;
       } else {
         lock.depth = maxDepth;
@@ -642,12 +642,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       if (lockDurationStr.startsWith("Second-")) {
         lockDuration = Integer.parseInt(lockDurationStr.substring(7));
       } else {
-        if (lockDurationStr.equalsIgnoreCase("infinity")) {
+        if ("infinity".equalsIgnoreCase(lockDurationStr)) {
           lockDuration = MAX_TIMEOUT;
         } else {
           try {
             lockDuration = Integer.parseInt(lockDurationStr);
-          } catch (NumberFormatException e) {
+          } catch (NumberFormatException _) {
             lockDuration = MAX_TIMEOUT;
           }
         }
@@ -673,7 +673,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       // Get the root element of the document
       var rootElement = document.getDocumentElement();
       lockInfoNode = rootElement;
-    } catch (IOException | SAXException e) {
+    } catch (IOException | SAXException _) {
       lockRequestType = LOCK_REFRESH;
     }
 
@@ -924,7 +924,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             var slash = lock.path.lastIndexOf('/');
             var parentPath = lock.path.substring(0, slash);
 
-            lockNullResources.computeIfAbsent(parentPath, k -> new CopyOnWriteArrayList<>()).add(lock.path);
+            lockNullResources.computeIfAbsent(parentPath, _ -> new CopyOnWriteArrayList<>()).add(lock.path);
           }
 
           // Add the Lock-Token header as by RFC 2518 8.10.1
@@ -1141,7 +1141,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     URI destinationUri;
     try {
       destinationUri = new URI(destinationHeader);
-    } catch (URISyntaxException e) {
+    } catch (URISyntaxException _) {
       resp.sendError(WebdavStatus.SC_BAD_REQUEST);
       return false;
     }
@@ -1206,7 +1206,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     var overwrite = true;
     var overwriteHeader = req.getHeader("Overwrite");
     if (overwriteHeader != null) {
-      overwrite = overwriteHeader.equalsIgnoreCase("T");
+      overwrite = "T".equalsIgnoreCase(overwriteHeader);
     }
 
     // Overwriting the destination
@@ -1235,9 +1235,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     var infiniteCopy = true;
     var depthHeader = req.getHeader("Depth");
     if (depthHeader != null) {
-      if (depthHeader.equals("infinity")) {
+      if ("infinity".equals(depthHeader)) {
         // NO-OP - this is the default
-      } else if (depthHeader.equals("0")) {
+      } else if ("0".equals(depthHeader)) {
         infiniteCopy = false;
       } else {
         resp.sendError(WebdavStatus.SC_BAD_REQUEST);
@@ -1291,12 +1291,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         var entries = resources.list(source);
         for (var entry : entries) {
           var childDest = dest;
-          if (!childDest.equals("/")) {
+          if (!"/".equals(childDest)) {
             childDest += "/";
           }
           childDest += entry;
           var childSrc = source;
-          if (!childSrc.equals("/")) {
+          if (!"/".equals(childSrc)) {
             childSrc += "/";
           }
           childSrc += entry;
@@ -1432,7 +1432,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
     for (var entry : entries) {
       var childName = path;
-      if (!childName.equals("/")) {
+      if (!"/".equals(childName)) {
         childName += "/";
       }
       childName += entry;
@@ -1802,7 +1802,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Trace - assume disabled unless we can prove otherwise
-    if (req instanceof RequestFacade && ((RequestFacade) req).getAllowTrace()) {
+    if (req instanceof RequestFacade facade && facade.getAllowTrace()) {
       methodsAllowed.append(", TRACE");
     }
 
@@ -1840,10 +1840,10 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     String path = "/";
     String type = "write";
     String scope = "exclusive";
-    int depth = 0;
+    int depth;
     String owner = "";
     List<String> tokens = Collections.synchronizedList(new ArrayList<>());
-    long expiresAt = 0;
+    long expiresAt;
     Date creationDate = new Date();
 
     LockInfo(int maxDepth) {
@@ -1875,7 +1875,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     public boolean isExclusive() {
-      return scope.equals("exclusive");
+      return "exclusive".equals(scope);
     }
 
     public void toXML(XMLWriter generatedXML) {
@@ -1950,4 +1950,7 @@ class WebdavStatus {
 
   public static final int SC_MULTI_STATUS = 207;
   public static final int SC_LOCKED = 423;
+
+  private WebdavStatus() {
+  }
 }

@@ -159,4 +159,7 @@ public final class ControlCommand {
                     }))))
     );
   }
+
+  private ControlCommand() {
+  }
 }

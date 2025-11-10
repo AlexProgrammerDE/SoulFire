@@ -40,8 +40,8 @@ public final class SoulFireScheduler implements Executor {
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final RunnableWrapper runnableWrapper;
-  private boolean blockNewTasks = false;
-  private boolean isShutdown = false;
+  private boolean blockNewTasks;
+  private boolean isShutdown;
 
   public SoulFireScheduler(RunnableWrapper runnableWrapper) {
     this.runnableWrapper = runnableWrapper;

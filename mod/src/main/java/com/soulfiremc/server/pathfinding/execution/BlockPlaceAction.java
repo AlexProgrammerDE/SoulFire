@@ -34,8 +34,8 @@ public final class BlockPlaceAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockPlaceAgainstData blockPlaceAgainstData;
-  private boolean putOnHotbar = false;
-  private boolean finishedPlacing = false;
+  private boolean putOnHotbar;
+  private boolean finishedPlacing;
 
   @Override
   public boolean isCompleted(BotConnection connection) {

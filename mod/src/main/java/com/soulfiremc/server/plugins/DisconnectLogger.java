@@ -78,7 +78,7 @@ public final class DisconnectLogger extends InternalPlugin {
     var ansiMessage = SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message);
 
     var deduplicateAmount = instanceManager.settingsSource().get(DisconnectLoggerSettings.DEDUPLICATE_AMOUNT);
-    int messageCount = Objects.requireNonNull(disconnectMessage.get(ansiMessage, (key) -> 0));
+    int messageCount = Objects.requireNonNull(disconnectMessage.get(ansiMessage, _ -> 0));
     if (messageCount < deduplicateAmount) {
       // Print to remote console (always true color)
       log.atInfo()

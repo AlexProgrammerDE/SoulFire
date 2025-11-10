@@ -128,7 +128,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
   public DownMovement clone() {
     try {
       return (DownMovement) super.clone();
-    } catch (CloneNotSupportedException cantHappen) {
+    } catch (CloneNotSupportedException _) {
       throw new InternalError();
     }
   }

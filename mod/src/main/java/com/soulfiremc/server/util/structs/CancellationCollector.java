@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 public final class CancellationCollector {
   private final List<CompletableFuture<?>> futures = new ArrayList<>();
   @Getter
-  private boolean cancelled = false;
+  private boolean cancelled;
 
   public CancellationCollector(StreamObserver<?> casted) {
     var observer = (ServerCallStreamObserver<?>) casted;

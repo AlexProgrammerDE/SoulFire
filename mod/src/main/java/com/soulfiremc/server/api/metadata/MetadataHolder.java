@@ -27,7 +27,7 @@ public final class MetadataHolder {
   private final Map<Key, Object> metadata = new ConcurrentHashMap<>();
 
   public <T> T getOrSet(MetadataKey<T> key, Supplier<T> defaultValue) {
-    return key.cast(this.metadata.computeIfAbsent(key.key(), k -> defaultValue.get()));
+    return key.cast(this.metadata.computeIfAbsent(key.key(), _ -> defaultValue.get()));
   }
 
   public <T> T getOrDefault(MetadataKey<T> key, T defaultValue) {

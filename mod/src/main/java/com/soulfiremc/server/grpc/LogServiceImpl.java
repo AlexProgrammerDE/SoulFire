@@ -181,7 +181,7 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
 
   private EventPredicate eventPredicate(LogScope scope) {
     return switch (scope.getScopeCase()) {
-      case GLOBAL -> (event, personal) -> !personal;
+      case GLOBAL -> (_, personal) -> !personal;
       case GLOBAL_SCRIPT -> {
         var scriptId = UUID.fromString(scope.getGlobalScript().getScriptId());
         yield (event, personal) -> !personal && scriptId.equals(event.scriptId());
@@ -200,8 +200,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         var scriptId = UUID.fromString(scope.getInstanceScript().getScriptId());
         yield (event, personal) -> !personal && instanceId.equals(event.instanceId()) && scriptId.equals(event.scriptId());
       }
-      case PERSONAL -> (event, personal) -> personal;
-      case SCOPE_NOT_SET -> (event, personal) -> false;
+      case PERSONAL -> (_, personal) -> personal;
+      case SCOPE_NOT_SET -> (_, _) -> false;
     };
   }
 

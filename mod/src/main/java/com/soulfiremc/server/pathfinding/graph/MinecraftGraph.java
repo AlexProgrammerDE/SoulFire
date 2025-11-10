@@ -23,7 +23,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -60,7 +59,7 @@ public record MinecraftGraph(BlockGetter blockAccessor,
     var currentSubscriptions = new AtomicInteger(0);
     SubscriptionConsumer blockSubscribersConsumer = (key, value) -> {
       currentSubscriptions.incrementAndGet();
-      blockSubscribers.computeIfAbsent(key, k -> new ArrayList<>()).add(new WrappedActionSubscription(actions.size(), value));
+      blockSubscribers.computeIfAbsent(key, _ -> new ArrayList<>()).add(new WrappedActionSubscription(actions.size(), value));
     };
     Consumer<GraphAction> actionAdder = action -> {
       actions.add(action);

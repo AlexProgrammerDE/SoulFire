@@ -33,8 +33,8 @@ public class MixinMinecraftGameProvider {
   @Redirect(method = "initialize", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/game/GameProviderHelper;deobfuscate(Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Lnet/fabricmc/loader/impl/launch/FabricLauncher;)Ljava/util/Map;"))
   private Map<String, Path> redirectDeobfuscate(Map<String, Path> inputFileMap, String sourceNamespace, String gameId, String gameVersion, Path gameDir, FabricLauncher launcher) {
     // Inject custom logic to also deobfuscate to intermediary
-    if (!launcher.getMappingConfiguration().getRuntimeNamespace().equals("intermediary")) {
-      System.out.println("Remapping Minecraft to intermediary to remap mods. This will take a while...");
+    if (!"intermediary".equals(launcher.getMappingConfiguration().getRuntimeNamespace())) {
+      IO.println("Remapping Minecraft to intermediary to remap mods. This will take a while...");
       System.setProperty("sf.customIntermediaryDeobfuscation", "true");
       GameProviderHelper.deobfuscate(
         inputFileMap,

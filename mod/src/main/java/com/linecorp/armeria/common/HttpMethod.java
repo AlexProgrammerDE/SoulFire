@@ -256,88 +256,48 @@ public enum HttpMethod {
       return null;
     }
 
-    switch (method) {
-      case "ACL":
-        return ACL;
-      case "BASELINE-CONTROL":
-        return BASELINE_CONTROL;
-      case "BIND":
-        return BIND;
-      case "CHECKIN":
-        return CHECKIN;
-      case "CHECKOUT":
-        return CHECKOUT;
-      case "CONNECT":
-        return CONNECT;
-      case "COPY":
-        return COPY;
-      case "DELETE":
-        return DELETE;
-      case "GET":
-        return GET;
-      case "HEAD":
-        return HEAD;
-      case "LABEL":
-        return LABEL;
-      case "LINK":
-        return LINK;
-      case "LOCK":
-        return LOCK;
-      case "MERGE":
-        return MERGE;
-      case "MKACTIVITY":
-        return MKACTIVITY;
-      case "MKCALENDAR":
-        return MKCALENDAR;
-      case "MKCOL":
-        return MKCOL;
-      case "MKREDIRECTREF":
-        return MKREDIRECTREF;
-      case "MKWORKSPACE":
-        return MKWORKSPACE;
-      case "MOVE":
-        return MOVE;
-      case "OPTIONS":
-        return OPTIONS;
-      case "ORDERPATCH":
-        return ORDERPATCH;
-      case "PATCH":
-        return PATCH;
-      case "POST":
-        return POST;
-      case "PRI":
-        return PRI;
-      case "PROPFIND":
-        return PROPFIND;
-      case "PROPPATCH":
-        return PROPPATCH;
-      case "PUT":
-        return PUT;
-      case "REBIND":
-        return REBIND;
-      case "REPORT":
-        return REPORT;
-      case "SEARCH":
-        return SEARCH;
-      case "TRACE":
-        return TRACE;
-      case "UNBIND":
-        return UNBIND;
-      case "UNCHECKOUT":
-        return UNCHECKOUT;
-      case "UNLINK":
-        return UNLINK;
-      case "UNLOCK":
-        return UNLOCK;
-      case "UPDATE":
-        return UPDATE;
-      case "UPDATEREDIRECTREF":
-        return UPDATEREDIRECTREF;
-      case "VERSION-CONTROL":
-        return VERSION_CONTROL;
-      default:
-        return null;
-    }
+    return switch (method) {
+      case "ACL" -> ACL;
+      case "BASELINE-CONTROL" -> BASELINE_CONTROL;
+      case "BIND" -> BIND;
+      case "CHECKIN" -> CHECKIN;
+      case "CHECKOUT" -> CHECKOUT;
+      case "CONNECT" -> CONNECT;
+      case "COPY" -> COPY;
+      case "DELETE" -> DELETE;
+      case "GET" -> GET;
+      case "HEAD" -> HEAD;
+      case "LABEL" -> LABEL;
+      case "LINK" -> LINK;
+      case "LOCK" -> LOCK;
+      case "MERGE" -> MERGE;
+      case "MKACTIVITY" -> MKACTIVITY;
+      case "MKCALENDAR" -> MKCALENDAR;
+      case "MKCOL" -> MKCOL;
+      case "MKREDIRECTREF" -> MKREDIRECTREF;
+      case "MKWORKSPACE" -> MKWORKSPACE;
+      case "MOVE" -> MOVE;
+      case "OPTIONS" -> OPTIONS;
+      case "ORDERPATCH" -> ORDERPATCH;
+      case "PATCH" -> PATCH;
+      case "POST" -> POST;
+      case "PRI" -> PRI;
+      case "PROPFIND" -> PROPFIND;
+      case "PROPPATCH" -> PROPPATCH;
+      case "PUT" -> PUT;
+      case "REBIND" -> REBIND;
+      case "REPORT" -> REPORT;
+      case "SEARCH" -> SEARCH;
+      case "TRACE" -> TRACE;
+      case "UNBIND" -> UNBIND;
+      case "UNCHECKOUT" -> UNCHECKOUT;
+      case "UNLINK" -> UNLINK;
+      case "UNLOCK" -> UNLOCK;
+      case "UPDATE" -> UPDATE;
+      case "UPDATEREDIRECTREF" -> UPDATEREDIRECTREF;
+      case "VERSION-CONTROL" -> VERSION_CONTROL;
+      default -> null;
+    };
   }
 
   public enum Type {

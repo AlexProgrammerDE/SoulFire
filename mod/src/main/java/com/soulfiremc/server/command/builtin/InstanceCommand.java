@@ -67,4 +67,7 @@ public final class InstanceCommand {
       return b.buildFuture();
     }
   }
+
+  private InstanceCommand() {
+  }
 }

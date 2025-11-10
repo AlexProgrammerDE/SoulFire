@@ -43,4 +43,7 @@ public final class StopTaskCommand {
                   return Command.SINGLE_SUCCESS;
                 }))));
   }
+
+  private StopTaskCommand() {
+  }
 }

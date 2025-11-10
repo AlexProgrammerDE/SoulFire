@@ -37,4 +37,7 @@ public final class WhoAmICommand {
               return Command.SINGLE_SUCCESS;
             })));
   }
+
+  private WhoAmICommand() {
+  }
 }

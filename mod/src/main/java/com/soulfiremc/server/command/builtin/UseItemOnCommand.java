@@ -89,4 +89,7 @@ public final class UseItemOnCommand {
                               });
                           }))))))));
   }
+
+  private UseItemOnCommand() {
+  }
 }

@@ -87,4 +87,7 @@ public final class MimicCommand {
                   });
               }))));
   }
+
+  private MimicCommand() {
+  }
 }

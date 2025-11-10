@@ -63,7 +63,7 @@ public final class AuthSystem {
   }
 
   private void createRootUser() {
-    sessionFactory.inTransaction((s) -> {
+    sessionFactory.inTransaction(s -> {
       var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
         var collidingUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
@@ -77,7 +77,7 @@ public final class AuthSystem {
       }
     });
 
-    sessionFactory.inTransaction((s) -> {
+    sessionFactory.inTransaction(s -> {
       var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
       if (currentRootUser == null) {
         var rootUser = new UserEntity();
@@ -122,7 +122,7 @@ public final class AuthSystem {
     try {
       // verify token signature and parse claims
       claims = parser.parseSignedClaims(token);
-    } catch (JwtException e) {
+    } catch (JwtException _) {
       return Optional.empty();
     }
 

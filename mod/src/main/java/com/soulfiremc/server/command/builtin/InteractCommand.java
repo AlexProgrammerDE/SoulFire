@@ -78,4 +78,7 @@ public final class InteractCommand {
                         });
                     })))));
   }
+
+  private InteractCommand() {
+  }
 }

@@ -76,7 +76,7 @@ public final class ReactorHttpHelper {
         }
 
         if (proxyData.password() != null) {
-          spec.password(s -> proxyData.password());
+          spec.password(_ -> proxyData.password());
         }
       });
   }

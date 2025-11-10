@@ -39,4 +39,7 @@ public final class StopCommand {
               return Command.SINGLE_SUCCESS;
             })));
   }
+
+  private StopCommand() {
+  }
 }

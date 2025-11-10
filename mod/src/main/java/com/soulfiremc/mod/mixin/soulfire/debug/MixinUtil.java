@@ -35,4 +35,7 @@ public class MixinUtil {
   private static void logAndPauseIfInIde(Logger instance, String s) {
     LOGGER.error(s, new RuntimeException(s));
   }
+
+  private MixinUtil() {
+  }
 }

@@ -72,4 +72,7 @@ public final class UseItemCommand {
                     });
                 }))));
   }
+
+  private UseItemCommand() {
+  }
 }

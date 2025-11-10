@@ -43,7 +43,7 @@ public class SFInfoPlaceholder implements StrLookup {
 
   @Override
   public @Nullable String lookup(LogEvent event, String key) {
-    if (key.equals("context_info")) {
+    if ("context_info".equals(key)) {
       var builder = new StringBuilder();
 
       var contextData = event.getContextData();

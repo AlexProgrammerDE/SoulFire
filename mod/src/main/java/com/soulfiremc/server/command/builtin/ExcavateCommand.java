@@ -91,4 +91,7 @@ public final class ExcavateCommand {
                           });
                       }))))))));
   }
+
+  private ExcavateCommand() {
+  }
 }

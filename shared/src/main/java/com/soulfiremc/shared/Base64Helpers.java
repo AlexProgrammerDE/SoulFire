@@ -34,4 +34,7 @@ public class Base64Helpers {
       .map(s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8))
       .toArray(String[]::new);
   }
+
+  private Base64Helpers() {
+  }
 }

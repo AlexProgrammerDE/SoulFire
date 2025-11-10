@@ -28,4 +28,7 @@ public class TestBootstrap {
     ClientBootstrap.bootstrap();
     Bootstrap.validate();
   }
+
+  private TestBootstrap() {
+  }
 }

@@ -36,8 +36,8 @@ public final class BlockBreakAction implements WorldAction {
   @Getter
   private final SFVec3i blockPosition;
   private final BlockFace blockBreakSideHint;
-  private boolean didLook = false;
-  private boolean putInHand = false;
+  private boolean didLook;
+  private boolean putInHand;
   private int remainingTicks = -1;
   private int totalTicks = -1;
 

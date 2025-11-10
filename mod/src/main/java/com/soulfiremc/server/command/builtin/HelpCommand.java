@@ -41,4 +41,7 @@ public final class HelpCommand {
               return Command.SINGLE_SUCCESS;
             })));
   }
+
+  private HelpCommand() {
+  }
 }

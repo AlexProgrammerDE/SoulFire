@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @Mixin(ServerPackManager.ServerPackData.class)
 public class MixinServerPackData {
-  @Inject(method = "<init>", at = @At(value = "RETURN"))
+  @Inject(method = "<init>", at = @At("RETURN"))
   private void onInit(UUID id, URL url, HashCode hash, CallbackInfo ci) {
     var packDataThis = (ServerPackManager.ServerPackData) (Object) this;
     packDataThis.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;

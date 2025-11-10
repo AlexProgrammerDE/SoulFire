@@ -63,4 +63,7 @@ public final class CollectCommand {
                       });
                   }))))));
   }
+
+  private CollectCommand() {
+  }
 }

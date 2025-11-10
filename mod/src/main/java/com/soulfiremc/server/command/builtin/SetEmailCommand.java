@@ -45,4 +45,7 @@ public final class SetEmailCommand {
                 return Command.SINGLE_SUCCESS;
               }))));
   }
+
+  private SetEmailCommand() {
+  }
 }

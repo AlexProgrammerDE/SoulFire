@@ -51,7 +51,7 @@ public interface ControllingTask {
   @RequiredArgsConstructor
   class SingleTickTask implements ControllingTask {
     private final Runnable runnable;
-    private boolean done = false;
+    private boolean done;
 
     @Override
     public void tick() {
@@ -81,9 +81,9 @@ public interface ControllingTask {
   @RequiredArgsConstructor
   class StagedTask implements ControllingTask {
     private final List<Stage> stages;
-    private long currentDelay = 0;
-    private int currentStage = 0;
-    private boolean done = false;
+    private long currentDelay;
+    private int currentStage;
+    private boolean done;
 
     @Override
     public void tick() {
@@ -129,7 +129,7 @@ public interface ControllingTask {
   class ManualControllingTask implements ControllingTask {
     @Getter
     private final ManualTaskMarker marker;
-    private boolean done = false;
+    private boolean done;
 
     @Override
     public void tick() {

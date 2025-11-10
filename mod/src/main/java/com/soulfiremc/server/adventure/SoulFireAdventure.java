@@ -52,4 +52,7 @@ public final class SoulFireAdventure {
       .flattener(FLATTENER)
       .colorLevel(ColorLevel.TRUE_COLOR)
       .build();
+
+  private SoulFireAdventure() {
+  }
 }

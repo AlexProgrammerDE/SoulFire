@@ -52,4 +52,7 @@ public final class BlockItems {
   public static boolean hasItem(Block blockType) {
     return VALUES_REVERSE[BuiltInRegistries.BLOCK.getId(blockType)] != null;
   }
+
+  private BlockItems() {
+  }
 }

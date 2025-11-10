@@ -98,7 +98,7 @@ public final class BotConnection {
   private final boolean isStatusPing;
   @Setter
   private ProtocolVersion currentProtocolVersion;
-  private boolean isDisconnected = false;
+  private boolean isDisconnected;
 
   public BotConnection(
     BotConnectionFactory factory,
@@ -222,7 +222,7 @@ public final class BotConnection {
 
             minecraft.disconnectWithProgressScreen();
           }).orTimeout(5, TimeUnit.SECONDS).join();
-        } catch (Throwable ignored) {
+        } catch (Throwable _) {
         }
 
         minecraft.stop();

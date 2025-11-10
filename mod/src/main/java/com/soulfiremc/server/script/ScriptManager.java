@@ -194,9 +194,9 @@ public class ScriptManager {
       .allowIteratorAccess(true)
       .allowMapAccess(true)
       .allowBigIntegerNumberAccess(true)
-      .targetTypeMapping(String.class, UUID.class, string -> true,
+      .targetTypeMapping(String.class, UUID.class, _ -> true,
         UUIDHelper::tryParseUniqueIdOrNull)
-      .targetTypeMapping(Value.class, JsonElement.class, value -> true,
+      .targetTypeMapping(Value.class, JsonElement.class, _ -> true,
         value -> {
           var metaLanguage = ScriptHelper.getMetaLanguage(value.getContext());
           return GsonInstance.GSON.fromJson(value.getContext().eval(metaLanguage.languageId(), switch (metaLanguage) {
@@ -206,7 +206,7 @@ public class ScriptManager {
         })
       .targetTypeMapping(Value.class, JsonObject.class, value -> value.as(JsonElement.class).isJsonObject(),
         value -> value.as(JsonElement.class).getAsJsonObject())
-      .targetTypeMapping(Value.class, Component.class, value -> true,
+      .targetTypeMapping(Value.class, Component.class, _ -> true,
         value -> GsonComponentSerializer.gson().deserializeFromTree(value.as(JsonElement.class)))
       .build();
   }

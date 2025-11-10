@@ -45,4 +45,7 @@ public final class HealthCommand {
                 return Command.SINGLE_SUCCESS;
               }))));
   }
+
+  private HealthCommand() {
+  }
 }

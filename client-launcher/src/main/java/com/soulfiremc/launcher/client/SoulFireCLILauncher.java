@@ -22,7 +22,7 @@ import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 import java.nio.file.Path;
 
 public final class SoulFireCLILauncher {
-  public static void main(String[] args) {
+  void main(String[] args) {
     SoulFireAbstractLauncher.run(
       Path.of(System.getProperty("user.home")).resolve(".soulfire"),
       "com.soulfiremc.bootstrap.client.SoulFireCLIBootstrap",

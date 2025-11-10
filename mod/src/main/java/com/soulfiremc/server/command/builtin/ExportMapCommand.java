@@ -37,22 +37,7 @@ import java.util.function.Function;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class ExportMapCommand {
-  public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-    dispatcher.register(
-      literal("export-map")
-        .executes(
-          help(
-            "Exports images of all map items. Can be a held item or in a item-frame.",
-            c -> exportMap(c, level -> level.getAllMapData().keySet())))
-        .then(
-          argument("map_id", IntegerArgumentType.integer())
-            .executes(
-              help(
-                "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
-                c -> {
-                  var mapId = IntegerArgumentType.getInteger(c, "map_id");
-                  return exportMap(c, bot -> Set.of(new MapId(mapId)));
-                }))));
+  private ExportMapCommand() {
   }
 
   private static int exportMap(
@@ -90,5 +75,23 @@ public final class ExportMapCommand {
 
         return Command.SINGLE_SUCCESS;
       });
+  }
+
+  public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    dispatcher.register(
+      literal("export-map")
+        .executes(
+          help(
+            "Exports images of all map items. Can be a held item or in a item-frame.",
+            c -> exportMap(c, level -> level.getAllMapData().keySet())))
+        .then(
+          argument("map_id", IntegerArgumentType.integer())
+            .executes(
+              help(
+                "Exports a image of a map item by map id. Can be a held item or in a item-frame.",
+                c -> {
+                  var mapId = IntegerArgumentType.getInteger(c, "map_id");
+                  return exportMap(c, _ -> Set.of(new MapId(mapId)));
+                }))));
   }
 }

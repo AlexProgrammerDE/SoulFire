@@ -217,4 +217,7 @@ public final class InventoryCommand {
       () -> gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player)));
     return Command.SINGLE_SUCCESS;
   }
+
+  private InventoryCommand() {
+  }
 }

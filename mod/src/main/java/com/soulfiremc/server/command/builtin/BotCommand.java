@@ -68,4 +68,7 @@ public final class BotCommand {
       return b.buildFuture();
     }
   }
+
+  private BotCommand() {
+  }
 }

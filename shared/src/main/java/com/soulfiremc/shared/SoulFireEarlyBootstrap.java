@@ -18,16 +18,20 @@
 package com.soulfiremc.shared;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.jul.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 
 @SuppressWarnings("unused")
 @Slf4j
 public class SoulFireEarlyBootstrap {
+  private SoulFireEarlyBootstrap() {
+  }
+
   public static void earlyBootstrap() {
     SFInfoPlaceholder.register();
 
     // Install the Log4J JUL bridge
-    org.apache.logging.log4j.jul.LogManager.getLogManager().reset();
+    LogManager.getLogManager().reset();
 
     SFLogAppender.INSTANCE.start();
 

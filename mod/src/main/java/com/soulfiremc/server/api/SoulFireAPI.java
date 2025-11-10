@@ -37,7 +37,7 @@ public final class SoulFireAPI {
       .setAlwaysCallParents(true)
       .setExceptionHandler(EventExceptionHandler.INSTANCE)
       .setEventFilter(
-        (c, h) -> {
+        (c, _) -> {
           if (SoulFireEvent.class.isAssignableFrom(c)) {
             return true;
           } else {

@@ -36,10 +36,10 @@ public final class MovementAction implements WorldAction {
   private final SFVec3i blockPosition;
   // Corner jumps normally require you to stand closer to the block to jump
   private final boolean walkFewTicksNoJump;
-  private boolean didLook = false;
-  private boolean lockYRot = false;
-  private boolean wasStill = false;
-  private int noJumpTicks = 0;
+  private boolean didLook;
+  private boolean lockYRot;
+  private boolean wasStill;
+  private int noJumpTicks;
 
   public static double minXZ(AABB bb) {
     var x = bb.maxX - bb.minX;

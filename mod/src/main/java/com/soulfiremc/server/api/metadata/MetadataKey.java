@@ -27,7 +27,7 @@ public record MetadataKey<T>(Key key, Class<T> type) {
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(type, "type");
 
-    if (key.namespace().equals(Key.MINECRAFT_NAMESPACE)) {
+    if (Key.MINECRAFT_NAMESPACE.equals(key.namespace())) {
       throw new IllegalArgumentException("Key namespace must not be the Minecraft namespace");
     }
   }

@@ -53,7 +53,7 @@ public final class TimeUtil {
           return true;
         }
       });
-    } catch (InterruptedException e) {
+    } catch (InterruptedException _) {
       Thread.currentThread().interrupt();
     }
   }
@@ -75,7 +75,7 @@ public final class TimeUtil {
           return !condition.getAsBoolean();
         }
       });
-    } catch (InterruptedException e) {
+    } catch (InterruptedException _) {
       Thread.currentThread().interrupt();
     }
   }

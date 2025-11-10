@@ -79,4 +79,7 @@ public final class DiagonalCollisionCalculator {
 
   public record CollisionData(BlockState blockState, int diagonalArrayIndex, BodyPart bodyPart, MovementSide side) {
   }
+
+  private DiagonalCollisionCalculator() {
+  }
 }

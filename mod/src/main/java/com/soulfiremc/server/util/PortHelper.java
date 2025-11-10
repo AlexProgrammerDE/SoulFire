@@ -26,19 +26,7 @@ import java.net.ServerSocket;
 public final class PortHelper {
   public static final int SF_DEFAULT_PORT = 38765;
 
-  public static int getAvailablePort(int startPort) {
-    while (true) {
-      try {
-        var serverSocket = new ServerSocket(startPort);
-        serverSocket.close();
-        break; // Port is available, exit the loop
-      } catch (IOException e) {
-        log.info("Port {} is already in use, trying next port...", startPort);
-        startPort++; // Increment the port number and try again
-      }
-    }
-
-    return startPort;
+  private PortHelper() {
   }
 
   public static int getRandomAvailablePort() {
@@ -50,5 +38,20 @@ public final class PortHelper {
     } catch (IOException e) {
       throw new RuntimeException("Could not find an available port", e);
     }
+  }
+
+  public static int getAvailablePort(int startPort) {
+    while (true) {
+      try {
+        var serverSocket = new ServerSocket(startPort);
+        serverSocket.close();
+        break; // Port is available, exit the loop
+      } catch (IOException _) {
+        log.info("Port {} is already in use, trying next port...", startPort);
+        startPort++; // Increment the port number and try again
+      }
+    }
+
+    return startPort;
   }
 }

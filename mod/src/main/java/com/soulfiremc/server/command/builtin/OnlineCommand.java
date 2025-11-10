@@ -49,4 +49,7 @@ public final class OnlineCommand {
                   return Command.SINGLE_SUCCESS;
                 }))));
   }
+
+  private OnlineCommand() {
+  }
 }

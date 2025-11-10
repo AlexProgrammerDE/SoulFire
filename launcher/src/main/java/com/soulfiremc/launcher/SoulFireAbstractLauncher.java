@@ -33,32 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SoulFireAbstractLauncher {
-  @SneakyThrows
-  private static void loadLibs(Path basePath) {
-    var librariesPath = basePath.resolve("libraries");
-    var extractedLibs = createLibClassLoader(librariesPath);
-    if (extractedLibs.length == 0) {
-      System.out.println("No libraries found in /META-INF/dependency-list.txt, skipping library loading.");
-      return;
-    }
-
-    var reflectLibPath = Arrays.stream(extractedLibs)
-      .filter(path -> path.getFileName().toString().startsWith("Reflect-"))
-      .findFirst()
-      .orElseThrow(() -> new RuntimeException("Reflect library not found in extracted libs"));
-    try (var reflectLib = new URLClassLoader(new URL[]{reflectLibPath.toUri().toURL()})) {
-      var addToSystemClassPath = reflectLib.loadClass("net.lenni0451.reflect.ClassLoaders")
-        .getDeclaredMethod("addToSystemClassPath", URL.class);
-
-      for (var lib : extractedLibs) {
-        System.setProperty("java.class.path",
-          Stream.concat(Arrays.stream(System.getProperty("java.class.path").split(File.pathSeparator)),
-              Stream.of(lib.toAbsolutePath().toString()))
-            .collect(Collectors.joining(File.pathSeparator)));
-
-        addToSystemClassPath.invoke(null, lib.toUri().toURL());
-      }
-    }
+  private SoulFireAbstractLauncher() {
   }
 
   private static Path[] createLibClassLoader(Path libDir) {
@@ -96,5 +71,33 @@ public final class SoulFireAbstractLauncher {
     Class.forName(SoulFirePostLibLauncher.class.getName())
       .getMethod("runPostLib", Path.class, String.class, String[].class)
       .invoke(null, basePath, bootstrapClassName, args);
+  }
+
+  @SneakyThrows
+  private static void loadLibs(Path basePath) {
+    var librariesPath = basePath.resolve("libraries");
+    var extractedLibs = createLibClassLoader(librariesPath);
+    if (extractedLibs.length == 0) {
+      IO.println("No libraries found in /META-INF/dependency-list.txt, skipping library loading.");
+      return;
+    }
+
+    var reflectLibPath = Arrays.stream(extractedLibs)
+      .filter(path -> path.getFileName().toString().startsWith("Reflect-"))
+      .findFirst()
+      .orElseThrow(() -> new RuntimeException("Reflect library not found in extracted libs"));
+    try (var reflectLib = new URLClassLoader(new URL[]{reflectLibPath.toUri().toURL()})) {
+      var addToSystemClassPath = reflectLib.loadClass("net.lenni0451.reflect.ClassLoaders")
+        .getDeclaredMethod("addToSystemClassPath", URL.class);
+
+      for (var lib : extractedLibs) {
+        System.setProperty("java.class.path",
+          Stream.concat(Arrays.stream(System.getProperty("java.class.path").split(File.pathSeparator)),
+              Stream.of(lib.toAbsolutePath().toString()))
+            .collect(Collectors.joining(File.pathSeparator)));
+
+        addToSystemClassPath.invoke(null, lib.toUri().toURL());
+      }
+    }
   }
 }

@@ -57,6 +57,6 @@ public final class TranslationMapper implements Function<TranslatableComponent, 
         .map(TranslationArgumentLike::asComponent)
         .map(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER::serialize)
         .toArray(String[]::new);
-    return String.format(translation, (Object[]) args);
+    return translation.formatted((Object[]) args);
   }
 }

@@ -41,7 +41,7 @@ public enum SFLibrary implements LibClassifier.LibraryType {
   private final String[] paths;
 
   SFLibrary(String path) {
-    this(null, new String[] { path });
+    this(null, new String[]{path});
   }
 
   SFLibrary(String... paths) {

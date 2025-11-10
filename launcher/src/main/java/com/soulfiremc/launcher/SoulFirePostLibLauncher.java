@@ -34,18 +34,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SoulFirePostLibLauncher {
-  private static void injectEarlyMixins() {
-    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
-    var transformerManager = new TransformerManager(classProvider);
-    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-    transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");
-
-    try {
-      transformerManager.hookInstrumentation(Agents.getInstrumentation());
-      System.out.println("Used Runtime Agent to inject mixins");
-    } catch (IOException t) {
-      throw new IllegalStateException("Failed to inject mixins", t);
-    }
+  private SoulFirePostLibLauncher() {
   }
 
   @SneakyThrows
@@ -92,5 +81,19 @@ public class SoulFirePostLibLauncher {
     SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
 
     KnotClient.main(new String[]{"--username", "SoulFire"});
+  }
+
+  private static void injectEarlyMixins() {
+    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
+    var transformerManager = new TransformerManager(classProvider);
+    transformerManager.addTransformerPreprocessor(new MixinsTranslator());
+    transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");
+
+    try {
+      transformerManager.hookInstrumentation(Agents.getInstrumentation());
+      IO.println("Used Runtime Agent to inject mixins");
+    } catch (IOException t) {
+      throw new IllegalStateException("Failed to inject mixins", t);
+    }
   }
 }
