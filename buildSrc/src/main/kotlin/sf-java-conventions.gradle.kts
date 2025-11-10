@@ -6,10 +6,12 @@ plugins {
   id("net.kyori.indra.git")
   id("io.freefair.javadoc-utf-8")
   id("net.ltgt.errorprone")
+  id("com.github.spotbugs")
 }
 
 dependencies {
   errorprone("com.google.errorprone:error_prone_core:2.44.0")
+  spotbugs("com.github.spotbugs:spotbugs:4.9.8")
 }
 
 tasks {
