@@ -155,7 +155,7 @@ public final class BotSettings implements SettingsObject {
         Sometimes a bot fails to process a packet. When that happens it disconnects due to "packet errors".
         When this option is turned on, SoulFire will ignore errors during the packet handling process and keep bots connected.
         This might cause bots to have inconsistent world state though, so it could be detected by the server.""")
-      .defaultValue(false)
+      .defaultValue(true)
       .build();
 
   private static String formatVersion(ProtocolVersion version) {
