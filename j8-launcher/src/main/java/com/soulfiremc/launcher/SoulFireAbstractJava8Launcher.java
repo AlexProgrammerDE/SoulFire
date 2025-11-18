@@ -1,13 +1,16 @@
 package com.soulfiremc.launcher;
 
+import java.lang.reflect.Method;
+
 // Too early to init loggers
 @SuppressWarnings("CallToPrintStackTrace")
 public abstract class SoulFireAbstractJava8Launcher {
   public void run(String[] args) {
     try {
-      Class.forName(getLauncherClassName())
-        .getMethod("main", String[].class)
-        .invoke(null, (Object) args);
+      Class<?> launcherClass = Class.forName(getLauncherClassName());
+      Method mainMethod = launcherClass.getDeclaredMethod("main", String[].class);
+      mainMethod.setAccessible(true);
+      mainMethod.invoke(launcherClass.newInstance(), (Object) args);
     } catch (UnsupportedClassVersionError e) {
       System.out.println("[SoulFire] SoulFire requires Java 25 or higher!");
       System.out.println("[SoulFire] Please update your Java version!");
