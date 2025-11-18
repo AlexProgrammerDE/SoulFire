@@ -5,9 +5,25 @@ plugins {
 repositories {
   maven("https://maven.wagyourtail.xyz/releases") {
     name = "WagYourReleases"
+    mavenContent {
+      releasesOnly()
+      includeGroup("xyz.wagyourtail.unimined")
+      includeGroup("xyz.wagyourtail.unimined.mapping")
+      includeGroup("xyz.wagyourtail.commons")
+      includeGroup("net.minecraftforge")
+      includeGroup("net.fabricmc")
+    }
   }
   maven("https://maven.wagyourtail.xyz/snapshots") {
     name = "WagYourSnapshots"
+    mavenContent {
+      snapshotsOnly()
+      includeGroup("xyz.wagyourtail.unimined")
+      includeGroup("xyz.wagyourtail.unimined.mapping")
+      includeGroup("xyz.wagyourtail.commons")
+      includeGroup("net.minecraftforge")
+      includeGroup("net.fabricmc")
+    }
   }
   gradlePluginPortal()
   mavenCentral()
