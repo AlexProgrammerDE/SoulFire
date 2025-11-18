@@ -46,7 +46,7 @@ public class MixinConnection$1 {
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
 
-  @WrapOperation(method = "initChannel", at = @At(value = "NEW", target = "(I)Lio/netty/handler/timeout/ReadTimeoutHandler;"))
+  @WrapOperation(method = "initChannel", at = @At(value = "INVOKE", target = "Lio/netty/handler/timeout/ReadTimeoutHandler;<init>(I)V"))
   private ReadTimeoutHandler setReadTimeout(int timeoutSeconds, Operation<ReadTimeoutHandler> original) {
     return original.call(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT));
   }
