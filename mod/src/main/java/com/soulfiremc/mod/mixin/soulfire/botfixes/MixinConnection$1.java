@@ -25,6 +25,7 @@ import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.NettyHelper;
 import io.netty.channel.Channel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,17 +35,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "net.minecraft.network.Connection$1", priority = 500)
 public class MixinConnection$1 {
   @Inject(method = "initChannel", at = @At("HEAD"))
-  private void injectProxy(Channel channel, CallbackInfo ci) {
+  private void injectProxyAndWriteTimeout(Channel channel, CallbackInfo ci) {
     var proxyData = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get().proxy();
     if (proxyData == null) {
       return;
     }
 
     NettyHelper.addProxy(proxyData, channel.pipeline());
+
+    channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
 
   @WrapOperation(method = "initChannel", at = @At(value = "NEW", target = "(I)Lio/netty/handler/timeout/ReadTimeoutHandler;"))
-  private ReadTimeoutHandler injectProxy(int timeoutSeconds, Operation<ReadTimeoutHandler> original) {
+  private ReadTimeoutHandler setReadTimeout(int timeoutSeconds, Operation<ReadTimeoutHandler> original) {
     return original.call(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT));
   }
 }
