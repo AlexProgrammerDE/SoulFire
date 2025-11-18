@@ -22,9 +22,9 @@ dependencies {
   implementation(libs.gradle.plugin.indra.git)
   implementation(libs.gradle.plugin.unimined)
   implementation(libs.gradle.plugin.spotless)
-  implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.4.4")
+  implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.4.5")
   implementation(libs.gradle.plugin.freefair)
   implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:4.3.0")
-  implementation("org.openrewrite:plugin:7.19.0")
+  implementation("org.openrewrite:plugin:7.20.0")
   implementation("org.ow2.asm:asm:9.9")
 }
