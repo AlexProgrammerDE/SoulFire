@@ -15,8 +15,8 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  modImplementation("com.viaversion:viafabricplus:4.3.3")
-  include("com.viaversion:viafabricplus:4.3.3") {
+  modImplementation("com.viaversion:viafabricplus:4.3.1")
+  include("com.viaversion:viafabricplus:4.3.1") {
     isTransitive = false
   }
 
