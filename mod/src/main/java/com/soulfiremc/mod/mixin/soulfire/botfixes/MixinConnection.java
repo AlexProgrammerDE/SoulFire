@@ -23,12 +23,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.TransportHelper;
 import com.viaversion.viafabricplus.injection.access.base.IClientConnection;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -37,6 +39,8 @@ import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+import java.util.concurrent.TimeUnit;
+
 // Inject actions to run before VFP
 @Mixin(value = Connection.class, priority = 2000)
 public class MixinConnection {
@@ -44,6 +48,7 @@ public class MixinConnection {
   private static AbstractBootstrap<?, ?> useCustomGroup(Bootstrap instance, EventLoopGroup eventExecutors, Operation<AbstractBootstrap<Bootstrap, Channel>> original, @Local(argsOnly = true) Connection clientConnection) {
     return instance
       .attr(SFConstants.NETTY_BOT_CONNECTION, BotConnection.CURRENT.get())
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) TimeUnit.SECONDS.toMillis(BotConnection.CURRENT.get().settingsSource().get(BotSettings.CONNECT_TIMEOUT)))
       .group(BotConnection.CURRENT.get().eventLoopGroup());
   }
 
