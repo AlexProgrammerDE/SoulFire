@@ -17,11 +17,14 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.botfixes;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.NettyHelper;
 import io.netty.channel.Channel;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,9 +46,8 @@ public class MixinConnection$1 {
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
 
-  // TODO: Make compile with this
-  // @WrapOperation(method = "initChannel", at = @At(value = "NEW", target = "(I)Lio/netty/handler/timeout/ReadTimeoutHandler;"))
-  // private ReadTimeoutHandler setReadTimeout(int timeoutSeconds, Operation<ReadTimeoutHandler> original) {
-  //   return original.call(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT));
-  // }
+  @WrapOperation(method = "initChannel*", at = @At(value = "NEW", target = "(I)Lio/netty/handler/timeout/ReadTimeoutHandler;"))
+  private ReadTimeoutHandler setReadTimeout(int timeoutSeconds, Operation<ReadTimeoutHandler> original) {
+    return original.call(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT));
+  }
 }
