@@ -88,6 +88,7 @@ unimined.minecraft {
 
   mods {
     modImplementation {
+      catchAWNamespaceAssertion()
       mixinRemap {
         @Suppress("UnstableApiUsage")
         reset()
