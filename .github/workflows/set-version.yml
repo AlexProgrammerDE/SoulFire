@@ -1,4 +1,4 @@
-name: set-version
+name: Set Version
 
 on:
   workflow_dispatch:
@@ -18,19 +18,21 @@ jobs:
 
     permissions:
       contents: write
-
     runs-on: ubuntu-24.04
     steps:
       - name: 'Shared: Checkout repository'
-        uses: actions/checkout@v6
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # 6.0.0
         with:
           ref: ${{ github.ref }}
+          persist-credentials: false
 
       - name: 'Set Version'
         run: |
-          sed -i 's/^maven_version=.*/maven_version='"${{ inputs.version }}"'/g' gradle.properties
+          sed -i 's/^maven_version=.*/maven_version='"${INPUTS_VERSION}"'/g' gradle.properties
+        env:
+          INPUTS_VERSION: ${{ inputs.version }}
 
       - name: 'Commit Version'
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # 7.0.0
         with:
           commit_message: 'chore(release): bump version to ${{ inputs.version }}'
