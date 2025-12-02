@@ -15,8 +15,8 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  modImplementation("com.viaversion:viafabricplus:4.3.1")
-  include("com.viaversion:viafabricplus:4.3.1") {
+  modImplementation("com.viaversion:viafabricplus:4.3.3")
+  include("com.viaversion:viafabricplus:4.3.3") {
     isTransitive = false
   }
 
@@ -88,6 +88,7 @@ unimined.minecraft {
 
   mods {
     modImplementation {
+      catchAWNamespaceAssertion()
       mixinRemap {
         @Suppress("UnstableApiUsage")
         reset()
