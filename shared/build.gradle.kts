@@ -63,7 +63,7 @@ dependencies {
   api("org.lwjgl:lwjgl-stb:3.3.6")
   api("org.lwjgl:lwjgl-tinyfd:3.3.6")
   api("org.lwjgl:lwjgl:3.3.6")
-  api("org.lz4:lz4-java:1.8.0")
+  api("org.lz4:lz4-java:1.8.1")
   api("org.slf4j:slf4j-api:2.0.17")
 
   api("io.github.llamalad7:mixinextras-fabric:0.5.0")
