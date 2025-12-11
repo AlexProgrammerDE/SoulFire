@@ -105,6 +105,7 @@ allprojects {
       name = "FabricMC"
       content {
         includeGroup("net.fabricmc")
+        includeGroup("net.fabricmc.fabric-api")
       }
     }
     ivy("https://github.com/3arthqu4ke") {

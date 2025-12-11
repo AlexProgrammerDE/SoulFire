@@ -119,6 +119,9 @@ dependencies {
   api(libs.sqlite)
   api(libs.mariadb)
 
+  api(libs.bundles.armeria)
+  api(libs.bundles.reactor.netty)
+
   // For script support
   api(
     files(
