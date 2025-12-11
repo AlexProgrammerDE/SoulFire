@@ -81,9 +81,15 @@ loom {
   }
 }
 
+configurations {
+  testRuntimeClasspath {
+    exclude(group = "net.fabricmc", module = "fabric-log4j-util")
+  }
+}
+
 tasks {
   test {
-    classpath += sourceSets.main.get().compileClasspath
+    useJUnitPlatform()
   }
 
   remapJar {
