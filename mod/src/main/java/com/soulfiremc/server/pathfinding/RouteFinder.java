@@ -28,7 +28,6 @@ import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
 import com.soulfiremc.server.util.structs.IntReference;
 import com.soulfiremc.server.util.structs.Long2ObjectLRUCache;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -191,32 +190,31 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       try {
-        instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (_, v) -> {
-          if (v == null) {
-            var counter = new IntReference();
-            var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
-            graph.insertActions(
-              current.node().blockPosition(),
-              current.parentToNodeDirection(),
-              instructions -> {
-                list[counter.value++] = instructions;
-                handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
-              }
-            );
+        var positionLong = current.node().blockPosition().asMinecraftLong();
+        var cachedInstructions = instructionCache.get(positionLong);
 
-            return list;
-          }
-
-          for (var instructions : v) {
+        if (cachedInstructions == null) {
+          // Cache miss - compute and store instructions
+          var counter = new IntReference();
+          var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
+          graph.insertActions(
+            current.node().blockPosition(),
+            current.parentToNodeDirection(),
+            instructions -> {
+              list[counter.value++] = instructions;
+              handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
+            }
+          );
+          instructionCache.put(positionLong, list);
+        } else {
+          // Cache hit - reuse cached instructions
+          for (var instructions : cachedInstructions) {
             if (instructions == null) {
               break;
             }
-
             handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
           }
-
-          return v;
-        });
+        }
       } catch (OutOfLevelException _) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
@@ -245,7 +243,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
   private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
                                   Long2ObjectOpenHashMap<MinecraftRouteNode>[] routeIndex,
-                                  Long2IntMap blockItemsIndex,
+                                  Long2IntOpenHashMap blockItemsIndex,
                                   MinecraftRouteNode current,
                                   GraphInstructions instructions) {
     // Creative mode placing requires us to have at least one block
@@ -265,16 +263,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Pre-check if we can reach this node with the current amount of items
     // We don't want to consider nodes again where we have even less usable items
-    var bestUsableItems = blockItemsIndex.compute(blockPositionLong, (_, v) -> {
-      if (v == null || newBlocks > v) {
-        return newBlocks;
-      }
-
-      return v;
-    });
-    if (bestUsableItems > newBlocks) {
-      return;
+    // Using get/put instead of compute() to avoid lambda allocation overhead
+    var currentBest = blockItemsIndex.get(blockPositionLong);
+    if (currentBest >= newBlocks) {
+      return; // Already found a path with same or more blocks
     }
+    blockItemsIndex.put(blockPositionLong, newBlocks);
 
     var actionCost = instructions.actionCost();
     var worldActions = instructions.actions();
@@ -286,47 +280,41 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     var newTargetCost = scorer.computeScore(graph, blockPosition, worldActions);
     var newTotalRouteScore = newSourceCost + newTargetCost;
 
+    // Using get/put instead of compute() to avoid lambda allocation overhead
     var routeMap = getRouteMap(routeIndex, newBlocks);
-    routeMap.compute(
-      blockPositionLong,
-      (_, v) -> {
-        // The first time we see this node
-        if (v == null) {
-          var instructionNode = new NodeState(blockPosition, newBlocks);
-          var node =
-            new MinecraftRouteNode(
-              instructionNode,
-              current,
-              instructions.moveDirection(),
-              worldActions,
-              newSourceCost,
-              newTargetCost,
-              newTotalRouteScore);
+    var existingNode = routeMap.get(blockPositionLong);
 
-          log.debug("Found a new node: {}", instructionNode);
+    if (existingNode == null) {
+      // The first time we see this node
+      var instructionNode = new NodeState(blockPosition, newBlocks);
+      var node =
+        new MinecraftRouteNode(
+          instructionNode,
+          current,
+          instructions.moveDirection(),
+          worldActions,
+          newSourceCost,
+          newTargetCost,
+          newTotalRouteScore);
 
-          openSet.enqueue(node);
+      log.debug("Found a new node: {}", instructionNode);
 
-          return node;
-        }
+      routeMap.put(blockPositionLong, node);
+      openSet.enqueue(node);
+    } else if (newSourceCost < existingNode.sourceCost()) {
+      // If we found a better route to this node, update it
+      existingNode.setBetterParent(
+        current,
+        instructions.moveDirection(),
+        worldActions,
+        newSourceCost,
+        newTargetCost,
+        newTotalRouteScore);
 
-        // If we found a better route to this node, update it
-        if (newSourceCost < v.sourceCost()) {
-          v.setBetterParent(
-            current,
-            instructions.moveDirection(),
-            worldActions,
-            newSourceCost,
-            newTargetCost,
-            newTotalRouteScore);
+      log.debug("Found a better route to node: {}", existingNode.node());
 
-          log.debug("Found a better route to node: {}", v.node());
-
-          openSet.enqueue(v);
-        }
-
-        return v;
-      });
+      openSet.enqueue(existingNode);
+    }
   }
 
   private List<WorldAction> repositionIfNeeded(List<WorldAction> actions, NodeState from, boolean requiresRepositioning) {
