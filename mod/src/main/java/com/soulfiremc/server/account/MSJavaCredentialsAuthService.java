@@ -20,8 +20,9 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepCredentialsMsaCode;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.msa.model.MsaCredentials;
+import net.raphimc.minecraftauth.msa.service.impl.CredentialsMsaAuthService;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,11 +39,10 @@ public final class MSJavaCredentialsAuthService
   @Override
   public CompletableFuture<MinecraftAccount> login(MSJavaCredentialsAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_CREDENTIALS, flow, flow.getFromInput(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepCredentialsMsaCode.MsaCredentials(data.email, data.password)));
+        var authManager = JavaAuthManager.create(LenniHttpHelper.createLenniMCAuthHttpClient(proxyData))
+          .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -69,12 +69,12 @@ public final class MSJavaCredentialsAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-      var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
+      var httpClient = LenniHttpHelper.createLenniMCAuthHttpClient(proxyData);
+      var authManager = JavaAuthManager.fromJson(httpClient, ((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_CREDENTIALS, flow, flow.refresh(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          fullJavaSession));
+        authManager.getMinecraftToken().refresh();
+        authManager.getMinecraftProfile().refresh();
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -83,14 +83,13 @@ public final class MSJavaCredentialsAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpired();
+    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis();
   }
 
   @Override
   public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpiredOrOutdated();
+    // Consider outdated if within 5 minutes of expiration
+    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis() + 5 * 60 * 1000;
   }
 
   public record MSJavaCredentialsAuthData(String email, String password) {}

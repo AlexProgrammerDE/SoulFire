@@ -19,43 +19,55 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
-import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 public final class AuthHelpers {
   private AuthHelpers() {
   }
 
-  public static MinecraftAccount fromFullBedrockSession(AuthType authType, AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
-    var mcChain = fullBedrockSession.getMcChain();
-    var xblXsts = mcChain.getXblXsts();
-    var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
-    var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
-    return new MinecraftAccount(
-      authType,
-      mcChain.getId(),
-      mcChain.getDisplayName(),
-      new BedrockData(
-        mcChain.getMojangJwt(),
-        mcChain.getIdentityJwt(),
-        mcChain.getPublicKey(),
-        mcChain.getPrivateKey(),
-        deviceId,
-        playFabId,
-        flow.toJson(fullBedrockSession)));
+  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager) {
+    try {
+      var mcChain = authManager.getMinecraftCertificateChain().getUpToDate();
+      var deviceId = authManager.getDeviceId();
+      var sessionKeyPair = authManager.getSessionKeyPair();
+      var playFabId = authManager.getPlayFabToken().getUpToDate().getPlayFabId();
+      return new MinecraftAccount(
+        authType,
+        mcChain.getIdentityUuid(),
+        mcChain.getIdentityDisplayName(),
+        new BedrockData(
+          mcChain.getMojangJwt(),
+          mcChain.getIdentityJwt(),
+          (ECPublicKey) sessionKeyPair.getPublic(),
+          (ECPrivateKey) sessionKeyPair.getPrivate(),
+          deviceId,
+          playFabId,
+          BedrockAuthManager.toJson(authManager)));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
-  public static MinecraftAccount fromFullJavaSession(AuthType authType, AbstractStep<?, StepFullJavaSession.FullJavaSession> flow, StepFullJavaSession.FullJavaSession fullJavaSession) {
-    var mcProfile = fullJavaSession.getMcProfile();
-    var mcToken = mcProfile.getMcToken();
-    return new MinecraftAccount(
-      authType,
-      mcProfile.getId(),
-      mcProfile.getName(),
-      new OnlineChainJavaData(
-        mcToken.getAccessToken(),
-        mcToken.getExpireTimeMs(),
-        flow.toJson(fullJavaSession)));
+  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager) {
+    try {
+      var mcProfile = authManager.getMinecraftProfile().getUpToDate();
+      var mcToken = authManager.getMinecraftToken().getUpToDate();
+      return new MinecraftAccount(
+        authType,
+        mcProfile.getId(),
+        mcProfile.getName(),
+        new OnlineChainJavaData(
+          mcToken.getToken(),
+          mcToken.getExpireTimeMs(),
+          JavaAuthManager.toJson(authManager)));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

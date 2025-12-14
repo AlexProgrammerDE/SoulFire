@@ -331,7 +331,7 @@ public final class InstanceManager {
         var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
         if (botAmount > maxBots) {
           log.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
-          log.warn("Continuing with {} bots.", maxBots);
+          log.warn("Continuing with {} bots due to proxies.", maxBots);
           botAmount = maxBots;
         }
 
@@ -351,7 +351,7 @@ public final class InstanceManager {
             "You have requested {} bots, but only {} are possible with the current amount of accounts.",
             botAmount,
             availableAccounts);
-          log.warn("Continuing with {} bots.", availableAccounts);
+          log.warn("Continuing with {} bots due to accounts.", availableAccounts);
           botAmount = availableAccounts;
         }
       } else {

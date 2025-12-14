@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
   `sf-special-publish-conventions`
-  id("fabric-loom")
+  id("net.fabricmc.fabric-loom-remap")
   alias(libs.plugins.jmh)
 }
 
@@ -28,8 +28,8 @@ dependencies {
   })
   modImplementation("net.fabricmc:fabric-loader:0.17.2")
 
-  modImplementation("com.viaversion:viafabricplus:4.3.1")
-  include("com.viaversion:viafabricplus:4.3.1") {
+  modImplementation("com.viaversion:viafabricplus:4.3.6-SNAPSHOT")
+  include("com.viaversion:viafabricplus:4.3.6-SNAPSHOT") {
     isTransitive = false
   }
 

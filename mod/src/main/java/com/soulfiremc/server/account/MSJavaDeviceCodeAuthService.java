@@ -20,8 +20,9 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +31,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public final class MSJavaDeviceCodeAuthService
-  implements MCAuthService<Consumer<StepMsaDeviceCode.MsaDeviceCode>, MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData> {
+  implements MCAuthService<Consumer<MsaDeviceCode>, MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData> {
   public static final MSJavaDeviceCodeAuthService INSTANCE = new MSJavaDeviceCodeAuthService();
 
   private MSJavaDeviceCodeAuthService() {}
@@ -38,11 +39,10 @@ public final class MSJavaDeviceCodeAuthService
   @Override
   public CompletableFuture<MinecraftAccount> login(MSJavaDeviceCodeAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_DEVICE_CODE, flow, flow.getFromInput(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepMsaDeviceCode.MsaDeviceCodeCallback(data.callback)));
+        var authManager = JavaAuthManager.create(LenniHttpHelper.createLenniMCAuthHttpClient(proxyData))
+          .login(DeviceCodeMsaAuthService::new, data.callback);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -50,19 +50,19 @@ public final class MSJavaDeviceCodeAuthService
   }
 
   @Override
-  public MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData createData(Consumer<StepMsaDeviceCode.MsaDeviceCode> data) {
+  public MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData createData(Consumer<MsaDeviceCode> data) {
     return new MSJavaDeviceCodeAuthService.MSJavaDeviceCodeAuthData(data);
   }
 
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
-      var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
+      var httpClient = LenniHttpHelper.createLenniMCAuthHttpClient(proxyData);
+      var authManager = JavaAuthManager.fromJson(httpClient, ((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_DEVICE_CODE, flow, flow.refresh(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          fullJavaSession));
+        authManager.getMinecraftToken().refresh();
+        authManager.getMinecraftProfile().refresh();
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -71,15 +71,14 @@ public final class MSJavaDeviceCodeAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpired();
+    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis();
   }
 
   @Override
   public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpiredOrOutdated();
+    // Consider outdated if within 5 minutes of expiration
+    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis() + 5 * 60 * 1000;
   }
 
-  public record MSJavaDeviceCodeAuthData(Consumer<StepMsaDeviceCode.MsaDeviceCode> callback) {}
+  public record MSJavaDeviceCodeAuthData(Consumer<MsaDeviceCode> callback) {}
 }

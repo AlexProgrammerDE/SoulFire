@@ -25,7 +25,7 @@ import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.TransportHelper;
-import com.viaversion.viafabricplus.injection.access.base.IClientConnection;
+import com.viaversion.viafabricplus.injection.access.base.IConnection;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -54,7 +54,7 @@ public class MixinConnection {
 
   @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;"))
   private static AbstractBootstrap<?, ?> useCustomChannel(Bootstrap instance, Class<? extends Channel> channelTypeClass, Operation<AbstractBootstrap<Bootstrap, Channel>> original, @Local(argsOnly = true) Connection clientConnection) {
-    if (BedrockProtocolVersion.bedrockLatest.equals(((IClientConnection) clientConnection).viaFabricPlus$getTargetVersion())) {
+    if (BedrockProtocolVersion.bedrockLatest.equals(((IConnection) clientConnection).viaFabricPlus$getTargetVersion())) {
       return instance.channelFactory(RakChannelFactory.client(TransportHelper.TRANSPORT_TYPE.datagramChannelClass()));
     } else {
       return instance.channel(TransportHelper.TRANSPORT_TYPE.socketChannelClass());
