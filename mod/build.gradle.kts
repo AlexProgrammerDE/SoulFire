@@ -116,3 +116,9 @@ publishing {
     }
   }
 }
+
+jmh {
+  warmupIterations = 2
+  iterations = 2
+  fork = 2
+}
