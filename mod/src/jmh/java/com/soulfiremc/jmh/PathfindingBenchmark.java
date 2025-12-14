@@ -27,6 +27,7 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
+import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -74,18 +75,18 @@ public class PathfindingBenchmark {
 
       // Find the first safe block at 0 0
       var safeY = Integer.MIN_VALUE;
-      var accessor = new JMHBlockGetter(-64, 320);
+      var accessor = new TestBlockAccessorBuilder();
       for (var x = 0; x < data.length; x++) {
         for (var y = 0; y < data[0].length; y++) {
           for (var z = 0; z < data[0][0].length; z++) {
             var key = blockDefinitions[data[x][y][z]];
-            var blockState = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(key.asString())).defaultBlockState();
-            if (blockState.isAir()) {
+            var block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(key.asString()));
+            if (block.defaultBlockState().isAir()) {
               continue;
             }
 
             // Insert blocks
-            accessor.setBlockState(x, y, z, blockState);
+            accessor.setBlockAt(x, y, z, block);
             if (x == 0 && z == 0) {
               safeY = Math.max(safeY, y + 1);
             }
@@ -93,12 +94,14 @@ public class PathfindingBenchmark {
         }
       }
 
+      var builtAccessor = accessor.build();
+
       var inventory = ProjectedInventory.forUnitTest(0);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(
-        accessor,
+        builtAccessor,
         inventory,
         JMHPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
 
