@@ -50,6 +50,28 @@ public final class ProjectedInventory {
   private final IDMap<BlockState, Costs.BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
+  /// Creates a ProjectedInventory for unit testing with basic block breaking capabilities.
+  /// Uses a fixed mining cost for all blocks that can be broken by hand.
+  public static ProjectedInventory forUnitTest(int usableBlockItems) {
+    return new ProjectedInventory(
+      usableBlockItems,
+      new ItemStack[]{ItemStack.EMPTY},
+      new IDMap<>(Block.BLOCK_STATE_REGISTRY, blockState -> {
+        // Return a fixed mining cost for blocks that can be broken
+        if (SFBlockHelpers.isDiggable(blockState.getBlock())) {
+          return new Costs.BlockMiningCosts(
+            Costs.BREAK_BLOCK_PENALTY + 20 / Costs.TICKS_PER_BLOCK, // ~20 ticks to mine
+            ItemStack.EMPTY,
+            SFBlockHelpers.isUsableBlockItem(blockState.getBlock())
+          );
+        }
+        return null;
+      }),
+      new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
+        state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state))
+    );
+  }
+
   public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
       Lists.newArrayList(playerInventory.iterator())

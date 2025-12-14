@@ -3,6 +3,7 @@ import net.fabricmc.loom.task.RemapJarTask
 plugins {
   `sf-special-publish-conventions`
   id("fabric-loom")
+  alias(libs.plugins.jmh)
 }
 
 repositories {
@@ -69,6 +70,8 @@ dependencies {
   testRuntimeOnly(libs.junit.launcher)
   testImplementation(libs.junit)
   testImplementation(projects.shared)
+
+  jmhImplementation(projects.shared)
 }
 
 loom {
