@@ -15,26 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test.utils;
+package com.soulfiremc.test.mixin;
 
-import com.soulfiremc.test.mixin.MixinSupportMain;
-import lombok.SneakyThrows;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.ClientBootstrap;
-import net.minecraft.server.Bootstrap;
+import org.jspecify.annotations.NonNull;
+import org.spongepowered.asm.service.IPropertyKey;
 
-public class TestBootstrap {
-  @SneakyThrows
-  public static void bootstrapForTest() {
-    MixinSupportMain.load();
+import java.util.Objects;
 
-    SharedConstants.tryDetectVersion();
-    SharedConstants.CHECK_DATA_FIXER_SCHEMA = false;
-    Bootstrap.bootStrap();
-    ClientBootstrap.bootstrap();
-    Bootstrap.validate();
+public record AgentMixinStringPropertyKey(String key) implements IPropertyKey {
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof AgentMixinStringPropertyKey)) {
+      return false;
+    } else {
+      return Objects.equals(this.key, ((AgentMixinStringPropertyKey) obj).key);
+    }
   }
 
-  private TestBootstrap() {
+  @Override
+  public @NonNull String toString() {
+    return this.key;
   }
 }

@@ -36,6 +36,7 @@ public final class LoadTest {
     System.setProperty("sf.baseDir", tempDir.toAbsolutePath().toString());
     System.setProperty("sf.unit.test", "true");
 
+    // Bootstrap mixins and Minecraft registries
     TestBootstrap.bootstrapForTest();
 
     SFLogAppender.INSTANCE.start();

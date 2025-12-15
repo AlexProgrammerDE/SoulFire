@@ -32,7 +32,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -45,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 public final class PathfindingTest {
   @BeforeAll
   public static void setup() {
-    // Bootstrap Minecraft registries
+    // Bootstrap mixins and Minecraft registries
     TestBootstrap.bootstrapForTest();
   }
 

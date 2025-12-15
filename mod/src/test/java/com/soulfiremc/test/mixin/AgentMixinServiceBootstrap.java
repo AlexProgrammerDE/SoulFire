@@ -15,26 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test.utils;
+package com.soulfiremc.test.mixin;
 
-import com.soulfiremc.test.mixin.MixinSupportMain;
-import lombok.SneakyThrows;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.ClientBootstrap;
-import net.minecraft.server.Bootstrap;
+import org.spongepowered.asm.service.IMixinServiceBootstrap;
 
-public class TestBootstrap {
-  @SneakyThrows
-  public static void bootstrapForTest() {
-    MixinSupportMain.load();
+public class AgentMixinServiceBootstrap implements IMixinServiceBootstrap {
 
-    SharedConstants.tryDetectVersion();
-    SharedConstants.CHECK_DATA_FIXER_SCHEMA = false;
-    Bootstrap.bootStrap();
-    ClientBootstrap.bootstrap();
-    Bootstrap.validate();
+  @Override
+  public String getName() {
+    return "AgentMixin";
   }
 
-  private TestBootstrap() {
+  @Override
+  public String getServiceClassName() {
+    return AgentMixinService.class.getName();
   }
+
+  @Override
+  public void bootstrap() {
+  }
+
 }

@@ -54,7 +54,7 @@ public class PathfindingBenchmark {
 
   @Setup
   public void setup() {
-    // Bootstrap Minecraft registries
+    // Bootstrap mixins and Minecraft registries
     TestBootstrap.bootstrapForTest();
 
     var byteArrayInputStream =
