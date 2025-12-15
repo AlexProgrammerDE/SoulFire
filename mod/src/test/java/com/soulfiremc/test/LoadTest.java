@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.test;
 
-import com.soulfiremc.bootstrap.TestBootstrap;
+import com.soulfiremc.test.utils.TestBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.shared.SFLogAppender;

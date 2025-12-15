@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.cost.Costs;
+import com.soulfiremc.server.pathfinding.cost.EntityMiningCostCalculator;
+import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;
@@ -50,39 +52,17 @@ public final class ProjectedInventory {
   private final IDMap<BlockState, Costs.BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
-  /// Creates a ProjectedInventory for unit testing with basic block breaking capabilities.
-  /// Uses a fixed mining cost for all blocks that can be broken by hand.
-  public static ProjectedInventory forUnitTest(int usableBlockItems) {
-    return new ProjectedInventory(
-      usableBlockItems,
-      new ItemStack[]{ItemStack.EMPTY},
-      new IDMap<>(Block.BLOCK_STATE_REGISTRY, blockState -> {
-        // Return a fixed mining cost for blocks that can be broken
-        if (SFBlockHelpers.isDiggable(blockState.getBlock())) {
-          return new Costs.BlockMiningCosts(
-            Costs.BREAK_BLOCK_PENALTY + 20 / Costs.TICKS_PER_BLOCK, // ~20 ticks to mine
-            ItemStack.EMPTY,
-            SFBlockHelpers.isUsableBlockItem(blockState.getBlock())
-          );
-        }
-        return null;
-      }),
-      new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
-        state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state))
-    );
-  }
-
   public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
       Lists.newArrayList(playerInventory.iterator())
         .stream()
         .filter(item -> !item.isEmpty())
         .toList(),
-      entity,
+      new EntityMiningCostCalculator(entity),
       pathConstraint);
   }
 
-  public ProjectedInventory(List<ItemStack> items, LocalPlayer entity, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<ItemStack> items, MiningCostCalculator costCalculator, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndEmpty = new HashSet<ItemStack>();
 
@@ -100,7 +80,7 @@ public final class ProjectedInventory {
     this.usableBlockItems = blockItems;
     this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new ItemStack[0]);
     this.sharedMiningCosts = new IDMap<>(Block.BLOCK_STATE_REGISTRY,
-      blockType -> Costs.calculateBlockBreakCost(entity, this, blockType));
+      blockType -> costCalculator.calculateBlockBreakCost(this, blockType));
     this.stairsBlockToStandOn = new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }

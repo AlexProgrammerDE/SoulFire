@@ -18,7 +18,7 @@
 package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
-import com.soulfiremc.bootstrap.TestBootstrap;
+import com.soulfiremc.test.utils.TestBootstrap;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;

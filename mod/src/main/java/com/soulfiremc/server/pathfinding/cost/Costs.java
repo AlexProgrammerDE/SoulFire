@@ -15,10 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding;
+package com.soulfiremc.server.pathfinding.cost;
 
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import net.lenni0451.reflect.Objects;
+import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -68,40 +73,21 @@ public final class Costs {
 
   private Costs() {}
 
-  public static @Nullable BlockMiningCosts calculateBlockBreakCost(
-    LocalPlayer entity,
-    ProjectedInventory inventory,
-    BlockState blockState) {
-    var lowestMiningTicks = Integer.MAX_VALUE;
-    ItemStack bestItem = null;
-    var willDropUsableBlockItem = false;
-    for (var slot : inventory.usableToolsAndEmpty()) {
-      var miningTicks = getRequiredMiningTicks(entity, slot, blockState);
-      if (miningTicks.ticks() < lowestMiningTicks) {
-        lowestMiningTicks = miningTicks.ticks();
-        bestItem = slot;
-        willDropUsableBlockItem = miningTicks.willDropUsableBlockItem();
-      }
-    }
-
-    if (lowestMiningTicks == Integer.MAX_VALUE) {
-      return null;
-    }
-
-    return new BlockMiningCosts(
-      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_PENALTY, bestItem, willDropUsableBlockItem);
-  }
-
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     LocalPlayer entity,
     ItemStack itemStack,
     BlockState blockState) {
     SELECTED_ITEM_MIXIN_OVERRIDE.set(itemStack);
-    var correctToolUsed = entity.hasCorrectToolForDrops(blockState);
-    // If this value adds up over all ticks to 1, the block is fully mined
-    var damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
-    SELECTED_ITEM_MIXIN_OVERRIDE.remove();
+    boolean correctToolUsed;
+    float damage;
+    try {
+      correctToolUsed = entity.hasCorrectToolForDrops(blockState);
+      // If this value adds up over all ticks to 1, the block is fully mined
+      damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
+    } finally {
+      SELECTED_ITEM_MIXIN_OVERRIDE.remove();
+    }
 
     var creativeMode = entity.getAbilities().instabuild;
     var willDropUsableBlockItem = correctToolUsed && !creativeMode && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());

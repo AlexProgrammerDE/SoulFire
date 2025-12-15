@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.bootstrap;
+package com.soulfiremc.test.utils;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBootstrap;
