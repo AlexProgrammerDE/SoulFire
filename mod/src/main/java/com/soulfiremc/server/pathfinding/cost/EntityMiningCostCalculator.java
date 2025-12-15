@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record EntityMiningCostCalculator(LocalPlayer player) implements MiningCostCalculator {
   @Override
-  public Costs.@Nullable BlockMiningCosts calculateBlockBreakCost(ProjectedInventory inventory, BlockState blockState) {
+  public @Nullable BlockMiningCosts calculateBlockBreakCost(ProjectedInventory inventory, BlockState blockState) {
     var lowestMiningTicks = Integer.MAX_VALUE;
     ItemStack bestItem = null;
     var willDropUsableBlockItem = false;
@@ -42,7 +42,7 @@ public record EntityMiningCostCalculator(LocalPlayer player) implements MiningCo
       return null;
     }
 
-    return new Costs.BlockMiningCosts(
+    return new BlockMiningCosts(
       (lowestMiningTicks / Costs.TICKS_PER_BLOCK) + Costs.BREAK_BLOCK_PENALTY, bestItem, willDropUsableBlockItem);
   }
 }

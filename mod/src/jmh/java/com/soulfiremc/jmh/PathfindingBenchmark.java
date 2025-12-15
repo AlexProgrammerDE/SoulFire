@@ -18,7 +18,6 @@
 package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
-import com.soulfiremc.test.utils.TestBootstrap;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
@@ -28,6 +27,8 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
+import com.soulfiremc.test.utils.TestBootstrap;
+import com.soulfiremc.test.utils.TestMiningCostCalculator;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
@@ -42,6 +43,7 @@ import org.openjdk.jmh.annotations.State;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -97,7 +99,7 @@ public class PathfindingBenchmark {
 
       var builtAccessor = accessor.build();
 
-      var inventory = ProjectedInventory.forUnitTest(0);
+      var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 

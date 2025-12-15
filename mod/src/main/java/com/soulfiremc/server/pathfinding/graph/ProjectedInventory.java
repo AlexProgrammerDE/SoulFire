@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import com.soulfiremc.server.pathfinding.cost.Costs;
+import com.soulfiremc.server.pathfinding.cost.BlockMiningCosts;
 import com.soulfiremc.server.pathfinding.cost.EntityMiningCostCalculator;
 import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
 import com.soulfiremc.server.util.SFBlockHelpers;
@@ -49,7 +49,7 @@ public final class ProjectedInventory {
   @Getter
   @ToString.Include
   private final ItemStack[] usableToolsAndEmpty;
-  private final IDMap<BlockState, Costs.BlockMiningCosts> sharedMiningCosts;
+  private final IDMap<BlockState, BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
   public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
@@ -85,7 +85,7 @@ public final class ProjectedInventory {
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
 
-  public Costs.BlockMiningCosts getMiningCosts(BlockState blockState) {
+  public BlockMiningCosts getMiningCosts(BlockState blockState) {
     return Objects.requireNonNull(sharedMiningCosts.get(blockState), "Block not destructible");
   }
 

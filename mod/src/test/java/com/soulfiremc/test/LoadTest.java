@@ -17,10 +17,10 @@
  */
 package com.soulfiremc.test;
 
-import com.soulfiremc.test.utils.TestBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.shared.SFLogAppender;
+import com.soulfiremc.test.utils.TestBootstrap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

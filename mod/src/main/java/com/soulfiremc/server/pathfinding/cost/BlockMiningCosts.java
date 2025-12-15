@@ -17,12 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.cost;
 
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public interface MiningCostCalculator {
-  @Nullable BlockMiningCosts calculateBlockBreakCost(
-    ProjectedInventory inventory,
-    BlockState blockState);
-}
+public record BlockMiningCosts(
+  double miningCost, @NonNull ItemStack usedTool, boolean willDropUsableBlockItem) {}

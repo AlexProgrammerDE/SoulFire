@@ -100,8 +100,5 @@ public final class Costs {
     return new TickResult((int) Math.ceil(1 / damage), willDropUsableBlockItem);
   }
 
-  public record BlockMiningCosts(
-    double miningCost, @NonNull ItemStack usedTool, boolean willDropUsableBlockItem) {}
-
   public record TickResult(int ticks, boolean willDropUsableBlockItem) {}
 }

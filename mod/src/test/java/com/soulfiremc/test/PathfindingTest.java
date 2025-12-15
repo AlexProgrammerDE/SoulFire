@@ -17,9 +17,6 @@
  */
 package com.soulfiremc.test;
 
-import com.soulfiremc.server.pathfinding.cost.Costs;
-import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
-import com.soulfiremc.test.utils.TestBootstrap;
 import com.soulfiremc.server.pathfinding.NoRouteFoundException;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
@@ -28,6 +25,8 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
+import com.soulfiremc.test.utils.TestBootstrap;
+import com.soulfiremc.test.utils.TestMiningCostCalculator;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -44,9 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public final class PathfindingTest {
-  private static final MiningCostCalculator CALCULATOR = (_, _) ->
-    new Costs.BlockMiningCosts(1, ItemStack.EMPTY, true);
-
   @BeforeAll
   public static void setup() {
     // Bootstrap Minecraft registries
@@ -60,7 +56,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(1, 0, 0, Blocks.STONE);
     accessor.setBlockAt(2, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -80,7 +76,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(1, 0, 0, Blocks.STONE);
     accessor.setBlockAt(2, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder =
       new RouteFinder(
         new MinecraftGraph(
@@ -103,7 +99,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(1, 0, 1, Blocks.STONE);
     accessor.setBlockAt(2, 0, 2, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -129,7 +125,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(2, 1, 1, Blocks.BEDROCK);
     accessor.setBlockAt(2, 2, 1, Blocks.BEDROCK);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -148,7 +144,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, height, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -172,7 +168,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, height, 1, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -196,7 +192,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, -height, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -220,7 +216,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, -height, 1, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -244,7 +240,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(gapLength + 1, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -267,7 +263,7 @@ public final class PathfindingTest {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.STONE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.STONE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -285,7 +281,7 @@ public final class PathfindingTest {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.STONE, amount)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.STONE, amount)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -308,7 +304,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(0, -1, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -330,7 +326,7 @@ public final class PathfindingTest {
     accessor.setBlockAt(1, 2, 0, Blocks.STONE);
     accessor.setBlockAt(2, 0, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -352,7 +348,7 @@ public final class PathfindingTest {
       accessor.setBlockAt(1, 3, 0, Blocks.WATER);
     }
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -379,7 +375,7 @@ public final class PathfindingTest {
       accessor.setBlockAt(1, 0, 0, Blocks.LAVA);
     }
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
@@ -408,7 +404,7 @@ public final class PathfindingTest {
 
     accessor.setBlockAt(0, -level, 0, Blocks.STONE);
 
-    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), CALCULATOR, TestPathConstraint.INSTANCE);
+    var inventory = new ProjectedInventory(List.of(new ItemStack(Items.DIAMOND_PICKAXE)), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
     var routeFinder = new RouteFinder(new MinecraftGraph(
       accessor.build(),
       inventory,
