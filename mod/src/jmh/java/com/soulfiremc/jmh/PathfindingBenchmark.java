@@ -28,6 +28,7 @@ import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
+import com.soulfiremc.test.utils.TestPathConstraint;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -103,7 +104,7 @@ public class PathfindingBenchmark {
       routeFinder = new RouteFinder(new MinecraftGraph(
         builtAccessor,
         inventory,
-        JMHPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
+        TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {
