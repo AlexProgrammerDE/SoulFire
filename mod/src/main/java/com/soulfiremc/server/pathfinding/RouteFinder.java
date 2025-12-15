@@ -113,6 +113,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
+    blockItemsIndex.defaultReturnValue(-1); // -1 means not visited yet
     var instructionCache = new Long2ObjectLRUCache<GraphInstructions[]>(50_000);
     // Array of maps indexed by usable block items count for O(1) lookup without hash collisions
     // Uses Long2ObjectOpenHashMap with SFVec3i.asMinecraftLong() as key for optimal performance

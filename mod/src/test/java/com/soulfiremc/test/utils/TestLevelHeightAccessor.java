@@ -24,11 +24,11 @@ public final class TestLevelHeightAccessor implements LevelHeightAccessor {
 
   @Override
   public int getHeight() {
-    return 256;
+    return 384;
   }
 
   @Override
   public int getMinY() {
-    return 0;
+    return -64;
   }
 }
