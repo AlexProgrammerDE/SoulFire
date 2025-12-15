@@ -317,7 +317,6 @@ public final class PathfindingTest {
   }
 
   @Test
-  @Disabled // TODO: fix this test
   public void testPathfindingThroughWallToMoveUp() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
