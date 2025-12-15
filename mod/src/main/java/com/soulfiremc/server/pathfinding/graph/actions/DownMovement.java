@@ -112,7 +112,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
-      breakCost.willDropUsableBlockItem() ? 1 : 0,
+      graph.canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem() ? 1 : 0,
       false,
       actionDirection,
       cost,

@@ -91,6 +91,10 @@ public record MinecraftGraph(BlockGetter blockAccessor,
     return pathConstraint.doUsableBlocksDecreaseWhenPlaced();
   }
 
+  public boolean canBlocksDropWhenBroken() {
+    return pathConstraint.canBlocksDropWhenBroken();
+  }
+
   public boolean disallowedToPlaceBlock(SFVec3i position) {
     return !pathConstraint.canPlaceBlockPos(position);
   }

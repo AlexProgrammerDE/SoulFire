@@ -57,6 +57,10 @@ public class PathConstraint {
     return entity == null || !entity.getAbilities().instabuild;
   }
 
+  public boolean canBlocksDropWhenBroken() {
+    return entity == null || !entity.getAbilities().instabuild;
+  }
+
   public boolean isPlaceable(ItemStack item) {
     return SFItemHelpers.isSafeFullBlockItem(item);
   }
