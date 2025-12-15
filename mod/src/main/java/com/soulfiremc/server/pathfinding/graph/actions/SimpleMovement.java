@@ -278,7 +278,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         cost += breakCost.miningCost();
         actions.add(new BlockBreakAction(breakCost));
 
-        if (graph.canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem()) {
+        if (graph.pathConstraint().canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem()) {
           usableBlockItemsDiff++;
         }
       }
@@ -289,7 +289,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     // Even creative mode needs a block in the inv to place
     var requiresOneBlock = requiresAgainstBlock && usableBlockItemsDiff <= 0;
     if (requiresAgainstBlock) {
-      if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+      if (graph.pathConstraint().doUsableBlocksDecreaseWhenPlaced()) {
         // After the place we'll have one less usable block item
         usableBlockItemsDiff--;
       }
@@ -348,10 +348,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Search for a way to break this block
-      if (graph.disallowedToBreakBlock(absoluteKey)
+      if (!graph.pathConstraint().canBreakBlockPos(absoluteKey)
         || !simpleMovement.allowBlockActions
         || blockBreakSideHint == null
-        || graph.disallowedToBreakBlock(blockState.getBlock())
+        || !graph.pathConstraint().canBreakBlock(blockState.getBlock())
         // Check if we previously found out this block is unsafe to break
         || simpleMovement.unsafeToBreak[blockArrayIndex]) {
         // No way to break this block
@@ -423,7 +423,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      if (graph.disallowedToPlaceBlock(absoluteKey)
+      if (!graph.pathConstraint().canPlaceBlockPos(absoluteKey)
         || !simpleMovement.allowBlockActions
         || !blockState.canBeReplaced()) {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;

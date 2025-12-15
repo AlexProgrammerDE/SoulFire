@@ -23,7 +23,6 @@ import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -85,26 +84,6 @@ public record MinecraftGraph(BlockGetter blockAccessor,
       SUBSCRIPTION_KEYS[i] = entry.getKey();
       SUBSCRIPTION_VALUES[i] = entry.getValue().toArray(new WrappedActionSubscription[0]);
     }
-  }
-
-  public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return pathConstraint.doUsableBlocksDecreaseWhenPlaced();
-  }
-
-  public boolean canBlocksDropWhenBroken() {
-    return pathConstraint.canBlocksDropWhenBroken();
-  }
-
-  public boolean disallowedToPlaceBlock(SFVec3i position) {
-    return !pathConstraint.canPlaceBlockPos(position);
-  }
-
-  public boolean disallowedToBreakBlock(SFVec3i position) {
-    return !pathConstraint.canBreakBlockPos(position);
-  }
-
-  public boolean disallowedToBreakBlock(Block blockType) {
-    return !pathConstraint.canBreakBlock(blockType);
   }
 
   public void insertActions(SFVec3i node, @Nullable ActionDirection fromDirection, Consumer<GraphInstructions> callback) {

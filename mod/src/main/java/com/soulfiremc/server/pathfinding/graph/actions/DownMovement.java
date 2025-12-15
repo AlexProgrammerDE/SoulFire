@@ -112,7 +112,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
-      graph.canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem() ? 1 : 0,
+      graph.pathConstraint().canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem() ? 1 : 0,
       false,
       actionDirection,
       cost,
@@ -140,8 +140,8 @@ public final class DownMovement extends GraphAction implements Cloneable {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (graph.disallowedToBreakBlock(absoluteKey)
-        || graph.disallowedToBreakBlock(blockState.getBlock())) {
+      if (!graph.pathConstraint().canBreakBlockPos(absoluteKey)
+        || !graph.pathConstraint().canBreakBlock(blockState.getBlock())) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
