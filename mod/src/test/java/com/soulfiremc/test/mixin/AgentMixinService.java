@@ -102,7 +102,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
 
   private byte[] applyTransformers(String name, byte[] basicClass, Profiler profiler) {
     for (ITransformer transformer : this.getTransformers()) {
-      if (!(transformer instanceof ILegacyClassTransformer)) continue;
+      if (!(transformer instanceof ILegacyClassTransformer legacyClassTransformer)) continue;
       // Clear the re-entrance semaphore
       this.lock.clear();
 
@@ -110,7 +110,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
       String simpleName = transformer.getName().substring(pos + 1);
       Profiler.Section transformTime = profiler.begin(Profiler.FINE, simpleName.toLowerCase(Locale.ROOT));
       transformTime.setInfo(transformer.getName());
-      basicClass = ((ILegacyClassTransformer) transformer).transformClassBytes(name, name, basicClass);
+      basicClass = legacyClassTransformer.transformClassBytes(name, name, basicClass);
       transformTime.end();
 
       if (this.lock.isSet()) {
@@ -200,7 +200,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
 
   @Override
   public MixinEnvironment.CompatibilityLevel getMinCompatibilityLevel() {
-    return MixinEnvironment.CompatibilityLevel.JAVA_8;
+    return MixinEnvironment.CompatibilityLevel.JAVA_21;
   }
 
   @Override
