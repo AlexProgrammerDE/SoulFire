@@ -197,7 +197,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Towering requires placing a block at old feet position
-      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)) {
+      if (!graph.pathConstraint().canPlaceBlock(absoluteKey)) {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
