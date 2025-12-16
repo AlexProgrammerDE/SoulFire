@@ -348,10 +348,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Search for a way to break this block
-      if (!graph.pathConstraint().canBreakBlockPos(absoluteKey)
+      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)
         || !simpleMovement.allowBlockActions
         || blockBreakSideHint == null
-        || !graph.pathConstraint().canBreakBlock(blockState.getBlock())
         // Check if we previously found out this block is unsafe to break
         || simpleMovement.unsafeToBreak[blockArrayIndex]) {
         // No way to break this block
@@ -423,7 +422,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      if (!graph.pathConstraint().canPlaceBlockPos(absoluteKey)
+      if (!graph.pathConstraint().canPlaceBlock(absoluteKey)
         || !simpleMovement.allowBlockActions
         || !blockState.canBeReplaced()) {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;

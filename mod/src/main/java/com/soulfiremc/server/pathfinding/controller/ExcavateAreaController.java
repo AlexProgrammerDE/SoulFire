@@ -80,8 +80,8 @@ public final class ExcavateAreaController {
           .map(BreakBlockPosGoal::new)
           .collect(Collectors.toUnmodifiableSet())), new PathConstraint(bot) {
           @Override
-          public boolean canPlaceBlockPos(SFVec3i pos) {
-            return super.canPlaceBlockPos(pos) && !blocksToMine.contains(pos);
+          public boolean canPlaceBlock(SFVec3i pos) {
+            return super.canPlaceBlock(pos) && !blocksToMine.contains(pos);
           }
         }).get();
       } catch (Exception e) {

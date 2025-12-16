@@ -29,7 +29,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -61,6 +60,14 @@ public class PathConstraint {
     return entity == null || !entity.getAbilities().instabuild;
   }
 
+  public boolean canBreakBlocks() {
+    return true;
+  }
+
+  public boolean canPlaceBlocks() {
+    return true;
+  }
+
   public boolean isPlaceable(ItemStack item) {
     return SFItemHelpers.isSafeFullBlockItem(item);
   }
@@ -73,20 +80,20 @@ public class PathConstraint {
     return blockState.getBlock() == Blocks.VOID_AIR && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
-  public boolean canBreakBlockPos(SFVec3i pos) {
-    return !levelHeightAccessor.isOutsideBuildHeight(pos.y);
-  }
-
-  public boolean canPlaceBlockPos(SFVec3i pos) {
-    return !levelHeightAccessor.isOutsideBuildHeight(pos.y);
-  }
-
-  public boolean canBreakBlock(Block blockType) {
-    if (ALLOW_BREAKING_UNDIGGABLE) {
+  public boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
+    if (!canBreakBlocks()) {
+      return false;
+    } else if (levelHeightAccessor.isOutsideBuildHeight(pos.y)) {
+      return false;
+    } else if (ALLOW_BREAKING_UNDIGGABLE) {
       return true;
+    } else {
+      return SFBlockHelpers.isDiggable(blockState.getBlock());
     }
+  }
 
-    return SFBlockHelpers.isDiggable(blockType);
+  public boolean canPlaceBlock(SFVec3i pos) {
+    return canPlaceBlocks() && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
   public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
