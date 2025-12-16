@@ -24,6 +24,8 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
@@ -35,6 +37,7 @@ import net.kyori.adventure.key.Key;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.intellij.lang.annotations.Subst;
+import org.jspecify.annotations.NonNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -99,14 +102,20 @@ public class PathfindingBenchmark {
 
       var builtAccessor = accessor.build();
 
-      var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+      var pathConstraint = new AbstractDelegatePathConstraint() {
+        @Override
+        protected @NonNull PathConstraint delegate() {
+          return TestPathConstraint.INSTANCE;
+        }
+      };
+      var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, pathConstraint);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
       routeFinder = new RouteFinder(new MinecraftGraph(
         builtAccessor,
         inventory,
-        TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
+        pathConstraint), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {
