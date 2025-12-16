@@ -41,7 +41,7 @@ public class TestMiningCostCalculator implements MiningCostCalculator {
   private TestMiningCostCalculator() {}
 
   @Override
-  public @Nullable BlockMiningCosts calculateBlockBreakCost(@NonNull ProjectedInventory inventory, @NonNull BlockState blockState) {
+  public @Nullable BlockMiningCosts calculateBlockBreakCost(@NonNull ProjectedInventory inventory, @NonNull BlockState blockState, double breakBlockPenalty) {
     // Check if block is unbreakable (like bedrock)
     var destroyTime = blockState.getBlock().defaultDestroyTime();
     if (destroyTime < 0) {
@@ -66,7 +66,7 @@ public class TestMiningCostCalculator implements MiningCostCalculator {
     }
 
     return new BlockMiningCosts(
-      (lowestMiningTicks / Costs.TICKS_PER_BLOCK) + Costs.BREAK_BLOCK_PENALTY,
+      (lowestMiningTicks / Costs.TICKS_PER_BLOCK) + breakBlockPenalty,
       bestItem,
       willDropUsableBlockItem);
   }

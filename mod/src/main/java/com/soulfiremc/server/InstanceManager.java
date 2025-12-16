@@ -36,10 +36,7 @@ import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.script.ScriptManager;
-import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.instance.AccountSettings;
-import com.soulfiremc.server.settings.instance.BotSettings;
-import com.soulfiremc.server.settings.instance.ProxySettings;
+import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -133,7 +130,8 @@ public final class InstanceManager {
         .addInternalPage(BotSettings.class, "Bot Settings")
         .addInternalPage(AccountSettings.class, "Account Settings")
         .addInternalPage(ProxySettings.class, "Proxy Settings")
-        .addInternalPage(AISettings.class, "AI Settings");
+        .addInternalPage(AISettings.class, "AI Settings")
+        .addInternalPage(PathfindingSettings.class, "Pathfinding Settings");
 
       SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
 

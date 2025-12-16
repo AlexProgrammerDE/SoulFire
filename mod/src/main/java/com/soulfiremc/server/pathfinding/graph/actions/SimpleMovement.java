@@ -294,7 +294,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         usableBlockItemsDiff--;
       }
 
-      cost += Costs.PLACE_BLOCK_PENALTY;
+      cost += graph.pathConstraint().placeBlockPenalty();
 
       var floorBlock = absoluteTargetFeetBlock.sub(0, 1, 0);
       actions.add(new BlockPlaceAction(floorBlock, blockPlaceAgainstData));

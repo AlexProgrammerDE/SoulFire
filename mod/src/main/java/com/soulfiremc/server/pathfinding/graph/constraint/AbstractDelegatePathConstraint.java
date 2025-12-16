@@ -79,5 +79,25 @@ public abstract class AbstractDelegatePathConstraint implements PathConstraint {
     return delegate().modifyAsNeeded(instruction);
   }
 
+  @Override
+  public double breakBlockPenalty() {
+    return delegate().breakBlockPenalty();
+  }
+
+  @Override
+  public double placeBlockPenalty() {
+    return delegate().placeBlockPenalty();
+  }
+
+  @Override
+  public int expireTimeout() {
+    return delegate().expireTimeout();
+  }
+
+  @Override
+  public boolean disablePruning() {
+    return delegate().disablePruning();
+  }
+
   protected abstract PathConstraint delegate();
 }

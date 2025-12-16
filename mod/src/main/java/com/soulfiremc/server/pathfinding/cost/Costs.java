@@ -36,10 +36,6 @@ public final class Costs {
   /// The distance in blocks between two points that are diagonal to each other.
   /// Calculated using the Pythagorean theorem.
   public static final double DIAGONAL = Math.sqrt(2);
-  /// We don't want a bot that frequently tries to break blocks instead of walking around them.
-  public static final double BREAK_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-break-block-penalty", 2);
-  /// We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
-  public static final double PLACE_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-place-block-penalty", 5);
   /// A normal server runs at 20 ticks per second.
   public static final double TICKS_PER_SECOND = 20;
   /// Normal player walking speed in blocks per second.

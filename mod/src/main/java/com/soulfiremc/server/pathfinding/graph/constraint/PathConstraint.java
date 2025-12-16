@@ -46,4 +46,16 @@ public interface PathConstraint {
   boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData);
 
   GraphInstructions modifyAsNeeded(GraphInstructions instruction);
+
+  /// Returns the cost penalty for breaking a block during pathfinding.
+  double breakBlockPenalty();
+
+  /// Returns the cost penalty for placing a block during pathfinding.
+  double placeBlockPenalty();
+
+  /// Returns the maximum time in seconds before pathfinding gives up.
+  int expireTimeout();
+
+  /// Returns whether pruning of the pathfinding search space is disabled.
+  boolean disablePruning();
 }

@@ -25,7 +25,18 @@ import org.jspecify.annotations.NonNull;
 public final class TestPathConstraint extends AbstractDelegatePathConstraint {
   public static final TestPathConstraint INSTANCE = new TestPathConstraint();
 
-  private final PathConstraint pathConstraint = new PathConstraintImpl(null, TestLevelHeightAccessor.INSTANCE);
+  private final PathConstraint pathConstraint = new PathConstraintImpl(
+    null,
+    TestLevelHeightAccessor.INSTANCE,
+    false,  // allowBreakingUndiggable
+    false,  // avoidDiagonalSqueeze
+    true,   // avoidHarmfulEntities
+    50,     // maxEnemyPenalty
+    2,      // breakBlockPenalty
+    5,      // placeBlockPenalty
+    180,    // expireTimeout
+    false   // disablePruning
+  );
 
   private TestPathConstraint() {}
 

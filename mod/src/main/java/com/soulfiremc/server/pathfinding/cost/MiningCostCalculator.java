@@ -24,5 +24,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface MiningCostCalculator {
   @Nullable BlockMiningCosts calculateBlockBreakCost(
     ProjectedInventory inventory,
-    BlockState blockState);
+    BlockState blockState,
+    double breakBlockPenalty);
 }

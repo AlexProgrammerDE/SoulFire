@@ -120,7 +120,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       usableBlockItemsDiff--;
     }
 
-    cost += Costs.PLACE_BLOCK_PENALTY;
+    cost += graph.pathConstraint().placeBlockPenalty();
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(

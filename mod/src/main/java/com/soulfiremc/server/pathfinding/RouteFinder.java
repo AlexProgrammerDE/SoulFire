@@ -81,7 +81,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   @VisibleForTesting
   public List<WorldAction> findRouteSync(NodeState from) {
     var stopwatch = Stopwatch.createStarted();
-    var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Integer.getInteger("sf.pathfinding-expire", 180));
+    var pathConstraint = graph.pathConstraint();
+    var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pathConstraint.expireTimeout());
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
@@ -126,7 +127,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       );
     }, 1, TimeUnit.SECONDS, true);
     var cleaner = new CallLimiter(() -> {
-      if (Boolean.getBoolean("sf.pathfinding-no-prune")) {
+      if (pathConstraint.disablePruning()) {
         return;
       }
 

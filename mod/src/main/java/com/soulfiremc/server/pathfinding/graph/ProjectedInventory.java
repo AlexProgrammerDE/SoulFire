@@ -80,8 +80,9 @@ public final class ProjectedInventory {
 
     this.usableBlockItems = blockItems;
     this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new ItemStack[0]);
+    var breakBlockPenalty = pathConstraint.breakBlockPenalty();
     this.sharedMiningCosts = new IDMap<>(Block.BLOCK_STATE_REGISTRY,
-      blockType -> costCalculator.calculateBlockBreakCost(this, blockType));
+      blockType -> costCalculator.calculateBlockBreakCost(this, blockType, breakBlockPenalty));
     this.stairsBlockToStandOn = new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
