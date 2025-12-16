@@ -82,6 +82,8 @@ public final class ExportBasicRenderCommand {
         context.getSource().source().sendInfo("Rendering {}x{} image (render distance: {} chunks / {} blocks)...",
           width, height, renderDistanceChunks, maxDistance);
 
+        var renderStart = System.currentTimeMillis();
+
         var eyePos = player.getEyePosition();
         var yRot = player.getYRot();
         var xRot = player.getXRot();
@@ -93,6 +95,9 @@ public final class ExportBasicRenderCommand {
         var entities = collectEntities(level, player, eyePos, maxDistance);
 
         var image = renderScene(level, eyePos, yRot, xRot, width, height, DEFAULT_FOV, maxDistance, mapFrames, entities);
+
+        var renderTime = System.currentTimeMillis() - renderStart;
+        context.getSource().source().sendInfo("Render completed in {}ms", renderTime);
 
         var fileName = "render_%d_%s.png".formatted(currentTime, bot.accountName());
         try {
