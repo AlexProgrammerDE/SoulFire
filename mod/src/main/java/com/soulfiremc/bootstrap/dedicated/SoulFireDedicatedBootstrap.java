@@ -60,7 +60,7 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
         try {
           return commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource));
         } catch (Throwable t) {
-          log.error("Error while executing command '{}': {}", command, t.getMessage());
+          log.atError().setCause(t).log("Error while executing command '{}'", command);
           return 0;
         }
       },
@@ -68,7 +68,7 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
         try {
           return commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource));
         } catch (Throwable t) {
-          log.error("Error while tab completing command '{}': {}", command, t.getMessage());
+          log.atError().setCause(t).log("Error while tab completing command '{}'", command);
           return List.of();
         }
       },
