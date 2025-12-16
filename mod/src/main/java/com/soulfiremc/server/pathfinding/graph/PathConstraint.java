@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,7 @@ public class PathConstraint {
   private static final boolean DO_NOT_SQUEEZE_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
   private static final boolean DO_NOT_AVOID_HARMFUL_ENTITIES = Boolean.getBoolean("sf.pathfinding-do-not-avoid-harmful-entities");
   private static final int MAX_CLOSE_TO_ENEMY_PENALTY = Integer.getInteger("sf.pathfinding-max-close-to-enemy-penalty", 50);
+  @Nullable
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
   private final CachedLazyObject<List<EntityRangeData>> unfriendlyEntities = new CachedLazyObject<>(this::getUnfriendlyEntitiesExpensive, 10, TimeUnit.SECONDS);
@@ -53,11 +55,11 @@ public class PathConstraint {
   }
 
   public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return entity == null || !entity.getAbilities().instabuild;
+    return entity == null || !entity.hasInfiniteMaterials();
   }
 
   public boolean canBlocksDropWhenBroken() {
-    return entity == null || !entity.getAbilities().instabuild;
+    return entity == null || !entity.preventsBlockDrops();
   }
 
   public boolean canBreakBlocks() {

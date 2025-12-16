@@ -17,19 +17,12 @@
  */
 package com.soulfiremc.server.pathfinding.cost;
 
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFBlockHelpers;
-import net.lenni0451.reflect.Objects;
-import net.minecraft.client.ClientRecipeBook;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
+import com.soulfiremc.server.util.SFHelpers;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /// This class helps in calculating the costs of different actions. It is used in the pathfinding
 /// algorithm to determine the best path to a goal.
@@ -78,19 +71,17 @@ public final class Costs {
     LocalPlayer entity,
     ItemStack itemStack,
     BlockState blockState) {
-    SELECTED_ITEM_MIXIN_OVERRIDE.set(itemStack);
     boolean correctToolUsed;
     float damage;
-    try {
+    try (var ignored = SFHelpers.smartThreadLocalCloseable(SELECTED_ITEM_MIXIN_OVERRIDE, itemStack)) {
       correctToolUsed = entity.hasCorrectToolForDrops(blockState);
       // If this value adds up over all ticks to 1, the block is fully mined
       damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
-    } finally {
-      SELECTED_ITEM_MIXIN_OVERRIDE.remove();
     }
 
-    var creativeMode = entity.getAbilities().instabuild;
-    var willDropUsableBlockItem = correctToolUsed && !creativeMode && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());
+    var willDropUsableBlockItem = correctToolUsed
+      && !entity.preventsBlockDrops()
+      && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());
 
     // Insta mine
     if (damage >= 1) {
