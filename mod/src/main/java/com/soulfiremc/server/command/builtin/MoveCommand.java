@@ -32,7 +32,7 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.goals.XZGoal;
 import com.soulfiremc.server.pathfinding.goals.YGoal;
-import com.soulfiremc.server.pathfinding.graph.PathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.util.Mth;
 
@@ -67,7 +67,7 @@ public final class MoveCommand {
                     PathExecutor.executePathfinding(
                       bot,
                       new PosGoal(SFVec3i.fromDouble(entity.get().position())),
-                      new PathConstraint(bot)
+                      new PathConstraintImpl(bot)
                     );
 
                     return Command.SINGLE_SUCCESS;
@@ -143,7 +143,7 @@ public final class MoveCommand {
     return forEveryBot(
       context,
       bot -> {
-        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraint(bot));
+        PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraintImpl(bot));
         return Command.SINGLE_SUCCESS;
       });
   }

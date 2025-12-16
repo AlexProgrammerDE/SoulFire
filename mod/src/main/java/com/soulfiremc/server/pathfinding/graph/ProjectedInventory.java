@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.pathfinding.cost.BlockMiningCosts;
 import com.soulfiremc.server.pathfinding.cost.EntityMiningCostCalculator;
 import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;

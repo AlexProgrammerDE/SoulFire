@@ -17,9 +17,9 @@
  */
 package com.soulfiremc.test.utils;
 
-import com.soulfiremc.server.pathfinding.graph.PathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 
-public final class TestPathConstraint extends PathConstraint {
+public final class TestPathConstraint extends PathConstraintImpl {
   public static final TestPathConstraint INSTANCE = new TestPathConstraint();
 
   private TestPathConstraint() {

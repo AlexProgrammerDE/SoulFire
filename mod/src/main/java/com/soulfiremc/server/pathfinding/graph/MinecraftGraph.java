@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.level.BlockGetter;

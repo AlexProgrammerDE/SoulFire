@@ -15,10 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding.graph;
+package com.soulfiremc.server.pathfinding.graph.constraint;
 
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
+import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
@@ -40,7 +42,7 @@ import java.util.stream.StreamSupport;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 @RequiredArgsConstructor
-public class PathConstraint {
+public class PathConstraintImpl implements PathConstraint {
   private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
   private static final boolean DO_NOT_SQUEEZE_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
   private static final boolean DO_NOT_AVOID_HARMFUL_ENTITIES = Boolean.getBoolean("sf.pathfinding-do-not-avoid-harmful-entities");
@@ -50,38 +52,46 @@ public class PathConstraint {
   private final LevelHeightAccessor levelHeightAccessor;
   private final CachedLazyObject<List<EntityRangeData>> unfriendlyEntities = new CachedLazyObject<>(this::getUnfriendlyEntitiesExpensive, 10, TimeUnit.SECONDS);
 
-  public PathConstraint(BotConnection botConnection) {
+  public PathConstraintImpl(BotConnection botConnection) {
     this(botConnection.minecraft().player, botConnection.minecraft().level);
   }
 
+  @Override
   public boolean doUsableBlocksDecreaseWhenPlaced() {
     return entity == null || !entity.hasInfiniteMaterials();
   }
 
+  @Override
   public boolean canBlocksDropWhenBroken() {
     return entity == null || !entity.preventsBlockDrops();
   }
 
+  @Override
   public boolean canBreakBlocks() {
     return true;
   }
 
+  @Override
   public boolean canPlaceBlocks() {
     return true;
   }
 
+  @Override
   public boolean isPlaceable(ItemStack item) {
     return SFItemHelpers.isSafeFullBlockItem(item);
   }
 
+  @Override
   public boolean isTool(ItemStack item) {
     return SFItemHelpers.isTool(item);
   }
 
+  @Override
   public boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
     return blockState.getBlock() == Blocks.VOID_AIR && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
+  @Override
   public boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
     if (!canBreakBlocks()) {
       return false;
@@ -94,10 +104,12 @@ public class PathConstraint {
     }
   }
 
+  @Override
   public boolean canPlaceBlock(SFVec3i pos) {
     return canPlaceBlocks() && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
+  @Override
   public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
     if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
       return SFBlockHelpers.COLLISION_SHAPE_NOT_EMPTY.get(collisionData.blockState());
@@ -110,6 +122,7 @@ public class PathConstraint {
     return DiagonalCollisionCalculator.collidesWith(collisionData);
   }
 
+  @Override
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
     if (!DO_NOT_AVOID_HARMFUL_ENTITIES) {
       var addedPenalty = 0D;
