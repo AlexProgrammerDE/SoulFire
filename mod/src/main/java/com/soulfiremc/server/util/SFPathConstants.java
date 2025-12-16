@@ -31,4 +31,8 @@ public final class SFPathConstants {
   public static Path getMapsDirectory(Path baseDir) {
     return baseDir.resolve("maps");
   }
+
+  public static Path getRendersDirectory(Path baseDir) {
+    return baseDir.resolve("renders");
+  }
 }
