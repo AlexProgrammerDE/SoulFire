@@ -19,6 +19,8 @@ dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
   compileOnly(projects.shared)
+  api(projects.pathfinding)
+  include(projects.pathfinding)
 
   minecraft("com.mojang:minecraft:1.21.10")
   @Suppress("UnstableApiUsage")

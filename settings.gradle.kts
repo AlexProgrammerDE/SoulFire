@@ -36,6 +36,7 @@ include(
   "build-data",
   "proto",
   "shared",
+  "pathfinding",
   "mod",
   "launcher",
   "j8-launcher",
