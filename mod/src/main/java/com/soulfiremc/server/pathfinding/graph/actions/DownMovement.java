@@ -140,12 +140,12 @@ public final class DownMovement extends GraphAction implements Cloneable {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)) {
+      if (!graph.mcPathConstraint().canBreakBlock(absoluteKey, blockState)) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
-      var cacheableMiningCost = graph.inventory().getMiningCosts(blockState);
+      var cacheableMiningCost = graph.mcInventory().getMiningCosts(blockState);
       // We can mine this block, lets add costs and continue
       downMovement.breakCost = new MovementMiningCost(
         absoluteKey,

@@ -21,6 +21,8 @@ import com.soulfiremc.server.pathfinding.cost.BlockMiningCosts;
 import com.soulfiremc.server.pathfinding.cost.EntityMiningCostCalculator;
 import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.pathfinding.minecraft.MinecraftBlockState;
+import com.soulfiremc.server.pathfinding.world.BlockState;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;
@@ -32,7 +34,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.compress.utils.Lists;
 
 import java.util.HashSet;
@@ -41,19 +42,20 @@ import java.util.Objects;
 
 /// An immutable representation of a player inventory. This takes an inventory and projects places/breaks
 /// onto it. This way we calculate the way we can do actions after a block was broken/placed.
+/// Implements the abstract ProjectedInventory interface for pathfinding module compatibility.
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
-public final class ProjectedInventory {
+public final class MinecraftProjectedInventory implements ProjectedInventory {
   @Getter
   @ToString.Include
   private final int usableBlockItems;
   @Getter
   @ToString.Include
   private final ItemStack[] usableToolsAndEmpty;
-  private final IDMap<BlockState, BlockMiningCosts> sharedMiningCosts;
-  private final IDBooleanMap<BlockState> stairsBlockToStandOn;
+  private final IDMap<net.minecraft.world.level.block.state.BlockState, BlockMiningCosts> sharedMiningCosts;
+  private final IDBooleanMap<net.minecraft.world.level.block.state.BlockState> stairsBlockToStandOn;
 
-  public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
+  public MinecraftProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
     this(
       Lists.newArrayList(playerInventory.iterator())
         .stream()
@@ -63,7 +65,7 @@ public final class ProjectedInventory {
       pathConstraint);
   }
 
-  public ProjectedInventory(List<ItemStack> items, MiningCostCalculator costCalculator, PathConstraint pathConstraint) {
+  public MinecraftProjectedInventory(List<ItemStack> items, MiningCostCalculator costCalculator, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndEmpty = new HashSet<ItemStack>();
 
@@ -87,11 +89,36 @@ public final class ProjectedInventory {
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
 
-  public BlockMiningCosts getMiningCosts(BlockState blockState) {
+  /// Minecraft-specific method to get mining costs.
+  public BlockMiningCosts getMiningCosts(net.minecraft.world.level.block.state.BlockState blockState) {
     return Objects.requireNonNull(sharedMiningCosts.get(blockState), "Block not destructible");
   }
 
-  public boolean isStairsBlockToStandOn(BlockState blockState) {
+  /// Minecraft-specific method to check if a block is a stairs block suitable for standing on.
+  public boolean isStairsBlockToStandOn(net.minecraft.world.level.block.state.BlockState blockState) {
     return stairsBlockToStandOn.get(blockState);
+  }
+
+  // Abstract interface implementations
+
+  @Override
+  public int usableBlockItems() {
+    return usableBlockItems;
+  }
+
+  @Override
+  public BlockMiningCosts getMiningCosts(BlockState blockState) {
+    if (blockState instanceof MinecraftBlockState mcState) {
+      return getMiningCosts(mcState.unwrap());
+    }
+    throw new IllegalArgumentException("Expected MinecraftBlockState but got: " + blockState.getClass());
+  }
+
+  @Override
+  public boolean isStairsBlockToStandOn(BlockState blockState) {
+    if (blockState instanceof MinecraftBlockState mcState) {
+      return isStairsBlockToStandOn(mcState.unwrap());
+    }
+    throw new IllegalArgumentException("Expected MinecraftBlockState but got: " + blockState.getClass());
   }
 }

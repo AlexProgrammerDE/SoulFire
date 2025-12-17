@@ -21,6 +21,7 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
@@ -43,7 +44,7 @@ public final class ExcavateAreaController {
     for (var x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
       for (var y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {
         for (var z = Math.min(from.z, to.z); z <= Math.max(from.z, to.z); z++) {
-          cube.add(new SFVec3i(x, y, z));
+          cube.add(SFVec3i.from(x, y, z));
         }
       }
     }
@@ -57,7 +58,7 @@ public final class ExcavateAreaController {
       for (var y = -radius; y <= radius; y++) {
         for (var z = -radius; z <= radius; z++) {
           if (Math.sqrt(x * x + y * y + z * z) <= radius) {
-            sphere.add(new SFVec3i(origin.x + x, origin.y + y, origin.z + z));
+            sphere.add(SFVec3i.from(origin.x + x, origin.y + y, origin.z + z));
           }
         }
       }
@@ -68,7 +69,7 @@ public final class ExcavateAreaController {
 
   private boolean someBlocksCanBeMined(BotConnection bot) {
     return blocksToMine.stream().anyMatch(blockPos -> {
-      var blockState = bot.minecraft().level.getBlockState(blockPos.toBlockPos());
+      var blockState = bot.minecraft().level.getBlockState(SFVec3iMinecraft.toBlockPos(blockPos));
       return SFBlockHelpers.isFullBlock(blockState) && SFBlockHelpers.isDiggable(blockState.getBlock());
     });
   }

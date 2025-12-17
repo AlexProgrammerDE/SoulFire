@@ -21,11 +21,15 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.pathfinding.minecraft.MinecraftBlockAccessor;
+import com.soulfiremc.server.pathfinding.world.BlockAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +44,8 @@ import java.util.function.Consumer;
 /// This way we can most efficiently calculate the actions that can be performed on a blocks by immediately running multiple actions per block.
 /// Traditionally an action would dynamically check if it is possible and a block would be considered multiple times across multiple actions.
 /// However, with subscriptions multiple actions can "opt-in" to a block and perform their checks on a block a single time.
-///
-/// @param blockAccessor  The block accessor
-/// @param inventory      The inventory of the bot
-/// @param pathConstraint The path constraint
 @Slf4j
-public record MinecraftGraph(BlockGetter blockAccessor,
-                             ProjectedInventory inventory,
-                             PathConstraint pathConstraint) {
+public final class MinecraftGraph implements PathfindingGraph {
   public static final int ACTIONS_SIZE;
   private static final GraphAction[] ACTIONS_TEMPLATE;
   private static final SFVec3i[] SUBSCRIPTION_KEYS;
@@ -87,6 +85,50 @@ public record MinecraftGraph(BlockGetter blockAccessor,
     }
   }
 
+  private final BlockGetter mcBlockAccessor;
+  private final MinecraftBlockAccessor abstractBlockAccessor;
+  private final MinecraftProjectedInventory inventory;
+  private final PathConstraint pathConstraint;
+
+  public MinecraftGraph(BlockGetter blockAccessor, LevelHeightAccessor heightAccessor,
+                        MinecraftProjectedInventory inventory, PathConstraint pathConstraint) {
+    this.mcBlockAccessor = blockAccessor;
+    this.abstractBlockAccessor = new MinecraftBlockAccessor(blockAccessor, heightAccessor);
+    this.inventory = inventory;
+    this.pathConstraint = pathConstraint;
+  }
+
+  @Override
+  public int actionsSize() {
+    return ACTIONS_SIZE;
+  }
+
+  @Override
+  public BlockAccessor blockAccessor() {
+    return abstractBlockAccessor;
+  }
+
+  @Override
+  public com.soulfiremc.server.pathfinding.graph.ProjectedInventory inventory() {
+    return inventory;
+  }
+
+  @Override
+  public com.soulfiremc.server.pathfinding.graph.PathConstraint pathConstraint() {
+    return pathConstraint;
+  }
+
+  /// Returns the Minecraft-specific inventory for internal use.
+  public MinecraftProjectedInventory mcInventory() {
+    return inventory;
+  }
+
+  /// Returns the Minecraft-specific path constraint for internal use.
+  public PathConstraint mcPathConstraint() {
+    return pathConstraint;
+  }
+
+  @Override
   public void insertActions(SFVec3i node, @Nullable ActionDirection fromDirection, Consumer<GraphInstructions> callback) {
     log.debug("Inserting actions for node: {}", node);
     calculateActions(node, generateTemplateActions(fromDirection), callback);
@@ -136,7 +178,7 @@ public record MinecraftGraph(BlockGetter blockAccessor,
       if (blockState == null) {
         // Lazy calculation to avoid unnecessary calls
         absolutePositionBlock = node.add(key);
-        blockState = blockAccessor.getBlockState(absolutePositionBlock.toBlockPos());
+        blockState = mcBlockAccessor.getBlockState(new BlockPos(absolutePositionBlock.x, absolutePositionBlock.y, absolutePositionBlock.z));
 
         if (pathConstraint.isOutOfLevel(blockState, absolutePositionBlock)) {
           throw new OutOfLevelException();

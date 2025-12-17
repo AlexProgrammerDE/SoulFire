@@ -348,7 +348,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Search for a way to break this block
-      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)
+      if (!graph.mcPathConstraint().canBreakBlock(absoluteKey, blockState)
         || !simpleMovement.allowBlockActions
         || blockBreakSideHint == null
         // Check if we previously found out this block is unsafe to break
@@ -357,7 +357,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
-      var cacheableMiningCost = graph.inventory().getMiningCosts(blockState);
+      var cacheableMiningCost = graph.mcInventory().getMiningCosts(blockState);
       // We can mine this block, lets add costs and continue
       simpleMovement.blockBreakCosts[blockArrayIndex] =
         new MovementMiningCost(
@@ -418,7 +418,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // Stairs blocks are pretty much identical to full blocks
-      if (graph.inventory().isStairsBlockToStandOn(blockState)) {
+      if (graph.mcInventory().isStairsBlockToStandOn(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
@@ -442,7 +442,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         || SFBlockHelpers.affectsTouchMovementSpeed(blockState.getBlock())) {
         // Since this is a corner, we can also avoid touching blocks that hurt us, e.g., cacti
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
-      } else if (graph.pathConstraint().collidesWithAtEdge(new DiagonalCollisionCalculator.CollisionData(blockState, diagonalArrayIndex, bodyPart, side))) {
+      } else if (graph.mcPathConstraint().collidesWithAtEdge(new DiagonalCollisionCalculator.CollisionData(blockState, diagonalArrayIndex, bodyPart, side))) {
         var blockedSide = simpleMovement.blockedSide;
         if (blockedSide == null) {
           simpleMovement.blockedSide = side;

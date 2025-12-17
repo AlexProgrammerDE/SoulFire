@@ -24,8 +24,9 @@ import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.pathfinding.graph.MinecraftProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
@@ -64,17 +65,17 @@ public final class PathExecutor implements ControllingTask {
       requiresRepositioning -> {
         var level = bot.minecraft().player.level();
         var inventory =
-          new ProjectedInventory(clientEntity.getInventory(), clientEntity, pathConstraint);
+          new MinecraftProjectedInventory(clientEntity.getInventory(), clientEntity, pathConstraint);
         var start =
-          SFVec3i.fromInt(clientEntity.blockPosition());
-        var startBlockState = level.getBlockState(start.toBlockPos());
+          SFVec3iMinecraft.fromBlockPos(clientEntity.blockPosition());
+        var startBlockState = level.getBlockState(SFVec3iMinecraft.toBlockPos(start));
         if (SFBlockHelpers.isTopFullBlock(startBlockState)) {
           // If the player is inside a block, move them up
           start = start.add(0, 1, 0);
         }
 
         var routeFinder =
-          new RouteFinder(new MinecraftGraph(level, inventory, pathConstraint), goalScorer);
+          new RouteFinder(new MinecraftGraph(level, level, inventory, pathConstraint), goalScorer);
 
         log.info("Starting calculations at: {}", start.formatXYZ());
         var actionsFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory), requiresRepositioning);
@@ -181,7 +182,7 @@ public final class PathExecutor implements ControllingTask {
       return;
     }
 
-    if (SFVec3i.fromInt(connection.minecraft().player.blockPosition())
+    if (SFVec3iMinecraft.fromBlockPos(connection.minecraft().player.blockPosition())
       .distance(worldAction.targetPosition(connection)) > MAX_ERROR_DISTANCE) {
       log.warn("More than {} blocks away from target, this must be a mistake!", MAX_ERROR_DISTANCE);
       log.warn("Recalculating path...");

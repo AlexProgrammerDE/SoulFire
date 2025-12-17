@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.graph.constraint;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.settings.instance.PathfindingSettings;
 import com.soulfiremc.server.settings.lib.SettingsSource;
@@ -224,7 +225,7 @@ public final class PathConstraintImpl implements PathConstraint {
         ? Stream.of(livingEntity) : Stream.empty())
       .map(e -> new EntityRangeData(
         e.getAttributeValue(Attributes.FOLLOW_RANGE),
-        SFVec3i.fromInt(e.blockPosition())
+        SFVec3iMinecraft.fromBlockPos(e.blockPosition())
       ))
       .toList();
   }

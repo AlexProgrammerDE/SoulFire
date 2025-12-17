@@ -172,13 +172,13 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
 
       // Search for a way to break this block
-      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)
+      if (!graph.mcPathConstraint().canBreakBlock(absoluteKey, blockState)
         || upMovement.unsafeToBreak[blockArrayIndex]) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
-      var cacheableMiningCost = graph.inventory().getMiningCosts(blockState);
+      var cacheableMiningCost = graph.mcInventory().getMiningCosts(blockState);
       // We can mine this block, lets add costs and continue
       upMovement.blockBreakCosts[blockArrayIndex] =
         new MovementMiningCost(

@@ -21,6 +21,7 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public final class CollectBlockController {
   public static Set<SFVec3i> searchWithinRadius(BotConnection botConnection, Predicate<BlockState> checker, int radius) {
     var clientEntity = botConnection.minecraft().player;
     var level = botConnection.minecraft().level;
-    var rootPosition = SFVec3i.fromInt(clientEntity.blockPosition());
+    var rootPosition = SFVec3iMinecraft.fromBlockPos(clientEntity.blockPosition());
 
     var minY = Math.max(level.getMinY(), rootPosition.y - radius);
     var maxY = Math.min(level.getMaxY(), rootPosition.y + radius);
@@ -55,8 +56,8 @@ public final class CollectBlockController {
         var blockX = rootPosition.x + x;
         var blockZ = rootPosition.z + z;
         for (var y = minY; y <= maxY; y++) {
-          var blockPos = new SFVec3i(blockX, y, blockZ);
-          var blockState = level.getBlockState(blockPos.toBlockPos());
+          var blockPos = SFVec3i.from(blockX, y, blockZ);
+          var blockState = level.getBlockState(SFVec3iMinecraft.toBlockPos(blockPos));
           if (!(blockState.getBlock() instanceof AirBlock) && checker.test(blockState)) {
             list.add(blockPos);
           }

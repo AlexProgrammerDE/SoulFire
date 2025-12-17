@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.pathfinding.cost;
 
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.pathfinding.graph.MinecraftProjectedInventory;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record EntityMiningCostCalculator(LocalPlayer player) implements MiningCostCalculator {
   @Override
-  public @Nullable BlockMiningCosts calculateBlockBreakCost(ProjectedInventory inventory, BlockState blockState, double breakBlockPenalty) {
+  public @Nullable BlockMiningCosts calculateBlockBreakCost(MinecraftProjectedInventory inventory, BlockState blockState, double breakBlockPenalty) {
     var lowestMiningTicks = Integer.MAX_VALUE;
     ItemStack bestItem = null;
     var willDropUsableBlockItem = false;

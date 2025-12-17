@@ -18,44 +18,60 @@
 package com.soulfiremc.server.pathfinding.graph.constraint;
 
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.CollisionData;
 import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.pathfinding.minecraft.MinecraftBlockState;
+import com.soulfiremc.server.pathfinding.world.BlockState;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 
+/// Minecraft-specific path constraint interface that extends the abstract PathConstraint.
+/// This interface adds methods that work with Minecraft types directly.
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-public interface PathConstraint {
-  boolean doUsableBlocksDecreaseWhenPlaced();
-
-  boolean canBlocksDropWhenBroken();
-
-  boolean canBreakBlocks();
-
-  boolean canPlaceBlocks();
-
+public interface PathConstraint extends com.soulfiremc.server.pathfinding.graph.PathConstraint {
   boolean isPlaceable(ItemStack item);
 
   boolean isTool(ItemStack item);
 
-  boolean isOutOfLevel(BlockState blockState, SFVec3i pos);
+  /// Minecraft-specific version of isOutOfLevel.
+  boolean isOutOfLevel(net.minecraft.world.level.block.state.BlockState blockState, SFVec3i pos);
 
-  boolean canBreakBlock(SFVec3i pos, BlockState blockState);
+  /// Minecraft-specific version of canBreakBlock.
+  boolean canBreakBlock(SFVec3i pos, net.minecraft.world.level.block.state.BlockState blockState);
 
-  boolean canPlaceBlock(SFVec3i pos);
-
+  /// Minecraft-specific version of collidesWithAtEdge.
   boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData);
 
-  GraphInstructions modifyAsNeeded(GraphInstructions instruction);
+  // Default implementations for abstract interface methods that delegate to Minecraft-specific ones
 
-  /// Returns the cost penalty for breaking a block during pathfinding.
-  double breakBlockPenalty();
+  @Override
+  default boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
+    if (blockState instanceof MinecraftBlockState mcState) {
+      return isOutOfLevel(mcState.unwrap(), pos);
+    }
+    throw new IllegalArgumentException("Expected MinecraftBlockState but got: " + blockState.getClass());
+  }
 
-  /// Returns the cost penalty for placing a block during pathfinding.
-  double placeBlockPenalty();
+  @Override
+  default boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
+    if (blockState instanceof MinecraftBlockState mcState) {
+      return canBreakBlock(pos, mcState.unwrap());
+    }
+    throw new IllegalArgumentException("Expected MinecraftBlockState but got: " + blockState.getClass());
+  }
 
-  /// Returns the maximum time in seconds before pathfinding gives up.
-  int expireTimeout();
-
-  /// Returns whether pruning of the pathfinding search space is disabled.
-  boolean disablePruning();
+  @Override
+  default boolean collidesWithAtEdge(CollisionData collisionData) {
+    // For the abstract CollisionData, we need to convert it to Minecraft's CollisionData
+    // This requires the underlying BlockState to be a MinecraftBlockState
+    if (collisionData.blockState() instanceof MinecraftBlockState mcState) {
+      return collidesWithAtEdge(new DiagonalCollisionCalculator.CollisionData(
+        mcState.unwrap(),
+        collisionData.diagonalArrayIndex(),
+        collisionData.bodyPart(),
+        collisionData.side()
+      ));
+    }
+    throw new IllegalArgumentException("Expected MinecraftBlockState but got: " + collisionData.blockState().getClass());
+  }
 }

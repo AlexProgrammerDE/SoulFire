@@ -21,6 +21,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.BodyPart;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.DiagonalDirection;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementSide;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.util.structs.EmptyBlockGetter;
 import com.soulfiremc.server.util.structs.IDMap;
 import net.minecraft.core.BlockPos;
@@ -45,7 +46,7 @@ public final class DiagonalCollisionCalculator {
           var collides = false;
 
           for (var step : STEPS) {
-            var currentPosition = START_POSITION.add(step.multiply(baseOffset.toVec3()));
+            var currentPosition = START_POSITION.add(step.multiply(SFVec3iMinecraft.toVec3(baseOffset)));
             var collisionShape = blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
             if (collisionShape.isEmpty()) {
               continue;
@@ -53,7 +54,7 @@ public final class DiagonalCollisionCalculator {
 
             collides = collisionShape
               .bounds()
-              .move(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO)).toBlockPos())
+              .move(SFVec3iMinecraft.toBlockPos(bodyPart.offset(diagonal.side(side).offset(SFVec3i.ZERO))))
               .intersects(Avatar.STANDING_DIMENSIONS.makeBoundingBox(currentPosition));
 
             if (collides) {

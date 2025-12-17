@@ -20,6 +20,7 @@ package com.soulfiremc.server.pathfinding.execution;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.cost.Costs;
+import com.soulfiremc.server.pathfinding.minecraft.SFVec3iMinecraft;
 import com.soulfiremc.server.util.BlockItems;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import com.soulfiremc.server.util.TimeUtil;
@@ -92,7 +93,7 @@ public final class ItemPlaceHelper {
         sawEmpty = true;
       }
 
-      var optionalBlock = level.getBlockState(blockPosition.toBlockPos());
+      var optionalBlock = level.getBlockState(SFVec3iMinecraft.toBlockPos(blockPosition));
       if (optionalBlock.getBlock() == Blocks.VOID_AIR) {
         throw new IllegalStateException("Block at %s is not loaded".formatted(blockPosition));
       }

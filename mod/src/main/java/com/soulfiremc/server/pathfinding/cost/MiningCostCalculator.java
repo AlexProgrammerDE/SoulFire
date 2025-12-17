@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.server.pathfinding.cost;
 
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.pathfinding.graph.MinecraftProjectedInventory;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface MiningCostCalculator {
   @Nullable BlockMiningCosts calculateBlockBreakCost(
-    ProjectedInventory inventory,
+    MinecraftProjectedInventory inventory,
     BlockState blockState,
     double breakBlockPenalty);
 }
