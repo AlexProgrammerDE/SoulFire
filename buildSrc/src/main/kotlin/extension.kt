@@ -11,8 +11,8 @@ fun PublishingExtension.applyMainPublishing(project: Project) {
     maven("https://repo.codemc.org/repository/${repoName}/") {
       name = "codemc"
       credentials {
-        username = System.getenv("CODEMC_USERNAME")
-        password = System.getenv("CODEMC_PASSWORD")
+        username = project.providers.environmentVariable("CODEMC_USERNAME").orNull
+        password = project.providers.environmentVariable("CODEMC_PASSWORD").orNull
       }
     }
   }
@@ -21,7 +21,7 @@ fun PublishingExtension.applyMainPublishing(project: Project) {
     register<MavenPublication>("mavenJava") {
       pom {
         name = "SoulFire"
-        description = project.rootProject.description
+        description = project.description
         url = "https://soulfiremc.com"
         organization {
           name = "AlexProgrammerDE"

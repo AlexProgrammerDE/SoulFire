@@ -8,6 +8,8 @@ base {
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireCLIJava8Launcher"
 
+val ideaActive = providers.systemProperty("idea.active")
+
 tasks.register("runSFCLI", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire client"
@@ -35,7 +37,7 @@ tasks.register("runSFCLI", JavaExec::class) {
     "-Dsf.remapToNamed=true"
   )
 
-  if (System.getProperty("idea.active") != null) {
+  if (ideaActive.isPresent) {
     argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
   }
 
@@ -74,7 +76,7 @@ tasks.register("printSFCLIFlags", JavaExec::class) {
     "-Dsf.flags.v2=true"
   )
 
-  if (System.getProperty("idea.active") != null) {
+  if (ideaActive.isPresent) {
     argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
   }
 

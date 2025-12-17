@@ -12,6 +12,6 @@ spotless {
 
     importOrder("", "javax|java", "\\#")
 
-    licenseHeaderFile(rootProject.file("file_header.txt"))
+    licenseHeaderFile(rootProject.layout.projectDirectory.file("file_header.txt"))
   }
 }

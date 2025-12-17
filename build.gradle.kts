@@ -9,21 +9,28 @@ dependencies {
   javadocClasspath(libs.immutables.value)
   javadocClasspath(libs.immutables.gson)
 
-  rootProject.subprojects.forEach { subproject ->
-    if (subproject.name == "data-generator") {
-      return@forEach
-    }
-
-    subproject.plugins.withId("java") {
-      javadocClasspath(subproject)
-      javadoc(subproject)
-    }
+  // Explicitly list Java subprojects for configuration cache compatibility
+  listOf(
+    projects.buildData,
+    projects.proto,
+    projects.shared,
+    projects.mod,
+    projects.launcher,
+    projects.j8Launcher,
+    projects.clientLauncher,
+    projects.dedicatedLauncher
+  ).forEach { projectDep ->
+    javadocClasspath(projectDep)
+    javadoc(projectDep)
   }
 }
 
 tasks {
   javadoc {
-    classpath += project.project("mod").sourceSets["main"].compileClasspath
+    dependsOn(projects.mod.dependencyProject.tasks.named("compileJava"))
+    classpath += files(projects.mod.dependencyProject.tasks.named("compileJava").map {
+      (it as JavaCompile).classpath
+    })
   }
   build {
     dependsOn("javadoc")
@@ -36,9 +43,9 @@ tasks.register<Javadoc>("generateTSDoc") {
 
   source = tasks.javadoc.get().source
   classpath = tasks.javadoc.get().classpath
-  destinationDir = rootProject.layout.buildDirectory.asFile.get().resolve("docs/typescript/headers")
+  destinationDir = layout.buildDirectory.dir("docs/typescript/headers").get().asFile
   options.doclet = "com.soulfiremc.doclet.TSDoclet"
-  options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
+  options.docletpath = listOf(layout.projectDirectory.dir("buildSrc/build/libs").file("soulfire-buildsrc.jar").asFile)
   (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
 }
 
@@ -48,9 +55,9 @@ tasks.register<Javadoc>("generatePyDoc") {
 
   source = tasks.javadoc.get().source
   classpath = tasks.javadoc.get().classpath
-  destinationDir = rootProject.layout.buildDirectory.asFile.get().resolve("docs/python/headers")
+  destinationDir = layout.buildDirectory.dir("docs/python/headers").get().asFile
   options.doclet = "com.soulfiremc.doclet.PyDoclet"
-  options.docletpath = listOf(rootProject.rootDir.resolve("buildSrc/build/libs/soulfire-buildsrc.jar"))
+  options.docletpath = listOf(layout.projectDirectory.dir("buildSrc/build/libs").file("soulfire-buildsrc.jar").asFile)
   (options as StandardJavadocDocletOptions).addStringOption("v", project.version.toString())
 }
 

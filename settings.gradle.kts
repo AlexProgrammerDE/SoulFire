@@ -22,13 +22,11 @@ dependencyResolutionManagement {
 
 develocity {
   buildScan {
-    val isCi = !System.getenv("CI").isNullOrEmpty()
-    if (isCi) {
-      termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
-      termsOfUseAgree = "yes"
-      tag("CI")
-    }
-    publishing.onlyIf { isCi }
+    val ciProvider = providers.environmentVariable("CI")
+    termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+    termsOfUseAgree = "yes"
+    tag("CI")
+    publishing.onlyIf { ciProvider.isPresent }
   }
 }
 

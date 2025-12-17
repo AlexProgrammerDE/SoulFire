@@ -8,6 +8,8 @@ base {
 
 val projectMainClass = "com.soulfiremc.launcher.SoulFireDedicatedJava8Launcher"
 
+val ideaActive = providers.systemProperty("idea.active")
+
 tasks.register("runSFDedicated", JavaExec::class) {
   group = "application"
   description = "Runs the SoulFire dedicated server"
@@ -35,7 +37,7 @@ tasks.register("runSFDedicated", JavaExec::class) {
     "-Dsf.remapToNamed=true"
   )
 
-  if (System.getProperty("idea.active") != null) {
+  if (ideaActive.isPresent) {
     argsMutable += "-Dnet.kyori.ansi.colorLevel=truecolor"
   }
 
@@ -43,9 +45,12 @@ tasks.register("runSFDedicated", JavaExec::class) {
 
   standardInput = System.`in`
 
-  val runDir = projectDir.resolve("run")
-  runDir.mkdirs()
-  workingDir = runDir
+  val runDir = layout.projectDirectory.dir("run")
+  workingDir = runDir.asFile
+
+  doFirst {
+    runDir.asFile.mkdirs()
+  }
 
   outputs.upToDateWhen { false }
 }

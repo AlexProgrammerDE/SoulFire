@@ -68,7 +68,10 @@ tasks {
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
   }
   withType<Jar> {
-    from(rootProject.file("LICENSE"))
+    from(rootProject.layout.projectDirectory.file("LICENSE"))
+  }
+  withType<Zip>().configureEach {
+    isZip64 = true
   }
 }
 
@@ -82,10 +85,4 @@ java {
 
 lombok {
   version = "1.18.42"
-}
-
-afterEvaluate {
-  tasks.withType<Zip> {
-    isZip64 = true
-  }
 }
