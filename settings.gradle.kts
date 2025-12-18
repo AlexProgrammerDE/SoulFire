@@ -41,6 +41,7 @@ include(
   "j8-launcher",
   "client-launcher",
   "dedicated-launcher",
+  "javadoc",
 )
 
 rootProject.name = "soulfire"

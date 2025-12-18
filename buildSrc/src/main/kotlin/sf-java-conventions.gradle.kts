@@ -32,16 +32,17 @@ dependencies {
 tasks {
   // Variable replacements
   processResources {
+    // Capture values at configuration time for configuration cache compatibility
+    val expandProperties = mapOf(
+      "version" to project.version.toString(),
+      "description" to (project.description ?: ""),
+      "url" to "https://soulfiremc.com",
+      "commit" to (indraGit.commit().orNull?.name ?: "unknown"),
+      "branch" to (indraGit.branchName().orNull ?: "unknown"),
+    )
+    inputs.properties(expandProperties)
     filesMatching(listOf("fabric.mod.json", "soulfire-build-data.properties")) {
-      expand(
-        mapOf(
-          "version" to project.version,
-          "description" to project.description,
-          "url" to "https://soulfiremc.com",
-          "commit" to (indraGit.commit().orNull?.name ?: "unknown"),
-          "branch" to (indraGit.branchName().orNull ?: "unknown"),
-        )
-      )
+      expand(expandProperties)
     }
   }
   javadoc {
