@@ -22,7 +22,10 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
-public class Base64Helpers {
+public final class Base64Helpers {
+  private Base64Helpers() {
+  }
+
   public static String joinBase64(String[] args) {
     return Arrays.stream(args)
       .map(s -> Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8)))
@@ -33,8 +36,5 @@ public class Base64Helpers {
     return Arrays.stream(base64.split(","))
       .map(s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8))
       .toArray(String[]::new);
-  }
-
-  private Base64Helpers() {
   }
 }

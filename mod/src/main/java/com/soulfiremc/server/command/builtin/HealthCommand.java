@@ -24,6 +24,9 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class HealthCommand {
+  private HealthCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("health")
@@ -44,8 +47,5 @@ public final class HealthCommand {
 
                 return Command.SINGLE_SUCCESS;
               }))));
-  }
-
-  private HealthCommand() {
   }
 }

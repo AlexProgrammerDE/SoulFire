@@ -34,8 +34,11 @@ import io.netty.channel.uring.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 
-public class TransportHelper {
+public final class TransportHelper {
   public static final TransportHelper.TransportType TRANSPORT_TYPE = TransportHelper.determineTransportMethod();
+
+  private TransportHelper() {
+  }
 
   private static TransportType determineTransportMethod() {
     if (IoUring.isAvailable()) {
@@ -111,8 +114,5 @@ public class TransportHelper {
                               Function<ThreadFactory, EventLoopGroup> eventLoopGroupFactory,
                               boolean supportsTcpFastOpenServer,
                               boolean supportsTcpFastOpenClient) {
-  }
-
-  private TransportHelper() {
   }
 }

@@ -127,7 +127,7 @@ dependencies {
     files(
       configurations.detachedConfiguration(
         *libs.bundles.graalvm.polyglot.get()
-          .map { it -> dependencies.create(it) }
+          .map { dependencies.create(it) }
           .toTypedArray())
         .resolve()
         .filter { file -> file.name.endsWith(".jar") }

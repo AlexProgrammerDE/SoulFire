@@ -41,6 +41,9 @@ public final class BlockItems {
     }
   }
 
+  private BlockItems() {
+  }
+
   public static Optional<Block> getBlock(Item itemType) {
     return Optional.ofNullable(VALUES[BuiltInRegistries.ITEM.getId(itemType)]);
   }
@@ -51,8 +54,5 @@ public final class BlockItems {
 
   public static boolean hasItem(Block blockType) {
     return VALUES_REVERSE[BuiltInRegistries.BLOCK.getId(blockType)] != null;
-  }
-
-  private BlockItems() {
   }
 }

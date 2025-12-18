@@ -43,6 +43,9 @@ import java.util.stream.StreamSupport;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class MoveCommand {
+  private MoveCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("move")
@@ -146,8 +149,5 @@ public final class MoveCommand {
         PathExecutor.executePathfinding(bot, goalScorerFactory.apply(bot), new PathConstraintImpl(bot));
         return Command.SINGLE_SUCCESS;
       });
-  }
-
-  private MoveCommand() {
   }
 }

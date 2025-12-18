@@ -73,13 +73,6 @@ public class ScriptManager {
     SoulFireAPI.registerListenersOfObject(this);
   }
 
-  @EventHandler
-  public void handleGenericEvent(SoulFireInstanceEvent event) {
-    if (event.instanceManager() == instanceManager) {
-      forwardEvent(event);
-    }
-  }
-
   private static void unlockClass(HostAccess.Builder builder, Class<?> clazz) {
     for (var field : clazz.getFields()) {
       builder.allowAccess(field);
@@ -91,6 +84,13 @@ public class ScriptManager {
 
     for (var constructor : clazz.getConstructors()) {
       builder.allowAccess(constructor);
+    }
+  }
+
+  @EventHandler
+  public void handleGenericEvent(SoulFireInstanceEvent event) {
+    if (event.instanceManager() == instanceManager) {
+      forwardEvent(event);
     }
   }
 

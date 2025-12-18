@@ -31,6 +31,9 @@ import net.minecraft.world.level.block.Block;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class CollectCommand {
+  private CollectCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("collect")
@@ -62,8 +65,5 @@ public final class CollectCommand {
                         return Command.SINGLE_SUCCESS;
                       });
                   }))))));
-  }
-
-  private CollectCommand() {
   }
 }

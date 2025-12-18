@@ -24,6 +24,9 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class RespawnCommand {
+  private RespawnCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("respawn")
@@ -41,8 +44,5 @@ public final class RespawnCommand {
 
                   return Command.SINGLE_SUCCESS;
                 }))));
-  }
-
-  private RespawnCommand() {
   }
 }

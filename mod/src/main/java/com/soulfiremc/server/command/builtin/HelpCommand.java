@@ -26,6 +26,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
 public final class HelpCommand {
+  private HelpCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("help")
@@ -40,8 +43,5 @@ public final class HelpCommand {
 
               return Command.SINGLE_SUCCESS;
             })));
-  }
-
-  private HelpCommand() {
   }
 }

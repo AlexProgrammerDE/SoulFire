@@ -27,6 +27,9 @@ import com.soulfiremc.server.pathfinding.controller.FollowEntityController;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class FollowCommand {
+  private FollowCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("follow")
@@ -50,8 +53,5 @@ public final class FollowCommand {
                       return Command.SINGLE_SUCCESS;
                     });
                 })))));
-  }
-
-  private FollowCommand() {
   }
 }

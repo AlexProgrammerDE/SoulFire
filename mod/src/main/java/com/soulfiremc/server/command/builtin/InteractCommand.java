@@ -31,6 +31,9 @@ import java.util.stream.StreamSupport;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InteractCommand {
+  private InteractCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("interact")
@@ -77,8 +80,5 @@ public final class InteractCommand {
                           return Command.SINGLE_SUCCESS;
                         });
                     })))));
-  }
-
-  private InteractCommand() {
   }
 }

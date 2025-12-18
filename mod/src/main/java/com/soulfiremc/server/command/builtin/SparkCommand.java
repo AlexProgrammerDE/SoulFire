@@ -27,6 +27,9 @@ import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class SparkCommand {
+  private SparkCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("spark")
@@ -48,8 +51,5 @@ public final class SparkCommand {
               c.getSource().soulFire().sparkPlugin().platform().executeCommand(new SFSparkCommandSender(c.getSource().source()), new String[]{});
               return Command.SINGLE_SUCCESS;
             })));
-  }
-
-  private SparkCommand() {
   }
 }

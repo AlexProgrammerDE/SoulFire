@@ -61,7 +61,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RequiredArgsConstructor
 public class SFWebDavServlet extends DefaultServlet implements PeriodicEventListener {
   protected static final String DEFAULT_NAMESPACE = "DAV:";
-  private final SoulFireServer soulFireServer;
   protected static final ConcurrentDateFormat creationDateFormat = new ConcurrentDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US, TimeZone.getTimeZone("GMT"));
   private static final String SF_USER_ATTRIBUTE = "sf_user";
   @Serial
@@ -80,6 +79,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
   private static final int LOCK_REFRESH = 1;
   private static final int DEFAULT_TIMEOUT = 3600;
   private static final int MAX_TIMEOUT = 604800;
+  private final SoulFireServer soulFireServer;
   private final ConcurrentHashMap<String, LockInfo> resourceLocks = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> lockNullResources = new ConcurrentHashMap<>();
   private final CopyOnWriteArrayList<LockInfo> collectionLocks = new CopyOnWriteArrayList<>();

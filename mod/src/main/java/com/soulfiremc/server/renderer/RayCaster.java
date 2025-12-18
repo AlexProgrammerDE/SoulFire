@@ -167,7 +167,7 @@ public class RayCaster {
     var i = Double.doubleToLongBits(x);
     i = 0x5fe6eb50c7b537a9L - (i >> 1);
     x = Double.longBitsToDouble(i);
-    x *= (1.5 - xhalf * x * x); // Newton-Raphson iteration
+    x *= 1.5 - xhalf * x * x; // Newton-Raphson iteration
     return x;
   }
 
@@ -251,7 +251,8 @@ public class RayCaster {
     var hitZ = camera.eyeZ() + dirZ * distance;
 
     var direction = mapFrame.direction();
-    double u, v;
+    double u;
+    double v;
 
     if (direction == Direction.UP || direction == Direction.DOWN) {
       u = hitX - (mapFrame.posX() - 0.5);

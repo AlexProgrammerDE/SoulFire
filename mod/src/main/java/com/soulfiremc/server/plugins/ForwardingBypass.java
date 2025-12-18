@@ -177,7 +177,7 @@ public final class ForwardingBypass extends InternalPlugin {
     Objects.requireNonNull(connection.minecraft().getConnection()).send(response);
   }
 
-  private static class PlayerDataForwarding {
+  private static final class PlayerDataForwarding {
     public static final ResourceLocation CHANNEL = ResourceLocation.parse("velocity:player_info");
     public static final int MODERN_DEFAULT = 1;
     public static final int MODERN_WITH_KEY = 2;

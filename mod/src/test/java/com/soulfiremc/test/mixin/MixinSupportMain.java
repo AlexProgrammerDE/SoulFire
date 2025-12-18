@@ -29,6 +29,9 @@ import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 
 public class MixinSupportMain {
+  private MixinSupportMain() {
+  }
+
   public static void load() throws IOException {
     MixinBootstrap.init();
     Mixins.addConfiguration("soulfire.mixins.json");

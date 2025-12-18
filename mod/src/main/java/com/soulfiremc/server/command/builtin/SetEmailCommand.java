@@ -26,6 +26,9 @@ import com.soulfiremc.server.database.UserEntity;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class SetEmailCommand {
+  private SetEmailCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("set-email")
@@ -44,8 +47,5 @@ public final class SetEmailCommand {
 
                 return Command.SINGLE_SUCCESS;
               }))));
-  }
-
-  private SetEmailCommand() {
   }
 }

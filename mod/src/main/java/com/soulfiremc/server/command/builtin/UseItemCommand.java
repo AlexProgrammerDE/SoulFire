@@ -28,6 +28,9 @@ import net.minecraft.world.InteractionResult;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class UseItemCommand {
+  private UseItemCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("useitem")
@@ -71,8 +74,5 @@ public final class UseItemCommand {
                       return Command.SINGLE_SUCCESS;
                     });
                 }))));
-  }
-
-  private UseItemCommand() {
   }
 }

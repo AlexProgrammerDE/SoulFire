@@ -32,6 +32,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
+  @Inject(method = "fillSystemReport", at = @At("HEAD"), cancellable = true)
+  private static void preventFillSystemReport(SystemReport report, Minecraft minecraft, LanguageManager languageManager, String launchVersion, Options options, CallbackInfoReturnable<SystemReport> cir) {
+    cir.setReturnValue(report);
+  }
+
   @Inject(method = "<init>", at = @At("RETURN"))
   private void closeRenderer(GameConfig arg, CallbackInfo ci) {
     ((Minecraft) (Object) this).gameRenderer.close();
@@ -45,10 +50,5 @@ public class MixinMinecraft {
   @Inject(method = "updateLevelInEngines", at = @At("HEAD"), cancellable = true)
   private void updateLevelEngineHook(ClientLevel level, CallbackInfo ci) {
     ci.cancel();
-  }
-
-  @Inject(method = "fillSystemReport", at = @At("HEAD"), cancellable = true)
-  private static void preventFillSystemReport(SystemReport report, Minecraft minecraft, LanguageManager languageManager, String launchVersion, Options options, CallbackInfoReturnable<SystemReport> cir) {
-    cir.setReturnValue(report);
   }
 }

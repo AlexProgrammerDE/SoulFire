@@ -24,10 +24,8 @@ import com.soulfiremc.bootstrap.client.grpc.RPCClient;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.server.util.RPCConstants;
-import com.soulfiremc.server.util.SFPathConstants;
 import lombok.extern.slf4j.Slf4j;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 @Slf4j

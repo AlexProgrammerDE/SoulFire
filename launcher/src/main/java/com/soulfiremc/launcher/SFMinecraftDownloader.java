@@ -43,12 +43,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SFMinecraftDownloader {
+public final class SFMinecraftDownloader {
   private static final String MINECRAFT_VERSION = "1.21.10";
   private static final String MINECRAFT_CLIENT_JAR_NAME = "minecraft-%s-client.jar".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME = "minecraft-%s-client-mappings.txt".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_TINY_NAME = "minecraft-%s-client-mappings.tiny".formatted(MINECRAFT_VERSION);
   private static final String MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+
+  private SFMinecraftDownloader() {
+  }
 
   private static Path getAndCreateDownloadDirectory(Path basePath) {
     var downloadDir = basePath.resolve("mc-downloads");
@@ -82,9 +85,6 @@ public class SFMinecraftDownloader {
     } catch (Exception e) {
       throw new RuntimeException("Failed to fetch URL: " + url, e);
     }
-  }
-
-  private SFMinecraftDownloader() {
   }
 
   @SneakyThrows

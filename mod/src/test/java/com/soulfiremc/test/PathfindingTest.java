@@ -41,15 +41,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-public final class PathfindingTest {
+final class PathfindingTest {
   @BeforeAll
-  public static void setup() {
+  static void setup() {
     // Bootstrap mixins and Minecraft registries
     TestBootstrap.bootstrapForTest();
   }
 
   @Test
-  public void testPathfindingStraight() {
+  void pathfindingStraight() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, 0, 0, Blocks.STONE);
@@ -69,7 +69,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingImpossible() {
+  void pathfindingImpossible() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, 0, 0, Blocks.STONE);
@@ -92,7 +92,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingDiagonal() {
+  void pathfindingDiagonal() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, 0, 1, Blocks.STONE);
@@ -112,7 +112,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingDiagonalImpossible() {
+  void pathfindingDiagonalImpossible() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, 0, 1, Blocks.STONE);
@@ -138,7 +138,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3})
-  public void testPathfindingJump(int height) {
+  void pathfindingJump(int height) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, height, 0, Blocks.STONE);
@@ -162,7 +162,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3})
-  public void testPathfindingJumpDiagonal(int height) {
+  void pathfindingJumpDiagonal(int height) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, height, 1, Blocks.STONE);
@@ -186,7 +186,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4, 5})
-  public void testPathfindingFall(int height) {
+  void pathfindingFall(int height) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, -height, 0, Blocks.STONE);
@@ -210,7 +210,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4, 5})
-  public void testPathfindingFallDiagonal(int height) {
+  void pathfindingFallDiagonal(int height) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, -height, 1, Blocks.STONE);
@@ -234,7 +234,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4, 5})
-  public void testPathfindingGapJump(int gapLength) {
+  void pathfindingGapJump(int gapLength) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(gapLength + 1, 0, 0, Blocks.STONE);
@@ -258,7 +258,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingUp() {
+  void pathfindingUp() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
 
@@ -276,7 +276,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {15, 20, 25})
-  public void testPathfindingUpStacking(int amount) {
+  void pathfindingUpStacking(int amount) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
 
@@ -298,7 +298,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingDown() {
+  void pathfindingDown() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(0, -1, 0, Blocks.STONE);
@@ -316,7 +316,7 @@ public final class PathfindingTest {
   }
 
   @Test
-  public void testPathfindingThroughWallToMoveUp() {
+  void pathfindingThroughWallToMoveUp() {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(1, 0, 0, Blocks.STONE);
@@ -338,7 +338,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  public void testPathfindingMoveUpSideUnsafe(boolean unsafe) {
+  void pathfindingMoveUpSideUnsafe(boolean unsafe) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(0, 3, 0, Blocks.STONE);
@@ -365,7 +365,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  public void testPathfindingDigSideUnsafe(boolean unsafe) {
+  void pathfindingDigSideUnsafe(boolean unsafe) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(0, -1, 0, Blocks.STONE);
@@ -392,7 +392,7 @@ public final class PathfindingTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4})
-  public void testPathfindingDigBelowUnsafe(int level) {
+  void pathfindingDigBelowUnsafe(int level) {
     var accessor = new TestBlockAccessorBuilder();
     accessor.setBlockAt(0, 0, 0, Blocks.STONE);
     accessor.setBlockAt(0, -1, 0, Blocks.LAVA);

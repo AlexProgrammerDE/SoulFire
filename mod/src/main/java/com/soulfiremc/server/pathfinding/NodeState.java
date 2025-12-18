@@ -41,7 +41,6 @@ public record NodeState(SFVec3i blockPosition, int usableBlockItems) {
   @Override
   public int hashCode() {
     var result = blockPosition.hashCode();
-    result = 31 * result + usableBlockItems;
-    return result;
+    return 31 * result + usableBlockItems;
   }
 }

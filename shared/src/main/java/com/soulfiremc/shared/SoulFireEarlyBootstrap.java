@@ -23,7 +23,7 @@ import org.fusesource.jansi.AnsiConsole;
 
 @SuppressWarnings("unused")
 @Slf4j
-public class SoulFireEarlyBootstrap {
+public final class SoulFireEarlyBootstrap {
   private SoulFireEarlyBootstrap() {
   }
 

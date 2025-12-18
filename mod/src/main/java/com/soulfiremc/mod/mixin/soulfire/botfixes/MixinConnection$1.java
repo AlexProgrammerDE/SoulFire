@@ -44,7 +44,7 @@ public class MixinConnection$1 {
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
 
-  @Inject(method = "initChannel", at = @At(value = "RETURN"))
+  @Inject(method = "initChannel", at = @At("RETURN"))
   private void setReadTimeout(Channel channel, CallbackInfo ci) {
     channel.pipeline().replace("timeout", "timeout", new ReadTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT)));
   }

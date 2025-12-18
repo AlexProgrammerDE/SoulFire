@@ -23,7 +23,10 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBootstrap;
 import net.minecraft.server.Bootstrap;
 
-public class TestBootstrap {
+public final class TestBootstrap {
+  private TestBootstrap() {
+  }
+
   @SneakyThrows
   public static void bootstrapForTest() {
     MixinSupportMain.load();
@@ -33,8 +36,5 @@ public class TestBootstrap {
     Bootstrap.bootStrap();
     ClientBootstrap.bootstrap();
     Bootstrap.validate();
-  }
-
-  private TestBootstrap() {
   }
 }

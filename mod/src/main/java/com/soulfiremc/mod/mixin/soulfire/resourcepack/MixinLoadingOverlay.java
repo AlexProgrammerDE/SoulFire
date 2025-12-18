@@ -30,8 +30,8 @@ import java.util.function.Consumer;
 
 @Mixin(LoadingOverlay.class)
 public class MixinLoadingOverlay {
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void onInit(Minecraft minecraft, ReloadInstance reload, Consumer<Optional<Throwable>> onFinish, boolean fadeIn, CallbackInfo ci) {
-        onFinish.accept(Optional.empty());
-    }
+  @Inject(method = "<init>", at = @At("RETURN"))
+  private void onInit(Minecraft minecraft, ReloadInstance reload, Consumer<Optional<Throwable>> onFinish, boolean fadeIn, CallbackInfo ci) {
+    onFinish.accept(Optional.empty());
+  }
 }

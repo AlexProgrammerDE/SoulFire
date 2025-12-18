@@ -33,6 +33,9 @@ import org.slf4j.event.Level;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InventoryCommand {
+  private InventoryCommand() {
+  }
+
   private static String format(ItemStack item) {
     return item.isEmpty() ? "empty" : item.getItemHolder().getRegisteredName() + " x" + item.getCount();
   }
@@ -216,8 +219,5 @@ public final class InventoryCommand {
     bot.botControl().registerControllingTask(ControllingTask.singleTick(
       () -> gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player)));
     return Command.SINGLE_SUCCESS;
-  }
-
-  private InventoryCommand() {
   }
 }

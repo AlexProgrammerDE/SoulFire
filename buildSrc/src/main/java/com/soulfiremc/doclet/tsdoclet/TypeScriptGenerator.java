@@ -170,6 +170,7 @@ public class TypeScriptGenerator {
       }
     }
   }
+
   private void generateEnum(TypeElement enumElement, PrintWriter writer) {
     writeDocComment(writer, enumElement, 0);
     writer.println("export enum " + enumElement.getSimpleName() + " {");

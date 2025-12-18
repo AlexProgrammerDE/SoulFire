@@ -24,6 +24,9 @@ import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 
 public final class AuthHelpers {
+  private AuthHelpers() {
+  }
+
   public static MinecraftAccount fromFullBedrockSession(AuthType authType, AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
     var mcChain = fullBedrockSession.getMcChain();
     var xblXsts = mcChain.getXblXsts();
@@ -54,8 +57,5 @@ public final class AuthHelpers {
         mcToken.getAccessToken(),
         mcToken.getExpireTimeMs(),
         flow.toJson(fullJavaSession)));
-  }
-
-  private AuthHelpers() {
   }
 }

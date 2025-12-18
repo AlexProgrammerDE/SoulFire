@@ -188,21 +188,18 @@ public final class CaptchaSolver extends InternalPlugin {
       try {
         var plainMessage = event.parseToPlainText();
 
-        switch (trigger) {
-          case CHAT_MESSAGE -> {
-            var textTrigger = settingsSource.get(CaptchaSolverSettings.TEXT_TRIGGER);
-            if (plainMessage.contains(textTrigger)) {
-              handleImageInput(event.connection(), getImageFromSource(event.connection()));
-            }
+        if (trigger == CaptchaSolver.CaptchaSolverSettings.CaptchaTrigger.CHAT_MESSAGE) {
+          var textTrigger = settingsSource.get(CaptchaSolverSettings.TEXT_TRIGGER);
+          if (plainMessage.contains(textTrigger)) {
+            handleImageInput(event.connection(), getImageFromSource(event.connection()));
           }
-          case TEXT_BASED -> {
-            var regex = settingsSource.get(CaptchaSolverSettings.CAPTCHA_REGEX);
-            var pattern = Pattern.compile(regex);
-            var matcher = pattern.matcher(plainMessage);
-            if (matcher.find() && matcher.groupCount() >= 1) {
-              var captchaText = matcher.group(1);
-              handleTextInput(event.connection(), captchaText);
-            }
+        } else if (trigger == CaptchaSolver.CaptchaSolverSettings.CaptchaTrigger.TEXT_BASED) {
+          var regex = settingsSource.get(CaptchaSolverSettings.CAPTCHA_REGEX);
+          var pattern = Pattern.compile(regex);
+          var matcher = pattern.matcher(plainMessage);
+          if (matcher.find() && matcher.groupCount() >= 1) {
+            var captchaText = matcher.group(1);
+            handleTextInput(event.connection(), captchaText);
           }
         }
       } catch (Exception e) {

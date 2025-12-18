@@ -11,9 +11,12 @@ plugins {
 }
 
 rewrite {
+  activeRecipe("org.openrewrite.staticanalysis.CommonStaticAnalysis")
   activeRecipe("org.openrewrite.staticanalysis.CodeCleanup")
+  activeRecipe("org.openrewrite.staticanalysis.JavaApiBestPractices")
+  activeRecipe("org.openrewrite.java.testing.junit5.JUnit5BestPractices")
+  activeRecipe("org.openrewrite.java.testing.cleanup.BestPractices")
   activeRecipe("org.openrewrite.java.migrate.UpgradeToJava25")
-  activeRecipe("org.openrewrite.java.recipes.RecipeTestingBestPractices")
   isExportDatatables = true
 }
 

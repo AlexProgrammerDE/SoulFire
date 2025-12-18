@@ -25,6 +25,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
 public final class StopCommand {
+  private StopCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("stop")
@@ -38,8 +41,5 @@ public final class StopCommand {
 
               return Command.SINGLE_SUCCESS;
             })));
-  }
-
-  private StopCommand() {
   }
 }

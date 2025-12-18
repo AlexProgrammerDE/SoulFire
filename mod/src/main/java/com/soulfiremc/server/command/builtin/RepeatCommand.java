@@ -26,6 +26,9 @@ import java.util.ArrayList;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class RepeatCommand {
+  private RepeatCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("repeat")
@@ -46,8 +49,5 @@ public final class RepeatCommand {
                 }),
               true
             )));
-  }
-
-  private RepeatCommand() {
   }
 }

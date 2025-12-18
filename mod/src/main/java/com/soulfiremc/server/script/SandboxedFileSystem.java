@@ -38,9 +38,9 @@ public class SandboxedFileSystem implements FileSystem {
   private final Set<Path> writableDirs;
   private final Set<Path> readableDirs;
   private final Path tempDir;
-  private Path workingDir;
   private final FileSystem delegateFs = FileSystem.newDefaultFileSystem();
   private final FileSystem delegateReadOnlyFs = FileSystem.newReadOnlyFileSystem(delegateFs);
+  private Path workingDir;
 
   @SneakyThrows
   public SandboxedFileSystem(Set<Path> writableDirs, Set<Path> readableDirs, Path defaultWorkingDir) {

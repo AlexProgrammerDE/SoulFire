@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class BotCommand {
+  private BotCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("bot")
@@ -67,8 +70,5 @@ public final class BotCommand {
 
       return b.buildFuture();
     }
-  }
-
-  private BotCommand() {
   }
 }

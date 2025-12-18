@@ -25,6 +25,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
 public final class WhoAmICommand {
+  private WhoAmICommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("whoami")
@@ -36,8 +39,5 @@ public final class WhoAmICommand {
 
               return Command.SINGLE_SUCCESS;
             })));
-  }
-
-  private WhoAmICommand() {
   }
 }

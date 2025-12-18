@@ -33,7 +33,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
-public class SoulFirePostLibLauncher {
+public final class SoulFirePostLibLauncher {
   private SoulFirePostLibLauncher() {
   }
 

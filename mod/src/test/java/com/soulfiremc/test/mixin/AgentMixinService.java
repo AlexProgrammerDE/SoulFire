@@ -77,7 +77,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
     }
 
     if (classBytes == null) {
-      throw new ClassNotFoundException(String.format("The specified class '%s' was not found", className));
+      throw new ClassNotFoundException("The specified class '%s' was not found".formatted(className));
     }
 
     return classBytes;
@@ -93,7 +93,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
       }
 
       return ByteStreams.toByteArray(classStream);
-    } catch (Exception ex) {
+    } catch (Exception _) {
       return null;
     } finally {
       Closeables.closeQuietly(classStream);
@@ -102,7 +102,9 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
 
   private byte[] applyTransformers(String name, byte[] basicClass, Profiler profiler) {
     for (ITransformer transformer : this.getTransformers()) {
-      if (!(transformer instanceof ILegacyClassTransformer legacyClassTransformer)) continue;
+      if (!(transformer instanceof ILegacyClassTransformer legacyClassTransformer)) {
+        continue;
+      }
       // Clear the re-entrance semaphore
       this.lock.clear();
 
@@ -211,7 +213,9 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
   @Override
   public boolean isClassLoaded(String className) {
     for (Class<?> clazz : Agents.getInstrumentation().getAllLoadedClasses()) {
-      if (clazz != null && clazz.getName().equals(className)) return true;
+      if (clazz != null && clazz.getName().equals(className)) {
+        return true;
+      }
     }
     return false;
   }

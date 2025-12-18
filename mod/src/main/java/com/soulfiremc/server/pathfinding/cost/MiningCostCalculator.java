@@ -22,7 +22,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface MiningCostCalculator {
-  @Nullable BlockMiningCosts calculateBlockBreakCost(
+  @Nullable
+  BlockMiningCosts calculateBlockBreakCost(
     ProjectedInventory inventory,
     BlockState blockState,
     double breakBlockPenalty);

@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(KeyboardInput.class)
 public class MixinKeyboardInput {
   @WrapOperation(method = "tick", at = @At(value = "NEW", target = "(ZZZZZZZ)Lnet/minecraft/world/entity/player/Input;"))
-  private Input soulfire$updatePlayerMoveState(boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, boolean bl6, boolean bl7, Operation<Input> original) {
+  private Input soulfireUpdatePlayerMoveState(boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, boolean bl6, boolean bl7, Operation<Input> original) {
     var controlState = BotConnection.CURRENT.get().controlState();
     return new Input(
       controlState.up(),

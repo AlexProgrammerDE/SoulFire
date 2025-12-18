@@ -35,7 +35,7 @@ import org.jspecify.annotations.NonNull;
  * without requiring a real player entity. This uses Minecraft's block and tool
  * data directly to compute realistic mining times.
  */
-public class TestMiningCostCalculator implements MiningCostCalculator {
+public final class TestMiningCostCalculator implements MiningCostCalculator {
   public static final TestMiningCostCalculator INSTANCE = new TestMiningCostCalculator();
 
   private TestMiningCostCalculator() {}
@@ -80,7 +80,7 @@ public class TestMiningCostCalculator implements MiningCostCalculator {
     }
 
     // Get speed multiplier from tool
-    float speedMultiplier = 1.0f;
+    float speedMultiplier = 1.0F;
     Tool toolComponent = itemStack.getComponents().get(DataComponents.TOOL);
     if (toolComponent != null) {
       speedMultiplier = toolComponent.getMiningSpeed(blockState);
