@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.common.base.Supplier;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
@@ -31,6 +32,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -145,7 +147,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
       var issuedAt = ServerRPCConstants.USER_CONTEXT_KEY.get().getIssuedAt();
-      var user = new CachedLazyObject<>(() -> soulFireServer.authSystem().authenticateBySubject(userId, issuedAt), 1, TimeUnit.SECONDS);
+      var user = new CachedLazyObject<>((Supplier<Optional<SoulFireUser>>)
+        () -> soulFireServer.authSystem().authenticateBySubject(userId, issuedAt), 1, TimeUnit.SECONDS);
       var predicate = eventPredicate(request.getScope());
       new ConnectionMessageSender(
         subscribers,
