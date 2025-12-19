@@ -21,7 +21,6 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -105,12 +104,10 @@ public final class SoulFireAbstractLauncher {
     }
   }
 
-  /**
-   * On Windows, Gradle uses a classpath JAR manifest to avoid command-line length limits.
-   * This JAR contains a manifest with Class-Path attribute that lists the actual classpath entries.
-   * Fabric Loader reads java.class.path but only sees the wrapper JAR, breaking class isolation.
-   * This method expands the manifest and updates java.class.path with the actual entries.
-   */
+  /// On Windows, Gradle uses a classpath JAR manifest to avoid command-line length limits.
+  /// This JAR contains a manifest with Class-Path attribute that lists the actual classpath entries.
+  /// Fabric Loader reads java.class.path but only sees the wrapper JAR, breaking class isolation.
+  /// This method expands the manifest and updates java.class.path with the actual entries.
   private static void expandGradleClasspathJar() {
     var classPath = System.getProperty("java.class.path");
     if (classPath == null) {

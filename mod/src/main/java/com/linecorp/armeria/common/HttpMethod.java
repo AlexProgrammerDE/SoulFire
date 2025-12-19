@@ -181,50 +181,11 @@ public enum HttpMethod {
   /// @return `true` if supported. `false` otherwise.
   public static boolean isSupported(String value) {
     requireNonNull(value, "value");
-    switch (value) {
-      case "ACL":
-      case "BASELINE-CONTROL":
-      case "BIND":
-      case "CHECKIN":
-      case "CHECKOUT":
-      case "CONNECT":
-      case "COPY":
-      case "DELETE":
-      case "GET":
-      case "HEAD":
-      case "LABEL":
-      case "LINK":
-      case "LOCK":
-      case "MERGE":
-      case "MKACTIVITY":
-      case "MKCALENDAR":
-      case "MKCOL":
-      case "MKREDIRECTREF":
-      case "MKWORKSPACE":
-      case "MOVE":
-      case "OPTIONS":
-      case "ORDERPATCH":
-      case "PATCH":
-      case "POST":
-      case "PRI":
-      case "PROPFIND":
-      case "PROPPATCH":
-      case "PUT":
-      case "REBIND":
-      case "REPORT":
-      case "SEARCH":
-      case "TRACE":
-      case "UNBIND":
-      case "UNCHECKOUT":
-      case "UNLINK":
-      case "UNLOCK":
-      case "UPDATE":
-      case "UPDATEREDIRECTREF":
-      case "VERSION-CONTROL":
-        return true;
-    }
+    return switch (value) {
+      case "ACL", "BASELINE-CONTROL", "BIND", "CHECKIN", "CHECKOUT", "CONNECT", "COPY", "DELETE", "GET", "HEAD", "LABEL", "LINK", "LOCK", "MERGE", "MKACTIVITY", "MKCALENDAR", "MKCOL", "MKREDIRECTREF", "MKWORKSPACE", "MOVE", "OPTIONS", "ORDERPATCH", "PATCH", "POST", "PRI", "PROPFIND", "PROPPATCH", "PUT", "REBIND", "REPORT", "SEARCH", "TRACE", "UNBIND", "UNCHECKOUT", "UNLINK", "UNLOCK", "UPDATE", "UPDATEREDIRECTREF", "VERSION-CONTROL" -> true;
+      default -> false;
+    };
 
-    return false;
   }
 
   /// Returns the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Idempotent">idempotent</a>

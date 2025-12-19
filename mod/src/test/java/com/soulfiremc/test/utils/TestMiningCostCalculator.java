@@ -30,11 +30,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jspecify.annotations.NonNull;
 
-/**
- * A test implementation of MiningCostCalculator that calculates mining costs
- * without requiring a real player entity. This uses Minecraft's block and tool
- * data directly to compute realistic mining times.
- */
+/// A test implementation of MiningCostCalculator that calculates mining costs
+/// without requiring a real player entity. This uses Minecraft's block and tool
+/// data directly to compute realistic mining times.
 public final class TestMiningCostCalculator implements MiningCostCalculator {
   public static final TestMiningCostCalculator INSTANCE = new TestMiningCostCalculator();
 

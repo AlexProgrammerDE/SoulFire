@@ -1842,9 +1842,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     String scope = "exclusive";
     int depth;
     String owner = "";
-    List<String> tokens = Collections.synchronizedList(new ArrayList<>());
+    final List<String> tokens = Collections.synchronizedList(new ArrayList<>());
     long expiresAt;
-    Date creationDate = new Date();
+    final Date creationDate = new Date();
 
     LockInfo(int maxDepth) {
       this.maxDepth = maxDepth;

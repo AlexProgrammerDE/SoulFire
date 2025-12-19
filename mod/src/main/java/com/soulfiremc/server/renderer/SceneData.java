@@ -23,23 +23,7 @@ import net.minecraft.world.phys.AABB;
 /// Pre-collected scene data for rendering.
 /// Contains cached information about entities and map frames to avoid
 /// repeated method calls during ray casting.
-public final class SceneData {
-  private final MapFrameData[] mapFrames;
-  private final EntityData[] entities;
-
-  public SceneData(MapFrameData[] mapFrames, EntityData[] entities) {
-    this.mapFrames = mapFrames;
-    this.entities = entities;
-  }
-
-  public MapFrameData[] mapFrames() {
-    return mapFrames;
-  }
-
-  public EntityData[] entities() {
-    return entities;
-  }
-
+public record SceneData(MapFrameData[] mapFrames, EntityData[] entities) {
   /// Pre-computed data for an item frame containing a map.
   public record MapFrameData(
     AABB bbox,
