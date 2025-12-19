@@ -30,7 +30,7 @@ public final class SFModHelpers {
     RStream.of(object)
       .withSuper()
       .fields()
-      .filter(false)
+      .filterStatic(false)
       .forEach(field -> field.copy(newObject));
     return newObject;
   }

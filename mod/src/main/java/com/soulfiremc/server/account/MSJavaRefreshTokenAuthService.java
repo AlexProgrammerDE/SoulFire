@@ -21,7 +21,6 @@ import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
-import net.raphimc.minecraftauth.msa.model.MsaToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +37,7 @@ public final class MSJavaRefreshTokenAuthService
   public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        var authManager = JavaAuthManager.create(LenniHttpHelper.createLenniMCAuthHttpClient(proxyData))
+        var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(data.refreshToken);
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
       } catch (Exception e) {
@@ -55,11 +54,8 @@ public final class MSJavaRefreshTokenAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var httpClient = LenniHttpHelper.createLenniMCAuthHttpClient(proxyData);
-      var authManager = JavaAuthManager.fromJson(httpClient, ((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        authManager.getMinecraftToken().refresh();
-        authManager.getMinecraftProfile().refresh();
+        var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
@@ -69,13 +65,8 @@ public final class MSJavaRefreshTokenAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis();
-  }
-
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    // Consider outdated if within 5 minutes of expiration
-    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis() + 5 * 60 * 1000;
+    var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(null);
+    return authManager.getMinecraftToken().isExpired();
   }
 
   public record MSJavaRefreshTokenAuthData(String refreshToken) {}

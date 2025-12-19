@@ -21,15 +21,27 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.Struct;
 import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
+import com.soulfiremc.server.account.AuthHelpers;
+import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.util.LenniHttpHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.SneakyThrows;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
 
-public record OnlineChainJavaData(String authToken, long tokenExpireAt, JsonObject authChain) implements AccountData, OnlineJavaDataLike {
+import javax.annotation.Nullable;
+
+public record OnlineChainJavaData(JsonObject authChain) implements AccountData {
+  public OnlineChainJavaData {
+    authChain = AuthHelpers.migrateJavaAuthChain(authChain);
+  }
+
+  public JavaAuthManager getJavaAuthManager(@Nullable SFProxy proxyData) {
+    return JavaAuthManager.fromJson(LenniHttpHelper.client(proxyData), authChain);
+  }
+
   @SneakyThrows
   public static OnlineChainJavaData fromProto(MinecraftAccountProto.OnlineChainJavaData data) {
     return new OnlineChainJavaData(
-      data.getAuthToken(),
-      data.getTokenExpireAt(),
       GsonInstance.GSON.fromJson(JsonFormat.printer().print(data.getAuthChain()), JsonObject.class));
   }
 
@@ -38,8 +50,6 @@ public record OnlineChainJavaData(String authToken, long tokenExpireAt, JsonObje
     var authChainBuilder = Struct.newBuilder();
     JsonFormat.parser().merge(GsonInstance.GSON.toJson(authChain), authChainBuilder);
     return MinecraftAccountProto.OnlineChainJavaData.newBuilder()
-      .setAuthToken(authToken)
-      .setTokenExpireAt(tokenExpireAt)
       .setAuthChain(authChainBuilder)
       .build();
   }

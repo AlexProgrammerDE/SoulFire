@@ -41,7 +41,7 @@ public final class MSBedrockCredentialsAuthService
   public CompletableFuture<MinecraftAccount> login(MSBedrockCredentialsAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        var authManager = BedrockAuthManager.create(LenniHttpHelper.createLenniMCAuthHttpClient(proxyData), ProtocolConstants.BEDROCK_VERSION_NAME)
+        var authManager = BedrockAuthManager.create(LenniHttpHelper.client(proxyData), ProtocolConstants.BEDROCK_VERSION_NAME)
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
         return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager);
       } catch (Exception e) {
@@ -70,12 +70,8 @@ public final class MSBedrockCredentialsAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var httpClient = LenniHttpHelper.createLenniMCAuthHttpClient(proxyData);
-      var authManager = BedrockAuthManager.fromJson(httpClient, ProtocolConstants.BEDROCK_VERSION_NAME, ((BedrockData) account.accountData()).authChain());
       try {
-        authManager.getMinecraftCertificateChain().refresh();
-        authManager.getRealmsXstsToken().refresh();
-        authManager.getPlayFabToken().refresh();
+        var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(proxyData);
         return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
@@ -85,14 +81,10 @@ public final class MSBedrockCredentialsAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    // Bedrock tokens don't have a simple expiry, check the auth chain
-    return false;
-  }
-
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    // Bedrock tokens should be refreshed periodically
-    return false;
+    var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(null);
+    return authManager.getMinecraftCertificateChain().isExpired()
+      || authManager.getRealmsXstsToken().isExpired()
+      || authManager.getPlayFabToken().isExpired();
   }
 
   public record MSBedrockCredentialsAuthData(String email, String password) {}

@@ -37,13 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Type;
 import java.net.SocketAddress;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 @With
@@ -55,8 +48,6 @@ public record InstanceSettingsImpl(
   public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of());
   private static final Gson PROFILE_GSON =
     GsonInstance.GSON.newBuilder()
-      .registerTypeHierarchyAdapter(ECPublicKey.class, new ECPublicKeyAdapter())
-      .registerTypeHierarchyAdapter(ECPrivateKey.class, new ECPrivateKeyAdapter())
       .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
       .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
       .create();
@@ -129,46 +120,6 @@ public record InstanceSettingsImpl(
   public Optional<JsonElement> get(Property property) {
     return Optional.ofNullable(settings.get(property.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(property.key())));
-  }
-
-  private static class ECPublicKeyAdapter extends AbstractKeyAdapter<ECPublicKey> {
-    @Override
-    protected ECPublicKey createKey(byte[] bytes) throws JsonParseException {
-      try {
-        var keyFactory = KeyFactory.getInstance("EC");
-        return (ECPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
-      } catch (GeneralSecurityException e) {
-        throw new JsonParseException(e);
-      }
-    }
-  }
-
-  private static class ECPrivateKeyAdapter extends AbstractKeyAdapter<ECPrivateKey> {
-    @Override
-    protected ECPrivateKey createKey(byte[] bytes) throws JsonParseException {
-      try {
-        var keyFactory = KeyFactory.getInstance("EC");
-        return (ECPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-      } catch (GeneralSecurityException e) {
-        throw new JsonParseException(e);
-      }
-    }
-  }
-
-  private abstract static class AbstractKeyAdapter<T>
-    implements JsonSerializer<Key>, JsonDeserializer<T> {
-    @Override
-    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-      throws JsonParseException {
-      return createKey(Base64.getDecoder().decode(json.getAsString()));
-    }
-
-    @Override
-    public JsonElement serialize(Key src, Type typeOfSrc, JsonSerializationContext context) {
-      return new JsonPrimitive(Base64.getEncoder().encodeToString(src.getEncoded()));
-    }
-
-    protected abstract T createKey(byte[] bytes) throws JsonParseException;
   }
 
   private static class MinecraftAccountAdapter

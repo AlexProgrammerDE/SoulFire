@@ -82,6 +82,4 @@ public sealed interface MCAuthService<I, T>
   CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor);
 
   boolean isExpired(MinecraftAccount account);
-
-  boolean isExpiredOrOutdated(MinecraftAccount account);
 }

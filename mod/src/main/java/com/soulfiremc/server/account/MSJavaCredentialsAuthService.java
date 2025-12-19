@@ -40,7 +40,7 @@ public final class MSJavaCredentialsAuthService
   public CompletableFuture<MinecraftAccount> login(MSJavaCredentialsAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        var authManager = JavaAuthManager.create(LenniHttpHelper.createLenniMCAuthHttpClient(proxyData))
+        var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
       } catch (Exception e) {
@@ -69,11 +69,8 @@ public final class MSJavaCredentialsAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var httpClient = LenniHttpHelper.createLenniMCAuthHttpClient(proxyData);
-      var authManager = JavaAuthManager.fromJson(httpClient, ((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        authManager.getMinecraftToken().refresh();
-        authManager.getMinecraftProfile().refresh();
+        var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
@@ -83,13 +80,8 @@ public final class MSJavaCredentialsAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis();
-  }
-
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    // Consider outdated if within 5 minutes of expiration
-    return ((OnlineChainJavaData) account.accountData()).tokenExpireAt() < System.currentTimeMillis() + 5 * 60 * 1000;
+    var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(null);
+    return authManager.getMinecraftToken().isExpired();
   }
 
   public record MSJavaCredentialsAuthData(String email, String password) {}

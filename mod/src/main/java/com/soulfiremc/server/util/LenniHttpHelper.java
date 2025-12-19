@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class LenniHttpHelper {
   private LenniHttpHelper() {}
 
-  public static HttpClient createLenniMCAuthHttpClient(@Nullable SFProxy proxyData) {
+  public static HttpClient client(@Nullable SFProxy proxyData) {
     return MinecraftAuth.createHttpClient()
       .setProxyHandler(proxyData == null ? new ProxyHandler() : new ProxyHandler(switch (proxyData.type()) {
         case HTTP -> ProxyType.HTTP;

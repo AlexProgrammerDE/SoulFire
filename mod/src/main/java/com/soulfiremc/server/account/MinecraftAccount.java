@@ -18,7 +18,10 @@
 package com.soulfiremc.server.account;
 
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
-import com.soulfiremc.server.account.service.*;
+import com.soulfiremc.server.account.service.AccountData;
+import com.soulfiremc.server.account.service.BedrockData;
+import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.NonNull;
 
@@ -61,14 +64,6 @@ public record MinecraftAccount(
   public String toString() {
     return "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)"
       .formatted(authType, profileId, lastKnownName);
-  }
-
-  public boolean isPremiumJava() {
-    return accountData instanceof OnlineJavaDataLike;
-  }
-
-  public boolean isPremiumBedrock() {
-    return accountData instanceof BedrockData;
   }
 
   public MinecraftAccountProto toProto() {
