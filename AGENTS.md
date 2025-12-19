@@ -6,11 +6,14 @@ SoulFire is a multi-module Gradle build targeting Java 25. `mod/` holds the Fabr
 
 ## Build, Test, and Development Commands
 
-Use `./gradlew build` for a full compile, remap, and documentation aggregation. Run `./gradlew test` to execute the JUnit 5 suite with production classpaths. `./gradlew :mod:remapJar` emits the Fabric-ready artifact in `mod/build/libs`, while `./gradlew spotlessCheck`/`spotlessApply` enforce formatting. When touching public APIs, regenerate doc stubs with `./gradlew generateTSDoc` or `generatePyDoc` as needed.
+Use `./gradlew build` for a full compile, remap, and documentation aggregation. Run `./gradlew test` to execute the JUnit 5 suite with production classpaths. `./gradlew :mod:remapJar` emits the Fabric-ready artifact in `mod/build/libs`, while `./gradlew spotlessCheck`/`spotlessApply` enforce formatting.
 
 ## Coding Style & Naming Conventions
 
 `.editorconfig` and Spotless enforce two-space indentation, LF endings, trimmed whitespace, and the license header in `file_header.txt`. Keep imports sorted (``, `javax|java`, then `#`), avoid wildcards, and prefer `var` for locals to match existing code. Packages stay under `com.soulfiremc`, fields use camelCase, constants use `UPPER_SNAKE_CASE`, and method names should remain descriptive verbs. Import the IntelliJ inspection profile in `config/intellij_inspections.xml` before submitting.
+
+Use modern Java 25 features such as `var` and `try-with-resources` where possible, and prefer `List.of()`, `Map.of()`, and `Set.of()` for immutable collections. Favor `StringBuilder` for concatenation in loops, and use `Optional` to avoid nulls.
+Also use `_` for unused parameters in lambdas and use `///` Markdown Javadocs instead of the old `/** */` syntax.
 
 ## Testing Guidelines
 
