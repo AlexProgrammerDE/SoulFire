@@ -25,6 +25,8 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.renderer.RenderConstants;
+import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.instance.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
@@ -145,6 +147,31 @@ public final class CaptchaSolver extends InternalPlugin {
 
         yield toBase64PNG(SFHelpers.toBufferedImage(mapState));
       }
+      case POV_RENDER -> {
+        var player = connection.minecraft().player;
+        var level = connection.minecraft().level;
+        if (player == null || level == null) {
+          throw new IllegalStateException("Player or level is null, cannot render POV image");
+        }
+
+        var width = settingsSource.get(CaptchaSolverSettings.POV_RENDER_WIDTH);
+        var height = settingsSource.get(CaptchaSolverSettings.POV_RENDER_HEIGHT);
+
+        // Get render distance from settings (in chunks) and convert to blocks
+        var renderDistanceChunks = connection.minecraft().options.getEffectiveRenderDistance();
+        var maxDistance = renderDistanceChunks * 16;
+
+        var image = SoftwareRenderer.render(
+          level,
+          player,
+          width,
+          height,
+          RenderConstants.DEFAULT_FOV,
+          maxDistance
+        );
+
+        yield toBase64PNG(image);
+      }
     };
   }
 
@@ -161,21 +188,18 @@ public final class CaptchaSolver extends InternalPlugin {
       try {
         var plainMessage = event.parseToPlainText();
 
-        switch (trigger) {
-          case CHAT_MESSAGE -> {
-            var textTrigger = settingsSource.get(CaptchaSolverSettings.TEXT_TRIGGER);
-            if (plainMessage.contains(textTrigger)) {
-              handleImageInput(event.connection(), getImageFromSource(event.connection()));
-            }
+        if (trigger == CaptchaSolver.CaptchaSolverSettings.CaptchaTrigger.CHAT_MESSAGE) {
+          var textTrigger = settingsSource.get(CaptchaSolverSettings.TEXT_TRIGGER);
+          if (plainMessage.contains(textTrigger)) {
+            handleImageInput(event.connection(), getImageFromSource(event.connection()));
           }
-          case TEXT_BASED -> {
-            var regex = settingsSource.get(CaptchaSolverSettings.CAPTCHA_REGEX);
-            var pattern = Pattern.compile(regex);
-            var matcher = pattern.matcher(plainMessage);
-            if (matcher.find() && matcher.groupCount() >= 1) {
-              var captchaText = matcher.group(1);
-              handleTextInput(event.connection(), captchaText);
-            }
+        } else if (trigger == CaptchaSolver.CaptchaSolverSettings.CaptchaTrigger.TEXT_BASED) {
+          var regex = settingsSource.get(CaptchaSolverSettings.CAPTCHA_REGEX);
+          var pattern = Pattern.compile(regex);
+          var matcher = pattern.matcher(plainMessage);
+          if (matcher.find() && matcher.groupCount() >= 1) {
+            var captchaText = matcher.group(1);
+            handleTextInput(event.connection(), captchaText);
           }
         }
       } catch (Exception e) {
@@ -237,6 +261,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .defaultValue(ImageSource.MAP_IN_HAND.name())
         .addOptions(ComboProperty.optionsFromEnum(ImageSource.values(), ComboProperty::capitalizeEnum, e -> switch (e) {
           case MAP_IN_HAND -> "map";
+          case POV_RENDER -> "camera";
         }))
         .build();
     public static final ComboProperty CAPTCHA_TRIGGER =
@@ -267,9 +292,32 @@ public final class CaptchaSolver extends InternalPlugin {
         .description("Regex pattern with a capturing group to extract the captcha text from the message")
         .defaultValue("/captcha (\\w+)")
         .build();
+    public static final IntProperty POV_RENDER_WIDTH =
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("pov-render-width")
+        .uiName("POV Render Width")
+        .description("Width of the POV render image in pixels")
+        .defaultValue(RenderConstants.DEFAULT_WIDTH)
+        .minValue(1)
+        .maxValue(3840)
+        .stepValue(1)
+        .build();
+    public static final IntProperty POV_RENDER_HEIGHT =
+      ImmutableIntProperty.builder()
+        .namespace(NAMESPACE)
+        .key("pov-render-height")
+        .uiName("POV Render Height")
+        .description("Height of the POV render image in pixels")
+        .defaultValue(RenderConstants.DEFAULT_HEIGHT)
+        .minValue(1)
+        .maxValue(2160)
+        .stepValue(1)
+        .build();
 
     enum ImageSource {
-      MAP_IN_HAND
+      MAP_IN_HAND,
+      POV_RENDER
     }
 
     enum CaptchaTrigger {

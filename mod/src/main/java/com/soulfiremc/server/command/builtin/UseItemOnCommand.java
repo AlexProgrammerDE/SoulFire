@@ -32,6 +32,9 @@ import net.minecraft.world.level.ClipContext;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class UseItemOnCommand {
+  private UseItemOnCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("useitemon")
@@ -88,8 +91,5 @@ public final class UseItemOnCommand {
                                 return Command.SINGLE_SUCCESS;
                               });
                           }))))))));
-  }
-
-  private UseItemOnCommand() {
   }
 }

@@ -27,6 +27,8 @@ import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.log4j.GenericTerminalConsole;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap {
   private SoulFireDedicatedBootstrap() {
@@ -54,8 +56,22 @@ public final class SoulFireDedicatedBootstrap extends SoulFireAbstractBootstrap 
     var commandSource = new ConsoleCommandSource(soulFire.authSystem());
     new GenericTerminalConsole(
       soulFire.shutdownManager(),
-      command -> commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
-      (command, cursor) -> commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource)),
+      command -> {
+        try {
+          return commandManager.execute(command, CommandSourceStack.ofUnrestricted(soulFire, commandSource));
+        } catch (Throwable t) {
+          log.atError().setCause(t).log("Error while executing command '{}'", command);
+          return 0;
+        }
+      },
+      (command, cursor) -> {
+        try {
+          return commandManager.complete(command, cursor, CommandSourceStack.ofUnrestricted(soulFire, commandSource));
+        } catch (Throwable t) {
+          log.atError().setCause(t).log("Error while tab completing command '{}'", command);
+          return List.of();
+        }
+      },
       SFPathConstants.BASE_DIR
     ).start();
 

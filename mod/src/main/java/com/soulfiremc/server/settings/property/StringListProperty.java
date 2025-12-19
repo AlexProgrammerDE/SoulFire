@@ -25,7 +25,7 @@ import java.util.List;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public non-sealed abstract class StringListProperty implements Property {
+public abstract non-sealed class StringListProperty implements Property {
   public abstract String key();
 
   public abstract String uiName();

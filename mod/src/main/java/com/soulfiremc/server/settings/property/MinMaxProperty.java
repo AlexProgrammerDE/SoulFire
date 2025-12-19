@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public non-sealed abstract class MinMaxProperty implements Property {
+public abstract non-sealed class MinMaxProperty implements Property {
   public abstract String namespace();
 
   public abstract String key();

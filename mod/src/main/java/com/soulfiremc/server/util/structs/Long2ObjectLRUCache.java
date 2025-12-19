@@ -19,8 +19,6 @@ package com.soulfiremc.server.util.structs;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 
-import java.util.function.BiFunction;
-
 public final class Long2ObjectLRUCache<V> {
   private final Long2ObjectLinkedOpenHashMap<V> cache;
   private final int capacity;
@@ -37,22 +35,14 @@ public final class Long2ObjectLRUCache<V> {
   }
 
   public V get(long key) {
-    if (!cache.containsKey(key)) {
-      return null;
-    }
-    // Access-order emulation: remove and reinsert
-    var value = cache.remove(key);
-    cache.put(key, value);
-    return value;
+    // Use getAndMoveToLast for efficient LRU access-order update
+    // This is O(1) instead of O(n) for remove+put
+    return cache.getAndMoveToLast(key);
   }
 
   public void put(long key, V value) {
     clean();
     cache.put(key, value);
-  }
-
-  public boolean containsKey(long key) {
-    return cache.containsKey(key);
   }
 
   public V remove(long key) {
@@ -61,15 +51,6 @@ public final class Long2ObjectLRUCache<V> {
 
   public int size() {
     return cache.size();
-  }
-
-  public void clear() {
-    cache.clear();
-  }
-
-  public void compute(final long k, final BiFunction<? super Long, ? super V, ? extends V> remappingFunction) {
-    clean();
-    cache.compute(k, remappingFunction);
   }
 
   public void clean() {

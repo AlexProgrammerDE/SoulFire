@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin.soulfire.api;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.cost.Costs;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

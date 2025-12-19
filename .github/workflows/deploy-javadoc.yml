@@ -23,10 +23,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # 5.0.0
       - name: Build with Gradle
-        run: ./gradlew javadoc --stacktrace
+        run: ./gradlew :javadoc:javadoc --stacktrace
       - name: Move files
         run: |
-          mv ./build/docs/javadoc ./docs
+          mv ./javadoc/build/docs/javadoc ./docs
       - name: Create CNAME
         run: |
           echo "jd.soulfiremc.com" > ./docs/CNAME

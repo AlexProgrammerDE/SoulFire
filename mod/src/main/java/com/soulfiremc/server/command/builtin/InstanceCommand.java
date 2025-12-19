@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class InstanceCommand {
+  private InstanceCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("instance")
@@ -66,8 +69,5 @@ public final class InstanceCommand {
 
       return b.buildFuture();
     }
-  }
-
-  private InstanceCommand() {
   }
 }

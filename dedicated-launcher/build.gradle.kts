@@ -59,39 +59,23 @@ dependencies {
   implementation(projects.j8Launcher)
 }
 
-fun Manifest.applySFAttributes() {
-  attributes["Main-Class"] = projectMainClass
-  attributes["Name"] = "SoulFire"
-  attributes["Specification-Title"] = "SoulFire"
-  attributes["Specification-Version"] = version.toString()
-  attributes["Specification-Vendor"] = "AlexProgrammerDE"
-  attributes["Implementation-Title"] = "SoulFire"
-  attributes["Implementation-Version"] = version.toString()
-  attributes["Implementation-Vendor"] = "AlexProgrammerDE"
-  attributes["Multi-Release"] = "true"
-  attributes["Enable-Native-Access"] = "ALL-UNNAMED"
-}
-
-fun File.isJar(): Boolean {
-  return name.endsWith(".jar")
-}
-
-fun File.shouldShadow(): Boolean {
-  return toString().contains("launcher" + File.separator + "build" + File.separator + "libs")
-}
+// Capture version at configuration time for configuration cache compatibility
+val projectVersionString = version.toString()
+val launcherPathPattern = "launcher" + File.separator + "build" + File.separator + "libs"
 
 tasks {
   val generateDependencyList = register("generateDependencyList") {
-    dependsOn(configurations.runtimeClasspath)
     inputs.files(configurations.runtimeClasspath)
 
     val outputFile = layout.buildDirectory.file("dependency-list.txt")
     outputs.file(outputFile)
 
+    // Capture pattern inside task configuration to avoid capturing script object
+    val pathPattern = launcherPathPattern
     doLast {
-      val dependencies = configurations.runtimeClasspath.get().files
-        .filter { it.isJar() }
-        .filter { !it.shouldShadow() }
+      val dependencies = inputs.files.files
+        .filter { it.name.endsWith(".jar") }
+        .filter { !it.toString().contains(pathPattern) }
         .joinToString("\n") { it.name }
       outputFile.get().asFile.writeText(dependencies)
     }
@@ -99,31 +83,59 @@ tasks {
   jar {
     archiveClassifier = "unshaded"
 
-    manifest.applySFAttributes()
+    manifest {
+      attributes["Main-Class"] = projectMainClass
+      attributes["Name"] = "SoulFire"
+      attributes["Specification-Title"] = "SoulFire"
+      attributes["Specification-Version"] = projectVersionString
+      attributes["Specification-Vendor"] = "AlexProgrammerDE"
+      attributes["Implementation-Title"] = "SoulFire"
+      attributes["Implementation-Version"] = projectVersionString
+      attributes["Implementation-Vendor"] = "AlexProgrammerDE"
+      attributes["Multi-Release"] = "true"
+      attributes["Enable-Native-Access"] = "ALL-UNNAMED"
+    }
   }
   val uberJar = register<Jar>("uberJar") {
-    dependsOn(jar)
-    from(zipTree(jar.get().outputs.files.singleFile))
+    val jarTask = jar
+    dependsOn(jarTask)
 
-    manifest.applySFAttributes()
+    manifest {
+      attributes["Main-Class"] = projectMainClass
+      attributes["Name"] = "SoulFire"
+      attributes["Specification-Title"] = "SoulFire"
+      attributes["Specification-Version"] = projectVersionString
+      attributes["Specification-Vendor"] = "AlexProgrammerDE"
+      attributes["Implementation-Title"] = "SoulFire"
+      attributes["Implementation-Version"] = projectVersionString
+      attributes["Implementation-Vendor"] = "AlexProgrammerDE"
+      attributes["Multi-Release"] = "true"
+      attributes["Enable-Native-Access"] = "ALL-UNNAMED"
+    }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn(configurations.runtimeClasspath)
 
-    from({
-      configurations.runtimeClasspath.get()
-        .filter { it.isJar() }
-        .filter { it.shouldShadow() }
+    // Include content from main jar
+    from(jarTask.map { it.outputs.files.map { file -> zipTree(file) } })
+
+    // Shade launcher jars (extract and include contents)
+    from(configurations.runtimeClasspath.map { config ->
+      config.files
+        .filter { it.name.endsWith(".jar") }
+        .filter { it.toString().contains(launcherPathPattern) }
         .map { zipTree(it) }
     })
-    from({
-      configurations.runtimeClasspath.get()
-        .filter { it.isJar() }
-        .filter { !it.shouldShadow() }
+
+    // Include other jars as libraries
+    from(configurations.runtimeClasspath.map { config ->
+      config.files
+        .filter { it.name.endsWith(".jar") }
+        .filter { !it.toString().contains(launcherPathPattern) }
     }) {
       into("META-INF/lib")
     }
-    from(generateDependencyList.get().outputs.files) {
+
+    from(generateDependencyList.map { it.outputs.files }) {
       into("META-INF")
     }
   }

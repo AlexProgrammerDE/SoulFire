@@ -15,16 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding;
+package com.soulfiremc.server.pathfinding.cost;
 
-import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.SFHelpers;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /// This class helps in calculating the costs of different actions. It is used in the pathfinding
 /// algorithm to determine the best path to a goal.
@@ -38,10 +36,6 @@ public final class Costs {
   /// The distance in blocks between two points that are diagonal to each other.
   /// Calculated using the Pythagorean theorem.
   public static final double DIAGONAL = Math.sqrt(2);
-  /// We don't want a bot that frequently tries to break blocks instead of walking around them.
-  public static final double BREAK_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-break-block-penalty", 2);
-  /// We don't want a bot that frequently tries to place blocks instead of finding smarter paths.
-  public static final double PLACE_BLOCK_PENALTY = Integer.getInteger("sf.pathfinding-place-block-penalty", 5);
   /// A normal server runs at 20 ticks per second.
   public static final double TICKS_PER_SECOND = 20;
   /// Normal player walking speed in blocks per second.
@@ -68,43 +62,22 @@ public final class Costs {
 
   private Costs() {}
 
-  public static @Nullable BlockMiningCosts calculateBlockBreakCost(
-    LocalPlayer entity,
-    ProjectedInventory inventory,
-    BlockState blockState) {
-    var lowestMiningTicks = Integer.MAX_VALUE;
-    ItemStack bestItem = null;
-    var willDropUsableBlockItem = false;
-    for (var slot : inventory.usableToolsAndEmpty()) {
-      var miningTicks = getRequiredMiningTicks(entity, slot, blockState);
-      if (miningTicks.ticks() < lowestMiningTicks) {
-        lowestMiningTicks = miningTicks.ticks();
-        bestItem = slot;
-        willDropUsableBlockItem = miningTicks.willDropUsableBlockItem();
-      }
-    }
-
-    if (lowestMiningTicks == Integer.MAX_VALUE) {
-      return null;
-    }
-
-    return new BlockMiningCosts(
-      (lowestMiningTicks / TICKS_PER_BLOCK) + BREAK_BLOCK_PENALTY, bestItem, willDropUsableBlockItem);
-  }
-
   // Time in ticks
   public static TickResult getRequiredMiningTicks(
     LocalPlayer entity,
     ItemStack itemStack,
     BlockState blockState) {
-    SELECTED_ITEM_MIXIN_OVERRIDE.set(itemStack);
-    var correctToolUsed = entity.hasCorrectToolForDrops(blockState);
-    // If this value adds up over all ticks to 1, the block is fully mined
-    var damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
-    SELECTED_ITEM_MIXIN_OVERRIDE.remove();
+    boolean correctToolUsed;
+    float damage;
+    try (var ignored = SFHelpers.smartThreadLocalCloseable(SELECTED_ITEM_MIXIN_OVERRIDE, itemStack)) {
+      correctToolUsed = entity.hasCorrectToolForDrops(blockState);
+      // If this value adds up over all ticks to 1, the block is fully mined
+      damage = blockState.getDestroyProgress(entity, entity.level(), BlockPos.ZERO);
+    }
 
-    var creativeMode = entity.getAbilities().instabuild;
-    var willDropUsableBlockItem = correctToolUsed && !creativeMode && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());
+    var willDropUsableBlockItem = correctToolUsed
+      && !entity.preventsBlockDrops()
+      && SFBlockHelpers.isUsableBlockItem(blockState.getBlock());
 
     // Insta mine
     if (damage >= 1) {
@@ -113,9 +86,6 @@ public final class Costs {
 
     return new TickResult((int) Math.ceil(1 / damage), willDropUsableBlockItem);
   }
-
-  public record BlockMiningCosts(
-    double miningCost, @NonNull ItemStack usedTool, boolean willDropUsableBlockItem) {}
 
   public record TickResult(int ticks, boolean willDropUsableBlockItem) {}
 }

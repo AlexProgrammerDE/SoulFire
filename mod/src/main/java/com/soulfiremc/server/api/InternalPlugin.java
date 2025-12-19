@@ -18,7 +18,7 @@
 package com.soulfiremc.server.api;
 
 /// This interface is for internal server plugins.
-public non-sealed abstract class InternalPlugin extends Plugin {
+public abstract non-sealed class InternalPlugin extends Plugin {
   protected InternalPlugin(PluginInfo pluginInfo) {
     super(pluginInfo);
   }

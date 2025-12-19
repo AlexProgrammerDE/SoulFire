@@ -26,16 +26,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Util.class)
-public class MixinUtil {
+public final class MixinUtil {
   @Final
   @Shadow
   static Logger LOGGER;
 
+  private MixinUtil() {
+  }
+
   @Redirect(method = "logAndPauseIfInIde(Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;)V"))
   private static void logAndPauseIfInIde(Logger instance, String s) {
     LOGGER.error(s, new RuntimeException(s));
-  }
-
-  private MixinUtil() {
   }
 }

@@ -161,7 +161,7 @@ public final class ServerSettingsRegistry {
   /// @param pageName     The name of the page
   /// @param owningPlugin The owning plugin
   /// @param iconId       The icon id
-  ///                     Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
+  ///                                         Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
   /// @return The registry
   @This
   public ServerSettingsRegistry addPluginPage(

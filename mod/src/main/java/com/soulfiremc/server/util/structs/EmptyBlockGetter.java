@@ -26,7 +26,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
-public class EmptyBlockGetter implements BlockGetter {
+public final class EmptyBlockGetter implements BlockGetter {
   public static final EmptyBlockGetter INSTANCE = new EmptyBlockGetter();
 
   private EmptyBlockGetter() {}

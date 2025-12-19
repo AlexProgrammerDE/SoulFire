@@ -39,17 +39,6 @@ import java.util.Collection;
 public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImplBase {
   private final SoulFireServer soulFireServer;
 
-  private Collection<GlobalPermissionState> getGlobalPermissions() {
-    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    return Arrays.stream(GlobalPermission.values())
-      .filter(permission -> permission != GlobalPermission.UNRECOGNIZED)
-      .map(permission -> GlobalPermissionState.newBuilder()
-        .setGlobalPermission(permission)
-        .setGranted(user.hasPermission(PermissionContext.global(permission)))
-        .build())
-      .toList();
-  }
-
   private static String buildWebDAVAddress(String baseUrl) {
     if (baseUrl.endsWith("/")) {
       return baseUrl + "webdav";
@@ -64,6 +53,17 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
     } else {
       return baseUrl + "/docs";
     }
+  }
+
+  private Collection<GlobalPermissionState> getGlobalPermissions() {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    return Arrays.stream(GlobalPermission.values())
+      .filter(permission -> permission != GlobalPermission.UNRECOGNIZED)
+      .map(permission -> GlobalPermissionState.newBuilder()
+        .setGlobalPermission(permission)
+        .setGranted(user.hasPermission(PermissionContext.global(permission)))
+        .build())
+      .toList();
   }
 
   @Override

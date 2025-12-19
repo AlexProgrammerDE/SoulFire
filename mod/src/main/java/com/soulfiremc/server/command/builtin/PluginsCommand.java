@@ -26,6 +26,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
 public final class PluginsCommand {
+  private PluginsCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("plugins")
@@ -55,8 +58,5 @@ public final class PluginsCommand {
 
               return Command.SINGLE_SUCCESS;
             })));
-  }
-
-  private PluginsCommand() {
   }
 }

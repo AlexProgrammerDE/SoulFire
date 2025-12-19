@@ -18,8 +18,8 @@
 package com.soulfiremc.server.pathfinding.execution;
 
 import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.cost.Costs;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.MovementMiningCost;
 import com.soulfiremc.server.util.SFBlockHelpers;

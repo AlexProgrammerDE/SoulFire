@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.pathfinding.graph.actions;
 
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.cost.Costs;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
@@ -112,7 +112,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
 
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
-      breakCost.willDropUsableBlockItem() ? 1 : 0,
+      graph.pathConstraint().canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem() ? 1 : 0,
       false,
       actionDirection,
       cost,
@@ -140,8 +140,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, DownMovement downMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (graph.disallowedToBreakBlock(absoluteKey)
-        || graph.disallowedToBreakBlock(blockState.getBlock())) {
+      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }

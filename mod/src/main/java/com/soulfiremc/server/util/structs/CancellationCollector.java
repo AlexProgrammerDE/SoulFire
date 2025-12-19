@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public final class CancellationCollector {
+  private static final int CLEANUP_THRESHOLD = 100;
   private final List<CompletableFuture<?>> futures = new ArrayList<>();
   @Getter
   private boolean cancelled;
@@ -46,6 +47,13 @@ public final class CancellationCollector {
     }
 
     futures.add(future);
+
+    // Periodically clean up completed futures to prevent memory buildup
+    // during large import operations
+    if (futures.size() > CLEANUP_THRESHOLD) {
+      futures.removeIf(CompletableFuture::isDone);
+    }
+
     return future;
   }
 
@@ -58,5 +66,6 @@ public final class CancellationCollector {
     for (var future : futures) {
       future.cancel(true);
     }
+    futures.clear();
   }
 }

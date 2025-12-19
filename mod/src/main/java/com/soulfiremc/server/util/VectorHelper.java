@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector2d;
 
-public class VectorHelper {
+public final class VectorHelper {
   private VectorHelper() {
   }
 

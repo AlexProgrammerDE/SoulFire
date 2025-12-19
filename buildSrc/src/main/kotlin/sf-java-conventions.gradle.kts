@@ -11,9 +11,12 @@ plugins {
 }
 
 rewrite {
+  activeRecipe("org.openrewrite.staticanalysis.CommonStaticAnalysis")
   activeRecipe("org.openrewrite.staticanalysis.CodeCleanup")
+  activeRecipe("org.openrewrite.staticanalysis.JavaApiBestPractices")
+  activeRecipe("org.openrewrite.java.testing.junit5.JUnit5BestPractices")
+  activeRecipe("org.openrewrite.java.testing.cleanup.BestPractices")
   activeRecipe("org.openrewrite.java.migrate.UpgradeToJava25")
-  activeRecipe("org.openrewrite.java.recipes.RecipeTestingBestPractices")
   isExportDatatables = true
 }
 
@@ -32,16 +35,17 @@ dependencies {
 tasks {
   // Variable replacements
   processResources {
+    // Capture values at configuration time for configuration cache compatibility
+    val expandProperties = mapOf(
+      "version" to project.version.toString(),
+      "description" to (project.description ?: ""),
+      "url" to "https://soulfiremc.com",
+      "commit" to (indraGit.commit().orNull?.name ?: "unknown"),
+      "branch" to (indraGit.branchName().orNull ?: "unknown"),
+    )
+    inputs.properties(expandProperties)
     filesMatching(listOf("fabric.mod.json", "soulfire-build-data.properties")) {
-      expand(
-        mapOf(
-          "version" to project.version,
-          "description" to project.description,
-          "url" to "https://soulfiremc.com",
-          "commit" to (indraGit.commit().orNull?.name ?: "unknown"),
-          "branch" to (indraGit.branchName().orNull ?: "unknown"),
-        )
-      )
+      expand(expandProperties)
     }
   }
   javadoc {

@@ -17,32 +17,37 @@
  */
 package com.soulfiremc.test;
 
-import com.soulfiremc.bootstrap.TestBootstrap;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.util.PortHelper;
 import com.soulfiremc.shared.SFLogAppender;
+import com.soulfiremc.test.utils.TestBootstrap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 public final class LoadTest {
   @TempDir
   public Path tempDir;
 
   @Test
-  public void testLoad() {
-    System.setProperty("sf.baseDir", tempDir.toAbsolutePath().toString());
-    System.setProperty("sf.unit.test", "true");
+  void load() {
+    assertDoesNotThrow(() -> {
+      System.setProperty("sf.baseDir", tempDir.toAbsolutePath().toString());
+      System.setProperty("sf.unit.test", "true");
 
-    TestBootstrap.bootstrapForTest();
+      // Bootstrap mixins and Minecraft registries
+      TestBootstrap.bootstrapForTest();
 
-    SFLogAppender.INSTANCE.start();
+      SFLogAppender.INSTANCE.start();
 
-    var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now());
+      var server = new SoulFireServer("127.0.0.1", PortHelper.getRandomAvailablePort(), Instant.now());
 
-    server.shutdownManager().shutdownSoftware(false);
-    server.shutdownManager().awaitShutdown();
+      server.shutdownManager().shutdownSoftware(false);
+      server.shutdownManager().awaitShutdown();
+    });
   }
 }

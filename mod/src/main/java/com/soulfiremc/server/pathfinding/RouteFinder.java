@@ -28,19 +28,24 @@ import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
 import com.soulfiremc.server.util.structs.CallLimiter;
 import com.soulfiremc.server.util.structs.IntReference;
 import com.soulfiremc.server.util.structs.Long2ObjectLRUCache;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import com.soulfiremc.server.util.structs.ObjectReference;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+  /// Maximum possible usable block items (4 rows * 9 columns * 64 stack size)
+  private static final int MAX_USABLE_BLOCK_ITEMS = 4 * 9 * 64;
+
   private static List<WorldAction> reconstructPath(MinecraftRouteNode current) {
     var actions = new ArrayList<WorldAction>();
 
@@ -59,22 +64,14 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return actions;
   }
 
-  private static MinecraftRouteNode findBestNode(Collection<MinecraftRouteNode> values) {
-    MinecraftRouteNode bestNode = null;
-    var smallestScore = Double.MAX_VALUE;
-
-    for (var node : values) {
-      // Our implementation calculates the score from this node to the start,
-      // so we need to get it by subtracting the source cost
-      var targetScore = node.totalRouteScore() - node.sourceCost();
-
-      if (targetScore < smallestScore) {
-        smallestScore = targetScore;
-        bestNode = node;
-      }
+  private static Long2ObjectOpenHashMap<MinecraftRouteNode> getRouteMap(
+    Long2ObjectOpenHashMap<MinecraftRouteNode>[] routeIndex, int usableBlockItems) {
+    var map = routeIndex[usableBlockItems];
+    if (map == null) {
+      map = new Long2ObjectOpenHashMap<>();
+      routeIndex[usableBlockItems] = map;
     }
-
-    return Objects.requireNonNull(bestNode, "No best node found");
+    return map;
   }
 
   public CompletableFuture<List<WorldAction>> findRouteFuture(NodeState from, boolean requiresRepositioning) {
@@ -84,15 +81,22 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   @VisibleForTesting
   public List<WorldAction> findRouteSync(NodeState from) {
     var stopwatch = Stopwatch.createStarted();
-    var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Integer.getInteger("sf.pathfinding-expire", 180));
+    var pathConstraint = graph.pathConstraint();
+    var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pathConstraint.expireTimeout());
 
     // Store block positions and the best route to them
     var blockItemsIndex = new Long2IntOpenHashMap();
+    blockItemsIndex.defaultReturnValue(-1); // -1 means not visited yet
     var instructionCache = new Long2ObjectLRUCache<GraphInstructions[]>(50_000);
-    var routeIndex = new Object2ObjectOpenHashMap<NodeState, MinecraftRouteNode>();
+    // Array of maps indexed by usable block items count for O(1) lookup without hash collisions
+    // Uses Long2ObjectOpenHashMap with SFVec3i.asMinecraftLong() as key for optimal performance
+    @SuppressWarnings("unchecked")
+    var routeIndex = (Long2ObjectOpenHashMap<MinecraftRouteNode>[])
+      new Long2ObjectOpenHashMap[MAX_USABLE_BLOCK_ITEMS + 1];
 
     // Store block positions that we need to look at
     var openSet = new ObjectHeapPriorityQueue<MinecraftRouteNode>();
+    var bestGlobalNode = new ObjectReference<MinecraftRouteNode>();
 
     {
       var startScore = scorer.computeScore(graph, from.blockPosition(), List.of());
@@ -105,8 +109,9 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           0,
           startScore,
           startScore);
-      routeIndex.put(from, start);
+      getRouteMap(routeIndex, from.usableBlockItems()).put(from.blockPosition().asMinecraftLong(), start);
       openSet.enqueue(start);
+      bestGlobalNode.value = start;
     }
 
     var progressInfo = new CallLimiter(() -> {
@@ -114,25 +119,23 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         return;
       }
 
-      var bestNode = findBestNode(routeIndex.values());
-      log.info("Still looking for route... {}ms time left, {} nodes left, closest position is {} with distance {}",
+      log.info("Still looking for route... {}ms time left, {} nodes left, closest position is {} with distance to target {}",
         expireTime - System.currentTimeMillis(),
         openSet.size(),
-        bestNode.node().blockPosition().formatXYZ(),
-        bestNode.totalRouteScore() - bestNode.sourceCost()
+        bestGlobalNode.value.node().blockPosition().formatXYZ(),
+        bestGlobalNode.value.targetCost()
       );
     }, 1, TimeUnit.SECONDS, true);
     var cleaner = new CallLimiter(() -> {
-      if (Boolean.getBoolean("sf.pathfinding-no-prune")) {
+      if (pathConstraint.disablePruning()) {
         return;
       }
 
       log.info("Pruning route index and open set to avoid branching");
 
-      var bestNode = findBestNode(routeIndex.values());
       openSet.clear();
-      openSet.enqueue(bestNode);
-      routeIndex.clear();
+      openSet.enqueue(bestGlobalNode.value);
+      Arrays.fill(routeIndex, null);
     }, 5, TimeUnit.SECONDS, true);
     while (!openSet.isEmpty()) {
       if (Thread.currentThread().isInterrupted()) {
@@ -161,32 +164,31 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       }
 
       try {
-        instructionCache.compute(current.node().blockPosition().asMinecraftLong(), (_, v) -> {
-          if (v == null) {
-            var counter = new IntReference();
-            var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
-            graph.insertActions(
-              current.node().blockPosition(),
-              current.parentToNodeDirection(),
-              instructions -> {
-                list[counter.value++] = instructions;
-                handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
-              }
-            );
+        var positionLong = current.node().blockPosition().asMinecraftLong();
+        var cachedInstructions = instructionCache.get(positionLong);
 
-            return list;
-          }
-
-          for (var instructions : v) {
+        if (cachedInstructions == null) {
+          // Cache miss - compute and store instructions
+          var counter = new IntReference();
+          var list = new GraphInstructions[MinecraftGraph.ACTIONS_SIZE];
+          graph.insertActions(
+            current.node().blockPosition(),
+            current.parentToNodeDirection(),
+            instructions -> {
+              list[counter.value++] = instructions;
+              handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
+            }
+          );
+          instructionCache.put(positionLong, list);
+        } else {
+          // Cache hit - reuse cached instructions
+          for (var instructions : cachedInstructions) {
             if (instructions == null) {
               break;
             }
-
-            handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions);
+            handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
           }
-
-          return v;
-        });
+        }
       } catch (OutOfLevelException _) {
         log.debug("Found a node out of the level: {}", current.node());
         stopwatch.stop();
@@ -195,7 +197,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
           stopwatch.elapsed().toMillis());
 
         // The current node is not always the best node. We need to find the best node.
-        var bestNode = findBestNode(routeIndex.values());
+        var bestNode = bestGlobalNode.value;
 
         // This is the best node we found so far
         // We will add a recalculating action and return the best route
@@ -214,10 +216,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   }
 
   private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
-                                  Map<NodeState, MinecraftRouteNode> routeIndex,
-                                  Long2IntMap blockItemsIndex,
+                                  Long2ObjectOpenHashMap<MinecraftRouteNode>[] routeIndex,
+                                  Long2IntOpenHashMap blockItemsIndex,
                                   MinecraftRouteNode current,
-                                  GraphInstructions instructions) {
+                                  GraphInstructions instructions,
+                                  ObjectReference<MinecraftRouteNode> bestGlobalNode) {
     // Creative mode placing requires us to have at least one block
     if (instructions.requiresOneBlock() && current.node().usableBlockItems() < 1) {
       return;
@@ -230,20 +233,17 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       return;
     }
 
-    var instructionNode = new NodeState(instructions.blockPosition(), newBlocks);
+    var blockPosition = instructions.blockPosition();
+    var blockPositionLong = blockPosition.asMinecraftLong();
 
     // Pre-check if we can reach this node with the current amount of items
     // We don't want to consider nodes again where we have even less usable items
-    var bestUsableItems = blockItemsIndex.compute(instructionNode.blockPosition().asMinecraftLong(), (_, v) -> {
-      if (v == null || instructionNode.usableBlockItems() > v) {
-        return instructionNode.usableBlockItems();
-      }
-
-      return v;
-    });
-    if (bestUsableItems > instructionNode.usableBlockItems()) {
-      return;
+    // Using get/put instead of compute() to avoid lambda allocation overhead
+    var currentBest = blockItemsIndex.get(blockPositionLong);
+    if (currentBest >= newBlocks) {
+      return; // Already found a path with same or more blocks
     }
+    blockItemsIndex.put(blockPositionLong, newBlocks);
 
     var actionCost = instructions.actionCost();
     var worldActions = instructions.actions();
@@ -252,49 +252,52 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     // Get distance from the current element
     // and add the distance from the current element to the next element
     var newSourceCost = current.sourceCost() + actionCost;
-    var newTargetCost = scorer.computeScore(graph, instructionNode.blockPosition(), worldActions);
+    var newTargetCost = scorer.computeScore(graph, blockPosition, worldActions);
     var newTotalRouteScore = newSourceCost + newTargetCost;
 
-    routeIndex.compute(
-      instructionNode,
-            (_, v) -> {
-        // The first time we see this node
-        if (v == null) {
-          var node =
-            new MinecraftRouteNode(
-              instructionNode,
-              current,
-              instructions.moveDirection(),
-              worldActions,
-              newSourceCost,
-              newTargetCost,
-              newTotalRouteScore);
+    // Using get/put instead of compute() to avoid lambda allocation overhead
+    var routeMap = getRouteMap(routeIndex, newBlocks);
+    var existingNode = routeMap.get(blockPositionLong);
 
-          log.debug("Found a new node: {}", instructionNode);
+    if (existingNode == null) {
+      // The first time we see this node
+      var instructionNode = new NodeState(blockPosition, newBlocks);
+      var node =
+        new MinecraftRouteNode(
+          instructionNode,
+          current,
+          instructions.moveDirection(),
+          worldActions,
+          newSourceCost,
+          newTargetCost,
+          newTotalRouteScore);
 
+      if (newTargetCost < bestGlobalNode.value.targetCost()) {
+        bestGlobalNode.value = node;
+      }
 
-          openSet.enqueue(node);
+      log.debug("Found a new node: {}", instructionNode);
 
-          return node;
-        }
+      routeMap.put(blockPositionLong, node);
+      openSet.enqueue(node);
+    } else if (newSourceCost < existingNode.sourceCost()) {
+      // If we found a better route to this node, update it
+      existingNode.setBetterParent(
+        current,
+        instructions.moveDirection(),
+        worldActions,
+        newSourceCost,
+        newTargetCost,
+        newTotalRouteScore);
 
-        // If we found a better route to this node, update it
-        if (newSourceCost < v.sourceCost()) {
-          v.setBetterParent(
-            current,
-            instructions.moveDirection(),
-            worldActions,
-            newSourceCost,
-            newTargetCost,
-            newTotalRouteScore);
+      if (newTargetCost < bestGlobalNode.value.targetCost()) {
+        bestGlobalNode.value = existingNode;
+      }
 
-          log.debug("Found a better route to node: {}", instructionNode);
+      log.debug("Found a better route to node: {}", existingNode.node());
 
-          openSet.enqueue(v);
-        }
-
-        return v;
-      });
+      openSet.enqueue(existingNode);
+    }
   }
 
   private List<WorldAction> repositionIfNeeded(List<WorldAction> actions, NodeState from, boolean requiresRepositioning) {

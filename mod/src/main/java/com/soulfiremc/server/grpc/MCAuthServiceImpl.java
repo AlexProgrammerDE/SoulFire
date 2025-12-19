@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,6 +65,8 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
                   settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
                   instance.scheduler()
                 ))
+                // Add timeout to prevent hanging forever on slow/unresponsive auth servers
+                .orTimeout(2, TimeUnit.MINUTES)
                 .thenApply(MinecraftAccount::toProto)
                 .exceptionally(t -> {
                   log.error("Error authenticating account", t);
@@ -137,6 +140,8 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
         settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
         instance.scheduler()
       ))
+      // Microsoft device codes typically expire after 15 minutes
+      .orTimeout(15, TimeUnit.MINUTES)
       .whenComplete((account, t) -> {
         if (t != null) {
           log.error("Error authenticating account", t);
@@ -162,20 +167,23 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
     var settings = instance.settingsSource();
 
     var cancellationCollector = new CancellationCollector(responseObserver);
-    try {
-      var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
-      var service = MCAuthService.convertService(request.getAccount().getType());
-      var account = cancellationCollector.add(service.refresh(
+    var receivedAccount = MinecraftAccount.fromProto(request.getAccount());
+    var service = MCAuthService.convertService(request.getAccount().getType());
+    cancellationCollector.add(service.refresh(
         receivedAccount,
         settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
         instance.scheduler()
-      )).join();
-
-      responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error refreshing account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
+      ))
+      // Add timeout to prevent hanging forever on slow/unresponsive auth servers
+      .orTimeout(2, TimeUnit.MINUTES)
+      .whenComplete((account, t) -> {
+        if (t != null) {
+          log.error("Error refreshing account", t);
+          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
+        } else {
+          responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
+          responseObserver.onCompleted();
+        }
+      });
   }
 }

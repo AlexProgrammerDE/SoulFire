@@ -34,15 +34,15 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public final class SFBlockHelpers {
   // A player can jump up 1.25 blocks
   private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
-  public static IDMap<BlockState, VoxelShape> RAW_COLLISION_SHAPES = new IDMap<>(
+  public static final IDMap<BlockState, VoxelShape> RAW_COLLISION_SHAPES = new IDMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
-  public static IDBooleanMap<BlockState> COLLISION_SHAPE_EMPTY = new IDBooleanMap<>(
+  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_EMPTY = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> RAW_COLLISION_SHAPES.get(blockState).isEmpty());
-  public static IDBooleanMap<BlockState> COLLISION_SHAPE_NOT_EMPTY = new IDBooleanMap<>(
+  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_NOT_EMPTY = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> !COLLISION_SHAPE_EMPTY.get(blockState));
-  public static IDBooleanMap<BlockState> COLLISION_SHAPE_FULL_BLOCK = new IDBooleanMap<>(
+  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_FULL_BLOCK = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> Block.isShapeFullBlock(RAW_COLLISION_SHAPES.get(blockState)));
-  public static IDBooleanMap<BlockState> COLLISION_SHAPE_TOP_FACE_FULL = new IDBooleanMap<>(
+  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_TOP_FACE_FULL = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> Block.isFaceFull(RAW_COLLISION_SHAPES.get(blockState), Direction.UP));
 
   private SFBlockHelpers() {}

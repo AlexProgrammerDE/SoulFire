@@ -23,6 +23,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.BotSettings;
@@ -37,12 +38,14 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import org.slf4j.event.Level;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -82,17 +85,23 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               proxy,
               proxyCheckEventLoopGroup
             );
+            var connectionHolder = new CompletableFuture<BotConnection>();
             return instance.scheduler().supplyAsync(() -> {
                 var future = cancellationCollector.add(new CompletableFuture<Void>());
                 var connection = factory.prepareConnection(true);
+                connectionHolder.complete(connection);
 
                 connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
 
-                SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, event -> {
+                Consumer<BotPacketPreReceiveEvent> listener = event -> {
                   if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
                     future.complete(null);
                   }
-                });
+                };
+                SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, listener);
+
+                // Ensure listener is unregistered when future completes (success, failure, or timeout)
+                future.whenComplete((_, _) -> SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener));
 
                 log.debug("Checking proxy: {}", proxy);
                 connection.connect().join();
@@ -100,6 +109,11 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 return future.join();
               }, Level.TRACE)
               .orTimeout(30, TimeUnit.SECONDS)
+              .whenComplete((_, _) -> {
+                // Ensure connection resources are cleaned up after timeout or completion
+                connectionHolder.thenAccept(conn ->
+                  conn.disconnect(Component.text("Proxy check completed")));
+              })
               .handle((_, throwable) -> ProxyCheckResponseSingle.newBuilder()
                 .setProxy(payload)
                 .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))

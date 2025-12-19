@@ -21,10 +21,10 @@ import com.soulfiremc.server.bot.BotConnection;
 import io.netty.util.AttributeKey;
 import net.minecraft.client.Minecraft;
 
-public class SFConstants {
-  public static Minecraft BASE_MC_INSTANCE;
+public final class SFConstants {
   public static final ThreadLocal<Minecraft> MINECRAFT_INSTANCE = new InheritableThreadLocal<>();
   public static final AttributeKey<BotConnection> NETTY_BOT_CONNECTION = AttributeKey.valueOf("soulfire_bot_connection");
+  public static Minecraft BASE_MC_INSTANCE;
 
   private SFConstants() {
   }

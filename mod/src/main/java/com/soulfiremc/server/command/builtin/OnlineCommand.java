@@ -26,6 +26,9 @@ import java.util.ArrayList;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class OnlineCommand {
+  private OnlineCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("online")
@@ -48,8 +51,5 @@ public final class OnlineCommand {
                       online.size() + " bots online: " + String.join(", ", online));
                   return Command.SINGLE_SUCCESS;
                 }))));
-  }
-
-  private OnlineCommand() {
   }
 }

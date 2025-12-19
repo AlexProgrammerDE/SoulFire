@@ -15,23 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.pathfinding.graph;
+package com.soulfiremc.server.pathfinding.graph.constraint;
 
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
+import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
+import com.soulfiremc.server.settings.instance.PathfindingSettings;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,54 +42,125 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-@RequiredArgsConstructor
-public class PathConstraint {
-  private static final boolean ALLOW_BREAKING_UNDIGGABLE = Boolean.getBoolean("sf.pathfinding-allow-breaking-undiggable");
-  private static final boolean DO_NOT_SQUEEZE_THROUGH_DIAGONALS = Boolean.getBoolean("sf.pathfinding-do-not-squeezing-through-diagonals");
-  private static final boolean DO_NOT_AVOID_HARMFUL_ENTITIES = Boolean.getBoolean("sf.pathfinding-do-not-avoid-harmful-entities");
-  private static final int MAX_CLOSE_TO_ENEMY_PENALTY = Integer.getInteger("sf.pathfinding-max-close-to-enemy-penalty", 50);
+public final class PathConstraintImpl implements PathConstraint {
+  @Nullable
   private final LocalPlayer entity;
   private final LevelHeightAccessor levelHeightAccessor;
+  private final boolean allowBreakingUndiggable;
+  private final boolean avoidDiagonalSqueeze;
+  private final boolean avoidHarmfulEntities;
+  private final int maxEnemyPenalty;
+  private final int breakBlockPenalty;
+  private final int placeBlockPenalty;
+  private final int expireTimeout;
+  private final boolean disablePruning;
   private final CachedLazyObject<List<EntityRangeData>> unfriendlyEntities = new CachedLazyObject<>(this::getUnfriendlyEntitiesExpensive, 10, TimeUnit.SECONDS);
 
-  public PathConstraint(BotConnection botConnection) {
-    this(botConnection.minecraft().player, botConnection.minecraft().level);
+  public PathConstraintImpl(
+    @Nullable LocalPlayer entity,
+    LevelHeightAccessor levelHeightAccessor,
+    boolean allowBreakingUndiggable,
+    boolean avoidDiagonalSqueeze,
+    boolean avoidHarmfulEntities,
+    int maxEnemyPenalty,
+    int breakBlockPenalty,
+    int placeBlockPenalty,
+    int expireTimeout,
+    boolean disablePruning) {
+    this.entity = entity;
+    this.levelHeightAccessor = levelHeightAccessor;
+    this.allowBreakingUndiggable = allowBreakingUndiggable;
+    this.avoidDiagonalSqueeze = avoidDiagonalSqueeze;
+    this.avoidHarmfulEntities = avoidHarmfulEntities;
+    this.maxEnemyPenalty = maxEnemyPenalty;
+    this.breakBlockPenalty = breakBlockPenalty;
+    this.placeBlockPenalty = placeBlockPenalty;
+    this.expireTimeout = expireTimeout;
+    this.disablePruning = disablePruning;
   }
 
+  public PathConstraintImpl(BotConnection botConnection) {
+    this(
+      botConnection.minecraft().player,
+      botConnection.minecraft().level,
+      botConnection.settingsSource()
+    );
+  }
+
+  public PathConstraintImpl(
+    @Nullable LocalPlayer entity,
+    LevelHeightAccessor levelHeightAccessor,
+    SettingsSource settingsSource) {
+    this(
+      entity,
+      levelHeightAccessor,
+      settingsSource.get(PathfindingSettings.ALLOW_BREAKING_UNDIGGABLE),
+      settingsSource.get(PathfindingSettings.AVOID_DIAGONAL_SQUEEZE),
+      settingsSource.get(PathfindingSettings.AVOID_HARMFUL_ENTITIES),
+      settingsSource.get(PathfindingSettings.MAX_ENEMY_PENALTY),
+      settingsSource.get(PathfindingSettings.BREAK_BLOCK_PENALTY),
+      settingsSource.get(PathfindingSettings.PLACE_BLOCK_PENALTY),
+      settingsSource.get(PathfindingSettings.EXPIRE_TIMEOUT),
+      settingsSource.get(PathfindingSettings.DISABLE_PRUNING)
+    );
+  }
+
+  @Override
   public boolean doUsableBlocksDecreaseWhenPlaced() {
-    return entity == null || !entity.getAbilities().instabuild;
+    return entity == null || !entity.hasInfiniteMaterials();
   }
 
+  @Override
+  public boolean canBlocksDropWhenBroken() {
+    return entity == null || !entity.preventsBlockDrops();
+  }
+
+  @Override
+  public boolean canBreakBlocks() {
+    return true;
+  }
+
+  @Override
+  public boolean canPlaceBlocks() {
+    return true;
+  }
+
+  @Override
   public boolean isPlaceable(ItemStack item) {
     return SFItemHelpers.isSafeFullBlockItem(item);
   }
 
+  @Override
   public boolean isTool(ItemStack item) {
     return SFItemHelpers.isTool(item);
   }
 
+  @Override
   public boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
     return blockState.getBlock() == Blocks.VOID_AIR && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
   }
 
-  public boolean canBreakBlockPos(SFVec3i pos) {
-    return !levelHeightAccessor.isOutsideBuildHeight(pos.y);
-  }
-
-  public boolean canPlaceBlockPos(SFVec3i pos) {
-    return !levelHeightAccessor.isOutsideBuildHeight(pos.y);
-  }
-
-  public boolean canBreakBlock(Block blockType) {
-    if (ALLOW_BREAKING_UNDIGGABLE) {
+  @Override
+  public boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
+    if (!canBreakBlocks()) {
+      return false;
+    } else if (levelHeightAccessor.isOutsideBuildHeight(pos.y)) {
+      return false;
+    } else if (allowBreakingUndiggable) {
       return true;
+    } else {
+      return SFBlockHelpers.isDiggable(blockState.getBlock());
     }
-
-    return SFBlockHelpers.isDiggable(blockType);
   }
 
+  @Override
+  public boolean canPlaceBlock(SFVec3i pos) {
+    return canPlaceBlocks() && !levelHeightAccessor.isOutsideBuildHeight(pos.y);
+  }
+
+  @Override
   public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
-    if (DO_NOT_SQUEEZE_THROUGH_DIAGONALS) {
+    if (avoidDiagonalSqueeze) {
       return SFBlockHelpers.COLLISION_SHAPE_NOT_EMPTY.get(collisionData.blockState());
     }
 
@@ -97,14 +171,15 @@ public class PathConstraint {
     return DiagonalCollisionCalculator.collidesWith(collisionData);
   }
 
+  @Override
   public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
-    if (!DO_NOT_AVOID_HARMFUL_ENTITIES) {
+    if (avoidHarmfulEntities) {
       var addedPenalty = 0D;
       for (var entity : unfriendlyEntities.get()) {
         var followRange = entity.followRange;
         var distance = instruction.blockPosition().distance(entity.entityPosition);
         if (distance <= followRange) {
-          addedPenalty += MAX_CLOSE_TO_ENEMY_PENALTY * (followRange - distance) / followRange;
+          addedPenalty += maxEnemyPenalty * (followRange - distance) / followRange;
         }
       }
 
@@ -114,6 +189,26 @@ public class PathConstraint {
     }
 
     return instruction;
+  }
+
+  @Override
+  public double breakBlockPenalty() {
+    return breakBlockPenalty;
+  }
+
+  @Override
+  public double placeBlockPenalty() {
+    return placeBlockPenalty;
+  }
+
+  @Override
+  public int expireTimeout() {
+    return expireTimeout;
+  }
+
+  @Override
+  public boolean disablePruning() {
+    return disablePruning;
   }
 
   private List<EntityRangeData> getUnfriendlyEntitiesExpensive() {

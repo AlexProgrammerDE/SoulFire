@@ -73,13 +73,13 @@ public final class DiagonalCollisionCalculator {
     return diagonalsArray;
   });
 
+  private DiagonalCollisionCalculator() {
+  }
+
   public static boolean collidesWith(CollisionData collisionData) {
     return COLLISIONS.get(collisionData.blockState)[collisionData.diagonalArrayIndex][collisionData.bodyPart.ordinal()][collisionData.side.ordinal()];
   }
 
   public record CollisionData(BlockState blockState, int diagonalArrayIndex, BodyPart bodyPart, MovementSide side) {
-  }
-
-  private DiagonalCollisionCalculator() {
   }
 }

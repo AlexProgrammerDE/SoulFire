@@ -18,8 +18,8 @@
 package com.soulfiremc.server.pathfinding.graph.actions;
 
 import com.soulfiremc.server.pathfinding.BlockPlaceAgainstData;
-import com.soulfiremc.server.pathfinding.Costs;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.cost.Costs;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.JumpAndPlaceBelowAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
@@ -106,7 +106,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       cost += breakCost.miningCost();
       actions.add(new BlockBreakAction(breakCost));
 
-      if (breakCost.willDropUsableBlockItem()) {
+      if (graph.pathConstraint().canBlocksDropWhenBroken() && breakCost.willDropUsableBlockItem()) {
         usableBlockItemsDiff++;
       }
     }
@@ -115,12 +115,12 @@ public final class UpMovement extends GraphAction implements Cloneable {
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
     // We need a block to place below us
-    if (graph.doUsableBlocksDecreaseWhenPlaced()) {
+    if (graph.pathConstraint().doUsableBlocksDecreaseWhenPlaced()) {
       // After the place we'll have one less usable block item
       usableBlockItemsDiff--;
     }
 
-    cost += Costs.PLACE_BLOCK_PENALTY;
+    cost += graph.pathConstraint().placeBlockPenalty();
 
     // Where we are standing right now, we'll place the target block below us after jumping
     actions.add(
@@ -172,8 +172,7 @@ public final class UpMovement extends GraphAction implements Cloneable {
       }
 
       // Search for a way to break this block
-      if (graph.disallowedToBreakBlock(absoluteKey)
-        || graph.disallowedToBreakBlock(blockState.getBlock())
+      if (!graph.pathConstraint().canBreakBlock(absoluteKey, blockState)
         || upMovement.unsafeToBreak[blockArrayIndex]) {
         // No way to break this block
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
@@ -198,7 +197,8 @@ public final class UpMovement extends GraphAction implements Cloneable {
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, UpMovement upMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Towering requires placing a block at old feet position
-      if (graph.disallowedToPlaceBlock(absoluteKey)) {
+      if (!graph.pathConstraint().canPlaceBlock(absoluteKey)
+        || !blockState.canBeReplaced()) {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 

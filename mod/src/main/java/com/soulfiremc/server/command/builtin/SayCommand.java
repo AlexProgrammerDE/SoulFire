@@ -25,6 +25,9 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class SayCommand {
+  private SayCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("say")
@@ -44,8 +47,5 @@ public final class SayCommand {
                       return Command.SINGLE_SUCCESS;
                     });
                 }))));
-  }
-
-  private SayCommand() {
   }
 }

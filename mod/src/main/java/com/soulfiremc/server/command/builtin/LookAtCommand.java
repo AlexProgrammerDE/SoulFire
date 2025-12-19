@@ -27,6 +27,9 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class LookAtCommand {
+  private LookAtCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("lookat")
@@ -58,8 +61,5 @@ public final class LookAtCommand {
                         return Command.SINGLE_SUCCESS;
                       });
                   }))))));
-  }
-
-  private LookAtCommand() {
   }
 }

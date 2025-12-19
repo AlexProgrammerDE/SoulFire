@@ -30,15 +30,15 @@ import org.sqlite.JDBC;
 import java.nio.file.Path;
 
 public final class DatabaseManager {
+  private DatabaseManager() {
+  }
+
   public static SessionFactory select() {
     return switch (System.getProperty("database", "sqlite")) {
       case "sqlite" -> forSqlite(SFPathConstants.BASE_DIR.resolve("soulfire.sqlite"));
       case "mysql" -> forMysql();
       default -> throw new IllegalArgumentException("Invalid database type");
     };
-  }
-
-  private DatabaseManager() {
   }
 
   private static SessionFactory forSqlite(Path dbFile) {

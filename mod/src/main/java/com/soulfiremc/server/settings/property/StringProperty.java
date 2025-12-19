@@ -24,7 +24,7 @@ import org.immutables.value.Value;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public non-sealed abstract class StringProperty implements Property {
+public abstract non-sealed class StringProperty implements Property {
   public abstract String key();
 
   public abstract String uiName();

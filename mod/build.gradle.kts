@@ -1,19 +1,32 @@
-import org.gradle.api.internal.catalog.DelegatingProjectDependency
-import xyz.wagyourtail.unimined.api.minecraft.task.AbstractRemapJarTask
-import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
   `sf-special-publish-conventions`
-  id("xyz.wagyourtail.unimined")
+  id("fabric-loom")
+  alias(libs.plugins.jmh)
 }
 
-val modImplementation: Configuration by configurations.creating
-val include: Configuration by configurations.creating
+repositories {
+  maven("https://maven.parchmentmc.org") {
+    name = "ParchmentMC"
+    content {
+      includeGroup("org.parchmentmc.data")
+    }
+  }
+}
 
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
   compileOnly(projects.shared)
+
+  minecraft("com.mojang:minecraft:1.21.10")
+  @Suppress("UnstableApiUsage")
+  mappings(loom.layered {
+    officialMojangMappings()
+    parchment("org.parchmentmc.data:parchment-1.21.10:2025.10.12@zip")
+  })
+  modImplementation("net.fabricmc:fabric-loader:0.17.2")
 
   modImplementation("com.viaversion:viafabricplus:4.3.1")
   include("com.viaversion:viafabricplus:4.3.1") {
@@ -28,84 +41,70 @@ dependencies {
 
   annotationProcessor(libs.picoli.codegen)
 
-  val excludeConf: ModuleDependency.() -> Unit = {
+  // For CLI support
+  api(libs.picoli) {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+  include(libs.picoli) {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+  api(projects.proto) {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+  include(projects.proto) {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+  api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar") {
+    exclude("io.netty")
+    exclude("org.slf4j")
+  }
+  include("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar") {
     exclude("io.netty")
     exclude("org.slf4j")
   }
 
-  fun apiInclude(dependencyNotation: String) {
-    api(dependencyNotation, excludeConf)
-    include(dependencyNotation, excludeConf)
-  }
-
-  fun apiInclude(dependencyNotation: Provider<*>) {
-    api(dependencyNotation, excludeConf)
-    include(dependencyNotation, excludeConf)
-  }
-
-  fun apiInclude(dependencyNotation: ProviderConvertible<*>) {
-    api(dependencyNotation, excludeConf)
-    include(dependencyNotation, excludeConf)
-  }
-
-  fun apiInclude(dependencyNotation: DelegatingProjectDependency) {
-    api(dependencyNotation, excludeConf)
-    include(dependencyNotation, excludeConf)
-  }
-
-  // For CLI support
-  apiInclude(libs.picoli)
-  apiInclude(projects.proto)
-  apiInclude("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar")
-
-  apiInclude(libs.bundles.armeria)
-  apiInclude(libs.bundles.reactor.netty)
-
   testRuntimeOnly(libs.junit.launcher)
   testImplementation(libs.junit)
   testImplementation(projects.shared)
+
+  jmhImplementation(projects.shared)
+}
+
+loom {
+  accessWidenerPath = file("src/main/resources/soulfire.accesswidener")
+
+  runs {
+    configureEach {
+      ideConfigGenerated(false)
+    }
+  }
+}
+
+configurations {
+  testRuntimeClasspath {
+    exclude(group = "net.fabricmc", module = "fabric-log4j-util")
+  }
 }
 
 tasks {
   test {
-    classpath += sourceSets.main.get().compileClasspath
-  }
-}
-
-unimined.minecraft {
-  version("1.21.10")
-
-  mappings {
-    intermediary()
-    mojmap()
-    parchment("1.21.10", "2025.10.12")
+    useJUnitPlatform()
   }
 
-  fabric {
-    loader("0.17.2")
-    accessWidener(project.projectDir.resolve("src/main/resources/soulfire.accesswidener"))
+  remapJar {
+    dependsOn(":proto:jar")
   }
-
-  mods {
-    modImplementation {
-      mixinRemap {
-        @Suppress("UnstableApiUsage")
-        reset()
-        enableBaseMixin()
-        enableMixinExtra()
-      }
-    }
-  }
-
-  defaultRemapJar = true
-  runs.off = true
 }
 
 configurations.create("remapped")
 
-val remapJarTask = tasks.getByName<RemapJarTask>("remapJar")
+val remapJarTask = tasks.named<RemapJarTask>("remapJar")
 artifacts {
-  add("remapped", remapJarTask.outputs.files.singleFile) {
+  add("remapped", remapJarTask.flatMap { it.archiveFile }) {
     builtBy(remapJarTask)
   }
 }
@@ -118,9 +117,8 @@ publishing {
   }
 }
 
-tasks {
-  withType<AbstractRemapJarTask> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn(":proto:jar")
-  }
+jmh {
+  warmupIterations = 2
+  iterations = 2
+  fork = 2
 }

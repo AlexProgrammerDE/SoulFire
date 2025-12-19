@@ -29,6 +29,9 @@ import java.util.stream.IntStream;
 
 @Slf4j
 public final class SFInventoryHelpers {
+  private SFInventoryHelpers() {
+  }
+
   public static boolean isSelectableHotbarSlot(int slot) {
     return slot >= InventoryMenu.USE_ROW_SLOT_START && slot < InventoryMenu.USE_ROW_SLOT_END;
   }
@@ -76,8 +79,5 @@ public final class SFInventoryHelpers {
     return IntStream.range(5, 9)
       .filter(intPredicate)
       .findFirst();
-  }
-
-  private SFInventoryHelpers() {
   }
 }

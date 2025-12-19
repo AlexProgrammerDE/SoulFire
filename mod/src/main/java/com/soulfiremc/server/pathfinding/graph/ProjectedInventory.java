@@ -17,7 +17,10 @@
  */
 package com.soulfiremc.server.pathfinding.graph;
 
-import com.soulfiremc.server.pathfinding.Costs;
+import com.soulfiremc.server.pathfinding.cost.BlockMiningCosts;
+import com.soulfiremc.server.pathfinding.cost.EntityMiningCostCalculator;
+import com.soulfiremc.server.pathfinding.cost.MiningCostCalculator;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;
@@ -47,7 +50,7 @@ public final class ProjectedInventory {
   @Getter
   @ToString.Include
   private final ItemStack[] usableToolsAndEmpty;
-  private final IDMap<BlockState, Costs.BlockMiningCosts> sharedMiningCosts;
+  private final IDMap<BlockState, BlockMiningCosts> sharedMiningCosts;
   private final IDBooleanMap<BlockState> stairsBlockToStandOn;
 
   public ProjectedInventory(Inventory playerInventory, LocalPlayer entity, PathConstraint pathConstraint) {
@@ -56,11 +59,11 @@ public final class ProjectedInventory {
         .stream()
         .filter(item -> !item.isEmpty())
         .toList(),
-      entity,
+      new EntityMiningCostCalculator(entity),
       pathConstraint);
   }
 
-  public ProjectedInventory(List<ItemStack> items, LocalPlayer entity, PathConstraint pathConstraint) {
+  public ProjectedInventory(List<ItemStack> items, MiningCostCalculator costCalculator, PathConstraint pathConstraint) {
     var blockItems = 0;
     var usableToolsAndEmpty = new HashSet<ItemStack>();
 
@@ -77,13 +80,14 @@ public final class ProjectedInventory {
 
     this.usableBlockItems = blockItems;
     this.usableToolsAndEmpty = usableToolsAndEmpty.toArray(new ItemStack[0]);
+    var breakBlockPenalty = pathConstraint.breakBlockPenalty();
     this.sharedMiningCosts = new IDMap<>(Block.BLOCK_STATE_REGISTRY,
-      blockType -> Costs.calculateBlockBreakCost(entity, this, blockType));
+      blockType -> costCalculator.calculateBlockBreakCost(this, blockType, breakBlockPenalty));
     this.stairsBlockToStandOn = new IDBooleanMap<>(Block.BLOCK_STATE_REGISTRY,
       state -> state.is(BlockTags.STAIRS) && !SFBlockHelpers.isHurtWhenStoodOn(state));
   }
 
-  public Costs.BlockMiningCosts getMiningCosts(BlockState blockState) {
+  public BlockMiningCosts getMiningCosts(BlockState blockState) {
     return Objects.requireNonNull(sharedMiningCosts.get(blockState), "Block not destructible");
   }
 

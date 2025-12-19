@@ -28,6 +28,9 @@ import java.util.stream.StreamSupport;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class MimicCommand {
+  private MimicCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("mimic")
@@ -86,8 +89,5 @@ public final class MimicCommand {
                     return Command.SINGLE_SUCCESS;
                   });
               }))));
-  }
-
-  private MimicCommand() {
   }
 }

@@ -24,7 +24,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 
 @Slf4j
-public class SoulFirePreMainBootstrap {
+public final class SoulFirePreMainBootstrap {
+  private SoulFirePreMainBootstrap() {
+  }
+
   public static void preMainBootstrap() {
     // If Velocity's natives are being extracted to a different temporary directory, make sure the
     // Netty natives are extracted there as well
@@ -60,8 +63,5 @@ public class SoulFirePreMainBootstrap {
   private static void injectExceptionHandler() {
     Thread.setDefaultUncaughtExceptionHandler(
       (thread, throwable) -> log.atError().setCause(throwable).log("Uncaught exception in thread {}", thread.getName()));
-  }
-
-  private SoulFirePreMainBootstrap() {
   }
 }

@@ -15,20 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.bootstrap;
+package com.soulfiremc.server.pathfinding.cost;
 
-import net.minecraft.SharedConstants;
-import net.minecraft.client.ClientBootstrap;
-import net.minecraft.server.Bootstrap;
+import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class TestBootstrap {
-  public static void bootstrapForTest() {
-    SharedConstants.tryDetectVersion();
-    Bootstrap.bootStrap();
-    ClientBootstrap.bootstrap();
-    Bootstrap.validate();
-  }
-
-  private TestBootstrap() {
-  }
-}
+public record BlockMiningCosts(
+  double miningCost, @NonNull ItemStack usedTool, boolean willDropUsableBlockItem) {}

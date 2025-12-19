@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 /// This interface is for any plugin that hooks into the server.
 @Slf4j
 @Getter
-public sealed abstract class Plugin permits ExternalPlugin, InternalPlugin {
+public abstract sealed class Plugin permits ExternalPlugin, InternalPlugin {
   private final PluginInfo pluginInfo;
 
   protected Plugin(PluginInfo pluginInfo) {

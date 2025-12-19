@@ -48,7 +48,7 @@ public final class PrintDocsCommand {
               c -> {
                 var builder = new StringBuilder("\n");
                 for (var command : BrigadierHelper.getAllUsage(dispatcher, dispatcher.getRoot(), c.getSource())) {
-                  builder.append("| `%s{:bash}` | %s |\n".formatted(
+                  builder.append("| `%s{:bash}` | %s |%n".formatted(
                     command.command(),
                     Objects.requireNonNullElse(command.helpMeta().help(), "")
                       .replace("|", "\\|")
@@ -70,7 +70,7 @@ public final class PrintDocsCommand {
                   }
 
                   var pluginInfo = plugin.pluginInfo();
-                  builder.append("| `%s` | %s | %s | %s |\n".formatted(
+                  builder.append("| `%s` | %s | %s | %s |%n".formatted(
                     pluginInfo.id(),
                     pluginInfo.description()
                       .replace("|", "\\|")
@@ -103,12 +103,12 @@ public final class PrintDocsCommand {
                         type = "JAVA";
                       }
 
-                      builder.append("| `%s`%s | `%s` | `%s` |\n".formatted(
-                          version.getName(),
-                          ProtocolTranslator.NATIVE_VERSION == version ? " (native)" : "",
-                          versionId,
-                          type
-                        ));
+                      builder.append("| `%s`%s | `%s` | `%s` |%n".formatted(
+                        version.getName(),
+                        ProtocolTranslator.NATIVE_VERSION == version ? " (native)" : "",
+                        versionId,
+                        type
+                      ));
                     });
                 c.getSource().source().sendInfo(builder.toString());
 

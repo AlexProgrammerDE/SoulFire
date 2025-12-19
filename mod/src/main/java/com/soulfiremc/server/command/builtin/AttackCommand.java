@@ -25,6 +25,9 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class AttackCommand {
+  private AttackCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("attack")
@@ -69,8 +72,5 @@ public final class AttackCommand {
                     })))
         )
     );
-  }
-
-  private AttackCommand() {
   }
 }

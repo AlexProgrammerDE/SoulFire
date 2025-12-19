@@ -25,8 +25,11 @@ import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
 
-public class NettyHelper {
+public final class NettyHelper {
   public static final String PROXY_NAME = "sf_proxy";
+
+  private NettyHelper() {
+  }
 
   public static void addProxy(SFProxy proxy, ChannelPipeline pipeline) {
     switch (proxy.type()) {
@@ -64,8 +67,5 @@ public class NettyHelper {
     Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(group::shutdownGracefully));
 
     return group;
-  }
-
-  private NettyHelper() {
   }
 }

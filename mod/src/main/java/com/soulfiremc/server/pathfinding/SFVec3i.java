@@ -49,15 +49,6 @@ public final class SFVec3i {
     return new SFVec3i(x, y, z);
   }
 
-  // Long hash as seen in baritone
-  public static long longHash(int x, int y, int z) {
-    long hash = 3241;
-    hash = 3457689L * hash + x;
-    hash = 8734625L * hash + y;
-    hash = 2873465L * hash + z;
-    return hash;
-  }
-
   public boolean equals(SFVec3i other) {
     return x == other.x && y == other.y && z == other.z;
   }
@@ -74,7 +65,7 @@ public final class SFVec3i {
   @Override
   public int hashCode() {
     if (!hashCodeSet) {
-      hashCode = (int) longHash(x, y, z);
+      hashCode = Long.hashCode(asMinecraftLong());
       hashCodeSet = true;
     }
 

@@ -25,6 +25,9 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class ControlCommand {
+  private ControlCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("control")
@@ -158,8 +161,5 @@ public final class ControlCommand {
                       return Command.SINGLE_SUCCESS;
                     }))))
     );
-  }
-
-  private ControlCommand() {
   }
 }

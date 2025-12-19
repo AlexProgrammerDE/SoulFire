@@ -128,7 +128,7 @@ public final class BrigadierHelper {
 
   public static int forEveryInstance(
     CommandContext<CommandSourceStack> context,
-    CommandFunction<InstanceManager> consumer) throws CommandSyntaxException {
+    CommandFunction<InstanceManager> consumer) {
     var instances = context.getSource().getVisibleInstances();
     if (instances.isEmpty()) {
       context.getSource().source().sendWarn("No instances found!");

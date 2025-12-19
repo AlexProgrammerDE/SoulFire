@@ -28,6 +28,9 @@ import com.soulfiremc.server.pathfinding.controller.ExcavateAreaController;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
 public final class ExcavateCommand {
+  private ExcavateCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("excavate")
@@ -90,8 +93,5 @@ public final class ExcavateCommand {
                             return Command.SINGLE_SUCCESS;
                           });
                       }))))))));
-  }
-
-  private ExcavateCommand() {
   }
 }

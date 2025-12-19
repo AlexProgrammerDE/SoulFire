@@ -3,27 +3,8 @@ plugins {
 }
 
 repositories {
-  maven("https://maven.wagyourtail.xyz/releases") {
-    name = "WagYourReleases"
-    mavenContent {
-      releasesOnly()
-      includeGroup("xyz.wagyourtail.unimined")
-      includeGroup("xyz.wagyourtail.unimined.mapping")
-      includeGroup("xyz.wagyourtail.commons")
-      includeGroup("net.minecraftforge")
-      includeGroup("net.fabricmc")
-    }
-  }
-  maven("https://maven.wagyourtail.xyz/snapshots") {
-    name = "WagYourSnapshots"
-    mavenContent {
-      snapshotsOnly()
-      includeGroup("xyz.wagyourtail.unimined")
-      includeGroup("xyz.wagyourtail.unimined.mapping")
-      includeGroup("xyz.wagyourtail.commons")
-      includeGroup("net.minecraftforge")
-      includeGroup("net.fabricmc")
-    }
+  maven("https://maven.fabricmc.net") {
+    name = "FabricMC"
   }
   gradlePluginPortal()
   mavenCentral()
@@ -36,7 +17,7 @@ dependencies {
   implementation(libs.gradle.plugin.shadow)
   implementation(libs.gradle.plugin.lombok)
   implementation(libs.gradle.plugin.indra.git)
-  implementation(libs.gradle.plugin.unimined)
+  implementation(libs.gradle.plugin.loom)
   implementation(libs.gradle.plugin.spotless)
   implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.4.5")
   implementation(libs.gradle.plugin.freefair)

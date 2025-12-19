@@ -18,20 +18,26 @@
 package com.soulfiremc.jmh;
 
 import com.google.gson.JsonObject;
-import com.soulfiremc.server.data.Block;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
+import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
+import com.soulfiremc.test.utils.TestBootstrap;
+import com.soulfiremc.test.utils.TestMiningCostCalculator;
 import com.soulfiremc.test.utils.TestPathConstraint;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import org.intellij.lang.annotations.Subst;
+import org.jspecify.annotations.NonNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -39,6 +45,7 @@ import org.openjdk.jmh.annotations.State;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -50,10 +57,13 @@ public class PathfindingBenchmark {
 
   @Setup
   public void setup() {
+    // Bootstrap mixins and Minecraft registries
+    TestBootstrap.bootstrapForTest();
+
     var byteArrayInputStream =
       new ByteArrayInputStream(SFHelpers.getResourceAsBytes("world_data.json.zip"));
     try (var gzipInputStream = new GZIPInputStream(byteArrayInputStream);
-         var reader = new InputStreamReader(gzipInputStream)) {
+         var reader = new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8)) {
       log.info("Reading world data...");
       var worldData = GsonInstance.GSON.fromJson(reader, JsonObject.class);
       var definitions = worldData.getAsJsonArray("definitions");
@@ -75,13 +85,14 @@ public class PathfindingBenchmark {
       for (var x = 0; x < data.length; x++) {
         for (var y = 0; y < data[0].length; y++) {
           for (var z = 0; z < data[0][0].length; z++) {
-            var blockType = Block.REGISTRY.getByKey(blockDefinitions[data[x][y][z]]);
-            if (blockType.air()) {
+            var key = blockDefinitions[data[x][y][z]];
+            var block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(key.asString()));
+            if (block.defaultBlockState().isAir()) {
               continue;
             }
 
             // Insert blocks
-            accessor.setBlockAt(x, y, z, blockType);
+            accessor.setBlockAt(x, y, z, block);
             if (x == 0 && z == 0) {
               safeY = Math.max(safeY, y + 1);
             }
@@ -91,14 +102,20 @@ public class PathfindingBenchmark {
 
       var builtAccessor = accessor.build();
 
-      var inventory = ProjectedInventory.forUnitTest(List.of(), DefaultTagsState.TAGS_STATE, TestPathConstraint.INSTANCE);
+      var pathConstraint = new AbstractDelegatePathConstraint() {
+        @Override
+        protected @NonNull PathConstraint delegate() {
+          return TestPathConstraint.INSTANCE;
+        }
+      };
+      var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, pathConstraint);
       initialState = NodeState.forInfo(new SFVec3i(0, safeY, 0), inventory);
       log.info("Initial state: {}", initialState.blockPosition().formatXYZ());
 
-      routeFinder = new RouteFinder(new MinecraftGraph(DefaultTagsState.TAGS_STATE,
+      routeFinder = new RouteFinder(new MinecraftGraph(
         builtAccessor,
         inventory,
-        TestPathConstraint.INSTANCE), new PosGoal(100, 80, 100));
+        pathConstraint), new PosGoal(100, 80, 100));
 
       log.info("Done loading! Testing...");
     } catch (Exception e) {

@@ -26,6 +26,9 @@ import static com.soulfiremc.server.command.brigadier.BrigadierHelper.help;
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.literal;
 
 public final class GenerateTokenCommand {
+  private GenerateTokenCommand() {
+  }
+
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
       literal("generate-token")
@@ -59,8 +62,5 @@ public final class GenerateTokenCommand {
 
                 return Command.SINGLE_SUCCESS;
               }))));
-  }
-
-  private GenerateTokenCommand() {
   }
 }

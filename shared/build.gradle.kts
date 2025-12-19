@@ -13,7 +13,7 @@ dependencies {
   api("org.ow2.asm:asm-tree:9.9")
   api("org.ow2.asm:asm-util:9.9")
   api("net.fabricmc:sponge-mixin:0.16.5+mixin.0.8.7")
-  api("net.fabricmc:intermediary:1.21.9:v2@jar")
+  api("net.fabricmc:intermediary:1.21.10:v2@jar")
   api("net.fabricmc:fabric-loader:0.18.1")
   api("net.fabricmc:mapping-io:0.8.0")
   api("net.fabricmc:tiny-remapper:0.12.0")
@@ -119,12 +119,15 @@ dependencies {
   api(libs.sqlite)
   api(libs.mariadb)
 
+  api(libs.bundles.armeria)
+  api(libs.bundles.reactor.netty)
+
   // For script support
   api(
     files(
       configurations.detachedConfiguration(
         *libs.bundles.graalvm.polyglot.get()
-          .map { it -> dependencies.create(it) }
+          .map { dependencies.create(it) }
           .toTypedArray())
         .resolve()
         .filter { file -> file.name.endsWith(".jar") }

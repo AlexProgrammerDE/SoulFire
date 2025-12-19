@@ -24,7 +24,10 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 
-public class ScriptHelper {
+public final class ScriptHelper {
+  private ScriptHelper() {
+  }
+
   public static MetaLanguage getMetaLanguage(Context context) {
     var languageId = context.getEngine()
       .getLanguages().keySet().stream().findFirst().orElseThrow(
@@ -44,8 +47,5 @@ public class ScriptHelper {
 
   public static Value componentToValue(Context context, Component component) {
     return jsonToValue(context, GsonComponentSerializer.gson().serializeToTree(component));
-  }
-
-  private ScriptHelper() {
   }
 }
