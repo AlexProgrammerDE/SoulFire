@@ -81,7 +81,9 @@ public final class MSJavaCredentialsAuthService
   @Override
   public boolean isExpired(MinecraftAccount account) {
     var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(null);
-    return authManager.getMinecraftToken().isExpired();
+    return authManager.getMinecraftToken().isExpired()
+      || authManager.getMinecraftProfile().isExpired()
+      || authManager.getMinecraftPlayerCertificates().isExpired();
   }
 
   public record MSJavaCredentialsAuthData(String email, String password) {}

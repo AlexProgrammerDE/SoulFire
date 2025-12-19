@@ -82,9 +82,18 @@ public final class MSBedrockCredentialsAuthService
   @Override
   public boolean isExpired(MinecraftAccount account) {
     var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(null);
-    return authManager.getMinecraftCertificateChain().isExpired()
+    return authManager.getMsaToken().isExpired()
+      || authManager.getXblDeviceToken().isExpired()
+      || authManager.getXblUserToken().isExpired()
+      || authManager.getXblTitleToken().isExpired()
+      || authManager.getBedrockXstsToken().isExpired()
+      || authManager.getPlayFabXstsToken().isExpired()
       || authManager.getRealmsXstsToken().isExpired()
-      || authManager.getPlayFabToken().isExpired();
+      || authManager.getXboxLiveXstsToken().isExpired()
+      || authManager.getPlayFabToken().isExpired()
+      || authManager.getMinecraftSession().isExpired()
+      || authManager.getMinecraftMultiplayerToken().isExpired()
+      || authManager.getMinecraftCertificateChain().isExpired();
   }
 
   public record MSBedrockCredentialsAuthData(String email, String password) {}

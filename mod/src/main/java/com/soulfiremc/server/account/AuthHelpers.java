@@ -32,6 +32,18 @@ public final class AuthHelpers {
 
   public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager) throws IOException {
     var mcChain = authManager.getMinecraftCertificateChain().getUpToDate();
+    authManager.getMsaToken().refreshIfExpired();
+    authManager.getXblDeviceToken().refreshIfExpired();
+    authManager.getXblUserToken().refreshIfExpired();
+    authManager.getXblTitleToken().refreshIfExpired();
+    authManager.getBedrockXstsToken().refreshIfExpired();
+    authManager.getPlayFabXstsToken().refreshIfExpired();
+    authManager.getRealmsXstsToken().refreshIfExpired();
+    authManager.getXboxLiveXstsToken().refreshIfExpired();
+    authManager.getPlayFabToken().refreshIfExpired();
+    authManager.getMinecraftSession().refreshIfExpired();
+    authManager.getMinecraftMultiplayerToken().refreshIfExpired();
+    authManager.getMinecraftCertificateChain().refreshIfExpired();
     return new MinecraftAccount(
       authType,
       mcChain.getIdentityUuid(),
@@ -42,6 +54,8 @@ public final class AuthHelpers {
 
   public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager) throws IOException {
     var mcProfile = authManager.getMinecraftProfile().getUpToDate();
+    authManager.getMinecraftToken().refreshIfExpired();
+    authManager.getMinecraftPlayerCertificates().refreshIfExpired();
     return new MinecraftAccount(
       authType,
       mcProfile.getId(),

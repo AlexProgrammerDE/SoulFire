@@ -70,9 +70,18 @@ public final class MSBedrockDeviceCodeAuthService
   @Override
   public boolean isExpired(MinecraftAccount account) {
     var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(null);
-    return authManager.getMinecraftCertificateChain().isExpired()
-            || authManager.getRealmsXstsToken().isExpired()
-            || authManager.getPlayFabToken().isExpired();
+    return authManager.getMsaToken().isExpired()
+      || authManager.getXblDeviceToken().isExpired()
+      || authManager.getXblUserToken().isExpired()
+      || authManager.getXblTitleToken().isExpired()
+      || authManager.getBedrockXstsToken().isExpired()
+      || authManager.getPlayFabXstsToken().isExpired()
+      || authManager.getRealmsXstsToken().isExpired()
+      || authManager.getXboxLiveXstsToken().isExpired()
+      || authManager.getPlayFabToken().isExpired()
+      || authManager.getMinecraftSession().isExpired()
+      || authManager.getMinecraftMultiplayerToken().isExpired()
+      || authManager.getMinecraftCertificateChain().isExpired();
   }
 
   public record MSBedrockDeviceCodeAuthData(Consumer<MsaDeviceCode> callback) {}
