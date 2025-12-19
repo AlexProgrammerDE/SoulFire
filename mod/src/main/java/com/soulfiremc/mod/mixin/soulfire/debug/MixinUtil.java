@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.debug;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

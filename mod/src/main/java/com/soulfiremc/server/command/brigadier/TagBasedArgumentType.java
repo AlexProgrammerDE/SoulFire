@@ -26,7 +26,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 import java.util.Collection;
@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public final class TagBasedArgumentType<T, R extends TagResolvable<T>> implements ArgumentType<R> {
   private static final String TAG_PREFIX = "#";
-  private final Function<ResourceLocation, R> directSupplier;
+  private final Function<Identifier, R> directSupplier;
   private final Function<TagKey<T>, R> tagSupplier;
-  private final List<ResourceLocation> directKeys;
+  private final List<Identifier> directKeys;
   private final List<TagKey<T>> tagKeys;
 
   public static boolean isAllowedInUnquotedString(final char c) {
@@ -125,11 +125,11 @@ public final class TagBasedArgumentType<T, R extends TagResolvable<T>> implement
     return Stream.concat(
         directKeys.stream()
           .limit(2)
-          .map(ResourceLocation::getPath),
+          .map(Identifier::getPath),
         tagKeys.stream()
           .limit(1)
           .map(TagKey::location)
-          .map(ResourceLocation::getPath)
+          .map(Identifier::getPath)
           .map(s -> TAG_PREFIX + s))
       .toList();
   }

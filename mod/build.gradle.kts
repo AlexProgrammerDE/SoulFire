@@ -20,7 +20,7 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  minecraft("com.mojang:minecraft:1.21.10")
+  minecraft("com.mojang:minecraft:1.21.11")
   @Suppress("UnstableApiUsage")
   mappings(loom.layered {
     officialMojangMappings()
@@ -28,8 +28,8 @@ dependencies {
   })
   modImplementation("net.fabricmc:fabric-loader:0.17.2")
 
-  modImplementation("com.viaversion:viafabricplus:4.3.6-SNAPSHOT")
-  include("com.viaversion:viafabricplus:4.3.6-SNAPSHOT") {
+  modImplementation("com.viaversion:viafabricplus:4.4.0")
+  include("com.viaversion:viafabricplus:4.4.0") {
     isTransitive = false
   }
 

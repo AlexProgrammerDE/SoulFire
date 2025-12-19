@@ -41,14 +41,14 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufLoginQueryRequestPayload;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufLoginQueryResponse;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import org.jspecify.annotations.Nullable;
 
@@ -178,7 +178,7 @@ public final class ForwardingBypass extends InternalPlugin {
   }
 
   private static final class PlayerDataForwarding {
-    public static final ResourceLocation CHANNEL = ResourceLocation.parse("velocity:player_info");
+    public static final Identifier CHANNEL = Identifier.parse("velocity:player_info");
     public static final int MODERN_DEFAULT = 1;
     public static final int MODERN_WITH_KEY = 2;
     public static final int MODERN_WITH_KEY_V2 = 3;

@@ -40,7 +40,7 @@ public final class CollectCommand {
         .then(argument("block", new TagBasedArgumentType<Block, BlockTagResolvable>(
           key -> () -> block -> BuiltInRegistries.BLOCK.getKey(block).equals(key),
           key -> () -> block -> block.defaultBlockState().is(key),
-          BuiltInRegistries.BLOCK.listElementIds().map(ResourceKey::location).toList(),
+          BuiltInRegistries.BLOCK.listElementIds().map(ResourceKey::identifier).toList(),
           BuiltInRegistries.BLOCK.listTagIds().toList()
         ))
           .then(argument("amount", IntegerArgumentType.integer(1))
