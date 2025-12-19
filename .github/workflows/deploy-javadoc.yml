@@ -1,27 +1,27 @@
-name: Javadoc
+name: Deploy Javadoc
 
 on: [ workflow_dispatch, workflow_call ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # 6.0.0
         with:
           ref: ${{ github.ref }}
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v5
+          persist-credentials: false
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: '25'
           distribution: 'zulu'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+          check-latest: true
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # 5.0.0
       - name: Build with Gradle
         run: ./gradlew :javadoc:javadoc --stacktrace
       - name: Move files
@@ -32,7 +32,7 @@ jobs:
           echo "jd.soulfiremc.com" > ./docs/CNAME
 
       - name: 'Push changes'
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # 7.0.0
         with:
           commit_message: 'Deploy SoulFire Javadoc'
           branch: 'gh-pages'
