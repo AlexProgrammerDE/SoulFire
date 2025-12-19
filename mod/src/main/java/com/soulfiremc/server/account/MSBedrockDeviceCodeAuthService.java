@@ -20,8 +20,10 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +32,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public final class MSBedrockDeviceCodeAuthService
-  implements MCAuthService<Consumer<StepMsaDeviceCode.MsaDeviceCode>, MSBedrockDeviceCodeAuthService.MSBedrockDeviceCodeAuthData> {
+  implements MCAuthService<Consumer<MsaDeviceCode>, MSBedrockDeviceCodeAuthService.MSBedrockDeviceCodeAuthData> {
   public static final MSBedrockDeviceCodeAuthService INSTANCE = new MSBedrockDeviceCodeAuthService();
 
   private MSBedrockDeviceCodeAuthService() {}
@@ -38,11 +40,10 @@ public final class MSBedrockDeviceCodeAuthService
   @Override
   public CompletableFuture<MinecraftAccount> login(MSBedrockDeviceCodeAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
       try {
-        return AuthHelpers.fromFullBedrockSession(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, flow, flow.getFromInput(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepMsaDeviceCode.MsaDeviceCodeCallback(data.callback)));
+        var authManager = BedrockAuthManager.create(LenniHttpHelper.client(proxyData), ProtocolConstants.BEDROCK_VERSION_NAME)
+          .login(DeviceCodeMsaAuthService::new, data.callback);
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -50,19 +51,16 @@ public final class MSBedrockDeviceCodeAuthService
   }
 
   @Override
-  public MSBedrockDeviceCodeAuthData createData(Consumer<StepMsaDeviceCode.MsaDeviceCode> data) {
+  public MSBedrockDeviceCodeAuthData createData(Consumer<MsaDeviceCode> data) {
     return new MSBedrockDeviceCodeAuthData(data);
   }
 
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
-      var fullBedrockSession = flow.fromJson(((BedrockData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullBedrockSession(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, flow, flow.refresh(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          fullBedrockSession));
+        var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(proxyData);
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_DEVICE_CODE, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -71,15 +69,20 @@ public final class MSBedrockDeviceCodeAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
-    return flow.fromJson(((BedrockData) account.accountData()).authChain()).isExpired();
+    var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(null);
+    return authManager.getMsaToken().isExpired()
+      || authManager.getXblDeviceToken().isExpired()
+      || authManager.getXblUserToken().isExpired()
+      || authManager.getXblTitleToken().isExpired()
+      || authManager.getBedrockXstsToken().isExpired()
+      || authManager.getPlayFabXstsToken().isExpired()
+      || authManager.getRealmsXstsToken().isExpired()
+      || authManager.getXboxLiveXstsToken().isExpired()
+      || authManager.getPlayFabToken().isExpired()
+      || authManager.getMinecraftSession().isExpired()
+      || authManager.getMinecraftMultiplayerToken().isExpired()
+      || authManager.getMinecraftCertificateChain().isExpired();
   }
 
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    var flow = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN;
-    return flow.fromJson(((BedrockData) account.accountData()).authChain()).isExpiredOrOutdated();
-  }
-
-  public record MSBedrockDeviceCodeAuthData(Consumer<StepMsaDeviceCode.MsaDeviceCode> callback) {}
+  public record MSBedrockDeviceCodeAuthData(Consumer<MsaDeviceCode> callback) {}
 }

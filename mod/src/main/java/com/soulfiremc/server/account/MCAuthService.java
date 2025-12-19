@@ -21,7 +21,7 @@ import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.AccountTypeDeviceCode;
 import com.soulfiremc.grpc.generated.MinecraftAccountProto;
 import com.soulfiremc.server.proxy.SFProxy;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +40,7 @@ public sealed interface MCAuthService<I, T>
     };
   }
 
-  static MCAuthService<Consumer<StepMsaDeviceCode.MsaDeviceCode>, ?> convertService(AccountTypeDeviceCode service) {
+  static MCAuthService<Consumer<MsaDeviceCode>, ?> convertService(AccountTypeDeviceCode service) {
     return switch (service) {
       case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
@@ -82,6 +82,4 @@ public sealed interface MCAuthService<I, T>
   CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor);
 
   boolean isExpired(MinecraftAccount account);
-
-  boolean isExpiredOrOutdated(MinecraftAccount account);
 }

@@ -44,7 +44,7 @@ public final class SFSessionService {
       case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Server does not support auth type: " + account.authType());
     };
     var authenticationToken = switch (account.accountData()) {
-      case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.authToken();
+      case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getJavaAuthManager(botConnection.proxy()).getMinecraftToken().getUpToDateUnchecked().getToken();
       case OfflineJavaData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
       case BedrockData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
     };

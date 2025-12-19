@@ -58,10 +58,5 @@ public final class OfflineAuthService
     return false;
   }
 
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    return false;
-  }
-
   public record OfflineAuthData(String username) {}
 }

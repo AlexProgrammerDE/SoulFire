@@ -32,6 +32,7 @@ import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
+import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
@@ -139,16 +140,7 @@ public final class SoulFireServer {
     });
 
     this.sessionFactory = sessionFactoryFuture.join();
-    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(() ->
-      this.sessionFactory.fromTransaction(session -> {
-        var entity = session.find(ServerConfigEntity.class, 1);
-        if (entity == null) {
-          entity = new ServerConfigEntity();
-          session.persist(entity);
-        }
-
-        return entity.settings();
-      }), 1, TimeUnit.SECONDS));
+    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.authSystem = authSystemFuture.join();
     this.rpcServer = rpcServerFuture.join();
 
@@ -186,6 +178,18 @@ public final class SoulFireServer {
 
     log.info(
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
+  }
+
+  private ServerSettingsSource fetchSettingsSource() {
+    return this.sessionFactory.fromTransaction(session -> {
+      var entity = session.find(ServerConfigEntity.class, 1);
+      if (entity == null) {
+        entity = new ServerConfigEntity();
+        session.persist(entity);
+      }
+
+      return entity.settings();
+    });
   }
 
   public EmailSender emailSender() {

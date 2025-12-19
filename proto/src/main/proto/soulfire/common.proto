@@ -43,8 +43,6 @@ message MinecraftAccountProto {
   }
 
   message OnlineChainJavaData {
-    string auth_token = 1;
-    int64 token_expire_at = 2;
     google.protobuf.Struct auth_chain = 3;
   }
 
@@ -52,12 +50,6 @@ message MinecraftAccountProto {
   }
 
   message BedrockData {
-    string mojang_jwt = 1;
-    string identity_jwt = 2;
-    string public_key = 3;
-    string private_key = 4;
-    string device_id = 5;
-    string play_fab_id = 6;
     google.protobuf.Struct auth_chain = 7;
   }
 

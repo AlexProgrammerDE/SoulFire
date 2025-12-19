@@ -20,8 +20,7 @@ package com.soulfiremc.server.account;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepMsaToken;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -37,11 +36,10 @@ public final class MSJavaRefreshTokenAuthService
   @Override
   public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, flow, flow.getFromInput(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          new StepMsaToken.RefreshToken(data.refreshToken)));
+        var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
+          .login(data.refreshToken);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -56,12 +54,9 @@ public final class MSJavaRefreshTokenAuthService
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
-      var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-      var fullJavaSession = flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain());
       try {
-        return AuthHelpers.fromFullJavaSession(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, flow, flow.refresh(
-          LenniHttpHelper.createLenniMCAuthHttpClient(proxyData),
-          fullJavaSession));
+        var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -70,14 +65,10 @@ public final class MSJavaRefreshTokenAuthService
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpired();
-  }
-
-  @Override
-  public boolean isExpiredOrOutdated(MinecraftAccount account) {
-    var flow = MinecraftAuth.JAVA_CREDENTIALS_LOGIN;
-    return flow.fromJson(((OnlineChainJavaData) account.accountData()).authChain()).isExpiredOrOutdated();
+    var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(null);
+    return authManager.getMinecraftToken().isExpired()
+      || authManager.getMinecraftProfile().isExpired()
+      || authManager.getMinecraftPlayerCertificates().isExpired();
   }
 
   public record MSJavaRefreshTokenAuthData(String refreshToken) {}

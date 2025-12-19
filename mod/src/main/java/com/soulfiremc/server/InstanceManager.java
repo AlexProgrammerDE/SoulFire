@@ -38,6 +38,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.MathHelper;
@@ -87,18 +88,8 @@ public final class InstanceManager {
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
     this.sessionFactory = sessionFactory;
-    this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(() ->
-      sessionFactory.fromTransaction(session -> session.find(InstanceEntity.class, id).settings()), 1, TimeUnit.SECONDS));
-    this.friendlyNameCache = new CachedLazyObject<>(() ->
-      sessionFactory.fromTransaction(session -> {
-        var instance = session.find(InstanceEntity.class, id);
-
-        if (instance == null) {
-          return "Unknown";
-        } else {
-          return instance.friendlyName();
-        }
-      }), 1, TimeUnit.SECONDS);
+    this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
+    this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
     this.scriptManager = new ScriptManager(this);
 
     try {
@@ -147,6 +138,30 @@ public final class InstanceManager {
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
       switchToState(null, lastState);
     }
+  }
+
+  private InstanceSettingsSource fetchSettingsSource() {
+    return sessionFactory.fromTransaction(session -> {
+      var instance = session.find(InstanceEntity.class, id);
+
+      if (instance == null) {
+        throw new IllegalStateException("Instance not found");
+      } else {
+        return instance.settings();
+      }
+    });
+  }
+
+  private String fetchFriendlyName() {
+    return sessionFactory.fromTransaction(session -> {
+      var instance = session.find(InstanceEntity.class, id);
+
+      if (instance == null) {
+        return "Unknown";
+      } else {
+        return instance.friendlyName();
+      }
+    });
   }
 
   private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
@@ -331,7 +346,7 @@ public final class InstanceManager {
         var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
         if (botAmount > maxBots) {
           log.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
-          log.warn("Continuing with {} bots.", maxBots);
+          log.warn("Continuing with {} bots due to proxies.", maxBots);
           botAmount = maxBots;
         }
 
@@ -351,7 +366,7 @@ public final class InstanceManager {
             "You have requested {} bots, but only {} are possible with the current amount of accounts.",
             botAmount,
             availableAccounts);
-          log.warn("Continuing with {} bots.", availableAccounts);
+          log.warn("Continuing with {} bots due to accounts.", availableAccounts);
           botAmount = availableAccounts;
         }
       } else {

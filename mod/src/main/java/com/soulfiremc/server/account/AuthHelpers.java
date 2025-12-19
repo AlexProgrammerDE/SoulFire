@@ -17,45 +17,68 @@
  */
 package com.soulfiremc.server.account;
 
+import com.google.gson.JsonObject;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
-import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.util.MinecraftAuth4To5Migrator;
+
+import java.io.IOException;
 
 public final class AuthHelpers {
   private AuthHelpers() {
   }
 
-  public static MinecraftAccount fromFullBedrockSession(AuthType authType, AbstractStep<?, StepFullBedrockSession.FullBedrockSession> flow, StepFullBedrockSession.FullBedrockSession fullBedrockSession) {
-    var mcChain = fullBedrockSession.getMcChain();
-    var xblXsts = mcChain.getXblXsts();
-    var deviceId = xblXsts.getInitialXblSession().getXblDeviceToken().getId();
-    var playFabId = fullBedrockSession.getPlayFabToken().getPlayFabId();
+  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager) throws IOException {
+    var mcChain = authManager.getMinecraftCertificateChain().getUpToDate();
+    authManager.getMsaToken().refreshIfExpired();
+    authManager.getXblDeviceToken().refreshIfExpired();
+    authManager.getXblUserToken().refreshIfExpired();
+    authManager.getXblTitleToken().refreshIfExpired();
+    authManager.getBedrockXstsToken().refreshIfExpired();
+    authManager.getPlayFabXstsToken().refreshIfExpired();
+    authManager.getRealmsXstsToken().refreshIfExpired();
+    authManager.getXboxLiveXstsToken().refreshIfExpired();
+    authManager.getPlayFabToken().refreshIfExpired();
+    authManager.getMinecraftSession().refreshIfExpired();
+    authManager.getMinecraftMultiplayerToken().refreshIfExpired();
+    authManager.getMinecraftCertificateChain().refreshIfExpired();
     return new MinecraftAccount(
       authType,
-      mcChain.getId(),
-      mcChain.getDisplayName(),
+      mcChain.getIdentityUuid(),
+      mcChain.getIdentityDisplayName(),
       new BedrockData(
-        mcChain.getMojangJwt(),
-        mcChain.getIdentityJwt(),
-        mcChain.getPublicKey(),
-        mcChain.getPrivateKey(),
-        deviceId,
-        playFabId,
-        flow.toJson(fullBedrockSession)));
+        BedrockAuthManager.toJson(authManager)));
   }
 
-  public static MinecraftAccount fromFullJavaSession(AuthType authType, AbstractStep<?, StepFullJavaSession.FullJavaSession> flow, StepFullJavaSession.FullJavaSession fullJavaSession) {
-    var mcProfile = fullJavaSession.getMcProfile();
-    var mcToken = mcProfile.getMcToken();
+  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager) throws IOException {
+    var mcProfile = authManager.getMinecraftProfile().getUpToDate();
+    authManager.getMinecraftToken().refreshIfExpired();
+    authManager.getMinecraftPlayerCertificates().refreshIfExpired();
     return new MinecraftAccount(
       authType,
       mcProfile.getId(),
       mcProfile.getName(),
       new OnlineChainJavaData(
-        mcToken.getAccessToken(),
-        mcToken.getExpireTimeMs(),
-        flow.toJson(fullJavaSession)));
+        JavaAuthManager.toJson(authManager)));
+  }
+
+  public static JsonObject migrateBedrockAuthChain(JsonObject oldAuthChain) {
+    if (oldAuthChain.has("_saveVersion")) {
+      // Already migrated
+      return oldAuthChain;
+    }
+
+    return MinecraftAuth4To5Migrator.migrateBedrockSave(oldAuthChain);
+  }
+
+  public static JsonObject migrateJavaAuthChain(JsonObject oldAuthChain) {
+    if (oldAuthChain.has("_saveVersion")) {
+      // Already migrated
+      return oldAuthChain;
+    }
+
+    return MinecraftAuth4To5Migrator.migrateJavaSave(oldAuthChain);
   }
 }
