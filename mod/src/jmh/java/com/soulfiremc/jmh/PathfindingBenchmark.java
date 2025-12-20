@@ -35,7 +35,7 @@ import com.soulfiremc.test.utils.TestPathConstraint;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.intellij.lang.annotations.Subst;
 import org.jspecify.annotations.NonNull;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -86,7 +86,7 @@ public class PathfindingBenchmark {
         for (var y = 0; y < data[0].length; y++) {
           for (var z = 0; z < data[0][0].length; z++) {
             var key = blockDefinitions[data[x][y][z]];
-            var block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(key.asString()));
+            var block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(key.asString()));
             if (block.defaultBlockState().isAir()) {
               continue;
             }
