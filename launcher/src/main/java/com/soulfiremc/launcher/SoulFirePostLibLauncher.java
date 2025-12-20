@@ -26,6 +26,7 @@ import net.fabricmc.loader.impl.util.SystemProperties;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.reflect.Agents;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -68,19 +69,39 @@ public final class SoulFirePostLibLauncher {
 
   @SuppressWarnings("unused")
   public static void runPostLib(Path basePath, String bootstrapClassName, String[] args) {
-    System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
-    System.setProperty("java.awt.headless", "true");
-    System.setProperty("joml.nounsafe", "true");
-    System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
-    System.setProperty("sf.bootstrap.class", bootstrapClassName);
-    System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
+    try {
+      injectEarlyExceptionHandler();
+      System.setProperty("sf.baseDir", basePath.toAbsolutePath().toString());
+      System.setProperty("java.awt.headless", "true");
+      System.setProperty("joml.nounsafe", "true");
+      System.setProperty(SystemProperties.SKIP_MC_PROVIDER, "true");
+      System.setProperty("sf.bootstrap.class", bootstrapClassName);
+      System.setProperty("sf.initial.arguments", Base64Helpers.joinBase64(args));
 
-    injectEarlyMixins();
-    setupManagedMods(basePath);
-    SFInfoPlaceholder.register();
-    SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
+      injectEarlyMixins();
+      setupManagedMods(basePath);
+      SFInfoPlaceholder.register();
+      SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
 
-    KnotClient.main(new String[]{"--username", "SoulFire"});
+      KnotClient.main(new String[]{"--username", "SoulFire"});
+    } catch (Throwable t) {
+      // Catches fabric errors during launch
+      System.err.println("Fatal error during SoulFire launch:");
+      t.printStackTrace(System.err);
+      LogManager.shutdown();
+    }
+  }
+
+  /// This injects a super early exception handler before mixins are loaded.
+  /// We need mixins for log4j and other stuff, so we use stderr directly here.
+  /// A later exception handler will use log4j.
+  private static void injectEarlyExceptionHandler() {
+    Thread.setDefaultUncaughtExceptionHandler(
+      (thread, throwable) -> {
+        System.err.println("Uncaught exception in thread " + thread.getName() + ":");
+        throwable.printStackTrace(System.err);
+        LogManager.shutdown();
+      });
   }
 
   private static void injectEarlyMixins() {
