@@ -4,6 +4,13 @@ plugins {
   id("io.freefair.aggregate-javadoc")
 }
 
+// Ensure all subprojects are evaluated before this project configures dependencies
+rootProject.subprojects.forEach { subproject ->
+  if (subproject.name != "javadoc" && subproject.name != "data-generator") {
+    evaluationDependsOn(subproject.path)
+  }
+}
+
 dependencies {
   javadocClasspath("org.projectlombok:lombok:1.18.42")
   javadocClasspath(libs.immutables.value)
@@ -14,22 +21,20 @@ dependencies {
       return@forEach
     }
 
-    subproject.plugins.withId("java") {
+    if (subproject.plugins.hasPlugin("java")) {
       javadocClasspath(subproject)
       javadoc(subproject)
     }
   }
 }
 
-// Configure mod compile classpath after mod project is evaluated
+// Configure mod compile classpath - mod project is already evaluated due to evaluationDependsOn
 val javadocTask = tasks.named<Javadoc>("javadoc")
-project(":mod").afterEvaluate {
-  val modCompileClasspath = extensions
-    .getByType<SourceSetContainer>()["main"].compileClasspath
+val modCompileClasspath = project(":mod").extensions
+  .getByType<SourceSetContainer>()["main"].compileClasspath
 
-  javadocTask.configure {
-    classpath = classpath.plus(modCompileClasspath)
-  }
+javadocTask.configure {
+  classpath = classpath.plus(modCompileClasspath)
 }
 
 val usedJavadocTool: Provider<JavadocTool> = javaToolchains.javadocToolFor {
