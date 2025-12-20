@@ -26,7 +26,7 @@ dependencies {
     officialMojangMappings()
     parchment("org.parchmentmc.data:parchment-1.21.10:2025.10.12@zip")
   })
-  modImplementation("net.fabricmc:fabric-loader:0.17.2")
+  modImplementation("net.fabricmc:fabric-loader:0.18.3")
 
   modImplementation("com.viaversion:viafabricplus:4.4.0")
   include("com.viaversion:viafabricplus:4.4.0") {

@@ -25,11 +25,11 @@ spotbugs {
 }
 
 dependencies {
-  errorprone("com.google.errorprone:error_prone_core:2.44.0")
+  errorprone("com.google.errorprone:error_prone_core:2.45.0")
   spotbugs("com.github.spotbugs:spotbugs:4.9.8")
-  rewrite("org.openrewrite.recipe:rewrite-static-analysis:2.22.0")
-  rewrite("org.openrewrite.recipe:rewrite-migrate-java:3.22.0")
-  rewrite("org.openrewrite.recipe:rewrite-rewrite:0.16.0")
+  rewrite("org.openrewrite.recipe:rewrite-static-analysis:2.24.0")
+  rewrite("org.openrewrite.recipe:rewrite-migrate-java:3.24.0")
+  rewrite("org.openrewrite.recipe:rewrite-rewrite:0.17.0")
 }
 
 tasks {
