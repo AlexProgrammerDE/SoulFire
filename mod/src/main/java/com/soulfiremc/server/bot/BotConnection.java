@@ -59,6 +59,7 @@ import net.minecraft.client.multiplayer.ServerStatusPinger;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.network.PacketProcessor;
+import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -175,7 +176,8 @@ public final class BotConnection {
               new ServerStatusPinger().pingServer(
                 serverData,
                 () -> {},
-                () -> {}
+                () -> {},
+                EventLoopGroupHolder.remote(this.minecraft.options.useNativeTransport())
               );
             } catch (Throwable t) {
               this.disconnect(Component.text("Failed to ping server: " + t.getMessage()));
@@ -244,7 +246,7 @@ public final class BotConnection {
     }
 
     var chatScreen = new ChatScreen("", false);
-    chatScreen.init(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+    chatScreen.init(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
     chatScreen.handleChatInput(message, false);
   }
 

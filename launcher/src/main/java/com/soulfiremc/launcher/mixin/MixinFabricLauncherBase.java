@@ -15,35 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.mod.mixin.headless.rendering;
+package com.soulfiremc.launcher.mixin;
 
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.core.BlockPos;
+import net.fabricmc.loader.impl.FormattedException;
+import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(LevelRenderer.class)
-public class MixinLevelRenderer {
-  @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-  private void tickHook(CallbackInfo ci) {
-    ci.cancel();
+@Mixin(FabricLauncherBase.class)
+public class MixinFabricLauncherBase {
+  /// @reason Rethrow, so we handle errors during launch ourselves.
+  ///         Avoids issues with log4j async logging.
+  @Inject(method = "handleFormattedException", at = @At("HEAD"))
+  private static void handleFormattedException(FormattedException exc, CallbackInfo ci) {
+    throw new RuntimeException(exc);
   }
 
-  @Inject(method = "setSectionDirty(IIIZ)V", at = @At("HEAD"), cancellable = true)
-  private void setSectionDirty(CallbackInfo ci) {
+  /// @reason We use our own uncaught exception handler.
+  ///         We don't want Fabric to override it.
+  @Inject(method = "setupUncaughtExceptionHandler", at = @At("HEAD"), cancellable = true)
+  private static void setupUncaughtExceptionHandler(CallbackInfo ci) {
     ci.cancel();
-  }
-
-  @Inject(method = "onSectionBecomingNonEmpty", at = @At("HEAD"), cancellable = true)
-  private void onSectionBecomingNonEmpty(CallbackInfo ci) {
-    ci.cancel();
-  }
-
-  @Inject(method = "isSectionCompiledAndVisible", at = @At("HEAD"), cancellable = true)
-  private void isSectionCompiledAndVisibleHook(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-    cir.setReturnValue(true);
   }
 }

@@ -47,8 +47,8 @@ public class MixinMinecraft {
     cir.setReturnValue(UserApiService.OFFLINE);
   }
 
-  @Inject(method = "updateLevelInEngines", at = @At("HEAD"), cancellable = true)
-  private void updateLevelEngineHook(ClientLevel level, CallbackInfo ci) {
+  @Inject(method = "updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;Z)V", at = @At("HEAD"), cancellable = true)
+  private void updateLevelEngineHook(ClientLevel clientLevel, boolean stopSound, CallbackInfo ci) {
     ci.cancel();
   }
 }

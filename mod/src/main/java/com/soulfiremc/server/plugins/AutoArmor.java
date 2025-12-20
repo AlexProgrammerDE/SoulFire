@@ -93,9 +93,9 @@ public final class AutoArmor extends InternalPlugin {
         .reduce(
           (first, second) -> {
             var firstArmor = Objects.requireNonNullElse(first.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-              .compute(1, equipmentSlotEnum);
+              .compute(null, 1, equipmentSlotEnum);
             var secondArmor = Objects.requireNonNullElse(second.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-              .compute(1, equipmentSlotEnum);
+              .compute(null, 1, equipmentSlotEnum);
 
             return firstArmor > secondArmor ? first : second;
           });
@@ -115,10 +115,10 @@ public final class AutoArmor extends InternalPlugin {
     if (!equipmentSlotItem.isEmpty()) {
       var targetItemArmor = Objects.requireNonNullElse(
           equipmentSlotItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-        .compute(1, equipmentSlotEnum);
+        .compute(null, 1, equipmentSlotEnum);
       var bestItemArmor = Objects.requireNonNullElse(
           bestItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-        .compute(1, equipmentSlotEnum);
+        .compute(null, 1, equipmentSlotEnum);
 
       if (targetItemArmor >= bestItemArmor) {
         return;
