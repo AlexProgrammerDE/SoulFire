@@ -24,7 +24,7 @@ dependencies {
   @Suppress("UnstableApiUsage")
   mappings(loom.layered {
     officialMojangMappings()
-    parchment("org.parchmentmc.data:parchment-1.21.10:2025.10.12@zip")
+    parchment("org.parchmentmc.data:parchment-1.21.11:2025.12.20@zip")
   })
   modImplementation("net.fabricmc:fabric-loader:0.18.3")
 
