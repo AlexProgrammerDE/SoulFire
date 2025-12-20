@@ -42,8 +42,8 @@ public class MixinLevelRenderer {
     ci.cancel();
   }
 
-  @Inject(method = "isSectionCompiled", at = @At("HEAD"), cancellable = true)
-  private void isSectionCompiledHook(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+  @Inject(method = "isSectionCompiledAndVisible", at = @At("HEAD"), cancellable = true)
+  private void isSectionCompiledAndVisibleHook(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
     cir.setReturnValue(true);
   }
 }

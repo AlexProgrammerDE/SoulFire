@@ -75,7 +75,7 @@ public class MixinMinecraft implements IMinecraft {
     ci.cancel();
   }
 
-  @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
+  @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
   private void preventResetData(GameRenderer instance) {
     // Prevent resetting because it causes race conditions
   }
