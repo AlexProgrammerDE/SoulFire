@@ -31,7 +31,6 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,8 +75,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return CompletableFuture.supplyAsync(() -> findRouteSync(from));
   }
 
-  @VisibleForTesting
-  public RouteSearchResult findRouteSync(NodeState from) {
+  private RouteSearchResult findRouteSync(NodeState from) {
     var stopwatch = Stopwatch.createStarted();
     var pathConstraint = graph.pathConstraint();
     var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pathConstraint.expireTimeout());

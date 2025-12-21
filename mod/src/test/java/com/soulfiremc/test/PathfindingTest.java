@@ -62,7 +62,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    var route = routeFinder.findRouteSync(initialState);
+    var route = routeFinder.findRouteFuture(initialState).join();
 
     var foundRouteResult = assertInstanceOf(
       RouteFinder.FoundRouteResult.class, route);
@@ -89,7 +89,7 @@ final class PathfindingTest {
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
     assertInstanceOf(
-      RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+      RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
   }
 
   @Test
@@ -107,7 +107,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    var route = routeFinder.findRouteSync(initialState);
+    var route = routeFinder.findRouteFuture(initialState).join();
 
     var foundRouteResult = assertInstanceOf(
       RouteFinder.FoundRouteResult.class, route);
@@ -136,7 +136,7 @@ final class PathfindingTest {
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
     assertInstanceOf(
-      RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+      RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
   }
 
   @ParameterizedTest
@@ -156,9 +156,9 @@ final class PathfindingTest {
 
     if (height > 1) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -182,9 +182,9 @@ final class PathfindingTest {
 
     if (height > 1) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -208,9 +208,9 @@ final class PathfindingTest {
 
     if (height > 3) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -234,9 +234,9 @@ final class PathfindingTest {
 
     if (height > 3) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -261,9 +261,9 @@ final class PathfindingTest {
     // TODO: Allow longer jumps
     if (gapLength > 1) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -283,7 +283,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    var route = routeFinder.findRouteSync(initialState);
+    var route = routeFinder.findRouteFuture(initialState).join();
     var foundRouteResult = assertInstanceOf(
       RouteFinder.FoundRouteResult.class, route);
     assertEquals(1, foundRouteResult.actions().size());
@@ -305,9 +305,9 @@ final class PathfindingTest {
 
     if (amount < 20) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(20, foundRouteResult.actions().size());
@@ -328,7 +328,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    var route = routeFinder.findRouteSync(initialState);
+    var route = routeFinder.findRouteFuture(initialState).join();
     var foundRouteResult = assertInstanceOf(
       RouteFinder.FoundRouteResult.class, route);
     assertEquals(1, foundRouteResult.actions().size());
@@ -351,7 +351,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    var route = routeFinder.findRouteSync(initialState);
+    var route = routeFinder.findRouteFuture(initialState).join();
     var foundRouteResult = assertInstanceOf(
       RouteFinder.FoundRouteResult.class, route);
     assertEquals(3, foundRouteResult.actions().size());
@@ -377,9 +377,9 @@ final class PathfindingTest {
 
     if (unsafe) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(2, foundRouteResult.actions().size());
@@ -406,9 +406,9 @@ final class PathfindingTest {
 
     if (unsafe) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
@@ -437,9 +437,9 @@ final class PathfindingTest {
 
     if (level > 1) {
       assertInstanceOf(
-        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteSync(initialState));
+        RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
-      var route = routeFinder.findRouteSync(initialState);
+      var route = routeFinder.findRouteFuture(initialState).join();
       var foundRouteResult = assertInstanceOf(
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
