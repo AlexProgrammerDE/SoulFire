@@ -32,8 +32,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public final class SFBlockHelpers {
-  // A player can jump up 1.25 blocks
-  private static final double SAFE_BLOCK_MIN_HEIGHT = 0.75;
   public static final IDMap<BlockState, VoxelShape> RAW_COLLISION_SHAPES = new IDMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
   public static final IDBooleanMap<BlockState> COLLISION_SHAPE_EMPTY = new IDBooleanMap<>(
@@ -111,11 +109,5 @@ public final class SFBlockHelpers {
   public static boolean isEmptyBlock(Block type) {
     // Void air stands for not loaded blocks, so we do not know what is there
     return type instanceof AirBlock && type != Blocks.VOID_AIR;
-  }
-
-  @SuppressWarnings("deprecation")
-  public static boolean isSuffocating(BlockState state) {
-    // TODO: Handle edge cases like pistons
-    return state.blocksMotion() && isFullBlock(state);
   }
 }
