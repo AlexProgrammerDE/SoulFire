@@ -18,8 +18,6 @@
 package com.soulfiremc.server.pathfinding;
 
 import com.google.common.base.Stopwatch;
-import com.soulfiremc.server.pathfinding.execution.MovementAction;
-import com.soulfiremc.server.pathfinding.execution.RecalculatePathAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
@@ -74,12 +72,12 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return map;
   }
 
-  public CompletableFuture<List<WorldAction>> findRouteFuture(NodeState from, boolean requiresRepositioning) {
-    return CompletableFuture.supplyAsync(() -> repositionIfNeeded(findRouteSync(from), from, requiresRepositioning));
+  public CompletableFuture<RouteSearchResult> findRouteFuture(NodeState from) {
+    return CompletableFuture.supplyAsync(() -> findRouteSync(from));
   }
 
   @VisibleForTesting
-  public List<WorldAction> findRouteSync(NodeState from) {
+  public RouteSearchResult findRouteSync(NodeState from) {
     var stopwatch = Stopwatch.createStarted();
     var pathConstraint = graph.pathConstraint();
     var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pathConstraint.expireTimeout());
@@ -141,11 +139,11 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       if (Thread.currentThread().isInterrupted()) {
         stopwatch.stop();
         log.info("Cancelled pathfinding after {}ms", stopwatch.elapsed().toMillis());
-        return List.of();
+        return SearchInterruptedResult.INSTANCE;
       } else if (System.currentTimeMillis() > expireTime) {
         stopwatch.stop();
         log.info("Expired pathfinding after {}ms", stopwatch.elapsed().toMillis());
-        throw new IllegalStateException("Pathfinding took too long");
+        return SearchExpiredResult.INSTANCE;
       }
 
       progressInfo.run();
@@ -160,7 +158,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         stopwatch.stop();
         log.info("Success! Took {}ms to find route", stopwatch.elapsed().toMillis());
 
-        return reconstructPath(current);
+        return new FoundRouteResult(reconstructPath(current));
       }
 
       try {
@@ -199,20 +197,13 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
         // The current node is not always the best node. We need to find the best node.
         var bestNode = bestGlobalNode.value;
 
-        // This is the best node we found so far
-        // We will add a recalculating action and return the best route
-        var recalculateTrace = reconstructPath(bestNode);
-        if (recalculateTrace.isEmpty()) {
-          throw new AlreadyClosestException();
-        }
-
-        return addRecalculate(recalculateTrace);
+        return new PartialRouteResult(reconstructPath(bestNode));
       }
     }
 
     stopwatch.stop();
     log.info("Failed to find route after {}ms", stopwatch.elapsed().toMillis());
-    throw new NoRouteFoundException();
+    return NoRouteFoundResult.INSTANCE;
   }
 
   private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
@@ -300,22 +291,30 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     }
   }
 
-  private List<WorldAction> repositionIfNeeded(List<WorldAction> actions, NodeState from, boolean requiresRepositioning) {
-    if (!requiresRepositioning) {
-      return actions;
-    }
-
-    var repositionActions = new ArrayList<WorldAction>();
-    repositionActions.add(new MovementAction(from.blockPosition(), false));
-    repositionActions.addAll(actions);
-
-    return repositionActions;
+  /// The result of a route search
+  public sealed interface RouteSearchResult {
   }
 
-  private List<WorldAction> addRecalculate(List<WorldAction> actions) {
-    var repositionActions = new ArrayList<>(actions);
-    repositionActions.add(new RecalculatePathAction());
+  /// No route found to the target
+  public record NoRouteFoundResult() implements RouteSearchResult {
+    public static final NoRouteFoundResult INSTANCE = new NoRouteFoundResult();
+  }
 
-    return repositionActions;
+  /// The search was interrupted before finding a route
+  public record SearchInterruptedResult() implements RouteSearchResult {
+    public static final SearchInterruptedResult INSTANCE = new SearchInterruptedResult();
+  }
+
+  /// The search expired before finding a route
+  public record SearchExpiredResult() implements RouteSearchResult {
+    public static final SearchExpiredResult INSTANCE = new SearchExpiredResult();
+  }
+
+  /// A full route found to the target
+  public record FoundRouteResult(List<WorldAction> actions) implements RouteSearchResult {
+  }
+
+  /// This is the best route we found before reaching the edge of view distance
+  public record PartialRouteResult(List<WorldAction> actions) implements RouteSearchResult {
   }
 }

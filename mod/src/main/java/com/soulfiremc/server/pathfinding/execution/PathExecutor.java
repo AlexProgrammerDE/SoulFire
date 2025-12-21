@@ -27,10 +27,11 @@ import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
-import it.unimi.dsi.fastutil.booleans.Boolean2ObjectFunction;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -42,55 +43,47 @@ public final class PathExecutor implements ControllingTask {
   private static final int MAX_ERROR_DISTANCE = 20;
   private final Queue<WorldAction> worldActionQueue = new LinkedBlockingQueue<>();
   private final BotConnection connection;
-  private final Boolean2ObjectFunction<List<WorldAction>> findPath;
+  private final LiveRouteFinder findPath;
   private final CompletableFuture<Void> pathCompletionFuture;
   private int totalMovements;
   private int ticks;
   private int movementNumber = 1;
 
-  public PathExecutor(
+  private PathExecutor(
     BotConnection connection,
-    Boolean2ObjectFunction<List<WorldAction>> findPath,
+    LiveRouteFinder findPath,
     CompletableFuture<Void> pathCompletionFuture) {
     this.connection = connection;
     this.findPath = findPath;
     this.pathCompletionFuture = pathCompletionFuture;
   }
 
+  private static List<WorldAction> repositionIfNeeded(List<WorldAction> actions, SFVec3i from, boolean requiresRepositioning) {
+    if (!requiresRepositioning) {
+      return actions;
+    }
+
+    var repositionActions = new ArrayList<WorldAction>();
+    repositionActions.add(new MovementAction(from, false));
+    repositionActions.addAll(actions);
+
+    return repositionActions;
+  }
+
+  private static List<WorldAction> addRecalculate(List<WorldAction> actions) {
+    var repositionActions = new ArrayList<>(actions);
+    repositionActions.add(new RecalculatePathAction());
+
+    return repositionActions;
+  }
+
   public static CompletableFuture<Void> executePathfinding(BotConnection bot, GoalScorer goalScorer, PathConstraint pathConstraint) {
-    var clientEntity = bot.minecraft().player;
-
-    Boolean2ObjectFunction<List<WorldAction>> findPath =
-      requiresRepositioning -> {
-        var level = bot.minecraft().player.level();
-        var inventory =
-          new ProjectedInventory(clientEntity.getInventory(), clientEntity, pathConstraint);
-        var start =
-          SFVec3i.fromInt(clientEntity.blockPosition());
-        var startBlockState = level.getBlockState(start.toBlockPos());
-        if (SFBlockHelpers.isTopFullBlock(startBlockState)) {
-          // If the player is inside a block, move them up
-          start = start.add(0, 1, 0);
-        }
-
-        var routeFinder =
-          new RouteFinder(new MinecraftGraph(level, inventory, pathConstraint), goalScorer);
-
-        log.info("Starting calculations at: {}", start.formatXYZ());
-        var actionsFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory), requiresRepositioning);
-        bot.shutdownHooks().add(() -> actionsFuture.cancel(true));
-        var actions = actionsFuture.join();
-        log.info("Calculated path with {} actions: {}", actions.size(), actions);
-
-        return actions;
-      };
-
     var pathCompletionFuture = new CompletableFuture<Void>();
 
     // Cancel the path if the bot is disconnected
     bot.shutdownHooks().add(() -> pathCompletionFuture.cancel(true));
 
-    var pathExecutor = new PathExecutor(bot, findPath, pathCompletionFuture);
+    var pathExecutor = new PathExecutor(bot, new LiveRouteFinder(bot, goalScorer, pathConstraint), pathCompletionFuture);
     pathExecutor.submitForPathCalculation(true);
 
     return pathCompletionFuture;
@@ -118,22 +111,44 @@ public final class PathExecutor implements ControllingTask {
           }
         }
 
-        var newActions = findPath.get(isInitial);
+        var routeSearchResult = findPath.findPath();
         if (isDone()) {
           return;
         }
 
-        if (newActions.isEmpty()) {
-          log.info("We're already at the goal!");
-          return;
-        }
+        SFHelpers.mustSupply(() -> switch (routeSearchResult.routeSearchResult()) {
+          case RouteFinder.FoundRouteResult foundRouteResult -> () -> {
+            var newActions = repositionIfNeeded(foundRouteResult.actions(), routeSearchResult.start(), isInitial);
+            if (newActions.isEmpty()) {
+              log.info("We're already at the goal!");
+              return;
+            }
 
-        log.info("Found path with {} actions!", newActions.size());
+            log.info("Found path with {} actions!", newActions.size());
 
-        preparePath(newActions);
+            preparePath(newActions);
 
-        // Register again
-        register();
+            // Register again
+            register();
+          };
+          case RouteFinder.NoRouteFoundResult _ -> throw new IllegalStateException("No route found to the goal!");
+          case RouteFinder.PartialRouteResult partialRouteResult -> () -> {
+            var newActions = addRecalculate(repositionIfNeeded(partialRouteResult.actions(), routeSearchResult.start(), isInitial));
+            if (newActions.isEmpty()) {
+              log.info("We're already at the goal!");
+              return;
+            }
+
+            log.info("Found path with {} actions!", newActions.size());
+
+            preparePath(newActions);
+
+            // Register again
+            register();
+          };
+          case RouteFinder.SearchExpiredResult _ -> throw new IllegalStateException("Route search expired before finding a route!");
+          case RouteFinder.SearchInterruptedResult _ -> throw new IllegalStateException("Route search was interrupted before finding a route!");
+        });
       } catch (Throwable t) {
         log.error("Error while calculating path", t);
         pathCompletionFuture.completeExceptionally(t);
@@ -244,5 +259,35 @@ public final class PathExecutor implements ControllingTask {
 
   public void recalculatePath() {
     submitForPathCalculation(false);
+  }
+
+  private record LiveRouteFinder(BotConnection bot, GoalScorer goalScorer, PathConstraint pathConstraint) {
+    public LiveRouteFinderResult findPath() {
+      var clientEntity = bot.minecraft().player;
+      var level = bot.minecraft().player.level();
+      var inventory =
+        new ProjectedInventory(clientEntity.getInventory(), clientEntity, pathConstraint);
+      var start =
+        SFVec3i.fromInt(clientEntity.blockPosition());
+      var startBlockState = level.getBlockState(start.toBlockPos());
+      if (SFBlockHelpers.isTopFullBlock(startBlockState)) {
+        // If the player is inside a block, move them up
+        start = start.add(0, 1, 0);
+      }
+
+      var routeFinder =
+        new RouteFinder(new MinecraftGraph(level, inventory, pathConstraint), goalScorer);
+
+      log.info("Starting calculations at: {}", start.formatXYZ());
+      var routeSearchResultFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory));
+      bot.shutdownHooks().add(() -> routeSearchResultFuture.cancel(true));
+      var routeSearchResult = routeSearchResultFuture.join();
+      log.info("Route search result: {}", routeSearchResult);
+
+      return new LiveRouteFinderResult(routeSearchResult, start);
+    }
+
+    private record LiveRouteFinderResult(RouteFinder.RouteSearchResult routeSearchResult, SFVec3i start) {
+    }
   }
 }
