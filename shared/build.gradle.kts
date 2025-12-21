@@ -16,7 +16,7 @@ dependencies {
   api("net.fabricmc:intermediary:1.21.11:v2@jar")
   api("net.fabricmc:fabric-loader:0.18.3")
   api("net.fabricmc:mapping-io:0.8.0")
-  api("net.fabricmc:tiny-remapper:0.12.1")
+  api("net.fabricmc:tiny-remapper:0.12.2")
 
   api("at.yawk.lz4:lz4-java:1.10.2")
   api("com.azure:azure-json:1.5.0")
