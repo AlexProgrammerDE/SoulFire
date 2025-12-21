@@ -470,7 +470,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
 
       // This block should not be placed against
-      if (!SFBlockHelpers.isFullBlock(blockState)) {
+      if (!SFBlockHelpers.isCollisionShapeFullBlock(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 

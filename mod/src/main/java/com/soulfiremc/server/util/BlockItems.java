@@ -33,7 +33,7 @@ public final class BlockItems {
         // Let's not use bedrock as a building block
         if (SFBlockHelpers.isDiggable(blockType.getValue())
           && itemType.getKey().identifier().equals(blockType.getKey().identifier())
-          && SFBlockHelpers.isFullBlock(blockType.getValue().defaultBlockState())) {
+          && SFBlockHelpers.isCollisionShapeFullBlock(blockType.getValue().defaultBlockState())) {
           VALUES[BuiltInRegistries.ITEM.getId(itemType.getValue())] = blockType.getValue();
           VALUES_REVERSE[BuiltInRegistries.BLOCK.getId(blockType.getValue())] = itemType.getValue();
         }

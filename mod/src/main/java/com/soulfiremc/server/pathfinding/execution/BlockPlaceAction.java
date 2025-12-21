@@ -41,7 +41,7 @@ public final class BlockPlaceAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.minecraft().level;
 
-    return SFBlockHelpers.isFullBlock(level.getBlockState(blockPosition.toBlockPos()));
+    return SFBlockHelpers.isCollisionShapeFullBlock(level.getBlockState(blockPosition.toBlockPos()));
   }
 
   @Override

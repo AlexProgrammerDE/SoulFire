@@ -34,27 +34,25 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public final class SFBlockHelpers {
   public static final IDMap<BlockState, VoxelShape> RAW_COLLISION_SHAPES = new IDMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
-  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_EMPTY = new IDBooleanMap<>(
-    Block.BLOCK_STATE_REGISTRY, blockState -> RAW_COLLISION_SHAPES.get(blockState).isEmpty());
-  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_NOT_EMPTY = new IDBooleanMap<>(
-    Block.BLOCK_STATE_REGISTRY, blockState -> !COLLISION_SHAPE_EMPTY.get(blockState));
-  public static final IDBooleanMap<BlockState> COLLISION_SHAPE_FULL_BLOCK = new IDBooleanMap<>(
-    Block.BLOCK_STATE_REGISTRY, blockState -> Block.isShapeFullBlock(RAW_COLLISION_SHAPES.get(blockState)));
   public static final IDBooleanMap<BlockState> COLLISION_SHAPE_TOP_FACE_FULL = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> Block.isFaceFull(RAW_COLLISION_SHAPES.get(blockState), Direction.UP));
 
   private SFBlockHelpers() {}
 
-  public static boolean isFullBlock(BlockState state) {
-    return COLLISION_SHAPE_FULL_BLOCK.get(state);
-  }
-
   @SuppressWarnings("deprecation")
   public static boolean isBlockFree(BlockState blockState) {
-    return COLLISION_SHAPE_EMPTY.get(blockState)
+    return isCollisionShapeEmpty(blockState)
       && blockState.getFluidState().getType() == Fluids.EMPTY
       && !blockState.blocksMotion()
       && !affectsTouchMovementSpeed(blockState.getBlock());
+  }
+
+  public static boolean isCollisionShapeEmpty(BlockState blockState) {
+    return blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
+  }
+
+  public static boolean isCollisionShapeFullBlock(BlockState blockState) {
+    return blockState.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
   }
 
   public static boolean affectsTouchMovementSpeed(Block blockType) {

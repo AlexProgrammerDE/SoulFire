@@ -161,10 +161,10 @@ public final class PathConstraintImpl implements PathConstraint {
   @Override
   public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
     if (avoidDiagonalSqueeze) {
-      return SFBlockHelpers.COLLISION_SHAPE_NOT_EMPTY.get(collisionData.blockState());
+      return !SFBlockHelpers.isCollisionShapeEmpty(collisionData.blockState());
     }
 
-    if (SFBlockHelpers.COLLISION_SHAPE_EMPTY.get(collisionData.blockState())) {
+    if (SFBlockHelpers.isCollisionShapeEmpty(collisionData.blockState())) {
       return false;
     }
 

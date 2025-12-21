@@ -40,7 +40,7 @@ public final class JumpAndPlaceBelowAction implements WorldAction {
   public boolean isCompleted(BotConnection connection) {
     var level = connection.minecraft().level;
 
-    return SFBlockHelpers.isFullBlock(level.getBlockState(blockPlacePosition.toBlockPos()));
+    return SFBlockHelpers.isCollisionShapeFullBlock(level.getBlockState(blockPlacePosition.toBlockPos()));
   }
 
   @Override

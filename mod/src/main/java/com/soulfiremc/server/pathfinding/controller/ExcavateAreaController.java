@@ -69,7 +69,7 @@ public final class ExcavateAreaController {
   private boolean someBlocksCanBeMined(BotConnection bot) {
     return blocksToMine.stream().anyMatch(blockPos -> {
       var blockState = bot.minecraft().level.getBlockState(blockPos.toBlockPos());
-      return SFBlockHelpers.isFullBlock(blockState) && SFBlockHelpers.isDiggable(blockState.getBlock());
+      return SFBlockHelpers.isCollisionShapeFullBlock(blockState) && SFBlockHelpers.isDiggable(blockState.getBlock());
     });
   }
 
