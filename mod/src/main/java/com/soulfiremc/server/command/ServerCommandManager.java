@@ -94,6 +94,17 @@ public final class ServerCommandManager {
       return dispatcher.execute(command, source);
     } catch (CommandSyntaxException e) {
       source.source().sendWarn(e.getMessage());
+      var parseContext = dispatcher.parse(command, source).getContext();
+      if (!parseContext.getNodes().isEmpty()) {
+        var lastNode = parseContext.getNodes().getLast();
+        var smartUsage = dispatcher.getSmartUsage(lastNode.getNode(), source);
+        if (!smartUsage.isEmpty()) {
+          source.source().sendWarn("Did you mean:");
+          for (var usage : smartUsage.values()) {
+            source.source().sendWarn(command + " " + usage);
+          }
+        }
+      }
       return 0;
     }
   }
