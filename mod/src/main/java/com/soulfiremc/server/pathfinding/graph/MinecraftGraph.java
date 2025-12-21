@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.graph.actions.*;
 import com.soulfiremc.server.pathfinding.graph.actions.movement.ActionDirection;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,6 +48,7 @@ import java.util.function.Consumer;
 @Slf4j
 public record MinecraftGraph(BlockGetter blockAccessor,
                              ProjectedInventory inventory,
+                             @With
                              PathConstraint pathConstraint) {
   public static final int ACTIONS_SIZE;
   private static final GraphAction[] ACTIONS_TEMPLATE;

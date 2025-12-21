@@ -23,10 +23,7 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
-import com.soulfiremc.server.util.structs.CallLimiter;
-import com.soulfiremc.server.util.structs.IntReference;
-import com.soulfiremc.server.util.structs.Long2ObjectLRUCache;
-import com.soulfiremc.server.util.structs.ObjectReference;
+import com.soulfiremc.server.util.structs.*;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -36,10 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
+public record RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer) {
   /// Maximum possible usable block items (4 rows * 9 columns * 64 stack size)
   private static final int MAX_USABLE_BLOCK_ITEMS = 4 * 9 * 64;
 
@@ -72,10 +70,72 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
   }
 
   public CompletableFuture<RouteSearchResult> findRouteFuture(NodeState from) {
-    return CompletableFuture.supplyAsync(() -> findRouteSync(from));
+    var stopwatch = Stopwatch.createStarted();
+    var futures = new ArrayList<CompletableFuture<RouteSearchResult>>();
+    var cancellationToken = new CancellationToken();
+
+    futures.add(findRouteFutureSingle(baseGraph, from, cancellationToken));
+//    var pathConstraint = baseGraph.pathConstraint();
+//    if (pathConstraint.canBreakBlocks() && pathConstraint.canPlaceBlocks()) {
+//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+//        new NoBlockActionsConstraint(pathConstraint)
+//      ), from, cancellationToken));
+//    }
+//
+//    if (pathConstraint.canBreakBlocks()) {
+//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+//        new NoBlockBreakingConstraint(pathConstraint)
+//      ), from, cancellationToken));
+//    }
+//
+//    if (pathConstraint.canPlaceBlocks()) {
+//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+//        new NoBlockPlacingConstraint(pathConstraint)
+//      ), from, cancellationToken));
+//    }
+
+    var resultFuture = new CompletableFuture<RouteSearchResult>();
+    var countdown = new CountDownLatch(futures.size());
+    for (var future : futures) {
+      future.thenAccept(result -> {
+          if (result instanceof FoundRouteResult || result instanceof PartialRouteResult) {
+            if (!resultFuture.isDone()) {
+              resultFuture.complete(result);
+            }
+            cancellationToken.cancel();
+            for (var f : futures) {
+              f.cancel(true);
+            }
+            stopwatch.stop();
+            log.info("Best route found in {}ms", stopwatch.elapsed().toMillis());
+          } else {
+            countdown.countDown();
+            if (countdown.getCount() == 0 && !resultFuture.isDone()) {
+              resultFuture.complete(futures.getFirst().resultNow());
+              stopwatch.stop();
+              log.info("No route found after {}ms", stopwatch.elapsed().toMillis());
+            }
+          }
+        })
+        .exceptionally(ex -> {
+          countdown.countDown();
+          if (countdown.getCount() == 0 && !resultFuture.isDone()) {
+            resultFuture.completeExceptionally(ex);
+            stopwatch.stop();
+            log.info("Route finding failed after {}ms", stopwatch.elapsed().toMillis());
+          }
+          return null;
+        });
+    }
+
+    return resultFuture;
   }
 
-  private RouteSearchResult findRouteSync(NodeState from) {
+  public CompletableFuture<RouteSearchResult> findRouteFutureSingle(MinecraftGraph graph, NodeState from, CancellationToken cancellationToken) {
+    return CompletableFuture.supplyAsync(() -> findRouteSyncSingle(graph, from, cancellationToken));
+  }
+
+  private RouteSearchResult findRouteSyncSingle(MinecraftGraph graph, NodeState from, CancellationToken cancellationToken) {
     var stopwatch = Stopwatch.createStarted();
     var pathConstraint = graph.pathConstraint();
     var expireTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pathConstraint.expireTimeout());
@@ -134,7 +194,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
       Arrays.fill(routeIndex, null);
     }, 5, TimeUnit.SECONDS, true);
     while (!openSet.isEmpty()) {
-      if (Thread.currentThread().isInterrupted()) {
+      if (Thread.currentThread().isInterrupted() || cancellationToken.isCancelled()) {
         stopwatch.stop();
         log.info("Cancelled pathfinding after {}ms", stopwatch.elapsed().toMillis());
         return SearchInterruptedResult.INSTANCE;
@@ -172,7 +232,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             current.parentToNodeDirection(),
             instructions -> {
               list[counter.value++] = instructions;
-              handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
+              handleInstructions(graph, openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
             }
           );
           instructionCache.put(positionLong, list);
@@ -182,7 +242,7 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
             if (instructions == null) {
               break;
             }
-            handleInstructions(openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
+            handleInstructions(graph, openSet, routeIndex, blockItemsIndex, current, instructions, bestGlobalNode);
           }
         }
       } catch (OutOfLevelException _) {
@@ -204,7 +264,8 @@ public record RouteFinder(MinecraftGraph graph, GoalScorer scorer) {
     return NoRouteFoundResult.INSTANCE;
   }
 
-  private void handleInstructions(ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
+  private void handleInstructions(MinecraftGraph graph,
+                                  ObjectHeapPriorityQueue<MinecraftRouteNode> openSet,
                                   Long2ObjectOpenHashMap<MinecraftRouteNode>[] routeIndex,
                                   Long2IntOpenHashMap blockItemsIndex,
                                   MinecraftRouteNode current,
