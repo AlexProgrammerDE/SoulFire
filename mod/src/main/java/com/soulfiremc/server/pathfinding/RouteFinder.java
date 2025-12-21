@@ -23,6 +23,9 @@ import com.soulfiremc.server.pathfinding.goals.GoalScorer;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.OutOfLevelException;
+import com.soulfiremc.server.pathfinding.graph.constraint.NoBlockActionsConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.NoBlockBreakingConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.NoBlockPlacingConstraint;
 import com.soulfiremc.server.util.structs.*;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -75,24 +78,24 @@ public record RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer) {
     var cancellationToken = new CancellationToken();
 
     futures.add(findRouteFutureSingle(baseGraph, from, cancellationToken));
-//    var pathConstraint = baseGraph.pathConstraint();
-//    if (pathConstraint.canBreakBlocks() && pathConstraint.canPlaceBlocks()) {
-//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
-//        new NoBlockActionsConstraint(pathConstraint)
-//      ), from, cancellationToken));
-//    }
-//
-//    if (pathConstraint.canBreakBlocks()) {
-//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
-//        new NoBlockBreakingConstraint(pathConstraint)
-//      ), from, cancellationToken));
-//    }
-//
-//    if (pathConstraint.canPlaceBlocks()) {
-//      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
-//        new NoBlockPlacingConstraint(pathConstraint)
-//      ), from, cancellationToken));
-//    }
+    var pathConstraint = baseGraph.pathConstraint();
+    if (pathConstraint.canBreakBlocks() && pathConstraint.canPlaceBlocks()) {
+      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+        new NoBlockActionsConstraint(pathConstraint)
+      ), from, cancellationToken));
+    }
+
+    if (pathConstraint.canBreakBlocks()) {
+      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+        new NoBlockBreakingConstraint(pathConstraint)
+      ), from, cancellationToken));
+    }
+
+    if (pathConstraint.canPlaceBlocks()) {
+      futures.add(findRouteFutureSingle(baseGraph.withPathConstraint(
+        new NoBlockPlacingConstraint(pathConstraint)
+      ), from, cancellationToken));
+    }
 
     var resultFuture = new CompletableFuture<RouteSearchResult>();
     var countdown = new CountDownLatch(futures.size());
