@@ -22,7 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.goals.CompositeGoal;
-import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.DelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.util.SFBlockHelpers;
@@ -80,16 +80,16 @@ public final class ExcavateAreaController {
       try {
         PathExecutor.executePathfinding(bot, new CompositeGoal(blocksToMine.stream()
           .map(BreakBlockPosGoal::new)
-          .collect(Collectors.toUnmodifiableSet())), new AbstractDelegatePathConstraint() {
+          .collect(Collectors.toUnmodifiableSet())), new DelegatePathConstraint() {
           private final PathConstraint pathConstraint = new PathConstraintImpl(bot);
 
           @Override
           public boolean canPlaceBlock(SFVec3i pos) {
-            return super.canPlaceBlock(pos) && !blocksToMine.contains(pos);
+            return pathConstraint.canPlaceBlock(pos) && !blocksToMine.contains(pos);
           }
 
           @Override
-          protected PathConstraint delegate() {
+          public PathConstraint delegate() {
             return pathConstraint;
           }
         }).get();

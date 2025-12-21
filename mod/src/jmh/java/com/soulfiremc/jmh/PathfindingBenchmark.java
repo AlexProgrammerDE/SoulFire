@@ -24,7 +24,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
-import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.DelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -102,9 +102,10 @@ public class PathfindingBenchmark {
 
       var builtAccessor = accessor.build();
 
-      var pathConstraint = new AbstractDelegatePathConstraint() {
+      var pathConstraint = new DelegatePathConstraint() {
         @Override
-        protected @NonNull PathConstraint delegate() {
+        @NonNull
+        public PathConstraint delegate() {
           return TestPathConstraint.INSTANCE;
         }
       };

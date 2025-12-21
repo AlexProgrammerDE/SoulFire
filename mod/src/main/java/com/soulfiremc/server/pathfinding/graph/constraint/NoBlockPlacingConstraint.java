@@ -15,25 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test.mixin;
+package com.soulfiremc.server.pathfinding.graph.constraint;
 
-import org.jspecify.annotations.NonNull;
-import org.spongepowered.asm.service.IPropertyKey;
-
-import java.util.Objects;
-
-public record AgentMixinStringPropertyKey(String key) implements IPropertyKey {
+public record NoBlockPlacingConstraint(PathConstraint delegate) implements DelegatePathConstraint {
   @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof AgentMixinStringPropertyKey agentMixinStringPropertyKey)) {
-      return false;
-    } else {
-      return Objects.equals(this.key, agentMixinStringPropertyKey.key);
-    }
+  public boolean canBlocksDropWhenBroken() {
+    // Prevents that blocks are collected for placing
+    return false;
   }
 
   @Override
-  public @NonNull String toString() {
-    return this.key;
+  public boolean canPlaceBlocks() {
+    // Prevents block placing
+    return false;
   }
 }

@@ -23,81 +23,81 @@ import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class AbstractDelegatePathConstraint implements PathConstraint {
+public interface DelegatePathConstraint extends PathConstraint {
   @Override
-  public boolean doUsableBlocksDecreaseWhenPlaced() {
+  default boolean doUsableBlocksDecreaseWhenPlaced() {
     return delegate().doUsableBlocksDecreaseWhenPlaced();
   }
 
   @Override
-  public boolean canBlocksDropWhenBroken() {
+  default boolean canBlocksDropWhenBroken() {
     return delegate().canBlocksDropWhenBroken();
   }
 
   @Override
-  public boolean canBreakBlocks() {
+  default boolean canBreakBlocks() {
     return delegate().canBreakBlocks();
   }
 
   @Override
-  public boolean canPlaceBlocks() {
+  default boolean canPlaceBlocks() {
     return delegate().canPlaceBlocks();
   }
 
   @Override
-  public boolean isPlaceable(ItemStack item) {
+  default boolean isPlaceable(ItemStack item) {
     return delegate().isPlaceable(item);
   }
 
   @Override
-  public boolean isTool(ItemStack item) {
+  default boolean isTool(ItemStack item) {
     return delegate().isTool(item);
   }
 
   @Override
-  public boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
+  default boolean isOutOfLevel(BlockState blockState, SFVec3i pos) {
     return delegate().isOutOfLevel(blockState, pos);
   }
 
   @Override
-  public boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
+  default boolean canBreakBlock(SFVec3i pos, BlockState blockState) {
     return delegate().canBreakBlock(pos, blockState);
   }
 
   @Override
-  public boolean canPlaceBlock(SFVec3i pos) {
+  default boolean canPlaceBlock(SFVec3i pos) {
     return delegate().canPlaceBlock(pos);
   }
 
   @Override
-  public boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
+  default boolean collidesWithAtEdge(DiagonalCollisionCalculator.CollisionData collisionData) {
     return delegate().collidesWithAtEdge(collisionData);
   }
 
   @Override
-  public GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
+  default GraphInstructions modifyAsNeeded(GraphInstructions instruction) {
     return delegate().modifyAsNeeded(instruction);
   }
 
   @Override
-  public double breakBlockPenalty() {
+  default double breakBlockPenalty() {
     return delegate().breakBlockPenalty();
   }
 
   @Override
-  public double placeBlockPenalty() {
+  default double placeBlockPenalty() {
     return delegate().placeBlockPenalty();
   }
 
   @Override
-  public int expireTimeout() {
+  default int expireTimeout() {
     return delegate().expireTimeout();
   }
 
   @Override
-  public boolean disablePruning() {
+  default boolean disablePruning() {
     return delegate().disablePruning();
   }
 
-  protected abstract PathConstraint delegate();
+  PathConstraint delegate();
 }

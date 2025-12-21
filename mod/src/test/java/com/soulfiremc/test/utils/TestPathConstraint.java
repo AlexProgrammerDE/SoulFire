@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.test.utils;
 
-import com.soulfiremc.server.pathfinding.graph.constraint.AbstractDelegatePathConstraint;
+import com.soulfiremc.server.pathfinding.graph.constraint.DelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import org.jspecify.annotations.NonNull;
 
-public final class TestPathConstraint extends AbstractDelegatePathConstraint {
+public final class TestPathConstraint implements DelegatePathConstraint {
   public static final TestPathConstraint INSTANCE = new TestPathConstraint();
 
   private final PathConstraint pathConstraint = new PathConstraintImpl(
@@ -41,7 +41,7 @@ public final class TestPathConstraint extends AbstractDelegatePathConstraint {
   private TestPathConstraint() {}
 
   @Override
-  protected @NonNull PathConstraint delegate() {
+  public @NonNull PathConstraint delegate() {
     return pathConstraint;
   }
 }
