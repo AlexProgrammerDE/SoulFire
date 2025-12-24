@@ -14,7 +14,7 @@ dependencies {
   api("org.ow2.asm:asm-util:9.9.1")
   api("net.fabricmc:sponge-mixin:0.17.0+mixin.0.8.7")
   api("net.fabricmc:intermediary:1.21.11:v2@jar")
-  api("net.fabricmc:fabric-loader:0.18.3")
+  api("net.fabricmc:fabric-loader:0.18.4")
   api("net.fabricmc:mapping-io:0.8.0")
   api("net.fabricmc:tiny-remapper:0.12.2")
 
