@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
   idea
   `java-library`
@@ -27,6 +29,7 @@ spotbugs {
 dependencies {
   errorprone("com.google.errorprone:error_prone_core:2.45.0")
   spotbugs("com.github.spotbugs:spotbugs:4.9.8")
+
   rewrite("org.openrewrite.recipe:rewrite-static-analysis:2.24.0")
   rewrite("org.openrewrite.recipe:rewrite-migrate-java:3.24.0")
   rewrite("org.openrewrite.recipe:rewrite-rewrite:0.17.0")
@@ -52,7 +55,10 @@ tasks {
     title = "SoulFire Javadocs"
     (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
   }
-  compileJava {
+  withType<JavaCompile> {
+    options.errorprone {
+      disableWarningsInGeneratedCode = true
+    }
     options.encoding = Charsets.UTF_8.name()
     options.compilerArgs.addAll(
       listOf(
