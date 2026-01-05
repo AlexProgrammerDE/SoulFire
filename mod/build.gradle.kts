@@ -28,10 +28,10 @@ dependencies {
   })
   modImplementation("net.fabricmc:fabric-loader:0.18.4")
 
-  modImplementation("com.viaversion:viafabricplus:4.4.1") {
+  modImplementation("com.viaversion:viafabricplus:4.4.2-SNAPSHOT") {
     exclude("org.lz4")
   }
-  include("com.viaversion:viafabricplus:4.4.1") {
+  include("com.viaversion:viafabricplus:4.4.2-SNAPSHOT") {
     isTransitive = false
   }
 
