@@ -60,7 +60,7 @@ dependencies {
     exclude("io.netty")
     exclude("org.slf4j")
   }
-  api("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar") {
+  api("headlessmc:headlessmc-lwjgl:2.8.0:no-asm@jar") {
     exclude("io.netty")
     exclude("org.slf4j")
   }
