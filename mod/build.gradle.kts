@@ -28,10 +28,11 @@ dependencies {
   })
   modImplementation("net.fabricmc:fabric-loader:0.18.4")
 
-  modImplementation("com.viaversion:viafabricplus:4.4.2-SNAPSHOT") {
+  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.2-SNAPSHOT"
+  modImplementation(viaFabricPlusNotation) {
     exclude("org.lz4")
   }
-  include("com.viaversion:viafabricplus:4.4.2-SNAPSHOT") {
+  include(viaFabricPlusNotation) {
     isTransitive = false
   }
 
@@ -60,11 +61,12 @@ dependencies {
     exclude("io.netty")
     exclude("org.slf4j")
   }
-  api("headlessmc:headlessmc-lwjgl:2.8.0:no-asm@jar") {
+  val headlessMcNotation = "headlessmc:headlessmc-lwjgl:2.8.0:no-asm@jar"
+  api(headlessMcNotation) {
     exclude("io.netty")
     exclude("org.slf4j")
   }
-  include("headlessmc:headlessmc-lwjgl:2.6.1:no-asm@jar") {
+  include(headlessMcNotation) {
     exclude("io.netty")
     exclude("org.slf4j")
   }
