@@ -16,6 +16,7 @@ allprojects {
       name = "Jitpack Repository"
       content {
         includeGroupByRegex("com\\.github\\..*")
+        includeGroup("dev.kastle.NetworkCompatible")
       }
     }
     maven("https://libraries.minecraft.net") {
