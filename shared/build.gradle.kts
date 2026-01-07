@@ -56,7 +56,7 @@ dependencies {
   api("org.slf4j:slf4j-api:2.0.17")
 
   api("io.github.llamalad7:mixinextras-fabric:0.5.2")
-  api("org.checkerframework:checker-qual:3.52.1")
+  api("org.checkerframework:checker-qual:3.53.0")
 
   api(projects.buildData)
 
