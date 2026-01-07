@@ -58,6 +58,15 @@ You can read about the SoulFire plugins in the [documentation](https://soulfirem
 You can read about how to import accounts in the [account documentation](https://soulfiremc.com/docs/usage/accounts) and
 how to import proxies in the [proxy documentation](https://soulfiremc.com/docs/usage/proxies).
 
+## 🤿 Looking for proxies?
+
+There are many websites that offer free proxies, but be careful as many of them are not reliable or secure.
+
+Our recommended proxy provider is [Thordata](https://affiliate.thordata.com/soulfire), who sponsors SoulFire monthly.
+They offer premium residential proxies with excellent speeds - use code **THORDATA** for 20% off your first purchase.
+
+For a full list of recommended providers, check out our [Get Proxies](/get-proxies) page.
+
 ## 💻 Command Line Usage
 
 If you want to use the CLI of SoulFire, please refer to the [CLI Mode Guide](https://soulfiremc.com/docs/guides/cli-mode).
