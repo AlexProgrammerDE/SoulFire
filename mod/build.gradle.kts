@@ -28,7 +28,7 @@ dependencies {
   })
   modImplementation("net.fabricmc:fabric-loader:0.18.4")
 
-  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.2-SNAPSHOT"
+  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.2"
   modImplementation(viaFabricPlusNotation) {
     exclude("org.lz4")
   }
