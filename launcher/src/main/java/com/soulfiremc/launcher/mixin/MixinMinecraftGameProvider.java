@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher.mixin;
 
+import com.soulfiremc.launcher.SFMinecraftDownloader;
 import net.fabricmc.loader.impl.game.GameProviderHelper;
 import net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
@@ -33,7 +34,7 @@ public class MixinMinecraftGameProvider {
   @Redirect(method = "initialize", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/game/GameProviderHelper;deobfuscate(Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Lnet/fabricmc/loader/impl/launch/FabricLauncher;)Ljava/util/Map;"))
   private Map<String, Path> redirectDeobfuscate(Map<String, Path> inputFileMap, String sourceNamespace, String gameId, String gameVersion, Path gameDir, FabricLauncher launcher) {
     // Inject custom logic to also deobfuscate to intermediary
-    if (!"intermediary".equals(launcher.getMappingConfiguration().getRuntimeNamespace())) {
+    if (SFMinecraftDownloader.IS_OBFUSCATED_RELEASE && !"intermediary".equals(launcher.getMappingConfiguration().getRuntimeNamespace())) {
       IO.println("Remapping Minecraft to intermediary to remap mods. This will take a while...");
       System.setProperty("sf.customIntermediaryDeobfuscation", "true");
       GameProviderHelper.deobfuscate(
@@ -47,7 +48,10 @@ public class MixinMinecraftGameProvider {
       System.clearProperty("sf.customIntermediaryDeobfuscation");
     }
 
-    System.out.printf("Remapping Minecraft to %s for runtime. This will take a while...%n", launcher.getMappingConfiguration().getRuntimeNamespace());
+    if (SFMinecraftDownloader.IS_OBFUSCATED_RELEASE) {
+      System.out.printf("Remapping Minecraft to %s for runtime. This will take a while...%n", launcher.getMappingConfiguration().getRuntimeNamespace());
+    }
+
     return GameProviderHelper.deobfuscate(
       inputFileMap,
       sourceNamespace,

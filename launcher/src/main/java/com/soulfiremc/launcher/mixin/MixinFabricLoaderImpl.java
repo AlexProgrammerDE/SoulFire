@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher.mixin;
 
+import com.soulfiremc.launcher.SFMinecraftDownloader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +30,6 @@ public class MixinFabricLoaderImpl {
   @Redirect(method = "setup", at = @At(value = "INVOKE", target = "Lnet/fabricmc/loader/impl/FabricLoaderImpl;isDevelopmentEnvironment()Z"))
   private boolean redirectIsDevelopmentEnvironment(FabricLoaderImpl instance) {
     // Trigger mod remapping at runtime if not running in intermediary
-    return !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
+    return SFMinecraftDownloader.IS_OBFUSCATED_RELEASE && !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
   }
 }

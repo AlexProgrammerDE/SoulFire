@@ -11,15 +11,15 @@ dependencies {
 val modProjectName = ":mod"
 evaluationDependsOn(modProjectName)
 afterEvaluate {
-  val remappedConfiguration = project(modProjectName).configurations.named("remapped")
+  val modJarConfiguration = project(modProjectName).configurations.named("mod-jar")
 
   tasks.named<Jar>("jar") {
     from({
-      remappedConfiguration.get().artifacts.files
+      modJarConfiguration.get().artifacts.files
     }) {
       into("META-INF/jars")
     }
 
-    dependsOn(remappedConfiguration)
+    dependsOn(modJarConfiguration)
   }
 }

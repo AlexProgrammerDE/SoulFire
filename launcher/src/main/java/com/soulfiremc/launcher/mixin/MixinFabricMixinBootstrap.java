@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher.mixin;
 
+import com.soulfiremc.launcher.SFMinecraftDownloader;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.launch.FabricMixinBootstrap;
@@ -32,6 +33,6 @@ public class MixinFabricMixinBootstrap {
     remap = false)
   private static boolean isDevelopment(FabricLauncher instance) {
     // Trigger refmap remapping at runtime if not running in intermediary
-    return !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
+    return SFMinecraftDownloader.IS_OBFUSCATED_RELEASE && !"intermediary".equals(FabricLauncherBase.getLauncher().getMappingConfiguration().getRuntimeNamespace());
   }
 }

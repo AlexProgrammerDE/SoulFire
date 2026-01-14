@@ -15,21 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.util.structs;
+package com.soulfiremc.shared;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor
-public final class LazyBoolean {
-  private final BooleanSupplier supplier;
-  private boolean value;
+public final class LazyObject<T> {
+  private final Supplier<T> supplier;
+  private T value;
   private boolean initialized;
 
-  public boolean get() {
+  public T get() {
     if (!initialized) {
-      value = supplier.getAsBoolean();
+      value = supplier.get();
       initialized = true;
     }
 

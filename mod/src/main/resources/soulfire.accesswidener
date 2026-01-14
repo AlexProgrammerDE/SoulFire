@@ -1,4 +1,4 @@
-accessWidener v2 named
+accessWidener v2 official
 
 accessible method net/minecraft/client/multiplayer/resolver/ServerAddress <init> (Lcom/google/common/net/HostAndPort;)V
 accessible method net/minecraft/client/multiplayer/ClientLevel getAllMapData ()Ljava/util/Map;

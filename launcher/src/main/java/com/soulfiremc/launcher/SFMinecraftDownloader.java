@@ -20,6 +20,7 @@ package com.soulfiremc.launcher;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.soulfiremc.shared.LazyObject;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.game.GameProviderHelper;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
@@ -44,7 +45,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SFMinecraftDownloader {
-  private static final String MINECRAFT_VERSION = "1.21.11";
+  public static final boolean IS_OBFUSCATED_RELEASE = Boolean.parseBoolean(System.getProperty("sf.obfuscatedRelease", "false"));
+  public static final String CLIENT_URL_OVERRIDE = System.getProperty("sf.clientUrlOverride", "https://piston-data.mojang.com/v1/objects/4509ee9b65f226be61142d37bf05f8d28b03417b/client.jar");
+  private static final String MINECRAFT_VERSION = System.getProperty("sf.mcVersionOverride", "1.21.11_unobfuscated");
   private static final String MINECRAFT_CLIENT_JAR_NAME = "minecraft-%s-client.jar".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_PROGUARD_NAME = "minecraft-%s-client-mappings.txt".formatted(MINECRAFT_VERSION);
   private static final String MINECRAFT_CLIENT_MAPPINGS_TINY_NAME = "minecraft-%s-client-mappings.tiny".formatted(MINECRAFT_VERSION);
@@ -116,24 +119,25 @@ public final class SFMinecraftDownloader {
     var minecraftJarPath = getMinecraftClientJarPath(basePath);
     var minecraftMappingsProguardPath = getMinecraftClientMappingsProguardPath(basePath);
     if (Files.exists(minecraftJarPath)
-      && Files.exists(minecraftMappingsProguardPath)) {
+      && (!IS_OBFUSCATED_RELEASE || Files.exists(minecraftMappingsProguardPath))) {
       IO.println("Minecraft already downloaded, continuing");
     } else {
       IO.println("Downloading Minecraft...");
-      var versionUrl = getUrl(MANIFEST_URL)
-        .getAsJsonArray("versions")
-        .asList()
-        .stream()
-        .map(JsonElement::getAsJsonObject)
-        .filter(v -> MINECRAFT_VERSION.equals(v.get("id").getAsString()))
-        .map(v -> v.get("url").getAsString())
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("Minecraft version " + MINECRAFT_VERSION + " not found in manifest"));
-
-      var versionInfo = getUrl(versionUrl);
+      var versionInfo = new LazyObject<>(() -> {
+        var versionUrl = getUrl(MANIFEST_URL)
+          .getAsJsonArray("versions")
+          .asList()
+          .stream()
+          .map(JsonElement::getAsJsonObject)
+          .filter(v -> MINECRAFT_VERSION.equals(v.get("id").getAsString()))
+          .map(v -> v.get("url").getAsString())
+          .findFirst()
+          .orElseThrow(() -> new RuntimeException("Minecraft version " + MINECRAFT_VERSION + " not found in manifest"));
+        return getUrl(versionUrl);
+      });
 
       if (!Files.exists(minecraftJarPath)) {
-        var clientUrl = versionInfo
+        var clientUrl = !CLIENT_URL_OVERRIDE.isBlank() ? CLIENT_URL_OVERRIDE : versionInfo.get()
           .getAsJsonObject("downloads")
           .getAsJsonObject("client")
           .get("url")
@@ -153,8 +157,8 @@ public final class SFMinecraftDownloader {
         IO.println("Minecraft client jar downloaded and saved to: " + minecraftJarPath);
       }
 
-      if (!Files.exists(minecraftMappingsProguardPath)) {
-        var clientMappingsUrl = versionInfo
+      if (IS_OBFUSCATED_RELEASE && !Files.exists(minecraftMappingsProguardPath)) {
+        var clientMappingsUrl = versionInfo.get()
           .getAsJsonObject("downloads")
           .getAsJsonObject("client_mappings")
           .get("url")
@@ -176,7 +180,7 @@ public final class SFMinecraftDownloader {
     }
 
     var minecraftMappingsTinyPath = getMinecraftClientMappingsTinyPath(basePath);
-    if (!Files.exists(minecraftMappingsTinyPath)) {
+    if (IS_OBFUSCATED_RELEASE && !Files.exists(minecraftMappingsTinyPath)) {
       try (var proguardReader = Files.newBufferedReader(minecraftMappingsProguardPath);
            var intermediaryReader = new InputStreamReader(
              Objects.requireNonNull(
@@ -197,14 +201,18 @@ public final class SFMinecraftDownloader {
       }
     }
 
-    System.setProperty(SystemProperties.MAPPING_PATH, minecraftMappingsTinyPath.toAbsolutePath().toString());
     System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
     System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, minecraftJarPath.toString());
-    if (Boolean.getBoolean("sf.remapToNamed")) {
-      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
-      setRemapClasspath(basePath);
+    if (IS_OBFUSCATED_RELEASE) {
+      System.setProperty(SystemProperties.MAPPING_PATH, minecraftMappingsTinyPath.toAbsolutePath().toString());
+      if (Boolean.getBoolean("sf.remapToNamed")) {
+        System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "named");
+        setRemapClasspath(basePath);
+      } else {
+        System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "intermediary");
+      }
     } else {
-      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "intermediary");
+      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "official");
     }
   }
 }

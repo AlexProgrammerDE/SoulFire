@@ -1,8 +1,6 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
   `sf-special-publish-conventions`
-  id("net.fabricmc.fabric-loom-remap")
+  id("net.fabricmc.fabric-loom")
   alias(libs.plugins.jmh)
 }
 
@@ -20,16 +18,11 @@ dependencies {
 
   compileOnly(projects.shared)
 
-  minecraft("com.mojang:minecraft:1.21.11")
-  @Suppress("UnstableApiUsage")
-  mappings(loom.layered {
-    officialMojangMappings()
-    parchment("org.parchmentmc.data:parchment-1.21.11:2025.12.20@zip")
-  })
-  modImplementation("net.fabricmc:fabric-loader:0.18.4")
+  minecraft("com.mojang:minecraft:1.21.11_unobfuscated")
+  implementation("net.fabricmc:fabric-loader:0.18.4")
 
-  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.2"
-  modImplementation(viaFabricPlusNotation) {
+  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.3-SNAPSHOT-UNOBF"
+  implementation(viaFabricPlusNotation) {
     exclude("org.lz4")
   }
   include(viaFabricPlusNotation) {
@@ -99,24 +92,23 @@ tasks {
     useJUnitPlatform()
   }
 
-  remapJar {
+  processIncludeJars {
     dependsOn(":proto:jar")
   }
 }
 
-configurations.create("remapped")
+configurations.create("mod-jar")
 
-val remapJarTask = tasks.named<RemapJarTask>("remapJar")
 artifacts {
-  add("remapped", remapJarTask.flatMap { it.archiveFile }) {
-    builtBy(remapJarTask)
+  add("mod-jar", tasks.jar.flatMap { it.archiveFile }) {
+    builtBy(tasks.jar)
   }
 }
 
 publishing {
   publications {
     getByName<MavenPublication>("mavenJava") {
-      artifact(remapJarTask)
+      artifact(tasks.jar)
     }
   }
 }

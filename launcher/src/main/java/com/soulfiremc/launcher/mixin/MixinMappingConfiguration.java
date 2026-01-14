@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.launcher.mixin;
 
+import com.soulfiremc.launcher.SFMinecraftDownloader;
 import net.fabricmc.loader.impl.launch.MappingConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +32,7 @@ public class MixinMappingConfiguration {
     cancellable = true,
     remap = false)
   public void getRuntimeNamespace(CallbackInfoReturnable<String> cir) {
-    if (Boolean.getBoolean("sf.customIntermediaryDeobfuscation")) {
+    if (SFMinecraftDownloader.IS_OBFUSCATED_RELEASE && Boolean.getBoolean("sf.customIntermediaryDeobfuscation")) {
       // Temporarily remap to intermediary
       cir.setReturnValue("intermediary");
     }
