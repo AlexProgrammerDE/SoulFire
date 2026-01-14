@@ -104,6 +104,7 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       null,
       null,
       null,
+      null,
       null
     );
     subscribers.values().stream()

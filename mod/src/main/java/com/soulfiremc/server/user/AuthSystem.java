@@ -268,7 +268,9 @@ public final class AuthSystem {
                ACCESS_OBJECT_STORAGE, ACCESS_SCRIPT_CODE_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
-               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
+               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS,
+               CREATE_BOT, READ_BOT, UPDATE_BOT, DELETE_BOT,
+               UPDATE_BOT_METADATA, SUBSCRIBE_BOT_STATE -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
         };
       };

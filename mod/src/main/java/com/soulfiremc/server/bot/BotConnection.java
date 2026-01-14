@@ -85,6 +85,8 @@ public final class BotConnection {
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
   private final InstanceSettingsSource settingsSource;
+  @Nullable
+  private final BotEntity botEntity;
   private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
   private final String accountName;
@@ -97,14 +99,17 @@ public final class BotConnection {
   private final EventLoopGroup eventLoopGroup;
   private final SFSessionService sessionService;
   private final boolean isStatusPing;
+  private final long createdAtMs;
   @Setter
   private ProtocolVersion currentProtocolVersion;
   private boolean isDisconnected;
+  private long connectedSinceMs = -1;
 
   public BotConnection(
     BotConnectionFactory factory,
     InstanceManager instanceManager,
     InstanceSettingsSource settingsSource,
+    @Nullable BotEntity botEntity,
     MinecraftAccount minecraftAccount,
     ProtocolVersion currentProtocolVersion,
     ServerAddress serverAddress,
@@ -115,6 +120,7 @@ public final class BotConnection {
     this.factory = factory;
     this.instanceManager = instanceManager;
     this.settingsSource = settingsSource;
+    this.botEntity = botEntity;
     this.minecraftAccount = minecraftAccount;
     this.accountProfileId = minecraftAccount.profileId();
     this.accountName = minecraftAccount.lastKnownName();
@@ -127,6 +133,21 @@ public final class BotConnection {
     this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
     this.isStatusPing = isStatusPing;
+    this.createdAtMs = System.currentTimeMillis();
+  }
+
+  public UUID botId() {
+    return botEntity != null ? botEntity.id() : accountProfileId;
+  }
+
+  public long connectedSinceMs() {
+    return connectedSinceMs;
+  }
+
+  public void markConnected() {
+    if (connectedSinceMs == -1) {
+      connectedSinceMs = System.currentTimeMillis();
+    }
   }
 
   @SneakyThrows
@@ -256,9 +277,10 @@ public final class BotConnection {
       return () -> {
         try (
           var ignored1 = SFHelpers.smartThreadLocalCloseable(CURRENT, botConnection);
-          var ignored2 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
-          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName());
-          var ignored4 = SFHelpers.smartThreadLocalCloseable(SFConstants.MINECRAFT_INSTANCE, botConnection.minecraft)) {
+          var ignored2 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ID, botConnection.botId().toString());
+          var ignored3 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_ID, botConnection.accountProfileId().toString());
+          var ignored4 = SFHelpers.smartMDCCloseable(SFLogAppender.SF_BOT_ACCOUNT_NAME, botConnection.accountName());
+          var ignored5 = SFHelpers.smartThreadLocalCloseable(SFConstants.MINECRAFT_INSTANCE, botConnection.minecraft)) {
           runnable.run();
         }
       };

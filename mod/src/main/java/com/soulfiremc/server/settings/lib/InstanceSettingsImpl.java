@@ -27,6 +27,7 @@ import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.AccountData;
+import com.soulfiremc.server.bot.BotEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.SFHelpers;
@@ -44,8 +45,9 @@ import java.util.*;
 public record InstanceSettingsImpl(
   Map<String, Map<String, JsonElement>> settings,
   List<MinecraftAccount> accounts,
-  List<SFProxy> proxies) implements InstanceSettingsSource {
-  public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of());
+  List<SFProxy> proxies,
+  List<BotEntity> bots) implements InstanceSettingsSource {
+  public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of(), List.of());
   private static final Gson PROFILE_GSON =
     GsonInstance.GSON.newBuilder()
       .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
@@ -58,8 +60,21 @@ public record InstanceSettingsImpl(
     for (var account : accounts) {
       newAccounts.put(account.profileId(), account);
     }
-
     accounts = List.copyOf(newAccounts.values());
+
+    // Remove duplicate proxies
+    var newProxies = new LinkedHashMap<UUID, SFProxy>();
+    for (var proxy : proxies) {
+      newProxies.put(proxy.id(), proxy);
+    }
+    proxies = List.copyOf(newProxies.values());
+
+    // Remove duplicate bots
+    var newBots = new LinkedHashMap<UUID, BotEntity>();
+    for (var bot : bots) {
+      newBots.put(bot.id(), bot);
+    }
+    bots = List.copyOf(newBots.values());
   }
 
   public static InstanceSettingsImpl deserialize(JsonElement json) {
@@ -84,7 +99,8 @@ public record InstanceSettingsImpl(
         HashMap::putAll
       ),
       request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
-      request.getProxiesList().stream().map(SFProxy::fromProto).toList()
+      request.getProxiesList().stream().map(SFProxy::fromProto).toList(),
+      request.getBotsList().stream().map(BotEntity::fromProto).toList()
     );
   }
 
@@ -113,6 +129,7 @@ public record InstanceSettingsImpl(
         .toList())
       .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
       .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
+      .addAllBots(this.bots.stream().map(BotEntity::toProto).toList())
       .build();
   }
 
@@ -120,6 +137,35 @@ public record InstanceSettingsImpl(
   public Optional<JsonElement> get(Property property) {
     return Optional.ofNullable(settings.get(property.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(property.key())));
+  }
+
+  public Optional<MinecraftAccount> getAccountById(UUID profileId) {
+    return accounts.stream().filter(a -> a.profileId().equals(profileId)).findFirst();
+  }
+
+  public Optional<SFProxy> getProxyById(UUID proxyId) {
+    return proxies.stream().filter(p -> p.id().equals(proxyId)).findFirst();
+  }
+
+  public Optional<BotEntity> getBotById(UUID botId) {
+    return bots.stream().filter(b -> b.id().equals(botId)).findFirst();
+  }
+
+  public InstanceSettingsImpl withUpdatedBot(BotEntity updatedBot) {
+    var newBots = new ArrayList<>(bots);
+    newBots.replaceAll(b -> b.id().equals(updatedBot.id()) ? updatedBot : b);
+    return this.withBots(newBots);
+  }
+
+  public InstanceSettingsImpl withAddedBot(BotEntity newBot) {
+    var newBots = new ArrayList<>(bots);
+    newBots.add(newBot);
+    return this.withBots(newBots);
+  }
+
+  public InstanceSettingsImpl withRemovedBot(UUID botId) {
+    var newBots = bots.stream().filter(b -> !b.id().equals(botId)).toList();
+    return this.withBots(newBots);
   }
 
   private static class MinecraftAccountAdapter

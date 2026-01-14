@@ -19,17 +19,19 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.bot.BotEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public final class InstanceSettingsDelegate implements InstanceSettingsSource {
-  private final Supplier<InstanceSettingsSource> source;
+  private final CachedLazyObject<InstanceSettingsSource> source;
 
   @Override
   public List<MinecraftAccount> accounts() {
@@ -42,7 +44,31 @@ public final class InstanceSettingsDelegate implements InstanceSettingsSource {
   }
 
   @Override
+  public List<BotEntity> bots() {
+    return source.get().bots();
+  }
+
+  @Override
+  public Optional<MinecraftAccount> getAccountById(UUID profileId) {
+    return source.get().getAccountById(profileId);
+  }
+
+  @Override
+  public Optional<SFProxy> getProxyById(UUID proxyId) {
+    return source.get().getProxyById(proxyId);
+  }
+
+  @Override
+  public Optional<BotEntity> getBotById(UUID botId) {
+    return source.get().getBotById(botId);
+  }
+
+  @Override
   public Optional<JsonElement> get(Property property) {
     return source.get().get(property);
+  }
+
+  public void invalidateCache() {
+    source.invalidate();
   }
 }

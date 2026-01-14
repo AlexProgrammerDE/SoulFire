@@ -24,12 +24,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.UUID;
 
 public record SFProxy(
+  @NonNull UUID id,
   @NonNull ProxyType type,
   @NonNull SocketAddress address,
   @Nullable String username,
   @Nullable String password) {
+
+  /**
+   * Convenience constructor that auto-generates an ID.
+   */
+  public SFProxy(ProxyType type, SocketAddress address, String username, String password) {
+    this(UUID.randomUUID(), type, address, username, password);
+  }
+
   public SFProxy {
     if (type == ProxyType.SOCKS4 && password != null) {
       throw new IllegalArgumentException("SOCKS4 does not support passwords!");
@@ -52,6 +62,7 @@ public record SFProxy(
 
   public static SFProxy fromProto(ProxyProto proto) {
     return new SFProxy(
+      proto.getId().isEmpty() ? UUID.randomUUID() : UUID.fromString(proto.getId()),
       ProxyType.valueOf(proto.getType().name()),
       SocketAddressHelper.deserialize(proto.getAddress()),
       proto.hasUsername() ? proto.getUsername() : null,
@@ -65,6 +76,7 @@ public record SFProxy(
   public ProxyProto toProto() {
     var builder =
       ProxyProto.newBuilder()
+        .setId(id.toString())
         .setType(ProxyProto.Type.valueOf(type.name()))
         .setAddress(SocketAddressHelper.serialize(address));
 

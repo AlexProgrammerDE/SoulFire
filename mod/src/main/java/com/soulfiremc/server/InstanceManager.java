@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.google.protobuf.Value;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
@@ -30,6 +31,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
+import com.soulfiremc.server.bot.BotEntity;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
@@ -162,23 +164,6 @@ public final class InstanceManager {
         return instance.friendlyName();
       }
     });
-  }
-
-  private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
-    if (proxies.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var selectedProxy =
-      proxies.stream()
-        .filter(ProxyData::isAvailable)
-        .min(Comparator.comparingInt(ProxyData::usedBots))
-        .orElseThrow(
-          () -> new IllegalStateException("No proxies available!"));
-
-    selectedProxy.useCount().incrementAndGet();
-
-    return Optional.of(selectedProxy.proxy());
   }
 
   private void tick() {
@@ -334,53 +319,123 @@ public final class InstanceManager {
     var botsPerProxy =
       settingsSource.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
 
+    // Prepare proxy tracking
     var proxies = new ArrayList<>(settingsSource.proxies()
       .stream()
       .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
       .toList());
-    {
-      var availableProxies = proxies.size();
-      if (availableProxies == 0) {
-        log.info("No proxies provided, attack will be performed without proxies");
-      } else {
-        var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
-        if (botAmount > maxBots) {
-          log.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
-          log.warn("Continuing with {} bots due to proxies.", maxBots);
-          botAmount = maxBots;
-        }
 
-        if (settingsSource.get(ProxySettings.SHUFFLE_PROXIES)) {
-          Collections.shuffle(proxies);
-        }
+    if (!proxies.isEmpty() && settingsSource.get(ProxySettings.SHUFFLE_PROXIES)) {
+      Collections.shuffle(proxies);
+    }
+
+    // Get existing enabled bots with valid account references
+    var existingBots = settingsSource.bots().stream()
+      .filter(BotEntity::enabled)
+      .filter(bot -> settingsSource.getAccountById(bot.accountId()).isPresent())
+      .toList();
+
+    // Find accounts not yet assigned to a bot
+    var usedAccountIds = existingBots.stream()
+      .map(BotEntity::accountId)
+      .collect(java.util.stream.Collectors.toSet());
+
+    var availableAccounts = new ArrayList<>(settingsSource.accounts().stream()
+      .filter(acc -> !usedAccountIds.contains(acc.profileId()))
+      .toList());
+
+    // If no accounts exist at all, generate offline accounts
+    if (settingsSource.accounts().isEmpty()) {
+      log.info("No custom accounts provided, generating offline accounts based on name format");
+      for (var i = 0; i < botAmount; i++) {
+        availableAccounts.add(OfflineAuthService.createAccount(settingsSource.get(AccountSettings.NAME_FORMAT).formatted(i + 1)));
+      }
+      // Persist the generated accounts
+      sessionFactory.inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, id);
+        instanceEntity.settings(instanceEntity.settings().withAccounts(availableAccounts));
+        session.merge(instanceEntity);
+      });
+      settingsSource.invalidateCache();
+    }
+
+    // Calculate how many bots we can have
+    var maxPossibleBots = existingBots.size() + availableAccounts.size();
+    if (!proxies.isEmpty()) {
+      var maxByProxies = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
+      maxPossibleBots = Math.min(maxPossibleBots, maxByProxies);
+    }
+
+    if (botAmount > maxPossibleBots) {
+      log.warn("You have requested {} bots, but only {} are possible.", botAmount, maxPossibleBots);
+      log.warn("Continuing with {} bots.", maxPossibleBots);
+      botAmount = maxPossibleBots;
+    }
+
+    // Calculate how many more bots we need to create
+    var botsToCreate = Math.max(0, botAmount - existingBots.size());
+
+    // Count existing proxy usage from persisted bots
+    for (var bot : existingBots) {
+      if (bot.proxyId() != null) {
+        proxies.stream()
+          .filter(p -> p.proxy().id().equals(bot.proxyId()))
+          .findFirst()
+          .ifPresent(p -> p.useCount().incrementAndGet());
       }
     }
 
-    var accountQueue = new ArrayBlockingQueue<MinecraftAccount>(botAmount);
-    {
-      var accounts = new ArrayList<>(settingsSource.accounts());
-      var availableAccounts = accounts.size();
-      if (availableAccounts > 0) {
-        if (botAmount > availableAccounts) {
-          log.warn(
-            "You have requested {} bots, but only {} are possible with the current amount of accounts.",
-            botAmount,
-            availableAccounts);
-          log.warn("Continuing with {} bots due to accounts.", availableAccounts);
-          botAmount = availableAccounts;
-        }
-      } else {
-        log.info("No custom accounts provided, generating offline accounts based on name format");
-        for (var i = 0; i < botAmount; i++) {
-          accounts.add(OfflineAuthService.createAccount(settingsSource.get(AccountSettings.NAME_FORMAT).formatted(i + 1)));
-        }
-      }
+    // Create new bots if needed
+    if (botsToCreate > 0 && !availableAccounts.isEmpty()) {
+      log.info("Auto-creating {} bots from available accounts", botsToCreate);
 
       if (settingsSource.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
-        Collections.shuffle(accounts);
+        Collections.shuffle(availableAccounts);
       }
 
-      accountQueue.addAll(accounts.subList(0, botAmount));
+      var newBots = new ArrayList<BotEntity>();
+      var accountIterator = availableAccounts.iterator();
+
+      for (int i = 0; i < botsToCreate && accountIterator.hasNext(); i++) {
+        var account = accountIterator.next();
+        var proxy = getAvailableProxy(proxies).orElse(null);
+
+        newBots.add(new BotEntity(
+          UUID.randomUUID(),
+          account.profileId(),
+          proxy != null ? proxy.id() : null,
+          new ConcurrentHashMap<>(),
+          true,
+          null
+        ));
+      }
+
+      // Persist new bots
+      if (!newBots.isEmpty()) {
+        sessionFactory.inTransaction(session -> {
+          var instanceEntity = session.find(InstanceEntity.class, id);
+          var allBots = new ArrayList<>(instanceEntity.settings().bots());
+          allBots.addAll(newBots);
+          instanceEntity.settings(instanceEntity.settings().withBots(allBots));
+          session.merge(instanceEntity);
+        });
+
+        // Refresh settings cache
+        settingsSource.invalidateCache();
+      }
+    }
+
+    // Now get final list of bots to connect
+    var botsToConnect = settingsSource.bots().stream()
+      .filter(BotEntity::enabled)
+      .filter(bot -> settingsSource.getAccountById(bot.accountId()).isPresent())
+      .limit(botAmount)
+      .toList();
+
+    if (botsToConnect.isEmpty()) {
+      log.warn("No bots available to connect - add accounts first");
+      this.attackLifecycle(AttackLifecycle.STOPPED);
+      return;
     }
 
     // Prepare an event loop group for the attack
@@ -390,18 +445,23 @@ public final class InstanceManager {
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(BotSettings.ADDRESS), protocolVersion);
 
-    var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
-    while (!accountQueue.isEmpty()) {
-      var minecraftAccount = refreshAccount(accountQueue.poll());
-      var proxyData = getProxy(proxies).orElse(null);
+    var factories = new ArrayBlockingQueue<BotConnectionFactory>(botsToConnect.size());
+    for (var bot : botsToConnect) {
+      var account = settingsSource.getAccountById(bot.accountId()).orElseThrow();
+      var refreshedAccount = refreshAccount(account);
+      var proxy = bot.proxyId() != null
+        ? settingsSource.getProxyById(bot.proxyId()).orElse(null)
+        : null;
+
       factories.add(
         new BotConnectionFactory(
           this,
           settingsSource,
-          minecraftAccount,
+          bot,
+          refreshedAccount,
           protocolVersion,
           serverAddress,
-          proxyData,
+          proxy,
           attackEventLoopGroup
         ));
     }
@@ -410,7 +470,7 @@ public final class InstanceManager {
     if (usedProxies == 0) {
       log.info("Starting attack at server with {} bots", factories.size());
     } else {
-      log.info("Starting attack at {} with server bots and {} active proxies", factories.size(), usedProxies);
+      log.info("Starting attack at server with {} bots and {} active proxies", factories.size(), usedProxies);
     }
 
     SoulFireAPI.postEvent(new AttackStartEvent(this));
@@ -461,6 +521,16 @@ public final class InstanceManager {
         if (this.attackLifecycle() == AttackLifecycle.STARTING) {
           this.attackLifecycle(AttackLifecycle.RUNNING);
         }
+      });
+  }
+
+  private Optional<SFProxy> getAvailableProxy(List<ProxyData> proxies) {
+    return proxies.stream()
+      .filter(ProxyData::isAvailable)
+      .min(Comparator.comparingInt(ProxyData::usedBots))
+      .map(p -> {
+        p.useCount().incrementAndGet();
+        return p.proxy();
       });
   }
 
@@ -588,8 +658,76 @@ public final class InstanceManager {
     return new ArrayList<>(botConnections.values());
   }
 
+  public Optional<BotConnection> getBotConnection(UUID botId) {
+    return Optional.ofNullable(botConnections.get(botId));
+  }
+
   public void storeNewBot(BotConnection connection) {
-    botConnections.put(connection.accountProfileId(), connection);
+    botConnections.put(connection.botId(), connection);
+  }
+
+  /**
+   * Update bot metadata and persist to profile.
+   */
+  public void updateBotMetadata(UUID botId, Map<String, Value> updates, boolean merge) {
+    // Update runtime bot if connected
+    var connection = botConnections.get(botId);
+    if (connection != null) {
+      if (merge) {
+        connection.botEntity().mergeMetadata(updates);
+      } else {
+        connection.botEntity().clearMetadata();
+        connection.botEntity().mergeMetadata(updates);
+      }
+    }
+
+    // Persist to profile
+    sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+      var settings = instanceEntity.settings();
+
+      var updatedBot = settings.getBotById(botId)
+        .map(b -> {
+          if (merge) {
+            b.mergeMetadata(updates);
+          } else {
+            b.clearMetadata();
+            b.mergeMetadata(updates);
+          }
+          return b;
+        })
+        .orElseThrow(() -> new IllegalArgumentException("Bot not found: " + botId));
+
+      instanceEntity.settings(settings.withUpdatedBot(updatedBot));
+      session.merge(instanceEntity);
+    });
+  }
+
+  /**
+   * Delete specific metadata keys from a bot.
+   */
+  public void deleteBotMetadataKeys(UUID botId, List<String> keys) {
+    // Update runtime bot if connected
+    var connection = botConnections.get(botId);
+    if (connection != null) {
+      keys.forEach(connection.botEntity()::removeMetadata);
+    }
+
+    // Persist to profile
+    sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+      var settings = instanceEntity.settings();
+
+      var updatedBot = settings.getBotById(botId)
+        .map(b -> {
+          keys.forEach(b::removeMetadata);
+          return b;
+        })
+        .orElseThrow(() -> new IllegalArgumentException("Bot not found: " + botId));
+
+      instanceEntity.settings(settings.withUpdatedBot(updatedBot));
+      session.merge(instanceEntity);
+    });
   }
 
   @Override

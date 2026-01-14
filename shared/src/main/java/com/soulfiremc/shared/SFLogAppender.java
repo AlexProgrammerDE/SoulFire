@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 public final class SFLogAppender extends AbstractAppender {
   public static final String SF_INSTANCE_ID = "sf-instance-id";
   public static final String SF_INSTANCE_NAME = "sf-instance-name";
+  public static final String SF_BOT_ID = "sf-bot-id";
   public static final String SF_BOT_ACCOUNT_ID = "sf-bot-account-id";
   public static final String SF_BOT_ACCOUNT_NAME = "sf-bot-account-name";
   public static final String SF_SCRIPT_ID = "sf-script-id";
@@ -100,6 +101,7 @@ public final class SFLogAppender extends AbstractAppender {
     @Nullable String level,
     @Nullable String loggerName,
     @Nullable UUID instanceId,
+    @Nullable UUID botId,
     @Nullable UUID botAccountId,
     @Nullable UUID scriptId,
     @Nullable String instanceName,
@@ -113,6 +115,7 @@ public final class SFLogAppender extends AbstractAppender {
         event.getLevel().name(),
         Objects.requireNonNullElse(event.getLoggerName(), event.getLoggerFqcn()),
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_INSTANCE_ID)),
+        UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ID)),
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_BOT_ACCOUNT_ID)),
         UUIDHelper.tryParseUniqueIdOrNull(event.getContextData().getValue(SF_SCRIPT_ID)),
         event.getContextData().getValue(SF_INSTANCE_NAME),

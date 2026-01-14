@@ -97,6 +97,7 @@ public final class RPCServer {
         .addService(new ClientServiceImpl(soulFireServer))
         .addService(new CommandServiceImpl(soulFireServer))
         .addService(new InstanceServiceImpl(soulFireServer))
+        .addService(new BotServiceImpl(soulFireServer))
         .addService(new MCAuthServiceImpl(soulFireServer))
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new DownloadServiceImpl())

@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record BotConnectionFactory(
   InstanceManager instanceManager,
   InstanceSettingsSource settingsSource,
+  @Nullable BotEntity botEntity,
   MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
   ServerAddress serverAddress,
@@ -58,6 +59,7 @@ public record BotConnectionFactory(
         this,
         instanceManager,
         settingsSource,
+        botEntity,
         minecraftAccount,
         protocolVersion,
         serverAddress,

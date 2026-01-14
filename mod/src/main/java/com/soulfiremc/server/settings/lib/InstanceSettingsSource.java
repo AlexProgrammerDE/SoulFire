@@ -18,12 +18,23 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.bot.BotEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public sealed interface InstanceSettingsSource extends SettingsSource permits InstanceSettingsDelegate, InstanceSettingsImpl {
   List<MinecraftAccount> accounts();
 
   List<SFProxy> proxies();
+
+  List<BotEntity> bots();
+
+  Optional<MinecraftAccount> getAccountById(UUID profileId);
+
+  Optional<SFProxy> getProxyById(UUID proxyId);
+
+  Optional<BotEntity> getBotById(UUID botId);
 }

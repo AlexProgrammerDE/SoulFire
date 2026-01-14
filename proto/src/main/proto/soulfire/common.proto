@@ -14,6 +14,7 @@ message ProxyProto {
     SOCKS5 = 2;
   }
 
+  string id = 5;
   Type type = 1;
   string address = 2;
   optional string username = 3;
@@ -116,6 +117,13 @@ enum InstancePermission {
   READ_SCRIPT = 17;
   UPDATE_SCRIPT = 18;
   DELETE_SCRIPT = 19;
+  // Bot permissions
+  CREATE_BOT = 21;
+  READ_BOT = 22;
+  UPDATE_BOT = 23;
+  DELETE_BOT = 24;
+  UPDATE_BOT_METADATA = 25;
+  SUBSCRIBE_BOT_STATE = 26;
 }
 
 enum UserRole {

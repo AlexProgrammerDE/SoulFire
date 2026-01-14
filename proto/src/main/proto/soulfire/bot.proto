@@ -1,0 +1,234 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "google/protobuf/struct.proto";
+
+// ═══════════════════════════════════════════════════════════════════
+// PERSISTENT BOT ENTITY (stored in profile)
+// ═══════════════════════════════════════════════════════════════════
+
+message BotMetadata {
+  // Key-value store for arbitrary metadata
+  // Keys are namespaced strings like "myplugin:last_position"
+  map<string, google.protobuf.Value> entries = 1;
+}
+
+message BotProto {
+  string id = 1;                          // Unique bot UUID
+  string account_id = 2;                  // References MinecraftAccountProto.profile_id
+  optional string proxy_id = 3;           // References ProxyProto.id (null = no proxy)
+  BotMetadata metadata = 4;               // Persistent metadata
+  bool enabled = 5;                       // Whether to connect this bot in attacks
+  optional string display_name = 6;       // Optional friendly name (falls back to account name)
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RUNTIME BOT STATE (queried during attack)
+// ═══════════════════════════════════════════════════════════════════
+
+enum BotConnectionState {
+  BOT_OFFLINE = 0;          // Not connected (attack not running or bot disabled)
+  BOT_CONNECTING = 1;       // Connection in progress
+  BOT_CONNECTED = 2;        // Connected but not yet in-game
+  BOT_PLAYING = 3;          // In-game with player entity
+  BOT_DISCONNECTING = 4;    // Graceful disconnect in progress
+}
+
+message Vec3d {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Rotation {
+  float yaw = 1;
+  float pitch = 2;
+}
+
+message VitalStats {
+  float health = 1;
+  float max_health = 2;
+  int32 food = 3;
+  float saturation = 4;
+}
+
+message InventorySlot {
+  int32 slot = 1;
+  string item_id = 2;           // e.g., "minecraft:diamond_sword"
+  int32 count = 3;
+  optional string display_name = 4;
+  optional google.protobuf.Struct nbt = 5;
+}
+
+message InventorySnapshot {
+  repeated InventorySlot slots = 1;
+  int32 selected_slot = 2;
+  optional InventorySlot cursor_item = 3;  // Item held by cursor in GUI
+}
+
+message BotRuntimeState {
+  string bot_id = 1;
+  BotConnectionState connection_state = 2;
+
+  // Only populated when PLAYING
+  optional Vec3d position = 3;
+  optional Rotation rotation = 4;
+  optional VitalStats vitals = 5;
+  optional string dimension = 6;
+  optional int32 experience_level = 7;
+  optional float experience_progress = 8;
+  optional bool on_ground = 9;
+  optional bool is_sprinting = 10;
+  optional bool is_sneaking = 11;
+  optional string game_mode = 12;           // survival, creative, etc.
+
+  // Expensive fields - only if requested
+  optional InventorySnapshot inventory = 20;
+
+  // Timestamps
+  int64 state_timestamp_ms = 30;
+  optional int64 connected_since_ms = 31;
+}
+
+// Combined persistent + runtime info
+message BotInfo {
+  BotProto config = 1;                      // Persistent config from profile
+  optional BotRuntimeState runtime = 2;     // Current runtime state (if attack running)
+  string account_name = 3;                  // Resolved from account_id
+  optional string proxy_address = 4;        // Resolved from proxy_id
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SERVICE REQUESTS/RESPONSES
+// ═══════════════════════════════════════════════════════════════════
+
+// --- Bot CRUD (modifies profile) ---
+
+message CreateBotRequest {
+  string instance_id = 1;
+  string account_id = 2;                    // Required: which account to use
+  optional string proxy_id = 3;             // Optional: which proxy to use
+  optional string display_name = 4;
+  optional BotMetadata initial_metadata = 5;
+  bool enabled = 6;
+}
+
+message CreateBotResponse {
+  BotProto bot = 1;
+}
+
+message DeleteBotRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message DeleteBotResponse {}
+
+message UpdateBotRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+
+  oneof update {
+    string account_id = 3;                  // Change account
+    OptionalString proxy_id = 4;            // Change proxy (can clear with empty)
+    string display_name = 5;
+    bool enabled = 6;
+  }
+}
+
+message OptionalString {
+  optional string value = 1;                // Empty = clear the field
+}
+
+message UpdateBotResponse {
+  BotProto bot = 1;
+}
+
+// --- Bot Queries ---
+
+message ListBotsRequest {
+  string instance_id = 1;
+  bool include_runtime_state = 2;           // Include current connection state
+  bool include_inventory = 3;               // Include inventory (expensive)
+}
+
+message ListBotsResponse {
+  repeated BotInfo bots = 1;
+}
+
+message GetBotRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  bool include_inventory = 3;
+}
+
+message GetBotResponse {
+  BotInfo bot = 1;
+}
+
+// --- Metadata Operations (works during attack) ---
+
+message GetBotMetadataRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  repeated string keys = 3;                 // Empty = return all
+}
+
+message GetBotMetadataResponse {
+  BotMetadata metadata = 1;
+}
+
+message UpdateBotMetadataRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  BotMetadata metadata = 3;
+  bool merge = 4;                           // true = merge, false = replace all
+}
+
+message UpdateBotMetadataResponse {
+  BotMetadata metadata = 1;                 // Returns updated metadata
+}
+
+message DeleteBotMetadataKeysRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  repeated string keys = 3;
+}
+
+message DeleteBotMetadataKeysResponse {}
+
+// --- Runtime State Streaming ---
+
+message SubscribeBotStateRequest {
+  string instance_id = 1;
+  repeated string bot_ids = 2;              // Empty = all bots
+  int32 interval_ms = 3;                    // Update interval (min 100ms)
+  bool include_inventory = 4;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SERVICE DEFINITION
+// ═══════════════════════════════════════════════════════════════════
+
+service BotService {
+  // Bot CRUD (modifies profile, persisted)
+  rpc CreateBot (CreateBotRequest) returns (CreateBotResponse) {}
+  rpc DeleteBot (DeleteBotRequest) returns (DeleteBotResponse) {}
+  rpc UpdateBot (UpdateBotRequest) returns (UpdateBotResponse) {}
+
+  // Bot Queries
+  rpc ListBots (ListBotsRequest) returns (ListBotsResponse) {}
+  rpc GetBot (GetBotRequest) returns (GetBotResponse) {}
+
+  // Metadata Operations (persisted immediately)
+  rpc GetBotMetadata (GetBotMetadataRequest) returns (GetBotMetadataResponse) {}
+  rpc UpdateBotMetadata (UpdateBotMetadataRequest) returns (UpdateBotMetadataResponse) {}
+  rpc DeleteBotMetadataKeys (DeleteBotMetadataKeysRequest) returns (DeleteBotMetadataKeysResponse) {}
+
+  // Runtime State Streaming
+  rpc SubscribeBotState (SubscribeBotStateRequest) returns (stream BotRuntimeState) {}
+}

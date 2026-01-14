@@ -76,10 +76,12 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
         SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
             var proxy = SFProxy.fromProto(payload);
             var stopWatch = Stopwatch.createStarted();
+            var proxyCheckAccount = MinecraftAccount.forProxyCheck();
             var factory = new BotConnectionFactory(
               instance,
               settingsSource,
-              MinecraftAccount.forProxyCheck(),
+              null, // No persistent BotEntity for proxy checks
+              proxyCheckAccount,
               protocolVersion,
               serverAddress,
               proxy,
