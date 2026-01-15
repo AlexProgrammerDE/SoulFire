@@ -27,9 +27,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.instance.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.IntProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

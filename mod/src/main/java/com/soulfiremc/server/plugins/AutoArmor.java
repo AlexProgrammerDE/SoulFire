@@ -25,8 +25,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
