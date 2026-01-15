@@ -25,7 +25,8 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -58,7 +59,7 @@ public final class AutoArmor extends InternalPlugin {
       "1.0.0",
       "Automatically puts on the best armor",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

@@ -23,7 +23,10 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotClientSettingsEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.StringProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -42,7 +45,7 @@ public final class ClientSettings extends InternalPlugin {
       "1.0.0",
       "Sends client settings to the server",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

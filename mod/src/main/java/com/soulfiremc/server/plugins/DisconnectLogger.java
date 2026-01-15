@@ -54,7 +54,7 @@ public final class DisconnectLogger extends InternalPlugin {
       "1.0.0",
       "Logs all bot disconnects to the terminal\nIncludes deduplication to prevent spamming the same disconnect message too often",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

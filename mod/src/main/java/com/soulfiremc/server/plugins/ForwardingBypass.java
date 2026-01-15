@@ -28,7 +28,9 @@ import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.UUIDHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -70,7 +72,7 @@ public final class ForwardingBypass extends InternalPlugin {
       "1.0.0",
       "Allows bypassing proxy forwarding",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

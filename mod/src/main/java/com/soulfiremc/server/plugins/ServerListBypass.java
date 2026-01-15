@@ -23,7 +23,8 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -39,7 +40,7 @@ public final class ServerListBypass extends InternalPlugin {
       "1.0.0",
       "Pings the server list before connecting. (Bypasses anti-bots like EpicGuard)",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

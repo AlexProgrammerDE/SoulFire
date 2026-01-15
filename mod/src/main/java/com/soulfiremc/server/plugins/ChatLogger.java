@@ -57,7 +57,7 @@ public final class ChatLogger extends InternalPlugin {
       "1.0.0",
       "Logs all received chat messages to the terminal\nIncludes deduplication to prevent spamming the same message too often",
       "AlexProgrammerDE",
-      "GPL-3.0",
+            "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

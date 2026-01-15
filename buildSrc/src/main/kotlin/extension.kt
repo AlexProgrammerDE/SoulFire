@@ -37,7 +37,7 @@ fun PublishingExtension.applyMainPublishing(project: Project) {
         licenses {
           license {
             name = "GNU Affero General Public License v3.0"
-            url = "https://www.gnu.org/licenses/gpl-3.0.html"
+            url = "https://www.gnu.org/licenses/agpl-3.0.html"
           }
         }
         scm {

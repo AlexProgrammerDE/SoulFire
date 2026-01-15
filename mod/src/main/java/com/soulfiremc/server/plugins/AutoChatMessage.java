@@ -23,7 +23,9 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.MinMaxProperty;
+import com.soulfiremc.server.settings.property.StringListProperty;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -40,7 +42,7 @@ public final class AutoChatMessage extends InternalPlugin {
       "1.0.0",
       "Automatically sends messages in a configured delay",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }

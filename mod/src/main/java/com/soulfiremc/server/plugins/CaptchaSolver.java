@@ -29,7 +29,10 @@ import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.instance.AISettings;
 import com.soulfiremc.server.settings.lib.SettingsObject;
-import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.settings.property.BooleanProperty;
+import com.soulfiremc.server.settings.property.ComboProperty;
+import com.soulfiremc.server.settings.property.IntProperty;
+import com.soulfiremc.server.settings.property.StringProperty;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -55,7 +58,7 @@ public final class CaptchaSolver extends InternalPlugin {
       "1.0.0",
       "Solve captchas",
       "AlexProgrammerDE",
-      "GPL-3.0",
+      "AGPL-3.0",
       "https://soulfiremc.com"
     ));
   }
