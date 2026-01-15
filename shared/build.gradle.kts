@@ -16,10 +16,10 @@ dependencies {
   api("net.fabricmc:intermediary:1.21.11:v2@jar")
   api("net.fabricmc:fabric-loader:0.18.4")
   api("net.fabricmc:mapping-io:0.8.0")
-  api("net.fabricmc:tiny-remapper:0.12.2")
+  api("net.fabricmc:tiny-remapper:0.12.3")
 
   api("at.yawk.lz4:lz4-java:1.10.2")
-  api("com.azure:azure-json:1.5.0")
+  api("com.azure:azure-json:1.5.1")
   api("com.github.oshi:oshi-core:6.9.2")
   api("com.google.code.gson:gson:2.13.2")
   api("com.google.guava:failureaccess:1.0.3")
