@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.graph.DiagonalCollisionCalculator;
 import com.soulfiremc.server.pathfinding.graph.GraphInstructions;
 import com.soulfiremc.server.settings.instance.PathfindingSettings;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFBlockHelpers;
@@ -91,7 +92,7 @@ public final class PathConstraintImpl implements PathConstraint {
   public PathConstraintImpl(
     @Nullable LocalPlayer entity,
     LevelHeightAccessor levelHeightAccessor,
-    InstanceSettingsSource settingsSource) {
+    BotSettingsSource settingsSource) {
     this(
       entity,
       levelHeightAccessor,

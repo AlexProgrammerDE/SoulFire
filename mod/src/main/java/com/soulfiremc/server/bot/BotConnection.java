@@ -32,6 +32,7 @@ import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.shared.SFLogAppender;
@@ -84,7 +85,7 @@ public final class BotConnection {
   private final SoulFireScheduler scheduler;
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
-  private final InstanceSettingsSource settingsSource;
+  private final BotSettingsSource settingsSource;
   private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
   private final String accountName;
@@ -104,7 +105,7 @@ public final class BotConnection {
   public BotConnection(
     BotConnectionFactory factory,
     InstanceManager instanceManager,
-    InstanceSettingsSource settingsSource,
+    BotSettingsSource settingsSource,
     MinecraftAccount minecraftAccount,
     ProtocolVersion currentProtocolVersion,
     ServerAddress serverAddress,

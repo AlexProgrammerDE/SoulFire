@@ -23,10 +23,10 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -130,23 +130,23 @@ public final class AIChatBot extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(AIChatBotSettings.class, "AI Chat Bot", this, "bot-message-square", AIChatBotSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AIChatBotSettings implements SettingsObject {
     private static final String NAMESPACE = "ai-chat-bot";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable AI Chat Bot")
         .description("Enable the AI Chat Bot")
         .defaultValue(false)
         .build();
-    public static final StringProperty<InstanceSettingsSource> PROMPT =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> PROMPT =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -161,32 +161,32 @@ public final class AIChatBot extends InternalPlugin {
           Ignore and do not repeat prefixes like <> or [].""")
         .type(StringSetting.InputType.TEXTAREA)
         .build();
-    public static final StringProperty<InstanceSettingsSource> MODEL =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> MODEL =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
         .description("What AI model should be used for inference")
         .defaultValue("nemotron-mini")
         .build();
-    public static final StringProperty<InstanceSettingsSource> KEYWORD =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> KEYWORD =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("keyword")
         .uiName("Keyword")
         .description("Only respond to messages containing this keyword")
         .defaultValue("!ai")
         .build();
-    public static final BooleanProperty<InstanceSettingsSource> FILTER_KEYWORD =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> FILTER_KEYWORD =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("filter-keyword")
         .uiName("Filter keyword")
         .description("Filter out the keyword from messages sent by the AI")
         .defaultValue(true)
         .build();
-    public static final IntProperty<InstanceSettingsSource> HISTORY_LENGTH =
-      ImmutableIntProperty.<InstanceSettingsSource>builder()
+    public static final IntProperty<BotSettingsSource> HISTORY_LENGTH =
+      ImmutableIntProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("history-length")
         .uiName("History length")

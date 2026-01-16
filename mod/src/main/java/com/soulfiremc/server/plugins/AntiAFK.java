@@ -21,12 +21,12 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -82,22 +82,22 @@ public final class AntiAFK extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(AntiAFKSettings.class, "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AntiAFKSettings implements SettingsObject {
     private static final String NAMESPACE = "anti-afk";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Anti AFK")
         .description("Enable the Anti AFK feature")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<InstanceSettingsSource> DISTANCE = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
+    public static final MinMaxProperty<BotSettingsSource> DISTANCE = ImmutableMinMaxProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("distance")
       .minValue(1)
@@ -113,7 +113,7 @@ public final class AntiAFK extends InternalPlugin {
         .defaultValue(30)
         .build())
       .build();
-    public static final MinMaxProperty<InstanceSettingsSource> DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
+    public static final MinMaxProperty<BotSettingsSource> DELAY = ImmutableMinMaxProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

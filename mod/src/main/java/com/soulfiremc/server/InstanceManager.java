@@ -37,10 +37,7 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.*;
-import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
-import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
-import com.soulfiremc.server.settings.lib.SettingsRegistry;
+import com.soulfiremc.server.settings.lib.*;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
@@ -398,7 +395,7 @@ public final class InstanceManager {
       factories.add(
         new BotConnectionFactory(
           this,
-          settingsSource,
+          new BotSettingsImpl(BotSettingsImpl.Stem.EMPTY, settingsSource),
           minecraftAccount,
           protocolVersion,
           serverAddress,

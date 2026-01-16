@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.settings.instance;
 
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -29,32 +29,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PathfindingSettings implements SettingsObject {
   private static final String NAMESPACE = "pathfinding";
-  public static final BooleanProperty<InstanceSettingsSource> ALLOW_BREAKING_UNDIGGABLE =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<BotSettingsSource> ALLOW_BREAKING_UNDIGGABLE =
+    ImmutableBooleanProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-breaking-undiggable")
       .uiName("Allow Breaking Undiggable")
       .description("Allow the bot to attempt breaking blocks that are normally undiggable (like bedrock)")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> AVOID_DIAGONAL_SQUEEZE =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<BotSettingsSource> AVOID_DIAGONAL_SQUEEZE =
+    ImmutableBooleanProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("avoid-diagonal-squeeze")
       .uiName("Avoid Diagonal Squeeze")
       .description("Prevent the bot from squeezing through diagonal gaps between blocks")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> AVOID_HARMFUL_ENTITIES =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<BotSettingsSource> AVOID_HARMFUL_ENTITIES =
+    ImmutableBooleanProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("avoid-harmful-entities")
       .uiName("Avoid Harmful Entities")
       .description("Add a penalty to paths that go near harmful entities like hostile mobs")
       .defaultValue(true)
       .build();
-  public static final IntProperty<InstanceSettingsSource> MAX_ENEMY_PENALTY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> MAX_ENEMY_PENALTY =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("max-enemy-penalty")
       .uiName("Max Enemy Penalty")
@@ -63,8 +63,8 @@ public final class PathfindingSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> BREAK_BLOCK_PENALTY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> BREAK_BLOCK_PENALTY =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("break-block-penalty")
       .uiName("Break Block Penalty")
@@ -73,8 +73,8 @@ public final class PathfindingSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> PLACE_BLOCK_PENALTY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> PLACE_BLOCK_PENALTY =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("place-block-penalty")
       .uiName("Place Block Penalty")
@@ -83,8 +83,8 @@ public final class PathfindingSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> EXPIRE_TIMEOUT =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> EXPIRE_TIMEOUT =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("expire-timeout")
       .uiName("Expire Timeout")
@@ -93,8 +93,8 @@ public final class PathfindingSettings implements SettingsObject {
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> DISABLE_PRUNING =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<BotSettingsSource> DISABLE_PRUNING =
+    ImmutableBooleanProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("disable-pruning")
       .uiName("Disable Pruning")

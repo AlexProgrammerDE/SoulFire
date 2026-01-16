@@ -39,7 +39,9 @@ import java.util.Optional;
 public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings) implements BotSettingsSource {
   @Override
   public Optional<JsonElement> get(Property<BotSettingsSource> property) {
-    return this.stem.get(property);
+    return this.stem.get(property)
+      // TODO: Properly store a base BotSettings steam inside a InstanceSettings stem in the future
+      .or(() -> SettingsSource.Stem.getFromRawSettings(instanceSettings.stem().settings(), property));
   }
 
   @With

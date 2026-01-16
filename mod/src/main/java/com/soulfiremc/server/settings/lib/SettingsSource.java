@@ -96,9 +96,13 @@ public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotS
   interface Stem<S extends SettingsSource<S>> {
     Map<String, Map<String, JsonElement>> settings();
 
-    default Optional<JsonElement> get(Property<S> property) {
-      return Optional.ofNullable(this.settings().get(property.namespace()))
+    static Optional<JsonElement> getFromRawSettings(Map<String, Map<String, JsonElement>> settings, Property<?> property) {
+      return Optional.ofNullable(settings.get(property.namespace()))
         .flatMap(map -> Optional.ofNullable(map.get(property.key())));
+    }
+
+    default Optional<JsonElement> get(Property<S> property) {
+      return getFromRawSettings(this.settings(), property);
     }
 
     static Map<String, Map<String, JsonElement>> settingsFromProto(List<SettingsNamespace> settingsList) {

@@ -21,9 +21,9 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFInventoryHelpers;
@@ -104,22 +104,22 @@ public final class AutoTotem extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(AutoTotemSettings.class, "Auto Totem", this, "cross", AutoTotemSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoTotemSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-totem";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Totem")
         .description("Always put available totems in the offhand slot")
         .defaultValue(true)
         .build();
-    public static final MinMaxProperty<InstanceSettingsSource> DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
+    public static final MinMaxProperty<BotSettingsSource> DELAY = ImmutableMinMaxProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

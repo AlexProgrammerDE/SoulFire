@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.instance;
 
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
@@ -89,8 +90,8 @@ public final class BotSettings implements SettingsObject {
       .defaultValue(getLatestProtocolVersionId())
       .addOptions(getProtocolVersionOptions())
       .build();
-  public static final IntProperty<InstanceSettingsSource> READ_TIMEOUT =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> READ_TIMEOUT =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("read-timeout")
       .uiName("Read Timeout")
@@ -99,8 +100,8 @@ public final class BotSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> WRITE_TIMEOUT =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> WRITE_TIMEOUT =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("write-timeout")
       .uiName("Write Timeout")
@@ -109,8 +110,8 @@ public final class BotSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> CONNECT_TIMEOUT =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> CONNECT_TIMEOUT =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("connect-timeout")
       .uiName("Connect Timeout")
@@ -147,8 +148,8 @@ public final class BotSettings implements SettingsObject {
         If turned off, the attack will not be restored after a reboot.""")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> IGNORE_PACKET_HANDLING_ERRORS =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<BotSettingsSource> IGNORE_PACKET_HANDLING_ERRORS =
+    ImmutableBooleanProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("ignore-packet-handling-errors")
       .uiName("Ignore Packet Handling Errors")

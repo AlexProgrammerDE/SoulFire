@@ -28,6 +28,7 @@ import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.instance.ProxySettings;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.netty.NettyHelper;
@@ -78,7 +79,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             var stopWatch = Stopwatch.createStarted();
             var factory = new BotConnectionFactory(
               instance,
-              settingsSource,
+              new BotSettingsImpl(BotSettingsImpl.Stem.EMPTY, settingsSource),
               MinecraftAccount.forProxyCheck(),
               protocolVersion,
               serverAddress,

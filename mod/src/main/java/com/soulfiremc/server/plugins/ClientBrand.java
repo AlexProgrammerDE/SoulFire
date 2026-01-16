@@ -21,8 +21,8 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotClientBrandEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -58,23 +58,23 @@ public final class ClientBrand extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(ClientBrandSettings.class, "Client Brand", this, "fingerprint", ClientBrandSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ClientBrandSettings implements SettingsObject {
     private static final String NAMESPACE = "client-brand";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Send client brand")
         .description("Send client brand to the server")
         .defaultValue(true)
         .build();
-    public static final StringProperty<InstanceSettingsSource> CLIENT_BRAND =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> CLIENT_BRAND =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("client-brand")
         .uiName("Client brand")

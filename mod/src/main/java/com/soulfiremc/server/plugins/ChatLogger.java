@@ -26,8 +26,10 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -65,7 +67,7 @@ public final class ChatLogger extends InternalPlugin {
 
   @EventHandler
   public static void onMessage(ChatMessageReceiveEvent event) {
-    var settingsSource = event.connection().settingsSource();
+    var settingsSource = event.connection().settingsSource().instanceSettings();
     if (!settingsSource.get(ChatLoggerSettings.ENABLED)) {
       return;
     }
@@ -81,7 +83,7 @@ public final class ChatLogger extends InternalPlugin {
       return;
     }
 
-    var settingsSource = event.connection().settingsSource();
+    var settingsSource = event.connection().settingsSource().instanceSettings();
     if (!settingsSource.get(ChatLoggerSettings.ENABLED)
       || !settingsSource.get(ChatLoggerSettings.LOG_DEATH_MESSAGES)) {
       return;

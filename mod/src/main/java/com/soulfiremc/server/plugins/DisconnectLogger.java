@@ -25,6 +25,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
@@ -62,7 +63,7 @@ public final class DisconnectLogger extends InternalPlugin {
 
   @EventHandler
   public static void onBotRemove(BotDisconnectedEvent event) {
-    var settingsSource = event.connection().settingsSource();
+    var settingsSource = event.connection().settingsSource().instanceSettings();
     if (!settingsSource.get(DisconnectLoggerSettings.ENABLED)) {
       return;
     }

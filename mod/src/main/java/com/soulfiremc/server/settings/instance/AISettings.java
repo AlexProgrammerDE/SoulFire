@@ -21,7 +21,7 @@ import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.ClientOptions;
 import com.soulfiremc.grpc.generated.StringSetting;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
@@ -37,16 +37,16 @@ import java.time.Duration;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
-  public static final StringProperty<InstanceSettingsSource> API_BASE_URL =
-    ImmutableStringProperty.<InstanceSettingsSource>builder()
+  public static final StringProperty<BotSettingsSource> API_BASE_URL =
+    ImmutableStringProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-base-url")
       .uiName("API Base URL")
       .description("API server base URL, can also be changed to other providers")
       .defaultValue(ClientOptions.PRODUCTION_URL)
       .build();
-  public static final StringProperty<InstanceSettingsSource> API_KEY =
-    ImmutableStringProperty.<InstanceSettingsSource>builder()
+  public static final StringProperty<BotSettingsSource> API_KEY =
+    ImmutableStringProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-key")
       .uiName("API Key")
@@ -54,8 +54,8 @@ public final class AISettings implements SettingsObject {
       .defaultValue("")
       .type(StringSetting.InputType.PASSWORD)
       .build();
-  public static final IntProperty<InstanceSettingsSource> REQUEST_TIMEOUT =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> REQUEST_TIMEOUT =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-request-timeout")
       .uiName("API Request Timeout")
@@ -64,8 +64,8 @@ public final class AISettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<InstanceSettingsSource> MAX_RETRIES =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<BotSettingsSource> MAX_RETRIES =
+    ImmutableIntProperty.<BotSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-max-retries")
       .uiName("API Max Retries")
@@ -75,7 +75,7 @@ public final class AISettings implements SettingsObject {
       .maxValue(Integer.MAX_VALUE)
       .build();
 
-  public static OpenAIClient create(InstanceSettingsSource source) {
+  public static OpenAIClient create(BotSettingsSource source) {
     return OpenAIOkHttpClient.builder()
       .baseUrl(source.get(AISettings.API_BASE_URL))
       .apiKey(source.get(AISettings.API_KEY))

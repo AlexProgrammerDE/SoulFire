@@ -21,8 +21,8 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -69,23 +69,23 @@ public final class AutoJump extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(AutoJumpSettings.class, "Auto Jump", this, "footprints", AutoJumpSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoJumpSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-jump";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Jump")
         .description("Attempt to jump automatically in random intervals")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<InstanceSettingsSource> DELAY =
-      ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
+    public static final MinMaxProperty<BotSettingsSource> DELAY =
+      ImmutableMinMaxProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

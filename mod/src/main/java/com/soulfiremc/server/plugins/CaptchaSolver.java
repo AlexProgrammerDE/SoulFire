@@ -23,12 +23,12 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -210,23 +210,23 @@ public final class CaptchaSolver extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
     event.settingsRegistry().addPluginPage(CaptchaSolverSettings.class, "Captcha Solver", this, "eye", CaptchaSolverSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class CaptchaSolverSettings implements SettingsObject {
     private static final String NAMESPACE = "captcha-solver";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<BotSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Captcha Solver")
         .description("Enable the Captcha Solver")
         .defaultValue(false)
         .build();
-    public static final StringProperty<InstanceSettingsSource> PROMPT =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> PROMPT =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -237,24 +237,24 @@ public final class CaptchaSolver extends InternalPlugin {
           Do not write anything except the text.""")
         .type(StringSetting.InputType.TEXTAREA)
         .build();
-    public static final StringProperty<InstanceSettingsSource> MODEL =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> MODEL =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
         .description("What AI model should be used for detecting the text in the CAPTCHA image")
         .defaultValue("llava")
         .build();
-    public static final StringProperty<InstanceSettingsSource> RESPONSE_COMMAND =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> RESPONSE_COMMAND =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("response-command")
         .uiName("Response Command")
         .description("What command should be ran using the response. Omit / to send a normal message")
         .defaultValue("%s")
         .build();
-    public static final ComboProperty<InstanceSettingsSource> IMAGE_SOURCE =
-      ImmutableComboProperty.<InstanceSettingsSource>builder()
+    public static final ComboProperty<BotSettingsSource> IMAGE_SOURCE =
+      ImmutableComboProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("image-source")
         .uiName("Image Source")
@@ -265,8 +265,8 @@ public final class CaptchaSolver extends InternalPlugin {
           case POV_RENDER -> "camera";
         }))
         .build();
-    public static final ComboProperty<InstanceSettingsSource> CAPTCHA_TRIGGER =
-      ImmutableComboProperty.<InstanceSettingsSource>builder()
+    public static final ComboProperty<BotSettingsSource> CAPTCHA_TRIGGER =
+      ImmutableComboProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("captcha-trigger")
         .uiName("Captcha Trigger")
@@ -277,24 +277,24 @@ public final class CaptchaSolver extends InternalPlugin {
           case TEXT_BASED -> "type";
         }))
         .build();
-    public static final StringProperty<InstanceSettingsSource> TEXT_TRIGGER =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> TEXT_TRIGGER =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("text-trigger")
         .uiName("Text Trigger")
         .description("Text that must be contained in the message to trigger image-based captcha solving")
         .defaultValue("/captcha")
         .build();
-    public static final StringProperty<InstanceSettingsSource> CAPTCHA_REGEX =
-      ImmutableStringProperty.<InstanceSettingsSource>builder()
+    public static final StringProperty<BotSettingsSource> CAPTCHA_REGEX =
+      ImmutableStringProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("captcha-regex")
         .uiName("Captcha Regex")
         .description("Regex pattern with a capturing group to extract the captcha text from the message")
         .defaultValue("/captcha (\\w+)")
         .build();
-    public static final IntProperty<InstanceSettingsSource> POV_RENDER_WIDTH =
-      ImmutableIntProperty.<InstanceSettingsSource>builder()
+    public static final IntProperty<BotSettingsSource> POV_RENDER_WIDTH =
+      ImmutableIntProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("pov-render-width")
         .uiName("POV Render Width")
@@ -304,8 +304,8 @@ public final class CaptchaSolver extends InternalPlugin {
         .maxValue(3840)
         .stepValue(1)
         .build();
-    public static final IntProperty<InstanceSettingsSource> POV_RENDER_HEIGHT =
-      ImmutableIntProperty.<InstanceSettingsSource>builder()
+    public static final IntProperty<BotSettingsSource> POV_RENDER_HEIGHT =
+      ImmutableIntProperty.<BotSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("pov-render-height")
         .uiName("POV Render Height")
