@@ -38,6 +38,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsRegistry;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -147,7 +148,7 @@ public final class InstanceManager {
       if (instance == null) {
         throw new IllegalStateException("Instance not found");
       } else {
-        return instance.settings();
+        return new InstanceSettingsImpl(instance.settings(), soulFireServer.settingsSource());
       }
     });
   }

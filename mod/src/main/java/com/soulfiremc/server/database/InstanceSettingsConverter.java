@@ -24,14 +24,14 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public final class InstanceSettingsConverter implements AttributeConverter<InstanceSettingsImpl, String> {
+public final class InstanceSettingsConverter implements AttributeConverter<InstanceSettingsImpl.Stem, String> {
   @Override
-  public String convertToDatabaseColumn(InstanceSettingsImpl attribute) {
+  public String convertToDatabaseColumn(InstanceSettingsImpl.Stem attribute) {
     return GsonInstance.GSON.toJson(attribute.serializeToTree());
   }
 
   @Override
-  public InstanceSettingsImpl convertToEntityAttribute(String dbData) {
-    return InstanceSettingsImpl.deserialize(GsonInstance.GSON.fromJson(dbData, JsonElement.class));
+  public InstanceSettingsImpl.Stem convertToEntityAttribute(String dbData) {
+    return InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(dbData, JsonElement.class));
   }
 }

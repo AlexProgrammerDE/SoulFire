@@ -15,28 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.database;
+package com.soulfiremc.server.settings.lib;
 
-import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@Entity
-@Table(name = "server_config")
-public final class ServerConfigEntity {
-  @Id
-  @NotNull(message = "ID cannot be null")
-  private Long id = 1L;
-
-  @NotNull(message = "Settings cannot be null")
-  @Convert(converter = ServerSettingsConverter.class)
-  @Column(nullable = false)
-  private ServerSettingsImpl.Stem settings = ServerSettingsImpl.Stem.EMPTY;
-
-  @Version
-  private long version;
+public sealed interface BotSettingsSource extends SettingsSource<BotSettingsSource> permits BotSettingsDelegate, BotSettingsImpl {
+  InstanceSettingsSource instanceSettings();
 }

@@ -181,7 +181,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
         }
 
-        instanceEntity.settings(InstanceSettingsImpl.fromProto(request.getConfig()));
+        instanceEntity.settings(InstanceSettingsImpl.Stem.fromProto(request.getConfig()));
 
         session.merge(instanceEntity);
       });

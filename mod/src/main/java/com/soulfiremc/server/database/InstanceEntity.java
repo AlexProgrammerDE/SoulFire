@@ -85,7 +85,7 @@ public final class InstanceEntity {
   @JdbcTypeCode(SqlTypes.JSON)
   @Convert(converter = InstanceSettingsConverter.class)
   @Column(nullable = false)
-  private InstanceSettingsImpl settings = InstanceSettingsImpl.EMPTY;
+  private InstanceSettingsImpl.Stem settings = InstanceSettingsImpl.Stem.EMPTY;
 
   @OneToMany(mappedBy = "instance", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ScriptEntity> scripts = new ArrayList<>();

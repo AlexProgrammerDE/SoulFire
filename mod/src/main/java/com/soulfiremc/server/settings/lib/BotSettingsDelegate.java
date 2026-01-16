@@ -15,28 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.database;
+package com.soulfiremc.server.settings.lib;
 
-import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import com.google.gson.JsonElement;
+import com.soulfiremc.server.settings.property.Property;
+import lombok.RequiredArgsConstructor;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "server_config")
-public final class ServerConfigEntity {
-  @Id
-  @NotNull(message = "ID cannot be null")
-  private Long id = 1L;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-  @NotNull(message = "Settings cannot be null")
-  @Convert(converter = ServerSettingsConverter.class)
-  @Column(nullable = false)
-  private ServerSettingsImpl.Stem settings = ServerSettingsImpl.Stem.EMPTY;
+@RequiredArgsConstructor
+public final class BotSettingsDelegate implements BotSettingsSource {
+  private final Supplier<BotSettingsSource> source;
 
-  @Version
-  private long version;
+  @Override
+  public Optional<JsonElement> get(Property<BotSettingsSource> property) {
+    return source.get().get(property);
+  }
+
+  @Override
+  public InstanceSettingsSource instanceSettings() {
+    return source.get().instanceSettings();
+  }
 }

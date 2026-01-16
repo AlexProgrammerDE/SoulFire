@@ -40,9 +40,9 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
 
     try {
       var configEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(ServerConfigEntity.class, 1));
-      ServerSettingsImpl config;
+      ServerSettingsImpl.Stem config;
       if (configEntity == null) {
-        config = ServerSettingsImpl.EMPTY;
+        config = ServerSettingsImpl.Stem.EMPTY;
       } else {
         config = configEntity.settings();
       }
@@ -67,10 +67,10 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
         var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
         if (currentConfigEntity == null) {
           var newConfigEntity = new ServerConfigEntity();
-          newConfigEntity.settings(ServerSettingsImpl.fromProto(request.getConfig()));
+          newConfigEntity.settings(ServerSettingsImpl.Stem.fromProto(request.getConfig()));
           session.persist(newConfigEntity);
         } else {
-          currentConfigEntity.settings(ServerSettingsImpl.fromProto(request.getConfig()));
+          currentConfigEntity.settings(ServerSettingsImpl.Stem.fromProto(request.getConfig()));
           session.merge(currentConfigEntity);
         }
       });

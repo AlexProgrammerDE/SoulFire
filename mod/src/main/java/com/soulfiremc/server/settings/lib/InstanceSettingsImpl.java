@@ -41,124 +41,137 @@ import java.util.*;
 
 @With
 @Slf4j
-public record InstanceSettingsImpl(
-  Map<String, Map<String, JsonElement>> settings,
-  List<MinecraftAccount> accounts,
-  List<SFProxy> proxies) implements InstanceSettingsSource {
-  public static final InstanceSettingsImpl EMPTY = new InstanceSettingsImpl(Map.of(), List.of(), List.of());
-  private static final Gson PROFILE_GSON =
-    GsonInstance.GSON.newBuilder()
-      .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
-      .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
-      .create();
-
-  public InstanceSettingsImpl {
-    // Remove duplicate accounts
-    var newAccounts = new LinkedHashMap<UUID, MinecraftAccount>();
-    for (var account : accounts) {
-      newAccounts.put(account.profileId(), account);
-    }
-
-    accounts = List.copyOf(newAccounts.values());
-  }
-
-  public static InstanceSettingsImpl deserialize(JsonElement json) {
-    return PROFILE_GSON.fromJson(json, InstanceSettingsImpl.class);
-  }
-
-  public static InstanceSettingsImpl fromProto(InstanceConfig request) {
-    return new InstanceSettingsImpl(
-      request.getSettingsList().stream().collect(
-        HashMap::new,
-        (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
-          HashMap::new,
-          (innerMap, entry) -> {
-            try {
-              innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-            } catch (InvalidProtocolBufferException e) {
-              log.error("Failed to deserialize settings", e);
-            }
-          },
-          HashMap::putAll
-        )),
-        HashMap::putAll
-      ),
-      request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
-      request.getProxiesList().stream().map(SFProxy::fromProto).toList()
-    );
-  }
-
-  public JsonObject serializeToTree() {
-    return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
-  }
-
-  public InstanceConfig toProto() {
-    return InstanceConfig.newBuilder()
-      .addAllSettings(this.settings.entrySet().stream()
-        .map(entry -> SettingsNamespace.newBuilder()
-          .setNamespace(entry.getKey())
-          .addAllEntries(entry.getValue().entrySet().stream()
-            .map(innerEntry -> SettingsEntry.newBuilder()
-              .setKey(innerEntry.getKey())
-              .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
-                try {
-                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
-                } catch (InvalidProtocolBufferException e) {
-                  log.error("Failed to serialize settings", e);
-                }
-              }))
-              .build())
-            .toList())
-          .build())
-        .toList())
-      .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
-      .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
-      .build();
-  }
-
+public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSettings) implements InstanceSettingsSource {
   @Override
   public Optional<JsonElement> get(Property<InstanceSettingsSource> property) {
-    return Optional.ofNullable(settings.get(property.namespace()))
+    return Optional.ofNullable(this.stem.settings.get(property.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(property.key())));
   }
 
-  private static class MinecraftAccountAdapter
-    implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
-    @Override
-    public MinecraftAccount deserialize(
-      JsonElement json, Type typeOfT, JsonDeserializationContext context)
-      throws JsonParseException {
-      var authType =
-        context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+  @Override
+  public List<MinecraftAccount> accounts() {
+    return this.stem.accounts();
+  }
 
-      return createGson(authType).fromJson(json, MinecraftAccount.class);
-    }
+  @Override
+  public List<SFProxy> proxies() {
+    return this.stem.proxies();
+  }
 
-    @Override
-    public JsonElement serialize(
-      MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
-      return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
-    }
-
-    private Gson createGson(AuthType authType) {
-      return GsonInstance.GSON.newBuilder()
-        .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+  @With
+  public record Stem(Map<String, Map<String, JsonElement>> settings,
+                     List<MinecraftAccount> accounts,
+                     List<SFProxy> proxies) {
+    public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of());
+    private static final Gson PROFILE_GSON =
+      GsonInstance.GSON.newBuilder()
+        .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
+        .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
         .create();
+
+    public Stem {
+      // Remove duplicate accounts
+      var newAccounts = new LinkedHashMap<UUID, MinecraftAccount>();
+      for (var account : accounts) {
+        newAccounts.put(account.profileId(), account);
+      }
+
+      accounts = List.copyOf(newAccounts.values());
     }
 
-    private record AccountDataAdapter(AuthType authType)
-      implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
+    public static Stem deserialize(JsonElement json) {
+      return PROFILE_GSON.fromJson(json, Stem.class);
+    }
+
+    public static Stem fromProto(InstanceConfig request) {
+      return
+        new Stem(
+          request.getSettingsList().stream().collect(
+            HashMap::new,
+            (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
+              HashMap::new,
+              (innerMap, entry) -> {
+                try {
+                  innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+                } catch (InvalidProtocolBufferException e) {
+                  log.error("Failed to deserialize settings", e);
+                }
+              },
+              HashMap::putAll
+            )),
+            HashMap::putAll
+          ),
+          request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
+          request.getProxiesList().stream().map(SFProxy::fromProto).toList()
+        );
+    }
+
+    public JsonObject serializeToTree() {
+      return PROFILE_GSON.toJsonTree(this).getAsJsonObject();
+    }
+
+    public InstanceConfig toProto() {
+      return InstanceConfig.newBuilder()
+        .addAllSettings(this.settings.entrySet().stream()
+          .map(entry -> SettingsNamespace.newBuilder()
+            .setNamespace(entry.getKey())
+            .addAllEntries(entry.getValue().entrySet().stream()
+              .map(innerEntry -> SettingsEntry.newBuilder()
+                .setKey(innerEntry.getKey())
+                .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
+                  try {
+                    JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                  } catch (InvalidProtocolBufferException e) {
+                    log.error("Failed to serialize settings", e);
+                  }
+                }))
+                .build())
+              .toList())
+            .build())
+          .toList())
+        .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
+        .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
+        .build();
+    }
+
+    private static class MinecraftAccountAdapter
+      implements JsonDeserializer<MinecraftAccount>, JsonSerializer<MinecraftAccount> {
       @Override
-      public AccountData deserialize(
+      public MinecraftAccount deserialize(
         JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
-        return PROFILE_GSON.fromJson(json, authType.accountDataClass());
+        var authType =
+          context.<AuthType>deserialize(json.getAsJsonObject().get("authType"), AuthType.class);
+
+        return createGson(authType).fromJson(json, MinecraftAccount.class);
       }
 
       @Override
       public JsonElement serialize(
-        AccountData src, Type typeOfSrc, JsonSerializationContext context) {
-        return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
+        MinecraftAccount src, Type typeOfSrc, JsonSerializationContext context) {
+        return createGson(src.authType()).toJsonTree(src, MinecraftAccount.class);
+      }
+
+      private Gson createGson(AuthType authType) {
+        return GsonInstance.GSON.newBuilder()
+          .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
+          .create();
+      }
+
+      private record AccountDataAdapter(AuthType authType)
+        implements JsonDeserializer<AccountData>, JsonSerializer<AccountData> {
+        @Override
+        public AccountData deserialize(
+          JsonElement json, Type typeOfT, JsonDeserializationContext context)
+          throws JsonParseException {
+          return PROFILE_GSON.fromJson(json, authType.accountDataClass());
+        }
+
+        @Override
+        public JsonElement serialize(
+          AccountData src, Type typeOfSrc, JsonSerializationContext context) {
+          return PROFILE_GSON.toJsonTree(src, authType.accountDataClass());
+        }
       }
     }
   }

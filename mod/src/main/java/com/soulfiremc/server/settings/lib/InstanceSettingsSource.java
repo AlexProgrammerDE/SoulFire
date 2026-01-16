@@ -26,4 +26,6 @@ public sealed interface InstanceSettingsSource extends SettingsSource<InstanceSe
   List<MinecraftAccount> accounts();
 
   List<SFProxy> proxies();
+
+  ServerSettingsSource serverSettings();
 }

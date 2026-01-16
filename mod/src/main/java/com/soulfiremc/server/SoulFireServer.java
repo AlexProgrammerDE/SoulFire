@@ -31,6 +31,7 @@ import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
+import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsRegistry;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.DevSettings;
@@ -188,7 +189,7 @@ public final class SoulFireServer {
         session.persist(entity);
       }
 
-      return entity.settings();
+      return new ServerSettingsImpl(entity.settings());
     });
   }
 

@@ -37,9 +37,9 @@ import java.util.Optional;
 
 @With
 @Slf4j
-public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
+public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings) implements BotSettingsSource {
   @Override
-  public Optional<JsonElement> get(Property<ServerSettingsSource> property) {
+  public Optional<JsonElement> get(Property<BotSettingsSource> property) {
     return Optional.ofNullable(this.stem.settings.get(property.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(property.key())));
   }
@@ -54,21 +54,21 @@ public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
 
     public static Stem fromProto(ServerConfig request) {
       return new Stem(
-          request.getSettingsList().stream().collect(
+        request.getSettingsList().stream().collect(
+          HashMap::new,
+          (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
             HashMap::new,
-            (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
-              HashMap::new,
-              (innerMap, entry) -> {
-                try {
-                  innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-                } catch (InvalidProtocolBufferException e) {
-                  log.error("Failed to deserialize settings", e);
-                }
-              },
-              HashMap::putAll
-            )),
+            (innerMap, entry) -> {
+              try {
+                innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+              } catch (InvalidProtocolBufferException e) {
+                log.error("Failed to deserialize settings", e);
+              }
+            },
             HashMap::putAll
-          )
+          )),
+          HashMap::putAll
+        )
       );
     }
 

@@ -50,7 +50,7 @@ public final class ClientSettingsManager {
   private final RPCClient rpcClient;
   @Setter
   private SFCommandDefinition commandDefinition;
-  private InstanceSettingsImpl settingsSource = InstanceSettingsImpl.EMPTY;
+  private InstanceSettingsImpl.Stem settingsSource = InstanceSettingsImpl.Stem.EMPTY;
 
   public void registerProvider(PropertyKey property, Supplier<JsonElement> provider) {
     providers

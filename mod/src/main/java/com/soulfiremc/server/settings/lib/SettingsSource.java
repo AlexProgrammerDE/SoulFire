@@ -28,7 +28,7 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
-public sealed interface SettingsSource<S extends SettingsSource<S>> permits InstanceSettingsSource, ServerSettingsSource {
+public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotSettingsSource, InstanceSettingsSource, ServerSettingsSource {
   default int get(IntProperty<S> property) {
     return getAsType(property, property.defaultValue(), Integer.class);
   }
