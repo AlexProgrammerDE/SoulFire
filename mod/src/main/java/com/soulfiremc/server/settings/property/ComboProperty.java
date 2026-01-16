@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.gson.Gson;
 import org.immutables.value.Value;
@@ -29,7 +30,7 @@ import java.util.function.Function;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public abstract non-sealed class ComboProperty implements Property {
+public abstract non-sealed class ComboProperty<S extends SettingsSource> implements Property<S> {
   public static <T extends Enum<T>> ComboOption[] optionsFromEnum(
     T[] values, Function<T, String> displayNameMapper, Function<T, @Nullable String> iconMapper) {
     var options = new ComboOption[values.length];

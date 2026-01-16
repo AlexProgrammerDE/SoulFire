@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -129,7 +130,7 @@ public final class SoulFireAbstractLauncher {
               for (var urlStr : manifestClassPath.split(" ")) {
                 if (urlStr.startsWith("file:")) {
                   // URL decode and convert to path
-                  var path = Path.of(new URL(urlStr).toURI()).toAbsolutePath().toString();
+                  var path = Path.of(URI.create(urlStr)).toAbsolutePath().toString();
                   expandedPaths.add(path);
                 }
               }

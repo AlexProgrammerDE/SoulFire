@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -63,8 +64,8 @@ public final class AutoRespawn extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoRespawnSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-respawn";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Respawn")

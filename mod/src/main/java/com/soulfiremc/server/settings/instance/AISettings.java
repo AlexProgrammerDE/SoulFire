@@ -37,16 +37,16 @@ import java.time.Duration;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
-  public static final StringProperty API_BASE_URL =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<InstanceSettingsSource> API_BASE_URL =
+    ImmutableStringProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-base-url")
       .uiName("API Base URL")
       .description("API server base URL, can also be changed to other providers")
       .defaultValue(ClientOptions.PRODUCTION_URL)
       .build();
-  public static final StringProperty API_KEY =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<InstanceSettingsSource> API_KEY =
+    ImmutableStringProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-key")
       .uiName("API Key")
@@ -54,8 +54,8 @@ public final class AISettings implements SettingsObject {
       .defaultValue("")
       .type(StringSetting.InputType.PASSWORD)
       .build();
-  public static final IntProperty REQUEST_TIMEOUT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> REQUEST_TIMEOUT =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-request-timeout")
       .uiName("API Request Timeout")
@@ -64,8 +64,8 @@ public final class AISettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty MAX_RETRIES =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> MAX_RETRIES =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("api-max-retries")
       .uiName("API Max Retries")

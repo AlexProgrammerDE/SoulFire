@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
@@ -25,7 +26,7 @@ import java.util.List;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public abstract non-sealed class StringListProperty implements Property {
+public abstract non-sealed class StringListProperty<S extends SettingsSource> implements Property<S> {
   public abstract String key();
 
   public abstract String uiName();

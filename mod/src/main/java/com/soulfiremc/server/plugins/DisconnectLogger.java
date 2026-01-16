@@ -27,6 +27,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -100,16 +101,16 @@ public final class DisconnectLogger extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class DisconnectLoggerSettings implements SettingsObject {
     private static final String NAMESPACE = "disconnect-logger";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log disconnects to terminal")
         .description("Log all bot disconnects to the terminal")
         .defaultValue(true)
         .build();
-    public static final IntProperty DEDUPLICATE_AMOUNT =
-      ImmutableIntProperty.builder()
+    public static final IntProperty<InstanceSettingsSource> DEDUPLICATE_AMOUNT =
+      ImmutableIntProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")

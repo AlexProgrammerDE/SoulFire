@@ -93,7 +93,7 @@ public record ServerSettingsImpl(
   }
 
   @Override
-  public Optional<JsonElement> get(Property property) {
+  public Optional<JsonElement> get(Property<ServerSettingsSource> property) {
     return Optional.ofNullable(settings.get(property.namespace()))
       .flatMap(map -> Optional.ofNullable(map.get(property.key())));
   }

@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public final class ServerSettingsRegistry {
-  private final Map<String, NamespaceRegistry> namespaceMap = new LinkedHashMap<>();
+public final class SettingsRegistry<S extends SettingsSource<S>> {
+  private final Map<String, NamespaceRegistry<S>> namespaceMap = new LinkedHashMap<>();
 
-  private static IntSetting createIntSetting(IntProperty property) {
+  private static IntSetting createIntSetting(IntProperty<?> property) {
     return IntSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -50,7 +50,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static DoubleSetting createDoubleSetting(DoubleProperty property) {
+  private static DoubleSetting createDoubleSetting(DoubleProperty<?> property) {
     return DoubleSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -75,7 +75,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static MinMaxSetting createMinMaxSetting(MinMaxProperty property) {
+  private static MinMaxSetting createMinMaxSetting(MinMaxProperty<?> property) {
     return MinMaxSetting.newBuilder()
       .setMin(property.minValue())
       .setMax(property.maxValue())
@@ -87,7 +87,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static StringSetting createStringSetting(StringProperty property) {
+  private static StringSetting createStringSetting(StringProperty<?> property) {
     return StringSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -101,7 +101,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static ComboSetting createComboSetting(ComboProperty property) {
+  private static ComboSetting createComboSetting(ComboProperty<?> property) {
     return ComboSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -124,7 +124,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static StringListSetting createStringListSetting(StringListProperty property) {
+  private static StringListSetting createStringListSetting(StringListProperty<?> property) {
     return StringListSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -133,7 +133,7 @@ public final class ServerSettingsRegistry {
       .build();
   }
 
-  private static BoolSetting createBoolSetting(BooleanProperty property) {
+  private static BoolSetting createBoolSetting(BooleanProperty<?> property) {
     return BoolSetting.newBuilder()
       .setUiName(property.uiName())
       .setDescription(property.description())
@@ -150,7 +150,7 @@ public final class ServerSettingsRegistry {
   /// @return The registry
   @This
   @ApiStatus.Internal
-  public ServerSettingsRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
+  public SettingsRegistry<S> addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
     return addPage(clazz, pageName, null, "triangle-alert", null);
   }
 
@@ -164,13 +164,14 @@ public final class ServerSettingsRegistry {
   ///                                         Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
   /// @return The registry
   @This
-  public ServerSettingsRegistry addPluginPage(
-    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty enabledProperty) {
+  public SettingsRegistry<S> addPluginPage(
+    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty<S> enabledProperty) {
     return addPage(clazz, pageName, owningPlugin, iconId, enabledProperty.key());
   }
 
+  @SuppressWarnings("unchecked")
   @This
-  private ServerSettingsRegistry addPage(
+  private SettingsRegistry<S> addPage(
     Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable String enabledProperty) {
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
@@ -180,14 +181,14 @@ public final class ServerSettingsRegistry {
         field.setAccessible(true);
 
         try {
-          var property = (Property) field.get(null);
+          var property = (Property<S>) field.get(null);
           if (property == null) {
             throw new IllegalStateException("Property is null!");
           }
 
           var registry = namespaceMap.computeIfAbsent(property.namespace(), _ -> {
             var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
-            return new NamespaceRegistry(pluginInfo, pageName, new ArrayList<>(), iconId, enabledProperty);
+            return new NamespaceRegistry<>(pluginInfo, pageName, new ArrayList<>(), iconId, enabledProperty);
           });
 
           registry.properties.add(property);
@@ -210,13 +211,13 @@ public final class ServerSettingsRegistry {
         var entryBuilder = SettingEntry.newBuilder()
           .setKey(property.key());
         entries.add(switch (property) {
-          case BooleanProperty booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
-          case IntProperty intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();
-          case DoubleProperty doubleProperty -> entryBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
-          case StringProperty stringProperty -> entryBuilder.setString(createStringSetting(stringProperty)).build();
-          case ComboProperty comboProperty -> entryBuilder.setCombo(createComboSetting(comboProperty)).build();
-          case StringListProperty stringListProperty -> entryBuilder.setStringList(createStringListSetting(stringListProperty)).build();
-          case MinMaxProperty minMaxProperty -> entryBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
+          case BooleanProperty<S> booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
+          case IntProperty<S> intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();
+          case DoubleProperty<S> doubleProperty -> entryBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
+          case StringProperty<S> stringProperty -> entryBuilder.setString(createStringSetting(stringProperty)).build();
+          case ComboProperty<S> comboProperty -> entryBuilder.setCombo(createComboSetting(comboProperty)).build();
+          case StringListProperty<S> stringListProperty -> entryBuilder.setStringList(createStringListSetting(stringListProperty)).build();
+          case MinMaxProperty<S> minMaxProperty -> entryBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
         });
       }
 
@@ -240,5 +241,5 @@ public final class ServerSettingsRegistry {
     return list;
   }
 
-  private record NamespaceRegistry(@Nullable PluginInfo owningPlugin, String pageName, List<Property> properties, String iconId, @Nullable String enabledProperty) {}
+  private record NamespaceRegistry<S extends SettingsSource<S>>(@Nullable PluginInfo owningPlugin, String pageName, List<Property<S>> properties, String iconId, @Nullable String enabledProperty) {}
 }

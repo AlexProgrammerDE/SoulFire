@@ -26,6 +26,7 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -313,24 +314,24 @@ public final class KillAura extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class KillAuraSettings implements SettingsObject {
     private static final String NAMESPACE = "kill-aura";
-    public static final BooleanProperty ENABLE =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLE =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enable")
         .uiName("Enable")
         .description("Enable KillAura")
         .defaultValue(false)
         .build();
-    public static final StringListProperty WHITELISTED_USERS =
-      ImmutableStringListProperty.builder()
+    public static final StringListProperty<InstanceSettingsSource> WHITELISTED_USERS =
+      ImmutableStringListProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("whitelisted-users")
         .uiName("Whitelisted Users")
         .description("These users will be ignored by the kill aura")
         .addDefaultValue("Dinnerbone")
         .build();
-    public static final DoubleProperty HIT_RANGE =
-      ImmutableDoubleProperty.builder()
+    public static final DoubleProperty<InstanceSettingsSource> HIT_RANGE =
+      ImmutableDoubleProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("hit-range")
         .uiName("Hit Range")
@@ -340,8 +341,8 @@ public final class KillAura extends InternalPlugin {
         .maxValue(6.0d)
         .stepValue(0.1d)
         .build();
-    public static final DoubleProperty SWING_RANGE =
-      ImmutableDoubleProperty.builder()
+    public static final DoubleProperty<InstanceSettingsSource> SWING_RANGE =
+      ImmutableDoubleProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("swing-range")
         .uiName("Swing Range")
@@ -351,8 +352,8 @@ public final class KillAura extends InternalPlugin {
         .maxValue(10.0d)
         .stepValue(0.1d)
         .build();
-    public static final DoubleProperty LOOK_RANGE =
-      ImmutableDoubleProperty.builder()
+    public static final DoubleProperty<InstanceSettingsSource> LOOK_RANGE =
+      ImmutableDoubleProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("look-range")
         .uiName("Look Range")
@@ -362,24 +363,24 @@ public final class KillAura extends InternalPlugin {
         .maxValue(25.0d)
         .stepValue(0.1d)
         .build();
-    public static final BooleanProperty CHECK_WALLS =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> CHECK_WALLS =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("check-walls")
         .uiName("Check Walls")
         .description("Check if the entity is behind a wall")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty IGNORE_COOLDOWN =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> IGNORE_COOLDOWN =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("ignore-cooldown")
         .uiName("Ignore Cooldown")
         .description("Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty ATTACK_DELAY_TICKS =
-      ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> ATTACK_DELAY_TICKS =
+      ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("attack-delay-ticks")
         .minValue(1)

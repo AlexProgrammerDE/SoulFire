@@ -26,6 +26,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -88,15 +89,15 @@ public final class AntiAFK extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AntiAFKSettings implements SettingsObject {
     private static final String NAMESPACE = "anti-afk";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Anti AFK")
         .description("Enable the Anti AFK feature")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty DISTANCE = ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DISTANCE = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("distance")
       .minValue(1)
@@ -112,7 +113,7 @@ public final class AntiAFK extends InternalPlugin {
         .defaultValue(30)
         .build())
       .build();
-    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

@@ -17,13 +17,14 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import org.immutables.gson.Gson;
 import org.immutables.value.Value;
 
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public abstract non-sealed class MinMaxProperty implements Property {
+public abstract non-sealed class MinMaxProperty<S extends SettingsSource> implements Property<S> {
   public abstract String namespace();
 
   public abstract String key();

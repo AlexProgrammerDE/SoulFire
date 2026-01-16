@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -74,16 +75,16 @@ public final class AutoChatMessage extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoChatMessageSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-chat-message";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Chat Message")
         .description("Attempt to send chat messages automatically in random intervals")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty DELAY =
-      ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DELAY =
+      ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)
@@ -99,8 +100,8 @@ public final class AutoChatMessage extends InternalPlugin {
           .defaultValue(5)
           .build())
         .build();
-    public static final StringListProperty MESSAGES =
-      ImmutableStringListProperty.builder()
+    public static final StringListProperty<InstanceSettingsSource> MESSAGES =
+      ImmutableStringListProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("messages")
         .uiName("Chat Messages")

@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -74,24 +75,24 @@ public final class AutoRegister extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoRegisterSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-register";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Register")
         .description("Make bots run the /register and /login command after joining")
         .defaultValue(false)
         .build();
-    public static final StringProperty REGISTER_COMMAND =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> REGISTER_COMMAND =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("register-command")
         .uiName("Register Command")
         .description("Command to be executed to register")
         .defaultValue("/register %password% %password%")
         .build();
-    public static final StringProperty LOGIN_COMMAND =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> LOGIN_COMMAND =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("login-command")
         .uiName("Login Command")
@@ -99,8 +100,8 @@ public final class AutoRegister extends InternalPlugin {
         .defaultValue("/login %password%")
         .build();
 
-    public static final StringProperty PASSWORD_FORMAT =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> PASSWORD_FORMAT =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("password-format")
         .uiName("Password Format")

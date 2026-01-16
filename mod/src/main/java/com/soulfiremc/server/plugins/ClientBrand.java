@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotClientBrandEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -64,16 +65,16 @@ public final class ClientBrand extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ClientBrandSettings implements SettingsObject {
     private static final String NAMESPACE = "client-brand";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Send client brand")
         .description("Send client brand to the server")
         .defaultValue(true)
         .build();
-    public static final StringProperty CLIENT_BRAND =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> CLIENT_BRAND =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("client-brand")
         .uiName("Client brand")

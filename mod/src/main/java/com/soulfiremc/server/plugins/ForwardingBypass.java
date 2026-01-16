@@ -27,6 +27,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -347,16 +348,16 @@ public final class ForwardingBypass extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "forwarding-bypass";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable forwarding bypass")
         .description("Enable the forwarding bypass")
         .defaultValue(false)
         .build();
-    public static final ComboProperty FORWARDING_MODE =
-      ImmutableComboProperty.builder()
+    public static final ComboProperty<InstanceSettingsSource> FORWARDING_MODE =
+      ImmutableComboProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("forwarding-mode")
         .uiName("Forwarding mode")
@@ -369,8 +370,8 @@ public final class ForwardingBypass extends InternalPlugin {
           case SF_BYPASS -> "door-open";
         }))
         .build();
-    public static final StringProperty SECRET =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> SECRET =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("secret")
         .uiName("Secret")
@@ -378,8 +379,8 @@ public final class ForwardingBypass extends InternalPlugin {
         .defaultValue("forwarding secret")
         .type(StringSetting.InputType.PASSWORD)
         .build();
-    public static final StringProperty PLAYER_ADDRESS =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> PLAYER_ADDRESS =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("player-address")
         .uiName("Player Address")

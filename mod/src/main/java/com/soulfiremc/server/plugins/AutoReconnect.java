@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
@@ -90,16 +91,16 @@ public final class AutoReconnect extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoReconnectSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-reconnect";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Reconnect")
         .description("Reconnect a bot when it times out/is kicked")
         .defaultValue(true)
         .build();
-    public static final MinMaxProperty DELAY =
-      ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DELAY =
+      ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

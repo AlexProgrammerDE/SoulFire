@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
@@ -71,15 +72,15 @@ public final class ServerListBypass extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ServerListBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "server-list-bypass";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Server List Bypass")
         .description("Whether to ping the server list before connecting.")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

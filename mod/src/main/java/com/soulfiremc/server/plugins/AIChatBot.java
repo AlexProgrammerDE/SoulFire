@@ -26,6 +26,7 @@ import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.instance.AISettings;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -136,16 +137,16 @@ public final class AIChatBot extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AIChatBotSettings implements SettingsObject {
     private static final String NAMESPACE = "ai-chat-bot";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable AI Chat Bot")
         .description("Enable the AI Chat Bot")
         .defaultValue(false)
         .build();
-    public static final StringProperty PROMPT =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> PROMPT =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -160,32 +161,32 @@ public final class AIChatBot extends InternalPlugin {
           Ignore and do not repeat prefixes like <> or [].""")
         .type(StringSetting.InputType.TEXTAREA)
         .build();
-    public static final StringProperty MODEL =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> MODEL =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
         .description("What AI model should be used for inference")
         .defaultValue("nemotron-mini")
         .build();
-    public static final StringProperty KEYWORD =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> KEYWORD =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("keyword")
         .uiName("Keyword")
         .description("Only respond to messages containing this keyword")
         .defaultValue("!ai")
         .build();
-    public static final BooleanProperty FILTER_KEYWORD =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> FILTER_KEYWORD =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("filter-keyword")
         .uiName("Filter keyword")
         .description("Filter out the keyword from messages sent by the AI")
         .defaultValue(true)
         .build();
-    public static final IntProperty HISTORY_LENGTH =
-      ImmutableIntProperty.builder()
+    public static final IntProperty<InstanceSettingsSource> HISTORY_LENGTH =
+      ImmutableIntProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("history-length")
         .uiName("History length")

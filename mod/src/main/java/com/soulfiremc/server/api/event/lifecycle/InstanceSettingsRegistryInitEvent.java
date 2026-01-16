@@ -19,7 +19,8 @@ package com.soulfiremc.server.api.event.lifecycle;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
-import com.soulfiremc.server.settings.lib.ServerSettingsRegistry;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
+import com.soulfiremc.server.settings.lib.SettingsRegistry;
 
-public record InstanceSettingsRegistryInitEvent(InstanceManager instanceManager, ServerSettingsRegistry settingsRegistry)
+public record InstanceSettingsRegistryInitEvent(InstanceManager instanceManager, SettingsRegistry<InstanceSettingsSource> settingsRegistry)
   implements SoulFireInstanceEvent {}

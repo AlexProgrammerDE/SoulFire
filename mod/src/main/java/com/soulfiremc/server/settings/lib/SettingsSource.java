@@ -28,51 +28,51 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
-public sealed interface SettingsSource permits InstanceSettingsSource, ServerSettingsSource {
-  default int get(IntProperty property) {
+public sealed interface SettingsSource<S extends SettingsSource<S>> permits InstanceSettingsSource, ServerSettingsSource {
+  default int get(IntProperty<S> property) {
     return getAsType(property, property.defaultValue(), Integer.class);
   }
 
-  default double get(DoubleProperty property) {
+  default double get(DoubleProperty<S> property) {
     return getAsType(property, property.defaultValue(), Double.class);
   }
 
-  default boolean get(BooleanProperty property) {
+  default boolean get(BooleanProperty<S> property) {
     return getAsType(property, property.defaultValue(), Boolean.class);
   }
 
-  default String get(StringProperty property) {
+  default String get(StringProperty<S> property) {
     return getAsType(property, property.defaultValue(), String.class);
   }
 
-  default <T> T get(ComboProperty property, Function<String, T> converter) {
+  default <T> T get(ComboProperty<S> property, Function<String, T> converter) {
     return converter.apply(getAsType(property, property.defaultValue(), String.class));
   }
 
-  default <T extends Enum<T>> T get(ComboProperty property, Class<T> clazz) {
+  default <T extends Enum<T>> T get(ComboProperty<S> property, Class<T> clazz) {
     return get(property, s -> Enum.valueOf(clazz, s));
   }
 
-  default List<String> get(StringListProperty property) {
+  default List<String> get(StringListProperty<S> property) {
     return List.of(getAsType(property, property.defaultValue().toArray(new String[0]), String[].class));
   }
 
-  default MinMaxProperty.DataLayout get(MinMaxProperty property) {
+  default MinMaxProperty.DataLayout get(MinMaxProperty<S> property) {
     return getAsType(property, property.defaultDataLayout(), MinMaxProperty.DataLayout.class);
   }
 
-  default CustomIntSupplier getRandom(MinMaxProperty property) {
+  default CustomIntSupplier getRandom(MinMaxProperty<S> property) {
     return () -> {
       var layout = get(property);
       return SFHelpers.getRandomInt(layout.min(), layout.max());
     };
   }
 
-  default <T> T getAsType(Property property, T defaultValue, Class<T> clazz) {
+  default <T> T getAsType(Property<S> property, T defaultValue, Class<T> clazz) {
     return get(property).map(v -> GsonInstance.GSON.fromJson(v, clazz)).orElse(defaultValue);
   }
 
-  Optional<JsonElement> get(Property property);
+  Optional<JsonElement> get(Property<S> property);
 
   interface CustomIntSupplier extends IntSupplier {
     default LongSupplier asLongSupplier() {

@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.server.settings.property;
 
-public sealed interface Property permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
+import com.soulfiremc.server.settings.lib.SettingsSource;
+
+public sealed interface Property<S extends SettingsSource> permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
   String namespace();
 
   String key();

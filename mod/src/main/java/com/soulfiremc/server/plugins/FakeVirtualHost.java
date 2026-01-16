@@ -22,6 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -69,24 +70,24 @@ public final class FakeVirtualHost extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class FakeVirtualHostSettings implements SettingsObject {
     private static final String NAMESPACE = "fake-virtual-host";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Fake virtual host")
         .description("Whether to fake the virtual host or not")
         .defaultValue(false)
         .build();
-    public static final StringProperty HOSTNAME =
-      ImmutableStringProperty.builder()
+    public static final StringProperty<InstanceSettingsSource> HOSTNAME =
+      ImmutableStringProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("hostname")
         .uiName("Hostname")
         .description("The hostname to fake")
         .defaultValue("localhost")
         .build();
-    public static final IntProperty PORT =
-      ImmutableIntProperty.builder()
+    public static final IntProperty<InstanceSettingsSource> PORT =
+      ImmutableIntProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("port")
         .uiName("Port")

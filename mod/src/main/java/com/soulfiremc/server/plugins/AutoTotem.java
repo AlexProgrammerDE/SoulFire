@@ -23,6 +23,7 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.ControllingTask;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFInventoryHelpers;
@@ -110,15 +111,15 @@ public final class AutoTotem extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoTotemSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-totem";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Totem")
         .description("Always put available totems in the offhand slot")
         .defaultValue(true)
         .build();
-    public static final MinMaxProperty DELAY = ImmutableMinMaxProperty.builder()
+    public static final MinMaxProperty<InstanceSettingsSource> DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

@@ -65,8 +65,8 @@ tasks {
       listOf(
         "-parameters",
         "-nowarn",
-        "-Xlint:-unchecked",
-        "-Xlint:-deprecation",
+        "-Xlint:unchecked",
+        "-Xlint:deprecation",
         "-Xlint:-processing"
       )
     )

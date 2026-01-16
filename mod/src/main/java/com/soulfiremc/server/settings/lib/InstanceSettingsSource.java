@@ -22,7 +22,7 @@ import com.soulfiremc.server.proxy.SFProxy;
 
 import java.util.List;
 
-public sealed interface InstanceSettingsSource extends SettingsSource permits InstanceSettingsDelegate, InstanceSettingsImpl {
+public sealed interface InstanceSettingsSource extends SettingsSource<InstanceSettingsSource> permits InstanceSettingsDelegate, InstanceSettingsImpl {
   List<MinecraftAccount> accounts();
 
   List<SFProxy> proxies();

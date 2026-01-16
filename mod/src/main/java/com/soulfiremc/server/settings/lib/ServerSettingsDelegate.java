@@ -29,7 +29,7 @@ public final class ServerSettingsDelegate implements ServerSettingsSource {
   private final Supplier<ServerSettingsSource> source;
 
   @Override
-  public Optional<JsonElement> get(Property property) {
+  public Optional<JsonElement> get(Property<ServerSettingsSource> property) {
     return source.get().get(property);
   }
 }

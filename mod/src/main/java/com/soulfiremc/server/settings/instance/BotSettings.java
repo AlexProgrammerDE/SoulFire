@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.settings.instance;
 
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import com.viaversion.viaaprilfools.api.AprilFoolsProtocolVersion;
@@ -45,16 +46,16 @@ public final class BotSettings implements SettingsObject {
       return ProtocolVersion.getProtocol(VersionType.valueOf(split[0]), Integer.parseInt(split[1]));
     };
   private static final String NAMESPACE = "bot";
-  public static final StringProperty ADDRESS =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<InstanceSettingsSource> ADDRESS =
+    ImmutableStringProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("address")
       .uiName("Address")
       .description("Address to connect to")
       .defaultValue("127.0.0.1:25565")
       .build();
-  public static final IntProperty AMOUNT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> AMOUNT =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("amount")
       .uiName("Amount")
@@ -63,7 +64,7 @@ public final class BotSettings implements SettingsObject {
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final MinMaxProperty JOIN_DELAY = ImmutableMinMaxProperty.builder()
+  public static final MinMaxProperty<InstanceSettingsSource> JOIN_DELAY = ImmutableMinMaxProperty.<InstanceSettingsSource>builder()
     .namespace(NAMESPACE)
     .key("join-delay")
     .minValue(0)
@@ -79,8 +80,8 @@ public final class BotSettings implements SettingsObject {
       .defaultValue(3000)
       .build())
     .build();
-  public static final ComboProperty PROTOCOL_VERSION =
-    ImmutableComboProperty.builder()
+  public static final ComboProperty<InstanceSettingsSource> PROTOCOL_VERSION =
+    ImmutableComboProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("protocol-version")
       .uiName("Protocol Version")
@@ -88,8 +89,8 @@ public final class BotSettings implements SettingsObject {
       .defaultValue(getLatestProtocolVersionId())
       .addOptions(getProtocolVersionOptions())
       .build();
-  public static final IntProperty READ_TIMEOUT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> READ_TIMEOUT =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("read-timeout")
       .uiName("Read Timeout")
@@ -98,8 +99,8 @@ public final class BotSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty WRITE_TIMEOUT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> WRITE_TIMEOUT =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("write-timeout")
       .uiName("Write Timeout")
@@ -108,8 +109,8 @@ public final class BotSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty CONNECT_TIMEOUT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> CONNECT_TIMEOUT =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("connect-timeout")
       .uiName("Connect Timeout")
@@ -118,16 +119,16 @@ public final class BotSettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final BooleanProperty RESOLVE_SRV =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<InstanceSettingsSource> RESOLVE_SRV =
+    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("resolve-srv")
       .uiName("Resolve SRV")
       .description("Try to resolve SRV records from the address")
       .defaultValue(true)
       .build();
-  public static final IntProperty CONCURRENT_CONNECTS =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<InstanceSettingsSource> CONCURRENT_CONNECTS =
+    ImmutableIntProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("concurrent-connects")
       .uiName("Concurrent Connects")
@@ -136,8 +137,8 @@ public final class BotSettings implements SettingsObject {
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final BooleanProperty RESTORE_ON_REBOOT =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<InstanceSettingsSource> RESTORE_ON_REBOOT =
+    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("restore-on-reboot")
       .uiName("Restore on Reboot")
@@ -146,8 +147,8 @@ public final class BotSettings implements SettingsObject {
         If turned off, the attack will not be restored after a reboot.""")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty IGNORE_PACKET_HANDLING_ERRORS =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<InstanceSettingsSource> IGNORE_PACKET_HANDLING_ERRORS =
+    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("ignore-packet-handling-errors")
       .uiName("Ignore Packet Handling Errors")

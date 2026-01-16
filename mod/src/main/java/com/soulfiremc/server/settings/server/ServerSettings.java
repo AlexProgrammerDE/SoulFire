@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.server;
 
 import com.soulfiremc.grpc.generated.StringSetting;
+import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
@@ -27,64 +28,64 @@ import lombok.RequiredArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ServerSettings implements SettingsObject {
   private static final String NAMESPACE = "server";
-  public static final StringProperty PUBLIC_ADDRESS =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<ServerSettingsSource> PUBLIC_ADDRESS =
+    ImmutableStringProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("public-address")
       .uiName("Public address")
       .description("The address clients on the internet use to connect to this SoulFire instance.\nUsed for links in E-Mails and WebDAV.")
       .defaultValue("http://127.0.0.1:38765")
       .build();
-  public static final BooleanProperty ALLOW_CREATING_INSTANCES =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_CREATING_INSTANCES =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-creating-instances")
       .uiName("Allow creating instances")
       .description("Allow (non-admin) users to create instances.")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty ALLOW_UPDATING_SELF_USERNAME =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_UPDATING_SELF_USERNAME =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-updating-self-username")
       .uiName("Allow updating self username")
       .description("Allow (non-admin) users to change their username.")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty ALLOW_UPDATING_SELF_EMAIL =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_UPDATING_SELF_EMAIL =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-updating-self-email")
       .uiName("Allow updating self email")
       .description("Allow (non-admin) users to change their email.")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty ALLOW_DELETING_INSTANCES =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_DELETING_INSTANCES =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-deleting-instances")
       .uiName("Allow deleting instances")
       .description("Allow the owner of an instance to delete it.")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty ALLOW_CHANGING_INSTANCE_META =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_CHANGING_INSTANCE_META =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-changing-instance-meta")
       .uiName("Allow changing instance meta")
       .description("Allow the owner of an instance to change meta like instance name and icon.")
       .defaultValue(true)
       .build();
-  public static final BooleanProperty ALLOW_INSTANCE_SCRIPTS =
-    ImmutableBooleanProperty.builder()
+  public static final BooleanProperty<ServerSettingsSource> ALLOW_INSTANCE_SCRIPTS =
+    ImmutableBooleanProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("allow-instance-scripts")
       .uiName("Allow instance scripts")
       .description("Allow users of instances to create custom instance-level scripts.")
       .defaultValue(true)
       .build();
-  public static final ComboProperty EMAIL_TYPE =
-    ImmutableComboProperty.builder()
+  public static final ComboProperty<ServerSettingsSource> EMAIL_TYPE =
+    ImmutableComboProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("email-type")
       .uiName("Email Type")
@@ -95,16 +96,16 @@ public final class ServerSettings implements SettingsObject {
         case SMTP -> "mails";
       }))
       .build();
-  public static final StringProperty SMTP_HOST =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<ServerSettingsSource> SMTP_HOST =
+    ImmutableStringProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-host")
       .uiName("SMTP Host")
       .description("SMTP server host to use for sending emails.")
       .defaultValue("smtp.gmail.com")
       .build();
-  public static final IntProperty SMTP_PORT =
-    ImmutableIntProperty.builder()
+  public static final IntProperty<ServerSettingsSource> SMTP_PORT =
+    ImmutableIntProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-port")
       .uiName("SMTP Port")
@@ -114,16 +115,16 @@ public final class ServerSettings implements SettingsObject {
       .maxValue(65535)
       .thousandSeparator(false)
       .build();
-  public static final StringProperty SMTP_USERNAME =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<ServerSettingsSource> SMTP_USERNAME =
+    ImmutableStringProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-username")
       .uiName("SMTP Username")
       .description("Username to use for SMTP authentication.")
       .defaultValue("")
       .build();
-  public static final StringProperty SMTP_PASSWORD =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<ServerSettingsSource> SMTP_PASSWORD =
+    ImmutableStringProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-password")
       .uiName("SMTP Password")
@@ -131,8 +132,8 @@ public final class ServerSettings implements SettingsObject {
       .defaultValue("")
       .type(StringSetting.InputType.PASSWORD)
       .build();
-  public static final ComboProperty SMTP_TYPE =
-    ImmutableComboProperty.builder()
+  public static final ComboProperty<ServerSettingsSource> SMTP_TYPE =
+    ImmutableComboProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-type")
       .uiName("SMTP Type")
@@ -144,8 +145,8 @@ public final class ServerSettings implements SettingsObject {
         case NONE -> "shield-off";
       }))
       .build();
-  public static final StringProperty SMTP_FROM =
-    ImmutableStringProperty.builder()
+  public static final StringProperty<ServerSettingsSource> SMTP_FROM =
+    ImmutableStringProperty.<ServerSettingsSource>builder()
       .namespace(NAMESPACE)
       .key("smtp-from")
       .uiName("SMTP From")

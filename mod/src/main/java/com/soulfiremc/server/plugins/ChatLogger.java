@@ -28,6 +28,7 @@ import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
+import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
@@ -121,24 +122,24 @@ public final class ChatLogger extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ChatLoggerSettings implements SettingsObject {
     private static final String NAMESPACE = "chat-logger";
-    public static final BooleanProperty ENABLED =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log chat to terminal")
         .description("Log all received chat messages to the terminal")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty LOG_DEATH_MESSAGES =
-      ImmutableBooleanProperty.builder()
+    public static final BooleanProperty<InstanceSettingsSource> LOG_DEATH_MESSAGES =
+      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("log-death-messages")
         .uiName("Additionally log death messages to terminal")
         .description("Log all death messages to the terminal")
         .defaultValue(true)
         .build();
-    public static final IntProperty DEDUPLICATE_AMOUNT =
-      ImmutableIntProperty.builder()
+    public static final IntProperty<InstanceSettingsSource> DEDUPLICATE_AMOUNT =
+      ImmutableIntProperty.<InstanceSettingsSource>builder()
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")
