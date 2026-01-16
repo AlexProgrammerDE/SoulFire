@@ -37,4 +37,9 @@ public final class BotSettingsDelegate implements BotSettingsSource {
   public InstanceSettingsSource instanceSettings() {
     return source.get().instanceSettings();
   }
+
+  @Override
+  public BotSettingsImpl.Stem stem() {
+    return source.get().stem();
+  }
 }

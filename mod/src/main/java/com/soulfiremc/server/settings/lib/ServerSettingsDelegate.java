@@ -32,4 +32,9 @@ public final class ServerSettingsDelegate implements ServerSettingsSource {
   public Optional<JsonElement> get(Property<ServerSettingsSource> property) {
     return source.get().get(property);
   }
+
+  @Override
+  public ServerSettingsImpl.Stem stem() {
+    return source.get().stem();
+  }
 }

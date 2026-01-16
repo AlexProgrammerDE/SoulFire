@@ -18,4 +18,5 @@
 package com.soulfiremc.server.settings.lib;
 
 public sealed interface ServerSettingsSource extends SettingsSource<ServerSettingsSource> permits ServerSettingsDelegate, ServerSettingsImpl {
+  ServerSettingsImpl.Stem stem();
 }

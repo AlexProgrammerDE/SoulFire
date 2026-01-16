@@ -44,8 +44,7 @@ import java.util.*;
 public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSettings) implements InstanceSettingsSource {
   @Override
   public Optional<JsonElement> get(Property<InstanceSettingsSource> property) {
-    return Optional.ofNullable(this.stem.settings.get(property.namespace()))
-      .flatMap(map -> Optional.ofNullable(map.get(property.key())));
+    return this.stem.get(property);
   }
 
   @Override
@@ -61,7 +60,7 @@ public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSetting
   @With
   public record Stem(Map<String, Map<String, JsonElement>> settings,
                      List<MinecraftAccount> accounts,
-                     List<SFProxy> proxies) {
+                     List<SFProxy> proxies) implements SettingsSource.Stem<InstanceSettingsSource> {
     public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of());
     private static final Gson PROFILE_GSON =
       GsonInstance.GSON.newBuilder()
@@ -86,21 +85,7 @@ public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSetting
     public static Stem fromProto(InstanceConfig request) {
       return
         new Stem(
-          request.getSettingsList().stream().collect(
-            HashMap::new,
-            (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
-              HashMap::new,
-              (innerMap, entry) -> {
-                try {
-                  innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-                } catch (InvalidProtocolBufferException e) {
-                  log.error("Failed to deserialize settings", e);
-                }
-              },
-              HashMap::putAll
-            )),
-            HashMap::putAll
-          ),
+          SettingsSource.Stem.settingsFromProto(request.getSettingsList()),
           request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
           request.getProxiesList().stream().map(SFProxy::fromProto).toList()
         );
@@ -112,23 +97,7 @@ public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSetting
 
     public InstanceConfig toProto() {
       return InstanceConfig.newBuilder()
-        .addAllSettings(this.settings.entrySet().stream()
-          .map(entry -> SettingsNamespace.newBuilder()
-            .setNamespace(entry.getKey())
-            .addAllEntries(entry.getValue().entrySet().stream()
-              .map(innerEntry -> SettingsEntry.newBuilder()
-                .setKey(innerEntry.getKey())
-                .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
-                  try {
-                    JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
-                  } catch (InvalidProtocolBufferException e) {
-                    log.error("Failed to serialize settings", e);
-                  }
-                }))
-                .build())
-              .toList())
-            .build())
-          .toList())
+        .addAllSettings(this.settingsToProto())
         .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
         .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
         .build();

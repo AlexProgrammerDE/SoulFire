@@ -28,4 +28,6 @@ public sealed interface InstanceSettingsSource extends SettingsSource<InstanceSe
   List<SFProxy> proxies();
 
   ServerSettingsSource serverSettings();
+
+  InstanceSettingsImpl.Stem stem();
 }

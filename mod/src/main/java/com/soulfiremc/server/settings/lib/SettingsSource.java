@@ -18,11 +18,18 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Value;
+import com.google.protobuf.util.JsonFormat;
+import com.soulfiremc.grpc.generated.SettingsEntry;
+import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -81,6 +88,56 @@ public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotS
 
     default long getAsLong() {
       return this.getAsInt();
+    }
+  }
+
+  Stem<S> stem();
+
+  interface Stem<S extends SettingsSource<S>> {
+    Map<String, Map<String, JsonElement>> settings();
+
+    default Optional<JsonElement> get(Property<S> property) {
+      return Optional.ofNullable(this.settings().get(property.namespace()))
+        .flatMap(map -> Optional.ofNullable(map.get(property.key())));
+    }
+
+    static Map<String, Map<String, JsonElement>> settingsFromProto(List<SettingsNamespace> settingsList) {
+      return settingsList.stream().collect(
+          HashMap::new,
+          (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
+            HashMap::new,
+            (innerMap, entry) -> {
+              try {
+                innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
+              } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+              }
+            },
+            HashMap::putAll
+          )),
+          HashMap::putAll
+        );
+    }
+
+    default Iterable<? extends SettingsNamespace> settingsToProto() {
+      return this.settings().entrySet().stream()
+        .map(entry -> SettingsNamespace.newBuilder()
+          .setNamespace(entry.getKey())
+          .addAllEntries(entry.getValue().entrySet()
+            .stream()
+            .map(innerEntry -> SettingsEntry.newBuilder()
+              .setKey(innerEntry.getKey())
+              .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
+                try {
+                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                } catch (InvalidProtocolBufferException e) {
+                  throw new RuntimeException(e);
+                }
+              }))
+              .build())
+            .toList())
+          .build())
+        .toList();
     }
   }
 }

@@ -40,12 +40,11 @@ import java.util.Optional;
 public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
   @Override
   public Optional<JsonElement> get(Property<ServerSettingsSource> property) {
-    return Optional.ofNullable(this.stem.settings.get(property.namespace()))
-      .flatMap(map -> Optional.ofNullable(map.get(property.key())));
+    return this.stem.get(property);
   }
 
   @With
-  public record Stem(Map<String, Map<String, JsonElement>> settings) {
+  public record Stem(Map<String, Map<String, JsonElement>> settings) implements SettingsSource.Stem<ServerSettingsSource> {
     public static final Stem EMPTY = new Stem(Map.of());
 
     public static Stem deserialize(JsonElement json) {
@@ -54,21 +53,7 @@ public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
 
     public static Stem fromProto(ServerConfig request) {
       return new Stem(
-          request.getSettingsList().stream().collect(
-            HashMap::new,
-            (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
-              HashMap::new,
-              (innerMap, entry) -> {
-                try {
-                  innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
-                } catch (InvalidProtocolBufferException e) {
-                  log.error("Failed to deserialize settings", e);
-                }
-              },
-              HashMap::putAll
-            )),
-            HashMap::putAll
-          )
+        SettingsSource.Stem.settingsFromProto(request.getSettingsList())
       );
     }
 
@@ -78,24 +63,7 @@ public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
 
     public ServerConfig toProto() {
       return ServerConfig.newBuilder()
-        .addAllSettings(this.settings.entrySet().stream()
-          .map(entry -> SettingsNamespace.newBuilder()
-            .setNamespace(entry.getKey())
-            .addAllEntries(entry.getValue().entrySet()
-              .stream()
-              .map(innerEntry -> SettingsEntry.newBuilder()
-                .setKey(innerEntry.getKey())
-                .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
-                  try {
-                    JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
-                  } catch (InvalidProtocolBufferException e) {
-                    log.error("Failed to serialize settings", e);
-                  }
-                }))
-                .build())
-              .toList())
-            .build())
-          .toList())
+        .addAllSettings(this.settingsToProto())
         .build();
     }
   }
