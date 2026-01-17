@@ -18,11 +18,8 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.soulfiremc.grpc.generated.BotConfig;
-import com.soulfiremc.grpc.generated.ServerConfig;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,18 +40,10 @@ public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings
   public record Stem(Map<String, Map<String, JsonElement>> settings) implements SettingsSource.Stem<SettingsSource.Bot> {
     public static final Stem EMPTY = new Stem(Map.of());
 
-    public static Stem deserialize(JsonElement json) {
-      return GsonInstance.GSON.fromJson(json, Stem.class);
-    }
-
-    public static Stem fromProto(ServerConfig request) {
+    public static Stem fromProto(BotConfig request) {
       return new Stem(
         SettingsSource.Stem.settingsFromProto(request.getSettingsList())
       );
-    }
-
-    public JsonObject serializeToTree() {
-      return GsonInstance.GSON.toJsonTree(this).getAsJsonObject();
     }
 
     public BotConfig toProto() {

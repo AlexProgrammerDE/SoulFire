@@ -164,7 +164,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error updating instance state", t);
+      log.error("Error updating instance meta", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
@@ -189,7 +189,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error updating instance state", t);
+      log.error("Error updating instance config", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

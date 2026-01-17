@@ -121,6 +121,8 @@ enum InstancePermission {
   READ_SCRIPT = 17;
   UPDATE_SCRIPT = 18;
   DELETE_SCRIPT = 19;
+  READ_BOT_INFO = 10;
+  UPDATE_BOT_CONFIG = 11;
 }
 
 enum UserRole {

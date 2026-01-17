@@ -13,16 +13,27 @@ message BotConfig {
 }
 
 message BotInfoRequest {
-  string id = 1;
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotLiveState {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  float xRot = 4;
+  float yRot = 5;
 }
 
 message BotInfoResponse {
   BotConfig config = 1;
+  optional BotLiveState live_state = 2;
 }
 
 message BotUpdateConfigRequest {
-  string id = 1;
-  BotConfig config = 2;
+  string instance_id = 1;
+  string bot_id = 2;
+  BotConfig config = 3;
 }
 
 message BotUpdateConfigResponse {

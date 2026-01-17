@@ -25,6 +25,7 @@ import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.NonNull;
+import lombok.With;
 import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
@@ -36,6 +37,7 @@ import java.util.UUID;
 /// @param profileId     Identifier that uniquely identifies the account
 /// @param lastKnownName The last known name of the account
 /// @param accountData   The data of the account (values depend on the authType)
+@With
 public record MinecraftAccount(
   @NonNull AuthType authType,
   @NonNull UUID profileId,

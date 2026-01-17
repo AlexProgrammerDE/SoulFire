@@ -46,14 +46,14 @@ import java.util.UUID;
 public final class AuthSystem {
   public static final UUID ROOT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   public static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
-  private final LogServiceImpl logService;
+  private final LogServiceImpl.StateHolder logService;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
   private final JwtParser parser;
   private final SessionFactory sessionFactory;
 
   public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
-    this.logService = soulFireServer.logService();
+    this.logService = soulFireServer.logStateHolder();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
     this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.settingsSource = soulFireServer.settingsSource();
@@ -201,7 +201,7 @@ public final class AuthSystem {
   }
 
   private record SoulFireUserImpl(
-    LogServiceImpl logService,
+    LogServiceImpl.StateHolder logService,
     UserEntity userData,
     SessionFactory sessionFactory,
     ServerSettingsSource settingsSource,
@@ -268,7 +268,8 @@ public final class AuthSystem {
                ACCESS_OBJECT_STORAGE, ACCESS_SCRIPT_CODE_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
-               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
+               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS,
+               READ_BOT_INFO, UPDATE_BOT_CONFIG -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
         };
       };

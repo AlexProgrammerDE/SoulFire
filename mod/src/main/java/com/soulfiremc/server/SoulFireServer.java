@@ -89,7 +89,7 @@ public final class SoulFireServer {
   private final SecretKey jwtSecretKey;
   private final SFSparkPlugin sparkPlugin;
   @Getter
-  private final LogServiceImpl logService = new LogServiceImpl(this);
+  private final LogServiceImpl.StateHolder logStateHolder = new LogServiceImpl.StateHolder();
 
   public SoulFireServer(
     String host,

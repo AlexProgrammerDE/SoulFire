@@ -29,6 +29,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -38,14 +39,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@RequiredArgsConstructor
 public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private final SoulFireServer soulFireServer;
-  private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
-
-  public LogServiceImpl(SoulFireServer soulFireServer) {
-    this.soulFireServer = soulFireServer;
-    SFLogAppender.INSTANCE.logConsumers().add(this::broadcastLogMessage);
-  }
 
   private static LogString fromEvent(SFLogAppender.SFLogEvent event, boolean personal) {
     var builder = LogString.newBuilder()
@@ -85,41 +81,6 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     return builder.build();
   }
 
-  public void broadcastLogMessage(SFLogAppender.SFLogEvent message) {
-    for (var sender : subscribers.values()) {
-      if (sender.eventPredicate().test(message, false)) {
-        sender.sendMessage(fromEvent(message, false));
-      }
-    }
-  }
-
-  public void sendPersonalMessage(UUID uuid, String message) {
-    var messageEvent = new SFLogAppender.SFLogEvent(
-      UUID.randomUUID().toString(),
-      message,
-      System.currentTimeMillis(),
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-    );
-    subscribers.values().stream()
-      .filter(sender -> sender.userId().equals(uuid))
-      .filter(sender -> sender.eventPredicate().test(messageEvent, true))
-      .forEach(sender -> sender.sendMessage(fromEvent(messageEvent, true)));
-  }
-
-  public void disconnect(UUID uuid) {
-    subscribers.values().stream()
-      .filter(sender -> sender.userId().equals(uuid))
-      .forEach(sender -> sender.responseObserver().onCompleted());
-
-    subscribers.entrySet().removeIf(entry -> entry.getValue().userId().equals(uuid));
-  }
-
   @Override
   public void getPrevious(PreviousLogRequest request, StreamObserver<PreviousLogResponse> responseObserver) {
     validateScopeAccess(request.getScope());
@@ -150,8 +111,8 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       var user = new CachedLazyObject<>((Supplier<Optional<SoulFireUser>>)
         () -> soulFireServer.authSystem().authenticateBySubject(userId, issuedAt), 1, TimeUnit.SECONDS);
       var predicate = eventPredicate(request.getScope());
-      new ConnectionMessageSender(
-        subscribers,
+      new StateHolder.ConnectionMessageSender(
+        soulFireServer.logStateHolder(),
         ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId(),
         (ServerCallStreamObserver<LogResponse>) responseObserver,
         (event, personal) -> user.get().filter(soulFireUser -> hasScopeAccess(soulFireUser, request.getScope())
@@ -213,26 +174,69 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     boolean test(SFLogAppender.SFLogEvent event, boolean personal);
   }
 
-  private record ConnectionMessageSender(Map<UUID, ConnectionMessageSender> subscribers,
-                                         UUID userId,
-                                         ServerCallStreamObserver<LogResponse> responseObserver,
-                                         EventPredicate eventPredicate) {
-    public ConnectionMessageSender {
-      var responseId = UUID.randomUUID();
-      subscribers.put(responseId, this);
+  public static class StateHolder {
+    private final Map<UUID, ConnectionMessageSender> subscribers = new ConcurrentHashMap<>();
 
-      responseObserver.setOnCancelHandler(() -> subscribers.remove(responseId));
-      responseObserver.setOnCloseHandler(() -> subscribers.remove(responseId));
+    public StateHolder() {
+      SFLogAppender.INSTANCE.logConsumers().add(this::broadcastLogMessage);
     }
 
-    public void sendMessage(LogString message) {
-      if (responseObserver.isCancelled()) {
-        return;
+    public void sendPersonalMessage(UUID uuid, String message) {
+      var messageEvent = new SFLogAppender.SFLogEvent(
+        UUID.randomUUID().toString(),
+        message,
+        System.currentTimeMillis(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      );
+      subscribers.values().stream()
+        .filter(sender -> sender.userId().equals(uuid))
+        .filter(sender -> sender.eventPredicate().test(messageEvent, true))
+        .forEach(sender -> sender.sendMessage(fromEvent(messageEvent, true)));
+    }
+
+    public void disconnect(UUID uuid) {
+      subscribers.values().stream()
+        .filter(sender -> sender.userId().equals(uuid))
+        .forEach(sender -> sender.responseObserver().onCompleted());
+
+      subscribers.entrySet().removeIf(entry -> entry.getValue().userId().equals(uuid));
+    }
+
+    public void broadcastLogMessage(SFLogAppender.SFLogEvent message) {
+      for (var sender : subscribers.values()) {
+        if (sender.eventPredicate().test(message, false)) {
+          sender.sendMessage(fromEvent(message, false));
+        }
+      }
+    }
+
+    private record ConnectionMessageSender(StateHolder stateHolder,
+                                           UUID userId,
+                                           ServerCallStreamObserver<LogResponse> responseObserver,
+                                           EventPredicate eventPredicate) {
+      public ConnectionMessageSender {
+        var responseId = UUID.randomUUID();
+        stateHolder.subscribers.put(responseId, this);
+
+        responseObserver.setOnCancelHandler(() -> stateHolder.subscribers.remove(responseId));
+        responseObserver.setOnCloseHandler(() -> stateHolder.subscribers.remove(responseId));
       }
 
-      responseObserver.onNext(LogResponse.newBuilder()
-        .setMessage(message)
-        .build());
+      public void sendMessage(LogString message) {
+        if (responseObserver.isCancelled()) {
+          return;
+        }
+
+        responseObserver.onNext(LogResponse.newBuilder()
+          .setMessage(message)
+          .build());
+      }
     }
   }
 }
