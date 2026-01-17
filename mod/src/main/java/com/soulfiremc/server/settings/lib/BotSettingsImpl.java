@@ -19,14 +19,8 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Value;
-import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.ServerConfig;
-import com.soulfiremc.grpc.generated.SettingsEntry;
-import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +32,14 @@ import java.util.Optional;
 @Slf4j
 public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings) implements BotSettingsSource {
   @Override
-  public Optional<JsonElement> get(Property<BotSettingsSource> property) {
+  public Optional<JsonElement> get(Property<SettingsSource.Bot> property) {
     return this.stem.get(property)
       // TODO: Properly store a base BotSettings steam inside a InstanceSettings stem in the future
       .or(() -> SettingsSource.Stem.getFromRawSettings(instanceSettings.stem().settings(), property));
   }
 
   @With
-  public record Stem(Map<String, Map<String, JsonElement>> settings) implements SettingsSource.Stem<BotSettingsSource> {
+  public record Stem(Map<String, Map<String, JsonElement>> settings) implements SettingsSource.Stem<SettingsSource.Bot> {
     public static final Stem EMPTY = new Stem(Map.of());
 
     public static Stem deserialize(JsonElement json) {

@@ -18,18 +18,12 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.*;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Value;
-import com.google.protobuf.util.JsonFormat;
 import com.soulfiremc.grpc.generated.InstanceConfig;
-import com.soulfiremc.grpc.generated.SettingsEntry;
-import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.With;
@@ -43,7 +37,7 @@ import java.util.*;
 @Slf4j
 public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSettings) implements InstanceSettingsSource {
   @Override
-  public Optional<JsonElement> get(Property<InstanceSettingsSource> property) {
+  public Optional<JsonElement> get(Property<SettingsSource.Instance> property) {
     return this.stem.get(property);
   }
 
@@ -60,7 +54,7 @@ public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSetting
   @With
   public record Stem(Map<String, Map<String, JsonElement>> settings,
                      List<MinecraftAccount> accounts,
-                     List<SFProxy> proxies) implements SettingsSource.Stem<InstanceSettingsSource> {
+                     List<SFProxy> proxies) implements SettingsSource.Stem<SettingsSource.Instance> {
     public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of());
     private static final Gson PROFILE_GSON =
       GsonInstance.GSON.newBuilder()

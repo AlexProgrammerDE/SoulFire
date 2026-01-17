@@ -52,7 +52,7 @@ public final class InstanceSettingsDelegate implements InstanceSettingsSource {
   }
 
   @Override
-  public Optional<JsonElement> get(Property<InstanceSettingsSource> property) {
+  public Optional<JsonElement> get(Property<SettingsSource.Instance> property) {
     return source.get().get(property);
   }
 }

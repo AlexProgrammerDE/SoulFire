@@ -26,8 +26,8 @@ import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import lombok.AccessLevel;
@@ -308,30 +308,30 @@ public final class KillAura extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(KillAuraSettings.class, "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
+    event.settingsPageRegistry().addPluginPage(KillAuraSettings.class, "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class KillAuraSettings implements SettingsObject {
     private static final String NAMESPACE = "kill-aura";
-    public static final BooleanProperty<BotSettingsSource> ENABLE =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLE =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enable")
         .uiName("Enable")
         .description("Enable KillAura")
         .defaultValue(false)
         .build();
-    public static final StringListProperty<BotSettingsSource> WHITELISTED_USERS =
-      ImmutableStringListProperty.<BotSettingsSource>builder()
+    public static final StringListProperty<SettingsSource.Bot> WHITELISTED_USERS =
+      ImmutableStringListProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("whitelisted-users")
         .uiName("Whitelisted Users")
         .description("These users will be ignored by the kill aura")
         .addDefaultValue("Dinnerbone")
         .build();
-    public static final DoubleProperty<BotSettingsSource> HIT_RANGE =
-      ImmutableDoubleProperty.<BotSettingsSource>builder()
+    public static final DoubleProperty<SettingsSource.Bot> HIT_RANGE =
+      ImmutableDoubleProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("hit-range")
         .uiName("Hit Range")
@@ -341,8 +341,8 @@ public final class KillAura extends InternalPlugin {
         .maxValue(6.0d)
         .stepValue(0.1d)
         .build();
-    public static final DoubleProperty<BotSettingsSource> SWING_RANGE =
-      ImmutableDoubleProperty.<BotSettingsSource>builder()
+    public static final DoubleProperty<SettingsSource.Bot> SWING_RANGE =
+      ImmutableDoubleProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("swing-range")
         .uiName("Swing Range")
@@ -352,8 +352,8 @@ public final class KillAura extends InternalPlugin {
         .maxValue(10.0d)
         .stepValue(0.1d)
         .build();
-    public static final DoubleProperty<BotSettingsSource> LOOK_RANGE =
-      ImmutableDoubleProperty.<BotSettingsSource>builder()
+    public static final DoubleProperty<SettingsSource.Bot> LOOK_RANGE =
+      ImmutableDoubleProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("look-range")
         .uiName("Look Range")
@@ -363,24 +363,24 @@ public final class KillAura extends InternalPlugin {
         .maxValue(25.0d)
         .stepValue(0.1d)
         .build();
-    public static final BooleanProperty<BotSettingsSource> CHECK_WALLS =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> CHECK_WALLS =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("check-walls")
         .uiName("Check Walls")
         .description("Check if the entity is behind a wall")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> IGNORE_COOLDOWN =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> IGNORE_COOLDOWN =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("ignore-cooldown")
         .uiName("Ignore Cooldown")
         .description("Ignore the 1.9+ attack cooldown to act like a 1.8 kill aura")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> ATTACK_DELAY_TICKS =
-      ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> ATTACK_DELAY_TICKS =
+      ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("attack-delay-ticks")
         .minValue(1)

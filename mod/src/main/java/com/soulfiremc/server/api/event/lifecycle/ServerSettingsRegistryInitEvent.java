@@ -19,8 +19,7 @@ package com.soulfiremc.server.api.event.lifecycle;
 
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.event.SoulFireGlobalEvent;
-import com.soulfiremc.server.settings.lib.ServerSettingsSource;
-import com.soulfiremc.server.settings.lib.SettingsRegistry;
+import com.soulfiremc.server.settings.lib.SettingsPageRegistry;
 
-public record ServerSettingsRegistryInitEvent(SoulFireServer soulFireServer, SettingsRegistry<ServerSettingsSource> settingsRegistry)
+public record ServerSettingsRegistryInitEvent(SoulFireServer soulFireServer, SettingsPageRegistry settingsPageRegistry)
   implements SoulFireGlobalEvent {}

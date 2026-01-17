@@ -23,6 +23,7 @@ import com.openai.core.ClientOptions;
 import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
 import com.soulfiremc.server.settings.property.IntProperty;
@@ -37,16 +38,16 @@ import java.time.Duration;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
-  public static final StringProperty<BotSettingsSource> API_BASE_URL =
-    ImmutableStringProperty.<BotSettingsSource>builder()
+  public static final StringProperty<SettingsSource.Bot> API_BASE_URL =
+    ImmutableStringProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("api-base-url")
       .uiName("API Base URL")
       .description("API server base URL, can also be changed to other providers")
       .defaultValue(ClientOptions.PRODUCTION_URL)
       .build();
-  public static final StringProperty<BotSettingsSource> API_KEY =
-    ImmutableStringProperty.<BotSettingsSource>builder()
+  public static final StringProperty<SettingsSource.Bot> API_KEY =
+    ImmutableStringProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("api-key")
       .uiName("API Key")
@@ -54,8 +55,8 @@ public final class AISettings implements SettingsObject {
       .defaultValue("")
       .type(StringSetting.InputType.PASSWORD)
       .build();
-  public static final IntProperty<BotSettingsSource> REQUEST_TIMEOUT =
-    ImmutableIntProperty.<BotSettingsSource>builder()
+  public static final IntProperty<SettingsSource.Bot> REQUEST_TIMEOUT =
+    ImmutableIntProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("api-request-timeout")
       .uiName("API Request Timeout")
@@ -64,8 +65,8 @@ public final class AISettings implements SettingsObject {
       .minValue(0)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final IntProperty<BotSettingsSource> MAX_RETRIES =
-    ImmutableIntProperty.<BotSettingsSource>builder()
+  public static final IntProperty<SettingsSource.Bot> MAX_RETRIES =
+    ImmutableIntProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("api-max-retries")
       .uiName("API Max Retries")

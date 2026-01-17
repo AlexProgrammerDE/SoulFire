@@ -27,8 +27,8 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.UUIDHelper;
@@ -83,7 +83,7 @@ public final class ForwardingBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone", ForwardingBypassSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone", ForwardingBypassSettings.ENABLED);
   }
 
   @EventHandler
@@ -348,16 +348,16 @@ public final class ForwardingBypass extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ForwardingBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "forwarding-bypass";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable forwarding bypass")
         .description("Enable the forwarding bypass")
         .defaultValue(false)
         .build();
-    public static final ComboProperty<BotSettingsSource> FORWARDING_MODE =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> FORWARDING_MODE =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("forwarding-mode")
         .uiName("Forwarding mode")
@@ -370,8 +370,8 @@ public final class ForwardingBypass extends InternalPlugin {
           case SF_BYPASS -> "door-open";
         }))
         .build();
-    public static final StringProperty<BotSettingsSource> SECRET =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> SECRET =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("secret")
         .uiName("Secret")
@@ -379,8 +379,8 @@ public final class ForwardingBypass extends InternalPlugin {
         .defaultValue("forwarding secret")
         .type(StringSetting.InputType.PASSWORD)
         .build();
-    public static final StringProperty<BotSettingsSource> PLAYER_ADDRESS =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> PLAYER_ADDRESS =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("player-address")
         .uiName("Player Address")

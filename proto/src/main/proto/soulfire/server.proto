@@ -17,6 +17,7 @@ message ServerInfoRequest {
 message ServerInfoResponse {
   ServerConfig config = 1;
   repeated SettingsPage server_settings = 2;
+  repeated ServerPlugin plugins = 3;
 }
 
 message ServerUpdateConfigRequest {

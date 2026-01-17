@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.settings.instance;
 
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -26,24 +26,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class AccountSettings implements SettingsObject {
   private static final String NAMESPACE = "account";
-  public static final StringProperty<InstanceSettingsSource> NAME_FORMAT =
-    ImmutableStringProperty.<InstanceSettingsSource>builder()
+  public static final StringProperty<SettingsSource.Instance> NAME_FORMAT =
+    ImmutableStringProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("name-format")
       .uiName("Name format")
       .description("The format of the bot names. %d will be replaced with the bot number.")
       .defaultValue("Bot_%d")
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> SHUFFLE_ACCOUNTS =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Instance> SHUFFLE_ACCOUNTS =
+    ImmutableBooleanProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("shuffle-accounts")
       .uiName("Shuffle accounts")
       .description("Should the accounts order be random when connecting bots?")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> USE_PROXIES_FOR_ACCOUNT_AUTH =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Instance> USE_PROXIES_FOR_ACCOUNT_AUTH =
+    ImmutableBooleanProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("use-proxies-for-account-auth")
       .uiName("Use proxies for account auth")
@@ -52,8 +52,8 @@ public final class AccountSettings implements SettingsObject {
         Otherwise the SF server will authenticate accounts directly.""")
       .defaultValue(false)
       .build();
-  public static final IntProperty<InstanceSettingsSource> ACCOUNT_IMPORT_CONCURRENCY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<SettingsSource.Instance> ACCOUNT_IMPORT_CONCURRENCY =
+    ImmutableIntProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("account-import-concurrency")
       .uiName("Account import concurrency")

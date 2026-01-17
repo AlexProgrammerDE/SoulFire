@@ -74,6 +74,7 @@ message InstanceInfoResponse {
   InstanceState state = 3;
   repeated InstancePermissionState instance_permissions = 4;
   repeated SettingsPage instance_settings = 6;
+  repeated ServerPlugin plugins = 7;
 }
 
 message InstanceUpdateMetaRequest {

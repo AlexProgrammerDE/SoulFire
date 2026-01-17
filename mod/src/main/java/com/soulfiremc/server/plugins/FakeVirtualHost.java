@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -64,30 +64,30 @@ public final class FakeVirtualHost extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(FakeVirtualHostSettings.class, "Fake Virtual Host", this, "globe", FakeVirtualHostSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(FakeVirtualHostSettings.class, "Fake Virtual Host", this, "globe", FakeVirtualHostSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class FakeVirtualHostSettings implements SettingsObject {
     private static final String NAMESPACE = "fake-virtual-host";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Fake virtual host")
         .description("Whether to fake the virtual host or not")
         .defaultValue(false)
         .build();
-    public static final StringProperty<BotSettingsSource> HOSTNAME =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> HOSTNAME =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("hostname")
         .uiName("Hostname")
         .description("The hostname to fake")
         .defaultValue("localhost")
         .build();
-    public static final IntProperty<BotSettingsSource> PORT =
-      ImmutableIntProperty.<BotSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Bot> PORT =
+      ImmutableIntProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("port")
         .uiName("Port")

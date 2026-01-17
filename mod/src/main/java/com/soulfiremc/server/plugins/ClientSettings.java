@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotClientSettingsEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -86,22 +86,22 @@ public final class ClientSettings extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(ClientSettingsSettings.class, "Client Settings", this, "settings-2", ClientSettingsSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ClientSettingsSettings.class, "Client Settings", this, "settings-2", ClientSettingsSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ClientSettingsSettings implements SettingsObject {
     private static final String NAMESPACE = "client-settings";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Send client settings")
         .description("Send client settings to the server when joining")
         .defaultValue(true)
         .build();
-    public static final StringProperty<BotSettingsSource> CLIENT_LOCALE =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> CLIENT_LOCALE =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("client-locale")
         .uiName("Client locale")
@@ -109,8 +109,8 @@ public final class ClientSettings extends InternalPlugin {
         .defaultValue("en_us")
         .maxLength(ClientInformation.MAX_LANGUAGE_LENGTH)
         .build();
-    public static final IntProperty<BotSettingsSource> RENDER_DISTANCE =
-      ImmutableIntProperty.<BotSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Bot> RENDER_DISTANCE =
+      ImmutableIntProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("render-distance")
         .uiName("Render distance")
@@ -119,8 +119,8 @@ public final class ClientSettings extends InternalPlugin {
         .minValue(2)
         .maxValue(32)
         .build();
-    public static final ComboProperty<BotSettingsSource> CHAT_VISIBILITY =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> CHAT_VISIBILITY =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("chat-visibility")
         .uiName("Chat visibility")
@@ -132,72 +132,72 @@ public final class ClientSettings extends InternalPlugin {
           case HIDDEN -> "eye-off";
         }))
         .build();
-    public static final BooleanProperty<BotSettingsSource> USE_CHAT_COLORS =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> USE_CHAT_COLORS =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("use-chat-colors")
         .uiName("Use chat colors")
         .description("Whether the client will use chat colors")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> CAPE_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> CAPE_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("cape-enabled")
         .uiName("Cape enabled")
         .description("Whether to display the bots cape if it has one")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> JACKET_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> JACKET_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("jacket-enabled")
         .uiName("Jacket enabled")
         .description("Whether to render the jacket overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> LEFT_SLEEVE_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> LEFT_SLEEVE_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("left-sleeve-enabled")
         .uiName("Left sleeve enabled")
         .description("Whether to render the left overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> RIGHT_SLEEVE_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> RIGHT_SLEEVE_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("right-sleeve-enabled")
         .uiName("Right sleeve enabled")
         .description("Whether to render the right overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> LEFT_PANTS_LEG_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> LEFT_PANTS_LEG_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("left-pants-leg-enabled")
         .uiName("Left pants leg enabled")
         .description("Whether to render the left pants leg overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> RIGHT_PANTS_LEG_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> RIGHT_PANTS_LEG_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("right-pants-leg-enabled")
         .uiName("Right pants leg enabled")
         .description("Whether to render the right pants leg overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<BotSettingsSource> HAT_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> HAT_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("hat-enabled")
         .uiName("Hat enabled")
         .description("Whether to render the hat overlay skin layer")
         .defaultValue(true)
         .build();
-    public static final ComboProperty<BotSettingsSource> HAND_PREFERENCE =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> HAND_PREFERENCE =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("hand-preference")
         .uiName("Hand preference")
@@ -208,24 +208,24 @@ public final class ClientSettings extends InternalPlugin {
           case RIGHT -> "circle-arrow-right";
         }))
         .build();
-    public static final BooleanProperty<BotSettingsSource> TEXT_FILTERING_ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> TEXT_FILTERING_ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("text-filtering-enabled")
         .uiName("Text filtering enabled")
         .description("Whether to filter chat messages from the server")
         .defaultValue(false)
         .build();
-    public static final BooleanProperty<BotSettingsSource> ALLOWS_LISTING =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ALLOWS_LISTING =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("allows-listing")
         .uiName("Allows listing")
         .description("Whether the client wants their username to be shown in the server list")
         .defaultValue(true)
         .build();
-    public static final ComboProperty<BotSettingsSource> PARTICLE_STATUS =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> PARTICLE_STATUS =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("particle-status")
         .uiName("Particle Status")

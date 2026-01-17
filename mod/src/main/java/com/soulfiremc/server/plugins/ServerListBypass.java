@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
@@ -66,21 +66,21 @@ public final class ServerListBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(ServerListBypassSettings.class, "Server List Bypass", this, "network", ServerListBypassSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ServerListBypassSettings.class, "Server List Bypass", this, "network", ServerListBypassSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class ServerListBypassSettings implements SettingsObject {
     private static final String NAMESPACE = "server-list-bypass";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Server List Bypass")
         .description("Whether to ping the server list before connecting.")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> DELAY = ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

@@ -17,10 +17,19 @@
  */
 package com.soulfiremc.server.settings.property;
 
+import com.soulfiremc.grpc.generated.SettingsEntryIdentifier;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 
-public sealed interface Property<S extends SettingsSource> permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
+@SuppressWarnings("unused")
+public sealed interface Property<S extends SettingsSource.SourceType> permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
   String namespace();
 
   String key();
+
+  default SettingsEntryIdentifier toProtoIdentifier() {
+    return SettingsEntryIdentifier.newBuilder()
+      .setNamespace(this.namespace())
+      .setKey(this.key())
+      .build();
+  }
 }

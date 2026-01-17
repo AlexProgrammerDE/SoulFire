@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.TimeUtil;
 import lombok.AccessLevel;
@@ -48,7 +48,7 @@ public final class AutoReconnect extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
   }
 
   @EventHandler
@@ -91,16 +91,16 @@ public final class AutoReconnect extends InternalPlugin {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoReconnectSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-reconnect";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Reconnect")
         .description("Reconnect a bot when it times out/is kicked")
         .defaultValue(true)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> DELAY =
-      ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY =
+      ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

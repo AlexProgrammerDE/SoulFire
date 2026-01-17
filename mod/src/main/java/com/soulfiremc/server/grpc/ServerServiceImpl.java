@@ -49,7 +49,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
 
       responseObserver.onNext(ServerInfoResponse.newBuilder()
         .setConfig(config.toProto())
-        .addAllServerSettings(soulFireServer.settingsRegistry().exportSettingsMeta())
+              .addAllServerSettings(soulFireServer.settingsPageRegistry().exportSettingsMeta())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

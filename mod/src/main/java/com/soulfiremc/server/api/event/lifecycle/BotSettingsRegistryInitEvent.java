@@ -17,13 +17,9 @@
  */
 package com.soulfiremc.server.api.event.lifecycle;
 
-import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
-import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
-import com.soulfiremc.server.settings.lib.SettingsRegistry;
+import com.soulfiremc.server.settings.lib.SettingsPageRegistry;
 
-public record BotSettingsRegistryInitEvent(BotConnection connection, SettingsRegistry<BotSettingsSource> settingsRegistry)
+public record BotSettingsRegistryInitEvent(BotConnection connection, SettingsPageRegistry settingsPageRegistry)
   implements SoulFireBotEvent {}

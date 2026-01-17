@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.settings.instance;
 
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ProxySettings implements SettingsObject {
   private static final String NAMESPACE = "proxy";
-  public static final IntProperty<InstanceSettingsSource> BOTS_PER_PROXY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<SettingsSource.Instance> BOTS_PER_PROXY =
+    ImmutableIntProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("bots-per-proxy")
       .uiName("Bots per proxy")
@@ -36,24 +36,24 @@ public final class ProxySettings implements SettingsObject {
       .minValue(-1)
       .maxValue(Integer.MAX_VALUE)
       .build();
-  public static final BooleanProperty<InstanceSettingsSource> SHUFFLE_PROXIES =
-    ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Instance> SHUFFLE_PROXIES =
+    ImmutableBooleanProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("shuffle-proxies")
       .uiName("Shuffle proxies")
       .description("Should the proxy order be random when connecting bots?")
       .defaultValue(false)
       .build();
-  public static final StringProperty<InstanceSettingsSource> PROXY_CHECK_ADDRESS =
-    ImmutableStringProperty.<InstanceSettingsSource>builder()
+  public static final StringProperty<SettingsSource.Instance> PROXY_CHECK_ADDRESS =
+    ImmutableStringProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("proxy-check-address")
       .uiName("Proxy check address")
       .description("What Minecraft server address to use to check if a proxy is working")
       .defaultValue("mc.hypixel.net")
       .build();
-  public static final IntProperty<InstanceSettingsSource> PROXY_CHECK_CONCURRENCY =
-    ImmutableIntProperty.<InstanceSettingsSource>builder()
+  public static final IntProperty<SettingsSource.Instance> PROXY_CHECK_CONCURRENCY =
+    ImmutableIntProperty.<SettingsSource.Instance>builder()
       .namespace(NAMESPACE)
       .key("proxy-check-concurrency")
       .uiName("Proxy check concurrency")

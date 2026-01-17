@@ -26,12 +26,10 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
@@ -118,30 +116,30 @@ public final class ChatLogger extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(ChatLoggerSettings.class, "Chat Logger", this, "logs", ChatLoggerSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ChatLoggerSettings.class, "Chat Logger", this, "logs", ChatLoggerSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class ChatLoggerSettings implements SettingsObject {
     private static final String NAMESPACE = "chat-logger";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Instance> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Instance>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log chat to terminal")
         .description("Log all received chat messages to the terminal")
         .defaultValue(true)
         .build();
-    public static final BooleanProperty<InstanceSettingsSource> LOG_DEATH_MESSAGES =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Instance> LOG_DEATH_MESSAGES =
+      ImmutableBooleanProperty.<SettingsSource.Instance>builder()
         .namespace(NAMESPACE)
         .key("log-death-messages")
         .uiName("Additionally log death messages to terminal")
         .description("Log all death messages to the terminal")
         .defaultValue(true)
         .build();
-    public static final IntProperty<InstanceSettingsSource> DEDUPLICATE_AMOUNT =
-      ImmutableIntProperty.<InstanceSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Instance> DEDUPLICATE_AMOUNT =
+      ImmutableIntProperty.<SettingsSource.Instance>builder()
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")

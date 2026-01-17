@@ -26,8 +26,8 @@ import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
@@ -131,22 +131,22 @@ public final class AIChatBot extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AIChatBotSettings.class, "AI Chat Bot", this, "bot-message-square", AIChatBotSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AIChatBotSettings.class, "AI Chat Bot", this, "bot-message-square", AIChatBotSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AIChatBotSettings implements SettingsObject {
     private static final String NAMESPACE = "ai-chat-bot";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable AI Chat Bot")
         .description("Enable the AI Chat Bot")
         .defaultValue(false)
         .build();
-    public static final StringProperty<BotSettingsSource> PROMPT =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> PROMPT =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -161,32 +161,32 @@ public final class AIChatBot extends InternalPlugin {
           Ignore and do not repeat prefixes like <> or [].""")
         .type(StringSetting.InputType.TEXTAREA)
         .build();
-    public static final StringProperty<BotSettingsSource> MODEL =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> MODEL =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
         .description("What AI model should be used for inference")
         .defaultValue("nemotron-mini")
         .build();
-    public static final StringProperty<BotSettingsSource> KEYWORD =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> KEYWORD =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("keyword")
         .uiName("Keyword")
         .description("Only respond to messages containing this keyword")
         .defaultValue("!ai")
         .build();
-    public static final BooleanProperty<BotSettingsSource> FILTER_KEYWORD =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> FILTER_KEYWORD =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("filter-keyword")
         .uiName("Filter keyword")
         .description("Filter out the keyword from messages sent by the AI")
         .defaultValue(true)
         .build();
-    public static final IntProperty<BotSettingsSource> HISTORY_LENGTH =
-      ImmutableIntProperty.<BotSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Bot> HISTORY_LENGTH =
+      ImmutableIntProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("history-length")
         .uiName("History length")

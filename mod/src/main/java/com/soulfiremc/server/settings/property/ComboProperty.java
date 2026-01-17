@@ -30,7 +30,7 @@ import java.util.function.Function;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public abstract non-sealed class ComboProperty<S extends SettingsSource> implements Property<S> {
+public abstract non-sealed class ComboProperty<S extends SettingsSource.SourceType> implements Property<S> {
   public static <T extends Enum<T>> ComboOption[] optionsFromEnum(
     T[] values, Function<T, String> displayNameMapper, Function<T, @Nullable String> iconMapper) {
     var options = new ComboOption[values.length];

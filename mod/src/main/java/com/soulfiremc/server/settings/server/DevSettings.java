@@ -17,8 +17,8 @@
  */
 package com.soulfiremc.server.settings.server;
 
-import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import lombok.AccessLevel;
@@ -27,56 +27,56 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DevSettings implements SettingsObject {
   private static final String NAMESPACE = "dev";
-  public static final BooleanProperty<ServerSettingsSource> SOULFIRE_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> SOULFIRE_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("soulfire-debug")
       .uiName("SoulFire debug")
       .description("Enable SoulFire debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> MINECRAFT_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> MINECRAFT_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("minecraft-debug")
       .uiName("Minecraft debug")
       .description("Enable Minecraft debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> NETTY_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> NETTY_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("netty-debug")
       .uiName("Netty debug")
       .description("Enable Netty debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> GRPC_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> GRPC_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("grpc-debug")
       .uiName("gRPC debug")
       .description("Enable gRPC debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> HIBERNATE_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> HIBERNATE_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("hibernate-debug")
       .uiName("Hibernate debug")
       .description("Enable Hibernate debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> VIA_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> VIA_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("via-debug")
       .uiName("Via debug")
       .description("Enable Via* debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<ServerSettingsSource> OTHER_DEBUG =
-    ImmutableBooleanProperty.<ServerSettingsSource>builder()
+  public static final BooleanProperty<SettingsSource.Server> OTHER_DEBUG =
+    ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .namespace(NAMESPACE)
       .key("other-debug")
       .uiName("Other debug")

@@ -29,7 +29,7 @@ public final class BotSettingsDelegate implements BotSettingsSource {
   private final Supplier<BotSettingsSource> source;
 
   @Override
-  public Optional<JsonElement> get(Property<BotSettingsSource> property) {
+  public Optional<JsonElement> get(Property<SettingsSource.Bot> property) {
     return source.get().get(property);
   }
 

@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableStringProperty;
@@ -69,30 +69,30 @@ public final class AutoRegister extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AutoRegisterSettings.class, "Auto Register", this, "key-round", AutoRegisterSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoRegisterSettings.class, "Auto Register", this, "key-round", AutoRegisterSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoRegisterSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-register";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Register")
         .description("Make bots run the /register and /login command after joining")
         .defaultValue(false)
         .build();
-    public static final StringProperty<BotSettingsSource> REGISTER_COMMAND =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> REGISTER_COMMAND =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("register-command")
         .uiName("Register Command")
         .description("Command to be executed to register")
         .defaultValue("/register %password% %password%")
         .build();
-    public static final StringProperty<BotSettingsSource> LOGIN_COMMAND =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> LOGIN_COMMAND =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("login-command")
         .uiName("Login Command")
@@ -100,8 +100,8 @@ public final class AutoRegister extends InternalPlugin {
         .defaultValue("/login %password%")
         .build();
 
-    public static final StringProperty<BotSettingsSource> PASSWORD_FORMAT =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> PASSWORD_FORMAT =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("password-format")
         .uiName("Password Format")

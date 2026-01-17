@@ -106,9 +106,9 @@ public final class CLIManager {
         .getInstanceInfo(InstanceInfoRequest.newBuilder().setId(cliInstanceId.toString()).build())
         .getInstanceSettingsList()) {
       for (var entry : page.getEntriesList()) {
-        var propertyKey = new PropertyKey(page.getNamespace(), entry.getKey());
+        var propertyKey = new PropertyKey(entry.getId().getNamespace(), entry.getId().getKey());
 
-        var baseArg = "--%s-%s".formatted(page.getNamespace(), entry.getKey());
+        var baseArg = "--%s-%s".formatted(entry.getId().getNamespace(), entry.getId().getKey());
         switch (entry.getValueCase()) {
           case STRING -> {
             var stringEntry = entry.getString();

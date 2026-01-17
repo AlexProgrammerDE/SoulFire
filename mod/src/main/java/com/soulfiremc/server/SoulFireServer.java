@@ -33,7 +33,7 @@ import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
-import com.soulfiremc.server.settings.lib.SettingsRegistry;
+import com.soulfiremc.server.settings.lib.SettingsPageRegistry;
 import com.soulfiremc.server.settings.server.DevSettings;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.spark.SFSparkPlugin;
@@ -82,7 +82,7 @@ public final class SoulFireServer {
   private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
-  private final SettingsRegistry<ServerSettingsSource> settingsRegistry;
+  private final SettingsPageRegistry settingsPageRegistry;
   private final ServerCommandManager serverCommandManager;
   private final ShutdownManager shutdownManager;
   private final SessionFactory sessionFactory;
@@ -131,7 +131,7 @@ public final class SoulFireServer {
         });
 
     var serverSettingsRegistryFuture = scheduler.supplyAsync(() -> {
-      var registry = new SettingsRegistry<ServerSettingsSource>()
+      var registry = new SettingsPageRegistry()
         .addInternalPage(ServerSettings.class, "Server Settings")
         .addInternalPage(DevSettings.class, "Developer Settings");
 
@@ -155,7 +155,7 @@ public final class SoulFireServer {
       log.info("SoulFire is up to date!");
     }
 
-    this.settingsRegistry = serverSettingsRegistryFuture.join();
+    this.settingsPageRegistry = serverSettingsRegistryFuture.join();
     this.sparkPlugin = sparkStart.join();
     this.serverCommandManager = serverCommandManagerFuture.join();
 

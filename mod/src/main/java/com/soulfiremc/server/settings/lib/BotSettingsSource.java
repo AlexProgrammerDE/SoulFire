@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.settings.lib;
 
-public sealed interface BotSettingsSource extends SettingsSource<BotSettingsSource> permits BotSettingsDelegate, BotSettingsImpl {
+public sealed interface BotSettingsSource extends SettingsSource<SettingsSource.Bot> permits BotSettingsDelegate, BotSettingsImpl {
   InstanceSettingsSource instanceSettings();
 
   BotSettingsImpl.Stem stem();

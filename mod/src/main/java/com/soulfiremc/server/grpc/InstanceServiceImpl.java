@@ -131,7 +131,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .setConfig(instanceEntity.settings().toProto())
         .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
-        .addAllInstanceSettings(instance.instanceSettingsRegistry().exportSettingsMeta())
+        .addAllInstanceSettings(instance.instanceSettingsPageRegistry().exportSettingsMeta())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

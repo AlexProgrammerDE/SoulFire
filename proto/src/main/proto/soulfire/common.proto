@@ -73,6 +73,11 @@ message SettingsNamespace {
   repeated SettingsEntry entries = 2;
 }
 
+message SettingsEntryIdentifier {
+  string namespace = 1;
+  string key = 2;
+}
+
 enum GlobalPermission {
   CREATE_INSTANCE = 0;
   GLOBAL_SUBSCRIBE_LOGS = 1;
@@ -223,9 +228,9 @@ message MinMaxSetting {
 }
 
 // A entry in the settings page
-message SettingEntry {
-  // Basically we only send a kv map to the server with every setting entry
-  string key = 1;
+message SettingsPageEntry {
+  // id + namespace that this setting corresponds to
+  SettingsEntryIdentifier id = 9;
   oneof value {
     StringSetting string = 2;
     IntSetting int = 3;
@@ -238,16 +243,14 @@ message SettingEntry {
 }
 
 message SettingsPage {
-  optional ServerPlugin owning_plugin = 2;
+  optional string owning_plugin_id = 2;
   // The name of the page for these settings
   string page_name = 3;
-  // What namespace the settings of this page represent
-  string namespace = 4;
-  repeated SettingEntry entries = 5;
+  repeated SettingsPageEntry entries = 5;
   // https://lucide.dev icon id for this page (Usually rendered left of the page name)
   string icon_id = 6;
   // Key which makes this plugin "enabled" or "disabled"
-  optional string enabled_key = 7;
+  optional SettingsEntryIdentifier enabled_identifier = 7;
 }
 
 message ServerPlugin {

@@ -76,7 +76,7 @@ public final class InstanceManager {
   private final SessionFactory sessionFactory;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final CachedLazyObject<String> friendlyNameCache;
-  private final SettingsRegistry<InstanceSettingsSource> instanceSettingsRegistry;
+  private final SettingsPageRegistry instanceSettingsPageRegistry;
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
 
@@ -113,8 +113,8 @@ public final class InstanceManager {
       log.error("Error while loading scripts for instance {}", id, t);
     }
 
-    this.instanceSettingsRegistry = scheduler.supplyAsync(() -> {
-      var registry = new SettingsRegistry<InstanceSettingsSource>()
+    this.instanceSettingsPageRegistry = scheduler.supplyAsync(() -> {
+      var registry = new SettingsPageRegistry()
         // Needs Via loaded to have all protocol versions
         .addInternalPage(BotSettings.class, "Bot Settings")
         .addInternalPage(AccountSettings.class, "Account Settings")

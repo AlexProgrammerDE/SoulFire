@@ -25,11 +25,10 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
 import com.soulfiremc.server.settings.property.ImmutableIntProperty;
@@ -96,22 +95,22 @@ public final class DisconnectLogger extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(DisconnectLoggerSettings.class, "Disconnect Logger", this, "logs", DisconnectLoggerSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(DisconnectLoggerSettings.class, "Disconnect Logger", this, "logs", DisconnectLoggerSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class DisconnectLoggerSettings implements SettingsObject {
     private static final String NAMESPACE = "disconnect-logger";
-    public static final BooleanProperty<InstanceSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<InstanceSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Instance> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Instance>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log disconnects to terminal")
         .description("Log all bot disconnects to the terminal")
         .defaultValue(true)
         .build();
-    public static final IntProperty<InstanceSettingsSource> DEDUPLICATE_AMOUNT =
-      ImmutableIntProperty.<InstanceSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Instance> DEDUPLICATE_AMOUNT =
+      ImmutableIntProperty.<SettingsSource.Instance>builder()
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")

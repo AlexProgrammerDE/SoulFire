@@ -26,8 +26,8 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -83,21 +83,21 @@ public final class AntiAFK extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AntiAFKSettings.class, "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AntiAFKSettings.class, "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AntiAFKSettings implements SettingsObject {
     private static final String NAMESPACE = "anti-afk";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Anti AFK")
         .description("Enable the Anti AFK feature")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> DISTANCE = ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DISTANCE = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("distance")
       .minValue(1)
@@ -113,7 +113,7 @@ public final class AntiAFK extends InternalPlugin {
         .defaultValue(30)
         .build())
       .build();
-    public static final MinMaxProperty<BotSettingsSource> DELAY = ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

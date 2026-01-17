@@ -23,8 +23,8 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
@@ -125,22 +125,22 @@ public final class AutoEat extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AutoEatSettings.class, "Auto Eat", this, "drumstick", AutoEatSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoEatSettings.class, "Auto Eat", this, "drumstick", AutoEatSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class AutoEatSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-eat";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Eat")
         .description("Eat available food automatically when hungry")
         .defaultValue(true)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> DELAY =
-      ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY =
+      ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

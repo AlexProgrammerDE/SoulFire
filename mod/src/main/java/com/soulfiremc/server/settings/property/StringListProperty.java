@@ -26,7 +26,7 @@ import java.util.List;
 @Gson.TypeAdapters
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
-public abstract non-sealed class StringListProperty<S extends SettingsSource> implements Property<S> {
+public abstract non-sealed class StringListProperty<S extends SettingsSource.SourceType> implements Property<S> {
   public abstract String key();
 
   public abstract String uiName();

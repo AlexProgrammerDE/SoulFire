@@ -22,8 +22,8 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
@@ -69,22 +69,22 @@ public final class AutoChatMessage extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(AutoChatMessageSettings.class, "Auto Chat Message", this, "message-circle-code", AutoChatMessageSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoChatMessageSettings.class, "Auto Chat Message", this, "message-circle-code", AutoChatMessageSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)
   private static class AutoChatMessageSettings implements SettingsObject {
     private static final String NAMESPACE = "auto-chat-message";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Chat Message")
         .description("Attempt to send chat messages automatically in random intervals")
         .defaultValue(false)
         .build();
-    public static final MinMaxProperty<BotSettingsSource> DELAY =
-      ImmutableMinMaxProperty.<BotSettingsSource>builder()
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY =
+      ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)
@@ -100,8 +100,8 @@ public final class AutoChatMessage extends InternalPlugin {
           .defaultValue(5)
           .build())
         .build();
-    public static final StringListProperty<BotSettingsSource> MESSAGES =
-      ImmutableStringListProperty.<BotSettingsSource>builder()
+    public static final StringListProperty<SettingsSource.Bot> MESSAGES =
+      ImmutableStringListProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("messages")
         .uiName("Chat Messages")

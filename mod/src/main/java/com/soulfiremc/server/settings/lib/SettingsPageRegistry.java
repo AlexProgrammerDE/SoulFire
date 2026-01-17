@@ -28,13 +28,11 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
-public final class SettingsRegistry<S extends SettingsSource<S>> {
-  private final Map<String, NamespaceRegistry<S>> namespaceMap = new LinkedHashMap<>();
+public final class SettingsPageRegistry {
+  private final List<PageDefinition> pageList = new ArrayList<>();
 
   private static IntSetting createIntSetting(IntProperty<?> property) {
     return IntSetting.newBuilder()
@@ -150,7 +148,7 @@ public final class SettingsRegistry<S extends SettingsSource<S>> {
   /// @return The registry
   @This
   @ApiStatus.Internal
-  public SettingsRegistry<S> addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
+  public SettingsPageRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
     return addPage(clazz, pageName, null, "triangle-alert", null);
   }
 
@@ -164,15 +162,15 @@ public final class SettingsRegistry<S extends SettingsSource<S>> {
   ///                                         Icons ids are from <a href="https://lucide.dev">lucide.dev</a>
   /// @return The registry
   @This
-  public SettingsRegistry<S> addPluginPage(
-    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty<S> enabledProperty) {
-    return addPage(clazz, pageName, owningPlugin, iconId, enabledProperty.key());
+  public SettingsPageRegistry addPluginPage(
+    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty<?> enabledProperty) {
+    return addPage(clazz, pageName, owningPlugin, iconId, enabledProperty);
   }
 
-  @SuppressWarnings("unchecked")
   @This
-  private SettingsRegistry<S> addPage(
-    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable String enabledProperty) {
+  private SettingsPageRegistry addPage(
+    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable BooleanProperty<?> enabledProperty) {
+    var properties = new ArrayList<Property<?>>();
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
         && Modifier.isFinal(field.getModifiers())
@@ -181,22 +179,25 @@ public final class SettingsRegistry<S extends SettingsSource<S>> {
         field.setAccessible(true);
 
         try {
-          var property = (Property<S>) field.get(null);
+          var property = (Property<?>) field.get(null);
           if (property == null) {
             throw new IllegalStateException("Property is null!");
           }
 
-          var registry = namespaceMap.computeIfAbsent(property.namespace(), _ -> {
-            var pluginInfo = owningPlugin != null ? owningPlugin.pluginInfo() : null;
-            return new NamespaceRegistry<>(pluginInfo, pageName, new ArrayList<>(), iconId, enabledProperty);
-          });
-
-          registry.properties.add(property);
+          properties.add(property);
         } catch (IllegalAccessException e) {
           throw new IllegalStateException("Failed to get property!", e);
         }
       }
     }
+
+    pageList.add(new PageDefinition(
+      owningPlugin != null ? owningPlugin.pluginInfo() : null,
+      pageName,
+      properties,
+      iconId,
+      enabledProperty
+    ));
 
     return this;
   }
@@ -204,35 +205,33 @@ public final class SettingsRegistry<S extends SettingsSource<S>> {
   public List<SettingsPage> exportSettingsMeta() {
     var list = new ArrayList<SettingsPage>();
 
-    for (var namespaceEntry : namespaceMap.entrySet()) {
-      var namespaceRegistry = namespaceEntry.getValue();
-      var entries = new ArrayList<SettingEntry>();
-      for (var property : namespaceRegistry.properties) {
-        var entryBuilder = SettingEntry.newBuilder()
-          .setKey(property.key());
+    for (var pageDefinition : pageList) {
+      var entries = new ArrayList<SettingsPageEntry>();
+      for (var property : pageDefinition.properties) {
+        var entryBuilder = SettingsPageEntry.newBuilder()
+          .setId(property.toProtoIdentifier());
         entries.add(switch (property) {
-          case BooleanProperty<S> booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
-          case IntProperty<S> intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();
-          case DoubleProperty<S> doubleProperty -> entryBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
-          case StringProperty<S> stringProperty -> entryBuilder.setString(createStringSetting(stringProperty)).build();
-          case ComboProperty<S> comboProperty -> entryBuilder.setCombo(createComboSetting(comboProperty)).build();
-          case StringListProperty<S> stringListProperty -> entryBuilder.setStringList(createStringListSetting(stringListProperty)).build();
-          case MinMaxProperty<S> minMaxProperty -> entryBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
+          case BooleanProperty<?> booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
+          case IntProperty<?> intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();
+          case DoubleProperty<?> doubleProperty -> entryBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
+          case StringProperty<?> stringProperty -> entryBuilder.setString(createStringSetting(stringProperty)).build();
+          case ComboProperty<?> comboProperty -> entryBuilder.setCombo(createComboSetting(comboProperty)).build();
+          case StringListProperty<?> stringListProperty -> entryBuilder.setStringList(createStringListSetting(stringListProperty)).build();
+          case MinMaxProperty<?> minMaxProperty -> entryBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
         });
       }
 
       var settingsPageBuilder = SettingsPage.newBuilder()
-        .setPageName(namespaceRegistry.pageName)
-        .setNamespace(namespaceEntry.getKey())
+        .setPageName(pageDefinition.pageName)
         .addAllEntries(entries)
-        .setIconId(namespaceRegistry.iconId);
+        .setIconId(pageDefinition.iconId);
 
-      if (namespaceRegistry.owningPlugin != null) {
-        settingsPageBuilder.setOwningPlugin(namespaceRegistry.owningPlugin.toProto());
+      if (pageDefinition.owningPlugin != null) {
+        settingsPageBuilder.setOwningPluginId(pageDefinition.owningPlugin.id());
       }
 
-      if (namespaceRegistry.enabledProperty != null) {
-        settingsPageBuilder.setEnabledKey(namespaceRegistry.enabledProperty);
+      if (pageDefinition.enabledProperty != null) {
+        settingsPageBuilder.setEnabledIdentifier(pageDefinition.enabledProperty.toProtoIdentifier());
       }
 
       list.add(settingsPageBuilder.build());
@@ -241,5 +240,5 @@ public final class SettingsRegistry<S extends SettingsSource<S>> {
     return list;
   }
 
-  private record NamespaceRegistry<S extends SettingsSource<S>>(@Nullable PluginInfo owningPlugin, String pageName, List<Property<S>> properties, String iconId, @Nullable String enabledProperty) {}
+  private record PageDefinition(@Nullable PluginInfo owningPlugin, String pageName, List<Property<?>> properties, String iconId, @Nullable Property<?> enabledProperty) {}
 }

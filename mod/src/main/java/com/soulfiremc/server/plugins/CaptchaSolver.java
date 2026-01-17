@@ -28,8 +28,8 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.instance.AISettings;
-import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.settings.lib.SettingsObject;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.AccessLevel;
@@ -211,22 +211,22 @@ public final class CaptchaSolver extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsRegistry().addPluginPage(CaptchaSolverSettings.class, "Captcha Solver", this, "eye", CaptchaSolverSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(CaptchaSolverSettings.class, "Captcha Solver", this, "eye", CaptchaSolverSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   private static class CaptchaSolverSettings implements SettingsObject {
     private static final String NAMESPACE = "captcha-solver";
-    public static final BooleanProperty<BotSettingsSource> ENABLED =
-      ImmutableBooleanProperty.<BotSettingsSource>builder()
+    public static final BooleanProperty<SettingsSource.Bot> ENABLED =
+      ImmutableBooleanProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Captcha Solver")
         .description("Enable the Captcha Solver")
         .defaultValue(false)
         .build();
-    public static final StringProperty<BotSettingsSource> PROMPT =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> PROMPT =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -237,24 +237,24 @@ public final class CaptchaSolver extends InternalPlugin {
           Do not write anything except the text.""")
         .type(StringSetting.InputType.TEXTAREA)
         .build();
-    public static final StringProperty<BotSettingsSource> MODEL =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> MODEL =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
         .description("What AI model should be used for detecting the text in the CAPTCHA image")
         .defaultValue("llava")
         .build();
-    public static final StringProperty<BotSettingsSource> RESPONSE_COMMAND =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> RESPONSE_COMMAND =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("response-command")
         .uiName("Response Command")
         .description("What command should be ran using the response. Omit / to send a normal message")
         .defaultValue("%s")
         .build();
-    public static final ComboProperty<BotSettingsSource> IMAGE_SOURCE =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> IMAGE_SOURCE =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("image-source")
         .uiName("Image Source")
@@ -265,8 +265,8 @@ public final class CaptchaSolver extends InternalPlugin {
           case POV_RENDER -> "camera";
         }))
         .build();
-    public static final ComboProperty<BotSettingsSource> CAPTCHA_TRIGGER =
-      ImmutableComboProperty.<BotSettingsSource>builder()
+    public static final ComboProperty<SettingsSource.Bot> CAPTCHA_TRIGGER =
+      ImmutableComboProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("captcha-trigger")
         .uiName("Captcha Trigger")
@@ -277,24 +277,24 @@ public final class CaptchaSolver extends InternalPlugin {
           case TEXT_BASED -> "type";
         }))
         .build();
-    public static final StringProperty<BotSettingsSource> TEXT_TRIGGER =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> TEXT_TRIGGER =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("text-trigger")
         .uiName("Text Trigger")
         .description("Text that must be contained in the message to trigger image-based captcha solving")
         .defaultValue("/captcha")
         .build();
-    public static final StringProperty<BotSettingsSource> CAPTCHA_REGEX =
-      ImmutableStringProperty.<BotSettingsSource>builder()
+    public static final StringProperty<SettingsSource.Bot> CAPTCHA_REGEX =
+      ImmutableStringProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("captcha-regex")
         .uiName("Captcha Regex")
         .description("Regex pattern with a capturing group to extract the captcha text from the message")
         .defaultValue("/captcha (\\w+)")
         .build();
-    public static final IntProperty<BotSettingsSource> POV_RENDER_WIDTH =
-      ImmutableIntProperty.<BotSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Bot> POV_RENDER_WIDTH =
+      ImmutableIntProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("pov-render-width")
         .uiName("POV Render Width")
@@ -304,8 +304,8 @@ public final class CaptchaSolver extends InternalPlugin {
         .maxValue(3840)
         .stepValue(1)
         .build();
-    public static final IntProperty<BotSettingsSource> POV_RENDER_HEIGHT =
-      ImmutableIntProperty.<BotSettingsSource>builder()
+    public static final IntProperty<SettingsSource.Bot> POV_RENDER_HEIGHT =
+      ImmutableIntProperty.<SettingsSource.Bot>builder()
         .namespace(NAMESPACE)
         .key("pov-render-height")
         .uiName("POV Render Height")

@@ -35,7 +35,7 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
-public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotSettingsSource, InstanceSettingsSource, ServerSettingsSource {
+public sealed interface SettingsSource<S extends SettingsSource.SourceType> permits BotSettingsSource, InstanceSettingsSource, ServerSettingsSource {
   default int get(IntProperty<S> property) {
     return getAsType(property, property.defaultValue(), Integer.class);
   }
@@ -93,7 +93,7 @@ public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotS
 
   Stem<S> stem();
 
-  interface Stem<S extends SettingsSource<S>> {
+  interface Stem<S extends SettingsSource.SourceType> {
     Map<String, Map<String, JsonElement>> settings();
 
     static Optional<JsonElement> getFromRawSettings(Map<String, Map<String, JsonElement>> settings, Property<?> property) {
@@ -143,5 +143,17 @@ public sealed interface SettingsSource<S extends SettingsSource<S>> permits BotS
           .build())
         .toList();
     }
+  }
+
+  sealed interface SourceType {
+  }
+
+  final class Bot implements SourceType {
+  }
+
+  final class Instance implements SourceType {
+  }
+
+  final class Server implements SourceType {
   }
 }
