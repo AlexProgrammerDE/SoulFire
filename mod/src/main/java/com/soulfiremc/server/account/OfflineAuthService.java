@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +36,8 @@ public final class OfflineAuthService
       AuthType.OFFLINE,
       OfflineJavaData.getOfflineUUID(username),
       username,
-      new OfflineJavaData());
+      new OfflineJavaData(),
+      BotSettingsImpl.Stem.EMPTY);
   }
 
   @Override

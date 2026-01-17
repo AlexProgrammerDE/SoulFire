@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
 import net.raphimc.minecraftauth.msa.model.MsaCredentials;
@@ -43,7 +44,7 @@ public final class MSBedrockCredentialsAuthService
       try {
         var authManager = BedrockAuthManager.create(LenniHttpHelper.client(proxyData), ProtocolConstants.BEDROCK_VERSION_NAME)
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
-        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager);
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, BotSettingsImpl.Stem.EMPTY);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -72,7 +73,7 @@ public final class MSBedrockCredentialsAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(proxyData);
-        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager);
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, account.settingsStem());
       } catch (Exception e) {
         throw new CompletionException(e);
       }

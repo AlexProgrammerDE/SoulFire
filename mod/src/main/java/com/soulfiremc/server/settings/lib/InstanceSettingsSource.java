@@ -21,9 +21,11 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.proxy.SFProxy;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public sealed interface InstanceSettingsSource extends SettingsSource<SettingsSource.Instance> permits InstanceSettingsDelegate, InstanceSettingsImpl {
-  List<MinecraftAccount> accounts();
+  Map<UUID, MinecraftAccount> accounts();
 
   List<SFProxy> proxies();
 

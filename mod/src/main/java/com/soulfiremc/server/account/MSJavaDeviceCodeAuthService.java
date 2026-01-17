@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
 import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
@@ -42,7 +43,7 @@ public final class MSJavaDeviceCodeAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(DeviceCodeMsaAuthService::new, data.callback);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, BotSettingsImpl.Stem.EMPTY);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -59,7 +60,7 @@ public final class MSJavaDeviceCodeAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, account.settingsStem());
       } catch (Exception e) {
         throw new CompletionException(e);
       }

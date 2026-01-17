@@ -20,9 +20,11 @@ package com.soulfiremc.server.account;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
 import net.raphimc.minecraftauth.util.MinecraftAuth4To5Migrator;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -30,7 +32,7 @@ public final class AuthHelpers {
   private AuthHelpers() {
   }
 
-  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager) throws IOException {
+  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager, BotSettingsImpl.@Nullable Stem settingsStem) throws IOException {
     var mcChain = authManager.getMinecraftCertificateChain().getUpToDate();
     authManager.getMsaToken().refreshIfExpired();
     authManager.getXblDeviceToken().refreshIfExpired();
@@ -49,10 +51,11 @@ public final class AuthHelpers {
       mcChain.getIdentityUuid(),
       mcChain.getIdentityDisplayName(),
       new BedrockData(
-        BedrockAuthManager.toJson(authManager)));
+        BedrockAuthManager.toJson(authManager)),
+      settingsStem);
   }
 
-  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager) throws IOException {
+  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager, BotSettingsImpl.@Nullable Stem settingsStem) throws IOException {
     var mcProfile = authManager.getMinecraftProfile().getUpToDate();
     authManager.getMinecraftToken().refreshIfExpired();
     authManager.getMinecraftPlayerCertificates().refreshIfExpired();
@@ -61,7 +64,8 @@ public final class AuthHelpers {
       mcProfile.getId(),
       mcProfile.getName(),
       new OnlineChainJavaData(
-        JavaAuthManager.toJson(authManager)));
+        JavaAuthManager.toJson(authManager)),
+      settingsStem);
   }
 
   public static JsonObject migrateBedrockAuthChain(JsonObject oldAuthChain) {

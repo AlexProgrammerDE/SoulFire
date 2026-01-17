@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,7 +40,7 @@ public final class MSJavaRefreshTokenAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(data.refreshToken);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, BotSettingsImpl.Stem.EMPTY);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -56,7 +57,7 @@ public final class MSJavaRefreshTokenAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, account.settingsStem());
       } catch (Exception e) {
         throw new CompletionException(e);
       }

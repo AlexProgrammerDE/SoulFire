@@ -35,15 +35,23 @@ import java.util.*;
 
 @With
 @Slf4j
-public record InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSettings) implements InstanceSettingsSource {
+public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mappedAccounts, ServerSettingsSource serverSettings) implements InstanceSettingsSource {
+  public InstanceSettingsImpl(Stem stem, ServerSettingsSource serverSettings) {
+    this(stem, stem.accounts().stream().collect(
+      LinkedHashMap::new,
+      (map, account) -> map.put(account.profileId(), account),
+      Map::putAll
+    ), serverSettings);
+  }
+
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Instance> property) {
     return this.stem.get(property);
   }
 
   @Override
-  public List<MinecraftAccount> accounts() {
-    return this.stem.accounts();
+  public Map<UUID, MinecraftAccount> accounts() {
+    return this.mappedAccounts;
   }
 
   @Override

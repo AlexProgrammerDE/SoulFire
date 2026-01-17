@@ -208,7 +208,7 @@ public final class InstanceManager {
 
     var accounts = new ArrayList<MinecraftAccount>();
     var refreshed = 0;
-    for (var account : settingsSource.accounts()) {
+    for (var account : settingsSource.accounts().values()) {
       var authService = MCAuthService.convertService(account.authType());
       if (authService.isExpired(account)) {
         if (refreshed == 0) {
@@ -252,7 +252,7 @@ public final class InstanceManager {
         ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
       scheduler
     ).join();
-    var accounts = new ArrayList<>(settingsSource.accounts());
+    var accounts = new ArrayList<>(settingsSource.accounts().values());
     accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
       && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
     sessionFactory.inTransaction(session -> {
@@ -356,7 +356,7 @@ public final class InstanceManager {
 
     var accountQueue = new ArrayBlockingQueue<MinecraftAccount>(botAmount);
     {
-      var accounts = new ArrayList<>(settingsSource.accounts());
+      var accounts = new ArrayList<>(settingsSource.accounts().values());
       var availableAccounts = accounts.size();
       if (availableAccounts > 0) {
         if (botAmount > availableAccounts) {
@@ -395,7 +395,13 @@ public final class InstanceManager {
       factories.add(
         new BotConnectionFactory(
           this,
-          new BotSettingsImpl(BotSettingsImpl.Stem.EMPTY, settingsSource),
+          new BotSettingsDelegate(new CachedLazyObject<>(() -> {
+            var fetchedSettingsSource = this.settingsSource();
+            var fetchedAccount = fetchedSettingsSource.accounts().get(minecraftAccount.profileId());
+            return new BotSettingsImpl(fetchedAccount == null || fetchedAccount.settingsStem() == null
+              ? BotSettingsImpl.Stem.EMPTY
+              : fetchedAccount.settingsStem(), fetchedSettingsSource);
+          }, 1, TimeUnit.SECONDS)),
           minecraftAccount,
           protocolVersion,
           serverAddress,

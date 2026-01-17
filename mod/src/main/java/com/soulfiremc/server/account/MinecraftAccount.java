@@ -22,8 +22,10 @@ import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -38,7 +40,8 @@ public record MinecraftAccount(
   @NonNull AuthType authType,
   @NonNull UUID profileId,
   @NonNull String lastKnownName,
-  @NonNull AccountData accountData) {
+  @NonNull AccountData accountData,
+  BotSettingsImpl.@Nullable Stem settingsStem) {
   public static MinecraftAccount fromProto(MinecraftAccountProto account) {
     return new MinecraftAccount(
       AuthType.valueOf(account.getType().name()),
@@ -49,7 +52,8 @@ public record MinecraftAccount(
         case OFFLINE_JAVA_DATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
         case BEDROCK_DATA -> BedrockData.fromProto(account.getBedrockData());
         case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
-      });
+      },
+      BotSettingsImpl.Stem.EMPTY); // TODO: Read from proto
   }
 
   public static MinecraftAccount forProxyCheck() {
@@ -57,7 +61,8 @@ public record MinecraftAccount(
       AuthType.OFFLINE,
       UUID.randomUUID(),
       "ProxyCheck",
-      new OfflineJavaData());
+      new OfflineJavaData(),
+      BotSettingsImpl.Stem.EMPTY);
   }
 
   @Override

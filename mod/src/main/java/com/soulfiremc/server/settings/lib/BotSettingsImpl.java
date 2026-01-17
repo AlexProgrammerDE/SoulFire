@@ -19,6 +19,7 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.soulfiremc.grpc.generated.BotConfig;
 import com.soulfiremc.grpc.generated.ServerConfig;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -56,8 +57,8 @@ public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings
       return GsonInstance.GSON.toJsonTree(this).getAsJsonObject();
     }
 
-    public ServerConfig toProto() {
-      return ServerConfig.newBuilder()
+    public BotConfig toProto() {
+      return BotConfig.newBuilder()
         .addAllSettings(this.settingsToProto())
         .build();
     }

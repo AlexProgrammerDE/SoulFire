@@ -24,7 +24,9 @@ import com.soulfiremc.server.settings.property.Property;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public final class InstanceSettingsDelegate implements InstanceSettingsSource {
   private final Supplier<InstanceSettingsSource> source;
 
   @Override
-  public List<MinecraftAccount> accounts() {
+  public Map<UUID, MinecraftAccount> accounts() {
     return source.get().accounts();
   }
 

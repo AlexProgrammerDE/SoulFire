@@ -19,6 +19,7 @@ package com.soulfiremc.server.account;
 
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import net.raphimc.minecraftauth.java.JavaAuthManager;
 import net.raphimc.minecraftauth.msa.model.MsaCredentials;
@@ -42,7 +43,7 @@ public final class MSJavaCredentialsAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, BotSettingsImpl.Stem.EMPTY);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -71,7 +72,7 @@ public final class MSJavaCredentialsAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, account.settingsStem());
       } catch (Exception e) {
         throw new CompletionException(e);
       }

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "soulfire/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message BotConfig {
+  repeated SettingsNamespace settings = 1;
+}
+
+message BotInfoRequest {
+  string id = 1;
+}
+
+message BotInfoResponse {
+  BotConfig config = 1;
+}
+
+message BotUpdateConfigRequest {
+  string id = 1;
+  BotConfig config = 2;
+}
+
+message BotUpdateConfigResponse {
+}
+
+service BotService {
+  rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
+  rpc UpdateBotConfig (BotUpdateConfigRequest) returns (BotUpdateConfigResponse) {}
+}
