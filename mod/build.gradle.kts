@@ -29,7 +29,7 @@ dependencies {
     isTransitive = false
   }
 
-  annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.2")
+  annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.3")
 
   annotationProcessor(libs.immutables.gson)
   compileOnly(libs.immutables.value)
