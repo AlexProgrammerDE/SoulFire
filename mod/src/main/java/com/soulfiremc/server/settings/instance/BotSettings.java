@@ -48,6 +48,7 @@ public final class BotSettings implements SettingsObject {
   private static final String NAMESPACE = "bot";
   public static final StringProperty<SettingsSource.Instance> ADDRESS =
     ImmutableStringProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("address")
       .uiName("Address")
@@ -56,6 +57,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Instance> AMOUNT =
     ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("amount")
       .uiName("Amount")
@@ -65,6 +67,7 @@ public final class BotSettings implements SettingsObject {
       .maxValue(Integer.MAX_VALUE)
       .build();
   public static final MinMaxProperty<SettingsSource.Instance> JOIN_DELAY = ImmutableMinMaxProperty.<SettingsSource.Instance>builder()
+    .sourceType(SettingsSource.Instance.INSTANCE)
     .namespace(NAMESPACE)
     .key("join-delay")
     .minValue(0)
@@ -82,6 +85,7 @@ public final class BotSettings implements SettingsObject {
     .build();
   public static final ComboProperty<SettingsSource.Instance> PROTOCOL_VERSION =
     ImmutableComboProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("protocol-version")
       .uiName("Protocol Version")
@@ -91,6 +95,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> READ_TIMEOUT =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("read-timeout")
       .uiName("Read Timeout")
@@ -101,6 +106,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> WRITE_TIMEOUT =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("write-timeout")
       .uiName("Write Timeout")
@@ -111,6 +117,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> CONNECT_TIMEOUT =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("connect-timeout")
       .uiName("Connect Timeout")
@@ -121,6 +128,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Instance> RESOLVE_SRV =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("resolve-srv")
       .uiName("Resolve SRV")
@@ -129,6 +137,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Instance> CONCURRENT_CONNECTS =
     ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("concurrent-connects")
       .uiName("Concurrent Connects")
@@ -139,6 +148,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Instance> RESTORE_ON_REBOOT =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("restore-on-reboot")
       .uiName("Restore on Reboot")
@@ -149,6 +159,7 @@ public final class BotSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Bot> IGNORE_PACKET_HANDLING_ERRORS =
     ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("ignore-packet-handling-errors")
       .uiName("Ignore Packet Handling Errors")

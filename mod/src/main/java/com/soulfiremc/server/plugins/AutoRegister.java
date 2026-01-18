@@ -77,6 +77,7 @@ public final class AutoRegister extends InternalPlugin {
     private static final String NAMESPACE = "auto-register";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Register")
@@ -85,6 +86,7 @@ public final class AutoRegister extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> REGISTER_COMMAND =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("register-command")
         .uiName("Register Command")
@@ -93,6 +95,7 @@ public final class AutoRegister extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> LOGIN_COMMAND =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("login-command")
         .uiName("Login Command")
@@ -102,6 +105,7 @@ public final class AutoRegister extends InternalPlugin {
 
     public static final StringProperty<SettingsSource.Bot> PASSWORD_FORMAT =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("password-format")
         .uiName("Password Format")

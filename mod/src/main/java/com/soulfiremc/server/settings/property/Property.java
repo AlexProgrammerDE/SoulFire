@@ -22,6 +22,8 @@ import com.soulfiremc.server.settings.lib.SettingsSource;
 
 @SuppressWarnings("unused")
 public sealed interface Property<S extends SettingsSource.SourceType> permits BooleanProperty, ComboProperty, DoubleProperty, IntProperty, MinMaxProperty, StringListProperty, StringProperty {
+  S sourceType();
+
   String namespace();
 
   String key();

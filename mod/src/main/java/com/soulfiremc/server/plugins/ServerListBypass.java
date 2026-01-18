@@ -74,6 +74,7 @@ public final class ServerListBypass extends InternalPlugin {
     private static final String NAMESPACE = "server-list-bypass";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Server List Bypass")
@@ -81,6 +82,7 @@ public final class ServerListBypass extends InternalPlugin {
         .defaultValue(false)
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

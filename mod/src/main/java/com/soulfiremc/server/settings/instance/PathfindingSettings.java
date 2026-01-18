@@ -31,6 +31,7 @@ public final class PathfindingSettings implements SettingsObject {
   private static final String NAMESPACE = "pathfinding";
   public static final BooleanProperty<SettingsSource.Bot> ALLOW_BREAKING_UNDIGGABLE =
     ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-breaking-undiggable")
       .uiName("Allow Breaking Undiggable")
@@ -39,6 +40,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Bot> AVOID_DIAGONAL_SQUEEZE =
     ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("avoid-diagonal-squeeze")
       .uiName("Avoid Diagonal Squeeze")
@@ -47,6 +49,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Bot> AVOID_HARMFUL_ENTITIES =
     ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("avoid-harmful-entities")
       .uiName("Avoid Harmful Entities")
@@ -55,6 +58,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> MAX_ENEMY_PENALTY =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("max-enemy-penalty")
       .uiName("Max Enemy Penalty")
@@ -65,6 +69,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> BREAK_BLOCK_PENALTY =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("break-block-penalty")
       .uiName("Break Block Penalty")
@@ -75,6 +80,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> PLACE_BLOCK_PENALTY =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("place-block-penalty")
       .uiName("Place Block Penalty")
@@ -85,6 +91,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> EXPIRE_TIMEOUT =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("expire-timeout")
       .uiName("Expire Timeout")
@@ -95,6 +102,7 @@ public final class PathfindingSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Bot> DISABLE_PRUNING =
     ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+            .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("disable-pruning")
       .uiName("Disable Pruning")

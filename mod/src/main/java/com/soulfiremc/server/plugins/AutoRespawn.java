@@ -66,6 +66,7 @@ public final class AutoRespawn extends InternalPlugin {
     private static final String NAMESPACE = "auto-respawn";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Respawn")

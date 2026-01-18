@@ -29,6 +29,7 @@ public final class DevSettings implements SettingsObject {
   private static final String NAMESPACE = "dev";
   public static final BooleanProperty<SettingsSource.Server> SOULFIRE_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("soulfire-debug")
       .uiName("SoulFire debug")
@@ -37,6 +38,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> MINECRAFT_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("minecraft-debug")
       .uiName("Minecraft debug")
@@ -45,6 +47,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> NETTY_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("netty-debug")
       .uiName("Netty debug")
@@ -53,6 +56,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> GRPC_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("grpc-debug")
       .uiName("gRPC debug")
@@ -61,6 +65,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> HIBERNATE_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("hibernate-debug")
       .uiName("Hibernate debug")
@@ -69,6 +74,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> VIA_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("via-debug")
       .uiName("Via debug")
@@ -77,6 +83,7 @@ public final class DevSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> OTHER_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("other-debug")
       .uiName("Other debug")

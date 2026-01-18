@@ -30,6 +30,7 @@ public final class ServerSettings implements SettingsObject {
   private static final String NAMESPACE = "server";
   public static final StringProperty<SettingsSource.Server> PUBLIC_ADDRESS =
     ImmutableStringProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("public-address")
       .uiName("Public address")
@@ -38,6 +39,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_CREATING_INSTANCES =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-creating-instances")
       .uiName("Allow creating instances")
@@ -46,6 +48,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_UPDATING_SELF_USERNAME =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-updating-self-username")
       .uiName("Allow updating self username")
@@ -54,6 +57,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_UPDATING_SELF_EMAIL =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-updating-self-email")
       .uiName("Allow updating self email")
@@ -62,6 +66,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_DELETING_INSTANCES =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-deleting-instances")
       .uiName("Allow deleting instances")
@@ -70,6 +75,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_CHANGING_INSTANCE_META =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-changing-instance-meta")
       .uiName("Allow changing instance meta")
@@ -78,6 +84,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Server> ALLOW_INSTANCE_SCRIPTS =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("allow-instance-scripts")
       .uiName("Allow instance scripts")
@@ -86,6 +93,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final ComboProperty<SettingsSource.Server> EMAIL_TYPE =
     ImmutableComboProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("email-type")
       .uiName("Email Type")
@@ -98,6 +106,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Server> SMTP_HOST =
     ImmutableStringProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-host")
       .uiName("SMTP Host")
@@ -106,6 +115,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Server> SMTP_PORT =
     ImmutableIntProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-port")
       .uiName("SMTP Port")
@@ -117,6 +127,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Server> SMTP_USERNAME =
     ImmutableStringProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-username")
       .uiName("SMTP Username")
@@ -125,6 +136,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Server> SMTP_PASSWORD =
     ImmutableStringProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-password")
       .uiName("SMTP Password")
@@ -134,6 +146,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final ComboProperty<SettingsSource.Server> SMTP_TYPE =
     ImmutableComboProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-type")
       .uiName("SMTP Type")
@@ -147,6 +160,7 @@ public final class ServerSettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Server> SMTP_FROM =
     ImmutableStringProperty.<SettingsSource.Server>builder()
+      .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
       .key("smtp-from")
       .uiName("SMTP From")

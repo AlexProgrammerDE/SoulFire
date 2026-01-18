@@ -149,11 +149,23 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
   }
 
   final class Bot implements SourceType {
+    public static Bot INSTANCE = new Bot();
+
+    private Bot() {
+    }
   }
 
   final class Instance implements SourceType {
+    public static Instance INSTANCE = new Instance();
+
+    private Instance() {
+    }
   }
 
   final class Server implements SourceType {
+    public static Server INSTANCE = new Server();
+
+    private Server() {
+    }
   }
 }

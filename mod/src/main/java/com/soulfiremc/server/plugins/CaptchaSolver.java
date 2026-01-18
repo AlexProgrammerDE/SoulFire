@@ -219,6 +219,7 @@ public final class CaptchaSolver extends InternalPlugin {
     private static final String NAMESPACE = "captcha-solver";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Captcha Solver")
@@ -227,6 +228,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> PROMPT =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -239,6 +241,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> MODEL =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
@@ -247,6 +250,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> RESPONSE_COMMAND =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("response-command")
         .uiName("Response Command")
@@ -255,6 +259,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> IMAGE_SOURCE =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("image-source")
         .uiName("Image Source")
@@ -267,6 +272,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> CAPTCHA_TRIGGER =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("captcha-trigger")
         .uiName("Captcha Trigger")
@@ -279,6 +285,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> TEXT_TRIGGER =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("text-trigger")
         .uiName("Text Trigger")
@@ -287,6 +294,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> CAPTCHA_REGEX =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("captcha-regex")
         .uiName("Captcha Regex")
@@ -295,6 +303,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Bot> POV_RENDER_WIDTH =
       ImmutableIntProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("pov-render-width")
         .uiName("POV Render Width")
@@ -306,6 +315,7 @@ public final class CaptchaSolver extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Bot> POV_RENDER_HEIGHT =
       ImmutableIntProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("pov-render-height")
         .uiName("POV Render Height")

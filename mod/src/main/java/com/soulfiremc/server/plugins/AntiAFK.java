@@ -91,6 +91,7 @@ public final class AntiAFK extends InternalPlugin {
     private static final String NAMESPACE = "anti-afk";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Anti AFK")
@@ -98,6 +99,7 @@ public final class AntiAFK extends InternalPlugin {
         .defaultValue(false)
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DISTANCE = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("distance")
       .minValue(1)
@@ -114,6 +116,7 @@ public final class AntiAFK extends InternalPlugin {
         .build())
       .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

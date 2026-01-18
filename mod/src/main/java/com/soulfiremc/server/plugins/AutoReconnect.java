@@ -93,6 +93,7 @@ public final class AutoReconnect extends InternalPlugin {
     private static final String NAMESPACE = "auto-reconnect";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Reconnect")
@@ -101,6 +102,7 @@ public final class AutoReconnect extends InternalPlugin {
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY =
       ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

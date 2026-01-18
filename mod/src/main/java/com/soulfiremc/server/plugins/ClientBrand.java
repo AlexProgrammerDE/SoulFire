@@ -67,6 +67,7 @@ public final class ClientBrand extends InternalPlugin {
     private static final String NAMESPACE = "client-brand";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Send client brand")
@@ -75,6 +76,7 @@ public final class ClientBrand extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> CLIENT_BRAND =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("client-brand")
         .uiName("Client brand")

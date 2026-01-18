@@ -40,6 +40,7 @@ public final class AISettings implements SettingsObject {
   private static final String NAMESPACE = "ai";
   public static final StringProperty<SettingsSource.Bot> API_BASE_URL =
     ImmutableStringProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("api-base-url")
       .uiName("API Base URL")
@@ -48,6 +49,7 @@ public final class AISettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Bot> API_KEY =
     ImmutableStringProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("api-key")
       .uiName("API Key")
@@ -57,6 +59,7 @@ public final class AISettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> REQUEST_TIMEOUT =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("api-request-timeout")
       .uiName("API Request Timeout")
@@ -67,6 +70,7 @@ public final class AISettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Bot> MAX_RETRIES =
     ImmutableIntProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("api-max-retries")
       .uiName("API Max Retries")

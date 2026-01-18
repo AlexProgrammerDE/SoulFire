@@ -78,6 +78,7 @@ public final class AutoJump extends InternalPlugin {
     private static final String NAMESPACE = "auto-jump";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Jump")
@@ -86,6 +87,7 @@ public final class AutoJump extends InternalPlugin {
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY =
       ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)

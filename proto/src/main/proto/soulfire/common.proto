@@ -229,10 +229,17 @@ message MinMaxSetting {
   bool disabled = 7;
 }
 
+enum SettingsPageEntryScopeType {
+  SERVER = 0;
+  INSTANCE = 1;
+  BOT = 2;
+}
+
 // A entry in the settings page
 message SettingsPageEntry {
   // id + namespace that this setting corresponds to
   SettingsEntryIdentifier id = 9;
+  SettingsPageEntryScopeType scope = 10;
   oneof value {
     StringSetting string = 2;
     IntSetting int = 3;

@@ -72,6 +72,7 @@ public final class FakeVirtualHost extends InternalPlugin {
     private static final String NAMESPACE = "fake-virtual-host";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Fake virtual host")
@@ -80,6 +81,7 @@ public final class FakeVirtualHost extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> HOSTNAME =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("hostname")
         .uiName("Hostname")
@@ -88,6 +90,7 @@ public final class FakeVirtualHost extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Bot> PORT =
       ImmutableIntProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("port")
         .uiName("Port")

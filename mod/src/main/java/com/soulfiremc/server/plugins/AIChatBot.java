@@ -139,6 +139,7 @@ public final class AIChatBot extends InternalPlugin {
     private static final String NAMESPACE = "ai-chat-bot";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable AI Chat Bot")
@@ -147,6 +148,7 @@ public final class AIChatBot extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> PROMPT =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("prompt")
         .uiName("AI System prompt")
@@ -163,6 +165,7 @@ public final class AIChatBot extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> MODEL =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("model")
         .uiName("AI Model")
@@ -171,6 +174,7 @@ public final class AIChatBot extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> KEYWORD =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("keyword")
         .uiName("Keyword")
@@ -179,6 +183,7 @@ public final class AIChatBot extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> FILTER_KEYWORD =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("filter-keyword")
         .uiName("Filter keyword")
@@ -187,6 +192,7 @@ public final class AIChatBot extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Bot> HISTORY_LENGTH =
       ImmutableIntProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("history-length")
         .uiName("History length")

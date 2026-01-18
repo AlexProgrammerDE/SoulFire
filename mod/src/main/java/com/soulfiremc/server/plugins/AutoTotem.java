@@ -113,6 +113,7 @@ public final class AutoTotem extends InternalPlugin {
     private static final String NAMESPACE = "auto-totem";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Totem")
@@ -120,6 +121,7 @@ public final class AutoTotem extends InternalPlugin {
         .defaultValue(true)
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY = ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("delay")
       .minValue(0)

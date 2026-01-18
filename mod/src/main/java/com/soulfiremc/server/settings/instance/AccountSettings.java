@@ -28,6 +28,7 @@ public final class AccountSettings implements SettingsObject {
   private static final String NAMESPACE = "account";
   public static final StringProperty<SettingsSource.Instance> NAME_FORMAT =
     ImmutableStringProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("name-format")
       .uiName("Name format")
@@ -36,6 +37,7 @@ public final class AccountSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Instance> SHUFFLE_ACCOUNTS =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("shuffle-accounts")
       .uiName("Shuffle accounts")
@@ -44,6 +46,7 @@ public final class AccountSettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Instance> USE_PROXIES_FOR_ACCOUNT_AUTH =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("use-proxies-for-account-auth")
       .uiName("Use proxies for account auth")
@@ -54,6 +57,7 @@ public final class AccountSettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Instance> ACCOUNT_IMPORT_CONCURRENCY =
     ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("account-import-concurrency")
       .uiName("Account import concurrency")

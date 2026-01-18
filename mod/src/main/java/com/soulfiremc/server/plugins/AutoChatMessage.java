@@ -77,6 +77,7 @@ public final class AutoChatMessage extends InternalPlugin {
     private static final String NAMESPACE = "auto-chat-message";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable Auto Chat Message")
@@ -85,6 +86,7 @@ public final class AutoChatMessage extends InternalPlugin {
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> DELAY =
       ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("delay")
         .minValue(0)
@@ -102,6 +104,7 @@ public final class AutoChatMessage extends InternalPlugin {
         .build();
     public static final StringListProperty<SettingsSource.Bot> MESSAGES =
       ImmutableStringListProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("messages")
         .uiName("Chat Messages")

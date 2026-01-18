@@ -28,6 +28,7 @@ public final class ProxySettings implements SettingsObject {
   private static final String NAMESPACE = "proxy";
   public static final IntProperty<SettingsSource.Instance> BOTS_PER_PROXY =
     ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("bots-per-proxy")
       .uiName("Bots per proxy")
@@ -38,6 +39,7 @@ public final class ProxySettings implements SettingsObject {
       .build();
   public static final BooleanProperty<SettingsSource.Instance> SHUFFLE_PROXIES =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("shuffle-proxies")
       .uiName("Shuffle proxies")
@@ -46,6 +48,7 @@ public final class ProxySettings implements SettingsObject {
       .build();
   public static final StringProperty<SettingsSource.Instance> PROXY_CHECK_ADDRESS =
     ImmutableStringProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("proxy-check-address")
       .uiName("Proxy check address")
@@ -54,6 +57,7 @@ public final class ProxySettings implements SettingsObject {
       .build();
   public static final IntProperty<SettingsSource.Instance> PROXY_CHECK_CONCURRENCY =
     ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
       .namespace(NAMESPACE)
       .key("proxy-check-concurrency")
       .uiName("Proxy check concurrency")

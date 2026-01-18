@@ -124,6 +124,7 @@ public final class ChatLogger extends InternalPlugin {
     private static final String NAMESPACE = "chat-logger";
     public static final BooleanProperty<SettingsSource.Instance> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+        .sourceType(SettingsSource.Instance.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log chat to terminal")
@@ -132,6 +133,7 @@ public final class ChatLogger extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Instance> LOG_DEATH_MESSAGES =
       ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+        .sourceType(SettingsSource.Instance.INSTANCE)
         .namespace(NAMESPACE)
         .key("log-death-messages")
         .uiName("Additionally log death messages to terminal")
@@ -140,6 +142,7 @@ public final class ChatLogger extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Instance> DEDUPLICATE_AMOUNT =
       ImmutableIntProperty.<SettingsSource.Instance>builder()
+        .sourceType(SettingsSource.Instance.INSTANCE)
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")

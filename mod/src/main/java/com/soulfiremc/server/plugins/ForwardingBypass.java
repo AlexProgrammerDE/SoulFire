@@ -350,6 +350,7 @@ public final class ForwardingBypass extends InternalPlugin {
     private static final String NAMESPACE = "forwarding-bypass";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Enable forwarding bypass")
@@ -358,6 +359,7 @@ public final class ForwardingBypass extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> FORWARDING_MODE =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("forwarding-mode")
         .uiName("Forwarding mode")
@@ -372,6 +374,7 @@ public final class ForwardingBypass extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> SECRET =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("secret")
         .uiName("Secret")
@@ -381,6 +384,7 @@ public final class ForwardingBypass extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> PLAYER_ADDRESS =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("player-address")
         .uiName("Player Address")

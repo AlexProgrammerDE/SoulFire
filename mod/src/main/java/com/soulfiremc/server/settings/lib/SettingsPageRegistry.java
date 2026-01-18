@@ -209,7 +209,12 @@ public final class SettingsPageRegistry {
       var entries = new ArrayList<SettingsPageEntry>();
       for (var property : pageDefinition.properties) {
         var entryBuilder = SettingsPageEntry.newBuilder()
-          .setId(property.toProtoIdentifier());
+          .setId(property.toProtoIdentifier())
+          .setScope(switch (property.sourceType()) {
+            case SettingsSource.Server _ -> SettingsPageEntryScopeType.SERVER;
+            case SettingsSource.Instance _ -> SettingsPageEntryScopeType.INSTANCE;
+            case SettingsSource.Bot _ -> SettingsPageEntryScopeType.BOT;
+          });
         entries.add(switch (property) {
           case BooleanProperty<?> booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
           case IntProperty<?> intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();

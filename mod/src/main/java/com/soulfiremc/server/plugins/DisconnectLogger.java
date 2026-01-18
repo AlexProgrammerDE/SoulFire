@@ -103,6 +103,7 @@ public final class DisconnectLogger extends InternalPlugin {
     private static final String NAMESPACE = "disconnect-logger";
     public static final BooleanProperty<SettingsSource.Instance> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+        .sourceType(SettingsSource.Instance.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Log disconnects to terminal")
@@ -111,6 +112,7 @@ public final class DisconnectLogger extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Instance> DEDUPLICATE_AMOUNT =
       ImmutableIntProperty.<SettingsSource.Instance>builder()
+        .sourceType(SettingsSource.Instance.INSTANCE)
         .namespace(NAMESPACE)
         .key("deduplicate-amount")
         .uiName("Deduplicate amount")

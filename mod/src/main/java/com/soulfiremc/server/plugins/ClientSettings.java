@@ -94,6 +94,7 @@ public final class ClientSettings extends InternalPlugin {
     private static final String NAMESPACE = "client-settings";
     public static final BooleanProperty<SettingsSource.Bot> ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enabled")
         .uiName("Send client settings")
@@ -102,6 +103,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final StringProperty<SettingsSource.Bot> CLIENT_LOCALE =
       ImmutableStringProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("client-locale")
         .uiName("Client locale")
@@ -111,6 +113,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final IntProperty<SettingsSource.Bot> RENDER_DISTANCE =
       ImmutableIntProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("render-distance")
         .uiName("Render distance")
@@ -121,6 +124,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> CHAT_VISIBILITY =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("chat-visibility")
         .uiName("Chat visibility")
@@ -134,6 +138,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> USE_CHAT_COLORS =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("use-chat-colors")
         .uiName("Use chat colors")
@@ -142,6 +147,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> CAPE_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("cape-enabled")
         .uiName("Cape enabled")
@@ -150,6 +156,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> JACKET_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("jacket-enabled")
         .uiName("Jacket enabled")
@@ -158,6 +165,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> LEFT_SLEEVE_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("left-sleeve-enabled")
         .uiName("Left sleeve enabled")
@@ -166,6 +174,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> RIGHT_SLEEVE_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("right-sleeve-enabled")
         .uiName("Right sleeve enabled")
@@ -174,6 +183,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> LEFT_PANTS_LEG_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("left-pants-leg-enabled")
         .uiName("Left pants leg enabled")
@@ -182,6 +192,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> RIGHT_PANTS_LEG_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("right-pants-leg-enabled")
         .uiName("Right pants leg enabled")
@@ -190,6 +201,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> HAT_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("hat-enabled")
         .uiName("Hat enabled")
@@ -198,6 +210,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> HAND_PREFERENCE =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("hand-preference")
         .uiName("Hand preference")
@@ -210,6 +223,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> TEXT_FILTERING_ENABLED =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("text-filtering-enabled")
         .uiName("Text filtering enabled")
@@ -218,6 +232,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> ALLOWS_LISTING =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("allows-listing")
         .uiName("Allows listing")
@@ -226,6 +241,7 @@ public final class ClientSettings extends InternalPlugin {
         .build();
     public static final ComboProperty<SettingsSource.Bot> PARTICLE_STATUS =
       ImmutableComboProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("particle-status")
         .uiName("Particle Status")

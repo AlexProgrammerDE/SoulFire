@@ -316,6 +316,7 @@ public final class KillAura extends InternalPlugin {
     private static final String NAMESPACE = "kill-aura";
     public static final BooleanProperty<SettingsSource.Bot> ENABLE =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("enable")
         .uiName("Enable")
@@ -324,6 +325,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final StringListProperty<SettingsSource.Bot> WHITELISTED_USERS =
       ImmutableStringListProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("whitelisted-users")
         .uiName("Whitelisted Users")
@@ -332,6 +334,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final DoubleProperty<SettingsSource.Bot> HIT_RANGE =
       ImmutableDoubleProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("hit-range")
         .uiName("Hit Range")
@@ -343,6 +346,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final DoubleProperty<SettingsSource.Bot> SWING_RANGE =
       ImmutableDoubleProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("swing-range")
         .uiName("Swing Range")
@@ -354,6 +358,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final DoubleProperty<SettingsSource.Bot> LOOK_RANGE =
       ImmutableDoubleProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("look-range")
         .uiName("Look Range")
@@ -365,6 +370,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> CHECK_WALLS =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("check-walls")
         .uiName("Check Walls")
@@ -373,6 +379,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final BooleanProperty<SettingsSource.Bot> IGNORE_COOLDOWN =
       ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("ignore-cooldown")
         .uiName("Ignore Cooldown")
@@ -381,6 +388,7 @@ public final class KillAura extends InternalPlugin {
         .build();
     public static final MinMaxProperty<SettingsSource.Bot> ATTACK_DELAY_TICKS =
       ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
         .namespace(NAMESPACE)
         .key("attack-delay-ticks")
         .minValue(1)
