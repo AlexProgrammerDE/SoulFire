@@ -116,11 +116,11 @@ public final class InstanceManager {
     this.instanceSettingsPageRegistry = scheduler.supplyAsync(() -> {
       var registry = new SettingsPageRegistry()
         // Needs Via loaded to have all protocol versions
-        .addInternalPage(BotSettings.class, "Bot Settings")
-        .addInternalPage(AccountSettings.class, "Account Settings")
-        .addInternalPage(ProxySettings.class, "Proxy Settings")
-        .addInternalPage(AISettings.class, "AI Settings")
-        .addInternalPage(PathfindingSettings.class, "Pathfinding Settings");
+        .addInternalPage(BotSettings.class, "bot", "Bot Settings")
+        .addInternalPage(AccountSettings.class, "account", "Account Settings")
+        .addInternalPage(ProxySettings.class, "proxy", "Proxy Settings")
+        .addInternalPage(AISettings.class, "ai", "AI Settings")
+        .addInternalPage(PathfindingSettings.class, "pathfinding", "Pathfinding Settings");
 
       SoulFireAPI.postEvent(new InstanceSettingsRegistryInitEvent(this, registry));
 

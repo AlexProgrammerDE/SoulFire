@@ -70,7 +70,7 @@ public final class AutoJump extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(AutoJumpSettings.class, "Auto Jump", this, "footprints", AutoJumpSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoJumpSettings.class, "auto-jump", "Auto Jump", this, "footprints", AutoJumpSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

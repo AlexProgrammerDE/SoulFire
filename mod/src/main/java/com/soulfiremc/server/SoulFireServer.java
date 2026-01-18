@@ -132,8 +132,8 @@ public final class SoulFireServer {
 
     var serverSettingsRegistryFuture = scheduler.supplyAsync(() -> {
       var registry = new SettingsPageRegistry()
-        .addInternalPage(ServerSettings.class, "Server Settings")
-        .addInternalPage(DevSettings.class, "Developer Settings");
+        .addInternalPage(ServerSettings.class, "server", "Server Settings")
+        .addInternalPage(DevSettings.class, "dev", "Developer Settings");
 
       SoulFireAPI.postEvent(new ServerSettingsRegistryInitEvent(this, registry));
 

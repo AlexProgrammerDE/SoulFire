@@ -64,7 +64,7 @@ public final class FakeVirtualHost extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(FakeVirtualHostSettings.class, "Fake Virtual Host", this, "globe", FakeVirtualHostSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(FakeVirtualHostSettings.class, "fake-virtual-host", "Fake Virtual Host", this, "globe", FakeVirtualHostSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

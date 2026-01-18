@@ -48,7 +48,7 @@ public final class AutoReconnect extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(AutoReconnectSettings.class, "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoReconnectSettings.class, "auto-reconnect", "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
   }
 
   @EventHandler

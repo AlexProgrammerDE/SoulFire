@@ -83,7 +83,7 @@ public final class AntiAFK extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(AntiAFKSettings.class, "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AntiAFKSettings.class, "anti-afk", "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

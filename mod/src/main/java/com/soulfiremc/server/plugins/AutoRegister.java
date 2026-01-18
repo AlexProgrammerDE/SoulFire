@@ -69,7 +69,7 @@ public final class AutoRegister extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(AutoRegisterSettings.class, "Auto Register", this, "key-round", AutoRegisterSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoRegisterSettings.class, "auto-register", "Auto Register", this, "key-round", AutoRegisterSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

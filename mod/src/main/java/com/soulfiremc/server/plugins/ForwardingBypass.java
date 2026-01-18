@@ -83,7 +83,7 @@ public final class ForwardingBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(ForwardingBypassSettings.class, "Forwarding Bypass", this, "milestone", ForwardingBypassSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ForwardingBypassSettings.class, "forwarding-bypass", "Forwarding Bypass", this, "milestone", ForwardingBypassSettings.ENABLED);
   }
 
   @EventHandler

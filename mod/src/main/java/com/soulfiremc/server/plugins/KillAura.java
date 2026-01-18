@@ -308,7 +308,7 @@ public final class KillAura extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(KillAuraSettings.class, "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
+    event.settingsPageRegistry().addPluginPage(KillAuraSettings.class, "kill-aura", "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

@@ -252,6 +252,8 @@ message SettingsPageEntry {
 }
 
 message SettingsPage {
+  // Unique page identifier (URL-safe, e.g., "bot", "account", "auto-reconnect")
+  string id = 1;
   optional string owning_plugin_id = 2;
   // The name of the page for these settings
   string page_name = 3;

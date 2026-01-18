@@ -66,7 +66,7 @@ public final class ServerListBypass extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(ServerListBypassSettings.class, "Server List Bypass", this, "network", ServerListBypassSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(ServerListBypassSettings.class, "server-list-bypass", "Server List Bypass", this, "network", ServerListBypassSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

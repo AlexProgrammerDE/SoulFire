@@ -58,7 +58,7 @@ public final class AutoRespawn extends InternalPlugin {
 
   @EventHandler
   public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
-    event.settingsPageRegistry().addPluginPage(AutoRespawnSettings.class, "Auto Respawn", this, "repeat", AutoRespawnSettings.ENABLED);
+    event.settingsPageRegistry().addPluginPage(AutoRespawnSettings.class, "auto-respawn", "Auto Respawn", this, "repeat", AutoRespawnSettings.ENABLED);
   }
 
   @NoArgsConstructor(access = AccessLevel.NONE)

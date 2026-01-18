@@ -145,17 +145,20 @@ public final class SettingsPageRegistry {
   /// They need to be handled explicitly by the client.
   ///
   /// @param clazz The class to register
+  /// @param id The unique page identifier (URL-safe)
+  /// @param pageName The display name of the page
   /// @return The registry
   @This
   @ApiStatus.Internal
-  public SettingsPageRegistry addInternalPage(Class<? extends SettingsObject> clazz, String pageName) {
-    return addPage(clazz, pageName, null, "triangle-alert", null);
+  public SettingsPageRegistry addInternalPage(Class<? extends SettingsObject> clazz, String id, String pageName) {
+    return addPage(clazz, id, pageName, null, "triangle-alert", null);
   }
 
   /// Registers an internal class with the settings registry.
   /// This is normally used for plugins, provide your plugin info to register the settings to your plugin.
   ///
   /// @param clazz        The class to register
+  /// @param id           The unique page identifier (URL-safe)
   /// @param pageName     The name of the page
   /// @param owningPlugin The owning plugin
   /// @param iconId       The icon id
@@ -163,13 +166,13 @@ public final class SettingsPageRegistry {
   /// @return The registry
   @This
   public SettingsPageRegistry addPluginPage(
-    Class<? extends SettingsObject> clazz, String pageName, Plugin owningPlugin, String iconId, BooleanProperty<?> enabledProperty) {
-    return addPage(clazz, pageName, owningPlugin, iconId, enabledProperty);
+    Class<? extends SettingsObject> clazz, String id, String pageName, Plugin owningPlugin, String iconId, BooleanProperty<?> enabledProperty) {
+    return addPage(clazz, id, pageName, owningPlugin, iconId, enabledProperty);
   }
 
   @This
   private SettingsPageRegistry addPage(
-    Class<? extends SettingsObject> clazz, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable BooleanProperty<?> enabledProperty) {
+    Class<? extends SettingsObject> clazz, String id, String pageName, @Nullable Plugin owningPlugin, String iconId, @Nullable BooleanProperty<?> enabledProperty) {
     var properties = new ArrayList<Property<?>>();
     for (var field : clazz.getDeclaredFields()) {
       if (Modifier.isPublic(field.getModifiers())
@@ -192,6 +195,7 @@ public final class SettingsPageRegistry {
     }
 
     pageList.add(new PageDefinition(
+      id,
       owningPlugin != null ? owningPlugin.pluginInfo() : null,
       pageName,
       properties,
@@ -227,6 +231,7 @@ public final class SettingsPageRegistry {
       }
 
       var settingsPageBuilder = SettingsPage.newBuilder()
+        .setId(pageDefinition.id)
         .setPageName(pageDefinition.pageName)
         .addAllEntries(entries)
         .setIconId(pageDefinition.iconId);
@@ -245,5 +250,5 @@ public final class SettingsPageRegistry {
     return list;
   }
 
-  private record PageDefinition(@Nullable PluginInfo owningPlugin, String pageName, List<Property<?>> properties, String iconId, @Nullable Property<?> enabledProperty) {}
+  private record PageDefinition(String id, @Nullable PluginInfo owningPlugin, String pageName, List<Property<?>> properties, String iconId, @Nullable Property<?> enabledProperty) {}
 }
