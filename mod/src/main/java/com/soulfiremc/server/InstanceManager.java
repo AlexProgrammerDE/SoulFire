@@ -19,7 +19,6 @@ package com.soulfiremc.server;
 
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
@@ -358,20 +357,13 @@ public final class InstanceManager {
     {
       var accounts = new ArrayList<>(settingsSource.accounts().values());
       var availableAccounts = accounts.size();
-      if (availableAccounts > 0) {
-        if (botAmount > availableAccounts) {
-          log.warn(
-            "You have requested {} bots, but only {} are possible with the current amount of accounts.",
-            botAmount,
-            availableAccounts);
-          log.warn("Continuing with {} bots due to accounts.", availableAccounts);
-          botAmount = availableAccounts;
-        }
-      } else {
-        log.info("No custom accounts provided, generating offline accounts based on name format");
-        for (var i = 0; i < botAmount; i++) {
-          accounts.add(OfflineAuthService.createAccount(settingsSource.get(AccountSettings.NAME_FORMAT).formatted(i + 1)));
-        }
+      if (availableAccounts == 0) {
+        throw new IllegalStateException("No accounts configured. Please import accounts before starting an attack.");
+      }
+
+      if (botAmount > availableAccounts) {
+        throw new IllegalStateException(
+          "Not enough accounts. You requested %d bots but only have %d accounts imported.".formatted(botAmount, availableAccounts));
       }
 
       if (settingsSource.get(AccountSettings.SHUFFLE_ACCOUNTS)) {
