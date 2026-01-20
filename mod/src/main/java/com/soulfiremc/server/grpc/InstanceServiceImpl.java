@@ -125,13 +125,15 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       }
 
       var instance = optionalInstance.get();
+      var registry = instance.instanceSettingsPageRegistry();
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setFriendlyName(instanceEntity.friendlyName())
         .setIcon(instanceEntity.icon())
         .setConfig(instanceEntity.settings().toProto())
         .setState(instanceEntity.attackLifecycle().toProto())
         .addAllInstancePermissions(getInstancePermissions(instanceId))
-        .addAllInstanceSettings(instance.instanceSettingsPageRegistry().exportSettingsMeta())
+        .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
+        .addAllInstanceSettings(registry.exportSettingsPages())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

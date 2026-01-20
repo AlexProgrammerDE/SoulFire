@@ -73,6 +73,9 @@ message InstanceInfoResponse {
   InstanceConfig config = 2;
   InstanceState state = 3;
   repeated InstancePermissionState instance_permissions = 4;
+  // All available settings definitions that can be rendered by identifier
+  repeated SettingsDefinition settings_definitions = 8;
+  // Pages that group settings together (reference settings by identifier)
   repeated SettingsPage instance_settings = 6;
   repeated ServerPlugin plugins = 7;
 }

@@ -47,9 +47,11 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
         config = configEntity.settings();
       }
 
+      var registry = soulFireServer.settingsPageRegistry();
       responseObserver.onNext(ServerInfoResponse.newBuilder()
         .setConfig(config.toProto())
-              .addAllServerSettings(soulFireServer.settingsPageRegistry().exportSettingsMeta())
+        .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
+        .addAllServerSettings(registry.exportSettingsPages())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

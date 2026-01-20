@@ -101,17 +101,32 @@ public final class CLIManager {
 
   @SuppressWarnings("unchecked")
   private void registerOptions(CommandLine.Model.CommandSpec targetCommandSpec) {
-    for (var page :
-      rpcClient.instanceStubBlocking()
-        .getInstanceInfo(InstanceInfoRequest.newBuilder().setId(cliInstanceId.toString()).build())
-        .getInstanceSettingsList()) {
-      for (var entry : page.getEntriesList()) {
-        var propertyKey = new PropertyKey(entry.getId().getNamespace(), entry.getId().getKey());
+    var instanceInfo = rpcClient.instanceStubBlocking()
+      .getInstanceInfo(InstanceInfoRequest.newBuilder().setId(cliInstanceId.toString()).build());
 
-        var baseArg = "--%s-%s".formatted(entry.getId().getNamespace(), entry.getId().getKey());
-        switch (entry.getValueCase()) {
+    // Build a lookup map for settings definitions by their identifier
+    var definitionsMap = new HashMap<String, SettingsDefinition>();
+    for (var definition : instanceInfo.getSettingsDefinitionsList()) {
+      var id = definition.getId();
+      var key = id.getNamespace() + ":" + id.getKey();
+      definitionsMap.put(key, definition);
+    }
+
+    for (var page : instanceInfo.getInstanceSettingsList()) {
+      for (var entryId : page.getEntriesList()) {
+        var propertyKey = new PropertyKey(entryId.getNamespace(), entryId.getKey());
+        var definitionKey = entryId.getNamespace() + ":" + entryId.getKey();
+        var definition = definitionsMap.get(definitionKey);
+
+        if (definition == null) {
+          log.warn("No definition found for setting: {}", definitionKey);
+          continue;
+        }
+
+        var baseArg = "--%s-%s".formatted(entryId.getNamespace(), entryId.getKey());
+        switch (definition.getTypeCase()) {
           case STRING -> {
-            var stringEntry = entry.getString();
+            var stringEntry = definition.getString();
             var description = escapeFormatSpecifiers(stringEntry.getDescription());
 
             var reference = new AtomicReference<String>();
@@ -138,7 +153,7 @@ public final class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case INT -> {
-            var intEntry = entry.getInt();
+            var intEntry = definition.getInt();
             var description = escapeFormatSpecifiers(intEntry.getDescription());
 
             targetCommandSpec.addOption(addIntSetting(
@@ -149,7 +164,7 @@ public final class CLIManager {
               intEntry));
           }
           case DOUBLE -> {
-            var doubleEntry = entry.getDouble();
+            var doubleEntry = definition.getDouble();
             var description = escapeFormatSpecifiers(doubleEntry.getDescription());
 
             targetCommandSpec.addOption(addDoubleSetting(
@@ -160,7 +175,7 @@ public final class CLIManager {
               doubleEntry));
           }
           case BOOL -> {
-            var boolEntry = entry.getBool();
+            var boolEntry = definition.getBool();
             var description = escapeFormatSpecifiers(boolEntry.getDescription());
 
             var reference = new AtomicReference<Boolean>();
@@ -187,7 +202,7 @@ public final class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case COMBO -> {
-            var comboEntry = entry.getCombo();
+            var comboEntry = definition.getCombo();
             var description = escapeFormatSpecifiers(comboEntry.getDescription());
 
             var reference = new AtomicReference<String>();
@@ -217,7 +232,7 @@ public final class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case STRING_LIST -> {
-            var stringListEntry = entry.getStringList();
+            var stringListEntry = definition.getStringList();
             var description = escapeFormatSpecifiers(stringListEntry.getDescription());
 
             var reference = new AtomicReference<String[]>();
@@ -255,7 +270,7 @@ public final class CLIManager {
             targetCommandSpec.addOption(optionSpec);
           }
           case MIN_MAX -> {
-            var minMaxEntry = entry.getMinMax();
+            var minMaxEntry = definition.getMinMax();
 
             var minEntry = minMaxEntry.getMinEntry();
             var minRef = new AtomicInteger();
@@ -307,8 +322,8 @@ public final class CLIManager {
             targetCommandSpec.addOption(minOptionSpec);
             targetCommandSpec.addOption(maxOptionSpec);
           }
-          case VALUE_NOT_SET -> throw new IllegalStateException(
-            "Unexpected value: " + entry.getValueCase());
+          case TYPE_NOT_SET -> throw new IllegalStateException(
+            "Unexpected value: " + definition.getTypeCase());
         }
       }
     }
