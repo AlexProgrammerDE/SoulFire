@@ -39,7 +39,6 @@
     "headless.rendering.MixinClientLevel",
     "headless.rendering.MixinEntityModelSet",
     "headless.rendering.MixinGameRenderer",
-    "headless.rendering.MixinGlDevice",
     "headless.rendering.MixinLevelRenderer",
     "headless.rendering.MixinModelPart",
     "headless.rendering.MixinMouseHandler",
