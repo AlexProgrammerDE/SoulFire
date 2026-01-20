@@ -16,6 +16,9 @@ message ServerInfoRequest {
 
 message ServerInfoResponse {
   ServerConfig config = 1;
+  // All available settings definitions that can be rendered by identifier
+  repeated SettingsDefinition settings_definitions = 4;
+  // Pages that group settings together (reference settings by identifier)
   repeated SettingsPage server_settings = 2;
   repeated ServerPlugin plugins = 3;
 }

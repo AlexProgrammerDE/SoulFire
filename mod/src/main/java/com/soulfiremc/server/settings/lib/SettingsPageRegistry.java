@@ -206,34 +206,49 @@ public final class SettingsPageRegistry {
     return this;
   }
 
-  public List<SettingsPage> exportSettingsMeta() {
-    var list = new ArrayList<SettingsPage>();
+  /// Exports all settings definitions as a flat list.
+  /// These can be rendered anywhere by their identifier (namespace + key).
+  public List<SettingsDefinition> exportSettingsDefinitions() {
+    var definitions = new ArrayList<SettingsDefinition>();
 
     for (var pageDefinition : pageList) {
-      var entries = new ArrayList<SettingsPageEntry>();
       for (var property : pageDefinition.properties) {
-        var entryBuilder = SettingsPageEntry.newBuilder()
+        var definitionBuilder = SettingsDefinition.newBuilder()
           .setId(property.toProtoIdentifier())
           .setScope(switch (property.sourceType()) {
             case SettingsSource.Server _ -> SettingsPageEntryScopeType.SERVER;
             case SettingsSource.Instance _ -> SettingsPageEntryScopeType.INSTANCE;
             case SettingsSource.Bot _ -> SettingsPageEntryScopeType.BOT;
           });
-        entries.add(switch (property) {
-          case BooleanProperty<?> booleanProperty -> entryBuilder.setBool(createBoolSetting(booleanProperty)).build();
-          case IntProperty<?> intProperty -> entryBuilder.setInt(createIntSetting(intProperty)).build();
-          case DoubleProperty<?> doubleProperty -> entryBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
-          case StringProperty<?> stringProperty -> entryBuilder.setString(createStringSetting(stringProperty)).build();
-          case ComboProperty<?> comboProperty -> entryBuilder.setCombo(createComboSetting(comboProperty)).build();
-          case StringListProperty<?> stringListProperty -> entryBuilder.setStringList(createStringListSetting(stringListProperty)).build();
-          case MinMaxProperty<?> minMaxProperty -> entryBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
+        definitions.add(switch (property) {
+          case BooleanProperty<?> booleanProperty -> definitionBuilder.setBool(createBoolSetting(booleanProperty)).build();
+          case IntProperty<?> intProperty -> definitionBuilder.setInt(createIntSetting(intProperty)).build();
+          case DoubleProperty<?> doubleProperty -> definitionBuilder.setDouble(createDoubleSetting(doubleProperty)).build();
+          case StringProperty<?> stringProperty -> definitionBuilder.setString(createStringSetting(stringProperty)).build();
+          case ComboProperty<?> comboProperty -> definitionBuilder.setCombo(createComboSetting(comboProperty)).build();
+          case StringListProperty<?> stringListProperty -> definitionBuilder.setStringList(createStringListSetting(stringListProperty)).build();
+          case MinMaxProperty<?> minMaxProperty -> definitionBuilder.setMinMax(createMinMaxSetting(minMaxProperty)).build();
         });
       }
+    }
+
+    return definitions;
+  }
+
+  /// Exports page definitions that reference settings by identifier.
+  /// Pages provide grouping and ordering of settings.
+  public List<SettingsPage> exportSettingsPages() {
+    var list = new ArrayList<SettingsPage>();
+
+    for (var pageDefinition : pageList) {
+      var entryIdentifiers = pageDefinition.properties.stream()
+        .map(Property::toProtoIdentifier)
+        .toList();
 
       var settingsPageBuilder = SettingsPage.newBuilder()
         .setId(pageDefinition.id)
         .setPageName(pageDefinition.pageName)
-        .addAllEntries(entries)
+        .addAllEntries(entryIdentifiers)
         .setIconId(pageDefinition.iconId);
 
       if (pageDefinition.owningPlugin != null) {

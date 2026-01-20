@@ -26,15 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class AccountSettings implements SettingsObject {
   private static final String NAMESPACE = "account";
-  public static final StringProperty<SettingsSource.Instance> NAME_FORMAT =
-    ImmutableStringProperty.<SettingsSource.Instance>builder()
-      .sourceType(SettingsSource.Instance.INSTANCE)
-      .namespace(NAMESPACE)
-      .key("name-format")
-      .uiName("Name format")
-      .description("The format of the bot names. %d will be replaced with the bot number.")
-      .defaultValue("Bot_%d")
-      .build();
   public static final BooleanProperty<SettingsSource.Instance> SHUFFLE_ACCOUNTS =
     ImmutableBooleanProperty.<SettingsSource.Instance>builder()
       .sourceType(SettingsSource.Instance.INSTANCE)

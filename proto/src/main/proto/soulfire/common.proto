@@ -235,32 +235,37 @@ enum SettingsPageEntryScopeType {
   BOT = 2;
 }
 
-// A entry in the settings page
-message SettingsPageEntry {
-  // id + namespace that this setting corresponds to
-  SettingsEntryIdentifier id = 9;
-  SettingsPageEntryScopeType scope = 10;
-  oneof value {
-    StringSetting string = 2;
-    IntSetting int = 3;
-    DoubleSetting double = 4;
-    BoolSetting bool = 5;
-    ComboSetting combo = 6;
-    StringListSetting string_list = 7;
-    MinMaxSetting min_max = 8;
+// A setting definition that can be rendered anywhere by identifier
+message SettingsDefinition {
+  // Unique identifier for this setting (namespace + key)
+  SettingsEntryIdentifier id = 1;
+  // Which scope this setting belongs to (SERVER, INSTANCE, BOT)
+  SettingsPageEntryScopeType scope = 2;
+  // The actual setting type and UI configuration
+  oneof type {
+    StringSetting string = 3;
+    IntSetting int = 4;
+    DoubleSetting double = 5;
+    BoolSetting bool = 6;
+    ComboSetting combo = 7;
+    StringListSetting string_list = 8;
+    MinMaxSetting min_max = 9;
   }
 }
 
+// A page definition that references settings by their identifiers
 message SettingsPage {
   // Unique page identifier (URL-safe, e.g., "bot", "account", "auto-reconnect")
   string id = 1;
+  // Plugin that owns this settings page (optional for internal pages)
   optional string owning_plugin_id = 2;
-  // The name of the page for these settings
+  // The display name of the page
   string page_name = 3;
-  repeated SettingsPageEntry entries = 5;
+  // Ordered list of setting identifiers to render on this page
+  repeated SettingsEntryIdentifier entries = 5;
   // https://lucide.dev icon id for this page (Usually rendered left of the page name)
   string icon_id = 6;
-  // Key which makes this plugin "enabled" or "disabled"
+  // Setting identifier that controls whether this page/plugin is enabled
   optional SettingsEntryIdentifier enabled_identifier = 7;
 }
 
