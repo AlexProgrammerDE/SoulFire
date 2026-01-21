@@ -18,7 +18,7 @@ dependencies {
   api("net.fabricmc:mapping-io:0.8.0")
   api("net.fabricmc:tiny-remapper:0.12.3")
 
-  api("at.yawk.lz4:lz4-java:1.10.2")
+  api("at.yawk.lz4:lz4-java:1.10.3")
   api("com.azure:azure-json:1.5.1")
   api("com.github.oshi:oshi-core:6.9.2")
   api("com.google.code.gson:gson:2.13.2")
