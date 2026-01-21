@@ -29,6 +29,7 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SocketAddressHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -545,7 +546,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         var currentSettings = instanceEntity.settings();
         var newProxies = currentSettings.proxies().stream()
-          .filter(proxy -> !addressesToRemove.contains(proxy.address()))
+          .filter(proxy -> !addressesToRemove.contains(SocketAddressHelper.serialize(proxy.address())))
           .toList();
         instanceEntity.settings(currentSettings.withProxies(newProxies));
 

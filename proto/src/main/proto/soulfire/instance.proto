@@ -66,9 +66,11 @@ message InstancePermissionState {
 
 message InstanceInfoRequest {
   string id = 1;
+  // Optional: if provided, returns NotModified if config hasn't changed since this timestamp
+  optional google.protobuf.Timestamp if_modified_since = 2;
 }
 
-message InstanceInfoResponse {
+message InstanceInfo {
   string friendly_name = 1;
   string icon = 5;
   InstanceConfig config = 2;
@@ -79,6 +81,19 @@ message InstanceInfoResponse {
   // Pages that group settings together (reference settings by identifier)
   repeated SettingsPage instance_settings = 6;
   repeated ServerPlugin plugins = 7;
+  // When the config was last modified
+  google.protobuf.Timestamp last_modified = 9;
+}
+
+message InstanceNotModified {
+  google.protobuf.Timestamp last_modified = 1;
+}
+
+message InstanceInfoResponse {
+  oneof result {
+    InstanceInfo info = 1;
+    InstanceNotModified not_modified = 2;
+  }
 }
 
 message InstanceUpdateMetaRequest {
@@ -136,6 +151,23 @@ message InstanceUpdateAccountRequest {
 message InstanceUpdateAccountResponse {
 }
 
+// Batch account operations
+message InstanceAddAccountsBatchRequest {
+  string id = 1;
+  repeated MinecraftAccountProto accounts = 2;
+}
+
+message InstanceAddAccountsBatchResponse {
+}
+
+message InstanceRemoveAccountsBatchRequest {
+  string id = 1;
+  repeated string profile_ids = 2;
+}
+
+message InstanceRemoveAccountsBatchResponse {
+}
+
 // Proxy operations
 message InstanceAddProxyRequest {
   string id = 1;
@@ -160,6 +192,23 @@ message InstanceUpdateProxyRequest {
 }
 
 message InstanceUpdateProxyResponse {
+}
+
+// Batch proxy operations
+message InstanceAddProxiesBatchRequest {
+  string id = 1;
+  repeated ProxyProto proxies = 2;
+}
+
+message InstanceAddProxiesBatchResponse {
+}
+
+message InstanceRemoveProxiesBatchRequest {
+  string id = 1;
+  repeated string addresses = 2;
+}
+
+message InstanceRemoveProxiesBatchResponse {
 }
 
 message InstanceStateChangeRequest {
@@ -208,10 +257,16 @@ service InstanceService {
   rpc AddInstanceAccount (InstanceAddAccountRequest) returns (InstanceAddAccountResponse) {}
   rpc RemoveInstanceAccount (InstanceRemoveAccountRequest) returns (InstanceRemoveAccountResponse) {}
   rpc UpdateInstanceAccount (InstanceUpdateAccountRequest) returns (InstanceUpdateAccountResponse) {}
+  // Batch account operations
+  rpc AddInstanceAccountsBatch (InstanceAddAccountsBatchRequest) returns (InstanceAddAccountsBatchResponse) {}
+  rpc RemoveInstanceAccountsBatch (InstanceRemoveAccountsBatchRequest) returns (InstanceRemoveAccountsBatchResponse) {}
   // Proxy operations
   rpc AddInstanceProxy (InstanceAddProxyRequest) returns (InstanceAddProxyResponse) {}
   rpc RemoveInstanceProxy (InstanceRemoveProxyRequest) returns (InstanceRemoveProxyResponse) {}
   rpc UpdateInstanceProxy (InstanceUpdateProxyRequest) returns (InstanceUpdateProxyResponse) {}
+  // Batch proxy operations
+  rpc AddInstanceProxiesBatch (InstanceAddProxiesBatchRequest) returns (InstanceAddProxiesBatchResponse) {}
+  rpc RemoveInstanceProxiesBatch (InstanceRemoveProxiesBatchRequest) returns (InstanceRemoveProxiesBatchResponse) {}
   rpc ChangeInstanceState (InstanceStateChangeRequest) returns (InstanceStateChangeResponse) {}
   rpc GetAuditLog (InstanceAuditLogRequest) returns (InstanceAuditLogResponse) {}
 }

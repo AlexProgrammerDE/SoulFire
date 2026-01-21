@@ -101,8 +101,14 @@ public final class CLIManager {
 
   @SuppressWarnings("unchecked")
   private void registerOptions(CommandLine.Model.CommandSpec targetCommandSpec) {
-    var instanceInfo = rpcClient.instanceStubBlocking()
+    var instanceInfoResponse = rpcClient.instanceStubBlocking()
       .getInstanceInfo(InstanceInfoRequest.newBuilder().setId(cliInstanceId.toString()).build());
+
+    if (!instanceInfoResponse.hasInfo()) {
+      throw new IllegalStateException("Failed to get instance info");
+    }
+
+    var instanceInfo = instanceInfoResponse.getInfo();
 
     // Build a lookup map for settings definitions by their identifier
     var definitionsMap = new HashMap<String, SettingsDefinition>();
