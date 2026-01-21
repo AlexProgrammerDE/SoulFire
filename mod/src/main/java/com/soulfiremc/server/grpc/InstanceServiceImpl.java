@@ -20,10 +20,13 @@ package com.soulfiremc.server.grpc;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.AttackLifecycle;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import io.grpc.Status;
@@ -32,6 +35,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -192,6 +196,218 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance config", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateInstanceConfigEntry(InstanceUpdateConfigEntryRequest request, StreamObserver<InstanceUpdateConfigEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newSettings = SettingsSource.Stem.withUpdatedEntry(
+          currentSettings.settings(),
+          request.getNamespace(),
+          request.getKey(),
+          SettingsSource.Stem.valueToJsonElement(request.getValue())
+        );
+        instanceEntity.settings(currentSettings.withSettings(newSettings));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceUpdateConfigEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating instance config entry", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void addInstanceAccount(InstanceAddAccountRequest request, StreamObserver<InstanceAddAccountResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newAccounts = new ArrayList<>(currentSettings.accounts());
+        newAccounts.add(MinecraftAccount.fromProto(request.getAccount()));
+        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceAddAccountResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error adding instance account", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void removeInstanceAccount(InstanceRemoveAccountRequest request, StreamObserver<InstanceRemoveAccountResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    var profileId = UUID.fromString(request.getProfileId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newAccounts = currentSettings.accounts().stream()
+          .filter(account -> !account.profileId().equals(profileId))
+          .toList();
+        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceRemoveAccountResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error removing instance account", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateInstanceAccount(InstanceUpdateAccountRequest request, StreamObserver<InstanceUpdateAccountResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var updatedAccount = MinecraftAccount.fromProto(request.getAccount());
+        var currentSettings = instanceEntity.settings();
+        var newAccounts = currentSettings.accounts().stream()
+          .map(account -> account.profileId().equals(updatedAccount.profileId()) ? updatedAccount : account)
+          .toList();
+        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceUpdateAccountResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating instance account", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void addInstanceProxy(InstanceAddProxyRequest request, StreamObserver<InstanceAddProxyResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newProxies = new ArrayList<>(currentSettings.proxies());
+        newProxies.add(SFProxy.fromProto(request.getProxy()));
+        instanceEntity.settings(currentSettings.withProxies(newProxies));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceAddProxyResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error adding instance proxy", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void removeInstanceProxy(InstanceRemoveProxyRequest request, StreamObserver<InstanceRemoveProxyResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    var index = request.getIndex();
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newProxies = new ArrayList<>(currentSettings.proxies());
+        if (index < 0 || index >= newProxies.size()) {
+          throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)));
+        }
+        newProxies.remove(index);
+        instanceEntity.settings(currentSettings.withProxies(newProxies));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceRemoveProxyResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error removing instance proxy", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateInstanceProxy(InstanceUpdateProxyRequest request, StreamObserver<InstanceUpdateProxyResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    var index = request.getIndex();
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newProxies = new ArrayList<>(currentSettings.proxies());
+        if (index < 0 || index >= newProxies.size()) {
+          throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)));
+        }
+        newProxies.set(index, SFProxy.fromProto(request.getProxy()));
+        instanceEntity.settings(currentSettings.withProxies(newProxies));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(InstanceUpdateProxyResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating instance proxy", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

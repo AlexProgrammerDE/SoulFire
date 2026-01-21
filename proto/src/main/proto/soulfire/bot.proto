@@ -7,6 +7,7 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 message BotConfig {
   repeated SettingsNamespace settings = 1;
@@ -39,7 +40,22 @@ message BotUpdateConfigRequest {
 message BotUpdateConfigResponse {
 }
 
+// Granular config entry update (single key-value)
+message BotUpdateConfigEntryRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  string namespace = 3;
+  string key = 4;
+  google.protobuf.Value value = 5;
+}
+
+message BotUpdateConfigEntryResponse {
+}
+
 service BotService {
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
+  // Used only for profile import - sends entire config
   rpc UpdateBotConfig (BotUpdateConfigRequest) returns (BotUpdateConfigResponse) {}
+  // Granular update for individual config entries
+  rpc UpdateBotConfigEntry (BotUpdateConfigEntryRequest) returns (BotUpdateConfigEntryResponse) {}
 }

@@ -7,6 +7,7 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 message InstanceUser {
   string id = 1;
@@ -99,6 +100,68 @@ message InstanceUpdateConfigRequest {
 message InstanceUpdateConfigResponse {
 }
 
+// Granular config entry update (single key-value)
+message InstanceUpdateConfigEntryRequest {
+  string id = 1;
+  string namespace = 2;
+  string key = 3;
+  google.protobuf.Value value = 4;
+}
+
+message InstanceUpdateConfigEntryResponse {
+}
+
+// Account operations
+message InstanceAddAccountRequest {
+  string id = 1;
+  MinecraftAccountProto account = 2;
+}
+
+message InstanceAddAccountResponse {
+}
+
+message InstanceRemoveAccountRequest {
+  string id = 1;
+  string profile_id = 2;
+}
+
+message InstanceRemoveAccountResponse {
+}
+
+message InstanceUpdateAccountRequest {
+  string id = 1;
+  MinecraftAccountProto account = 2;
+}
+
+message InstanceUpdateAccountResponse {
+}
+
+// Proxy operations
+message InstanceAddProxyRequest {
+  string id = 1;
+  ProxyProto proxy = 2;
+}
+
+message InstanceAddProxyResponse {
+}
+
+message InstanceRemoveProxyRequest {
+  string id = 1;
+  int32 index = 2;
+}
+
+message InstanceRemoveProxyResponse {
+}
+
+message InstanceUpdateProxyRequest {
+  string id = 1;
+  int32 index = 2;
+  ProxyProto proxy = 3;
+}
+
+message InstanceUpdateProxyResponse {
+}
+
 message InstanceStateChangeRequest {
   string id = 1;
   InstanceState state = 2;
@@ -137,7 +200,18 @@ service InstanceService {
   rpc ListInstances (InstanceListRequest) returns (InstanceListResponse) {}
   rpc GetInstanceInfo (InstanceInfoRequest) returns (InstanceInfoResponse) {}
   rpc UpdateInstanceMeta (InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse) {}
+  // Used only for profile import - sends entire config
   rpc UpdateInstanceConfig (InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse) {}
+  // Granular update for individual config entries
+  rpc UpdateInstanceConfigEntry (InstanceUpdateConfigEntryRequest) returns (InstanceUpdateConfigEntryResponse) {}
+  // Account operations
+  rpc AddInstanceAccount (InstanceAddAccountRequest) returns (InstanceAddAccountResponse) {}
+  rpc RemoveInstanceAccount (InstanceRemoveAccountRequest) returns (InstanceRemoveAccountResponse) {}
+  rpc UpdateInstanceAccount (InstanceUpdateAccountRequest) returns (InstanceUpdateAccountResponse) {}
+  // Proxy operations
+  rpc AddInstanceProxy (InstanceAddProxyRequest) returns (InstanceAddProxyResponse) {}
+  rpc RemoveInstanceProxy (InstanceRemoveProxyRequest) returns (InstanceRemoveProxyResponse) {}
+  rpc UpdateInstanceProxy (InstanceUpdateProxyRequest) returns (InstanceUpdateProxyResponse) {}
   rpc ChangeInstanceState (InstanceStateChangeRequest) returns (InstanceStateChangeResponse) {}
   rpc GetAuditLog (InstanceAuditLogRequest) returns (InstanceAuditLogResponse) {}
 }

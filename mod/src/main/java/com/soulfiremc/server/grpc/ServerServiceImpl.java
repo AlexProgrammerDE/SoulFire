@@ -21,6 +21,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.ServerConfigEntity;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -82,6 +83,45 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating server config", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateServerConfigEntry(ServerUpdateConfigEntryRequest request, StreamObserver<ServerUpdateConfigEntryResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SERVER_CONFIG));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
+        ServerSettingsImpl.Stem currentConfig;
+        if (currentConfigEntity == null) {
+          currentConfigEntity = new ServerConfigEntity();
+          currentConfig = ServerSettingsImpl.Stem.EMPTY;
+        } else {
+          currentConfig = currentConfigEntity.settings();
+        }
+
+        var newSettings = SettingsSource.Stem.withUpdatedEntry(
+          currentConfig.settings(),
+          request.getNamespace(),
+          request.getKey(),
+          SettingsSource.Stem.valueToJsonElement(request.getValue())
+        );
+        currentConfigEntity.settings(currentConfig.withSettings(newSettings));
+
+        if (session.find(ServerConfigEntity.class, 1) == null) {
+          session.persist(currentConfigEntity);
+        } else {
+          session.merge(currentConfigEntity);
+        }
+      });
+
+      soulFireServer.configUpdateHook();
+      responseObserver.onNext(ServerUpdateConfigEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating server config entry", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

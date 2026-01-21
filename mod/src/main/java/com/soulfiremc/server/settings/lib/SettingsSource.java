@@ -27,7 +27,7 @@ import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.GsonInstance;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -107,9 +107,9 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
 
     static Map<String, Map<String, JsonElement>> settingsFromProto(List<SettingsNamespace> settingsList) {
       return settingsList.stream().collect(
-          HashMap::new,
+          LinkedHashMap::new,
           (map, namespace) -> map.put(namespace.getNamespace(), namespace.getEntriesList().stream().collect(
-            HashMap::new,
+            LinkedHashMap::new,
             (innerMap, entry) -> {
               try {
                 innerMap.put(entry.getKey(), GsonInstance.GSON.fromJson(JsonFormat.printer().print(entry.getValue()), JsonElement.class));
@@ -117,10 +117,30 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
                 throw new RuntimeException(e);
               }
             },
-            HashMap::putAll
+            LinkedHashMap::putAll
           )),
-          HashMap::putAll
+          LinkedHashMap::putAll
         );
+    }
+
+    static JsonElement valueToJsonElement(Value value) {
+      try {
+        return GsonInstance.GSON.fromJson(JsonFormat.printer().print(value), JsonElement.class);
+      } catch (InvalidProtocolBufferException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    static Map<String, Map<String, JsonElement>> withUpdatedEntry(
+        Map<String, Map<String, JsonElement>> settings,
+        String namespace,
+        String key,
+        JsonElement value) {
+      var newSettings = new LinkedHashMap<>(settings);
+      var namespaceMap = new LinkedHashMap<>(newSettings.getOrDefault(namespace, Map.of()));
+      namespaceMap.put(key, value);
+      newSettings.put(namespace, namespaceMap);
+      return newSettings;
     }
 
     default Iterable<? extends SettingsNamespace> settingsToProto() {

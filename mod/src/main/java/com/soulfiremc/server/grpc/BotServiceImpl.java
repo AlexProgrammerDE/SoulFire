@@ -21,6 +21,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.settings.lib.BotSettingsImpl;
+import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -109,6 +110,47 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating bot config", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void updateBotConfigEntry(BotUpdateConfigEntryRequest request, StreamObserver<BotUpdateConfigEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        instanceEntity.settings(instanceEntity.settings().withAccounts(instanceEntity.settings().accounts().stream()
+          .map(minecraftAccount -> {
+            if (minecraftAccount.profileId().equals(botId)) {
+              var currentStem = minecraftAccount.settingsStem() == null ? BotSettingsImpl.Stem.EMPTY : minecraftAccount.settingsStem();
+              var newSettings = SettingsSource.Stem.withUpdatedEntry(
+                currentStem.settings(),
+                request.getNamespace(),
+                request.getKey(),
+                SettingsSource.Stem.valueToJsonElement(request.getValue())
+              );
+              return minecraftAccount.withSettingsStem(currentStem.withSettings(newSettings));
+            } else {
+              return minecraftAccount;
+            }
+          })
+          .toList()));
+
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(BotUpdateConfigEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error updating bot config entry", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

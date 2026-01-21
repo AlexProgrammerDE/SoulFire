@@ -6,6 +6,7 @@ option java_multiple_files = true;
 package soulfire.v1;
 
 import "soulfire/common.proto";
+import "google/protobuf/struct.proto";
 
 message ServerConfig {
   repeated SettingsNamespace settings = 1;
@@ -30,7 +31,20 @@ message ServerUpdateConfigRequest {
 message ServerUpdateConfigResponse {
 }
 
+// Granular config entry update (single key-value)
+message ServerUpdateConfigEntryRequest {
+  string namespace = 1;
+  string key = 2;
+  google.protobuf.Value value = 3;
+}
+
+message ServerUpdateConfigEntryResponse {
+}
+
 service ServerService {
   rpc GetServerInfo (ServerInfoRequest) returns (ServerInfoResponse) {}
+  // Used only for profile import - sends entire config
   rpc UpdateServerConfig (ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse) {}
+  // Granular update for individual config entries
+  rpc UpdateServerConfigEntry (ServerUpdateConfigEntryRequest) returns (ServerUpdateConfigEntryResponse) {}
 }
