@@ -53,6 +53,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
         .setConfig(config.toProto())
         .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
         .addAllServerSettings(registry.exportSettingsPages())
+        .addAllPlugins(registry.exportRegisteredPlugins())
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

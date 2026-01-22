@@ -161,6 +161,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .addAllInstancePermissions(getInstancePermissions(instanceId))
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
+          .addAllPlugins(registry.exportRegisteredPlugins())
           .setLastModified(lastModifiedProto)
           .build())
         .build());

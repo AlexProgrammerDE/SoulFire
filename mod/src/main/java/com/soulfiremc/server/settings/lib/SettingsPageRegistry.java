@@ -265,5 +265,18 @@ public final class SettingsPageRegistry {
     return list;
   }
 
+  public List<ServerPlugin> exportRegisteredPlugins() {
+    var plugins = new ArrayList<ServerPlugin>();
+    for (var pageDefinition : pageList) {
+      if (pageDefinition.owningPlugin != null) {
+        var pluginProto = pageDefinition.owningPlugin.toProto();
+        if (plugins.stream().noneMatch(p -> p.getId().equals(pluginProto.getId()))) {
+          plugins.add(pluginProto);
+        }
+      }
+    }
+    return plugins;
+  }
+
   private record PageDefinition(String id, @Nullable PluginInfo owningPlugin, String pageName, List<Property<?>> properties, String iconId, @Nullable Property<?> enabledProperty) {}
 }
