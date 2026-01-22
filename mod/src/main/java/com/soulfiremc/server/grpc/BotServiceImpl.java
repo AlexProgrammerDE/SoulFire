@@ -37,6 +37,51 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   private final SoulFireServer soulFireServer;
 
   @Override
+  public void getBotList(BotListRequest request, StreamObserver<BotListResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var botConnections = instance.botConnections();
+
+      var responseBuilder = BotListResponse.newBuilder();
+      for (var account : instance.settingsSource().accounts().values()) {
+        var profileId = account.profileId();
+        var entryBuilder = BotListEntry.newBuilder()
+          .setProfileId(profileId.toString())
+          .setIsOnline(botConnections.containsKey(profileId));
+
+        var activeBot = botConnections.get(profileId);
+        if (activeBot != null) {
+          var player = activeBot.minecraft().player;
+          if (player != null) {
+            entryBuilder.setLiveState(BotLiveState.newBuilder()
+              .setX(player.getX())
+              .setY(player.getY())
+              .setZ(player.getZ())
+              .setXRot(player.getXRot())
+              .setYRot(player.getYRot())
+              .build());
+          }
+        }
+        responseBuilder.addBots(entryBuilder.build());
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting bot list", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
   public void getBotInfo(BotInfoRequest request, StreamObserver<BotInfoResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
     var botId = UUID.fromString(request.getBotId());

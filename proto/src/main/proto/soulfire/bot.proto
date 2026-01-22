@@ -18,6 +18,20 @@ message BotInfoRequest {
   string bot_id = 2;
 }
 
+message BotListRequest {
+  string instance_id = 1;
+}
+
+message BotListEntry {
+  string profile_id = 1;
+  bool is_online = 2;
+  optional BotLiveState live_state = 3;
+}
+
+message BotListResponse {
+  repeated BotListEntry bots = 1;
+}
+
 message BotLiveState {
   double x = 1;
   double y = 2;
@@ -53,6 +67,7 @@ message BotUpdateConfigEntryResponse {
 }
 
 service BotService {
+  rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
   // Used only for profile import - sends entire config
   rpc UpdateBotConfig (BotUpdateConfigRequest) returns (BotUpdateConfigResponse) {}
