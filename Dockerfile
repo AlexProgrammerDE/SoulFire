@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-debian:25.0.1 AS soulfire-builder
+FROM azul/zulu-openjdk-debian:25.0.2 AS soulfire-builder
 
 # Get soulfire data
 COPY --chown=root:root . /soulfire
@@ -11,7 +11,7 @@ WORKDIR /soulfire
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked --mount=type=cache,target=/soulfire/.gradle,sharing=locked --mount=type=cache,target=/soulfire/work,sharing=locked \
     ./gradlew :dedicated:build --stacktrace
 
-FROM azul/zulu-openjdk-alpine:25.0.1-jre-headless AS soulfire-runner
+FROM azul/zulu-openjdk-alpine:25.0.2-jre-headless AS soulfire-runner
 
 # Setup groups and install dumb init
 RUN addgroup --gid 1001 soulfire && \
