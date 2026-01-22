@@ -21,7 +21,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.AwayFromPosGoal;
@@ -82,7 +82,7 @@ public final class AntiAFK extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsPageRegistry().addPluginPage(AntiAFKSettings.class, "anti-afk", "Anti AFK", this, "activity", AntiAFKSettings.ENABLED);
   }
 

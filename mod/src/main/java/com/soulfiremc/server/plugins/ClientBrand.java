@@ -21,7 +21,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotClientBrandEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.BooleanProperty;
@@ -58,7 +58,7 @@ public final class ClientBrand extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsPageRegistry().addPluginPage(ClientBrandSettings.class, "client-brand", "Client Brand", this, "fingerprint", ClientBrandSettings.ENABLED);
   }
 

@@ -22,7 +22,7 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPreEntityTickEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
@@ -307,7 +307,7 @@ public final class KillAura extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsPageRegistry().addPluginPage(KillAuraSettings.class, "kill-aura", "Kill Aura", this, "skull", KillAuraSettings.ENABLE);
   }
 

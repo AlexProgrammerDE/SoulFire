@@ -21,7 +21,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
@@ -47,7 +47,7 @@ public final class AutoReconnect extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsPageRegistry().addPluginPage(AutoReconnectSettings.class, "auto-reconnect", "Auto Reconnect", this, "refresh-ccw", AutoReconnectSettings.ENABLED);
   }
 

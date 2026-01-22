@@ -23,7 +23,7 @@ import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
-import com.soulfiremc.server.api.event.lifecycle.BotSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
@@ -210,7 +210,7 @@ public final class CaptchaSolver extends InternalPlugin {
   }
 
   @EventHandler
-  public void onSettingsRegistryInit(BotSettingsRegistryInitEvent event) {
+  public void onSettingsRegistryInit(InstanceSettingsRegistryInitEvent event) {
     event.settingsPageRegistry().addPluginPage(CaptchaSolverSettings.class, "captcha-solver", "Captcha Solver", this, "eye", CaptchaSolverSettings.ENABLED);
   }
 
