@@ -32,12 +32,41 @@ message BotListResponse {
   repeated BotListEntry bots = 1;
 }
 
+// Represents an item in an inventory slot
+message InventorySlot {
+  int32 slot = 1;
+  string item_id = 2;  // e.g., "minecraft:diamond_sword"
+  int32 count = 3;
+  optional string display_name = 4;  // Custom name if present
+}
+
 message BotLiveState {
   double x = 1;
   double y = 2;
   double z = 3;
   float xRot = 4;
   float yRot = 5;
+
+  // Health and food
+  float health = 6;
+  float max_health = 7;
+  int32 food_level = 8;
+  float saturation_level = 9;
+
+  // Inventory (only non-empty slots)
+  repeated InventorySlot inventory = 10;
+  int32 selected_hotbar_slot = 11;
+
+  // World info
+  string dimension = 12;  // e.g., "minecraft:overworld"
+
+  // Experience
+  int32 experience_level = 13;
+  float experience_progress = 14;  // 0.0 to 1.0
+
+  // Skin texture hash for avatar rendering (e.g., "abc123def456...")
+  // Use with https://mc-heads.net/body/<hash> for full body render
+  optional string skin_texture_hash = 15;
 }
 
 message BotInfoResponse {
@@ -66,6 +95,18 @@ message BotUpdateConfigEntryRequest {
 message BotUpdateConfigEntryResponse {
 }
 
+// POV Rendering
+message BotRenderPovRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  int32 width = 3;   // Image width (default 854)
+  int32 height = 4;  // Image height (default 480)
+}
+
+message BotRenderPovResponse {
+  string image_base64 = 1;  // Base64 encoded PNG image
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -73,4 +114,6 @@ service BotService {
   rpc UpdateBotConfig (BotUpdateConfigRequest) returns (BotUpdateConfigResponse) {}
   // Granular update for individual config entries
   rpc UpdateBotConfigEntry (BotUpdateConfigEntryRequest) returns (BotUpdateConfigEntryResponse) {}
+  // Render the bot's point of view using software rendering
+  rpc RenderBotPov (BotRenderPovRequest) returns (BotRenderPovResponse) {}
 }
