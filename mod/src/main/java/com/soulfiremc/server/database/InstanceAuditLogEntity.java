@@ -71,9 +71,9 @@ public final class InstanceAuditLogEntity {
 
   public enum AuditLogType {
     EXECUTE_COMMAND,
-    START_ATTACK,
-    PAUSE_ATTACK,
-    RESUME_ATTACK,
-    STOP_ATTACK,
+    START_SESSION,
+    PAUSE_SESSION,
+    RESUME_SESSION,
+    STOP_SESSION,
   }
 }

@@ -20,8 +20,8 @@ package com.soulfiremc.server.plugins;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
-import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.session.SessionBotRemoveEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
@@ -52,7 +52,7 @@ public final class AutoReconnect extends InternalPlugin {
   }
 
   @EventHandler
-  public void onAttackBotRemove(AttackBotRemoveEvent event) {
+  public void onSessionBotRemove(SessionBotRemoveEvent event) {
     var instanceManager = event.instanceManager();
     var bot = event.botConnection();
     var settingsSource = bot.settingsSource();
@@ -64,7 +64,7 @@ public final class AutoReconnect extends InternalPlugin {
       .scheduler()
       .schedule(
         () -> {
-          TimeUtil.waitCondition(() -> instanceManager.attackLifecycle().isPaused());
+          TimeUtil.waitCondition(() -> instanceManager.sessionLifecycle().isPaused());
 
           var eventLoopGroup = bot.eventLoopGroup();
           if (eventLoopGroup.isShuttingDown()
@@ -73,7 +73,7 @@ public final class AutoReconnect extends InternalPlugin {
             return;
           }
 
-          if (instanceManager.attackLifecycle().isStoppedOrStopping()) {
+          if (instanceManager.sessionLifecycle().isStoppedOrStopping()) {
             return;
           }
 

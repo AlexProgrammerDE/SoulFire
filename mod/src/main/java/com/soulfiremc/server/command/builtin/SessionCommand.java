@@ -19,28 +19,28 @@ package com.soulfiremc.server.command.builtin;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.command.CommandSourceStack;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
-public final class AttackCommand {
-  private AttackCommand() {
+public final class SessionCommand {
+  private SessionCommand() {
   }
 
   public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
     dispatcher.register(
-      literal("attack")
+      literal("session")
         .then(
           literal("start")
             .executes(
               help(
-                "Makes selected instances start an attack",
+                "Makes selected instances start a session",
                 c ->
                   forEveryInstance(
                     c,
                     instance -> {
-                      instance.switchToState(c.getSource().source(), AttackLifecycle.RUNNING);
+                      instance.switchToState(c.getSource().source(), SessionLifecycle.RUNNING);
 
                       return Command.SINGLE_SUCCESS;
                     }))))
@@ -48,12 +48,12 @@ public final class AttackCommand {
           literal("stop")
             .executes(
               help(
-                "Makes selected instances stop their attack",
+                "Makes selected instances stop their session",
                 c ->
                   forEveryInstance(
                     c,
                     instance -> {
-                      instance.switchToState(c.getSource().source(), AttackLifecycle.STOPPED);
+                      instance.switchToState(c.getSource().source(), SessionLifecycle.STOPPED);
 
                       return Command.SINGLE_SUCCESS;
                     }))))
@@ -61,12 +61,12 @@ public final class AttackCommand {
           literal("pause")
             .executes(
               help(
-                "Makes selected instances pause their attack",
+                "Makes selected instances pause their session",
                 c ->
                   forEveryInstance(
                     c,
                     instance -> {
-                      instance.switchToState(c.getSource().source(), AttackLifecycle.PAUSED);
+                      instance.switchToState(c.getSource().source(), SessionLifecycle.PAUSED);
 
                       return Command.SINGLE_SUCCESS;
                     })))

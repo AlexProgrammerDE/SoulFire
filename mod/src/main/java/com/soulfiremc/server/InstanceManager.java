@@ -19,13 +19,13 @@ package com.soulfiremc.server;
 
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
-import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
-import com.soulfiremc.server.api.event.attack.AttackStartEvent;
-import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.session.SessionBotRemoveEvent;
+import com.soulfiremc.server.api.event.session.SessionEndedEvent;
+import com.soulfiremc.server.api.event.session.SessionStartEvent;
+import com.soulfiremc.server.api.event.session.SessionTickEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /// Represents a single instance.
-/// An instance persists settings over restarts and managed attack session and attack state.
+/// An instance persists settings over restarts and manages bot sessions and session state.
 @Slf4j
 @Getter
 public final class InstanceManager {
@@ -77,9 +77,9 @@ public final class InstanceManager {
   private final CachedLazyObject<String> friendlyNameCache;
   private final SettingsPageRegistry instanceSettingsPageRegistry;
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
-  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
+  private SessionLifecycle sessionLifecycle = SessionLifecycle.STOPPED;
 
-  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, UUID id, AttackLifecycle lastState) {
+  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, UUID id, SessionLifecycle lastState) {
     this.id = id;
     this.runnableWrapper = soulFireServer.runnableWrapper().with(new InstanceRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
@@ -130,7 +130,7 @@ public final class InstanceManager {
     this.scheduler.scheduleWithFixedDelay(this::refreshExpiredAccounts, 0, 1, TimeUnit.HOURS);
 
     // Resync stopped state to DB
-    this.attackLifecycle(AttackLifecycle.STOPPED);
+    this.sessionLifecycle(SessionLifecycle.STOPPED);
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
       switchToState(null, lastState);
@@ -179,8 +179,8 @@ public final class InstanceManager {
   }
 
   private void tick() {
-    if (attackLifecycle().isTicking()) {
-      SoulFireAPI.postEvent(new AttackTickEvent(this));
+    if (sessionLifecycle().isTicking()) {
+      SoulFireAPI.postEvent(new SessionTickEvent(this));
     }
 
     evictBots();
@@ -192,7 +192,7 @@ public final class InstanceManager {
       var bot = entry.getValue();
       if (bot.isDisconnected()) {
         log.debug("Removing bot {}", bot.accountName());
-        SoulFireAPI.postEvent(new AttackBotRemoveEvent(this, bot));
+        SoulFireAPI.postEvent(new SessionBotRemoveEvent(this, bot));
         return true;
       }
       return false;
@@ -265,52 +265,52 @@ public final class InstanceManager {
     return refreshedAccount;
   }
 
-  public CompletableFuture<?> switchToState(@Nullable SoulFireUser initiator, AttackLifecycle targetState) {
+  public CompletableFuture<?> switchToState(@Nullable SoulFireUser initiator, SessionLifecycle targetState) {
     return switch (targetState) {
-      case STARTING, RUNNING -> switch (attackLifecycle()) {
+      case STARTING, RUNNING -> switch (sessionLifecycle()) {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
         case PAUSED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_SESSION, null);
           }
 
-          this.attackLifecycle(allBotsConnected.get() ? AttackLifecycle.RUNNING : AttackLifecycle.STARTING);
+          this.sessionLifecycle(allBotsConnected.get() ? SessionLifecycle.RUNNING : SessionLifecycle.STARTING);
           yield CompletableFuture.completedFuture(null);
         }
         case STOPPED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_SESSION, null);
           }
 
           yield scheduler.runAsync(this::start);
         }
       };
-      case PAUSED -> switch (attackLifecycle()) {
+      case PAUSED -> switch (sessionLifecycle()) {
         case STARTING, RUNNING -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_SESSION, null);
           }
 
-          this.attackLifecycle(AttackLifecycle.PAUSED);
+          this.sessionLifecycle(SessionLifecycle.PAUSED);
           yield CompletableFuture.completedFuture(null);
         }
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_ATTACK, null);
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_SESSION, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_SESSION, null);
           }
 
           yield scheduler.runAsync(this::start)
-            .thenRunAsync(() -> this.attackLifecycle(AttackLifecycle.PAUSED), scheduler);
+            .thenRunAsync(() -> this.sessionLifecycle(SessionLifecycle.PAUSED), scheduler);
         }
       };
-      case STOPPING, STOPPED -> switch (attackLifecycle()) {
+      case STOPPING, STOPPED -> switch (sessionLifecycle()) {
         case STARTING, RUNNING, PAUSED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.STOP_ATTACK, null);
+            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.STOP_SESSION, null);
           }
-          yield stopAttackPermanently();
+          yield stopSessionPermanently();
         }
         case STOPPING, STOPPED -> CompletableFuture.completedFuture(null);
       };
@@ -318,14 +318,14 @@ public final class InstanceManager {
   }
 
   private void start() {
-    if (!attackLifecycle().isFullyStopped()) {
-      throw new IllegalStateException("Another attack is still running");
+    if (!sessionLifecycle().isFullyStopped()) {
+      throw new IllegalStateException("Another session is still running");
     }
 
     allBotsConnected.set(false);
-    this.attackLifecycle(AttackLifecycle.STARTING);
+    this.sessionLifecycle(SessionLifecycle.STARTING);
 
-    log.info("Preparing bot attack at server");
+    log.info("Preparing bot session");
 
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
@@ -338,7 +338,7 @@ public final class InstanceManager {
     {
       var availableProxies = proxies.size();
       if (availableProxies == 0) {
-        log.info("No proxies provided, attack will be performed without proxies");
+        log.info("No proxies provided, session will be performed without proxies");
       } else {
         var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
         if (botAmount > maxBots) {
@@ -358,7 +358,7 @@ public final class InstanceManager {
       var accounts = new ArrayList<>(settingsSource.accounts().values());
       var availableAccounts = accounts.size();
       if (availableAccounts == 0) {
-        throw new IllegalStateException("No accounts configured. Please import accounts before starting an attack.");
+        throw new IllegalStateException("No accounts configured. Please import accounts before starting a session.");
       }
 
       if (botAmount > availableAccounts) {
@@ -373,9 +373,9 @@ public final class InstanceManager {
       accountQueue.addAll(accounts.subList(0, botAmount));
     }
 
-    // Prepare an event loop group for the attack
-    var attackEventLoopGroup =
-      NettyHelper.createEventLoopGroup("Attack-%s".formatted(id), runnableWrapper);
+    // Prepare an event loop group for the session
+    var sessionEventLoopGroup =
+      NettyHelper.createEventLoopGroup("Session-%s".formatted(id), runnableWrapper);
 
     var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
     var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(BotSettings.ADDRESS), protocolVersion);
@@ -398,18 +398,18 @@ public final class InstanceManager {
           protocolVersion,
           serverAddress,
           proxyData,
-          attackEventLoopGroup
+          sessionEventLoopGroup
         ));
     }
 
     var usedProxies = proxies.stream().filter(ProxyData::hasBots).count();
     if (usedProxies == 0) {
-      log.info("Starting attack at server with {} bots", factories.size());
+      log.info("Starting session with {} bots", factories.size());
     } else {
-      log.info("Starting attack at {} with server bots and {} active proxies", factories.size(), usedProxies);
+      log.info("Starting session with {} bots and {} active proxies", factories.size(), usedProxies);
     }
 
-    SoulFireAPI.postEvent(new AttackStartEvent(this));
+    SoulFireAPI.postEvent(new SessionStartEvent(this));
 
     var connectSemaphore = new Semaphore(settingsSource.get(BotSettings.CONCURRENT_CONNECTS));
     scheduler.schedule(
@@ -431,11 +431,11 @@ public final class InstanceManager {
           log.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
           scheduler.schedule(
             SoulFireScheduler.FinalizableRunnable.withFinalizer(() -> {
-              if (attackLifecycle().isStoppedOrStopping()) {
+              if (sessionLifecycle().isStoppedOrStopping()) {
                 return;
               }
 
-              TimeUtil.waitCondition(() -> attackLifecycle().isPaused());
+              TimeUtil.waitCondition(() -> sessionLifecycle().isPaused());
 
               log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
               var botConnection = factory.prepareConnection(false);
@@ -454,14 +454,14 @@ public final class InstanceManager {
         }
 
         allBotsConnected.set(true);
-        if (this.attackLifecycle() == AttackLifecycle.STARTING) {
-          this.attackLifecycle(AttackLifecycle.RUNNING);
+        if (this.sessionLifecycle() == SessionLifecycle.STARTING) {
+          this.sessionLifecycle(SessionLifecycle.RUNNING);
         }
       });
   }
 
   public CompletableFuture<?> deleteInstance() {
-    return stopAttackPermanently()
+    return stopSessionPermanently()
       .thenRunAsync(scriptManager::destroyManager, scheduler)
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
       .thenRunAsync(() -> {
@@ -474,35 +474,35 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> shutdownHook() {
-    return stopAttackSession()
+    return stopSession()
       .thenRunAsync(scriptManager::destroyManager, scheduler)
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
   }
 
-  public CompletableFuture<?> stopAttackPermanently() {
-    if (attackLifecycle().isStoppedOrStopping()) {
+  public CompletableFuture<?> stopSessionPermanently() {
+    if (sessionLifecycle().isStoppedOrStopping()) {
       return CompletableFuture.completedFuture(null);
     }
 
-    log.info("Stopping bot attack");
-    this.attackLifecycle(AttackLifecycle.STOPPING);
+    log.info("Stopping bot session");
+    this.sessionLifecycle(SessionLifecycle.STOPPING);
 
-    return this.stopAttackSession()
+    return this.stopSession()
       .thenRunAsync(() -> {
-        this.attackLifecycle(AttackLifecycle.STOPPED);
-        log.info("Attack stopped");
+        this.sessionLifecycle(SessionLifecycle.STOPPED);
+        log.info("Session stopped");
       }, scheduler);
   }
 
-  private void attackLifecycle(AttackLifecycle attackLifecycle) {
-    this.attackLifecycle = attackLifecycle;
+  private void sessionLifecycle(SessionLifecycle sessionLifecycle) {
+    this.sessionLifecycle = sessionLifecycle;
     sessionFactory.inTransaction(session -> {
       var instanceEntity = session.find(InstanceEntity.class, id);
       if (instanceEntity == null) {
         return;
       }
 
-      instanceEntity.attackLifecycle(attackLifecycle);
+      instanceEntity.sessionLifecycle(sessionLifecycle);
 
       session.merge(instanceEntity);
     });
@@ -511,7 +511,7 @@ public final class InstanceManager {
   // Doesn't shut down properly unless #shutdown() is called
   // Not sure why, netty moment...
   @SuppressWarnings("deprecation")
-  public CompletableFuture<?> stopAttackSession() {
+  public CompletableFuture<?> stopSession() {
     return scheduler.runAsync(() -> {
       allBotsConnected.set(false);
       log.info("Disconnecting bots");
@@ -520,7 +520,7 @@ public final class InstanceManager {
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         botConnections.entrySet().removeIf(entry -> {
           var botConnection = entry.getValue();
-          disconnectFuture.add(scheduler.runAsync(() -> botConnection.disconnect(Component.text("Attack stopped"))));
+          disconnectFuture.add(scheduler.runAsync(() -> botConnection.disconnect(Component.text("Session stopped"))));
           eventLoopGroups.add(botConnection.eventLoopGroup());
           return true;
         });
@@ -534,7 +534,7 @@ public final class InstanceManager {
           }
         }
 
-        log.info("Shutting down attack event loop groups");
+        log.info("Shutting down session event loop groups");
         for (var eventLoopGroup : eventLoopGroups) {
           try {
             eventLoopGroup.shutdown();
@@ -546,7 +546,7 @@ public final class InstanceManager {
       } while (!botConnections.isEmpty()); // To make sure really all bots are disconnected
 
       // Notify plugins of state change
-      SoulFireAPI.postEvent(new AttackEndedEvent(this));
+      SoulFireAPI.postEvent(new SessionEndedEvent(this));
     });
   }
 

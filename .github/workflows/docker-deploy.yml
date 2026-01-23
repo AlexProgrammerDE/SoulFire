@@ -54,5 +54,5 @@ jobs:
         with:
           destination_container_repo: alexprogrammerde/soulfire
           provider: dockerhub
-          short_description: 'Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your servers to measure performance.'
+          short_description: 'Advanced Minecraft Bot Tool. Deploy bots for testing, automation, and server development.'
           readme_file: 'README.md'

@@ -18,7 +18,7 @@
 package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import org.graalvm.polyglot.HostAccess;
 
 import java.util.List;
@@ -40,8 +40,8 @@ public record ScriptInstanceAPI(InstanceManager instanceManager) {
   }
 
   @HostAccess.Export
-  public AttackLifecycle getAttackState() {
-    return instanceManager.attackLifecycle();
+  public SessionLifecycle getSessionState() {
+    return instanceManager.sessionLifecycle();
   }
 
   @HostAccess.Export

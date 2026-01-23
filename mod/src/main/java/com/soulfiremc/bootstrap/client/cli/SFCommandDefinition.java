@@ -53,7 +53,7 @@ public final class SFCommandDefinition implements Callable<Integer> {
 
   @Option(
     names = {"-s", "--start"},
-    description = "Whether to start the attack automatically")
+    description = "Whether to start the session automatically")
   private boolean start;
 
   @Option(
@@ -135,10 +135,10 @@ public final class SFCommandDefinition implements Callable<Integer> {
       .build());
 
     if (start) {
-      cliManager.clientCommandManager().execute("attack start");
+      cliManager.clientCommandManager().execute("session start");
     } else {
       log.info(
-        "SoulFire is ready to go! Type 'attack start' to start the attack! (Use --start to start automatically)");
+        "SoulFire is ready to go! Type 'session start' to start the session! (Use --start to start automatically)");
     }
 
     var commandManager = cliManager.clientCommandManager();

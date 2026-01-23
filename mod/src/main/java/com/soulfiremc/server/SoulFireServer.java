@@ -18,10 +18,10 @@
 package com.soulfiremc.server;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
-import com.soulfiremc.server.api.event.attack.InstanceInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
+import com.soulfiremc.server.api.event.session.InstanceInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.DatabaseManager;
@@ -229,7 +229,7 @@ public final class SoulFireServer {
       for (var instanceData : sessionFactory.fromTransaction(s ->
         s.createQuery("FROM InstanceEntity", InstanceEntity.class).list())) {
         try {
-          var instance = new InstanceManager(this, sessionFactory, instanceData.id(), instanceData.attackLifecycle());
+          var instance = new InstanceManager(this, sessionFactory, instanceData.id(), instanceData.sessionLifecycle());
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
@@ -252,7 +252,7 @@ public final class SoulFireServer {
       log.error("Failed to stop RPC server", e);
     }
 
-    // Shutdown the attacks if there is any
+    // Shutdown the sessions if there is any
     shutdownInstances().join();
 
     // Shutdown scheduled tasks
@@ -272,7 +272,7 @@ public final class SoulFireServer {
 
       return newInstanceEntity;
     });
-    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity.id(), AttackLifecycle.STOPPED);
+    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity.id(), SessionLifecycle.STOPPED);
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);

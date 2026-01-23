@@ -152,8 +152,8 @@ public final class BotSettings implements SettingsObject {
       .key("restore-on-reboot")
       .uiName("Restore on Reboot")
       .description("""
-        Whether the attack should be restored after a reboot of the SoulFire machine.
-        If turned off, the attack will not be restored after a reboot.""")
+        Whether the session should be restored after a reboot of the SoulFire machine.
+        If turned off, the session will not be restored after a reboot.""")
       .defaultValue(true)
       .build();
   public static final BooleanProperty<SettingsSource.Bot> IGNORE_PACKET_HANDLING_ERRORS =

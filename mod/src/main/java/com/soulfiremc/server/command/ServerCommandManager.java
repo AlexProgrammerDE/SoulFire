@@ -68,7 +68,7 @@ public final class ServerCommandManager {
     InteractCommand.register(dispatcher);
 
     // Instance commands
-    AttackCommand.register(dispatcher);
+    SessionCommand.register(dispatcher);
 
     // Utility commands
     OnlineCommand.register(dispatcher);

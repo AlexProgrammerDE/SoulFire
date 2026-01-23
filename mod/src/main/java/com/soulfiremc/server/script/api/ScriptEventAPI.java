@@ -19,11 +19,11 @@ package com.soulfiremc.server.script.api;
 
 import com.soulfiremc.server.api.event.SoulFireBotEvent;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
-import com.soulfiremc.server.api.event.attack.AttackBotRemoveEvent;
-import com.soulfiremc.server.api.event.attack.AttackEndedEvent;
-import com.soulfiremc.server.api.event.attack.AttackStartEvent;
-import com.soulfiremc.server.api.event.attack.AttackTickEvent;
 import com.soulfiremc.server.api.event.bot.*;
+import com.soulfiremc.server.api.event.session.SessionBotRemoveEvent;
+import com.soulfiremc.server.api.event.session.SessionEndedEvent;
+import com.soulfiremc.server.api.event.session.SessionStartEvent;
+import com.soulfiremc.server.api.event.session.SessionTickEvent;
 import com.soulfiremc.server.script.ScriptHelper;
 import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.Context;
@@ -68,10 +68,10 @@ public class ScriptEventAPI {
       }
     } else {
       switch (event) {
-        case AttackBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
-        case AttackEndedEvent ignored -> forwardEvent("attackEnded");
-        case AttackStartEvent ignored -> forwardEvent("attackStart");
-        case AttackTickEvent ignored -> forwardEvent("attackTick");
+        case SessionBotRemoveEvent botRemoveEvent -> forwardEvent("botRemove", new ScriptBotAPI(botRemoveEvent.botConnection()));
+        case SessionEndedEvent ignored -> forwardEvent("sessionEnded");
+        case SessionStartEvent ignored -> forwardEvent("sessionStart");
+        case SessionTickEvent ignored -> forwardEvent("sessionTick");
         default -> {
         }
       }

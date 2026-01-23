@@ -15,9 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event.attack;
+package com.soulfiremc.server.api.event.session;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
+import com.soulfiremc.server.bot.BotConnection;
 
-public record AttackStartEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}
+/// When a bot is not active anymore and gets removed from the list of active bots.
+///
+/// @param instanceManager the instance manager
+/// @param botConnection   the bot connection
+public record SessionBotRemoveEvent(InstanceManager instanceManager, BotConnection botConnection) implements SoulFireInstanceEvent {}

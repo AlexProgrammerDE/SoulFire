@@ -34,7 +34,7 @@ public final class OnlineCommand {
       literal("online")
         .executes(
           help(
-            "Shows connected bots in attacks",
+            "Shows connected bots in sessions",
             c ->
               forEveryInstanceEnsureHasBots(
                 c,

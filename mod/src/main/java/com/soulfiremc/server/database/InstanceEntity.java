@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.database;
 
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.util.SFHelpers;
 import jakarta.persistence.*;
@@ -76,10 +76,10 @@ public final class InstanceEntity {
   @JoinColumn(nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private UserEntity owner;
 
-  @NotNull(message = "Attack lifecycle cannot be null")
+  @NotNull(message = "Session lifecycle cannot be null")
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private AttackLifecycle attackLifecycle = AttackLifecycle.STOPPED;
+  private SessionLifecycle sessionLifecycle = SessionLifecycle.STOPPED;
 
   @NotNull(message = "Settings cannot be null")
   @JdbcTypeCode(SqlTypes.JSON)

@@ -19,14 +19,14 @@ package com.soulfiremc.server.api;
 
 import com.soulfiremc.grpc.generated.InstanceState;
 
-public enum AttackLifecycle {
+public enum SessionLifecycle {
   STARTING,
   RUNNING,
   PAUSED,
   STOPPING,
   STOPPED;
 
-  public static AttackLifecycle fromProto(InstanceState state) {
+  public static SessionLifecycle fromProto(InstanceState state) {
     return switch (state) {
       case STARTING -> STARTING;
       case RUNNING -> RUNNING;

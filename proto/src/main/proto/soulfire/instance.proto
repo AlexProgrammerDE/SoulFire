@@ -226,10 +226,10 @@ message InstanceAuditLogRequest {
 message InstanceAuditLogResponse {
   enum AuditLogEntryType {
     EXECUTE_COMMAND = 0;
-    START_ATTACK = 1;
-    PAUSE_ATTACK = 2;
-    RESUME_ATTACK = 3;
-    STOP_ATTACK = 4;
+    START_SESSION = 1;
+    PAUSE_SESSION = 2;
+    RESUME_SESSION = 3;
+    STOP_SESSION = 4;
   }
 
   message AuditLogEntry {

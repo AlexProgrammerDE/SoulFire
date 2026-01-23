@@ -4,25 +4,23 @@
 
 # SoulFire
 
-Advanced Minecraft Server-Stresser Tool. Launch bot attacks on your own servers to stress-test them and measure
-performance.
+Advanced Minecraft Bot Tool. Deploy automated bots for server testing, automation, and development.
 
 This repository only contains the CLI and server implementation. The official GUI client is in [another repository](https://github.com/AlexProgrammerDE/SoulFireClient).
 
 ---
 
 > [!WARNING]
-> This is a very powerful tool that shall only be used to attack your own servers. Ensure your own DDoS protection
-> provider, and your host are okay with stress-tests. If you use this software to attack others, you make yourself (or
-> your
-> legal guardians) criminally liable; the developers of SoulFire are not responsible for your own actions.
+> This tool should only be used on servers you own or have explicit permission to test. Ensure your hosting provider
+> allows automated bot testing. If you use this software without authorization, you make yourself (or your
+> legal guardians) liable; the developers of SoulFire are not responsible for your own actions.
 
 ---
 
 ## 🚀 Features
 
 * GUI (Multiple themes) & CLI
-* Configurable options for every attack like the number of bots, join delay and more
+* Configurable options for every session like the number of bots, join delay and more
 * Load and save profiles for quick access
 * Support for online and offline mode servers
 * Supports [almost every Minecraft version](#-version-support)

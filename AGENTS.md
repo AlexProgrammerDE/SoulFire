@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-SoulFire is a multi-module Gradle build targeting Java 25. `mod/` holds the Fabric-based attack logic, mixins, and resources in `mod/src/main/resources`, with tests under `mod/src/test/java`. Shared utilities live in `shared/`, protocol definitions in `proto/`, and launchers in `client-launcher/`, `dedicated-launcher/`, and `launcher/`; each publishes jars to its `build/libs`. Auxiliary assets live in `build-data/`, `scripts/`, and `config/` (IDE inspections, lint configs).
+SoulFire is a multi-module Gradle build targeting Java 25. `mod/` holds the Fabric-based bot logic, mixins, and resources in `mod/src/main/resources`, with tests under `mod/src/test/java`. Shared utilities live in `shared/`, protocol definitions in `proto/`, and launchers in `client-launcher/`, `dedicated-launcher/`, and `launcher/`; each publishes jars to its `build/libs`. Auxiliary assets live in `build-data/`, `scripts/`, and `config/` (IDE inspections, lint configs).
 
 ## Build, Test, and Development Commands
 

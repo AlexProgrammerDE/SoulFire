@@ -15,5 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/// General events from instances and attacks, not specific to any bots.
-package com.soulfiremc.server.api.event.attack;
+package com.soulfiremc.server.api.event.session;
+
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
+
+public record SessionEndedEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}

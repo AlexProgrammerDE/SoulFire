@@ -21,7 +21,7 @@ import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
-import com.soulfiremc.server.api.AttackLifecycle;
+import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.proxy.SFProxy;
@@ -101,7 +101,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
             .setId(instance.id().toString())
             .setFriendlyName(instance.friendlyName())
             .setIcon(instance.icon())
-            .setState(instance.attackLifecycle().toProto())
+            .setState(instance.sessionLifecycle().toProto())
             .addAllInstancePermissions(getInstancePermissions(instance.id()))
             .build())
           .toList())
@@ -157,7 +157,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .setFriendlyName(instanceEntity.friendlyName())
           .setIcon(instanceEntity.icon())
           .setConfig(instanceEntity.settings().toProto())
-          .setState(instanceEntity.attackLifecycle().toProto())
+          .setState(instanceEntity.sessionLifecycle().toProto())
           .addAllInstancePermissions(getInstancePermissions(instanceId))
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
@@ -574,7 +574,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       }
 
       var instance = optionalInstance.get();
-      instance.switchToState(ServerRPCConstants.USER_CONTEXT_KEY.get(), AttackLifecycle.fromProto(request.getState())).join();
+      instance.switchToState(ServerRPCConstants.USER_CONTEXT_KEY.get(), SessionLifecycle.fromProto(request.getState())).join();
       responseObserver.onNext(InstanceStateChangeResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -611,10 +611,10 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
             .build())
           .setType(switch (log.type()) {
             case EXECUTE_COMMAND -> InstanceAuditLogResponse.AuditLogEntryType.EXECUTE_COMMAND;
-            case START_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.START_ATTACK;
-            case PAUSE_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.PAUSE_ATTACK;
-            case RESUME_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.RESUME_ATTACK;
-            case STOP_ATTACK -> InstanceAuditLogResponse.AuditLogEntryType.STOP_ATTACK;
+            case START_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.START_SESSION;
+            case PAUSE_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.PAUSE_SESSION;
+            case RESUME_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.RESUME_SESSION;
+            case STOP_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.STOP_SESSION;
           })
           .setTimestamp(Timestamps.fromMillis(log.createdAt().toEpochMilli()))
           .setData(log.data() != null ? log.data() : "")

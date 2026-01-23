@@ -18,6 +18,7 @@
 package com.soulfiremc.server.database;
 
 import com.soulfiremc.server.util.SFPathConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -28,7 +29,9 @@ import org.mariadb.jdbc.Driver;
 import org.sqlite.JDBC;
 
 import java.nio.file.Path;
+import java.sql.DriverManager;
 
+@Slf4j
 public final class DatabaseManager {
   private DatabaseManager() {
   }
@@ -43,11 +46,16 @@ public final class DatabaseManager {
 
   private static SessionFactory forSqlite(Path dbFile) {
     try {
+      var jdbcUrl = "jdbc:sqlite:%s".formatted(dbFile);
+
+      // Run migrations before Hibernate initializes
+      runMigrations(jdbcUrl, true);
+
       var configuration = new Configuration();
 
       configuration.setProperty("hibernate.dialect", SQLiteDialect.class);
       configuration.setProperty("hibernate.connection.driver_class", JDBC.class);
-      configuration.setProperty("hibernate.connection.url", "jdbc:sqlite:%s".formatted(dbFile));
+      configuration.setProperty("hibernate.connection.url", jdbcUrl);
       configuration.setProperty("hibernate.connection.pool_size", 1);
       // configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -82,17 +90,24 @@ public final class DatabaseManager {
 
   private static SessionFactory forMysql() {
     try {
+      var jdbcUrl = "jdbc:mysql://%s:%s/%s".formatted(
+        System.getProperty("mysql.host", "localhost"),
+        Integer.getInteger("mysql.port", 3306),
+        System.getProperty("mysql.database", "soulfire")
+      );
+      var username = System.getProperty("mysql.user");
+      var password = System.getProperty("mysql.password");
+
+      // Run migrations before Hibernate initializes
+      runMigrations(jdbcUrl, username, password, false);
+
       var configuration = new Configuration();
 
       configuration.setProperty("hibernate.dialect", MariaDBDialect.class);
       configuration.setProperty("hibernate.connection.driver_class", Driver.class);
-      configuration.setProperty("hibernate.connection.url", "jdbc:mysql://%s:%s/%s".formatted(
-        System.getProperty("mysql.host", "localhost"),
-        Integer.getInteger("mysql.port", 3306),
-        System.getProperty("mysql.database", "soulfire")
-      ));
-      configuration.setProperty("hibernate.connection.username", System.getProperty("mysql.user"));
-      configuration.setProperty("hibernate.connection.password", System.getProperty("mysql.password"));
+      configuration.setProperty("hibernate.connection.url", jdbcUrl);
+      configuration.setProperty("hibernate.connection.username", username);
+      configuration.setProperty("hibernate.connection.password", password);
       configuration.setProperty("hibernate.connection.pool_size", Integer.getInteger("mysql.pool_size", 10));
       // configuration.setProperty("hibernate.show_sql", true);
       configuration.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -104,6 +119,22 @@ public final class DatabaseManager {
       return fromConfiguration(configuration);
     } catch (Throwable ex) {
       throw new IllegalStateException(ex);
+    }
+  }
+
+  private static void runMigrations(String jdbcUrl, boolean isSqlite) {
+    try (var connection = DriverManager.getConnection(jdbcUrl)) {
+      DatabaseMigrations.runMigrations(connection, isSqlite);
+    } catch (Exception e) {
+      log.warn("Could not run database migrations (database may not exist yet)", e);
+    }
+  }
+
+  private static void runMigrations(String jdbcUrl, String username, String password, boolean isSqlite) {
+    try (var connection = DriverManager.getConnection(jdbcUrl, username, password)) {
+      DatabaseMigrations.runMigrations(connection, isSqlite);
+    } catch (Exception e) {
+      log.warn("Could not run database migrations (database may not exist yet)", e);
     }
   }
 }

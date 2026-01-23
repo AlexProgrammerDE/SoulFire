@@ -15,9 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.api.event.attack;
+package com.soulfiremc.server.api.event.session;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.api.event.SoulFireInstanceEvent;
 
-public record AttackTickEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}
+/// This event is called right after an InstanceManager is created and before any session is scheduled.
+/// This is intentionally in a global scope for any listener to subscribe to this InstanceManager.
+///
+/// @param instanceManager The instance manager instance.
+public record InstanceInitEvent(InstanceManager instanceManager) implements SoulFireInstanceEvent {}
