@@ -60,7 +60,7 @@ armeria-tomcat10 = { module = "com.linecorp.armeria:armeria-tomcat10" }
 reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor" }
 reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http", version.ref = "reactor" }
 spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
-openai = "com.openai:openai-java:4.16.0"
+openai = "com.openai:openai-java:4.16.1"
 immutables-value = "org.immutables:value:2.12.1"
 immutables-gson = "org.immutables:gson:2.12.1"
 hibernate-core = "org.hibernate.orm:hibernate-core:7.2.1.Final"
