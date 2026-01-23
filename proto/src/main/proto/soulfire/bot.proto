@@ -107,6 +107,90 @@ message BotRenderPovResponse {
   string image_base64 = 1;  // Base64 encoded PNG image
 }
 
+// Inventory Actions - click on a slot to interact with it
+message BotInventoryClickRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  int32 slot = 3;           // Slot index (-999 for outside/drop)
+  ClickType click_type = 4;
+  int32 hotbar_slot = 5;    // For SWAP_HOTBAR action (0-8)
+}
+
+enum ClickType {
+  CLICK_TYPE_UNSPECIFIED = 0;
+  LEFT_CLICK = 1;           // Pick up / place stack
+  RIGHT_CLICK = 2;          // Pick up half / place one
+  SHIFT_LEFT_CLICK = 3;     // Quick move to other inventory section
+  DROP_ONE = 4;             // Drop one item (Q key on slot)
+  DROP_ALL = 5;             // Drop entire stack (Ctrl+Q on slot)
+  SWAP_HOTBAR = 6;          // Swap slot with hotbar (1-9 keys)
+  MIDDLE_CLICK = 7;         // Clone item (creative mode)
+}
+
+message BotInventoryClickResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// Get current inventory state including carried item
+message BotInventoryStateRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+// Describes how a region of slots should be rendered
+enum SlotRegionType {
+  SLOT_REGION_NORMAL = 0;      // Regular interactive slots
+  SLOT_REGION_OUTPUT = 1;      // Output-only (crafting result, furnace output)
+  SLOT_REGION_DISPLAY = 2;     // Display-only (lectern book, some special slots)
+  SLOT_REGION_HOTBAR = 3;      // Player hotbar (show selection indicator)
+  SLOT_REGION_ARMOR = 4;       // Armor slots (show armor icons as placeholder)
+}
+
+// A group of slots that should be rendered together
+message SlotRegion {
+  string id = 1;           // Unique ID, e.g., "container", "player_hotbar"
+  string label = 2;        // Display label, e.g., "Chest", "Hotbar"
+  int32 start_index = 3;   // First slot index in this region
+  int32 slot_count = 4;    // Number of slots in this region
+  int32 columns = 5;       // Grid columns for layout
+  SlotRegionType type = 6; // Affects rendering behavior
+}
+
+// Describes the layout of an open container
+message ContainerLayout {
+  string title = 1;                  // Container title/name
+  repeated SlotRegion regions = 2;   // Ordered list of slot regions to render
+  int32 total_slots = 3;             // Total number of slots
+}
+
+message BotInventoryStateResponse {
+  ContainerLayout layout = 1;             // Container layout information
+  repeated InventorySlot slots = 2;       // All inventory slots with items
+  optional InventorySlot carried_item = 3; // Item currently on cursor
+  int32 selected_hotbar_slot = 4;
+}
+
+// Close current container
+message BotCloseContainerRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotCloseContainerResponse {
+  bool success = 1;
+}
+
+// Open player inventory
+message BotOpenInventoryRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotOpenInventoryResponse {
+  bool success = 1;
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -116,4 +200,9 @@ service BotService {
   rpc UpdateBotConfigEntry (BotUpdateConfigEntryRequest) returns (BotUpdateConfigEntryResponse) {}
   // Render the bot's point of view using software rendering
   rpc RenderBotPov (BotRenderPovRequest) returns (BotRenderPovResponse) {}
+  // Inventory management
+  rpc ClickInventorySlot (BotInventoryClickRequest) returns (BotInventoryClickResponse) {}
+  rpc GetInventoryState (BotInventoryStateRequest) returns (BotInventoryStateResponse) {}
+  rpc CloseContainer (BotCloseContainerRequest) returns (BotCloseContainerResponse) {}
+  rpc OpenInventory (BotOpenInventoryRequest) returns (BotOpenInventoryResponse) {}
 }

@@ -32,7 +32,10 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.inventory.*;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
@@ -380,6 +383,712 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error rendering bot POV", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void clickInventorySlot(BotInventoryClickRequest request, StreamObserver<BotInventoryClickResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      var gameMode = minecraft.gameMode;
+      if (player == null || gameMode == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available"));
+      }
+
+      // Map proto ClickType to Minecraft ClickType and mouse button
+      var container = player.containerMenu;
+      var slotId = request.getSlot();
+      int mouseButton;
+      net.minecraft.world.inventory.ClickType clickType;
+
+      switch (request.getClickType()) {
+        case LEFT_CLICK -> {
+          mouseButton = 0;
+          clickType = net.minecraft.world.inventory.ClickType.PICKUP;
+        }
+        case RIGHT_CLICK -> {
+          mouseButton = 1;
+          clickType = net.minecraft.world.inventory.ClickType.PICKUP;
+        }
+        case SHIFT_LEFT_CLICK -> {
+          mouseButton = 0;
+          clickType = net.minecraft.world.inventory.ClickType.QUICK_MOVE;
+        }
+        case DROP_ONE -> {
+          mouseButton = 0;
+          clickType = net.minecraft.world.inventory.ClickType.THROW;
+        }
+        case DROP_ALL -> {
+          mouseButton = 1;
+          clickType = net.minecraft.world.inventory.ClickType.THROW;
+        }
+        case SWAP_HOTBAR -> {
+          mouseButton = request.getHotbarSlot(); // 0-8 for hotbar slots
+          clickType = net.minecraft.world.inventory.ClickType.SWAP;
+        }
+        case MIDDLE_CLICK -> {
+          mouseButton = 2;
+          clickType = net.minecraft.world.inventory.ClickType.CLONE;
+        }
+        default -> {
+          responseObserver.onNext(BotInventoryClickResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Invalid click type")
+            .build());
+          responseObserver.onCompleted();
+          return;
+        }
+      }
+
+      // Perform the click
+      gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player);
+
+      responseObserver.onNext(BotInventoryClickResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error clicking inventory slot", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  /**
+   * Builds a ContainerLayout describing the slot regions for the given menu.
+   * This allows the frontend to render any container type dynamically.
+   */
+  private static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title) {
+    var layoutBuilder = ContainerLayout.newBuilder()
+      .setTitle(title)
+      .setTotalSlots(menu.slots.size());
+
+    // Player inventory always has these standard regions at the end
+    // The slot indices vary based on container type, but layout is consistent
+    int playerInvStart;
+    int hotbarStart;
+
+    if (menu instanceof InventoryMenu) {
+      // Player inventory screen layout:
+      // 0: crafting output
+      // 1-4: crafting grid (2x2)
+      // 5-8: armor slots
+      // 9-35: main inventory (27 slots, 3 rows of 9)
+      // 36-44: hotbar (9 slots)
+      // 45: offhand
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("crafting_output")
+        .setLabel("Crafting")
+        .setStartIndex(0)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("crafting_grid")
+        .setLabel("Crafting Grid")
+        .setStartIndex(1)
+        .setSlotCount(4)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("armor")
+        .setLabel("Armor")
+        .setStartIndex(5)
+        .setSlotCount(4)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_ARMOR)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("offhand")
+        .setLabel("Offhand")
+        .setStartIndex(45)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 9;
+      hotbarStart = 36;
+
+    } else if (menu instanceof ChestMenu chestMenu) {
+      // Chest layout: container slots first, then player inventory
+      int containerSize = chestMenu.getRowCount() * 9;
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("container")
+        .setLabel(title)
+        .setStartIndex(0)
+        .setSlotCount(containerSize)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = containerSize;
+      hotbarStart = containerSize + 27;
+
+    } else if (menu instanceof DispenserMenu) {
+      // Dispenser/Dropper: 9 slots in 3x3 grid
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("container")
+        .setLabel(title)
+        .setStartIndex(0)
+        .setSlotCount(9)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 9;
+      hotbarStart = 36;
+
+    } else if (menu instanceof HopperMenu) {
+      // Hopper: 5 slots in a row
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("container")
+        .setLabel(title)
+        .setStartIndex(0)
+        .setSlotCount(5)
+        .setColumns(5)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 5;
+      hotbarStart = 32;
+
+    } else if (menu instanceof AbstractFurnaceMenu) {
+      // Furnace/Blast Furnace/Smoker: input, fuel, output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Input")
+        .setStartIndex(0)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("fuel")
+        .setLabel("Fuel")
+        .setStartIndex(1)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Output")
+        .setStartIndex(2)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 3;
+      hotbarStart = 30;
+
+    } else if (menu instanceof CraftingMenu) {
+      // Crafting table: output + 3x3 grid
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("crafting_output")
+        .setLabel("Result")
+        .setStartIndex(0)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("crafting_grid")
+        .setLabel("Crafting Grid")
+        .setStartIndex(1)
+        .setSlotCount(9)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 10;
+      hotbarStart = 37;
+
+    } else if (menu instanceof AnvilMenu) {
+      // Anvil: 2 inputs + 1 output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Items")
+        .setStartIndex(0)
+        .setSlotCount(2)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(2)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 3;
+      hotbarStart = 30;
+
+    } else if (menu instanceof EnchantmentMenu) {
+      // Enchanting table: item + lapis
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("enchant")
+        .setLabel("Enchant")
+        .setStartIndex(0)
+        .setSlotCount(2)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 2;
+      hotbarStart = 29;
+
+    } else if (menu instanceof BrewingStandMenu) {
+      // Brewing stand: 3 potions + ingredient + fuel
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("potions")
+        .setLabel("Potions")
+        .setStartIndex(0)
+        .setSlotCount(3)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("ingredient")
+        .setLabel("Ingredient")
+        .setStartIndex(3)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("fuel")
+        .setLabel("Blaze Powder")
+        .setStartIndex(4)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 5;
+      hotbarStart = 32;
+
+    } else if (menu instanceof BeaconMenu) {
+      // Beacon: 1 payment slot
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("payment")
+        .setLabel("Payment")
+        .setStartIndex(0)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 1;
+      hotbarStart = 28;
+
+    } else if (menu instanceof ShulkerBoxMenu) {
+      // Shulker box: 27 slots like a small chest
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("container")
+        .setLabel(title)
+        .setStartIndex(0)
+        .setSlotCount(27)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      playerInvStart = 27;
+      hotbarStart = 54;
+
+    } else if (menu instanceof GrindstoneMenu) {
+      // Grindstone: 2 inputs + 1 output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Items")
+        .setStartIndex(0)
+        .setSlotCount(2)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(2)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 3;
+      hotbarStart = 30;
+
+    } else if (menu instanceof StonecutterMenu) {
+      // Stonecutter: 1 input + 1 output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Input")
+        .setStartIndex(0)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(1)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 2;
+      hotbarStart = 29;
+
+    } else if (menu instanceof LoomMenu) {
+      // Loom: banner + dye + pattern + output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Materials")
+        .setStartIndex(0)
+        .setSlotCount(3)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(3)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 4;
+      hotbarStart = 31;
+
+    } else if (menu instanceof CartographyTableMenu) {
+      // Cartography table: map + material + output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Materials")
+        .setStartIndex(0)
+        .setSlotCount(2)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(2)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 3;
+      hotbarStart = 30;
+
+    } else if (menu instanceof SmithingMenu) {
+      // Smithing table: template + base + addition + output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("input")
+        .setLabel("Materials")
+        .setStartIndex(0)
+        .setSlotCount(3)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("output")
+        .setLabel("Result")
+        .setStartIndex(3)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 4;
+      hotbarStart = 31;
+
+    } else if (menu instanceof MerchantMenu) {
+      // Villager trading: 2 inputs + 1 output
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("trade_input")
+        .setLabel("Trade")
+        .setStartIndex(0)
+        .setSlotCount(2)
+        .setColumns(2)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("trade_output")
+        .setLabel("Result")
+        .setStartIndex(2)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_OUTPUT)
+        .build());
+
+      playerInvStart = 3;
+      hotbarStart = 30;
+
+    } else {
+      // Generic fallback for unknown containers
+      // Just show all container slots, then player inventory
+      int containerSlots = menu.slots.size() - 36; // Assume 36 player slots at end
+      if (containerSlots > 0) {
+        layoutBuilder.addRegions(SlotRegion.newBuilder()
+          .setId("container")
+          .setLabel(title)
+          .setStartIndex(0)
+          .setSlotCount(containerSlots)
+          .setColumns(9) // Default to 9 columns
+          .setType(SlotRegionType.SLOT_REGION_NORMAL)
+          .build());
+      }
+      playerInvStart = Math.max(0, containerSlots);
+      hotbarStart = playerInvStart + 27;
+    }
+
+    // Add player inventory regions (common to all containers except pure player inventory)
+    if (!(menu instanceof InventoryMenu)) {
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("player_inventory")
+        .setLabel("Inventory")
+        .setStartIndex(playerInvStart)
+        .setSlotCount(27)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("player_hotbar")
+        .setLabel("Hotbar")
+        .setStartIndex(hotbarStart)
+        .setSlotCount(9)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_HOTBAR)
+        .build());
+    } else {
+      // For player inventory, add main and hotbar
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("player_inventory")
+        .setLabel("Inventory")
+        .setStartIndex(playerInvStart)
+        .setSlotCount(27)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("player_hotbar")
+        .setLabel("Hotbar")
+        .setStartIndex(hotbarStart)
+        .setSlotCount(9)
+        .setColumns(9)
+        .setType(SlotRegionType.SLOT_REGION_HOTBAR)
+        .build());
+    }
+
+    return layoutBuilder.build();
+  }
+
+  /**
+   * Gets the display title for a container menu.
+   */
+  private static String getContainerTitle(AbstractContainerMenu menu, Minecraft minecraft) {
+    // For player inventory, use a standard title
+    if (menu instanceof InventoryMenu) {
+      return "Inventory";
+    }
+
+    // Try to get the title from the screen if available
+    if (minecraft.screen instanceof AbstractContainerScreen<?> containerScreen) {
+      var title = containerScreen.getTitle();
+      if (title != null) {
+        return title.getString();
+      }
+    }
+
+    // Fallback to class name
+    return menu.getClass().getSimpleName().replace("Menu", "");
+  }
+
+  @Override
+  public void getInventoryState(BotInventoryStateRequest request, StreamObserver<BotInventoryStateResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+      }
+
+      var container = player.containerMenu;
+      var title = getContainerTitle(container, minecraft);
+      var layout = buildContainerLayout(container, title);
+
+      var responseBuilder = BotInventoryStateResponse.newBuilder()
+        .setLayout(layout)
+        .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
+
+      // Add all non-empty slots
+      for (var slot : container.slots) {
+        var item = slot.getItem();
+        if (!item.isEmpty()) {
+          var slotBuilder = InventorySlot.newBuilder()
+            .setSlot(slot.index)
+            .setItemId(item.getItemHolder().getRegisteredName())
+            .setCount(item.getCount());
+
+          if (item.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+            slotBuilder.setDisplayName(item.getHoverName().getString());
+          }
+
+          responseBuilder.addSlots(slotBuilder.build());
+        }
+      }
+
+      // Add carried item if present
+      var carried = container.getCarried();
+      if (!carried.isEmpty()) {
+        var carriedBuilder = InventorySlot.newBuilder()
+          .setSlot(-1) // -1 indicates carried item
+          .setItemId(carried.getItemHolder().getRegisteredName())
+          .setCount(carried.getCount());
+
+        if (carried.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+          carriedBuilder.setDisplayName(carried.getHoverName().getString());
+        }
+
+        responseBuilder.setCarriedItem(carriedBuilder.build());
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting inventory state", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void closeContainer(BotCloseContainerRequest request, StreamObserver<BotCloseContainerResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+      }
+
+      // Close any open container
+      player.closeContainer();
+
+      responseObserver.onNext(BotCloseContainerResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error closing container", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void openInventory(BotOpenInventoryRequest request, StreamObserver<BotOpenInventoryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+      }
+
+      // Open player inventory (sends inventory open packet to server)
+      player.sendOpenInventory();
+
+      responseObserver.onNext(BotOpenInventoryResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error opening inventory", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
