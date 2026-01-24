@@ -134,8 +134,16 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
   private boolean hasScopeAccess(SoulFireUser user, LogScope scope) {
     return switch (scope.getScopeCase()) {
       case GLOBAL, GLOBAL_SCRIPT -> user.hasPermission(PermissionContext.global(GlobalPermission.GLOBAL_SUBSCRIBE_LOGS));
-      case INSTANCE, BOT, INSTANCE_SCRIPT -> {
+      case INSTANCE -> {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        yield user.hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
+      }
+      case BOT -> {
+        var instanceId = UUID.fromString(scope.getBot().getInstanceId());
+        yield user.hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
+      }
+      case INSTANCE_SCRIPT -> {
+        var instanceId = UUID.fromString(scope.getInstanceScript().getInstanceId());
         yield user.hasPermission(PermissionContext.instance(InstancePermission.INSTANCE_SUBSCRIBE_LOGS, instanceId));
       }
       case PERSONAL -> true;
