@@ -9,10 +9,6 @@ import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
-message BotConfig {
-  repeated SettingsNamespace settings = 1;
-}
-
 message BotInfoRequest {
   string instance_id = 1;
   string bot_id = 2;
@@ -82,17 +78,7 @@ enum GameMode {
 }
 
 message BotInfoResponse {
-  BotConfig config = 1;
   optional BotLiveState live_state = 2;
-}
-
-message BotUpdateConfigRequest {
-  string instance_id = 1;
-  string bot_id = 2;
-  BotConfig config = 3;
-}
-
-message BotUpdateConfigResponse {
 }
 
 // Granular config entry update (single key-value)
@@ -567,8 +553,6 @@ message BotCloseDialogResponse {
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
-  // Used only for profile import - sends entire config
-  rpc UpdateBotConfig (BotUpdateConfigRequest) returns (BotUpdateConfigResponse) {}
   // Granular update for individual config entries
   rpc UpdateBotConfigEntry (BotUpdateConfigEntryRequest) returns (BotUpdateConfigEntryResponse) {}
   // Render the bot's point of view using software rendering

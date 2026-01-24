@@ -18,6 +18,7 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
+import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.property.Property;
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +40,7 @@ public final class BotSettingsDelegate implements BotSettingsSource {
   }
 
   @Override
-  public BotSettingsImpl.Stem stem() {
+  public MinecraftAccount stem() {
     return source.get().stem();
   }
 }

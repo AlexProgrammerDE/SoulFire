@@ -27,12 +27,13 @@ import net.raphimc.minecraftauth.util.MinecraftAuth4To5Migrator;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Map;
 
 public final class AuthHelpers {
   private AuthHelpers() {
   }
 
-  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager, BotSettingsImpl.@Nullable Stem settingsStem) throws IOException {
+  public static MinecraftAccount fromBedrockAuthManager(AuthType authType, BedrockAuthManager authManager,@Nullable  MinecraftAccount previousAccount) throws IOException {
     var mcChain = authManager.getMinecraftCertificateChain().getUpToDate();
     authManager.getMsaToken().refreshIfExpired();
     authManager.getXblDeviceToken().refreshIfExpired();
@@ -52,10 +53,11 @@ public final class AuthHelpers {
       mcChain.getIdentityDisplayName(),
       new BedrockData(
         BedrockAuthManager.toJson(authManager)),
-      settingsStem);
+      previousAccount != null ? previousAccount.settings() : Map.of(),
+      previousAccount != null ? previousAccount.persistentMetadata() : Map.of());
   }
 
-  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager, BotSettingsImpl.@Nullable Stem settingsStem) throws IOException {
+  public static MinecraftAccount fromJavaAuthManager(AuthType authType, JavaAuthManager authManager, @Nullable MinecraftAccount previousAccount) throws IOException {
     var mcProfile = authManager.getMinecraftProfile().getUpToDate();
     authManager.getMinecraftToken().refreshIfExpired();
     authManager.getMinecraftPlayerCertificates().refreshIfExpired();
@@ -65,7 +67,8 @@ public final class AuthHelpers {
       mcProfile.getName(),
       new OnlineChainJavaData(
         JavaAuthManager.toJson(authManager)),
-      settingsStem);
+      previousAccount != null ? previousAccount.settings() : Map.of(),
+      previousAccount != null ? previousAccount.persistentMetadata() : Map.of());
   }
 
   public static JsonObject migrateBedrockAuthChain(JsonObject oldAuthChain) {

@@ -61,16 +61,18 @@ message MinecraftAccountProto {
     OfflineJavaData offline_java_data = 6;
     BedrockData bedrock_data = 7;
   }
+  // Bot config stored with the account (namespace -> key -> value)
+  repeated SettingsNamespace config = 8;
   // Persistent metadata stored with the account (namespace -> key -> value)
-  repeated SettingsNamespace persistent_metadata = 8;
-}
-
-message SettingsEntry {
-  string key = 1;
-  google.protobuf.Value value = 2;
+  repeated SettingsNamespace persistent_metadata = 9;
 }
 
 message SettingsNamespace {
+  message SettingsEntry {
+    string key = 1;
+    google.protobuf.Value value = 2;
+  }
+
   string namespace = 1;
   repeated SettingsEntry entries = 2;
 }

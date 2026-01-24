@@ -43,7 +43,7 @@ public final class MSJavaDeviceCodeAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(DeviceCodeMsaAuthService::new, data.callback);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, BotSettingsImpl.Stem.EMPTY);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, null);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -60,7 +60,7 @@ public final class MSJavaDeviceCodeAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, account.settingsStem());
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_DEVICE_CODE, authManager, account);
       } catch (Exception e) {
         throw new CompletionException(e);
       }

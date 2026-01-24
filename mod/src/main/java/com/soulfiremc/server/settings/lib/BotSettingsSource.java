@@ -17,8 +17,10 @@
  */
 package com.soulfiremc.server.settings.lib;
 
+import com.soulfiremc.server.account.MinecraftAccount;
+
 public sealed interface BotSettingsSource extends SettingsSource<SettingsSource.Bot> permits BotSettingsDelegate, BotSettingsImpl {
   InstanceSettingsSource instanceSettings();
 
-  BotSettingsImpl.Stem stem();
+  MinecraftAccount stem();
 }

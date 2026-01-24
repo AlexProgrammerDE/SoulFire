@@ -79,7 +79,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             var stopWatch = Stopwatch.createStarted();
             var factory = new BotConnectionFactory(
               instance,
-              new BotSettingsImpl(BotSettingsImpl.Stem.EMPTY, settingsSource),
+              new BotSettingsImpl(null, settingsSource),
               MinecraftAccount.forProxyCheck(),
               protocolVersion,
               serverAddress,

@@ -43,7 +43,7 @@ public final class MSJavaCredentialsAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, BotSettingsImpl.Stem.EMPTY);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, null);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -72,7 +72,7 @@ public final class MSJavaCredentialsAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, account.settingsStem());
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_CREDENTIALS, authManager, account);
       } catch (Exception e) {
         throw new CompletionException(e);
       }

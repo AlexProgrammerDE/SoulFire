@@ -44,7 +44,7 @@ public final class MSBedrockCredentialsAuthService
       try {
         var authManager = BedrockAuthManager.create(LenniHttpHelper.client(proxyData), ProtocolConstants.BEDROCK_VERSION_NAME)
           .login(CredentialsMsaAuthService::new, new MsaCredentials(data.email, data.password));
-        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, BotSettingsImpl.Stem.EMPTY);
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, null);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -73,7 +73,7 @@ public final class MSBedrockCredentialsAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((BedrockData) account.accountData()).getBedrockAuthManager(proxyData);
-        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, account.settingsStem());
+        return AuthHelpers.fromBedrockAuthManager(AuthType.MICROSOFT_BEDROCK_CREDENTIALS, authManager, account);
       } catch (Exception e) {
         throw new CompletionException(e);
       }

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
@@ -43,10 +44,7 @@ import net.minecraft.world.inventory.LecternMenu;
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -191,40 +189,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   }
 
   @Override
-  public void updateBotConfig(BotUpdateConfigRequest request, StreamObserver<BotUpdateConfigResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getInstanceId());
-    var botId = UUID.fromString(request.getBotId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
-
-    try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
-        }
-
-        instanceEntity.settings(instanceEntity.settings().withAccounts(instanceEntity.settings().accounts().stream()
-          .map(minecraftAccount -> {
-            if (minecraftAccount.profileId().equals(botId)) {
-              return minecraftAccount.withSettingsStem(BotSettingsImpl.Stem.fromProto(request.getConfig()));
-            } else {
-              return minecraftAccount;
-            }
-          })
-          .toList()));
-
-        session.merge(instanceEntity);
-      });
-
-      responseObserver.onNext(BotUpdateConfigResponse.newBuilder().build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error updating bot config", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
-  }
-
-  @Override
   public void updateBotConfigEntry(BotUpdateConfigEntryRequest request, StreamObserver<BotUpdateConfigEntryResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
     var botId = UUID.fromString(request.getBotId());
@@ -240,14 +204,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         instanceEntity.settings(instanceEntity.settings().withAccounts(instanceEntity.settings().accounts().stream()
           .map(minecraftAccount -> {
             if (minecraftAccount.profileId().equals(botId)) {
-              var currentStem = minecraftAccount.settingsStem() == null ? BotSettingsImpl.Stem.EMPTY : minecraftAccount.settingsStem();
+              var currentStem = minecraftAccount.settings() == null ? Map.<String, Map<String, JsonElement>>of() : minecraftAccount.settings();
               var newSettings = SettingsSource.Stem.withUpdatedEntry(
-                currentStem.settings(),
+                currentStem,
                 request.getNamespace(),
                 request.getKey(),
                 SettingsSource.Stem.valueToJsonElement(request.getValue())
               );
-              return minecraftAccount.withSettingsStem(currentStem.withSettings(newSettings));
+              return minecraftAccount.withSettings(newSettings);
             } else {
               return minecraftAccount;
             }
@@ -324,9 +288,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Bot '%s' not found in instance '%s'".formatted(botId, instanceId)));
       }
 
-      var settingsStem = account.settingsStem() == null ? BotSettingsImpl.Stem.EMPTY : account.settingsStem();
-      var botInfoResponseBuilder = BotInfoResponse.newBuilder()
-        .setConfig(settingsStem.toProto());
+      var botInfoResponseBuilder = BotInfoResponse.newBuilder();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot != null) {
         var minecraft = activeBot.minecraft();

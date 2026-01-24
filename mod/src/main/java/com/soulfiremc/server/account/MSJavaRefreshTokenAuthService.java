@@ -40,7 +40,7 @@ public final class MSJavaRefreshTokenAuthService
       try {
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(data.refreshToken);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, BotSettingsImpl.Stem.EMPTY);
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, null);
       } catch (Exception e) {
         throw new CompletionException(e);
       }
@@ -57,7 +57,7 @@ public final class MSJavaRefreshTokenAuthService
     return CompletableFuture.supplyAsync(() -> {
       try {
         var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, account.settingsStem());
+        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, account);
       } catch (Exception e) {
         throw new CompletionException(e);
       }

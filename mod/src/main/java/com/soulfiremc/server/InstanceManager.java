@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
@@ -56,6 +57,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /// Represents a single instance.
 /// An instance persists settings over restarts and manages bot sessions and session state.
@@ -362,6 +364,7 @@ public final class InstanceManager {
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
       var minecraftAccount = refreshAccount(accountQueue.poll());
+      var lastAccountObject = new AtomicReference<>(minecraftAccount);
       var proxyData = getProxy(proxies).orElse(null);
       factories.add(
         new BotConnectionFactory(
@@ -369,9 +372,13 @@ public final class InstanceManager {
           new BotSettingsDelegate(new CachedLazyObject<>(() -> {
             var fetchedSettingsSource = this.settingsSource();
             var fetchedAccount = fetchedSettingsSource.accounts().get(minecraftAccount.profileId());
-            return new BotSettingsImpl(fetchedAccount == null || fetchedAccount.settingsStem() == null
-              ? BotSettingsImpl.Stem.EMPTY
-              : fetchedAccount.settingsStem(), fetchedSettingsSource);
+            if (fetchedAccount == null) {
+              fetchedAccount = lastAccountObject.get();
+            } else {
+              lastAccountObject.set(fetchedAccount);
+            }
+
+            return new BotSettingsImpl(fetchedAccount, fetchedSettingsSource);
           }, 1, TimeUnit.SECONDS)),
           minecraftAccount,
           protocolVersion,

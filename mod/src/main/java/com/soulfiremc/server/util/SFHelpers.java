@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.util;
 
+import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import com.soulfiremc.server.util.structs.SafeCloseable;
@@ -26,7 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.shredzone.acme4j.exception.AcmeProtocolException;
 import org.slf4j.MDC;
 
@@ -317,5 +318,9 @@ public final class SFHelpers {
     return GsonComponentSerializer.gson()
       .deserializeFromTree(ComponentSerialization.CODEC
         .encodeStart(JsonOps.INSTANCE, component).getOrThrow());
+  }
+
+  public static <K, V> Map<K, V> nullToEmptyMap(@Nullable Map<K, V> settings) {
+    return Objects.requireNonNullElse(settings, Map.of());
   }
 }

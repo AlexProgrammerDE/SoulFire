@@ -23,10 +23,8 @@ import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
-import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
-import lombok.NonNull;
 import lombok.With;
 import org.jspecify.annotations.Nullable;
 
@@ -40,25 +38,19 @@ import java.util.UUID;
 /// @param profileId          Identifier that uniquely identifies the account
 /// @param lastKnownName      The last known name of the account
 /// @param accountData        The data of the account (values depend on the authType)
-/// @param settingsStem       Per-bot settings
+/// @param settings           Per-bot settings
 /// @param persistentMetadata Persistent metadata stored with the account
 @With
 public record MinecraftAccount(
-  @NonNull AuthType authType,
-  @NonNull UUID profileId,
-  @NonNull String lastKnownName,
-  @NonNull AccountData accountData,
-  BotSettingsImpl.@Nullable Stem settingsStem,
-  @NonNull Map<String, Map<String, JsonElement>> persistentMetadata) {
-
-  // Secondary constructor for backwards compatibility
-  public MinecraftAccount(
-    AuthType authType,
-    UUID profileId,
-    String lastKnownName,
-    AccountData accountData,
-    BotSettingsImpl.Stem settingsStem) {
-    this(authType, profileId, lastKnownName, accountData, settingsStem, Map.of());
+  AuthType authType,
+  UUID profileId,
+  String lastKnownName,
+  AccountData accountData,
+  @Nullable Map<String, Map<String, JsonElement>> settings,
+  @Nullable Map<String, Map<String, JsonElement>> persistentMetadata) implements SettingsSource.Stem<SettingsSource.Bot> {
+  public MinecraftAccount {
+    settings = SFHelpers.nullToEmptyMap(settings);
+    persistentMetadata = SFHelpers.nullToEmptyMap(persistentMetadata);
   }
 
   public static MinecraftAccount fromProto(MinecraftAccountProto account) {
@@ -72,7 +64,7 @@ public record MinecraftAccount(
         case BEDROCK_DATA -> BedrockData.fromProto(account.getBedrockData());
         case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
       },
-      BotSettingsImpl.Stem.EMPTY, // TODO: Read from proto
+      SettingsSource.Stem.settingsFromProto(account.getConfigList()),
       SettingsSource.Stem.settingsFromProto(account.getPersistentMetadataList()));
   }
 
@@ -82,7 +74,7 @@ public record MinecraftAccount(
       UUID.randomUUID(),
       "ProxyCheck",
       new OfflineJavaData(),
-      BotSettingsImpl.Stem.EMPTY,
+      Map.of(),
       Map.of());
   }
 

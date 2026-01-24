@@ -21,7 +21,6 @@ import com.google.gson.JsonElement;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
-import com.soulfiremc.grpc.generated.SettingsEntry;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.SFHelpers;
@@ -167,7 +166,7 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
           .setNamespace(entry.getKey())
           .addAllEntries(entry.getValue().entrySet()
             .stream()
-            .map(innerEntry -> SettingsEntry.newBuilder()
+            .map(innerEntry -> SettingsNamespace.SettingsEntry.newBuilder()
               .setKey(innerEntry.getKey())
               .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
                 try {
@@ -188,7 +187,7 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
           .setNamespace(entry.getKey())
           .addAllEntries(entry.getValue().entrySet()
             .stream()
-            .map(innerEntry -> SettingsEntry.newBuilder()
+            .map(innerEntry -> SettingsNamespace.SettingsEntry.newBuilder()
               .setKey(innerEntry.getKey())
               .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
                 try {

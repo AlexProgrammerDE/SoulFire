@@ -18,38 +18,20 @@
 package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
-import com.soulfiremc.grpc.generated.BotConfig;
+import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.property.Property;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
 import java.util.Optional;
 
 @With
 @Slf4j
-public record BotSettingsImpl(Stem stem, InstanceSettingsSource instanceSettings) implements BotSettingsSource {
+public record BotSettingsImpl(MinecraftAccount stem, InstanceSettingsSource instanceSettings) implements BotSettingsSource {
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Bot> property) {
     return this.stem.get(property)
       // TODO: Properly store a base BotSettings steam inside a InstanceSettings stem in the future
       .or(() -> SettingsSource.Stem.getFromRawSettings(instanceSettings.stem().settings(), property));
-  }
-
-  @With
-  public record Stem(Map<String, Map<String, JsonElement>> settings) implements SettingsSource.Stem<SettingsSource.Bot> {
-    public static final Stem EMPTY = new Stem(Map.of());
-
-    public static Stem fromProto(BotConfig request) {
-      return new Stem(
-        SettingsSource.Stem.settingsFromProto(request.getSettingsList())
-      );
-    }
-
-    public BotConfig toProto() {
-      return BotConfig.newBuilder()
-        .addAllSettings(this.settingsToProto())
-        .build();
-    }
   }
 }
