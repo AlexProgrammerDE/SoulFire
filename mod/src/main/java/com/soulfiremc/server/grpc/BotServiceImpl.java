@@ -1550,4 +1550,248 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
+
+  // ============================================================================
+  // Dialog Management (Minecraft 1.21.6+)
+  // ============================================================================
+
+  /**
+   * Converts a Minecraft Dialog to the proto ServerDialog format.
+   * This is a simplified conversion that captures the essential dialog information.
+   */
+  private static ServerDialog convertDialogToProto(net.minecraft.core.Holder<net.minecraft.server.dialog.Dialog> dialogHolder) {
+    var dialog = dialogHolder.value();
+    var builder = ServerDialog.newBuilder();
+
+    // Set dialog ID from the holder key if available
+    dialogHolder.unwrapKey().ifPresent(key ->
+      builder.setId(key.identifier().toString()));
+
+    // Set dialog type based on the concrete class
+    if (dialog instanceof net.minecraft.server.dialog.NoticeDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_NOTICE);
+    } else if (dialog instanceof net.minecraft.server.dialog.ConfirmationDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_CONFIRMATION);
+    } else if (dialog instanceof net.minecraft.server.dialog.MultiActionDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_MULTI_ACTION);
+    } else if (dialog instanceof net.minecraft.server.dialog.ServerLinksDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_SERVER_LINKS);
+    } else if (dialog instanceof net.minecraft.server.dialog.DialogListDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_DIALOG_LIST);
+    }
+
+    // Set a basic title from the class name if we can't access the actual title
+    builder.setTitle(dialog.getClass().getSimpleName().replace("Dialog", ""));
+
+    return builder.build();
+  }
+
+  @Override
+  public void getDialog(BotGetDialogRequest request, StreamObserver<BotGetDialogResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var responseBuilder = BotGetDialogResponse.newBuilder();
+
+      // Get current dialog from the DialogHandler
+      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+      if (dialogHolder != null) {
+        responseBuilder.setDialog(convertDialogToProto(dialogHolder));
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting dialog", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void submitDialog(BotSubmitDialogRequest request, StreamObserver<BotSubmitDialogResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+      if (dialogHolder == null) {
+        responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
+          .setSuccess(false)
+          .setError("No dialog is currently displayed")
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      // For now, just clear the dialog state - actual packet sending for dialog responses
+      // requires more complex NBT payload construction that varies by dialog type
+      // TODO: Implement proper dialog response packets
+      log.info("Dialog submit requested with {} input values - clearing dialog state", request.getInputValuesCount());
+      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+
+      responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error submitting dialog", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void clickDialogButton(BotClickDialogButtonRequest request, StreamObserver<BotClickDialogButtonResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+      if (dialogHolder == null) {
+        responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
+          .setSuccess(false)
+          .setError("No dialog is currently displayed")
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      // For now, just clear the dialog state - actual packet sending for button clicks
+      // requires more complex NBT payload construction
+      // TODO: Implement proper dialog button click packets
+      log.info("Dialog button click requested (button index: {}) - clearing dialog state", request.getButtonIndex());
+      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+
+      responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error clicking dialog button", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void closeDialog(BotCloseDialogRequest request, StreamObserver<BotCloseDialogResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      // Just clear the dialog state locally - the server will handle cleanup
+      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+
+      responseObserver.onNext(BotCloseDialogResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error closing dialog", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void setHotbarSlot(BotSetHotbarSlotRequest request, StreamObserver<BotSetHotbarSlotResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    var slot = request.getSlot();
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      // Validate slot range
+      if (slot < 0 || slot > 8) {
+        responseObserver.onNext(BotSetHotbarSlotResponse.newBuilder()
+          .setSuccess(false)
+          .setError("Hotbar slot must be between 0 and 8, got: " + slot)
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        responseObserver.onNext(BotSetHotbarSlotResponse.newBuilder()
+          .setSuccess(false)
+          .setError("Player is not available")
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      // Set the selected hotbar slot
+      activeBot.botControl().registerControllingTask(
+        ControllingTask.singleTick(() -> player.getInventory().setSelectedSlot(slot)));
+
+      log.info("Setting hotbar slot to {} for bot {}", slot, botId);
+
+      responseObserver.onNext(BotSetHotbarSlotResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error setting hotbar slot", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
 }

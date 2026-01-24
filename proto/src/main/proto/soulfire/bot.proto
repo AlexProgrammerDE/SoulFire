@@ -264,6 +264,242 @@ message BotSetContainerTextResponse {
   optional string error = 2;
 }
 
+// Change the selected hotbar slot (0-8)
+message BotSetHotbarSlotRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  int32 slot = 3;           // Hotbar slot index (0-8)
+}
+
+message BotSetHotbarSlotResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// ============================================================================
+// Server Dialog Messages (Minecraft 1.21.6+)
+// Dialogs are server-sent UI screens that can display information and gather input
+// ============================================================================
+
+// Dialog types matching Minecraft's registry
+enum DialogType {
+  DIALOG_TYPE_UNSPECIFIED = 0;
+  DIALOG_TYPE_NOTICE = 1;           // Single action button in footer
+  DIALOG_TYPE_CONFIRMATION = 2;     // Yes/No buttons in footer
+  DIALOG_TYPE_MULTI_ACTION = 3;     // Scrollable list of action buttons
+  DIALOG_TYPE_SERVER_LINKS = 4;     // Server links display
+  DIALOG_TYPE_DIALOG_LIST = 5;      // Buttons linking to other dialogs
+}
+
+// Body element types
+message DialogBodyElement {
+  oneof element {
+    DialogPlainMessage plain_message = 1;
+    DialogItem item = 2;
+  }
+}
+
+message DialogPlainMessage {
+  string contents = 1;     // Text content (JSON text component)
+  int32 width = 2;         // Width (1-1024, default 200)
+}
+
+message DialogItem {
+  string item_id = 1;              // e.g., "minecraft:diamond"
+  int32 count = 2;                 // Item count
+  optional string description = 3; // Optional description text
+  bool show_decoration = 4;        // Show item frame decoration (default true)
+  bool show_tooltip = 5;           // Show item tooltip on hover (default true)
+  int32 width = 6;                 // Display width (1-256, default 16)
+  int32 height = 7;                // Display height (1-256, default 16)
+}
+
+// Input control types
+message DialogInput {
+  oneof input {
+    DialogTextInput text = 1;
+    DialogBooleanInput boolean = 2;
+    DialogSingleOptionInput single_option = 3;
+    DialogNumberRangeInput number_range = 4;
+  }
+}
+
+message DialogTextInput {
+  string key = 1;              // Identifier for submission
+  string label = 2;            // Display label
+  int32 width = 3;             // Width (1-1024, default 200)
+  bool label_visible = 4;      // Show label (default true)
+  string initial = 5;          // Default value
+  int32 max_length = 6;        // Max chars (default 32)
+  bool multiline = 7;          // Allow multiline input
+  int32 multiline_max_lines = 8; // Max lines for multiline
+  int32 multiline_height = 9;  // Height for multiline
+}
+
+message DialogBooleanInput {
+  string key = 1;              // Identifier for submission
+  string label = 2;            // Display label
+  bool initial = 3;            // Default value (default false)
+  string on_true = 4;          // Value when checked (default "true")
+  string on_false = 5;         // Value when unchecked (default "false")
+}
+
+message DialogSingleOptionInput {
+  string key = 1;              // Identifier for submission
+  string label = 2;            // Display label
+  bool label_visible = 3;      // Show label (default true)
+  int32 width = 4;             // Width (1-1024, default 200)
+  repeated DialogOption options = 5; // Available options
+  string initial_option_id = 6; // Initially selected option ID
+}
+
+message DialogOption {
+  string id = 1;               // Option identifier
+  string display = 2;          // Display text (optional, uses id if not set)
+}
+
+message DialogNumberRangeInput {
+  string key = 1;              // Identifier for submission
+  string label = 2;            // Display label
+  string label_format = 3;     // Translation key for label format
+  int32 width = 4;             // Width (1-1024, default 200)
+  double start = 5;            // Minimum value
+  double end = 6;              // Maximum value
+  double step = 7;             // Step size (optional)
+  double initial = 8;          // Default value
+}
+
+// Action types for buttons
+message DialogAction {
+  oneof action {
+    DialogOpenUrlAction open_url = 1;
+    DialogRunCommandAction run_command = 2;
+    DialogSuggestCommandAction suggest_command = 3;
+    DialogCopyToClipboardAction copy_to_clipboard = 4;
+    DialogShowDialogAction show_dialog = 5;
+    DialogCustomAction custom = 6;
+    DialogDynamicRunCommandAction dynamic_run_command = 7;
+    DialogDynamicCustomAction dynamic_custom = 8;
+  }
+}
+
+message DialogOpenUrlAction {
+  string url = 1;
+}
+
+message DialogRunCommandAction {
+  string command = 1;
+}
+
+message DialogSuggestCommandAction {
+  string command = 1;
+}
+
+message DialogCopyToClipboardAction {
+  string value = 1;
+}
+
+message DialogShowDialogAction {
+  string dialog_id = 1;        // Dialog ID to show (or inline definition)
+}
+
+message DialogCustomAction {
+  string id = 1;               // Custom action identifier
+  string payload = 2;          // Optional JSON payload
+}
+
+message DialogDynamicRunCommandAction {
+  string template = 1;         // Macro template with input placeholders
+}
+
+message DialogDynamicCustomAction {
+  string id = 1;               // Custom action identifier
+  string additions = 2;        // Optional NBT additions as JSON
+}
+
+// Button structure used across dialog types
+message DialogButton {
+  string label = 1;            // Button text (JSON text component)
+  optional string tooltip = 2; // Tooltip on hover
+  int32 width = 3;             // Button width (1-1024, default 150)
+  optional DialogAction action = 4; // Action when clicked
+}
+
+// After-action behavior
+enum DialogAfterAction {
+  DIALOG_AFTER_ACTION_UNSPECIFIED = 0;
+  DIALOG_AFTER_ACTION_CLOSE = 1;           // Close dialog (default)
+  DIALOG_AFTER_ACTION_NONE = 2;            // Keep dialog open
+  DIALOG_AFTER_ACTION_WAIT_FOR_RESPONSE = 3; // Show waiting screen
+}
+
+// Complete dialog definition
+message ServerDialog {
+  string id = 1;                          // Dialog ID (from server)
+  DialogType type = 2;                    // Dialog type
+  string title = 3;                       // Dialog title (JSON text component)
+  optional string external_title = 4;     // Button label when shown as external button
+  repeated DialogBodyElement body = 5;    // Body elements
+  repeated DialogInput inputs = 6;        // Input controls
+  bool can_close_with_escape = 7;         // Allow ESC to close (default true)
+  bool pause = 8;                         // Pause game in singleplayer (default true)
+  DialogAfterAction after_action = 9;     // Behavior after action
+
+  // Type-specific fields
+  optional DialogButton action = 10;      // For notice type - single action
+  optional DialogButton yes = 11;         // For confirmation type
+  optional DialogButton no = 12;          // For confirmation type
+  repeated DialogButton actions = 13;     // For multi_action type
+  int32 columns = 14;                     // For multi_action/dialog_list (default 2)
+  optional DialogButton exit_action = 15; // For multi_action/server_links/dialog_list
+  int32 button_width = 16;                // For server_links/dialog_list (default 150)
+}
+
+// Get current dialog state
+message BotGetDialogRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotGetDialogResponse {
+  optional ServerDialog dialog = 1;       // Current dialog, or null if none
+}
+
+// Submit dialog response (for dialogs with inputs)
+message BotSubmitDialogRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  map<string, string> input_values = 3;   // Input key -> value mappings
+}
+
+message BotSubmitDialogResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// Click a dialog button
+message BotClickDialogButtonRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  int32 button_index = 3;                 // Index of button to click (-1 for close/escape)
+}
+
+message BotClickDialogButtonResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// Close/dismiss current dialog
+message BotCloseDialogRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotCloseDialogResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -284,4 +520,11 @@ service BotService {
   rpc ClickContainerButton (BotContainerButtonClickRequest) returns (BotContainerButtonClickResponse) {}
   // Set text input in container (anvil rename, etc.)
   rpc SetContainerText (BotSetContainerTextRequest) returns (BotSetContainerTextResponse) {}
+  // Hotbar slot selection
+  rpc SetHotbarSlot (BotSetHotbarSlotRequest) returns (BotSetHotbarSlotResponse) {}
+  // Server dialog management (Minecraft 1.21.6+)
+  rpc GetDialog (BotGetDialogRequest) returns (BotGetDialogResponse) {}
+  rpc SubmitDialog (BotSubmitDialogRequest) returns (BotSubmitDialogResponse) {}
+  rpc ClickDialogButton (BotClickDialogButtonRequest) returns (BotClickDialogButtonResponse) {}
+  rpc CloseDialog (BotCloseDialogRequest) returns (BotCloseDialogResponse) {}
 }
