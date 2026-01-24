@@ -167,6 +167,21 @@ message ContainerButton {
   bool selected = 6;                // Whether this button is currently selected
 }
 
+// Text input field description for containers like anvil
+message ContainerTextInput {
+  string id = 1;           // Field identifier (e.g., "item_name" for anvil)
+  string label = 2;        // Display label
+  string current_value = 3; // Current text value
+  int32 max_length = 4;    // Maximum allowed characters (0 = no limit)
+  string placeholder = 5;  // Placeholder text
+}
+
+// Book page for lectern display
+message BookPage {
+  int32 page_number = 1;   // 0-indexed page number
+  string content = 2;      // Page content (may contain formatting codes)
+}
+
 // Describes the layout of an open container
 message ContainerLayout {
   string title = 1;                  // Container title/name
@@ -174,6 +189,9 @@ message ContainerLayout {
   int32 total_slots = 3;             // Total number of slots
   repeated ContainerButton buttons = 4; // Available action buttons (stonecutter recipes, enchants, etc.)
   string container_type = 5;         // Container type identifier for client-specific rendering
+  repeated ContainerTextInput text_inputs = 6; // Text input fields (anvil rename, etc.)
+  repeated BookPage book_pages = 7;  // Book pages for lectern
+  int32 current_book_page = 8;       // Current page being displayed (lectern)
 }
 
 message BotInventoryStateResponse {
@@ -233,6 +251,19 @@ message BotContainerButtonClickResponse {
   optional string error = 2;
 }
 
+// Set text input in a container (anvil rename, etc.)
+message BotSetContainerTextRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  string field_id = 3;    // Which field to set (e.g., "item_name")
+  string text = 4;        // The text value to set
+}
+
+message BotSetContainerTextResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -251,4 +282,6 @@ service BotService {
   rpc MouseClick (BotMouseClickRequest) returns (BotMouseClickResponse) {}
   // Container button actions (enchanting, stonecutter, etc.)
   rpc ClickContainerButton (BotContainerButtonClickRequest) returns (BotContainerButtonClickResponse) {}
+  // Set text input in container (anvil rename, etc.)
+  rpc SetContainerText (BotSetContainerTextRequest) returns (BotSetContainerTextResponse) {}
 }

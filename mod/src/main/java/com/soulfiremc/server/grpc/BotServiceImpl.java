@@ -936,6 +936,63 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       layoutBuilder.addButtons(button);
     }
 
+    // Add text inputs for containers that support them
+    if (menu instanceof AnvilMenu anvilMenu) {
+      var currentName = "";
+      var inputItem = anvilMenu.getSlot(0).getItem();
+      if (!inputItem.isEmpty()) {
+        // Get the item's custom name if it has one, otherwise empty
+        if (inputItem.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+          currentName = inputItem.getHoverName().getString();
+        }
+      }
+
+      layoutBuilder.addTextInputs(ContainerTextInput.newBuilder()
+        .setId("item_name")
+        .setLabel("Item Name")
+        .setCurrentValue(currentName)
+        .setMaxLength(50) // Minecraft's anvil name limit
+        .setPlaceholder("Enter new name...")
+        .build());
+    }
+
+    // Add book pages for lectern
+    if (menu instanceof LecternMenu lecternMenu) {
+      var bookSlot = lecternMenu.getSlot(0);
+      var bookItem = bookSlot.getItem();
+      if (!bookItem.isEmpty()) {
+        var currentPage = lecternMenu.getPage();
+        layoutBuilder.setCurrentBookPage(currentPage);
+
+        // Try to extract book content
+        var bookContent = bookItem.get(net.minecraft.core.component.DataComponents.WRITABLE_BOOK_CONTENT);
+        if (bookContent != null) {
+          var pages = bookContent.pages();
+          for (int i = 0; i < pages.size(); i++) {
+            var pageText = pages.get(i).get(false); // false = get raw text, not filtered
+            layoutBuilder.addBookPages(BookPage.newBuilder()
+              .setPageNumber(i)
+              .setContent(pageText != null ? pageText : "")
+              .build());
+          }
+        } else {
+          // Try written book content
+          var writtenContent = bookItem.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+          if (writtenContent != null) {
+            var pages = writtenContent.pages();
+            for (int i = 0; i < pages.size(); i++) {
+              var pageComponent = pages.get(i).get(false);
+              var pageText = pageComponent != null ? pageComponent.getString() : "";
+              layoutBuilder.addBookPages(BookPage.newBuilder()
+                .setPageNumber(i)
+                .setContent(pageText)
+                .build());
+            }
+          }
+        }
+      }
+    }
+
     return layoutBuilder.build();
   }
 
@@ -1429,6 +1486,67 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking container button", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void setContainerText(BotSetContainerTextRequest request, StreamObserver<BotSetContainerTextResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+      }
+
+      var container = player.containerMenu;
+      var fieldId = request.getFieldId();
+      var text = request.getText();
+
+      // Handle text input based on container type and field ID
+      if (container instanceof AnvilMenu anvilMenu && "item_name".equals(fieldId)) {
+        // Anvil rename - need to send packet to server
+        var connection = minecraft.getConnection();
+        if (connection == null) {
+          throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available"));
+        }
+
+        // Send the rename packet
+        activeBot.botControl().registerControllingTask(
+          ControllingTask.singleTick(() -> {
+            // The anvil menu has a setItemName method that we can call
+            // This will update the output slot and send the appropriate packet
+            anvilMenu.setItemName(text);
+          }));
+
+        responseObserver.onNext(BotSetContainerTextResponse.newBuilder()
+          .setSuccess(true)
+          .build());
+        responseObserver.onCompleted();
+      } else {
+        responseObserver.onNext(BotSetContainerTextResponse.newBuilder()
+          .setSuccess(false)
+          .setError("Unsupported container or field ID: " + container.getClass().getSimpleName() + "/" + fieldId)
+          .build());
+        responseObserver.onCompleted();
+      }
+    } catch (Throwable t) {
+      log.error("Error setting container text", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
