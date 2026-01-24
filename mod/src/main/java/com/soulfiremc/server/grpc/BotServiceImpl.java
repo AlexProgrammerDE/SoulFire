@@ -37,11 +37,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.LecternMenu;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -924,8 +927,229 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         .build());
     }
 
+    // Set container type for client-specific rendering
+    layoutBuilder.setContainerType(getContainerTypeId(menu));
+
+    // Add container buttons (for stonecutter, enchanting, loom, etc.)
+    for (var button : buildContainerButtons(menu)) {
+      layoutBuilder.addButtons(button);
+    }
+
     return layoutBuilder.build();
   }
+
+  /**
+   * Gets a container type identifier for client rendering.
+   */
+  private static String getContainerTypeId(AbstractContainerMenu menu) {
+    return switch (menu) {
+      case InventoryMenu ignored -> "inventory";
+      case ChestMenu ignored -> "chest";
+      case DispenserMenu ignored -> "dispenser";
+      case HopperMenu ignored -> "hopper";
+      case AbstractFurnaceMenu ignored -> "furnace";
+      case CraftingMenu ignored -> "crafting";
+      case AnvilMenu ignored -> "anvil";
+      case EnchantmentMenu ignored -> "enchanting";
+      case BrewingStandMenu ignored -> "brewing";
+      case BeaconMenu ignored -> "beacon";
+      case ShulkerBoxMenu ignored -> "shulker";
+      case GrindstoneMenu ignored -> "grindstone";
+      case StonecutterMenu ignored -> "stonecutter";
+      case LoomMenu ignored -> "loom";
+      case CartographyTableMenu ignored -> "cartography";
+      case SmithingMenu ignored -> "smithing";
+      case MerchantMenu ignored -> "merchant";
+      case CrafterMenu ignored -> "crafter";
+      case LecternMenu ignored -> "lectern";
+      default -> "generic";
+    };
+  }
+
+  /**
+   * Builds the available buttons for a container menu.
+   * Different container types have different interactive buttons.
+   * Note: Button details may be limited since some menu fields are private.
+   */
+  private static List<ContainerButton> buildContainerButtons(AbstractContainerMenu menu) {
+    var buttons = new ArrayList<ContainerButton>();
+
+    if (menu instanceof StonecutterMenu stonecutterMenu) {
+      // Stonecutter: recipes are shown in the output slot when selected
+      var inputSlot = stonecutterMenu.getSlot(0);
+      if (!inputSlot.getItem().isEmpty()) {
+        for (int i = 0; i < 20; i++) {  // Max typical stonecutter recipes
+          buttons.add(ContainerButton.newBuilder()
+            .setButtonId(i)
+            .setLabel("Recipe " + (i + 1))
+            .setDisabled(false)
+            .build());
+        }
+      }
+    } else if (menu instanceof EnchantmentMenu enchantmentMenu) {
+      // Enchanting table: 3 enchantment slots
+      // Slot 0 = item to enchant, Slot 1 = lapis lazuli
+      var itemSlot = enchantmentMenu.getSlot(0);
+      var lapisSlot = enchantmentMenu.getSlot(1);
+      var hasItem = !itemSlot.getItem().isEmpty();
+      var lapisCount = lapisSlot.getItem().isEmpty() ? 0 : lapisSlot.getItem().getCount();
+
+      // Enchantment costs increase per slot: 1, 2, 3 lapis and levels
+      int[] lapisCosts = {1, 2, 3};
+      int[] levelCosts = {1, 2, 3}; // Minimum levels shown, actual varies
+
+      for (int i = 0; i < 3; i++) {
+        var needsLapis = lapisCosts[i];
+        var disabled = !hasItem || lapisCount < needsLapis;
+        var description = String.format("Requires %d lapis, %d+ levels", needsLapis, levelCosts[i]);
+        if (!hasItem) {
+          description = "Insert item to enchant";
+        } else if (lapisCount < needsLapis) {
+          description = String.format("Need %d more lapis lazuli", needsLapis - lapisCount);
+        }
+
+        buttons.add(ContainerButton.newBuilder()
+          .setButtonId(i)
+          .setLabel("Enchant Slot " + (i + 1))
+          .setDescription(description)
+          .setIconItemId("minecraft:enchanted_book")
+          .setDisabled(disabled)
+          .build());
+      }
+    } else if (menu instanceof LoomMenu ignored) {
+      // Loom: banner patterns
+      for (int i = 0; i < 40; i++) {  // Max banner patterns
+        buttons.add(ContainerButton.newBuilder()
+          .setButtonId(i)
+          .setLabel("Pattern " + (i + 1))
+          .setDisabled(false)
+          .build());
+      }
+    } else if (menu instanceof MerchantMenu merchantMenu) {
+      // Villager trading: each trade offer is a button
+      var offers = merchantMenu.getOffers();
+      for (int i = 0; i < offers.size(); i++) {
+        var offer = offers.get(i);
+        var result = offer.getResult();
+        var costA = offer.getBaseCostA();
+        var costB = offer.getCostB();
+
+        var costDesc = costA.getCount() + "x " + costA.getHoverName().getString();
+        if (!costB.isEmpty()) {
+          costDesc += " + " + costB.getCount() + "x " + costB.getHoverName().getString();
+        }
+
+        buttons.add(ContainerButton.newBuilder()
+          .setButtonId(i)
+          .setLabel(result.getCount() + "x " + result.getHoverName().getString())
+          .setDescription(costDesc)
+          .setIconItemId(result.getItemHolder().getRegisteredName())
+          .setDisabled(offer.isOutOfStock())
+          .build());
+      }
+    } else if (menu instanceof BeaconMenu beaconMenu) {
+      // Beacon effects are unlocked based on pyramid levels:
+      // Level 1: Speed, Haste
+      // Level 2: Resistance, Jump Boost
+      // Level 3: Strength
+      // Level 4: Secondary effects (Regeneration or amplified primary)
+      // Payment slot must have a valid item to confirm
+
+      var beaconLevel = beaconMenu.getLevels();
+      var hasPayment = !beaconMenu.getSlot(0).getItem().isEmpty();
+
+      // Get actual MobEffect registry to iterate and find effects by name
+      var mobEffectRegistry = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT;
+
+      // Primary effects with their required levels
+      record BeaconEffectDef(String effectName, String displayName, int requiredLevel, boolean isPrimary) {}
+      var effects = new BeaconEffectDef[] {
+        new BeaconEffectDef("speed", "Speed", 1, true),
+        new BeaconEffectDef("haste", "Haste", 1, true),
+        new BeaconEffectDef("resistance", "Resistance", 2, true),
+        new BeaconEffectDef("jump_boost", "Jump Boost", 2, true),
+        new BeaconEffectDef("strength", "Strength", 3, true),
+        new BeaconEffectDef("regeneration", "Regeneration", 4, false),
+      };
+
+      // Iterate through registry to find effects by name and get their IDs
+      for (var entry : mobEffectRegistry.entrySet()) {
+        var key = entry.getKey();
+        var effectName = key.identifier().getPath(); // e.g., "speed", "haste"
+
+        for (var effectDef : effects) {
+          if (effectName.equals(effectDef.effectName)) {
+            var effectRegistryId = mobEffectRegistry.getId(entry.getValue());
+            var disabled = beaconLevel < effectDef.requiredLevel;
+
+            log.debug("Beacon effect {} has registry ID {}", effectDef.effectName, effectRegistryId);
+
+            buttons.add(ContainerButton.newBuilder()
+              .setButtonId(effectRegistryId)
+              .setLabel(effectDef.displayName)
+              .setDescription("Level " + effectDef.requiredLevel + "+ (" + (effectDef.isPrimary ? "Primary" : "Secondary") + ")" +
+                (disabled ? " - Requires more beacon levels" : ""))
+              .setIconItemId("minecraft:potion")
+              .setDisabled(disabled)
+              .build());
+            break;
+          }
+        }
+      }
+
+      // Confirm button - disabled if no payment item
+      buttons.add(ContainerButton.newBuilder()
+        .setButtonId(-1)
+        .setLabel("Confirm")
+        .setDescription(hasPayment ? "Apply beacon effects" : "Insert payment item (iron/gold/emerald/diamond/netherite ingot)")
+        .setIconItemId("minecraft:beacon")
+        .setDisabled(!hasPayment)
+        .build());
+    } else if (menu instanceof CrafterMenu ignored) {
+      // Crafter: 9 slot toggle buttons (button ID = slot index)
+      // Clicking toggles whether the slot is disabled
+      for (int i = 0; i < 9; i++) {
+        buttons.add(ContainerButton.newBuilder()
+          .setButtonId(i)
+          .setLabel("Toggle Slot " + (i + 1))
+          .setDescription("Enable/disable crafter slot")
+          .setDisabled(false)
+          .build());
+      }
+    } else if (menu instanceof LecternMenu lecternMenu) {
+      // Lectern: page navigation buttons
+      // Button 1 = previous page, Button 2 = next page, Button 3 = take book
+      // Data slot 0 = current page
+      var bookSlot = lecternMenu.getSlot(0);
+      var hasBook = !bookSlot.getItem().isEmpty();
+      var currentPage = lecternMenu.getPage();
+
+      buttons.add(ContainerButton.newBuilder()
+        .setButtonId(1)
+        .setLabel("Previous Page")
+        .setDescription(hasBook ? "Go to previous page" : "No book in lectern")
+        .setIconItemId("minecraft:writable_book")
+        .setDisabled(!hasBook || currentPage <= 0)
+        .build());
+      buttons.add(ContainerButton.newBuilder()
+        .setButtonId(2)
+        .setLabel("Next Page")
+        .setDescription(hasBook ? "Go to next page" : "No book in lectern")
+        .setIconItemId("minecraft:writable_book")
+        .setDisabled(!hasBook)  // Can't easily know max pages, let server reject
+        .build());
+      buttons.add(ContainerButton.newBuilder()
+        .setButtonId(3)
+        .setLabel("Take Book")
+        .setDescription(hasBook ? "Remove book from lectern" : "No book to take")
+        .setIconItemId("minecraft:book")
+        .setDisabled(!hasBook)
+        .build());
+    }
+
+    return buttons;
+  }
+
 
   /**
    * Gets the display title for a container menu.
@@ -1139,6 +1363,70 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error performing mouse click", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void clickContainerButton(BotContainerButtonClickRequest request, StreamObserver<BotContainerButtonClickResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      var gameMode = minecraft.gameMode;
+      if (player == null || gameMode == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available"));
+      }
+
+      var container = player.containerMenu;
+      var buttonId = request.getButtonId();
+
+      // Validate the button click based on container type
+      // Most containers accept any button ID and ignore invalid ones server-side
+      var validClick = switch (container) {
+        case StonecutterMenu ignored -> buttonId >= 0 && buttonId < 100; // Recipes vary by input
+        case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
+        case LoomMenu ignored -> buttonId >= 0 && buttonId < 100; // Patterns vary
+        case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
+        case BeaconMenu ignored -> true; // Beacon accepts various effect IDs including negative for confirm
+        case CrafterMenu ignored -> buttonId >= 0 && buttonId < 9; // 9 slot toggles
+        case LecternMenu ignored -> buttonId >= 1 && buttonId <= 3; // Page nav and take book
+        default -> true; // Allow button clicks on unknown containers - server will validate
+      };
+
+      if (!validClick) {
+        responseObserver.onNext(BotContainerButtonClickResponse.newBuilder()
+          .setSuccess(false)
+          .setError("Invalid button ID for this container type")
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      // Click the button
+      log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
+      gameMode.handleInventoryButtonClick(container.containerId, buttonId);
+
+      responseObserver.onNext(BotContainerButtonClickResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error clicking container button", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }

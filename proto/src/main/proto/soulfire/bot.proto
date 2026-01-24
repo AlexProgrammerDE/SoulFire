@@ -157,11 +157,23 @@ message SlotRegion {
   SlotRegionType type = 6; // Affects rendering behavior
 }
 
+// A clickable button in a container (e.g., enchantment options, stonecutter recipes)
+message ContainerButton {
+  int32 button_id = 1;              // Button ID to send when clicking
+  string label = 2;                 // Display label (e.g., "Silk Touch I")
+  optional string icon_item_id = 3; // Item ID for icon (e.g., "minecraft:stone_bricks")
+  optional string description = 4;  // Tooltip/description text
+  bool disabled = 5;                // Whether the button is currently disabled
+  bool selected = 6;                // Whether this button is currently selected
+}
+
 // Describes the layout of an open container
 message ContainerLayout {
   string title = 1;                  // Container title/name
   repeated SlotRegion regions = 2;   // Ordered list of slot regions to render
   int32 total_slots = 3;             // Total number of slots
+  repeated ContainerButton buttons = 4; // Available action buttons (stonecutter recipes, enchants, etc.)
+  string container_type = 5;         // Container type identifier for client-specific rendering
 }
 
 message BotInventoryStateResponse {
@@ -209,6 +221,18 @@ message BotMouseClickResponse {
   optional string error = 2;
 }
 
+// Click a container button (enchantment selection, stonecutter recipe, etc.)
+message BotContainerButtonClickRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  int32 button_id = 3;
+}
+
+message BotContainerButtonClickResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -225,4 +249,6 @@ service BotService {
   rpc OpenInventory (BotOpenInventoryRequest) returns (BotOpenInventoryResponse) {}
   // Mouse click actions
   rpc MouseClick (BotMouseClickRequest) returns (BotMouseClickResponse) {}
+  // Container button actions (enchanting, stonecutter, etc.)
+  rpc ClickContainerButton (BotContainerButtonClickRequest) returns (BotContainerButtonClickResponse) {}
 }
