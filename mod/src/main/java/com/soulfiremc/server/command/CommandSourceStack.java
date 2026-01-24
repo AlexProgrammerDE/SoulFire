@@ -48,6 +48,10 @@ public record CommandSourceStack(
     return new CommandSourceStack(soulFire, source, instanceIds, null);
   }
 
+  public static CommandSourceStack ofInstanceAndBot(SoulFireServer soulFire, SoulFireUser source, Set<UUID> instanceIds, Set<UUID> botIds) {
+    return new CommandSourceStack(soulFire, source, instanceIds, botIds);
+  }
+
   public CommandSourceStack withInstanceIds(Set<UUID> instanceIds) {
     if (Objects.equals(this.instanceIds, instanceIds)) {
       return this;

@@ -12,10 +12,16 @@ message InstanceCommandScope {
   string instance_id = 1;
 }
 
+message BotCommandScope {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
 message CommandScope {
   oneof scope {
     GlobalCommandScope global = 1;
     InstanceCommandScope instance = 2;
+    BotCommandScope bot = 3;
   }
 }
 

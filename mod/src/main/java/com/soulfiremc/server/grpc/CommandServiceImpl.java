@@ -94,6 +94,14 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
 
         yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
       }
+      case BOT -> {
+        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
+        user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
+
+        var botId = UUID.fromString(scope.getBot().getBotId());
+
+        yield CommandSourceStack.ofInstanceAndBot(soulFire, user, Set.of(instanceId), Set.of(botId));
+      }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };
   }
