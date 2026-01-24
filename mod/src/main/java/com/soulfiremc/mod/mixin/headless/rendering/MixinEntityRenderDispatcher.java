@@ -21,14 +21,18 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderDispatcher.class)
 public class MixinEntityRenderDispatcher {
+  @Unique
+  private static final EntityRenderState EMPTY_STATE = new EntityRenderState();
+
   @Inject(method = "extractEntity", at = @At("HEAD"), cancellable = true)
   private <E extends Entity> void extractEntity(E entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> cir) {
-    cir.setReturnValue(null);
+    cir.setReturnValue(EMPTY_STATE);
   }
 }
