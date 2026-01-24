@@ -191,6 +191,24 @@ message BotOpenInventoryResponse {
   bool success = 1;
 }
 
+// Mouse click actions - simulates left/right mouse button press
+message BotMouseClickRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  MouseButton button = 3;
+}
+
+enum MouseButton {
+  MOUSE_BUTTON_UNSPECIFIED = 0;
+  LEFT_BUTTON = 1;   // Attack entity / start breaking block
+  RIGHT_BUTTON = 2;  // Use item / interact with entity or block
+}
+
+message BotMouseClickResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
 service BotService {
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
@@ -205,4 +223,6 @@ service BotService {
   rpc GetInventoryState (BotInventoryStateRequest) returns (BotInventoryStateResponse) {}
   rpc CloseContainer (BotCloseContainerRequest) returns (BotCloseContainerResponse) {}
   rpc OpenInventory (BotOpenInventoryRequest) returns (BotOpenInventoryResponse) {}
+  // Mouse click actions
+  rpc MouseClick (BotMouseClickRequest) returns (BotMouseClickResponse) {}
 }

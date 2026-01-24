@@ -66,6 +66,7 @@ public final class ServerCommandManager {
     UseItemOnCommand.register(dispatcher);
     InventoryCommand.register(dispatcher);
     InteractCommand.register(dispatcher);
+    ClickCommand.register(dispatcher);
 
     // Instance commands
     SessionCommand.register(dispatcher);

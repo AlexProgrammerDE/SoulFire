@@ -27,6 +27,7 @@ import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.MouseClickHelper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -1089,6 +1090,55 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error opening inventory", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void mouseClick(BotMouseClickRequest request, StreamObserver<BotMouseClickResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      var level = minecraft.level;
+      var gameMode = minecraft.gameMode;
+      if (player == null || level == null || gameMode == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player, level, or gameMode is not available"));
+      }
+
+      switch (request.getButton()) {
+        case LEFT_BUTTON -> MouseClickHelper.performLeftClick(player, level, gameMode);
+        case RIGHT_BUTTON -> MouseClickHelper.performRightClick(player, level, gameMode);
+        default -> {
+          responseObserver.onNext(BotMouseClickResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Invalid mouse button")
+            .build());
+          responseObserver.onCompleted();
+          return;
+        }
+      }
+
+      responseObserver.onNext(BotMouseClickResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error performing mouse click", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
