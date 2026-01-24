@@ -38,6 +38,7 @@
     "headless.rendering.MixinClientChunkCache",
     "headless.rendering.MixinClientLevel",
     "headless.rendering.MixinEntityModelSet",
+    "headless.rendering.MixinEntityRenderDispatcher",
     "headless.rendering.MixinGameRenderer",
     "headless.rendering.MixinLevelRenderer",
     "headless.rendering.MixinModelPart",

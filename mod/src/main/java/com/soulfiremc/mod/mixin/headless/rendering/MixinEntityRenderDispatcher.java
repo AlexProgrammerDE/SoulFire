@@ -17,26 +17,18 @@
  */
 package com.soulfiremc.mod.mixin.headless.rendering;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ClientLevel.class)
-public class MixinClientLevel {
-  @Inject(method = "queueLightUpdate", at = @At("HEAD"), cancellable = true)
-  private void queueLightUpdateHook(Runnable runnable, CallbackInfo ci) {
-    // prevent light updates from being queued as that queue would never be cleared
-    ci.cancel();
+@Mixin(EntityRenderDispatcher.class)
+public class MixinEntityRenderDispatcher {
+  @Inject(method = "extractEntity", at = @At("HEAD"), cancellable = true)
+  private <E extends Entity> void extractEntity(E entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> cir) {
+    cir.setReturnValue(null);
   }
-
-  @Inject(method = "addDestroyBlockEffect", at = @At("HEAD"), cancellable = true)
-  private void addDestroyBlockEffect(BlockPos pos, BlockState blockState, CallbackInfo ci) {
-    // prevent spawn of block break particles in headless environment
-    ci.cancel();
-  }
-
 }
