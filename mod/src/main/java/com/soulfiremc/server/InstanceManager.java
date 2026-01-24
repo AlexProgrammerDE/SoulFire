@@ -31,10 +31,8 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.database.InstanceAuditLogEntity;
 import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.script.ScriptManager;
 import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.*;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -67,7 +65,6 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new InheritableThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder metadata = new MetadataHolder();
-  private final ScriptManager scriptManager;
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -87,29 +84,11 @@ public final class InstanceManager {
     this.sessionFactory = sessionFactory;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
-    this.scriptManager = new ScriptManager(this);
 
     try {
       Files.createDirectories(getInstanceObjectStoragePath());
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
-
-    try {
-      for (var script : sessionFactory.fromTransaction(session -> {
-        var instance = session.find(InstanceEntity.class, id);
-        if (instance == null) {
-          return Collections.<ScriptEntity>emptyList();
-        }
-
-        return session.createQuery("FROM ScriptEntity WHERE instance IS NULL OR instance = :instance", ScriptEntity.class)
-          .setParameter("instance", instance)
-          .list();
-      })) {
-        scriptManager.registerScript(script);
-      }
-    } catch (Throwable t) {
-      log.error("Error while loading scripts for instance {}", id, t);
     }
 
     this.instanceSettingsPageRegistry = scheduler.supplyAsync(() -> {
@@ -462,7 +441,6 @@ public final class InstanceManager {
 
   public CompletableFuture<?> deleteInstance() {
     return stopSessionPermanently()
-      .thenRunAsync(scriptManager::destroyManager, scheduler)
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
       .thenRunAsync(() -> {
         try {
@@ -475,7 +453,6 @@ public final class InstanceManager {
 
   public CompletableFuture<?> shutdownHook() {
     return stopSession()
-      .thenRunAsync(scriptManager::destroyManager, scheduler)
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler());
   }
 
@@ -574,10 +551,6 @@ public final class InstanceManager {
 
   public Path getInstanceObjectStoragePath() {
     return soulFireServer.getObjectStoragePath().resolve("instance-" + id.toString());
-  }
-
-  public Path getScriptDataPath(UUID id) {
-    return getInstanceObjectStoragePath().resolve("script-data-" + id);
   }
 
   public List<BotConnection> getConnectedBots() {

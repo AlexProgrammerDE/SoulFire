@@ -246,10 +246,7 @@ public final class AuthSystem {
                DELETE_USER, UPDATE_USER, READ_USER,
                CREATE_USER, UPDATE_SERVER_CONFIG, READ_SERVER_CONFIG,
                GLOBAL_SUBSCRIBE_LOGS, INVALIDATE_SESSIONS,
-               GENERATE_API_TOKEN,
-               CREATE_GLOBAL_SCRIPT, READ_GLOBAL_SCRIPT,
-               UPDATE_GLOBAL_SCRIPT, DELETE_GLOBAL_SCRIPT,
-               ELEVATE_SCRIPT_PERMISSIONS -> TriState.FALSE;
+               GENERATE_API_TOKEN -> TriState.FALSE;
           case CREATE_INSTANCE -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_CREATING_INSTANCES));
           case UPDATE_SELF_USERNAME -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_UPDATING_SELF_USERNAME));
           case UPDATE_SELF_EMAIL -> TriState.byBoolean(settingsSource.get(ServerSettings.ALLOW_UPDATING_SELF_EMAIL));
@@ -262,10 +259,8 @@ public final class AuthSystem {
             && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
           case UPDATE_INSTANCE_META -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
             && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
-          case CREATE_SCRIPT, READ_SCRIPT, UPDATE_SCRIPT, DELETE_SCRIPT -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
-            && settingsSource.get(ServerSettings.ALLOW_INSTANCE_SCRIPTS));
           case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS,
-               ACCESS_OBJECT_STORAGE, ACCESS_SCRIPT_CODE_OBJECT_STORAGE,
+               ACCESS_OBJECT_STORAGE,
                DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
                CHANGE_INSTANCE_STATE, UPDATE_INSTANCE_CONFIG,
                READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS,

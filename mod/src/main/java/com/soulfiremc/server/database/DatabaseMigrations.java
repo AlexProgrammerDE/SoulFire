@@ -42,9 +42,26 @@ public final class DatabaseMigrations {
   public static void runMigrations(Connection connection, boolean isSqlite) {
     try {
       migrateAttackToSession(connection, isSqlite);
+      dropScriptsTable(connection, isSqlite);
     } catch (SQLException e) {
       log.error("Failed to run database migrations", e);
       throw new RuntimeException("Database migration failed", e);
+    }
+  }
+
+  /**
+   * Migration: Drop the scripts table as scripting has been removed.
+   * The visual script editor will use a new table structure in the future.
+   */
+  private static void dropScriptsTable(Connection connection, boolean isSqlite) throws SQLException {
+    if (tableExists(connection, "scripts", isSqlite)) {
+      log.info("Migrating database: dropping scripts table (scripting system removed)");
+
+      try (var stmt = connection.createStatement()) {
+        stmt.execute("DROP TABLE scripts");
+      }
+
+      log.info("Successfully dropped scripts table");
     }
   }
 

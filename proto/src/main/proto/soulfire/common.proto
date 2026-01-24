@@ -96,11 +96,8 @@ enum GlobalPermission {
   UPDATE_SELF_EMAIL = 14;
   GENERATE_API_TOKEN = 16;
   INVALIDATE_SELF_SESSIONS = 17;
-  CREATE_GLOBAL_SCRIPT = 18;
-  READ_GLOBAL_SCRIPT = 19;
-  UPDATE_GLOBAL_SCRIPT = 20;
-  DELETE_GLOBAL_SCRIPT = 21;
-  ELEVATE_SCRIPT_PERMISSIONS = 22;
+  // Reserved for removed global script permissions (18-22)
+  reserved 18, 19, 20, 21, 22;
 }
 
 enum InstancePermission {
@@ -114,15 +111,12 @@ enum InstancePermission {
   CHECK_PROXY = 7;
   DOWNLOAD_URL = 8;
   ACCESS_OBJECT_STORAGE = 9;
-  ACCESS_SCRIPT_CODE_OBJECT_STORAGE = 20;
   INSTANCE_SUBSCRIBE_LOGS = 13;
   READ_INSTANCE_AUDIT_LOGS = 15;
-  CREATE_SCRIPT = 16;
-  READ_SCRIPT = 17;
-  UPDATE_SCRIPT = 18;
-  DELETE_SCRIPT = 19;
   READ_BOT_INFO = 10;
   UPDATE_BOT_CONFIG = 11;
+  // Reserved for removed script permissions (16-20)
+  reserved 16, 17, 18, 19, 20;
 }
 
 enum UserRole {

@@ -33,10 +33,6 @@ message BotLogScope {
   string bot_id = 2;
 }
 
-message GlobalScriptLogScope {
-  string script_id = 1;
-}
-
 message InstanceScriptLogScope {
   string instance_id = 1;
   string script_id = 2;
@@ -46,11 +42,11 @@ message PersonalLogScope {
 }
 
 message LogScope {
+  // Reserved for removed GlobalScriptLogScope (field 4)
   oneof scope {
     GlobalLogScope global = 1;
     InstanceLogScope instance = 2;
     BotLogScope bot = 3;
-    GlobalScriptLogScope global_script = 4;
     InstanceScriptLogScope instance_script = 5;
     PersonalLogScope personal = 6;
   }

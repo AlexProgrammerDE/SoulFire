@@ -19,7 +19,6 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.InstancePermission;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -212,17 +211,6 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         if (user.hasPermission(PermissionContext.instance(
           InstancePermission.ACCESS_OBJECT_STORAGE, instanceManager.id()))) {
           allowedPaths.add("/instance-" + instanceManager.id());
-        }
-
-        if (user.hasPermission(PermissionContext.instance(
-          InstancePermission.ACCESS_SCRIPT_CODE_OBJECT_STORAGE, instanceManager.id()))) {
-          for (var script : instanceManager.scriptManager().scripts().values()) {
-            if (script.scriptType() != ScriptEntity.ScriptType.INSTANCE) {
-              continue;
-            }
-
-            allowedPaths.add("/script-code-" + script.scriptId());
-          }
         }
       });
 

@@ -111,18 +111,6 @@ dependencies {
   api(libs.bundles.armeria)
   api(libs.bundles.reactor.netty)
 
-  // For script support
-  api(
-    files(
-      configurations.detachedConfiguration(
-        *libs.bundles.graalvm.polyglot.get()
-          .map { dependencies.create(it) }
-          .toTypedArray())
-        .resolve()
-        .filter { file -> file.name.endsWith(".jar") }
-    ))
-  api(libs.bundles.swc4j)
-
   // For mail support
   api(libs.angus)
 

@@ -79,7 +79,6 @@ public final class DatabaseManager {
       UserEntity.class,
       InstanceEntity.class,
       InstanceAuditLogEntity.class,
-      ScriptEntity.class,
       ServerConfigEntity.class
     );
 
