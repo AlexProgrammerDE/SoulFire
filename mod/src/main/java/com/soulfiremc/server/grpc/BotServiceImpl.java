@@ -1575,16 +1575,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
-      if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
-      }
-
       var responseBuilder = BotGetDialogResponse.newBuilder();
 
-      // Get current dialog from the DialogHandler
-      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
-      if (dialogHolder != null) {
-        responseBuilder.setDialog(convertDialogToProto(dialogHolder));
+      if (activeBot != null) {
+        // Get current dialog from the DialogHandler
+        var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+        if (dialogHolder != null) {
+          responseBuilder.setDialog(convertDialogToProto(dialogHolder));
+        }
       }
 
       responseObserver.onNext(responseBuilder.build());
