@@ -60,7 +60,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * @param includeInventory Whether to include full inventory data (more expensive)
    * @return The built BotLiveState
    */
-  private static BotLiveState buildLiveState(LocalPlayer player, boolean includeInventory) {
+  private static BotLiveState buildLiveState(Minecraft minecraft, LocalPlayer player, boolean includeInventory) {
     var builder = BotLiveState.newBuilder()
       .setX(player.getX())
       .setY(player.getY())
@@ -78,6 +78,18 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     // Add dimension
     var dimension = player.level().dimension().identifier().toString();
     builder.setDimension(dimension);
+
+    // Add game mode
+    var gameMode = minecraft.gameMode;
+    if (gameMode != null) {
+      var playerMode = gameMode.getPlayerMode();
+      builder.setGameMode(switch (playerMode) {
+        case SURVIVAL -> GameMode.GAME_MODE_SURVIVAL;
+        case CREATIVE -> GameMode.GAME_MODE_CREATIVE;
+        case ADVENTURE -> GameMode.GAME_MODE_ADVENTURE;
+        case SPECTATOR -> GameMode.GAME_MODE_SPECTATOR;
+      });
+    }
 
     // Add skin texture hash if available
     var skinHash = extractSkinTextureHash(player.getGameProfile());
@@ -276,10 +288,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
         var activeBot = botConnections.get(profileId);
         if (activeBot != null) {
-          var player = activeBot.minecraft().player;
+          var minecraft = activeBot.minecraft();
+          var player = minecraft.player;
           if (player != null) {
             // Don't include inventory for list view (too expensive)
-            entryBuilder.setLiveState(buildLiveState(player, false));
+            entryBuilder.setLiveState(buildLiveState(minecraft, player, false));
           }
         }
         responseBuilder.addBots(entryBuilder.build());
@@ -320,7 +333,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         var player = minecraft.player;
         if (player != null) {
           // Include full inventory data for detail view
-          botInfoResponseBuilder.setLiveState(buildLiveState(player, true));
+          botInfoResponseBuilder.setLiveState(buildLiveState(minecraft, player, true));
         }
       }
 

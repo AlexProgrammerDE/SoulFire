@@ -67,6 +67,18 @@ message BotLiveState {
   // Skin texture hash for avatar rendering (e.g., "abc123def456...")
   // Use with https://mc-heads.net/body/<hash> for full body render
   optional string skin_texture_hash = 15;
+
+  // Game mode (survival, creative, adventure, spectator)
+  GameMode game_mode = 16;
+}
+
+// Minecraft game modes
+enum GameMode {
+  GAME_MODE_UNSPECIFIED = 0;
+  GAME_MODE_SURVIVAL = 1;
+  GAME_MODE_CREATIVE = 2;
+  GAME_MODE_ADVENTURE = 3;
+  GAME_MODE_SPECTATOR = 4;
 }
 
 message BotInfoResponse {
