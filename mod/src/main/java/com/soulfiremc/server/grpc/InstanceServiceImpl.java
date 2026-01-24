@@ -628,4 +628,113 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
+
+  @Override
+  public void getAccountMetadata(GetAccountMetadataRequest request, StreamObserver<GetAccountMetadataResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var accountId = UUID.fromString(request.getAccountId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var account = instanceEntity.settings().accounts().stream()
+          .filter(a -> a.profileId().equals(accountId))
+          .findFirst()
+          .orElseThrow(() -> new StatusRuntimeException(
+            Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId))));
+
+        responseObserver.onNext(GetAccountMetadataResponse.newBuilder()
+          .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
+          .build());
+        responseObserver.onCompleted();
+      });
+    } catch (Throwable t) {
+      log.error("Error getting account metadata", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void setAccountMetadataEntry(SetAccountMetadataEntryRequest request, StreamObserver<SetAccountMetadataEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var accountId = UUID.fromString(request.getAccountId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newAccounts = currentSettings.accounts().stream()
+          .map(account -> {
+            if (account.profileId().equals(accountId)) {
+              var newMetadata = SettingsSource.Stem.withUpdatedEntry(
+                account.persistentMetadata(),
+                request.getNamespace(),
+                request.getKey(),
+                SettingsSource.Stem.valueToJsonElement(request.getValue()));
+              return account.withPersistentMetadata(newMetadata);
+            }
+            return account;
+          })
+          .toList();
+
+        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(SetAccountMetadataEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error setting account metadata entry", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void deleteAccountMetadataEntry(DeleteAccountMetadataEntryRequest request, StreamObserver<DeleteAccountMetadataEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var accountId = UUID.fromString(request.getAccountId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var instanceEntity = session.find(InstanceEntity.class, instanceId);
+        if (instanceEntity == null) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        }
+
+        var currentSettings = instanceEntity.settings();
+        var newAccounts = currentSettings.accounts().stream()
+          .map(account -> {
+            if (account.profileId().equals(accountId)) {
+              var newMetadata = SettingsSource.Stem.withDeletedEntry(
+                account.persistentMetadata(),
+                request.getNamespace(),
+                request.getKey());
+              return account.withPersistentMetadata(newMetadata);
+            }
+            return account;
+          })
+          .toList();
+
+        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        session.merge(instanceEntity);
+      });
+
+      responseObserver.onNext(DeleteAccountMetadataEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error deleting account metadata entry", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
 }

@@ -143,6 +143,45 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
       return newSettings;
     }
 
+    static Map<String, Map<String, JsonElement>> withDeletedEntry(
+        Map<String, Map<String, JsonElement>> settings,
+        String namespace,
+        String key) {
+      var newSettings = new LinkedHashMap<>(settings);
+      var namespaceMap = newSettings.get(namespace);
+      if (namespaceMap != null) {
+        var newNamespaceMap = new LinkedHashMap<>(namespaceMap);
+        newNamespaceMap.remove(key);
+        if (newNamespaceMap.isEmpty()) {
+          newSettings.remove(namespace);
+        } else {
+          newSettings.put(namespace, newNamespaceMap);
+        }
+      }
+      return newSettings;
+    }
+
+    static Iterable<? extends SettingsNamespace> mapToSettingsNamespaceProto(Map<String, Map<String, JsonElement>> settings) {
+      return settings.entrySet().stream()
+        .map(entry -> SettingsNamespace.newBuilder()
+          .setNamespace(entry.getKey())
+          .addAllEntries(entry.getValue().entrySet()
+            .stream()
+            .map(innerEntry -> SettingsEntry.newBuilder()
+              .setKey(innerEntry.getKey())
+              .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
+                try {
+                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                } catch (InvalidProtocolBufferException e) {
+                  throw new RuntimeException(e);
+                }
+              }))
+              .build())
+            .toList())
+          .build())
+        .toList();
+    }
+
     default Iterable<? extends SettingsNamespace> settingsToProto() {
       return this.settings().entrySet().stream()
         .map(entry -> SettingsNamespace.newBuilder()

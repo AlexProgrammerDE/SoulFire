@@ -223,6 +223,37 @@ message InstanceAuditLogRequest {
   string id = 1;
 }
 
+// Account metadata operations
+message GetAccountMetadataRequest {
+  string instance_id = 1;
+  string account_id = 2;  // profile_id of the account
+}
+
+message GetAccountMetadataResponse {
+  repeated SettingsNamespace metadata = 1;
+}
+
+message SetAccountMetadataEntryRequest {
+  string instance_id = 1;
+  string account_id = 2;
+  string namespace = 3;
+  string key = 4;
+  google.protobuf.Value value = 5;
+}
+
+message SetAccountMetadataEntryResponse {
+}
+
+message DeleteAccountMetadataEntryRequest {
+  string instance_id = 1;
+  string account_id = 2;
+  string namespace = 3;
+  string key = 4;
+}
+
+message DeleteAccountMetadataEntryResponse {
+}
+
 message InstanceAuditLogResponse {
   enum AuditLogEntryType {
     EXECUTE_COMMAND = 0;
@@ -269,4 +300,8 @@ service InstanceService {
   rpc RemoveInstanceProxiesBatch (InstanceRemoveProxiesBatchRequest) returns (InstanceRemoveProxiesBatchResponse) {}
   rpc ChangeInstanceState (InstanceStateChangeRequest) returns (InstanceStateChangeResponse) {}
   rpc GetAuditLog (InstanceAuditLogRequest) returns (InstanceAuditLogResponse) {}
+  // Account metadata operations
+  rpc GetAccountMetadata (GetAccountMetadataRequest) returns (GetAccountMetadataResponse) {}
+  rpc SetAccountMetadataEntry (SetAccountMetadataEntryRequest) returns (SetAccountMetadataEntryResponse) {}
+  rpc DeleteAccountMetadataEntry (DeleteAccountMetadataEntryRequest) returns (DeleteAccountMetadataEntryResponse) {}
 }
