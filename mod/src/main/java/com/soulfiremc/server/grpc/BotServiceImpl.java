@@ -1794,4 +1794,151 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
+
+  @Override
+  public void setMovementState(BotSetMovementStateRequest request, StreamObserver<BotSetMovementStateResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      // Apply movement state changes
+      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+        var controlState = activeBot.controlState();
+
+        if (request.hasForward()) {
+          controlState.up(request.getForward());
+        }
+        if (request.hasBackward()) {
+          controlState.down(request.getBackward());
+        }
+        if (request.hasLeft()) {
+          controlState.left(request.getLeft());
+        }
+        if (request.hasRight()) {
+          controlState.right(request.getRight());
+        }
+        if (request.hasJump()) {
+          controlState.jump(request.getJump());
+        }
+        if (request.hasSneak()) {
+          controlState.shift(request.getSneak());
+        }
+        if (request.hasSprint()) {
+          controlState.sprint(request.getSprint());
+        }
+      }));
+
+      responseObserver.onNext(BotSetMovementStateResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error setting movement state", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void resetMovement(BotResetMovementRequest request, StreamObserver<BotResetMovementResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      // Reset all movement
+      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+        activeBot.controlState().resetAll()));
+
+      log.info("Reset movement for bot {}", botId);
+
+      responseObserver.onNext(BotResetMovementResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error resetting movement", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  @Override
+  public void setRotation(BotSetRotationRequest request, StreamObserver<BotSetRotationResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        responseObserver.onNext(BotSetRotationResponse.newBuilder()
+          .setSuccess(false)
+          .setError("Player is not available")
+          .build());
+        responseObserver.onCompleted();
+        return;
+      }
+
+      var yaw = request.getYaw();
+      var pitch = request.getPitch();
+
+      // Clamp pitch to valid range
+      pitch = Math.max(-90f, Math.min(90f, pitch));
+
+      // Normalize yaw to -180 to 180 range
+      while (yaw > 180f) yaw -= 360f;
+      while (yaw < -180f) yaw += 360f;
+
+      final float finalYaw = yaw;
+      final float finalPitch = pitch;
+
+      // Set the rotation
+      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+        player.setYRot(finalYaw);
+        player.setXRot(finalPitch);
+      }));
+
+      responseObserver.onNext(BotSetRotationResponse.newBuilder()
+        .setSuccess(true)
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error setting rotation", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
 }

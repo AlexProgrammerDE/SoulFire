@@ -277,6 +277,58 @@ message BotSetHotbarSlotResponse {
 }
 
 // ============================================================================
+// Movement Control Messages
+// Control bot movement (WASD, jump, sneak, sprint)
+// ============================================================================
+
+// Movement state - each field is optional to allow partial updates
+message BotSetMovementStateRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  optional bool forward = 3;    // W key - move forward
+  optional bool backward = 4;   // S key - move backward
+  optional bool left = 5;       // A key - strafe left
+  optional bool right = 6;      // D key - strafe right
+  optional bool jump = 7;       // Space - jump
+  optional bool sneak = 8;      // Shift - sneak
+  optional bool sprint = 9;     // Ctrl - sprint
+}
+
+message BotSetMovementStateResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// Reset all movement to stopped state
+message BotResetMovementRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+}
+
+message BotResetMovementResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// ============================================================================
+// Rotation Control Messages
+// Control bot view direction (yaw/pitch)
+// ============================================================================
+
+// Set absolute rotation
+message BotSetRotationRequest {
+  string instance_id = 1;
+  string bot_id = 2;
+  float yaw = 3;    // Horizontal rotation (-180 to 180, 0 = south)
+  float pitch = 4;  // Vertical rotation (-90 to 90, negative = up)
+}
+
+message BotSetRotationResponse {
+  bool success = 1;
+  optional string error = 2;
+}
+
+// ============================================================================
 // Server Dialog Messages (Minecraft 1.21.6+)
 // Dialogs are server-sent UI screens that can display information and gather input
 // ============================================================================
@@ -522,6 +574,11 @@ service BotService {
   rpc SetContainerText (BotSetContainerTextRequest) returns (BotSetContainerTextResponse) {}
   // Hotbar slot selection
   rpc SetHotbarSlot (BotSetHotbarSlotRequest) returns (BotSetHotbarSlotResponse) {}
+  // Movement control (WASD, jump, sneak, sprint)
+  rpc SetMovementState (BotSetMovementStateRequest) returns (BotSetMovementStateResponse) {}
+  rpc ResetMovement (BotResetMovementRequest) returns (BotResetMovementResponse) {}
+  // Rotation control (look direction)
+  rpc SetRotation (BotSetRotationRequest) returns (BotSetRotationResponse) {}
   // Server dialog management (Minecraft 1.21.6+)
   rpc GetDialog (BotGetDialogRequest) returns (BotGetDialogResponse) {}
   rpc SubmitDialog (BotSubmitDialogRequest) returns (BotSubmitDialogResponse) {}
