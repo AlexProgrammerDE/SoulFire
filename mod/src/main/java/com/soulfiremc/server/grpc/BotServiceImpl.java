@@ -21,6 +21,7 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
@@ -1417,9 +1418,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         return;
       }
 
-      // Click the button
+      // Click the button - must be executed in game tick context
       log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
-      gameMode.handleInventoryButtonClick(container.containerId, buttonId);
+      activeBot.botControl().registerControllingTask(
+        ControllingTask.singleTick(() -> gameMode.handleInventoryButtonClick(container.containerId, buttonId)));
 
       responseObserver.onNext(BotContainerButtonClickResponse.newBuilder()
         .setSuccess(true)
