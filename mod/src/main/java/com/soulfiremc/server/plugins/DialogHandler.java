@@ -26,8 +26,8 @@ import com.soulfiremc.server.bot.BotConnection;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.minecraft.core.Holder;
-import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
 import net.minecraft.network.protocol.common.ClientboundClearDialogPacket;
+import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
 import net.minecraft.server.dialog.Dialog;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,11 +92,10 @@ public final class DialogHandler extends InternalPlugin {
 
   @EventHandler
   public static void onShowDialogPacket(BotPacketPreReceiveEvent event) {
-    if (!(event.packet() instanceof ClientboundShowDialogPacket showDialogPacket)) {
+    if (!(event.packet() instanceof ClientboundShowDialogPacket(Holder<Dialog> dialogHolder))) {
       return;
     }
 
-    var dialogHolder = showDialogPacket.dialog();
     setCurrentDialog(event.connection(), dialogHolder);
 
     var dialog = dialogHolder.value();
