@@ -55,6 +55,14 @@ public interface ScriptEventListener {
     // Default no-op implementation
   }
 
+  /// Called when a script logs a message (via Print node).
+  ///
+  /// @param level   the log level (debug, info, warn, error)
+  /// @param message the log message
+  default void onLog(String level, String message) {
+    // Default no-op implementation
+  }
+
   /// A no-op implementation of ScriptEventListener.
   ScriptEventListener NOOP = new ScriptEventListener() {
     @Override

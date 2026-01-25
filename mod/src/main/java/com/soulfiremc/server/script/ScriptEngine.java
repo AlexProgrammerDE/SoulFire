@@ -19,14 +19,13 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 /// Main execution engine for visual scripts.
 /// Parses script graphs, resolves execution order, and executes nodes.
@@ -35,28 +34,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /// with proper handling of async actions like pathfinding and block breaking.
 @Slf4j
 public final class ScriptEngine {
-  private final Map<String, ScriptNode> nodeRegistry = new ConcurrentHashMap<>();
 
-  /// Creates a new ScriptEngine and loads available node implementations.
+  /// Creates a new ScriptEngine.
   public ScriptEngine() {
-    loadNodeImplementations();
-  }
-
-  /// Loads ScriptNode implementations using ServiceLoader.
-  private void loadNodeImplementations() {
-    var loader = ServiceLoader.load(ScriptNode.class);
-    for (var node : loader) {
-      registerNode(node);
-    }
-    log.info("Loaded {} script node types", nodeRegistry.size());
-  }
-
-  /// Registers a custom node implementation.
-  ///
-  /// @param node the node implementation to register
-  public void registerNode(ScriptNode node) {
-    nodeRegistry.put(node.getType(), node);
-    log.debug("Registered script node type: {}", node.getType());
+    log.info("ScriptEngine initialized with {} registered node types", NodeRegistry.getRegisteredCount());
   }
 
   /// Gets a registered node by type.
@@ -64,7 +45,7 @@ public final class ScriptEngine {
   /// @param type the node type identifier
   /// @return the node implementation, or null if not found
   public ScriptNode getNode(String type) {
-    return nodeRegistry.get(type);
+    return NodeRegistry.isRegistered(type) ? NodeRegistry.create(type) : null;
   }
 
   /// Executes a script graph in INSTANCE scope.
@@ -97,6 +78,66 @@ public final class ScriptEngine {
   ) {
     var context = new ScriptContext(instance, bot, eventListener);
     return executeGraph(graph, context);
+  }
+
+  /// Executes a script starting from a specific trigger node with event inputs.
+  /// Used by ScriptTriggerService when an event fires.
+  ///
+  /// @param graph         the script graph
+  /// @param triggerNodeId the trigger node to start from
+  /// @param context       the execution context
+  /// @param eventInputs   inputs from the triggering event
+  /// @return a future that completes when execution finishes
+  public CompletableFuture<Void> executeFromTrigger(
+    ScriptGraph graph,
+    String triggerNodeId,
+    ScriptContext context,
+    Map<String, Object> eventInputs
+  ) {
+    return CompletableFuture.runAsync(() -> {
+      if (context.isCancelled()) {
+        return;
+      }
+
+      var graphNode = graph.getNode(triggerNodeId);
+      if (graphNode == null) {
+        log.warn("Trigger node {} not found in graph", triggerNodeId);
+        return;
+      }
+
+      if (!NodeRegistry.isRegistered(graphNode.type())) {
+        log.warn("No implementation found for trigger node type: {}", graphNode.type());
+        context.eventListener().onNodeError(triggerNodeId, "Unknown node type: " + graphNode.type());
+        return;
+      }
+      var nodeImpl = NodeRegistry.create(graphNode.type());
+
+      // Merge default inputs, event inputs, and resolved inputs
+      var inputs = new HashMap<>(nodeImpl.getDefaultInputs());
+      if (graphNode.defaultInputs() != null) {
+        inputs.putAll(graphNode.defaultInputs());
+      }
+      inputs.putAll(eventInputs);
+
+      context.eventListener().onNodeStarted(triggerNodeId);
+
+      try {
+        var outputs = nodeImpl.execute(context, inputs).join();
+        if (context.isCancelled()) {
+          return;
+        }
+
+        context.storeNodeOutputs(triggerNodeId, outputs);
+        context.eventListener().onNodeCompleted(triggerNodeId, outputs);
+
+        // Execute downstream nodes via the execution output
+        executeFromOutput(graph, triggerNodeId, "exec_out", context).join();
+      } catch (Exception e) {
+        var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+        log.error("Error executing trigger node {}: {}", triggerNodeId, message, e);
+        context.eventListener().onNodeError(triggerNodeId, message);
+      }
+    }, context.scheduler());
   }
 
   /// Executes the graph with the given context.
@@ -159,12 +200,12 @@ public final class ScriptEngine {
       return executeNodesRecursive(graph, executionOrder, index + 1, context);
     }
 
-    var nodeImpl = nodeRegistry.get(graphNode.type());
-    if (nodeImpl == null) {
+    if (!NodeRegistry.isRegistered(graphNode.type())) {
       log.warn("No implementation found for node type: {}", graphNode.type());
       context.eventListener().onNodeError(nodeId, "Unknown node type: " + graphNode.type());
       return executeNodesRecursive(graph, executionOrder, index + 1, context);
     }
+    var nodeImpl = NodeRegistry.create(graphNode.type());
 
     // Resolve inputs from connected nodes
     var inputs = graph.resolveInputs(nodeId, context);
@@ -239,11 +280,11 @@ public final class ScriptEngine {
       return CompletableFuture.completedFuture(null);
     }
 
-    var nodeImpl = nodeRegistry.get(graphNode.type());
-    if (nodeImpl == null) {
+    if (!NodeRegistry.isRegistered(graphNode.type())) {
       context.eventListener().onNodeError(nodeId, "Unknown node type: " + graphNode.type());
       return CompletableFuture.completedFuture(null);
     }
+    var nodeImpl = NodeRegistry.create(graphNode.type());
 
     var inputs = graph.resolveInputs(nodeId, context);
     var mergedInputs = new HashMap<>(nodeImpl.getDefaultInputs());
@@ -270,6 +311,6 @@ public final class ScriptEngine {
   ///
   /// @return list of registered node type identifiers
   public List<String> getRegisteredNodeTypes() {
-    return List.copyOf(nodeRegistry.keySet());
+    return List.copyOf(NodeRegistry.getRegisteredTypes());
   }
 }

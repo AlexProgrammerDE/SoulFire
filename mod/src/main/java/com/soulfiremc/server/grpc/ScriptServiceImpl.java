@@ -28,6 +28,11 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.ScriptEngine;
+import com.soulfiremc.server.script.ScriptEventListener;
+import com.soulfiremc.server.script.ScriptGraph;
+import com.soulfiremc.server.script.ScriptTriggerService;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
@@ -38,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,6 +60,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   private static final Type EDGE_LIST_TYPE = new TypeToken<List<ScriptEdgeData>>() {}.getType();
 
   private final SoulFireServer soulFireServer;
+  private final ScriptTriggerService triggerService = new ScriptTriggerService();
 
   // Track running scripts: scriptId -> execution state
   private final Map<UUID, ScriptExecutionState> runningScripts = new ConcurrentHashMap<>();
@@ -106,6 +113,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         newScript.scope(request.getScope());
         newScript.nodesJson(nodesToJson(request.getNodesList()));
         newScript.edgesJson(edgesToJson(request.getEdgesList()));
+        newScript.autoStart(request.getAutoStart());
 
         session.persist(newScript);
         return newScript;
@@ -182,6 +190,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         if (request.getUpdateEdges()) {
           script.edgesJson(edgesToJson(request.getEdgesList()));
         }
+        if (request.hasAutoStart()) {
+          script.autoStart(request.getAutoStart());
+        }
 
         session.merge(script);
         return script;
@@ -207,7 +218,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      // Stop the script if it's running
+      // Stop the script if it's running - unregister triggers first
+      triggerService.unregisterTriggers(scriptId);
       var executionState = runningScripts.remove(scriptId);
       if (executionState != null && executionState.observer() != null) {
         try {
@@ -323,25 +335,37 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .build())
         .build());
 
-      // TODO: Implement actual script execution engine
-      // For now, we just complete immediately with success
-      // The visual script engine would interpret the nodes/edges and execute them
-      soulFireServer.scheduler().schedule(() -> {
-        var state = runningScripts.remove(scriptId);
-        if (state != null && state.observer() != null && !state.observer().isCancelled()) {
-          try {
-            state.observer().onNext(ScriptEvent.newBuilder()
-              .setScriptCompleted(ScriptCompleted.newBuilder()
-                .setSuccess(true)
-                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-                .build())
-              .build());
-            state.observer().onCompleted();
-          } catch (Exception e) {
-            log.debug("Error completing script stream", e);
-          }
+      // Build the script graph from the entity
+      var graph = buildScriptGraph(scriptEntity);
+
+      // Get the instance manager
+      var instanceManager = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found")));
+
+      // Create event listener that streams events to the client
+      var eventListener = createStreamingEventListener(scriptId, serverObserver);
+
+      // Execute the script using the ScriptEngine
+      var engine = new ScriptEngine();
+      var context = new ScriptContext(instanceManager, eventListener);
+
+      // Register triggers for event-driven execution
+      triggerService.registerTriggers(scriptId, graph, context, engine);
+
+      // Also execute the one-shot path (for scripts with non-trigger entry points)
+      var future = engine.execute(graph, instanceManager, eventListener);
+
+      // Handle completion
+      future.whenComplete((result, error) -> {
+        // Only clean up if there are no active triggers keeping the script alive
+        if (!triggerService.hasActiveTriggers(scriptId)) {
+          runningScripts.remove(scriptId);
         }
-      }, 100, java.util.concurrent.TimeUnit.MILLISECONDS);
+        if (error != null && !serverObserver.isCancelled()) {
+          log.error("Script {} execution error", scriptId, error);
+          // Error event is already sent by the event listener
+        }
+      });
 
     } catch (StatusRuntimeException e) {
       throw e;
@@ -359,6 +383,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.CHANGE_INSTANCE_STATE, instanceId));
 
     try {
+      // Unregister any active triggers
+      triggerService.unregisterTriggers(scriptId);
+
       var executionState = runningScripts.remove(scriptId);
       if (executionState == null) {
         throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Script is not running"));
@@ -547,6 +574,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setScope(entity.scope())
       .addAllNodes(jsonToNodes(entity.nodesJson()))
       .addAllEdges(jsonToEdges(entity.edgesJson()))
+      .setAutoStart(entity.autoStart())
       .build();
   }
 
@@ -559,6 +587,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setScope(entity.scope())
       .setCreatedAt(instantToTimestamp(entity.createdAt()))
       .setUpdatedAt(instantToTimestamp(entity.updatedAt()))
+      .setAutoStart(entity.autoStart())
       .build();
   }
 
@@ -582,5 +611,185 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private ScriptGraph buildScriptGraph(ScriptEntity entity) {
+    var builder = ScriptGraph.builder(entity.id().toString(), entity.name());
+
+    List<ScriptNodeData> nodes = GsonInstance.GSON.fromJson(entity.nodesJson(), NODE_LIST_TYPE);
+    List<ScriptEdgeData> edges = GsonInstance.GSON.fromJson(entity.edgesJson(), EDGE_LIST_TYPE);
+
+    // Add nodes
+    if (nodes != null) {
+      for (var node : nodes) {
+        Map<String, Object> defaultInputs = new HashMap<>();
+        if (node.data() != null) {
+          for (var entry : node.data().entrySet()) {
+            defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
+          }
+        }
+        builder.addNode(node.id(), node.type(), defaultInputs);
+      }
+    }
+
+    // Add edges
+    if (edges != null) {
+      for (var edge : edges) {
+        if ("EDGE_TYPE_EXECUTION".equals(edge.edgeType())) {
+          builder.addExecutionEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
+        } else {
+          builder.addDataEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
+        }
+      }
+    }
+
+    return builder.build();
+  }
+
+  private Object jsonElementToObject(JsonElement element) {
+    if (element == null || element.isJsonNull()) {
+      return null;
+    }
+    if (element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
+      if (primitive.isBoolean()) {
+        return primitive.getAsBoolean();
+      }
+      if (primitive.isNumber()) {
+        return primitive.getAsDouble();
+      }
+      return primitive.getAsString();
+    }
+    if (element.isJsonArray()) {
+      return GsonInstance.GSON.fromJson(element, List.class);
+    }
+    if (element.isJsonObject()) {
+      return GsonInstance.GSON.fromJson(element, Map.class);
+    }
+    return element.toString();
+  }
+
+  private ScriptEventListener createStreamingEventListener(UUID scriptId, ServerCallStreamObserver<ScriptEvent> observer) {
+    return new ScriptEventListener() {
+      @Override
+      public void onNodeStarted(String nodeId) {
+        if (!observer.isCancelled()) {
+          try {
+            observer.onNext(ScriptEvent.newBuilder()
+              .setNodeStarted(NodeStarted.newBuilder()
+                .setNodeId(nodeId)
+                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+                .build())
+              .build());
+          } catch (Exception e) {
+            log.debug("Error sending node started event", e);
+          }
+        }
+      }
+
+      @Override
+      public void onNodeCompleted(String nodeId, Map<String, Object> outputs) {
+        if (!observer.isCancelled()) {
+          try {
+            var builder = NodeCompleted.newBuilder()
+              .setNodeId(nodeId)
+              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+            for (var entry : outputs.entrySet()) {
+              builder.putOutputs(entry.getKey(), objectToProtoValue(entry.getValue()));
+            }
+            observer.onNext(ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build());
+          } catch (Exception e) {
+            log.debug("Error sending node completed event", e);
+          }
+        }
+      }
+
+      @Override
+      public void onNodeError(String nodeId, String error) {
+        if (!observer.isCancelled()) {
+          try {
+            observer.onNext(ScriptEvent.newBuilder()
+              .setNodeError(NodeError.newBuilder()
+                .setNodeId(nodeId)
+                .setErrorMessage(error)
+                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+                .build())
+              .build());
+          } catch (Exception e) {
+            log.debug("Error sending node error event", e);
+          }
+        }
+      }
+
+      @Override
+      public void onScriptCompleted(boolean success) {
+        if (!observer.isCancelled()) {
+          try {
+            observer.onNext(ScriptEvent.newBuilder()
+              .setScriptCompleted(ScriptCompleted.newBuilder()
+                .setSuccess(success)
+                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+                .build())
+              .build());
+            observer.onCompleted();
+          } catch (Exception e) {
+            log.debug("Error sending script completed event", e);
+          }
+        }
+      }
+
+      @Override
+      public void onScriptCancelled() {
+        runningScripts.remove(scriptId);
+        if (!observer.isCancelled()) {
+          try {
+            observer.onNext(ScriptEvent.newBuilder()
+              .setScriptCompleted(ScriptCompleted.newBuilder()
+                .setSuccess(false)
+                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+                .build())
+              .build());
+            observer.onCompleted();
+          } catch (Exception e) {
+            log.debug("Error sending script cancelled event", e);
+          }
+        }
+      }
+
+      @Override
+      public void onLog(String level, String message) {
+        log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
+      }
+    };
+  }
+
+  private Value objectToProtoValue(Object value) {
+    if (value == null) {
+      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+    }
+    if (value instanceof Boolean b) {
+      return Value.newBuilder().setBoolValue(b).build();
+    }
+    if (value instanceof Number n) {
+      return Value.newBuilder().setNumberValue(n.doubleValue()).build();
+    }
+    if (value instanceof String s) {
+      return Value.newBuilder().setStringValue(s).build();
+    }
+    if (value instanceof List<?> list) {
+      var listBuilder = com.google.protobuf.ListValue.newBuilder();
+      for (var item : list) {
+        listBuilder.addValues(objectToProtoValue(item));
+      }
+      return Value.newBuilder().setListValue(listBuilder.build()).build();
+    }
+    if (value instanceof Map<?, ?> map) {
+      var structBuilder = com.google.protobuf.Struct.newBuilder();
+      for (var entry : map.entrySet()) {
+        structBuilder.putFields(entry.getKey().toString(), objectToProtoValue(entry.getValue()));
+      }
+      return Value.newBuilder().setStructValue(structBuilder.build()).build();
+    }
+    return Value.newBuilder().setStringValue(value.toString()).build();
   }
 }

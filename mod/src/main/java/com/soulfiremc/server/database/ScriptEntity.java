@@ -82,6 +82,12 @@ public final class ScriptEntity {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String edgesJson = "[]";
 
+  /**
+   * Whether this script should automatically start when the instance starts.
+   */
+  @Column(nullable = false)
+  private boolean autoStart = false;
+
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Instant createdAt;

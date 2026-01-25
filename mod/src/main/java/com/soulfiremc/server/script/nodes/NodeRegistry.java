@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes;
 
 import com.soulfiremc.server.script.ScriptNode;
 import com.soulfiremc.server.script.nodes.action.*;
+import com.soulfiremc.server.script.nodes.constant.*;
 import com.soulfiremc.server.script.nodes.data.*;
 import com.soulfiremc.server.script.nodes.flow.*;
 import com.soulfiremc.server.script.nodes.logic.*;
@@ -76,6 +77,8 @@ public final class NodeRegistry {
     register(SelectSlotNode.TYPE, SelectSlotNode::new);
     register(SendChatNode.TYPE, SendChatNode::new);
     register(WaitNode.TYPE, WaitNode::new);
+    register(PrintNode.TYPE, PrintNode::new);
+    register(SetVariableNode.TYPE, SetVariableNode::new);
 
     // Data Nodes
     register(GetPositionNode.TYPE, GetPositionNode::new);
@@ -86,6 +89,13 @@ public final class NodeRegistry {
     register(GetBlockNode.TYPE, GetBlockNode::new);
     register(FindEntityNode.TYPE, FindEntityNode::new);
     register(FindBlockNode.TYPE, FindBlockNode::new);
+    register(GetVariableNode.TYPE, GetVariableNode::new);
+
+    // Constant Nodes
+    register(NumberConstantNode.TYPE, NumberConstantNode::new);
+    register(StringConstantNode.TYPE, StringConstantNode::new);
+    register(BooleanConstantNode.TYPE, BooleanConstantNode::new);
+    register(Vector3ConstantNode.TYPE, Vector3ConstantNode::new);
 
     // Flow Control Nodes
     register(BranchNode.TYPE, BranchNode::new);
