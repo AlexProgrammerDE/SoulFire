@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new InheritableThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
-  private final MetadataHolder metadata = new MetadataHolder();
+  private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;

@@ -78,7 +78,7 @@ public final class BotConnection {
   public static final ThreadLocal<BotConnection> CURRENT = new InheritableThreadLocal<>();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
-  private final MetadataHolder metadata = new MetadataHolder();
+  private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final ControlState controlState = new ControlState();
   private final BotControlAPI botControl = new BotControlAPI();
   private final SoulFireScheduler scheduler;

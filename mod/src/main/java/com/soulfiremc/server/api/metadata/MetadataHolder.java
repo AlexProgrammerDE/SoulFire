@@ -23,30 +23,30 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public final class MetadataHolder {
-  private final Map<Key, Object> metadata = new ConcurrentHashMap<>();
+public final class MetadataHolder<O> {
+  private final Map<Key, O> metadata = new ConcurrentHashMap<>();
 
-  public <T> T getOrSet(MetadataKey<T> key, Supplier<T> defaultValue) {
+  public <T extends O> T getOrSet(MetadataKey<T> key, Supplier<T> defaultValue) {
     return key.cast(this.metadata.computeIfAbsent(key.key(), _ -> defaultValue.get()));
   }
 
-  public <T> T getOrDefault(MetadataKey<T> key, T defaultValue) {
+  public <T extends O> T getOrDefault(MetadataKey<T> key, T defaultValue) {
     return key.cast(this.metadata.getOrDefault(key.key(), defaultValue));
   }
 
-  public <T> T get(MetadataKey<T> key) {
+  public <T extends O> T get(MetadataKey<T> key) {
     return key.cast(this.metadata.get(key.key()));
   }
 
-  public <T> void set(MetadataKey<T> key, T value) {
+  public <T extends O> void set(MetadataKey<T> key, T value) {
     this.metadata.put(key.key(), value);
   }
 
-  public <T> void remove(MetadataKey<T> key) {
+  public <T extends O> void remove(MetadataKey<T> key) {
     this.metadata.remove(key.key());
   }
 
-  public <T> T getAndRemove(MetadataKey<T> key) {
+  public <T extends O> T getAndRemove(MetadataKey<T> key) {
     return key.cast(this.metadata.remove(key.key()));
   }
 }

@@ -78,7 +78,7 @@ public final class SoulFireServer {
   private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
-  private final MetadataHolder metadata = new MetadataHolder();
+  private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
   private final AuthSystem authSystem;
