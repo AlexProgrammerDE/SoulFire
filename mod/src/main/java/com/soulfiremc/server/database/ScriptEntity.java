@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -85,6 +86,7 @@ public final class ScriptEntity {
   /**
    * Whether this script should automatically start when the instance starts.
    */
+  @ColumnDefault("false")
   @Column(nullable = false)
   private boolean autoStart = false;
 
