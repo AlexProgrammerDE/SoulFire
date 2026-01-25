@@ -18,6 +18,7 @@
 package com.soulfiremc.server.bot;
 
 import com.google.common.collect.Queues;
+import com.google.gson.JsonElement;
 import com.soulfiremc.mod.access.IMinecraft;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.mod.util.SFModHelpers;
@@ -31,6 +32,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
@@ -41,6 +43,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.KeyPattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.DeltaTracker;
@@ -62,10 +65,7 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -79,6 +79,7 @@ public final class BotConnection {
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
+  private final MetadataHolder<JsonElement> persistentMetadata;
   private final ControlState controlState = new ControlState();
   private final BotControlAPI botControl = new BotControlAPI();
   private final SoulFireScheduler scheduler;
@@ -116,6 +117,7 @@ public final class BotConnection {
     var minecraftAccount = settingsSource.stem();
     this.accountProfileId = minecraftAccount.profileId();
     this.accountName = minecraftAccount.lastKnownName();
+    this.persistentMetadata = fillPersistentMetadata(minecraftAccount);
     this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.serverAddress = serverAddress;
@@ -125,6 +127,19 @@ public final class BotConnection {
     this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
     this.isStatusPing = isStatusPing;
+  }
+
+  private MetadataHolder<JsonElement> fillPersistentMetadata(MinecraftAccount minecraftAccount) {
+    var holder = new MetadataHolder<JsonElement>();
+    var persistentMetadata = minecraftAccount.persistentMetadata();
+    if (persistentMetadata != null) {
+      persistentMetadata.forEach((@KeyPattern.Namespace String namespace, Map<String, JsonElement> keyValues) -> {
+        keyValues.forEach((@KeyPattern.Value String key, JsonElement value) -> {
+          holder.set(MetadataKey.of(namespace, key, JsonElement.class), value);
+        });
+      });
+    }
+    return holder;
   }
 
   @SneakyThrows
