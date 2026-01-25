@@ -21,7 +21,7 @@ import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -57,7 +57,7 @@ public final class FindBlockNode extends AbstractScriptNode {
 
     // Parse block type
     var blockTypeId = blockTypeInput.contains(":") ? blockTypeInput : "minecraft:" + blockTypeInput;
-    var blockType = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockTypeId));
+    var blockType = BuiltInRegistries.BLOCK.getValue(Identifier.parse(blockTypeId));
 
     if (blockType == null) {
       return completed(notFoundResult());

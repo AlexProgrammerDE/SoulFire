@@ -43,7 +43,7 @@ public final class SneakNode extends AbstractScriptNode {
     var bot = context.requireBot();
     var enabled = getBooleanInput(inputs, "enabled", true);
 
-    bot.controlState().setShift(enabled);
+    bot.controlState().shift(enabled);
 
     return completedEmpty();
   }

@@ -20,7 +20,6 @@ package com.soulfiremc.server.script.nodes.data;
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 import java.util.Comparator;

@@ -39,11 +39,11 @@ public final class JumpNode extends AbstractScriptNode {
     var bot = context.requireBot();
 
     // Set jump for this tick
-    bot.controlState().setJump(true);
+    bot.controlState().jump(true);
 
     // Reset jump after one tick
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-      bot.controlState().setJump(false)));
+      bot.controlState().jump(false)));
 
     return completedEmpty();
   }

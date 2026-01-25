@@ -43,7 +43,7 @@ public final class SprintNode extends AbstractScriptNode {
     var bot = context.requireBot();
     var enabled = getBooleanInput(inputs, "enabled", true);
 
-    bot.controlState().setSprint(enabled);
+    bot.controlState().sprint(enabled);
 
     return completedEmpty();
   }
