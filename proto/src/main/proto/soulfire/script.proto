@@ -5,30 +5,499 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
-// ScriptService provides management capabilities for automation scripts within SoulFire.
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// The scope at which a script operates.
+// Determines the execution context and what resources the script can access.
+enum ScriptScope {
+  // Script operates at the instance level, affecting all bots in the instance.
+  // Has access to instance-wide resources and can coordinate multiple bots.
+  SCRIPT_SCOPE_INSTANCE = 0;
+  // Script operates at the individual bot level.
+  // Runs independently for each bot and has access to bot-specific resources.
+  SCRIPT_SCOPE_BOT = 1;
+}
+
+// The type of connection between nodes in the visual script editor.
+// Determines how data and control flow between nodes.
+enum EdgeType {
+  // Execution edge that controls the order of node execution.
+  // When a node completes, execution flows through its outgoing execution edges.
+  EDGE_TYPE_EXECUTION = 0;
+  // Data edge that passes values between nodes.
+  // Data edges transfer output values from one node's output port to another node's input port.
+  EDGE_TYPE_DATA = 1;
+}
+
+// Log levels for script execution logging.
+// Maps to standard logging severity levels for filtering and display.
+enum LogLevel {
+  // Debug level for verbose diagnostic information.
+  // Typically only shown when troubleshooting scripts.
+  LOG_LEVEL_DEBUG = 0;
+  // Informational messages about script execution progress.
+  // Normal operational messages.
+  LOG_LEVEL_INFO = 1;
+  // Warning level for potentially problematic situations.
+  // Script continues execution but something unexpected occurred.
+  LOG_LEVEL_WARN = 2;
+  // Error level for failures that may affect script execution.
+  // Indicates a problem that needs attention.
+  LOG_LEVEL_ERROR = 3;
+}
+
+// Represents the 2D position of a node in the visual script editor canvas.
+// Used for rendering the node graph and preserving user layout preferences.
+message Position {
+  // The horizontal position in canvas coordinates.
+  // Positive values extend to the right.
+  double x = 1;
+  // The vertical position in canvas coordinates.
+  // Positive values extend downward.
+  double y = 2;
+}
+
+// Represents a single node in the visual script graph.
+// Nodes are the building blocks of scripts, each performing a specific action
+// or computation when executed.
+message ScriptNode {
+  // Unique identifier for this node within the script.
+  // Used to reference this node in edges and during execution tracking.
+  // Format: UUID string.
+  string id = 1;
+  // The type identifier for this node, determining its behavior and available ports.
+  // Examples: "trigger.on_chat", "action.send_message", "control.delay", "logic.condition".
+  string type = 2;
+  // The visual position of this node on the editor canvas.
+  // Persisted to maintain the user's layout when reopening the script.
+  Position position = 3;
+  // Configuration data for this node instance.
+  // Contains node-specific settings and parameter values.
+  // The structure depends on the node type.
+  map<string, google.protobuf.Value> data = 4;
+}
+
+// Represents a connection between two nodes in the visual script graph.
+// Edges define how execution flows and how data passes between nodes.
+message ScriptEdge {
+  // Unique identifier for this edge within the script.
+  // Format: UUID string.
+  string id = 1;
+  // The ID of the source node where this edge originates.
+  // Must reference a valid node ID in the script's nodes list.
+  string source = 2;
+  // The handle/port identifier on the source node.
+  // Identifies which output port of the source node this edge connects from.
+  // Examples: "exec_out", "value", "true", "false".
+  string source_handle = 3;
+  // The ID of the target node where this edge terminates.
+  // Must reference a valid node ID in the script's nodes list.
+  string target = 4;
+  // The handle/port identifier on the target node.
+  // Identifies which input port of the target node this edge connects to.
+  // Examples: "exec_in", "message", "condition".
+  string target_handle = 5;
+  // The type of this edge, determining whether it carries execution flow or data.
+  EdgeType edge_type = 6;
+}
+
+// Complete data structure representing a visual script.
+// Contains all nodes, edges, and metadata needed to render and execute the script.
+message ScriptData {
+  // Unique identifier for this script.
+  // Format: UUID string.
+  string id = 1;
+  // Human-readable name for the script.
+  // Displayed in the UI and used for identification.
+  string name = 2;
+  // Optional description explaining what the script does.
+  // Displayed in script listings and detail views.
+  string description = 3;
+  // The list of nodes that make up this script's graph.
+  // Nodes are executed based on execution edge connections.
+  repeated ScriptNode nodes = 4;
+  // The list of edges connecting nodes in this script.
+  // Defines both execution flow and data transfer between nodes.
+  repeated ScriptEdge edges = 5;
+  // The scope at which this script operates (instance or bot level).
+  ScriptScope scope = 6;
+  // The instance this script belongs to.
+  // Scripts are always associated with a specific instance.
+  // Format: UUID string.
+  string instance_id = 7;
+}
+
+// Summary information about a script for listing purposes.
+// Contains metadata without the full node graph to reduce payload size.
+message ScriptInfo {
+  // Unique identifier for this script.
+  // Format: UUID string.
+  string id = 1;
+  // Human-readable name for the script.
+  string name = 2;
+  // Optional description of what the script does.
+  string description = 3;
+  // The scope at which this script operates.
+  ScriptScope scope = 4;
+  // The instance this script belongs to.
+  // Format: UUID string.
+  string instance_id = 5;
+  // Timestamp when the script was first created.
+  google.protobuf.Timestamp created_at = 6;
+  // Timestamp when the script was last modified.
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// Runtime status information for a script.
+// Provides information about current execution state and statistics.
+message ScriptStatus {
+  // The script this status applies to.
+  // Format: UUID string.
+  string script_id = 1;
+  // Whether the script is currently executing.
+  bool is_running = 2;
+  // The ID of the currently executing node, if any.
+  // Only present when is_running is true and a node is actively executing.
+  optional string active_node_id = 3;
+  // The total number of times this script has been executed.
+  // Incremented each time StartScript is called and execution begins.
+  int64 execution_count = 4;
+}
+
+// A single log entry generated during script execution.
+// Provides detailed information about script operations for debugging and monitoring.
+message ScriptLogEntry {
+  // The script that generated this log entry.
+  // Format: UUID string.
+  string script_id = 1;
+  // The node that generated this log entry, if applicable.
+  // May be empty for script-level log entries.
+  string node_id = 2;
+  // The severity level of this log entry.
+  LogLevel level = 3;
+  // The log message content.
+  string message = 4;
+  // When this log entry was created.
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+// Event emitted when a node begins execution.
+message NodeStarted {
+  // The ID of the node that started executing.
+  string node_id = 1;
+  // When the node started execution.
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+// Event emitted when a node completes execution successfully.
+message NodeCompleted {
+  // The ID of the node that completed execution.
+  string node_id = 1;
+  // The output values produced by the node.
+  // Keys are output port names, values are the data produced.
+  map<string, google.protobuf.Value> outputs = 2;
+  // When the node completed execution.
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+// Event emitted when a node encounters an error during execution.
+message NodeError {
+  // The ID of the node that encountered the error.
+  string node_id = 1;
+  // A description of what went wrong.
+  string error_message = 2;
+  // When the error occurred.
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+// Event emitted when script execution begins.
+message ScriptStarted {
+  // The ID of the script that started.
+  string script_id = 1;
+  // When the script started execution.
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+// Event emitted when script execution finishes.
+message ScriptCompleted {
+  // Whether the script completed successfully without errors.
+  bool success = 1;
+  // When the script completed execution.
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+// Union type for all script execution events.
+// Streamed to clients during script execution to provide real-time feedback.
+message ScriptEvent {
+  // The specific event that occurred.
+  oneof event {
+    // A node started executing.
+    NodeStarted node_started = 1;
+    // A node completed execution successfully.
+    NodeCompleted node_completed = 2;
+    // A node encountered an error.
+    NodeError node_error = 3;
+    // The script completed execution.
+    ScriptCompleted script_completed = 4;
+    // The script started execution.
+    ScriptStarted script_started = 5;
+  }
+}
+
+// Request to create a new script.
+message CreateScriptRequest {
+  // The instance to create the script in.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The human-readable name for the script.
+  string name = 2;
+  // Optional description of what the script does.
+  string description = 3;
+  // The scope at which this script operates.
+  ScriptScope scope = 4;
+  // Initial nodes for the script graph.
+  // Can be empty to create a blank script.
+  repeated ScriptNode nodes = 5;
+  // Initial edges for the script graph.
+  // Can be empty to create a blank script.
+  repeated ScriptEdge edges = 6;
+}
+
+// Response after successfully creating a script.
+message CreateScriptResponse {
+  // The complete script data including the generated ID.
+  ScriptData script = 1;
+}
+
+// Request to retrieve a specific script by ID.
+message GetScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to retrieve.
+  // Format: UUID string.
+  string script_id = 2;
+}
+
+// Response containing the requested script.
+message GetScriptResponse {
+  // The complete script data including all nodes and edges.
+  ScriptData script = 1;
+}
+
+// Request to update an existing script.
+message UpdateScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to update.
+  // Format: UUID string.
+  string script_id = 2;
+  // Updated name for the script.
+  // If not set, the name remains unchanged.
+  optional string name = 3;
+  // Updated description for the script.
+  // If not set, the description remains unchanged.
+  optional string description = 4;
+  // Updated scope for the script.
+  // If not set, the scope remains unchanged.
+  optional ScriptScope scope = 5;
+  // Updated list of nodes.
+  // If provided, replaces the entire node list.
+  // If not provided, nodes remain unchanged.
+  repeated ScriptNode nodes = 6;
+  // Updated list of edges.
+  // If provided, replaces the entire edge list.
+  // If not provided, edges remain unchanged.
+  repeated ScriptEdge edges = 7;
+  // Whether the nodes field should be updated (allows setting to empty list).
+  bool update_nodes = 8;
+  // Whether the edges field should be updated (allows setting to empty list).
+  bool update_edges = 9;
+}
+
+// Response after successfully updating a script.
+message UpdateScriptResponse {
+  // The updated script data.
+  ScriptData script = 1;
+}
+
+// Request to delete a script.
+message DeleteScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to delete.
+  // Format: UUID string.
+  string script_id = 2;
+}
+
+// Response after successfully deleting a script.
+// Empty response indicates success.
+message DeleteScriptResponse {
+}
+
+// Request to list all scripts in an instance.
+message ListScriptsRequest {
+  // The instance to list scripts from.
+  // Format: UUID string.
+  string instance_id = 1;
+}
+
+// Response containing the list of scripts.
+message ListScriptsResponse {
+  // Summary information for each script in the instance.
+  // Does not include full node/edge data to reduce payload size.
+  repeated ScriptInfo scripts = 1;
+}
+
+// Request to start executing a script.
+message StartScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to execute.
+  // Format: UUID string.
+  string script_id = 2;
+  // Optional initial input values for the script.
+  // Keys are input parameter names expected by trigger nodes.
+  map<string, google.protobuf.Value> inputs = 3;
+}
+
+// Request to stop a running script.
+message StopScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to stop.
+  // Format: UUID string.
+  string script_id = 2;
+}
+
+// Response after successfully stopping a script.
+// Empty response indicates success.
+message StopScriptResponse {
+}
+
+// Request to get the execution status of a script.
+message GetScriptStatusRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to check.
+  // Format: UUID string.
+  string script_id = 2;
+}
+
+// Response containing the script's execution status.
+message GetScriptStatusResponse {
+  // The current status of the script.
+  ScriptStatus status = 1;
+}
+
+// Request to subscribe to log entries from a script.
+message SubscribeScriptLogsRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to receive logs from.
+  // Format: UUID string.
+  string script_id = 2;
+  // Minimum log level to receive.
+  // Only log entries at this level or higher severity will be streamed.
+  LogLevel min_level = 3;
+}
+
+// ScriptService provides management and execution capabilities for visual node-based
+// automation scripts within SoulFire.
 //
-// STATUS: This service is currently DISABLED while a visual node-based script editor
-// is under development. The service definition is preserved as a placeholder for the
-// future implementation.
+// The visual scripting system allows users to create automation workflows by connecting
+// nodes in a graph. Each node represents an action, condition, or event trigger.
+// Nodes are connected by edges that define execution flow and data transfer.
 //
-// HISTORY: This service previously supported JavaScript, Python, and TypeScript scripts
-// that could be scoped either globally (affecting all instances) or per-instance.
-// The text-based scripting system (using GraalVM Polyglot) was removed in favor of
-// an upcoming visual script editor that will provide a more user-friendly,
-// node-based approach to automation.
+// SCRIPT LIFECYCLE:
+// 1. Create a script using CreateScript with initial nodes/edges or empty graph
+// 2. Edit the script using UpdateScript to modify the node graph
+// 3. Execute the script using StartScript, which returns a stream of execution events
+// 4. Monitor execution via the ScriptEvent stream or GetScriptStatus
+// 5. Optionally stop early using StopScript
+// 6. Delete unused scripts with DeleteScript
 //
-// PLANNED FUNCTIONALITY: When re-implemented, this service will likely provide:
-// - Script creation, deletion, and modification through a visual editor
-// - Script execution scoped to global or instance levels
-// - Script lifecycle management (start, stop, restart)
-// - Script listing and metadata retrieval
-// - Integration with the logging system via InstanceScriptLogScope (see logs.proto)
+// PERMISSIONS: Script operations require appropriate instance permissions.
+// The specific permissions are TBD but will likely include:
+// - READ_SCRIPT: View script definitions and status
+// - UPDATE_SCRIPT: Create, modify, and delete scripts
+// - EXECUTE_SCRIPT: Start and stop script execution
 //
-// PERMISSIONS: Script-related permissions have been reserved in common.proto:
-// - GlobalPermission fields 18-22 are reserved for global script permissions
-// - InstancePermission fields 16-20 are reserved for instance script permissions
-//
-// LOGGING: Script execution logs can be filtered using InstanceScriptLogScope
-// defined in logs.proto, which requires both an instance_id and script_id.
+// LOGGING: Script execution logs can be streamed via SubscribeScriptLogs or
+// filtered using InstanceScriptLogScope in the LogsService (see logs.proto).
 service ScriptService {
+  // Creates a new script in the specified instance.
+  // The script can be created with initial nodes and edges, or as a blank script
+  // to be edited later.
+  // Returns: The complete script data including the generated ID
+  // Errors: NOT_FOUND if instance does not exist
+  // Errors: PERMISSION_DENIED if user lacks script creation permission
+  // Errors: INVALID_ARGUMENT if required fields are missing or invalid
+  rpc CreateScript (CreateScriptRequest) returns (CreateScriptResponse) {}
+
+  // Retrieves a specific script by its ID.
+  // Returns the complete script data including all nodes and edges.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script read permission
+  rpc GetScript (GetScriptRequest) returns (GetScriptResponse) {}
+
+  // Updates an existing script's metadata and/or node graph.
+  // Only specified fields are updated; others remain unchanged.
+  // Use update_nodes/update_edges flags to explicitly set empty lists.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script update permission
+  // Errors: INVALID_ARGUMENT if update data is invalid
+  rpc UpdateScript (UpdateScriptRequest) returns (UpdateScriptResponse) {}
+
+  // Permanently deletes a script.
+  // If the script is currently running, it will be stopped first.
+  // This operation cannot be undone.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script delete permission
+  rpc DeleteScript (DeleteScriptRequest) returns (DeleteScriptResponse) {}
+
+  // Lists all scripts in the specified instance.
+  // Returns summary information (ScriptInfo) without full node/edge data
+  // to reduce response size.
+  // Errors: NOT_FOUND if instance does not exist
+  // Errors: PERMISSION_DENIED if user lacks script read permission
+  rpc ListScripts (ListScriptsRequest) returns (ListScriptsResponse) {}
+
+  // Starts executing a script and streams execution events.
+  // The stream provides real-time feedback about script execution including
+  // node start/complete events, errors, and final completion status.
+  // The stream remains open until the script completes or is stopped.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script execution permission
+  // Errors: FAILED_PRECONDITION if script is already running
+  // Errors: INVALID_ARGUMENT if script graph is invalid (e.g., no trigger nodes)
+  rpc StartScript (StartScriptRequest) returns (stream ScriptEvent) {}
+
+  // Stops a currently running script.
+  // Execution is halted gracefully after the current node completes.
+  // A ScriptCompleted event with success=false will be emitted on the StartScript stream.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script execution permission
+  // Errors: FAILED_PRECONDITION if script is not running
+  rpc StopScript (StopScriptRequest) returns (StopScriptResponse) {}
+
+  // Gets the current execution status of a script.
+  // Returns whether the script is running, which node is active, and execution count.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script read permission
+  rpc GetScriptStatus (GetScriptStatusRequest) returns (GetScriptStatusResponse) {}
+
+  // Subscribes to log entries generated during script execution.
+  // Returns a stream of log entries at or above the specified minimum level.
+  // The stream remains open until cancelled by the client.
+  // Errors: NOT_FOUND if instance or script does not exist
+  // Errors: PERMISSION_DENIED if user lacks script log subscription permission
+  rpc SubscribeScriptLogs (SubscribeScriptLogsRequest) returns (stream ScriptLogEntry) {}
 }

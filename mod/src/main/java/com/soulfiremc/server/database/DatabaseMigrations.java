@@ -50,18 +50,24 @@ public final class DatabaseMigrations {
   }
 
   /**
-   * Migration: Drop the scripts table as scripting has been removed.
-   * The visual script editor will use a new table structure in the future.
+   * Migration: Drop the old scripts table if it has the old schema.
+   * The new visual script editor uses a different table structure.
+   * The old table had columns like (id, name, description, instance_id, code, enabled, createdAt, updatedAt, version)
+   * while the new table has (id, name, description, instance_id, scope, nodesJson, edgesJson, createdAt, updatedAt, version).
    */
   private static void dropScriptsTable(Connection connection, boolean isSqlite) throws SQLException {
     if (tableExists(connection, "scripts", isSqlite)) {
-      log.info("Migrating database: dropping scripts table (scripting system removed)");
+      // Check if this is the old schema by looking for the 'code' column (old) vs 'nodesJson' column (new)
+      boolean hasOldSchema = columnExists(connection, "scripts", "code", isSqlite);
+      boolean hasNewSchema = columnExists(connection, "scripts", "nodesJson", isSqlite);
 
-      try (var stmt = connection.createStatement()) {
-        stmt.execute("DROP TABLE scripts");
+      if (hasOldSchema && !hasNewSchema) {
+        log.info("Migrating database: dropping old scripts table (old scripting system)");
+        try (var stmt = connection.createStatement()) {
+          stmt.execute("DROP TABLE scripts");
+        }
+        log.info("Successfully dropped old scripts table - new table will be created by Hibernate");
       }
-
-      log.info("Successfully dropped scripts table");
     }
   }
 

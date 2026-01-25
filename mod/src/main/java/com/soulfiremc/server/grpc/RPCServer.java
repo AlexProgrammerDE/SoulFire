@@ -104,6 +104,7 @@ public final class RPCServer {
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new ServerServiceImpl(soulFireServer))
         .addService(new UserServiceImpl(soulFireServer))
+        .addService(new ScriptServiceImpl(soulFireServer))
         // Allow collecting info about callable methods.
         .addService(ProtoReflectionServiceV1.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)

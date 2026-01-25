@@ -79,7 +79,8 @@ public final class DatabaseManager {
       UserEntity.class,
       InstanceEntity.class,
       InstanceAuditLogEntity.class,
-      ServerConfigEntity.class
+      ServerConfigEntity.class,
+      ScriptEntity.class
     );
 
     return metadataSources.getMetadataBuilder()
