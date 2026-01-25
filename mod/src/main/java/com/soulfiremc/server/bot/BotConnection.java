@@ -32,7 +32,6 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
-import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
@@ -43,7 +42,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.key.KeyPattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.DeltaTracker;
@@ -65,7 +63,10 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -133,11 +134,7 @@ public final class BotConnection {
     var holder = new MetadataHolder<JsonElement>();
     var persistentMetadata = minecraftAccount.persistentMetadata();
     if (persistentMetadata != null) {
-      persistentMetadata.forEach((@KeyPattern.Namespace String namespace, Map<String, JsonElement> keyValues) -> {
-        keyValues.forEach((@KeyPattern.Value String key, JsonElement value) -> {
-          holder.set(MetadataKey.of(namespace, key, JsonElement.class), value);
-        });
-      });
+      holder.resetFrom(persistentMetadata);
     }
     return holder;
   }
