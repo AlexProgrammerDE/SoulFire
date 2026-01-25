@@ -7,63 +7,200 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
+// Request message for credentials-based Minecraft account authentication.
+// Supports bulk authentication of multiple accounts in a single request.
 message CredentialsAuthRequest {
+  // The UUID of the SoulFire instance to authenticate accounts for.
+  // Must be a valid UUID string. The instance must exist and the caller
+  // must have AUTHENTICATE_MC_ACCOUNT permission for this instance.
   string instance_id = 1;
+
+  // The authentication service type to use.
+  // Determines how the payload strings are interpreted:
+  // - MICROSOFT_JAVA_CREDENTIALS: Payload format is "email:password"
+  // - MICROSOFT_BEDROCK_CREDENTIALS: Payload format is "email:password"
+  // - OFFLINE: Payload is the username to use (no authentication performed)
+  // - MICROSOFT_JAVA_REFRESH_TOKEN: Payload is a Microsoft refresh token
   AccountTypeCredentials service = 2;
+
+  // List of authentication credentials/data strings.
+  // Each string is processed according to the service type.
+  // Multiple payloads are authenticated concurrently (controlled by
+  // ACCOUNT_IMPORT_CONCURRENCY instance setting).
   repeated string payload = 3;
 }
 
-// Full response of all accounts that were authenticated
+// Final response containing all successfully authenticated accounts.
+// Sent as the last message in the stream after all individual results.
 message CredentialsAuthFullList {
+  // List of all successfully authenticated Minecraft accounts.
+  // Failed authentications are excluded from this list.
   repeated MinecraftAccountProto account = 1;
 }
 
-// Used when an account is successfully authenticated
+// Progress indicator sent when an individual account authentication succeeds.
+// This is a streaming progress update, not the final result.
+// The actual account data is included in the final CredentialsAuthFullList.
 message CredentialsAuthOneSuccess {
 }
 
-// Used when an account is not successfully authenticated
+// Progress indicator sent when an individual account authentication fails.
+// This is a streaming progress update indicating that one payload could not
+// be authenticated. The failure is logged server-side with detailed error info.
 message CredentialsAuthOneFailure {
 }
 
+// Streaming response message for credentials-based authentication.
+// The stream sends progress updates (one_success/one_failure) for each
+// payload being processed, followed by a final full_list with all
+// successfully authenticated accounts.
 message CredentialsAuthResponse {
   oneof data {
+    // Final response containing all successfully authenticated accounts.
+    // This is the last message in the stream.
     CredentialsAuthFullList full_list = 1;
+
+    // Progress indicator: one account was successfully authenticated.
+    // Sent for each successful authentication as they complete.
     CredentialsAuthOneSuccess one_success = 2;
+
+    // Progress indicator: one account authentication failed.
+    // Sent for each failed authentication as they complete.
+    // Errors are logged server-side (e.g., invalid credentials, network issues).
     CredentialsAuthOneFailure one_failure = 3;
   }
 }
 
+// Request message for Microsoft OAuth device code authentication flow.
+// This flow is interactive and requires user action in a web browser.
 message DeviceCodeAuthRequest {
+  // The UUID of the SoulFire instance to authenticate the account for.
+  // Must be a valid UUID string. The instance must exist and the caller
+  // must have AUTHENTICATE_MC_ACCOUNT permission for this instance.
   string instance_id = 1;
+
+  // The device code authentication service type to use:
+  // - MICROSOFT_JAVA_DEVICE_CODE: Microsoft Java Edition account
+  // - MICROSOFT_BEDROCK_DEVICE_CODE: Microsoft Bedrock Edition account
   AccountTypeDeviceCode service = 2;
 }
 
+// Microsoft OAuth device code information for user authentication.
+// The user must visit the verification URI and enter the user code
+// to authorize the application.
 message DeviceCode {
+  // The device code used internally for polling authentication status.
+  // This is not shown to the user.
   string device_code = 1;
+
+  // The short alphanumeric code the user must enter at the verification URI.
+  // Typically displayed to the user for manual entry.
   string user_code = 2;
+
+  // The URL where the user must go to enter the user_code.
+  // Example: "https://microsoft.com/devicelogin"
   string verification_uri = 3;
+
+  // A URL that includes the user_code as a parameter for one-click verification.
+  // Users can visit this URL directly without manually entering the code.
+  // Example: "https://microsoft.com/devicelogin?otc=ABCD1234"
   string direct_verification_uri = 4;
 }
 
+// Streaming response message for device code authentication.
+// First sends the device code for user interaction, then sends
+// the authenticated account once the user completes authorization.
 message DeviceCodeAuthResponse {
   oneof data {
+    // The successfully authenticated Minecraft account.
+    // Sent after the user completes the device code authorization flow.
+    // This is the final message in the stream.
     MinecraftAccountProto account = 1;
+
+    // The device code information for user authorization.
+    // Sent first in the stream. The client should display this to the user
+    // so they can complete authentication in their browser.
+    // The stream will wait (up to 15 minutes) for the user to authorize.
     DeviceCode device_code = 2;
   }
 }
 
+// Request message for refreshing an existing Minecraft account's authentication tokens.
+// Used to renew expired tokens without requiring the user to re-authenticate.
 message RefreshRequest {
+  // The UUID of the SoulFire instance context for the refresh operation.
+  // Must be a valid UUID string. The instance must exist and the caller
+  // must have AUTHENTICATE_MC_ACCOUNT permission for this instance.
   string instance_id = 1;
+
+  // The existing Minecraft account to refresh.
+  // Must include valid account data with refresh tokens.
+  // The account type determines which refresh mechanism is used.
+  // Offline accounts are returned unchanged (they never expire).
   MinecraftAccountProto account = 2;
 }
 
+// Response message containing the refreshed Minecraft account.
 message RefreshResponse {
+  // The refreshed Minecraft account with updated tokens.
+  // Contains new access tokens and updated expiration times.
+  // For offline accounts, returns the same account unchanged.
   MinecraftAccountProto account = 1;
 }
 
+// Service for authenticating Minecraft accounts for use with SoulFire bots.
+// Supports multiple authentication methods including Microsoft OAuth (credentials
+// and device code flows) and offline mode. All methods require the caller to
+// have AUTHENTICATE_MC_ACCOUNT permission for the target instance.
+//
+// Authentication may optionally use proxies if configured in instance settings
+// (USE_PROXIES_FOR_ACCOUNT_AUTH). All authentication operations have timeouts
+// to prevent indefinite hangs (2 minutes for credentials/refresh, 15 minutes
+// for device code flow).
 service MCAuthService {
+  // Authenticates one or more Minecraft accounts using credentials or tokens.
+  // Supports bulk authentication with concurrent processing.
+  //
+  // The stream sends progress updates (one_success/one_failure) as each
+  // account is processed, allowing clients to show real-time progress.
+  // The final message contains the full list of successfully authenticated accounts.
+  //
+  // Errors:
+  // - NOT_FOUND: The specified instance does not exist
+  // - PERMISSION_DENIED: Caller lacks AUTHENTICATE_MC_ACCOUNT permission
+  // - INTERNAL: Authentication error (logged server-side with details)
+  //
+  // Timeout: 2 minutes per account
   rpc LoginCredentials (CredentialsAuthRequest) returns (stream CredentialsAuthResponse) {}
+
+  // Authenticates a Minecraft account using the Microsoft OAuth device code flow.
+  // This is an interactive flow that requires user action in a web browser.
+  //
+  // The stream first sends a DeviceCode message containing the verification
+  // URL and user code. The client should display this to the user. Once the
+  // user completes authorization in their browser, the stream sends the
+  // authenticated account and completes.
+  //
+  // Errors:
+  // - NOT_FOUND: The specified instance does not exist
+  // - PERMISSION_DENIED: Caller lacks AUTHENTICATE_MC_ACCOUNT permission
+  // - INTERNAL: Authentication error (e.g., user denied access, timeout)
+  //
+  // Timeout: 15 minutes (Microsoft device codes typically expire after this)
   rpc LoginDeviceCode (DeviceCodeAuthRequest) returns (stream DeviceCodeAuthResponse) {}
+
+  // Refreshes the authentication tokens for an existing Minecraft account.
+  // Used to renew expired access tokens using stored refresh tokens.
+  //
+  // For Microsoft accounts, this refreshes the Minecraft token, profile,
+  // and player certificates. For offline accounts, returns the account
+  // unchanged (offline accounts never expire).
+  //
+  // Errors:
+  // - NOT_FOUND: The specified instance does not exist
+  // - PERMISSION_DENIED: Caller lacks AUTHENTICATE_MC_ACCOUNT permission
+  // - INTERNAL: Refresh error (e.g., refresh token expired or revoked)
+  //
+  // Timeout: 2 minutes
   rpc Refresh (RefreshRequest) returns (RefreshResponse) {}
 }

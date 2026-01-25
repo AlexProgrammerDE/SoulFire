@@ -9,299 +9,620 @@ import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
+// Represents a user associated with an instance, typically used in audit logs
+// to track who performed an action.
 message InstanceUser {
+  // Unique identifier for the user (UUID format).
   string id = 1;
+  // The username of the user.
   string username = 2;
+  // The email address of the user.
   string email = 3;
 }
 
+// Contains the complete configuration for an instance, including settings,
+// Minecraft accounts, and proxies.
 message InstanceConfig {
+  // Instance settings organized by namespace. Each namespace contains
+  // key-value pairs for configuration options.
   repeated SettingsNamespace settings = 1;
+  // List of Minecraft accounts available to this instance for bot connections.
   repeated MinecraftAccountProto accounts = 2;
+  // List of proxies available to this instance for routing bot connections.
   repeated ProxyProto proxies = 3;
 }
 
+// Request to create a new instance.
 message InstanceCreateRequest {
+  // A human-readable name for the instance. This will be displayed in the UI
+  // and can be changed later via UpdateInstanceMeta.
   string friendlyName = 1;
 }
 
+// Response after successfully creating an instance.
 message InstanceCreateResponse {
+  // The unique identifier (UUID) of the newly created instance.
+  // Use this ID for all subsequent operations on the instance.
   string id = 1;
 }
 
+// Request to delete an existing instance.
 message InstanceDeleteRequest {
+  // The unique identifier (UUID) of the instance to delete.
+  // The instance will be stopped if running before deletion.
   string id = 1;
 }
 
+// Response after successfully deleting an instance.
+// Empty response indicates successful deletion.
 message InstanceDeleteResponse {
 }
 
+// Represents the lifecycle state of an instance session.
+// State transitions follow a specific flow:
+// STOPPED -> STARTING -> RUNNING <-> PAUSED -> STOPPING -> STOPPED
 enum InstanceState {
+  // The instance is currently starting up and initializing bots.
+  // This is a transitional state.
   STARTING = 0;
+  // The instance is fully running with active bot connections.
+  // Bots are ticking and processing game logic.
   RUNNING = 1;
+  // The instance is paused. Bots maintain their connections but
+  // stop ticking and processing game logic.
   PAUSED = 2;
+  // The instance is in the process of stopping.
+  // This is a transitional state while bots disconnect.
   STOPPING = 3;
+  // The instance is fully stopped with no active bot connections.
+  // This is the initial state for new instances.
   STOPPED = 4;
 }
 
+// Request to list all instances visible to the current user.
 message InstanceListRequest {
 }
 
+// Response containing a list of instances the current user has permission to view.
 message InstanceListResponse {
+  // Summary information about a single instance.
   message Instance {
+    // The unique identifier (UUID) of the instance.
     string id = 1;
+    // The human-readable name of the instance.
     string friendly_name = 2;
+    // The icon identifier for the instance (used for UI display).
     string icon = 5;
+    // The current lifecycle state of the instance.
     InstanceState state = 3;
+    // The permissions the current user has on this instance.
+    // Each permission indicates whether a specific action is allowed.
     repeated InstancePermissionState instance_permissions = 4;
   }
 
+  // List of instances the user has READ_INSTANCE permission for.
   repeated Instance instances = 1;
 }
 
+// Represents the grant status of a specific instance permission for the current user.
 message InstancePermissionState {
+  // The permission being described.
   InstancePermission instance_permission = 1;
+  // Whether the current user has been granted this permission.
   bool granted = 2;
 }
 
+// Request to get detailed information about a specific instance.
 message InstanceInfoRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
-  // Optional: if provided, returns NotModified if config hasn't changed since this timestamp
+  // Optional timestamp for conditional requests. If provided and the instance
+  // configuration has not been modified since this timestamp, the server returns
+  // InstanceNotModified instead of the full InstanceInfo. This helps reduce
+  // bandwidth for polling clients.
   optional google.protobuf.Timestamp if_modified_since = 2;
 }
 
+// Contains comprehensive information about an instance including its
+// configuration, state, permissions, and available settings.
 message InstanceInfo {
+  // The human-readable name of the instance.
   string friendly_name = 1;
+  // The icon identifier for the instance (used for UI display).
   string icon = 5;
+  // The complete configuration of the instance including settings,
+  // accounts, and proxies.
   InstanceConfig config = 2;
+  // The current lifecycle state of the instance.
   InstanceState state = 3;
+  // The permissions the current user has on this instance.
   repeated InstancePermissionState instance_permissions = 4;
-  // All available settings definitions that can be rendered by identifier
+  // All available settings definitions that can be rendered by identifier.
+  // These define the schema and UI configuration for each setting.
   repeated SettingsDefinition settings_definitions = 8;
-  // Pages that group settings together (reference settings by identifier)
+  // Pages that group settings together for UI rendering.
+  // References settings by their identifiers from settings_definitions.
   repeated SettingsPage instance_settings = 6;
+  // List of plugins registered with this instance.
   repeated ServerPlugin plugins = 7;
-  // When the config was last modified
+  // Timestamp of when the configuration was last modified.
+  // Used for conditional requests via if_modified_since.
   google.protobuf.Timestamp last_modified = 9;
 }
 
+// Returned when the instance configuration has not changed since
+// the if_modified_since timestamp provided in the request.
 message InstanceNotModified {
+  // The current last_modified timestamp of the instance.
+  // Clients should use this for subsequent conditional requests.
   google.protobuf.Timestamp last_modified = 1;
 }
 
+// Response for GetInstanceInfo containing either full info or a not-modified status.
 message InstanceInfoResponse {
   oneof result {
+    // Full instance information when the config has been modified
+    // or no if_modified_since was provided.
     InstanceInfo info = 1;
+    // Returned when the config has not changed since if_modified_since.
     InstanceNotModified not_modified = 2;
   }
 }
 
+// Request to update instance metadata (name or icon).
 message InstanceUpdateMetaRequest {
+  // The unique identifier (UUID) of the instance to update.
   string id = 1;
+  // The metadata field to update. Only one can be set per request.
   oneof meta {
+    // New human-readable name for the instance.
     string friendly_name = 2;
+    // New icon identifier for the instance.
     string icon = 3;
   }
 }
 
+// Response after successfully updating instance metadata.
+// Empty response indicates success.
 message InstanceUpdateMetaResponse {
 }
 
+// Request to replace the entire instance configuration.
+// This is typically used for profile import operations.
+// For individual setting changes, use UpdateInstanceConfigEntry instead.
 message InstanceUpdateConfigRequest {
+  // The unique identifier (UUID) of the instance to update.
   string id = 1;
+  // The complete new configuration to replace the existing one.
+  // Includes settings, accounts, and proxies.
   InstanceConfig config = 2;
 }
 
+// Response after successfully updating instance configuration.
+// Empty response indicates success.
 message InstanceUpdateConfigResponse {
 }
 
-// Granular config entry update (single key-value)
+// Request to update a single configuration entry.
+// This is the preferred method for individual setting changes as it
+// is more efficient than replacing the entire configuration.
 message InstanceUpdateConfigEntryRequest {
+  // The unique identifier (UUID) of the instance to update.
   string id = 1;
+  // The namespace of the setting (e.g., "bot", "account", plugin ID).
   string namespace = 2;
+  // The key of the setting within the namespace.
   string key = 3;
+  // The new value for the setting. Supports JSON value types
+  // (string, number, boolean, null, array, object).
   google.protobuf.Value value = 4;
 }
 
+// Response after successfully updating a configuration entry.
+// Empty response indicates success.
 message InstanceUpdateConfigEntryResponse {
 }
 
-// Account operations
+// Request to add a single Minecraft account to an instance.
 message InstanceAddAccountRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The Minecraft account to add. The profile_id must be unique
+  // within the instance.
   MinecraftAccountProto account = 2;
 }
 
+// Response after successfully adding an account.
+// Empty response indicates success.
 message InstanceAddAccountResponse {
 }
 
+// Request to remove a Minecraft account from an instance.
 message InstanceRemoveAccountRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The profile_id (UUID) of the account to remove.
   string profile_id = 2;
 }
 
+// Response after successfully removing an account.
+// Empty response indicates success.
 message InstanceRemoveAccountResponse {
 }
 
+// Request to update an existing Minecraft account in an instance.
+// The account is matched by profile_id and replaced with the new data.
 message InstanceUpdateAccountRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The updated account data. The profile_id must match an existing
+  // account in the instance.
   MinecraftAccountProto account = 2;
 }
 
+// Response after successfully updating an account.
+// Empty response indicates success.
 message InstanceUpdateAccountResponse {
 }
 
-// Batch account operations
+// Request to add multiple Minecraft accounts to an instance in a single operation.
+// More efficient than multiple individual AddInstanceAccount calls.
 message InstanceAddAccountsBatchRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // List of accounts to add. Each account's profile_id must be unique
+  // within the instance.
   repeated MinecraftAccountProto accounts = 2;
 }
 
+// Response after successfully adding accounts in batch.
+// Empty response indicates success.
 message InstanceAddAccountsBatchResponse {
 }
 
+// Request to remove multiple Minecraft accounts from an instance in a single operation.
+// More efficient than multiple individual RemoveInstanceAccount calls.
 message InstanceRemoveAccountsBatchRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // List of profile_ids (UUIDs) of accounts to remove.
   repeated string profile_ids = 2;
 }
 
+// Response after successfully removing accounts in batch.
+// Empty response indicates success.
 message InstanceRemoveAccountsBatchResponse {
 }
 
-// Proxy operations
+// Request to add a single proxy to an instance.
 message InstanceAddProxyRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The proxy configuration to add.
   ProxyProto proxy = 2;
 }
 
+// Response after successfully adding a proxy.
+// Empty response indicates success.
 message InstanceAddProxyResponse {
 }
 
+// Request to remove a proxy from an instance by its index.
 message InstanceRemoveProxyRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The zero-based index of the proxy to remove.
+  // Returns INVALID_ARGUMENT if index is out of bounds.
   int32 index = 2;
 }
 
+// Response after successfully removing a proxy.
+// Empty response indicates success.
 message InstanceRemoveProxyResponse {
 }
 
+// Request to update an existing proxy in an instance.
 message InstanceUpdateProxyRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The zero-based index of the proxy to update.
+  // Returns INVALID_ARGUMENT if index is out of bounds.
   int32 index = 2;
+  // The new proxy configuration to replace the existing one.
   ProxyProto proxy = 3;
 }
 
+// Response after successfully updating a proxy.
+// Empty response indicates success.
 message InstanceUpdateProxyResponse {
 }
 
-// Batch proxy operations
+// Request to add multiple proxies to an instance in a single operation.
+// More efficient than multiple individual AddInstanceProxy calls.
 message InstanceAddProxiesBatchRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // List of proxy configurations to add.
   repeated ProxyProto proxies = 2;
 }
 
+// Response after successfully adding proxies in batch.
+// Empty response indicates success.
 message InstanceAddProxiesBatchResponse {
 }
 
+// Request to remove multiple proxies from an instance by their addresses.
 message InstanceRemoveProxiesBatchRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // List of proxy addresses to remove (in serialized format, e.g., "host:port").
+  // Proxies matching these addresses will be removed.
   repeated string addresses = 2;
 }
 
+// Response after successfully removing proxies in batch.
+// Empty response indicates success.
 message InstanceRemoveProxiesBatchResponse {
 }
 
+// Request to change the lifecycle state of an instance.
+// Used to start, pause, resume, or stop an instance.
 message InstanceStateChangeRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
+  // The target state for the instance. Valid transitions:
+  // - STOPPED -> RUNNING: Starts the instance
+  // - RUNNING -> PAUSED: Pauses bot ticking
+  // - PAUSED -> RUNNING: Resumes bot ticking
+  // - RUNNING/PAUSED -> STOPPED: Stops the instance
+  // The server will handle intermediate states (STARTING, STOPPING) automatically.
   InstanceState state = 2;
 }
 
+// Response after successfully changing instance state.
+// The operation completes when the state transition is finished.
+// Empty response indicates success.
 message InstanceStateChangeResponse {
 }
 
+// Request to retrieve the audit log for an instance.
 message InstanceAuditLogRequest {
+  // The unique identifier (UUID) of the instance.
   string id = 1;
 }
 
-// Account metadata operations
+// Request to get persistent metadata for a specific Minecraft account.
+// Persistent metadata survives bot restarts and is stored with the account.
 message GetAccountMetadataRequest {
+  // The unique identifier (UUID) of the instance containing the account.
   string instance_id = 1;
-  string account_id = 2;  // profile_id of the account
+  // The profile_id (UUID) of the Minecraft account.
+  string account_id = 2;
 }
 
+// Response containing the persistent metadata for an account.
 message GetAccountMetadataResponse {
+  // Metadata organized by namespace. Each namespace contains
+  // key-value pairs of metadata.
   repeated SettingsNamespace metadata = 1;
 }
 
+// Request to set a single persistent metadata entry for an account.
 message SetAccountMetadataEntryRequest {
+  // The unique identifier (UUID) of the instance containing the account.
   string instance_id = 1;
+  // The profile_id (UUID) of the Minecraft account.
   string account_id = 2;
+  // The namespace for the metadata entry.
   string namespace = 3;
+  // The key for the metadata entry within the namespace.
   string key = 4;
+  // The value to set. Supports JSON value types.
   google.protobuf.Value value = 5;
 }
 
+// Response after successfully setting a metadata entry.
+// Empty response indicates success.
 message SetAccountMetadataEntryResponse {
 }
 
+// Request to delete a persistent metadata entry from an account.
 message DeleteAccountMetadataEntryRequest {
+  // The unique identifier (UUID) of the instance containing the account.
   string instance_id = 1;
+  // The profile_id (UUID) of the Minecraft account.
   string account_id = 2;
+  // The namespace of the metadata entry to delete.
   string namespace = 3;
+  // The key of the metadata entry to delete.
   string key = 4;
 }
 
+// Response after successfully deleting a metadata entry.
+// Empty response indicates success.
 message DeleteAccountMetadataEntryResponse {
 }
 
+// Response containing the audit log entries for an instance.
 message InstanceAuditLogResponse {
+  // Types of actions that are recorded in the audit log.
   enum AuditLogEntryType {
+    // A command was executed on the instance.
     EXECUTE_COMMAND = 0;
+    // The instance session was started.
     START_SESSION = 1;
+    // The instance session was paused.
     PAUSE_SESSION = 2;
+    // The instance session was resumed from paused state.
     RESUME_SESSION = 3;
+    // The instance session was stopped.
     STOP_SESSION = 4;
   }
 
+  // A single entry in the audit log.
   message AuditLogEntry {
+    // Unique identifier for this audit log entry.
     string id = 1;
+    // The user who performed the action.
     InstanceUser user = 2;
+    // The type of action that was performed.
     AuditLogEntryType type = 3;
+    // When the action was performed.
     google.protobuf.Timestamp timestamp = 4;
+    // Additional data about the action (e.g., command text for EXECUTE_COMMAND).
+    // May be empty for some action types.
     string data = 5;
   }
 
+  // List of audit log entries, ordered by timestamp descending (newest first).
   repeated AuditLogEntry entry = 1;
 }
 
+// Service for managing SoulFire instances.
+// An instance represents a collection of Minecraft bots that can be started,
+// stopped, and configured together. Each instance has its own configuration
+// including settings, Minecraft accounts, and proxies.
+//
+// All operations require appropriate permissions:
+// - CREATE_INSTANCE (global): Required to create new instances
+// - READ_INSTANCE: Required to list and view instance details
+// - UPDATE_INSTANCE_META: Required to change instance name/icon
+// - UPDATE_INSTANCE_CONFIG: Required to modify settings, accounts, and proxies
+// - DELETE_INSTANCE: Required to delete an instance
+// - CHANGE_INSTANCE_STATE: Required to start/stop/pause the instance
+// - READ_INSTANCE_AUDIT_LOGS: Required to view audit logs
+// - READ_BOT_INFO: Required to read account metadata
 service InstanceService {
+  // Creates a new instance with the given friendly name.
+  // The instance starts in STOPPED state with default configuration.
+  // Requires: CREATE_INSTANCE global permission
+  // Returns: The UUID of the newly created instance
+  // Errors: INTERNAL if creation fails
   rpc CreateInstance (InstanceCreateRequest) returns (InstanceCreateResponse) {}
+
+  // Permanently deletes an instance and all its data.
+  // If the instance is running, it will be stopped first.
+  // This operation cannot be undone.
+  // Requires: DELETE_INSTANCE permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc DeleteInstance (InstanceDeleteRequest) returns (InstanceDeleteResponse) {}
+
+  // Lists all instances the current user has permission to view.
+  // Only instances where the user has READ_INSTANCE permission are returned.
+  // Returns summary information for each instance.
   rpc ListInstances (InstanceListRequest) returns (InstanceListResponse) {}
+
+  // Gets detailed information about a specific instance.
+  // Supports conditional requests via if_modified_since to reduce bandwidth.
+  // Requires: READ_INSTANCE permission on the instance
+  // Returns: Full instance info or not_modified status
+  // Errors: NOT_FOUND if instance does not exist
   rpc GetInstanceInfo (InstanceInfoRequest) returns (InstanceInfoResponse) {}
+
+  // Updates instance metadata (friendly name or icon).
+  // Only one field can be updated per request.
+  // Requires: UPDATE_INSTANCE_META permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc UpdateInstanceMeta (InstanceUpdateMetaRequest) returns (InstanceUpdateMetaResponse) {}
-  // Used only for profile import - sends entire config
+
+  // Replaces the entire instance configuration.
+  // Used primarily for profile import operations.
+  // For individual setting changes, use UpdateInstanceConfigEntry instead.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc UpdateInstanceConfig (InstanceUpdateConfigRequest) returns (InstanceUpdateConfigResponse) {}
-  // Granular update for individual config entries
+
+  // Updates a single configuration entry by namespace and key.
+  // More efficient than UpdateInstanceConfig for individual changes.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc UpdateInstanceConfigEntry (InstanceUpdateConfigEntryRequest) returns (InstanceUpdateConfigEntryResponse) {}
-  // Account operations
+
+  // Adds a Minecraft account to the instance.
+  // The account's profile_id must be unique within the instance.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc AddInstanceAccount (InstanceAddAccountRequest) returns (InstanceAddAccountResponse) {}
+
+  // Removes a Minecraft account from the instance by profile_id.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc RemoveInstanceAccount (InstanceRemoveAccountRequest) returns (InstanceRemoveAccountResponse) {}
+
+  // Updates an existing Minecraft account in the instance.
+  // The account is matched by profile_id and replaced.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc UpdateInstanceAccount (InstanceUpdateAccountRequest) returns (InstanceUpdateAccountResponse) {}
-  // Batch account operations
+
+  // Adds multiple Minecraft accounts to the instance in a single operation.
+  // More efficient than multiple AddInstanceAccount calls.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc AddInstanceAccountsBatch (InstanceAddAccountsBatchRequest) returns (InstanceAddAccountsBatchResponse) {}
+
+  // Removes multiple Minecraft accounts from the instance by their profile_ids.
+  // More efficient than multiple RemoveInstanceAccount calls.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc RemoveInstanceAccountsBatch (InstanceRemoveAccountsBatchRequest) returns (InstanceRemoveAccountsBatchResponse) {}
-  // Proxy operations
+
+  // Adds a proxy to the instance.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc AddInstanceProxy (InstanceAddProxyRequest) returns (InstanceAddProxyResponse) {}
+
+  // Removes a proxy from the instance by its index.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  // Errors: INVALID_ARGUMENT if index is out of bounds
   rpc RemoveInstanceProxy (InstanceRemoveProxyRequest) returns (InstanceRemoveProxyResponse) {}
+
+  // Updates an existing proxy in the instance by its index.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  // Errors: INVALID_ARGUMENT if index is out of bounds
   rpc UpdateInstanceProxy (InstanceUpdateProxyRequest) returns (InstanceUpdateProxyResponse) {}
-  // Batch proxy operations
+
+  // Adds multiple proxies to the instance in a single operation.
+  // More efficient than multiple AddInstanceProxy calls.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc AddInstanceProxiesBatch (InstanceAddProxiesBatchRequest) returns (InstanceAddProxiesBatchResponse) {}
+
+  // Removes multiple proxies from the instance by their addresses.
+  // More efficient than multiple RemoveInstanceProxy calls.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc RemoveInstanceProxiesBatch (InstanceRemoveProxiesBatchRequest) returns (InstanceRemoveProxiesBatchResponse) {}
+
+  // Changes the lifecycle state of an instance.
+  // Used to start, pause, resume, or stop bot sessions.
+  // The operation blocks until the state transition is complete.
+  // Requires: CHANGE_INSTANCE_STATE permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc ChangeInstanceState (InstanceStateChangeRequest) returns (InstanceStateChangeResponse) {}
+
+  // Retrieves the audit log for an instance.
+  // Returns a list of recorded actions ordered by timestamp (newest first).
+  // Requires: READ_INSTANCE_AUDIT_LOGS permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc GetAuditLog (InstanceAuditLogRequest) returns (InstanceAuditLogResponse) {}
-  // Account metadata operations
+
+  // Gets persistent metadata for a Minecraft account.
+  // Persistent metadata survives bot restarts and session changes.
+  // Requires: READ_BOT_INFO permission on the instance
+  // Errors: NOT_FOUND if instance or account does not exist
   rpc GetAccountMetadata (GetAccountMetadataRequest) returns (GetAccountMetadataResponse) {}
+
+  // Sets a single persistent metadata entry for a Minecraft account.
+  // Creates the namespace and key if they don't exist, or updates if they do.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc SetAccountMetadataEntry (SetAccountMetadataEntryRequest) returns (SetAccountMetadataEntryResponse) {}
+
+  // Deletes a persistent metadata entry from a Minecraft account.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
   rpc DeleteAccountMetadataEntry (DeleteAccountMetadataEntryRequest) returns (DeleteAccountMetadataEntryResponse) {}
 }

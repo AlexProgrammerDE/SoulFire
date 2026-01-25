@@ -1,3 +1,13 @@
+// SoulFire Server Configuration Service Protocol
+//
+// This protocol defines the gRPC service for managing global server-level configuration
+// in SoulFire, a Minecraft bot automation framework. Server configuration includes
+// settings that affect the entire SoulFire server instance, such as debug logging levels,
+// plugin settings, and other server-wide preferences.
+//
+// The configuration is persisted in a database and changes trigger runtime updates
+// (e.g., adjusting log levels for various components like Minecraft, Netty, gRPC, Hibernate).
+
 syntax = "proto3";
 
 option java_package = "com.soulfiremc.grpc.generated";
@@ -8,43 +18,169 @@ package soulfire.v1;
 import "soulfire/common.proto";
 import "google/protobuf/struct.proto";
 
+// ServerConfig represents the complete server-level configuration.
+// It contains all settings organized by namespace, where each namespace groups
+// related settings together (e.g., "dev" namespace for developer settings).
+// This configuration is stored persistently and affects server-wide behavior.
 message ServerConfig {
+  // Collection of settings organized by namespace.
+  // Each namespace contains key-value pairs representing individual settings.
+  // The structure allows for hierarchical organization of configuration values.
   repeated SettingsNamespace settings = 1;
 }
 
+// Request message for GetServerInfo RPC.
+// This is an empty request as no parameters are needed to retrieve server information.
+// The server returns all available configuration and metadata.
 message ServerInfoRequest {
 }
 
+// Response message for GetServerInfo RPC containing comprehensive server information.
+// This response provides everything needed to render a settings UI, including:
+// - Current configuration values
+// - All available setting definitions with their types and constraints
+// - Page layouts for organizing settings in the UI
+// - Information about registered plugins
 message ServerInfoResponse {
+  // The current server configuration containing all persisted settings values.
+  // If no configuration has been saved yet, this will contain default/empty values.
   ServerConfig config = 1;
-  // All available settings definitions that can be rendered by identifier
+
+  // All available settings definitions that can be rendered by identifier.
+  // Each definition includes the setting's type (string, int, bool, etc.),
+  // UI metadata (display name, description), constraints (min/max, patterns),
+  // and scope (SERVER, INSTANCE, or BOT level).
+  // These definitions are referenced by their identifier (namespace + key).
   repeated SettingsDefinition settings_definitions = 4;
-  // Pages that group settings together (reference settings by identifier)
+
+  // Pages that group settings together for UI organization.
+  // Each page has an ID, display name, icon, and references settings by their identifiers.
+  // Pages may be associated with plugins and can have an "enabled" toggle setting.
   repeated SettingsPage server_settings = 2;
+
+  // List of registered plugins on the server.
+  // Each plugin includes metadata such as ID, version, description, author,
+  // license, and website URL. Plugins may own settings pages.
   repeated ServerPlugin plugins = 3;
 }
 
+// Request message for UpdateServerConfig RPC.
+// Used for bulk configuration updates, typically during profile import operations.
+// This replaces the entire server configuration with the provided values.
 message ServerUpdateConfigRequest {
+  // The complete new server configuration to apply.
+  // This will replace the existing configuration entirely.
+  // All settings namespaces and their entries will be overwritten.
   ServerConfig config = 1;
 }
 
+// Response message for UpdateServerConfig RPC.
+// An empty response indicates successful configuration update.
+// The new configuration is persisted to the database and runtime hooks are triggered
+// (e.g., log level adjustments take effect immediately).
 message ServerUpdateConfigResponse {
 }
 
-// Granular config entry update (single key-value)
+// Request message for UpdateServerConfigEntry RPC.
+// Used for granular updates of individual configuration entries.
+// This is the preferred method for real-time UI updates as it only modifies
+// a single setting without affecting other configuration values.
 message ServerUpdateConfigEntryRequest {
+  // The namespace of the setting to update.
+  // Namespaces group related settings together (e.g., "dev" for developer settings).
+  // Must match an existing namespace or a new namespace will be created.
   string namespace = 1;
+
+  // The key identifying the specific setting within the namespace.
+  // Combined with namespace, this uniquely identifies the setting.
+  // Example: namespace="dev", key="soulfire-debug" for the SoulFire debug setting.
   string key = 2;
+
+  // The new value for the setting.
+  // Uses google.protobuf.Value to support various JSON types:
+  // - string_value for text settings
+  // - number_value for int/double settings
+  // - bool_value for boolean settings
+  // - list_value for string list settings
+  // - struct_value for complex settings like min/max ranges
   google.protobuf.Value value = 3;
 }
 
+// Response message for UpdateServerConfigEntry RPC.
+// An empty response indicates the setting was successfully updated.
+// The change is persisted to the database and runtime hooks are triggered
+// to apply the new value immediately where applicable.
 message ServerUpdateConfigEntryResponse {
 }
 
+// ServerService provides gRPC methods for managing server-level configuration
+// in SoulFire. This service handles global settings that affect the entire
+// SoulFire server instance, including debug logging, plugin configurations,
+// and other server-wide preferences.
+//
+// Configuration changes are persisted to a database and trigger runtime hooks
+// to apply settings immediately (e.g., adjusting log levels for SoulFire,
+// Minecraft, Netty, gRPC, Hibernate, and Via components).
+//
+// All methods require appropriate permissions:
+// - GetServerInfo requires READ_SERVER_CONFIG permission
+// - UpdateServerConfig requires UPDATE_SERVER_CONFIG permission
+// - UpdateServerConfigEntry requires UPDATE_SERVER_CONFIG permission
+//
+// Errors:
+// - PERMISSION_DENIED: If the caller lacks the required permission
+// - INTERNAL: If a database or processing error occurs
 service ServerService {
+  // Retrieves comprehensive server information including current configuration,
+  // all available settings definitions, settings page layouts, and registered plugins.
+  //
+  // This method is typically called when initializing a settings UI to obtain:
+  // 1. Current configuration values to populate form fields
+  // 2. Settings definitions describing each setting's type, constraints, and metadata
+  // 3. Page definitions for organizing settings into logical groups
+  // 4. Plugin information for displaying registered plugins
+  //
+  // Requires: READ_SERVER_CONFIG permission
+  //
+  // Returns: ServerInfoResponse with all server configuration and metadata
+  // Errors: PERMISSION_DENIED if caller lacks READ_SERVER_CONFIG permission
+  //         INTERNAL if a database error occurs while retrieving configuration
   rpc GetServerInfo (ServerInfoRequest) returns (ServerInfoResponse) {}
-  // Used only for profile import - sends entire config
+
+  // Replaces the entire server configuration with the provided values.
+  // This is a bulk update operation primarily used for profile import functionality.
+  //
+  // Use this method when you need to apply a complete configuration snapshot,
+  // such as when importing settings from a saved profile or restoring a backup.
+  // For individual setting changes during normal operation, prefer UpdateServerConfigEntry.
+  //
+  // The new configuration is persisted to the database, and runtime hooks are
+  // triggered to apply changes immediately (e.g., log level adjustments).
+  //
+  // Requires: UPDATE_SERVER_CONFIG permission
+  //
+  // Returns: Empty ServerUpdateConfigResponse on success
+  // Errors: PERMISSION_DENIED if caller lacks UPDATE_SERVER_CONFIG permission
+  //         INTERNAL if a database error occurs while saving configuration
   rpc UpdateServerConfig (ServerUpdateConfigRequest) returns (ServerUpdateConfigResponse) {}
-  // Granular update for individual config entries
+
+  // Updates a single configuration entry identified by namespace and key.
+  // This is a granular update operation for modifying individual settings.
+  //
+  // This is the preferred method for real-time UI interactions where users
+  // modify settings one at a time. It avoids overwriting unrelated settings
+  // and is more efficient than replacing the entire configuration.
+  //
+  // If the namespace doesn't exist, it will be created. If the key doesn't
+  // exist within the namespace, it will be added. Existing values are overwritten.
+  //
+  // The change is persisted to the database, and runtime hooks are triggered
+  // to apply the new value immediately where applicable.
+  //
+  // Requires: UPDATE_SERVER_CONFIG permission
+  //
+  // Returns: Empty ServerUpdateConfigEntryResponse on success
+  // Errors: PERMISSION_DENIED if caller lacks UPDATE_SERVER_CONFIG permission
+  //         INTERNAL if a database error occurs while saving the entry
   rpc UpdateServerConfigEntry (ServerUpdateConfigEntryRequest) returns (ServerUpdateConfigEntryResponse) {}
 }

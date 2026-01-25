@@ -7,72 +7,171 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
+// Request message for retrieving client data.
+// This is an empty message as the server identifies the client from the authentication context.
 message ClientDataRequest {
 }
 
+// Represents the grant status of a single global permission for the current user.
+// Used to communicate which server-wide permissions the authenticated user has been granted.
 message GlobalPermissionState {
+  // The global permission being described.
   GlobalPermission global_permission = 1;
+  // Whether this permission has been granted to the current user.
+  // True if the user has this permission, false otherwise.
   bool granted = 2;
 }
 
+// Contains metadata about the SoulFire server instance.
+// This information is useful for client compatibility checks and connecting to related services.
 message ServerInfo {
+  // The semantic version of the SoulFire server (e.g., "1.0.0").
   string version = 1;
+  // The git commit hash of the server build, useful for debugging and version tracking.
   string commit_hash = 2;
+  // The git branch name from which the server was built (e.g., "main", "develop").
   string branch_name = 3;
+  // The public URL for the gRPC/HTTP API endpoint.
+  // This is the base address clients should use to connect to the server.
   string public_api_address = 4;
+  // The public URL for the WebDAV file access endpoint.
+  // Derived from public_api_address with "/webdav" appended.
   string public_webdav_address = 5;
+  // The public URL for the API documentation endpoint.
+  // Derived from public_api_address with "/docs" appended.
   string public_docs_address = 6;
+  // The native Minecraft protocol version supported by this server (e.g., "1.21.4").
   string minecraft_version = 7;
 }
 
+// Response containing comprehensive information about the authenticated client and server.
+// This is typically called after authentication to populate the client UI with user details.
 message ClientDataResponse {
+  // The unique identifier (UUID) of the authenticated user.
   string id = 6;
+  // The display username of the authenticated user.
   string username = 1;
+  // The role assigned to the user (ADMIN or USER), which determines base permission levels.
   UserRole role = 7;
+  // The email address associated with the user account.
   string email = 8;
+  // A complete list of all global permissions and whether they are granted to this user.
+  // This allows the client to determine which features/actions are available.
   repeated GlobalPermissionState server_permissions = 2;
+  // Metadata about the server instance the client is connected to.
   ServerInfo server_info = 11;
 }
 
+// Request message for generating a WebDAV authentication token.
+// This is an empty message as the server identifies the user from the authentication context.
 message GenerateWebDAVTokenRequest {
 }
 
+// Response containing a newly generated WebDAV authentication token.
 message GenerateWebDAVTokenResponse {
+  // A JWT token with "webdav" audience that can be used to authenticate WebDAV requests.
+  // This token should be included in the Authorization header when accessing the WebDAV endpoint.
   string token = 1;
 }
 
+// Request message for generating an API authentication token.
+// This is an empty message as the server identifies the user from the authentication context.
 message GenerateAPITokenRequest {
 }
 
+// Response containing a newly generated API authentication token.
 message GenerateAPITokenResponse {
+  // A JWT token with "api" audience that can be used to authenticate gRPC/HTTP API requests.
+  // This token should be included in the Authorization header for subsequent API calls.
   string token = 1;
 }
 
+// Request message for updating the authenticated user's username.
 message UpdateSelfUsernameRequest {
+  // The new username to set for the current user.
+  // This will replace the existing username in the database.
   string username = 1;
 }
 
+// Response message for username update operation.
+// An empty response indicates the operation completed successfully.
 message UpdateSelfUsernameResponse {
 }
 
+// Request message for updating the authenticated user's email address.
 message UpdateSelfEmailRequest {
+  // The new email address to set for the current user.
+  // This will replace the existing email in the database.
   string email = 1;
 }
 
+// Response message for email update operation.
+// An empty response indicates the operation completed successfully.
 message UpdateSelfEmailResponse {
 }
 
+// Request message for invalidating all sessions of the authenticated user.
+// This is an empty message as the server identifies the user from the authentication context.
 message InvalidateSelfSessionsRequest {
 }
 
+// Response message for session invalidation operation.
+// An empty response indicates the operation completed successfully.
 message InvalidateSelfSessionsResponse {
 }
 
+// Service for managing client/user-specific operations.
+// All methods in this service operate on the currently authenticated user,
+// identified via the JWT token in the Authorization header.
+// Each method requires a specific GlobalPermission to be granted to the user.
 service ClientService {
+  // Retrieves comprehensive data about the authenticated client and the server.
+  // Returns user profile information, granted permissions, and server metadata.
+  // Required permission: READ_CLIENT_DATA
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks READ_CLIENT_DATA permission
+  //   - INTERNAL: Server error while fetching client data
   rpc GetClientData (ClientDataRequest) returns (ClientDataResponse) {}
+
+  // Generates a new JWT token specifically for WebDAV authentication.
+  // The generated token has the "webdav" audience and can only be used for WebDAV access.
+  // Required permission: GENERATE_SELF_WEBDAV_TOKEN
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks GENERATE_SELF_WEBDAV_TOKEN permission
+  //   - INTERNAL: Server error while generating token (e.g., user not found)
   rpc GenerateWebDAVToken (GenerateWebDAVTokenRequest) returns (GenerateWebDAVTokenResponse) {}
+
+  // Generates a new JWT token for API authentication.
+  // The generated token has the "api" audience and can be used for gRPC/HTTP API calls.
+  // Required permission: GENERATE_SELF_API_TOKEN
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks GENERATE_SELF_API_TOKEN permission
+  //   - INTERNAL: Server error while generating token (e.g., user not found)
   rpc GenerateAPIToken (GenerateAPITokenRequest) returns (GenerateAPITokenResponse) {}
+
+  // Updates the username of the currently authenticated user.
+  // The change is persisted to the database immediately.
+  // Required permission: UPDATE_SELF_USERNAME
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks UPDATE_SELF_USERNAME permission
+  //   - INTERNAL: Server error while updating (e.g., user not found in database)
   rpc UpdateSelfUsername (UpdateSelfUsernameRequest) returns (UpdateSelfUsernameResponse) {}
+
+  // Updates the email address of the currently authenticated user.
+  // The change is persisted to the database immediately.
+  // Required permission: UPDATE_SELF_EMAIL
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks UPDATE_SELF_EMAIL permission
+  //   - INTERNAL: Server error while updating (e.g., user not found in database)
   rpc UpdateSelfEmail (UpdateSelfEmailRequest) returns (UpdateSelfEmailResponse) {}
+
+  // Invalidates all existing sessions for the currently authenticated user.
+  // This is done by setting the user's minIssuedAt timestamp to the current time,
+  // which causes all previously issued JWT tokens to become invalid.
+  // After calling this method, the user will need to re-authenticate on all devices.
+  // Required permission: INVALIDATE_SELF_SESSIONS
+  // Error cases:
+  //   - PERMISSION_DENIED: User lacks INVALIDATE_SELF_SESSIONS permission
+  //   - INTERNAL: Server error while invalidating sessions (e.g., user not found)
   rpc InvalidateSelfSessions (InvalidateSelfSessionsRequest) returns (InvalidateSelfSessionsResponse) {}
 }

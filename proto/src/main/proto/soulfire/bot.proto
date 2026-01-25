@@ -9,268 +9,663 @@ import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
+// ============================================================================
+// BotService - Minecraft Bot Control and Information Service
+// ============================================================================
+//
+// The BotService provides comprehensive control and monitoring capabilities for
+// Minecraft bots managed by the SoulFire server. It enables clients to:
+//
+// - Query bot status and live state (position, health, inventory, etc.)
+// - Control bot movement (WASD, jump, sneak, sprint)
+// - Control bot view direction (yaw/pitch rotation)
+// - Manage inventory interactions (clicking slots, opening/closing containers)
+// - Render the bot's point-of-view as images
+// - Interact with server dialogs (Minecraft 1.21.6+)
+// - Update bot-specific configuration
+//
+// All RPC methods require appropriate permissions checked via the user context.
+// Most methods require the bot to be online (connected to a Minecraft server)
+// for the operation to succeed.
+// ============================================================================
+
+// Request message for retrieving detailed information about a specific bot.
+// Used by the GetBotInfo RPC to fetch a single bot's live state with full inventory data.
 message BotInfoRequest {
+  // The UUID of the SoulFire instance containing the bot.
+  // Must be a valid UUID string format (e.g., "550e8400-e29b-41d4-a716-446655440000").
   string instance_id = 1;
+
+  // The profile UUID of the bot (Minecraft account UUID).
+  // Must be a valid UUID string format.
   string bot_id = 2;
 }
 
+// Request message for listing all bots in an instance.
+// Used by the GetBotList RPC to enumerate all configured bots.
 message BotListRequest {
+  // The UUID of the SoulFire instance to list bots from.
+  // Must be a valid UUID string format.
   string instance_id = 1;
 }
 
+// Entry representing a single bot in the bot list.
+// Contains summary information suitable for display in a list view.
 message BotListEntry {
+  // The Minecraft profile UUID of the bot.
+  // This uniquely identifies the bot within the instance.
   string profile_id = 1;
+
+  // Whether the bot is currently connected to a Minecraft server.
+  // When false, the bot exists in configuration but is not active.
   bool is_online = 2;
+
+  // Live state of the bot if online and player data is available.
+  // Will be absent if the bot is offline or the player hasn't fully spawned.
+  // Note: For list views, inventory data is NOT included (too expensive).
   optional BotLiveState live_state = 3;
 }
 
+// Response containing the list of all bots in an instance.
 message BotListResponse {
+  // All bots configured in the instance, both online and offline.
+  // The order is determined by the account configuration order.
   repeated BotListEntry bots = 1;
 }
 
-// Represents an item in an inventory slot
+// Represents an item in an inventory slot.
+// Used for both container slots and carried (cursor) items.
 message InventorySlot {
+  // The slot index within the container.
+  // - For container menus: 0 to (total_slots - 1)
+  // - For player inventory: 0-4 crafting, 5-8 armor, 9-35 main inventory, 36-44 hotbar, 45 offhand
+  // - For carried items (cursor): -1 is used as a special indicator
   int32 slot = 1;
-  string item_id = 2;  // e.g., "minecraft:diamond_sword"
+
+  // The Minecraft item identifier in namespaced format.
+  // Examples: "minecraft:diamond_sword", "minecraft:stone", "minecraft:enchanted_book"
+  string item_id = 2;
+
+  // The number of items in this stack.
+  // Range: 1 to the item's maximum stack size (typically 1, 16, or 64).
   int32 count = 3;
-  optional string display_name = 4;  // Custom name if present
+
+  // The custom display name of the item, if it has been renamed.
+  // Only present when the item has a custom name component (e.g., renamed in an anvil).
+  // Contains the plain text string, not JSON text components.
+  optional string display_name = 4;
 }
 
+// Real-time state of a connected bot.
+// Contains position, health, inventory, and other live game data.
 message BotLiveState {
+  // X coordinate in the Minecraft world (east/west axis).
+  // East is positive, West is negative.
   double x = 1;
+
+  // Y coordinate in the Minecraft world (vertical axis).
+  // Increases upward. Sea level is typically around 63.
   double y = 2;
+
+  // Z coordinate in the Minecraft world (north/south axis).
+  // South is positive, North is negative.
   double z = 3;
+
+  // Vertical rotation (pitch) in degrees.
+  // Range: -90 (looking straight up) to 90 (looking straight down).
+  // 0 is looking at the horizon.
   float xRot = 4;
+
+  // Horizontal rotation (yaw) in degrees.
+  // Range: -180 to 180. 0 = South, 90 = West, -90 = East, +/-180 = North.
   float yRot = 5;
 
-  // Health and food
+  // Current health points.
+  // Range: 0 (dead) to max_health. 1 point = half a heart in the UI.
   float health = 6;
+
+  // Maximum health points the player can have.
+  // Default is 20 (10 hearts). Can be modified by effects or attributes.
   float max_health = 7;
+
+  // Current hunger/food level.
+  // Range: 0 (starving) to 20 (full). 1 point = half a drumstick in the UI.
+  // Below 6, the player cannot sprint. At 0, health starts draining.
   int32 food_level = 8;
+
+  // Current saturation level.
+  // Range: 0 to food_level. Acts as a buffer before hunger depletes.
+  // When saturation is above 0, hunger bar doesn't decrease while performing actions.
   float saturation_level = 9;
 
-  // Inventory (only non-empty slots)
+  // Inventory slots containing items (only non-empty slots are included).
+  // For list views (GetBotList), this will be empty for performance.
+  // For detail views (GetBotInfo), contains all non-empty slots from the player inventory.
   repeated InventorySlot inventory = 10;
+
+  // Currently selected hotbar slot index.
+  // Range: 0 to 8, corresponding to hotbar slots 1-9 in the UI.
   int32 selected_hotbar_slot = 11;
 
-  // World info
-  string dimension = 12;  // e.g., "minecraft:overworld"
+  // The dimension the player is currently in.
+  // Format: namespaced identifier (e.g., "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end").
+  // Custom dimensions will use their server-defined namespace.
+  string dimension = 12;
 
-  // Experience
+  // Player's current experience level (the number shown on the XP bar).
+  // Range: 0 to theoretically unlimited (typically 0-30+ for enchanting).
   int32 experience_level = 13;
-  float experience_progress = 14;  // 0.0 to 1.0
 
-  // Skin texture hash for avatar rendering (e.g., "abc123def456...")
-  // Use with https://mc-heads.net/body/<hash> for full body render
+  // Progress towards the next experience level.
+  // Range: 0.0 (just reached current level) to 1.0 (about to level up).
+  float experience_progress = 14;
+
+  // Skin texture hash for avatar rendering.
+  // This is the hash extracted from the texture URL in the player's game profile.
+  // Can be used with services like mc-heads.net: https://mc-heads.net/body/<hash>
+  // Will be absent if the player has no custom skin or skin data is unavailable.
   optional string skin_texture_hash = 15;
 
-  // Game mode (survival, creative, adventure, spectator)
+  // Current game mode of the player.
+  // Determines available actions (breaking blocks, flying, taking damage, etc.).
   GameMode game_mode = 16;
 }
 
-// Minecraft game modes
+// Minecraft game modes that determine player capabilities.
 enum GameMode {
+  // Unknown or not yet determined game mode.
   GAME_MODE_UNSPECIFIED = 0;
+
+  // Survival mode: resource gathering, health/hunger management, mob combat.
   GAME_MODE_SURVIVAL = 1;
+
+  // Creative mode: unlimited resources, instant block breaking, flying, invulnerability.
   GAME_MODE_CREATIVE = 2;
+
+  // Adventure mode: like survival but cannot break/place blocks without proper tools.
   GAME_MODE_ADVENTURE = 3;
+
+  // Spectator mode: invisible, can fly through blocks, cannot interact with the world.
   GAME_MODE_SPECTATOR = 4;
 }
 
+// Response containing detailed information about a specific bot.
 message BotInfoResponse {
+  // Live state of the bot including full inventory data.
+  // Will be absent if the bot is offline or player data is not available.
+  // When present, includes complete inventory slot information.
   optional BotLiveState live_state = 2;
 }
 
-// Granular config entry update (single key-value)
+// Request to update a single configuration entry for a specific bot.
+// This allows granular updates without replacing the entire configuration.
 message BotUpdateConfigEntryRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to update configuration for.
   string bot_id = 2;
+
+  // The settings namespace (e.g., plugin ID or "bot" for core bot settings).
+  // Examples: "bot", "auto-reconnect", "chat-message-controller"
   string namespace = 3;
+
+  // The key within the namespace to update.
+  // Must be a valid setting key defined for that namespace.
   string key = 4;
+
+  // The new value to set for this configuration entry.
+  // Must be a valid protobuf Value (null, number, string, bool, list, or struct).
   google.protobuf.Value value = 5;
 }
 
+// Response for bot configuration entry update.
+// Empty on success; errors are returned via gRPC status.
 message BotUpdateConfigEntryResponse {
 }
 
-// POV Rendering
+// Request to render the bot's point-of-view as an image.
+// Uses software rendering to generate a PNG image of what the bot "sees".
 message BotRenderPovRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to render POV for.
   string bot_id = 2;
-  int32 width = 3;   // Image width (default 854)
-  int32 height = 4;  // Image height (default 480)
+
+  // Desired image width in pixels.
+  // Default: 854 (if 0 or not provided).
+  // Maximum: 1920 (values above this are clamped).
+  // Minimum: 1 (values below this are clamped).
+  int32 width = 3;
+
+  // Desired image height in pixels.
+  // Default: 480 (if 0 or not provided).
+  // Maximum: 1080 (values above this are clamped).
+  // Minimum: 1 (values below this are clamped).
+  int32 height = 4;
 }
 
+// Response containing the rendered POV image.
 message BotRenderPovResponse {
-  string image_base64 = 1;  // Base64 encoded PNG image
+  // Base64-encoded PNG image data.
+  // Decode with standard Base64 decoder to get raw PNG bytes.
+  // The image uses the bot's current render distance setting.
+  string image_base64 = 1;
 }
 
-// Inventory Actions - click on a slot to interact with it
+// ============================================================================
+// Inventory Management Messages
+// ============================================================================
+
+// Request to perform a click action on an inventory slot.
+// Simulates the various mouse click interactions available in Minecraft inventory UIs.
 message BotInventoryClickRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot performing the inventory action.
   string bot_id = 2;
-  int32 slot = 3;           // Slot index (-999 for outside/drop)
+
+  // The slot index to click.
+  // Valid range depends on the currently open container.
+  // Special value: -999 for clicking outside the inventory (dropping items).
+  int32 slot = 3;
+
+  // The type of click to perform.
+  // Different click types have different effects on items.
   ClickType click_type = 4;
-  int32 hotbar_slot = 5;    // For SWAP_HOTBAR action (0-8)
+
+  // For SWAP_HOTBAR click type: which hotbar slot to swap with.
+  // Range: 0-8 (corresponding to hotbar slots 1-9).
+  // Ignored for other click types.
+  int32 hotbar_slot = 5;
 }
 
+// Types of inventory click actions available in Minecraft.
 enum ClickType {
+  // Invalid/unspecified click type. Will result in an error.
   CLICK_TYPE_UNSPECIFIED = 0;
-  LEFT_CLICK = 1;           // Pick up / place stack
-  RIGHT_CLICK = 2;          // Pick up half / place one
-  SHIFT_LEFT_CLICK = 3;     // Quick move to other inventory section
-  DROP_ONE = 4;             // Drop one item (Q key on slot)
-  DROP_ALL = 5;             // Drop entire stack (Ctrl+Q on slot)
-  SWAP_HOTBAR = 6;          // Swap slot with hotbar (1-9 keys)
-  MIDDLE_CLICK = 7;         // Clone item (creative mode)
+
+  // Left mouse click on a slot.
+  // - Empty cursor + item in slot: Pick up entire stack to cursor
+  // - Item on cursor + empty slot: Place entire stack in slot
+  // - Item on cursor + same item in slot: Combine stacks (up to max stack size)
+  // - Item on cursor + different item in slot: Swap cursor and slot items
+  LEFT_CLICK = 1;
+
+  // Right mouse click on a slot.
+  // - Empty cursor + item in slot: Pick up half the stack (rounded up)
+  // - Item on cursor + empty slot: Place one item from cursor
+  // - Item on cursor + same item in slot: Place one item from cursor
+  // - Item on cursor + different item in slot: Swap cursor and slot items
+  RIGHT_CLICK = 2;
+
+  // Shift + left click on a slot.
+  // Quick-moves the item stack to the opposite inventory section.
+  // - From player inventory to container (chest, furnace, etc.)
+  // - From container to player inventory
+  // - Between hotbar and main inventory
+  SHIFT_LEFT_CLICK = 3;
+
+  // Drop one item from the slot (Q key while hovering over slot).
+  // Drops a single item from the stack, leaving the rest.
+  DROP_ONE = 4;
+
+  // Drop entire stack from the slot (Ctrl+Q while hovering over slot).
+  // Drops all items from the stack at once.
+  DROP_ALL = 5;
+
+  // Swap slot contents with a hotbar slot (number keys 1-9).
+  // Requires hotbar_slot field to specify which hotbar slot (0-8).
+  // Works regardless of what's in the cursor.
+  SWAP_HOTBAR = 6;
+
+  // Middle mouse click (creative mode clone).
+  // In creative mode, clones the item to cursor without affecting the slot.
+  // No effect in survival mode.
+  MIDDLE_CLICK = 7;
 }
 
+// Response for inventory click action.
 message BotInventoryClickResponse {
+  // Whether the click action was successfully sent to the server.
+  // Note: This indicates the action was sent, not that the server accepted it.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Invalid click type"
   optional string error = 2;
 }
 
-// Get current inventory state including carried item
+// Request to get the current state of the bot's open container/inventory.
 message BotInventoryStateRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to get inventory state for.
   string bot_id = 2;
 }
 
-// Describes how a region of slots should be rendered
+// Describes how a region of slots should be rendered in the UI.
+// Different region types have different visual treatments.
 enum SlotRegionType {
-  SLOT_REGION_NORMAL = 0;      // Regular interactive slots
-  SLOT_REGION_OUTPUT = 1;      // Output-only (crafting result, furnace output)
-  SLOT_REGION_DISPLAY = 2;     // Display-only (lectern book, some special slots)
-  SLOT_REGION_HOTBAR = 3;      // Player hotbar (show selection indicator)
-  SLOT_REGION_ARMOR = 4;       // Armor slots (show armor icons as placeholder)
+  // Regular interactive slots that can accept most items.
+  SLOT_REGION_NORMAL = 0;
+
+  // Output-only slots (crafting result, furnace output).
+  // Items can only be taken out, not placed in.
+  SLOT_REGION_OUTPUT = 1;
+
+  // Display-only slots (lectern book display, some special UIs).
+  // May not allow any direct interaction.
+  SLOT_REGION_DISPLAY = 2;
+
+  // Player hotbar slots.
+  // Should show selection indicator for the currently selected slot.
+  SLOT_REGION_HOTBAR = 3;
+
+  // Armor slots in player inventory.
+  // May display placeholder armor icons when empty.
+  SLOT_REGION_ARMOR = 4;
 }
 
-// A group of slots that should be rendered together
+// A group of slots that should be rendered together in the UI.
+// Defines the layout grid for a section of the inventory.
 message SlotRegion {
-  string id = 1;           // Unique ID, e.g., "container", "player_hotbar"
-  string label = 2;        // Display label, e.g., "Chest", "Hotbar"
-  int32 start_index = 3;   // First slot index in this region
-  int32 slot_count = 4;    // Number of slots in this region
-  int32 columns = 5;       // Grid columns for layout
-  SlotRegionType type = 6; // Affects rendering behavior
+  // Unique identifier for this region within the container.
+  // Examples: "container", "player_inventory", "player_hotbar", "crafting_output"
+  string id = 1;
+
+  // Display label for this region.
+  // Examples: "Chest", "Inventory", "Hotbar", "Crafting Grid"
+  string label = 2;
+
+  // First slot index belonging to this region.
+  // Slots are numbered sequentially from 0 across all regions.
+  int32 start_index = 3;
+
+  // Total number of slots in this region.
+  int32 slot_count = 4;
+
+  // Number of columns for grid layout.
+  // Common values: 9 (standard inventory width), 3 (dispenser), 1 (armor column)
+  int32 columns = 5;
+
+  // The type of region, affecting rendering behavior.
+  SlotRegionType type = 6;
 }
 
-// A clickable button in a container (e.g., enchantment options, stonecutter recipes)
+// A clickable button in a container menu.
+// Used for special interactions like enchantment selection, stonecutter recipes, trade offers, etc.
 message ContainerButton {
-  int32 button_id = 1;              // Button ID to send when clicking
-  string label = 2;                 // Display label (e.g., "Silk Touch I")
-  optional string icon_item_id = 3; // Item ID for icon (e.g., "minecraft:stone_bricks")
-  optional string description = 4;  // Tooltip/description text
-  bool disabled = 5;                // Whether the button is currently disabled
-  bool selected = 6;                // Whether this button is currently selected
+  // Button ID to send to the server when clicking.
+  // The meaning depends on the container type.
+  int32 button_id = 1;
+
+  // Display label for the button.
+  // Examples: "Enchant Slot 1", "Recipe 5", "8x Emerald -> 1x Diamond Pickaxe"
+  string label = 2;
+
+  // Optional item ID for displaying an icon.
+  // Example: "minecraft:enchanted_book", "minecraft:stone_bricks"
+  optional string icon_item_id = 3;
+
+  // Optional tooltip/description text with additional details.
+  // Examples: "Requires 3 lapis, 30 levels", "Out of stock"
+  optional string description = 4;
+
+  // Whether the button is currently disabled (cannot be clicked).
+  // Reasons vary by container: missing materials, out of stock, insufficient levels, etc.
+  bool disabled = 5;
+
+  // Whether this button is currently selected/active.
+  // Used for toggle-style buttons or to show current selection.
+  bool selected = 6;
 }
 
-// Text input field description for containers like anvil
+// Text input field in a container menu.
+// Currently only used by the anvil for item renaming.
 message ContainerTextInput {
-  string id = 1;           // Field identifier (e.g., "item_name" for anvil)
-  string label = 2;        // Display label
-  string current_value = 3; // Current text value
-  int32 max_length = 4;    // Maximum allowed characters (0 = no limit)
-  string placeholder = 5;  // Placeholder text
+  // Field identifier for the SetContainerText RPC.
+  // Currently supported: "item_name" (anvil rename)
+  string id = 1;
+
+  // Display label for the input field.
+  string label = 2;
+
+  // Current text value in the field.
+  // For anvil: the item's current custom name, or empty if none.
+  string current_value = 3;
+
+  // Maximum allowed character length.
+  // For anvil: 50 characters.
+  // Value of 0 means no limit.
+  int32 max_length = 4;
+
+  // Placeholder text shown when field is empty.
+  string placeholder = 5;
 }
 
-// Book page for lectern display
+// A page from a book, used for lectern display.
 message BookPage {
-  int32 page_number = 1;   // 0-indexed page number
-  string content = 2;      // Page content (may contain formatting codes)
+  // Zero-indexed page number.
+  int32 page_number = 1;
+
+  // Page content text.
+  // May contain Minecraft formatting codes (section symbols).
+  string content = 2;
 }
 
-// Describes the layout of an open container
+// Complete layout description for an open container menu.
+// Provides all information needed to render the container UI.
 message ContainerLayout {
-  string title = 1;                  // Container title/name
-  repeated SlotRegion regions = 2;   // Ordered list of slot regions to render
-  int32 total_slots = 3;             // Total number of slots
-  repeated ContainerButton buttons = 4; // Available action buttons (stonecutter recipes, enchants, etc.)
-  string container_type = 5;         // Container type identifier for client-specific rendering
-  repeated ContainerTextInput text_inputs = 6; // Text input fields (anvil rename, etc.)
-  repeated BookPage book_pages = 7;  // Book pages for lectern
-  int32 current_book_page = 8;       // Current page being displayed (lectern)
+  // Container title/name displayed at the top.
+  // Examples: "Chest", "Crafting Table", "Inventory", custom container names.
+  string title = 1;
+
+  // Ordered list of slot regions defining the container layout.
+  // Regions are listed in rendering order (typically container slots first, then player inventory).
+  repeated SlotRegion regions = 2;
+
+  // Total number of slots in the container.
+  // Sum of all region slot_counts.
+  int32 total_slots = 3;
+
+  // Available action buttons for this container.
+  // Present for: stonecutter (recipes), enchanting table (3 enchant options),
+  // loom (patterns), villager trading (trade offers), beacon (effects), etc.
+  repeated ContainerButton buttons = 4;
+
+  // Container type identifier for client-specific rendering.
+  // Values: "inventory", "chest", "dispenser", "hopper", "furnace", "crafting",
+  //         "anvil", "enchanting", "brewing", "beacon", "shulker", "grindstone",
+  //         "stonecutter", "loom", "cartography", "smithing", "merchant",
+  //         "crafter", "lectern", "generic"
+  string container_type = 5;
+
+  // Text input fields available in this container.
+  // Currently only populated for anvil menus.
+  repeated ContainerTextInput text_inputs = 6;
+
+  // Book pages for lectern containers.
+  // Contains all pages of the book on the lectern.
+  repeated BookPage book_pages = 7;
+
+  // Current page being displayed (for lectern).
+  // Zero-indexed into book_pages.
+  int32 current_book_page = 8;
 }
 
+// Response containing the current inventory/container state.
 message BotInventoryStateResponse {
-  ContainerLayout layout = 1;             // Container layout information
-  repeated InventorySlot slots = 2;       // All inventory slots with items
-  optional InventorySlot carried_item = 3; // Item currently on cursor
+  // Layout information describing the container structure.
+  ContainerLayout layout = 1;
+
+  // All slots containing items (empty slots are omitted).
+  repeated InventorySlot slots = 2;
+
+  // Item currently held on the cursor (being moved).
+  // Absent if cursor is empty.
+  optional InventorySlot carried_item = 3;
+
+  // Currently selected hotbar slot index (0-8).
   int32 selected_hotbar_slot = 4;
 }
 
-// Close current container
+// Request to close the currently open container.
 message BotCloseContainerRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to close container for.
   string bot_id = 2;
 }
 
+// Response for container close action.
 message BotCloseContainerResponse {
+  // Whether the close action was successful.
   bool success = 1;
 }
 
-// Open player inventory
+// Request to open the player's inventory screen.
+// This sends a packet to the server to open the inventory UI.
 message BotOpenInventoryRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to open inventory for.
   string bot_id = 2;
 }
 
+// Response for inventory open action.
 message BotOpenInventoryResponse {
+  // Whether the open inventory action was successful.
   bool success = 1;
 }
 
-// Mouse click actions - simulates left/right mouse button press
+// ============================================================================
+// Mouse Click Messages
+// ============================================================================
+
+// Request to simulate a mouse click action in the game world.
+// Used for attacking entities, breaking blocks, using items, and interacting with blocks/entities.
 message BotMouseClickRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot performing the click.
   string bot_id = 2;
+
+  // Which mouse button to simulate clicking.
   MouseButton button = 3;
 }
 
+// Mouse buttons for world interaction.
 enum MouseButton {
+  // Invalid/unspecified button. Will result in an error.
   MOUSE_BUTTON_UNSPECIFIED = 0;
-  LEFT_BUTTON = 1;   // Attack entity / start breaking block
-  RIGHT_BUTTON = 2;  // Use item / interact with entity or block
+
+  // Left mouse button.
+  // Actions: Attack entity (if looking at one), start breaking block (if looking at one).
+  LEFT_BUTTON = 1;
+
+  // Right mouse button.
+  // Actions: Use held item, interact with entity (if looking at one),
+  //          interact with block (if looking at one, e.g., open chest, press button).
+  RIGHT_BUTTON = 2;
 }
 
+// Response for mouse click action.
 message BotMouseClickResponse {
+  // Whether the click action was successfully performed.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Invalid mouse button"
   optional string error = 2;
 }
 
-// Click a container button (enchantment selection, stonecutter recipe, etc.)
+// Request to click a container-specific action button.
+// Used for stonecutter recipes, enchantment selection, villager trades, beacon effects, etc.
 message BotContainerButtonClickRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot clicking the button.
   string bot_id = 2;
+
+  // The button ID to click.
+  // Valid values depend on container type:
+  // - Stonecutter: 0-99 (recipe index)
+  // - Enchanting table: 0-2 (enchantment slot)
+  // - Loom: 0-99 (pattern index)
+  // - Villager: 0 to (offer count - 1)
+  // - Beacon: mob effect registry ID, -1 for confirm
+  // - Crafter: 0-8 (slot toggle index)
+  // - Lectern: 1=prev page, 2=next page, 3=take book
   int32 button_id = 3;
 }
 
+// Response for container button click action.
 message BotContainerButtonClickResponse {
+  // Whether the button click was successfully queued.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Invalid button ID for this container type"
   optional string error = 2;
 }
 
-// Set text input in a container (anvil rename, etc.)
+// Request to set text in a container text input field.
+// Currently only supports anvil item renaming.
 message BotSetContainerTextRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot setting the text.
   string bot_id = 2;
-  string field_id = 3;    // Which field to set (e.g., "item_name")
-  string text = 4;        // The text value to set
+
+  // Which field to set the text for.
+  // Currently supported: "item_name" (anvil rename)
+  string field_id = 3;
+
+  // The text value to set.
+  // For anvil: max 50 characters for the item name.
+  string text = 4;
 }
 
+// Response for container text input action.
 message BotSetContainerTextResponse {
+  // Whether the text was successfully set.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Unsupported container or field ID: <type>/<field_id>"
   optional string error = 2;
 }
 
-// Change the selected hotbar slot (0-8)
+// Request to change the selected hotbar slot.
 message BotSetHotbarSlotRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to change hotbar selection for.
   string bot_id = 2;
-  int32 slot = 3;           // Hotbar slot index (0-8)
+
+  // Hotbar slot index to select.
+  // Range: 0-8 (corresponding to slots 1-9 in the UI).
+  int32 slot = 3;
 }
 
+// Response for hotbar slot selection.
 message BotSetHotbarSlotResponse {
+  // Whether the hotbar slot was successfully changed.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Hotbar slot must be between 0 and 8, got: <slot>",
+  //                  "Player is not available"
   optional string error = 2;
 }
 
@@ -279,32 +674,73 @@ message BotSetHotbarSlotResponse {
 // Control bot movement (WASD, jump, sneak, sprint)
 // ============================================================================
 
-// Movement state - each field is optional to allow partial updates
+// Request to update the bot's movement state.
+// Each field is optional to allow partial updates - only specified fields are changed.
+// The movement state persists until explicitly changed or reset.
 message BotSetMovementStateRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to control.
   string bot_id = 2;
-  optional bool forward = 3;    // W key - move forward
-  optional bool backward = 4;   // S key - move backward
-  optional bool left = 5;       // A key - strafe left
-  optional bool right = 6;      // D key - strafe right
-  optional bool jump = 7;       // Space - jump
-  optional bool sneak = 8;      // Shift - sneak
-  optional bool sprint = 9;     // Ctrl - sprint
+
+  // W key state - move forward.
+  // true = pressing W, false = not pressing W
+  optional bool forward = 3;
+
+  // S key state - move backward.
+  // true = pressing S, false = not pressing S
+  optional bool backward = 4;
+
+  // A key state - strafe left.
+  // true = pressing A, false = not pressing A
+  optional bool left = 5;
+
+  // D key state - strafe right.
+  // true = pressing D, false = not pressing D
+  optional bool right = 6;
+
+  // Space key state - jump.
+  // true = pressing Space, false = not pressing Space
+  // When held, the bot will jump repeatedly.
+  optional bool jump = 7;
+
+  // Shift key state - sneak/crouch.
+  // true = sneaking, false = not sneaking
+  // While sneaking: slower movement, won't fall off edges, crouching animation.
+  optional bool sneak = 8;
+
+  // Ctrl key state - sprint.
+  // true = sprinting, false = not sprinting
+  // Requires forward movement and sufficient hunger (food level >= 6).
+  optional bool sprint = 9;
 }
 
+// Response for movement state update.
 message BotSetMovementStateResponse {
+  // Whether the movement state was successfully updated.
   bool success = 1;
+
+  // Error message if success is false.
   optional string error = 2;
 }
 
-// Reset all movement to stopped state
+// Request to reset all movement to stopped state.
+// Equivalent to releasing all movement keys (WASD, Space, Shift, Ctrl).
 message BotResetMovementRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to stop movement for.
   string bot_id = 2;
 }
 
+// Response for movement reset.
 message BotResetMovementResponse {
+  // Whether the movement was successfully reset.
   bool success = 1;
+
+  // Error message if success is false.
   optional string error = 2;
 }
 
@@ -313,271 +749,644 @@ message BotResetMovementResponse {
 // Control bot view direction (yaw/pitch)
 // ============================================================================
 
-// Set absolute rotation
+// Request to set the bot's view rotation (look direction).
+// Used to aim the bot's view at specific targets or directions.
 message BotSetRotationRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to rotate.
   string bot_id = 2;
-  float yaw = 3;    // Horizontal rotation (-180 to 180, 0 = south)
-  float pitch = 4;  // Vertical rotation (-90 to 90, negative = up)
+
+  // Horizontal rotation angle in degrees (yaw).
+  // Range: -180 to 180 (values outside this range are normalized).
+  // Direction mapping: 0 = South, 90 = West, -90 = East, +/-180 = North.
+  float yaw = 3;
+
+  // Vertical rotation angle in degrees (pitch).
+  // Range: -90 to 90 (values outside this range are clamped).
+  // Direction mapping: -90 = looking up, 0 = horizon, 90 = looking down.
+  float pitch = 4;
 }
 
+// Response for rotation update.
 message BotSetRotationResponse {
+  // Whether the rotation was successfully set.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "Player is not available"
   optional string error = 2;
 }
 
 // ============================================================================
 // Server Dialog Messages (Minecraft 1.21.6+)
-// Dialogs are server-sent UI screens that can display information and gather input
+// Dialogs are server-sent UI screens that can display information and gather input.
+// They were introduced in Minecraft 1.21.6 as a way for servers to create custom UIs.
 // ============================================================================
 
-// Dialog types matching Minecraft's registry
+// Dialog types matching Minecraft's dialog registry.
+// Determines the overall structure and behavior of the dialog.
 enum DialogType {
+  // Unknown or unrecognized dialog type.
   DIALOG_TYPE_UNSPECIFIED = 0;
-  DIALOG_TYPE_NOTICE = 1;           // Single action button in footer
-  DIALOG_TYPE_CONFIRMATION = 2;     // Yes/No buttons in footer
-  DIALOG_TYPE_MULTI_ACTION = 3;     // Scrollable list of action buttons
-  DIALOG_TYPE_SERVER_LINKS = 4;     // Server links display
-  DIALOG_TYPE_DIALOG_LIST = 5;      // Buttons linking to other dialogs
+
+  // Notice dialog with a single action button in the footer.
+  // Used for informational messages that require acknowledgment.
+  DIALOG_TYPE_NOTICE = 1;
+
+  // Confirmation dialog with Yes/No buttons in the footer.
+  // Used for binary choices.
+  DIALOG_TYPE_CONFIRMATION = 2;
+
+  // Multi-action dialog with a scrollable list of action buttons.
+  // Used for menus with multiple options.
+  DIALOG_TYPE_MULTI_ACTION = 3;
+
+  // Server links dialog displaying clickable links.
+  // Used to show server website, Discord, etc.
+  DIALOG_TYPE_SERVER_LINKS = 4;
+
+  // Dialog list with buttons linking to other dialogs.
+  // Used for hierarchical menu navigation.
+  DIALOG_TYPE_DIALOG_LIST = 5;
 }
 
-// Body element types
+// Body element that can appear in a dialog.
+// Dialogs can contain a mix of text and item displays.
 message DialogBodyElement {
   oneof element {
+    // Plain text message element.
     DialogPlainMessage plain_message = 1;
+
+    // Item display element (shows a Minecraft item).
     DialogItem item = 2;
   }
 }
 
+// Plain text message in a dialog body.
 message DialogPlainMessage {
-  string contents = 1;     // Text content (JSON text component)
-  int32 width = 2;         // Width (1-1024, default 200)
+  // Text content, typically a JSON text component string.
+  // May contain formatting, colors, click events, etc.
+  string contents = 1;
+
+  // Display width in pixels.
+  // Range: 1-1024, default: 200.
+  int32 width = 2;
 }
 
+// Item display element in a dialog body.
 message DialogItem {
-  string item_id = 1;              // e.g., "minecraft:diamond"
-  int32 count = 2;                 // Item count
-  optional string description = 3; // Optional description text
-  bool show_decoration = 4;        // Show item frame decoration (default true)
-  bool show_tooltip = 5;           // Show item tooltip on hover (default true)
-  int32 width = 6;                 // Display width (1-256, default 16)
-  int32 height = 7;                // Display height (1-256, default 16)
+  // Minecraft item identifier.
+  // Example: "minecraft:diamond", "minecraft:netherite_sword"
+  string item_id = 1;
+
+  // Item count/stack size to display.
+  int32 count = 2;
+
+  // Optional description text below the item.
+  optional string description = 3;
+
+  // Whether to show the item frame decoration around the item.
+  // Default: true.
+  bool show_decoration = 4;
+
+  // Whether to show the item tooltip on hover.
+  // Default: true.
+  bool show_tooltip = 5;
+
+  // Display width in pixels.
+  // Range: 1-256, default: 16.
+  int32 width = 6;
+
+  // Display height in pixels.
+  // Range: 1-256, default: 16.
+  int32 height = 7;
 }
 
-// Input control types
+// Input control that can appear in a dialog.
+// Allows dialogs to gather user input before submission.
 message DialogInput {
   oneof input {
+    // Text input field (single or multi-line).
     DialogTextInput text = 1;
+
+    // Boolean checkbox input.
     DialogBooleanInput boolean = 2;
+
+    // Dropdown/combo box for selecting one option.
     DialogSingleOptionInput single_option = 3;
+
+    // Slider for selecting a number in a range.
     DialogNumberRangeInput number_range = 4;
   }
 }
 
+// Text input field in a dialog.
 message DialogTextInput {
-  string key = 1;              // Identifier for submission
-  string label = 2;            // Display label
-  int32 width = 3;             // Width (1-1024, default 200)
-  bool label_visible = 4;      // Show label (default true)
-  string initial = 5;          // Default value
-  int32 max_length = 6;        // Max chars (default 32)
-  bool multiline = 7;          // Allow multiline input
-  int32 multiline_max_lines = 8; // Max lines for multiline
-  int32 multiline_height = 9;  // Height for multiline
+  // Identifier used when submitting the dialog.
+  string key = 1;
+
+  // Display label for the field.
+  string label = 2;
+
+  // Display width in pixels.
+  // Range: 1-1024, default: 200.
+  int32 width = 3;
+
+  // Whether to show the label.
+  // Default: true.
+  bool label_visible = 4;
+
+  // Initial/default value.
+  string initial = 5;
+
+  // Maximum character length.
+  // Default: 32.
+  int32 max_length = 6;
+
+  // Whether to allow multi-line input.
+  bool multiline = 7;
+
+  // Maximum lines for multiline input.
+  int32 multiline_max_lines = 8;
+
+  // Display height for multiline input in pixels.
+  int32 multiline_height = 9;
 }
 
+// Boolean checkbox input in a dialog.
 message DialogBooleanInput {
-  string key = 1;              // Identifier for submission
-  string label = 2;            // Display label
-  bool initial = 3;            // Default value (default false)
-  string on_true = 4;          // Value when checked (default "true")
-  string on_false = 5;         // Value when unchecked (default "false")
+  // Identifier used when submitting the dialog.
+  string key = 1;
+
+  // Display label for the checkbox.
+  string label = 2;
+
+  // Initial checked state.
+  // Default: false.
+  bool initial = 3;
+
+  // String value to submit when checked.
+  // Default: "true".
+  string on_true = 4;
+
+  // String value to submit when unchecked.
+  // Default: "false".
+  string on_false = 5;
 }
 
+// Single option selection input (dropdown/combo box) in a dialog.
 message DialogSingleOptionInput {
-  string key = 1;              // Identifier for submission
-  string label = 2;            // Display label
-  bool label_visible = 3;      // Show label (default true)
-  int32 width = 4;             // Width (1-1024, default 200)
-  repeated DialogOption options = 5; // Available options
-  string initial_option_id = 6; // Initially selected option ID
+  // Identifier used when submitting the dialog.
+  string key = 1;
+
+  // Display label for the dropdown.
+  string label = 2;
+
+  // Whether to show the label.
+  // Default: true.
+  bool label_visible = 3;
+
+  // Display width in pixels.
+  // Range: 1-1024, default: 200.
+  int32 width = 4;
+
+  // Available options to choose from.
+  repeated DialogOption options = 5;
+
+  // ID of the initially selected option.
+  string initial_option_id = 6;
 }
 
+// An option in a single-option input.
 message DialogOption {
-  string id = 1;               // Option identifier
-  string display = 2;          // Display text (optional, uses id if not set)
+  // Option identifier (submitted value).
+  string id = 1;
+
+  // Display text for the option.
+  // If empty, the id is used for display.
+  string display = 2;
 }
 
+// Number range slider input in a dialog.
 message DialogNumberRangeInput {
-  string key = 1;              // Identifier for submission
-  string label = 2;            // Display label
-  string label_format = 3;     // Translation key for label format
-  int32 width = 4;             // Width (1-1024, default 200)
-  double start = 5;            // Minimum value
-  double end = 6;              // Maximum value
-  double step = 7;             // Step size (optional)
-  double initial = 8;          // Default value
+  // Identifier used when submitting the dialog.
+  string key = 1;
+
+  // Display label for the slider.
+  string label = 2;
+
+  // Translation key for formatting the label with the current value.
+  string label_format = 3;
+
+  // Display width in pixels.
+  // Range: 1-1024, default: 200.
+  int32 width = 4;
+
+  // Minimum value (left side of slider).
+  double start = 5;
+
+  // Maximum value (right side of slider).
+  double end = 6;
+
+  // Step size for discrete values.
+  // If 0, continuous values are allowed.
+  double step = 7;
+
+  // Initial/default value.
+  double initial = 8;
 }
 
-// Action types for buttons
+// Action that can be triggered by a dialog button.
 message DialogAction {
   oneof action {
+    // Open a URL in the browser.
     DialogOpenUrlAction open_url = 1;
+
+    // Run a chat command.
     DialogRunCommandAction run_command = 2;
+
+    // Suggest a command (put in chat box without sending).
     DialogSuggestCommandAction suggest_command = 3;
+
+    // Copy text to clipboard.
     DialogCopyToClipboardAction copy_to_clipboard = 4;
+
+    // Show another dialog.
     DialogShowDialogAction show_dialog = 5;
+
+    // Custom server-defined action.
     DialogCustomAction custom = 6;
+
+    // Run a command with input placeholders.
     DialogDynamicRunCommandAction dynamic_run_command = 7;
+
+    // Custom action with additional data.
     DialogDynamicCustomAction dynamic_custom = 8;
   }
 }
 
+// Action to open a URL in the user's browser.
 message DialogOpenUrlAction {
+  // The URL to open.
   string url = 1;
 }
 
+// Action to execute a chat command.
 message DialogRunCommandAction {
+  // The command to run (including the leading /).
   string command = 1;
 }
 
+// Action to suggest a command (place in chat input).
 message DialogSuggestCommandAction {
+  // The command to suggest.
   string command = 1;
 }
 
+// Action to copy text to the clipboard.
 message DialogCopyToClipboardAction {
+  // The text to copy.
   string value = 1;
 }
 
+// Action to display another dialog.
 message DialogShowDialogAction {
-  string dialog_id = 1;        // Dialog ID to show (or inline definition)
+  // Dialog ID to show (references a registered dialog).
+  string dialog_id = 1;
 }
 
+// Custom server-defined action.
 message DialogCustomAction {
-  string id = 1;               // Custom action identifier
-  string payload = 2;          // Optional JSON payload
+  // Action identifier known to the server.
+  string id = 1;
+
+  // Optional JSON payload for the action.
+  string payload = 2;
 }
 
+// Dynamic command action with input value substitution.
 message DialogDynamicRunCommandAction {
-  string template = 1;         // Macro template with input placeholders
+  // Command template with placeholders for input values.
+  // Placeholders are replaced with user input before execution.
+  string template = 1;
 }
 
+// Dynamic custom action with additional NBT data.
 message DialogDynamicCustomAction {
-  string id = 1;               // Custom action identifier
-  string additions = 2;        // Optional NBT additions as JSON
+  // Custom action identifier.
+  string id = 1;
+
+  // Additional NBT data as JSON string.
+  string additions = 2;
 }
 
-// Button structure used across dialog types
+// Button that can appear in a dialog.
 message DialogButton {
-  string label = 1;            // Button text (JSON text component)
-  optional string tooltip = 2; // Tooltip on hover
-  int32 width = 3;             // Button width (1-1024, default 150)
-  optional DialogAction action = 4; // Action when clicked
+  // Button text (may be a JSON text component).
+  string label = 1;
+
+  // Optional tooltip shown on hover.
+  optional string tooltip = 2;
+
+  // Button width in pixels.
+  // Range: 1-1024, default: 150.
+  int32 width = 3;
+
+  // Action to perform when clicked.
+  optional DialogAction action = 4;
 }
 
-// After-action behavior
+// Behavior after a dialog action is triggered.
 enum DialogAfterAction {
+  // Unspecified, use dialog default.
   DIALOG_AFTER_ACTION_UNSPECIFIED = 0;
-  DIALOG_AFTER_ACTION_CLOSE = 1;           // Close dialog (default)
-  DIALOG_AFTER_ACTION_NONE = 2;            // Keep dialog open
-  DIALOG_AFTER_ACTION_WAIT_FOR_RESPONSE = 3; // Show waiting screen
+
+  // Close the dialog after the action.
+  // This is the default behavior.
+  DIALOG_AFTER_ACTION_CLOSE = 1;
+
+  // Keep the dialog open after the action.
+  DIALOG_AFTER_ACTION_NONE = 2;
+
+  // Show a waiting/loading screen while action processes.
+  DIALOG_AFTER_ACTION_WAIT_FOR_RESPONSE = 3;
 }
 
-// Complete dialog definition
+// Complete server dialog definition.
+// Contains all information needed to render and interact with a dialog.
 message ServerDialog {
-  string id = 1;                          // Dialog ID (from server)
-  DialogType type = 2;                    // Dialog type
-  string title = 3;                       // Dialog title (JSON text component)
-  optional string external_title = 4;     // Button label when shown as external button
-  repeated DialogBodyElement body = 5;    // Body elements
-  repeated DialogInput inputs = 6;        // Input controls
-  bool can_close_with_escape = 7;         // Allow ESC to close (default true)
-  bool pause = 8;                         // Pause game in singleplayer (default true)
-  DialogAfterAction after_action = 9;     // Behavior after action
+  // Dialog identifier from the server.
+  // Format: namespaced identifier (e.g., "myserver:welcome_dialog").
+  string id = 1;
 
-  // Type-specific fields
-  optional DialogButton action = 10;      // For notice type - single action
-  optional DialogButton yes = 11;         // For confirmation type
-  optional DialogButton no = 12;          // For confirmation type
-  repeated DialogButton actions = 13;     // For multi_action type
-  int32 columns = 14;                     // For multi_action/dialog_list (default 2)
-  optional DialogButton exit_action = 15; // For multi_action/server_links/dialog_list
-  int32 button_width = 16;                // For server_links/dialog_list (default 150)
+  // The type of dialog, determining overall structure.
+  DialogType type = 2;
+
+  // Dialog title (may be a JSON text component).
+  string title = 3;
+
+  // Button label when shown as an external/minimized button.
+  optional string external_title = 4;
+
+  // Body elements (text and items) displayed in the dialog.
+  repeated DialogBodyElement body = 5;
+
+  // Input controls for gathering user data.
+  repeated DialogInput inputs = 6;
+
+  // Whether ESC key can close the dialog.
+  // Default: true.
+  bool can_close_with_escape = 7;
+
+  // Whether to pause the game in singleplayer.
+  // Default: true. No effect in multiplayer.
+  bool pause = 8;
+
+  // Behavior after an action button is clicked.
+  DialogAfterAction after_action = 9;
+
+  // For NOTICE type: the single action button.
+  optional DialogButton action = 10;
+
+  // For CONFIRMATION type: the "yes" button.
+  optional DialogButton yes = 11;
+
+  // For CONFIRMATION type: the "no" button.
+  optional DialogButton no = 12;
+
+  // For MULTI_ACTION type: list of action buttons.
+  repeated DialogButton actions = 13;
+
+  // For MULTI_ACTION and DIALOG_LIST: number of button columns.
+  // Default: 2.
+  int32 columns = 14;
+
+  // For MULTI_ACTION, SERVER_LINKS, DIALOG_LIST: exit/close button.
+  optional DialogButton exit_action = 15;
+
+  // For SERVER_LINKS and DIALOG_LIST: button width.
+  // Default: 150.
+  int32 button_width = 16;
 }
 
-// Get current dialog state
+// Request to get the currently displayed dialog (if any).
 message BotGetDialogRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to get dialog for.
   string bot_id = 2;
 }
 
+// Response containing the current dialog state.
 message BotGetDialogResponse {
-  optional ServerDialog dialog = 1;       // Current dialog, or null if none
+  // The currently displayed dialog.
+  // Absent if no dialog is being shown.
+  optional ServerDialog dialog = 1;
 }
 
-// Submit dialog response (for dialogs with inputs)
+// Request to submit a dialog with input values.
+// Used for dialogs that have input fields requiring user data.
 message BotSubmitDialogRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot submitting the dialog.
   string bot_id = 2;
-  map<string, string> input_values = 3;   // Input key -> value mappings
+
+  // Map of input key to value for each input field.
+  // Keys must match the `key` field of DialogInput elements.
+  map<string, string> input_values = 3;
 }
 
+// Response for dialog submission.
 message BotSubmitDialogResponse {
+  // Whether the submission was processed successfully.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "No dialog is currently displayed"
   optional string error = 2;
 }
 
-// Click a dialog button
+// Request to click a button in the current dialog.
 message BotClickDialogButtonRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot clicking the button.
   string bot_id = 2;
-  int32 button_index = 3;                 // Index of button to click (-1 for close/escape)
+
+  // Index of the button to click.
+  // For NOTICE: 0 for the action button
+  // For CONFIRMATION: 0 for yes, 1 for no
+  // For MULTI_ACTION: index into the actions list
+  // Special value: -1 to close/escape the dialog
+  int32 button_index = 3;
 }
 
+// Response for dialog button click.
 message BotClickDialogButtonResponse {
+  // Whether the button click was processed successfully.
   bool success = 1;
+
+  // Error message if success is false.
+  // Possible errors: "No dialog is currently displayed"
   optional string error = 2;
 }
 
-// Close/dismiss current dialog
+// Request to close/dismiss the current dialog.
 message BotCloseDialogRequest {
+  // The UUID of the SoulFire instance containing the bot.
   string instance_id = 1;
+
+  // The profile UUID of the bot to close dialog for.
   string bot_id = 2;
 }
 
+// Response for dialog close.
 message BotCloseDialogResponse {
+  // Whether the dialog was successfully closed.
   bool success = 1;
+
+  // Error message if success is false.
   optional string error = 2;
 }
 
+// ============================================================================
+// BotService Definition
+// ============================================================================
+
+// Service for managing and controlling Minecraft bots.
+// Provides comprehensive APIs for bot monitoring, movement control,
+// inventory management, and interaction with server dialogs.
+//
+// Permissions:
+// - READ_BOT_INFO: Required for GetBotList, GetBotInfo, GetInventoryState,
+//                  RenderBotPov, GetDialog
+// - UPDATE_BOT_CONFIG: Required for all other operations that modify bot state
+//
+// Error Handling:
+// - NOT_FOUND: Instance or bot does not exist
+// - FAILED_PRECONDITION: Bot is not online or required game state is unavailable
+// - INTERNAL: Unexpected server errors (check server logs for details)
 service BotService {
+  // Returns a list of all bots configured in the specified instance.
+  // Includes both online and offline bots with their current status.
+  // For online bots, includes live state (position, health, etc.) but NOT full inventory data.
+  // Requires READ_BOT_INFO permission.
   rpc GetBotList (BotListRequest) returns (BotListResponse) {}
+
+  // Returns detailed information about a specific bot.
+  // Includes full live state with complete inventory data when the bot is online.
+  // Requires READ_BOT_INFO permission.
   rpc GetBotInfo (BotInfoRequest) returns (BotInfoResponse) {}
-  // Granular update for individual config entries
+
+  // Updates a single configuration entry for a specific bot.
+  // The configuration is persisted to the database immediately.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc UpdateBotConfigEntry (BotUpdateConfigEntryRequest) returns (BotUpdateConfigEntryResponse) {}
-  // Render the bot's point of view using software rendering
+
+  // Renders the bot's point-of-view as a PNG image using software rendering.
+  // The bot must be online with a valid player and level.
+  // Uses the bot's current render distance setting.
+  // Requires READ_BOT_INFO permission.
   rpc RenderBotPov (BotRenderPovRequest) returns (BotRenderPovResponse) {}
-  // Inventory management
+
+  // Performs a click action on an inventory/container slot.
+  // Supports various click types (left, right, shift, drop, swap, middle).
+  // The bot must be online with a valid player and gameMode.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc ClickInventorySlot (BotInventoryClickRequest) returns (BotInventoryClickResponse) {}
+
+  // Returns the current state of the bot's open container/inventory.
+  // Includes layout information, slot contents, and carried item.
+  // The bot must be online with a valid player.
+  // Requires READ_BOT_INFO permission.
   rpc GetInventoryState (BotInventoryStateRequest) returns (BotInventoryStateResponse) {}
+
+  // Closes the currently open container (chest, crafting table, etc.).
+  // Returns to the player inventory view.
+  // The bot must be online with a valid player.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc CloseContainer (BotCloseContainerRequest) returns (BotCloseContainerResponse) {}
+
+  // Opens the player's inventory screen.
+  // Sends a packet to the server to display the inventory UI.
+  // The bot must be online with a valid player.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc OpenInventory (BotOpenInventoryRequest) returns (BotOpenInventoryResponse) {}
-  // Mouse click actions
+
+  // Simulates a mouse click in the game world.
+  // Left click: attack entity or start breaking block.
+  // Right click: use item or interact with entity/block.
+  // The bot must be online with valid player, level, and gameMode.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc MouseClick (BotMouseClickRequest) returns (BotMouseClickResponse) {}
-  // Container button actions (enchanting, stonecutter, etc.)
+
+  // Clicks a container-specific action button.
+  // Used for: stonecutter recipes, enchanting, loom patterns, villager trades,
+  // beacon effects, crafter slot toggles, lectern page navigation.
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc ClickContainerButton (BotContainerButtonClickRequest) returns (BotContainerButtonClickResponse) {}
-  // Set text input in container (anvil rename, etc.)
+
+  // Sets text in a container's text input field.
+  // Currently only supports anvil item renaming (field_id: "item_name").
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc SetContainerText (BotSetContainerTextRequest) returns (BotSetContainerTextResponse) {}
-  // Hotbar slot selection
+
+  // Changes the selected hotbar slot.
+  // Valid slot range: 0-8 (corresponding to slots 1-9 in the UI).
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc SetHotbarSlot (BotSetHotbarSlotRequest) returns (BotSetHotbarSlotResponse) {}
-  // Movement control (WASD, jump, sneak, sprint)
+
+  // Updates the bot's movement state (WASD, jump, sneak, sprint).
+  // Only specified fields are changed; omitted fields retain their current value.
+  // Movement persists until explicitly changed or reset.
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc SetMovementState (BotSetMovementStateRequest) returns (BotSetMovementStateResponse) {}
+
+  // Resets all movement to stopped state.
+  // Equivalent to releasing all movement keys.
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc ResetMovement (BotResetMovementRequest) returns (BotResetMovementResponse) {}
-  // Rotation control (look direction)
+
+  // Sets the bot's view rotation (look direction).
+  // Yaw is normalized to -180 to 180, pitch is clamped to -90 to 90.
+  // The action is queued and executed on the next game tick.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc SetRotation (BotSetRotationRequest) returns (BotSetRotationResponse) {}
-  // Server dialog management (Minecraft 1.21.6+)
+
+  // Returns the currently displayed server dialog (Minecraft 1.21.6+).
+  // Dialogs are server-sent UI screens for custom interactions.
+  // Returns empty response if no dialog is being shown.
+  // Does not require the bot to be online (but dialog will be absent).
+  // Requires READ_BOT_INFO permission.
   rpc GetDialog (BotGetDialogRequest) returns (BotGetDialogResponse) {}
+
+  // Submits a dialog with input values.
+  // Used for dialogs containing text fields, checkboxes, dropdowns, or sliders.
+  // The dialog is closed after submission.
+  // Note: Full dialog response packets are not yet implemented; this clears local state.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc SubmitDialog (BotSubmitDialogRequest) returns (BotSubmitDialogResponse) {}
+
+  // Clicks a button in the current dialog.
+  // Button index depends on dialog type (see BotClickDialogButtonRequest).
+  // The dialog is typically closed after the button click.
+  // Note: Full dialog button packets are not yet implemented; this clears local state.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc ClickDialogButton (BotClickDialogButtonRequest) returns (BotClickDialogButtonResponse) {}
+
+  // Closes/dismisses the current dialog.
+  // Clears the local dialog state.
+  // Requires UPDATE_BOT_CONFIG permission.
   rpc CloseDialog (BotCloseDialogRequest) returns (BotCloseDialogResponse) {}
 }

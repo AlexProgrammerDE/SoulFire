@@ -7,29 +7,100 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
+// Request message for checking the validity of one or more proxies.
+// The check is performed by attempting to connect to a Minecraft server
+// through each proxy and measuring the connection latency.
 message ProxyCheckRequest {
+  // The UUID of the instance to use for proxy checking.
+  // The instance provides configuration such as the target Minecraft server address
+  // (configured via ProxySettings.PROXY_CHECK_ADDRESS, defaults to "mc.hypixel.net"),
+  // the protocol version, and concurrency settings.
+  // The user must have CHECK_PROXY permission on this instance.
   string instance_id = 1;
+
+  // List of proxies to check. Each proxy will be tested by attempting to
+  // establish a connection to the configured Minecraft server through it.
+  // Proxies are checked concurrently based on the instance's PROXY_CHECK_CONCURRENCY
+  // setting (defaults to 10 concurrent checks).
   repeated ProxyProto proxy = 2;
 }
 
+// Result of checking a single proxy's validity and performance.
 message ProxyCheckResponseSingle {
+  // The proxy that was checked. This is echoed back from the request
+  // to allow correlation when checking multiple proxies.
   ProxyProto proxy = 1;
+
+  // Whether the proxy check was successful. A proxy is considered valid if
+  // a connection through it to the Minecraft server was established successfully
+  // and a status response packet was received within the 30-second timeout.
+  // If false, the proxy failed to connect, timed out, or encountered an error.
   bool valid = 2;
+
+  // The time in milliseconds taken to complete the proxy check.
+  // This measures the total time from starting the connection attempt
+  // until receiving the server status response (or until failure/timeout).
+  // Useful for comparing proxy performance and choosing the fastest proxies.
   int32 latency = 3;
+
+  // The real IP address as seen by the target server (if available).
+  // This field may be empty if the IP could not be determined.
+  // Note: Currently not populated by the implementation.
   string real_ip = 4;
 }
 
-// Marks the end of a proxy check stream
+// Sentinel message indicating that all proxy checks have completed.
+// This is the final message sent in the response stream, signaling
+// that no more ProxyCheckResponseSingle messages will follow.
 message ProxyCheckEnd {
 }
 
+// Response message for proxy checking, sent as a stream.
+// Each message contains either a single proxy check result or an end marker.
 message ProxyCheckResponse {
   oneof data {
+    // A single proxy check result. Multiple of these will be streamed
+    // as each proxy check completes, allowing the client to process
+    // results incrementally rather than waiting for all checks to finish.
     ProxyCheckResponseSingle single = 4;
+
+    // End-of-stream marker indicating all proxy checks are complete.
+    // This is always the last message in the stream before it closes.
     ProxyCheckEnd end = 5;
   }
 }
 
+// Service for validating proxy servers by testing their ability to connect
+// to Minecraft servers. This is useful for filtering out dead or slow proxies
+// before using them for bot connections.
+//
+// The service tests proxies by attempting to establish a Minecraft protocol
+// connection through each proxy to a configurable target server and waiting
+// for a status response packet. Results include whether the proxy works and
+// its latency.
 service ProxyCheckService {
+  // Checks the validity of one or more proxies by attempting to connect
+  // through them to a Minecraft server.
+  //
+  // The check process:
+  // 1. For each proxy in the request, a connection attempt is made through
+  //    the proxy to the Minecraft server configured in the instance settings
+  // 2. The connection uses the protocol version configured in the instance
+  // 3. A proxy is considered valid if it successfully connects and receives
+  //    a server status response within 30 seconds
+  // 4. Results are streamed back as each check completes
+  // 5. A ProxyCheckEnd message is sent when all checks are complete
+  //
+  // Concurrency is controlled by the instance's PROXY_CHECK_CONCURRENCY setting.
+  //
+  // Required permission: CHECK_PROXY on the specified instance.
+  //
+  // Error cases:
+  // - NOT_FOUND: The specified instance_id does not exist
+  // - PERMISSION_DENIED: The user lacks CHECK_PROXY permission on the instance
+  // - INTERNAL: An unexpected error occurred during proxy checking
+  //
+  // The stream can be cancelled by the client at any time, which will
+  // terminate any in-progress proxy checks.
   rpc Check (ProxyCheckRequest) returns (stream ProxyCheckResponse) {}
 }

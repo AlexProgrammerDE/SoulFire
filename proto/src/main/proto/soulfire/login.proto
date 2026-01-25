@@ -5,40 +5,131 @@ option java_multiple_files = true;
 
 package soulfire.v1;
 
+// Request message for initiating a login flow with an email address.
 message LoginRequest {
+  // The email address of the user attempting to log in.
+  // If a user with this email exists, a six-digit verification code will be sent to this address.
+  // For security reasons, the response is the same whether or not the email is registered,
+  // preventing enumeration attacks.
   string email = 1;
 }
 
+// Response message representing the next step in the authentication flow.
+// This is a polymorphic response that indicates what action should be taken next.
 message NextAuthFlowResponse {
+  // Indicates that an email verification code has been sent (if the email was registered).
+  // The client should prompt the user to enter the six-digit code from their email.
+  // This is an empty message as the presence itself is the signal; no additional data is needed.
   message EmailCode {
   }
 
+  // Indicates successful authentication.
+  // The client should store the JWT token and use it for subsequent authenticated requests.
   message Success {
+    // A JWT (JSON Web Token) for authenticating subsequent API requests.
+    // This token should be included in the Authorization header for authenticated endpoints.
+    // The token is issued with the "api" audience claim.
     string token = 1;
   }
 
+  // Indicates that the authentication flow has failed.
   message Failure {
+    // Enumeration of possible failure reasons.
     enum Reason {
+      // The provided verification code was incorrect, expired, or the auth flow token was invalid.
+      // This is also returned when the auth flow token does not exist (e.g., expired after 15 minutes)
+      // to prevent timing attacks that could reveal valid flow tokens.
       INVALID_CODE = 0;
     }
 
+    // The specific reason for the authentication failure.
     Reason reason = 1;
   }
 
+  // A unique token identifying this authentication flow session.
+  // This token must be included in subsequent requests (e.g., EmailCodeRequest) to continue the flow.
+  // The token is a UUID string and expires after 15 minutes of inactivity.
   string auth_flow_token = 1;
+
+  // The next step in the authentication flow. Exactly one of these will be set.
   oneof next {
+    // Set when the client should prompt the user to enter the email verification code.
+    // This is the response after a successful Login RPC call.
     EmailCode email_code = 2;
+
+    // Set when authentication is complete and successful.
+    // Contains the JWT token for authenticated API access.
     Success success = 3;
+
+    // Set when authentication has failed.
+    // Contains the reason for the failure.
     Failure failure = 4;
   }
 }
 
+// Request message for verifying an email verification code.
 message EmailCodeRequest {
+  // The authentication flow token received from the Login RPC response.
+  // This token links the code verification to the original login request.
+  // Must be a valid UUID string.
   string auth_flow_token = 1;
+
+  // The six-digit verification code that was sent to the user's email address.
+  // Must exactly match the code that was emailed to the user.
   string code = 2;
 }
 
+// Service for authenticating users via email-based passwordless login.
+//
+// Authentication Flow:
+// 1. Client calls Login with the user's email address
+// 2. If the email is registered, a six-digit code is sent to that email
+// 3. Client receives an auth_flow_token and EmailCode response
+// 4. User enters the code from their email
+// 5. Client calls EmailCode with the auth_flow_token and the code
+// 6. If valid, client receives a JWT token; if invalid, receives a Failure
+//
+// Security Features:
+// - Rate limited to 20 requests per 10 minutes per origin to prevent brute force attacks
+// - Auth flow tokens expire after 15 minutes
+// - Same response for registered and unregistered emails to prevent email enumeration
+// - Invalid codes return the same error as expired/invalid flow tokens to prevent timing attacks
+//
+// Error Handling:
+// - RESOURCE_EXHAUSTED: Rate limit exceeded (too many login attempts)
+// - UNAUTHENTICATED: No origin header provided (required for rate limiting)
+// - INTERNAL: Unexpected server error during processing
 service LoginService {
+  // Initiates a login flow for the specified email address.
+  //
+  // If the email is registered, a six-digit verification code is sent to that address.
+  // The response always indicates that an email code step is next, regardless of whether
+  // the email exists, to prevent email enumeration attacks.
+  //
+  // Returns:
+  // - NextAuthFlowResponse with email_code set and a new auth_flow_token
+  //
+  // Errors:
+  // - RESOURCE_EXHAUSTED: Too many login attempts from this origin
+  // - UNAUTHENTICATED: Missing origin header
+  // - INTERNAL: Server error (e.g., database or email sending failure)
   rpc Login (LoginRequest) returns (NextAuthFlowResponse) {}
+
+  // Verifies an email verification code to complete authentication.
+  //
+  // The auth_flow_token must match a pending login flow, and the code must match
+  // the one that was sent to the user's email. On success, returns a JWT token.
+  // On failure, returns a Failure response with INVALID_CODE reason.
+  //
+  // After successful verification, the auth_flow_token is invalidated and cannot be reused.
+  //
+  // Returns:
+  // - NextAuthFlowResponse with success set (containing JWT token) if code is valid
+  // - NextAuthFlowResponse with failure set (INVALID_CODE reason) if code is invalid
+  //
+  // Errors:
+  // - RESOURCE_EXHAUSTED: Too many login attempts from this origin
+  // - UNAUTHENTICATED: Missing origin header
+  // - INTERNAL: Server error (e.g., JWT generation failure)
   rpc EmailCode (EmailCodeRequest) returns (NextAuthFlowResponse) {}
 }

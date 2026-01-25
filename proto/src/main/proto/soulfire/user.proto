@@ -8,87 +8,230 @@ package soulfire.v1;
 import "soulfire/common.proto";
 import "google/protobuf/timestamp.proto";
 
+// Request message for creating a new user account in the SoulFire system.
+// The created user will have no password; authentication is done via JWT tokens.
 message UserCreateRequest {
+  // The username for the new user.
+  // Must be lowercase, between 3 and 32 characters.
+  // Must begin with an alphanumeric character, followed by alphanumeric characters or dashes,
+  // and end with an alphanumeric character.
+  // Must be unique across all users.
   string username = 1;
+  // The role to assign to the user. Determines what permissions the user has.
+  // ADMIN users have all permissions, while USER role has limited permissions
+  // controlled by server settings.
   UserRole role = 2;
+  // The email address for the user.
+  // Must be a valid email format and unique across all users.
+  // Maximum length is 255 characters.
   string email = 3;
 }
 
+// Response message returned after successfully creating a new user.
 message UserCreateResponse {
+  // The unique identifier (UUID) assigned to the newly created user.
+  // This ID should be used for all subsequent operations on this user.
   string id = 1;
 }
 
+// Request message for deleting an existing user from the system.
+// Deleting a user will also cascade delete all related data (owned instances, audit logs).
 message UserDeleteRequest {
+  // The unique identifier (UUID) of the user to delete.
+  // Cannot be the ID of the requesting user (cannot delete self).
+  // Cannot be the root user ID (00000000-0000-0000-0000-000000000000).
   string id = 1;
 }
 
+// Response message returned after successfully deleting a user.
+// Empty response indicates success.
 message UserDeleteResponse {
 }
 
+// Request message for listing all users in the system.
+// No parameters required; returns all users.
 message UserListRequest {
 }
 
+// Response message containing a list of all users in the system.
 message UserListResponse {
+  // Represents a user in the list with all their profile information.
   message User {
+    // The unique identifier (UUID) of the user.
     string id = 1;
+    // The username of the user (3-32 lowercase alphanumeric characters with dashes allowed).
     string username = 2;
+    // The role of the user (ADMIN or USER).
     UserRole role = 3;
+    // The email address of the user.
     string email = 4;
+    // Timestamp when the user account was created.
     google.protobuf.Timestamp created_at = 5;
+    // Timestamp when the user account was last updated.
     google.protobuf.Timestamp updated_at = 6;
+    // Timestamp of the user's last successful authentication.
+    // Optional; may be absent if the user has never logged in.
     optional google.protobuf.Timestamp last_login_at = 7;
+    // Minimum issued-at timestamp for valid JWT tokens.
+    // Tokens issued before this timestamp are considered invalid.
+    // Used to invalidate all sessions by updating this value.
     google.protobuf.Timestamp min_issued_at = 8;
   }
 
+  // List of all users in the system.
   repeated User users = 1;
 }
 
+// Request message for retrieving detailed information about a specific user.
 message UserInfoRequest {
+  // The unique identifier (UUID) of the user to retrieve information for.
   string id = 1;
 }
 
+// Response message containing detailed information about a specific user.
 message UserInfoResponse {
+  // The username of the user (3-32 lowercase alphanumeric characters with dashes allowed).
   string username = 1;
+  // The role of the user (ADMIN or USER).
   UserRole role = 2;
+  // The email address of the user.
   string email = 3;
+  // Timestamp when the user account was created.
   google.protobuf.Timestamp created_at = 4;
+  // Timestamp when the user account was last updated.
   google.protobuf.Timestamp updated_at = 5;
+  // Timestamp of the user's last successful authentication.
+  // Optional; may be absent if the user has never logged in.
   optional google.protobuf.Timestamp last_login_at = 6;
+  // Minimum issued-at timestamp for valid JWT tokens.
+  // Tokens issued before this timestamp are considered invalid.
+  // Used to invalidate all sessions by updating this value.
   google.protobuf.Timestamp min_issued_at = 7;
 }
 
-// Invalidate all sessions for a user, effectively logging them out of all devices.
+// Request message for invalidating all sessions for a user.
+// This effectively logs the user out of all devices by updating the min_issued_at
+// timestamp, which causes all previously issued JWT tokens to become invalid.
 message InvalidateSessionsRequest {
+  // The unique identifier (UUID) of the user whose sessions should be invalidated.
+  // Cannot be the ID of the requesting user (cannot invalidate own sessions via this method).
+  // Cannot be the root user ID (00000000-0000-0000-0000-000000000000).
   string id = 1;
 }
 
+// Response message returned after successfully invalidating all sessions.
+// Empty response indicates success.
 message InvalidateSessionsResponse {
 }
 
+// Request message for updating an existing user's profile information.
+// All fields except ID will be updated to the provided values.
 message UpdateUserRequest {
+  // The unique identifier (UUID) of the user to update.
+  // Cannot be the ID of the requesting user (cannot update self via this method).
+  // Cannot be the root user ID (00000000-0000-0000-0000-000000000000).
   string id = 1;
+  // The new username for the user.
+  // Must be lowercase, between 3 and 32 characters.
+  // Must begin with an alphanumeric character, followed by alphanumeric characters or dashes,
+  // and end with an alphanumeric character.
+  // Must be unique across all users.
   string username = 2;
+  // The new role to assign to the user.
+  // ADMIN users have all permissions, while USER role has limited permissions.
   UserRole role = 3;
+  // The new email address for the user.
+  // Must be a valid email format and unique across all users.
+  // Maximum length is 255 characters.
   string email = 4;
 }
 
+// Response message returned after successfully updating a user.
+// Empty response indicates success.
 message UpdateUserResponse {
 }
 
+// Request message for generating a new API token for a user.
+// The generated token is a JWT that can be used for API authentication.
 message GenerateUserAPITokenRequest {
+  // The unique identifier (UUID) of the user to generate a token for.
+  // Cannot be the ID of the requesting user (cannot generate token for self via this method).
+  // Cannot be the root user ID (00000000-0000-0000-0000-000000000000).
   string id = 1;
 }
 
+// Response message containing the newly generated API token.
 message GenerateUserAPITokenResponse {
+  // The generated JWT token for API authentication.
+  // This token is signed with the server's secret key and has the "api" audience.
+  // The token does not expire but can be invalidated by updating the user's min_issued_at.
+  // Should be stored securely as it grants full access as the specified user.
   string token = 1;
 }
 
+// UserService provides user management functionality for the SoulFire system.
+// All methods require authentication via JWT token in the request metadata.
+// Most methods require specific global permissions (CREATE_USER, READ_USER, UPDATE_USER,
+// DELETE_USER, INVALIDATE_SESSIONS, or GENERATE_API_TOKEN).
+// Admin users automatically have all permissions.
+// Note: The root user (ID: 00000000-0000-0000-0000-000000000000) cannot be modified or deleted.
+// Note: Users cannot modify their own account through this service (use self-service endpoints instead).
 service UserService {
+  // Creates a new user account in the system.
+  // Requires the CREATE_USER global permission.
+  // Returns the UUID of the newly created user.
+  // Error cases:
+  //   - INTERNAL: If username or email already exists, or validation fails
+  //   - PERMISSION_DENIED: If caller lacks CREATE_USER permission
   rpc CreateUser (UserCreateRequest) returns (UserCreateResponse) {}
+
+  // Deletes an existing user from the system.
+  // Requires the DELETE_USER global permission.
+  // Cascades to delete all owned instances and audit logs.
+  // Also disconnects the user from any active log subscriptions.
+  // Error cases:
+  //   - INTERNAL: If user not found, or attempting to delete self/root user
+  //   - PERMISSION_DENIED: If caller lacks DELETE_USER permission
   rpc DeleteUser (UserDeleteRequest) returns (UserDeleteResponse) {}
+
+  // Lists all users in the system.
+  // Requires the READ_USER global permission.
+  // Returns complete information for all users including timestamps.
+  // Error cases:
+  //   - INTERNAL: If database query fails
+  //   - PERMISSION_DENIED: If caller lacks READ_USER permission
   rpc ListUsers (UserListRequest) returns (UserListResponse) {}
+
+  // Retrieves detailed information about a specific user.
+  // Requires the READ_USER global permission.
+  // Error cases:
+  //   - INTERNAL: If user not found
+  //   - PERMISSION_DENIED: If caller lacks READ_USER permission
   rpc GetUserInfo (UserInfoRequest) returns (UserInfoResponse) {}
+
+  // Invalidates all active sessions for a user by updating their min_issued_at timestamp.
+  // Requires the INVALIDATE_SESSIONS global permission.
+  // After this call, all previously issued JWT tokens for the user become invalid,
+  // effectively logging them out of all devices.
+  // Error cases:
+  //   - INTERNAL: If user not found, or attempting to invalidate self/root user sessions
+  //   - PERMISSION_DENIED: If caller lacks INVALIDATE_SESSIONS permission
   rpc InvalidateSessions (InvalidateSessionsRequest) returns (InvalidateSessionsResponse) {}
+
+  // Updates an existing user's profile information.
+  // Requires the UPDATE_USER global permission.
+  // All profile fields (username, email, role) are updated to the provided values.
+  // Error cases:
+  //   - INTERNAL: If user not found, attempting to update self/root user, or validation fails
+  //   - PERMISSION_DENIED: If caller lacks UPDATE_USER permission
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {}
+
+  // Generates a new API token (JWT) for a specific user.
+  // Requires the GENERATE_API_TOKEN global permission.
+  // The generated token has the "api" audience and does not expire.
+  // The token can be invalidated by calling InvalidateSessions for the user.
+  // Error cases:
+  //   - INTERNAL: If user not found, or attempting to generate token for self/root user
+  //   - PERMISSION_DENIED: If caller lacks GENERATE_API_TOKEN permission
   rpc GenerateUserAPIToken (GenerateUserAPITokenRequest) returns (GenerateUserAPITokenResponse) {}
 }

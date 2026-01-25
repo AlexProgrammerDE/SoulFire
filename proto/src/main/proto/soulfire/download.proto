@@ -7,24 +7,105 @@ package soulfire.v1;
 
 import "soulfire/common.proto";
 
+// Represents a single HTTP header as a key-value pair.
+// Used for both request headers (sent to the target server) and
+// response headers (received from the target server).
 message HeaderPair {
+  // The header name (e.g., "Content-Type", "Authorization", "Accept").
+  // Header names are case-insensitive per HTTP specification.
   string key = 1;
+
+  // The header value (e.g., "application/json", "Bearer token123").
   string value = 2;
 }
 
+// Request message for downloading content from a URL through the SoulFire server.
+// This allows clients to fetch remote resources using the server's network connection,
+// optionally through a proxy, which is useful for accessing resources that may be
+// blocked or rate-limited from the client's network.
 message DownloadRequest {
+  // The UUID of the SoulFire instance to associate this download with.
+  // Used for permission checking - the caller must have DOWNLOAD_URL permission
+  // for this instance. Must be a valid UUID string (e.g., "550e8400-e29b-41d4-a716-446655440000").
   string instance_id = 1;
+
+  // The URI to download content from. Must be a valid, fully-formed URI
+  // (e.g., "https://example.com/resource.json"). The server will make an HTTP GET
+  // request to this URI.
   string uri = 2;
+
+  // Optional HTTP headers to include in the request to the target server.
+  // These headers are added on top of the default headers set by the server
+  // (Accept, Accept-Language, User-Agent). Custom headers can override defaults.
   repeated HeaderPair headers = 3;
+
+  // Optional proxy configuration for the download request.
+  // If not provided, the request will be made directly from the server.
+  // Supports HTTP, SOCKS4, and SOCKS5 proxies with optional authentication.
   optional ProxyProto proxy = 4;
 }
 
+// Response message containing the downloaded content and metadata.
+// Returned after successfully fetching content from the requested URI.
 message DownloadResponse {
+  // The raw bytes of the downloaded content.
+  // This contains the complete response body from the target server.
+  // May be empty if the server returned no content (e.g., 204 No Content).
   bytes data = 1;
+
+  // All HTTP headers returned by the target server in its response.
+  // Includes standard headers like Content-Type, Content-Length, Cache-Control,
+  // as well as any custom headers set by the server.
   repeated HeaderPair headers = 2;
+
+  // The HTTP status code returned by the target server (e.g., 200, 404, 500).
+  // Common values:
+  // - 200: OK - Request succeeded
+  // - 301/302: Redirect (note: redirects may be followed automatically)
+  // - 400: Bad Request
+  // - 401: Unauthorized
+  // - 403: Forbidden
+  // - 404: Not Found
+  // - 500: Internal Server Error
   int32 status_code = 3;
 }
 
+// Service for downloading content from remote URLs through the SoulFire server.
+// This service acts as a proxy, allowing clients to fetch remote resources using
+// the server's network connection and optionally through a configured proxy.
+//
+// Use cases include:
+// - Downloading resources that may be blocked from the client's network
+// - Fetching content through a specific proxy for anonymity or geo-unlocking
+// - Centralizing external API calls through the server
+//
+// The service uses a Reactor Netty HTTP client with:
+// - 5-second response timeout
+// - Automatic compression support
+// - Default Accept, Accept-Language, and User-Agent headers
+//
+// Authorization:
+// - Requires a valid JWT token
+// - Caller must have DOWNLOAD_URL permission for the specified instance
+//
+// Error handling:
+// - Returns gRPC INTERNAL status on network errors, timeouts, or server failures
+// - The error description contains details about the failure
 service DownloadService {
+  // Downloads content from the specified URI and returns the response.
+  //
+  // Makes an HTTP GET request to the URI specified in the request, optionally
+  // routing through a proxy. Custom headers can be provided to customize the request.
+  //
+  // Parameters:
+  //   request - Contains the target URI, instance ID for permissions, optional headers,
+  //             and optional proxy configuration
+  //
+  // Returns:
+  //   The downloaded content as bytes, along with response headers and HTTP status code
+  //
+  // Errors:
+  //   PERMISSION_DENIED - Caller lacks DOWNLOAD_URL permission for the instance
+  //   INTERNAL - Network error, connection timeout, invalid URI, or other server error
   rpc Download (DownloadRequest) returns (DownloadResponse) {}
 }
