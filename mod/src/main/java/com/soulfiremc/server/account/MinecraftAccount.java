@@ -68,16 +68,6 @@ public record MinecraftAccount(
       SettingsSource.Stem.settingsFromProto(account.getPersistentMetadataList()));
   }
 
-  public static MinecraftAccount forProxyCheck() {
-    return new MinecraftAccount(
-      AuthType.OFFLINE,
-      UUID.randomUUID(),
-      "ProxyCheck",
-      new OfflineJavaData(),
-      Map.of(),
-      Map.of());
-  }
-
   @Override
   public String toString() {
     return "MinecraftAccount(authType=%s, profileId=%s, lastKnownName=%s)"

@@ -21,6 +21,7 @@ import com.google.common.base.Stopwatch;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
+import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.bot.BotConnection;
@@ -51,6 +52,7 @@ import java.util.function.Consumer;
 @Slf4j
 @RequiredArgsConstructor
 public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyCheckServiceImplBase {
+  private static final MinecraftAccount PROXY_CHECK_ACCOUNT = OfflineAuthService.createAccount("ProxyCheck");
   private final SoulFireServer soulFireServer;
 
   @Override
@@ -79,8 +81,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
             var stopWatch = Stopwatch.createStarted();
             var factory = new BotConnectionFactory(
               instance,
-              new BotSettingsImpl(null, settingsSource),
-              MinecraftAccount.forProxyCheck(),
+              new BotSettingsImpl(PROXY_CHECK_ACCOUNT, settingsSource),
               protocolVersion,
               serverAddress,
               proxy,

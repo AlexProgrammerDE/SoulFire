@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server;
 
-import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
@@ -380,7 +379,6 @@ public final class InstanceManager {
 
             return new BotSettingsImpl(fetchedAccount, fetchedSettingsSource);
           }, 1, TimeUnit.SECONDS)),
-          minecraftAccount,
           protocolVersion,
           serverAddress,
           proxyData,
@@ -414,7 +412,7 @@ public final class InstanceManager {
             break;
           }
 
-          log.debug("Scheduling bot {}", factory.minecraftAccount().lastKnownName());
+          log.debug("Scheduling bot {}", factory.settingsSource().stem().lastKnownName());
           scheduler.schedule(
             SoulFireScheduler.FinalizableRunnable.withFinalizer(() -> {
               if (sessionLifecycle().isStoppedOrStopping()) {
@@ -423,7 +421,7 @@ public final class InstanceManager {
 
               TimeUtil.waitCondition(() -> sessionLifecycle().isPaused());
 
-              log.debug("Connecting bot {}", factory.minecraftAccount().lastKnownName());
+              log.debug("Connecting bot {}", factory.settingsSource().stem().lastKnownName());
               var botConnection = factory.prepareConnection(false);
               storeNewBot(botConnection);
 

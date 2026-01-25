@@ -33,7 +33,6 @@ import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.shared.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -86,7 +85,6 @@ public final class BotConnection {
   private final BotConnectionFactory factory;
   private final InstanceManager instanceManager;
   private final BotSettingsSource settingsSource;
-  private final MinecraftAccount minecraftAccount;
   private final UUID accountProfileId;
   private final String accountName;
   private final ServerAddress serverAddress;
@@ -106,7 +104,6 @@ public final class BotConnection {
     BotConnectionFactory factory,
     InstanceManager instanceManager,
     BotSettingsSource settingsSource,
-    MinecraftAccount minecraftAccount,
     ProtocolVersion currentProtocolVersion,
     ServerAddress serverAddress,
     @Nullable
@@ -116,13 +113,13 @@ public final class BotConnection {
     this.factory = factory;
     this.instanceManager = instanceManager;
     this.settingsSource = settingsSource;
-    this.minecraftAccount = minecraftAccount;
+    var minecraftAccount = settingsSource.stem();
     this.accountProfileId = minecraftAccount.profileId();
     this.accountName = minecraftAccount.lastKnownName();
     this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.serverAddress = serverAddress;
-    this.minecraft = createMinecraftCopy();
+    this.minecraft = createMinecraftCopy(minecraftAccount);
     this.proxy = proxyData;
     this.eventLoopGroup = eventLoopGroup;
     this.sessionService = new SFSessionService(this);
@@ -131,7 +128,7 @@ public final class BotConnection {
   }
 
   @SneakyThrows
-  private Minecraft createMinecraftCopy() {
+  private Minecraft createMinecraftCopy(MinecraftAccount minecraftAccount) {
     var newInstance = SFModHelpers.deepCopy(SFConstants.BASE_MC_INSTANCE);
 
     //noinspection DataFlowIssue

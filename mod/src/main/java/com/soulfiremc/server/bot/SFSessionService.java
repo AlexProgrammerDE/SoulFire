@@ -38,7 +38,7 @@ public final class SFSessionService {
   private final BotConnection botConnection;
 
   public void joinServer(String serverId) {
-    var account = botConnection.minecraftAccount();
+    var account = botConnection.settingsSource().stem();
     var joinEndpoint = switch (account.authType()) {
       case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
       case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Server does not support auth type: " + account.authType());

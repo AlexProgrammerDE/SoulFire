@@ -32,7 +32,7 @@ public class MixinAccountsSave {
   private void getBedrockAccount(CallbackInfoReturnable<BedrockAuthManager> cir) {
     var connection = BotConnection.CURRENT.get();
     cir.setReturnValue(
-      (((BedrockData) connection.minecraftAccount().accountData()).getBedrockAuthManager(connection.proxy()))
+      (((BedrockData) connection.settingsSource().stem().accountData()).getBedrockAuthManager(connection.proxy()))
     );
   }
 }

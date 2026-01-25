@@ -19,12 +19,10 @@ package com.soulfiremc.server.bot;
 
 import com.google.common.net.HostAndPort;
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
-import com.soulfiremc.server.settings.lib.InstanceSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.EventLoopGroup;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -34,7 +32,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record BotConnectionFactory(
   InstanceManager instanceManager,
   BotSettingsSource settingsSource,
-  MinecraftAccount minecraftAccount,
   ProtocolVersion protocolVersion,
   ServerAddress serverAddress,
   @Nullable
@@ -59,7 +56,6 @@ public record BotConnectionFactory(
         this,
         instanceManager,
         settingsSource,
-        minecraftAccount,
         protocolVersion,
         serverAddress,
         proxyData,
