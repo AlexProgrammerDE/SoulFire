@@ -666,6 +666,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      var jsonValue = SettingsSource.Stem.valueToJsonElement(request.getValue());
+
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
@@ -680,7 +682,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
                 account.persistentMetadata(),
                 request.getNamespace(),
                 request.getKey(),
-                SettingsSource.Stem.valueToJsonElement(request.getValue()));
+                jsonValue);
               return account.withPersistentMetadata(newMetadata);
             }
             return account;
@@ -689,6 +691,16 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         instanceEntity.settings(currentSettings.withAccounts(newAccounts));
         session.merge(instanceEntity);
+      });
+
+      // Also update the live bot's persistent metadata if it's connected
+      soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        var bot = instance.botConnections().get(accountId);
+        if (bot != null) {
+          bot.persistentMetadata().set(request.getNamespace(), request.getKey(), jsonValue);
+          // Mark clean since we just persisted it
+          bot.persistentMetadata().markClean();
+        }
       });
 
       responseObserver.onNext(SetAccountMetadataEntryResponse.newBuilder().build());
@@ -728,6 +740,16 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         instanceEntity.settings(currentSettings.withAccounts(newAccounts));
         session.merge(instanceEntity);
+      });
+
+      // Also update the live bot's persistent metadata if it's connected
+      soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        var bot = instance.botConnections().get(accountId);
+        if (bot != null) {
+          bot.persistentMetadata().remove(request.getNamespace(), request.getKey());
+          // Mark clean since we just persisted it
+          bot.persistentMetadata().markClean();
+        }
       });
 
       responseObserver.onNext(DeleteAccountMetadataEntryResponse.newBuilder().build());

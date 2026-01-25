@@ -21,7 +21,10 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
@@ -29,6 +32,7 @@ import java.util.function.Supplier;
 public final class MetadataHolder<O> {
   private final Map<Key, O> metadata = new HashMap<>();
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
+  private final AtomicBoolean dirty = new AtomicBoolean(false);
 
   public <T extends O> T getOrSet(MetadataKey<T> key, Supplier<T> defaultValue) {
     lock.readLock().lock();
@@ -49,6 +53,7 @@ public final class MetadataHolder<O> {
       }
       var value = defaultValue.get();
       this.metadata.put(key.key(), value);
+      dirty.set(true);
       return value;
     } finally {
       lock.writeLock().unlock();
@@ -77,6 +82,7 @@ public final class MetadataHolder<O> {
     lock.writeLock().lock();
     try {
       this.metadata.put(key.key(), value);
+      dirty.set(true);
     } finally {
       lock.writeLock().unlock();
     }
@@ -85,7 +91,9 @@ public final class MetadataHolder<O> {
   public <T extends O> void remove(MetadataKey<T> key) {
     lock.writeLock().lock();
     try {
-      this.metadata.remove(key.key());
+      if (this.metadata.remove(key.key()) != null) {
+        dirty.set(true);
+      }
     } finally {
       lock.writeLock().unlock();
     }
@@ -94,7 +102,11 @@ public final class MetadataHolder<O> {
   public <T extends O> T getAndRemove(MetadataKey<T> key) {
     lock.writeLock().lock();
     try {
-      return key.cast(this.metadata.remove(key.key()));
+      var removed = this.metadata.remove(key.key());
+      if (removed != null) {
+        dirty.set(true);
+      }
+      return key.cast(removed);
     } finally {
       lock.writeLock().unlock();
     }
@@ -109,8 +121,52 @@ public final class MetadataHolder<O> {
           this.metadata.put(Key.key(namespace, key), value);
         });
       });
+      dirty.set(false);
     } finally {
       lock.writeLock().unlock();
+    }
+  }
+
+  public void set(@KeyPattern.Namespace String namespace, @KeyPattern.Value String key, O value) {
+    lock.writeLock().lock();
+    try {
+      this.metadata.put(Key.key(namespace, key), value);
+      dirty.set(true);
+    } finally {
+      lock.writeLock().unlock();
+    }
+  }
+
+  public void remove(@KeyPattern.Namespace String namespace, @KeyPattern.Value String key) {
+    lock.writeLock().lock();
+    try {
+      if (this.metadata.remove(Key.key(namespace, key)) != null) {
+        dirty.set(true);
+      }
+    } finally {
+      lock.writeLock().unlock();
+    }
+  }
+
+  public void markClean() {
+    dirty.set(false);
+  }
+
+  public Optional<Map<String, Map<String, O>>> exportIfDirty() {
+    lock.readLock().lock();
+    try {
+      if (!dirty.get()) {
+        return Optional.empty();
+      }
+      var result = new LinkedHashMap<String, Map<String, O>>();
+      for (var entry : this.metadata.entrySet()) {
+        var key = entry.getKey();
+        result.computeIfAbsent(key.namespace(), _ -> new LinkedHashMap<>())
+          .put(key.value(), entry.getValue());
+      }
+      return Optional.of(result);
+    } finally {
+      lock.readLock().unlock();
     }
   }
 }

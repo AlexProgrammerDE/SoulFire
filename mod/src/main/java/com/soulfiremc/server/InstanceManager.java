@@ -164,6 +164,44 @@ public final class InstanceManager {
     }
 
     evictBots();
+    persistDirtyMetadata();
+  }
+
+  private void persistDirtyMetadata() {
+    var dirtyBots = new ArrayList<Map.Entry<UUID, Map<String, Map<String, com.google.gson.JsonElement>>>>();
+    for (var entry : botConnections.entrySet()) {
+      var bot = entry.getValue();
+      bot.persistentMetadata().exportIfDirty().ifPresent(metadata -> {
+        dirtyBots.add(Map.entry(entry.getKey(), metadata));
+        bot.persistentMetadata().markClean();
+      });
+    }
+
+    if (dirtyBots.isEmpty()) {
+      return;
+    }
+
+    sessionFactory.inTransaction(session -> {
+      var instanceEntity = session.find(InstanceEntity.class, id);
+      if (instanceEntity == null) {
+        return;
+      }
+
+      var currentSettings = instanceEntity.settings();
+      var newAccounts = currentSettings.accounts().stream()
+        .map(account -> {
+          for (var dirtyEntry : dirtyBots) {
+            if (account.profileId().equals(dirtyEntry.getKey())) {
+              return account.withPersistentMetadata(dirtyEntry.getValue());
+            }
+          }
+          return account;
+        })
+        .toList();
+
+      instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+      session.merge(instanceEntity);
+    });
   }
 
   private void evictBots() {
