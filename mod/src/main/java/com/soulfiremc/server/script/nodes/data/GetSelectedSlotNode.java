@@ -59,8 +59,8 @@ public final class GetSelectedSlotNode extends AbstractScriptNode {
     }
 
     var inventory = player.getInventory();
-    var selectedSlot = inventory.selected;
-    var heldItem = inventory.getSelected();
+    var selectedSlot = inventory.getSelectedSlot();
+    var heldItem = inventory.getSelectedItem();
     var itemId = BuiltInRegistries.ITEM.getKey(heldItem.getItem()).toString();
 
     return completed(results(

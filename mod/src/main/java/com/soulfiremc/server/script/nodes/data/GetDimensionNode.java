@@ -65,7 +65,7 @@ public final class GetDimensionNode extends AbstractScriptNode {
     }
 
     var dimensionKey = level.dimension();
-    var dimensionName = dimensionKey.location().toString();
+    var dimensionName = dimensionKey.identifier().toString();
 
     return completed(results(
       "dimension", dimensionName,

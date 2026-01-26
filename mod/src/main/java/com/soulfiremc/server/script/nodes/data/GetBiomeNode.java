@@ -58,7 +58,7 @@ public final class GetBiomeNode extends AbstractScriptNode {
 
     var biomeHolder = level.getBiome(player.blockPosition());
     var biomeKey = biomeHolder.unwrapKey();
-    var biomeName = biomeKey.map(key -> key.location().toString()).orElse("unknown");
+    var biomeName = biomeKey.map(key -> key.identifier().toString()).orElse("unknown");
 
     return completed(result("biome", biomeName));
   }
