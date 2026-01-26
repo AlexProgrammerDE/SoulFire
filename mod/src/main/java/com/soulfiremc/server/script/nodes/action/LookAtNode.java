@@ -20,7 +20,7 @@ package com.soulfiremc.server.script.nodes.action;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.phys.Vec3;
 
@@ -43,7 +43,7 @@ public final class LookAtNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);

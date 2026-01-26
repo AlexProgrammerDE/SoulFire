@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public final class BSplineNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // Get control points
     var p0 = getDoubleInput(inputs, "p0", 0.0);
     var p1 = getDoubleInput(inputs, "p1", 0.0);

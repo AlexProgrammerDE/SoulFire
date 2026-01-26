@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public final class ListLengthNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var list = getListInput(inputs, "list");
     return completed(result("length", list.size()));
   }

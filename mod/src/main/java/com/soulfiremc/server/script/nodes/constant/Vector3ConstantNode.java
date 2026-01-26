@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +40,7 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);

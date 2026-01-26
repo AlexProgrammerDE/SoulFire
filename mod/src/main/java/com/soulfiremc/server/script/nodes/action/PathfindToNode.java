@@ -23,7 +23,7 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -46,7 +46,7 @@ public final class PathfindToNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var x = getIntInput(inputs, "x", 0);
     var y = getIntInput(inputs, "y", 64);
@@ -60,7 +60,7 @@ public final class PathfindToNode extends AbstractScriptNode {
       .exceptionally(e -> result("success", false));
 
     // Track pending operation for cleanup on deactivation
-    context.addPendingOperation(future);
+    runtime.addPendingOperation(future);
     return future;
   }
 }

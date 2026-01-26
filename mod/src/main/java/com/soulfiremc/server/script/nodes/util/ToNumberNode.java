@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +41,7 @@ public final class ToNumberNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
     var defaultValue = getDoubleInput(inputs, "default", 0.0);
 

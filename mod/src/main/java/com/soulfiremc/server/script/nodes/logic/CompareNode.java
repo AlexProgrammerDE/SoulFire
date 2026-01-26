@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public final class CompareNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = inputs.get("a");
     var b = inputs.get("b");
     var operator = getStringInput(inputs, "operator", "==");

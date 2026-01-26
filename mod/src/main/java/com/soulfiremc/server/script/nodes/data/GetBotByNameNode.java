@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -41,14 +41,14 @@ public final class GetBotByNameNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var name = getStringInput(inputs, "name", "");
 
     if (name.isEmpty()) {
       return completed(results("bot", null, "found", false));
     }
 
-    var bot = context.instance().botConnections().values().stream()
+    var bot = runtime.instance().botConnections().values().stream()
       .filter(b -> b.accountName().equalsIgnoreCase(name))
       .findFirst()
       .orElse(null);

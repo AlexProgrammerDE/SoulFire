@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -40,15 +40,15 @@ public final class PrintNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var message = getInput(inputs, "message", null);
     var level = getStringInput(inputs, "level", "info");
 
     // Convert message to string representation
     var messageStr = message != null ? message.toString() : "null";
 
-    // Log via context's event listener
-    context.eventListener().onLog(level, messageStr);
+    // Log via runtime
+    runtime.log(level, messageStr);
 
     return completedEmpty();
   }

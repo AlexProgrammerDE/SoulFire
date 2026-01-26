@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -61,7 +61,7 @@ public final class FormulaNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var expression = getStringInput(inputs, "expression", "0");
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 0.0);

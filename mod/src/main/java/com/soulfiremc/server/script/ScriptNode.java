@@ -23,8 +23,9 @@ import java.util.concurrent.CompletableFuture;
 /// Base interface for all script nodes in the visual scripting system.
 /// Each node type implements this interface to define its execution behavior.
 ///
-/// Nodes can perform synchronous or asynchronous operations and return
-/// outputs that can be connected to other nodes as inputs.
+/// Nodes are functional and pure - they receive inputs and produce outputs.
+/// They have access to a minimal runtime API (instance, scheduler, pending ops)
+/// but not to execution machinery like output storage or cancellation state.
 public interface ScriptNode {
   /// Returns the unique type identifier for this node.
   /// This is used to match node definitions from the proto with their implementations.
@@ -32,13 +33,13 @@ public interface ScriptNode {
   /// @return the node type identifier (e.g., "trigger.on_start", "action.pathfind")
   String getType();
 
-  /// Executes this node with the given context and inputs.
+  /// Executes this node with the given runtime and inputs.
   /// The execution can be asynchronous for operations like pathfinding or block breaking.
   ///
-  /// @param context the execution context providing access to instance and variables
+  /// @param runtime the node runtime providing access to instance and scheduler
   /// @param inputs  the resolved input values from connected nodes or default values
   /// @return a future that completes with the node's output values
-  CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs);
+  CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs);
 
   /// Returns whether this node is a trigger node (entry point for script execution).
   /// Trigger nodes have no execution input and start script flows.

@@ -28,15 +28,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-/// Execution context for script nodes.
-/// Provides access to the instance, node outputs, and pending operations.
-/// This class is thread-safe for use in async node execution.
+/// Execution context for scripts.
+/// Implements NodeRuntime to provide the minimal API surface for nodes.
+/// Additional methods (output storage, cancellation) are for engine use only.
 ///
+/// This class is thread-safe for use in async node execution.
 /// Scripts run at instance level. Bot-specific operations receive the bot as an
 /// explicit input parameter - nodes should be stateless and pure.
-/// Data flows through node connections, not through mutable variables.
 @Getter
-public final class ScriptContext {
+public final class ScriptContext implements NodeRuntime {
   private final InstanceManager instance;
   private final Map<String, Map<String, NodeValue>> nodeOutputs;
   private final ScriptEventListener eventListener;
@@ -54,22 +54,22 @@ public final class ScriptContext {
     this.pendingOperations = ConcurrentHashMap.newKeySet();
   }
 
-  /// Gets the scheduler for async operations.
-  ///
-  /// @return the instance scheduler
+  @Override
   public SoulFireScheduler scheduler() {
     return instance.scheduler();
   }
 
-  /// Registers a pending async operation for cleanup on deactivation.
-  ///
-  /// @param future the future to track
+  @Override
   public void addPendingOperation(Future<?> future) {
     pendingOperations.add(future);
     // Auto-remove when complete
     if (future instanceof CompletableFuture<?> cf) {
       cf.whenComplete((_, _) -> pendingOperations.remove(future));
     }
+  }
+
+  public void log(String level, String message) {
+    eventListener.onLog(level, message);
   }
 
   /// Cancels all pending async operations.

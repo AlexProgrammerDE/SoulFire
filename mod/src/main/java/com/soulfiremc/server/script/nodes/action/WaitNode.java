@@ -19,7 +19,7 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptContext;
+import com.soulfiremc.server.script.NodeRuntime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +41,7 @@ public final class WaitNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var durationMs = getLongInput(inputs, "durationMs", 1000L);
 
     if (durationMs <= 0) {
@@ -50,7 +50,7 @@ public final class WaitNode extends AbstractScriptNode {
 
     var future = new CompletableFuture<Map<String, NodeValue>>();
 
-    context.scheduler().schedule(
+    runtime.scheduler().schedule(
       () -> future.complete(emptyResult()),
       durationMs,
       TimeUnit.MILLISECONDS
