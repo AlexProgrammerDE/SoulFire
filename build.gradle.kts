@@ -16,6 +16,7 @@ allprojects {
       name = "Jitpack Repository"
       content {
         includeGroupByRegex("com\\.github\\..*")
+        excludeGroup("com.github.ben-manes.caffeine")
         includeGroup("dev.kastle.NetworkCompatible")
       }
     }
