@@ -35,6 +35,10 @@ dependencies {
   compileOnly(libs.immutables.value)
   annotationProcessor(libs.immutables.value)
 
+  // Reactor for reactive script execution
+  api(libs.reactor.core)
+  testImplementation(libs.reactor.test)
+
   annotationProcessor(libs.picoli.codegen)
 
   // For CLI support

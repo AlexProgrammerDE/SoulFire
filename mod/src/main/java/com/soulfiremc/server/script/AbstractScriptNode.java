@@ -21,7 +21,9 @@ import com.google.gson.JsonElement;
 import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,5 +205,27 @@ public abstract class AbstractScriptNode implements ScriptNode {
   /// Helper method to create a completed future with empty results.
   protected CompletableFuture<Map<String, NodeValue>> completedEmpty() {
     return CompletableFuture.completedFuture(Map.of());
+  }
+
+  // ==================== Reactive Helper Methods ====================
+
+  /// Helper method to create a completed Mono with results.
+  protected Mono<Map<String, NodeValue>> completedMono(Map<String, NodeValue> results) {
+    return Mono.just(results);
+  }
+
+  /// Helper method to create a completed Mono with empty results.
+  protected Mono<Map<String, NodeValue>> completedEmptyMono() {
+    return Mono.just(Map.of());
+  }
+
+  /// Helper method to create a delayed Mono with results.
+  protected Mono<Map<String, NodeValue>> delayedMono(Duration delay, Map<String, NodeValue> results) {
+    return Mono.delay(delay).thenReturn(results);
+  }
+
+  /// Helper method to create a delayed Mono with empty results.
+  protected Mono<Map<String, NodeValue>> delayedEmptyMono(Duration delay) {
+    return Mono.delay(delay).thenReturn(Map.of());
   }
 }

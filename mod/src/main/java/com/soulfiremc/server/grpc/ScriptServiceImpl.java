@@ -343,12 +343,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Create event listener that streams events to the client
       var eventListener = createStreamingEventListener(scriptId, serverObserver);
 
-      // Create context for trigger execution
-      var context = new ScriptContext(instanceManager, eventListener);
+      // Create reactive context for trigger execution
+      var context = new ReactiveScriptContext(instanceManager, eventListener);
 
-      // Register triggers for event-driven execution
+      // Register triggers for event-driven execution using reactive engine
       // Scripts are now purely reactive - they only respond to trigger events
-      var engine = new ScriptEngine();
+      var engine = new ReactiveScriptEngine();
       triggerService.registerTriggers(scriptId, graph, context, engine);
 
       log.info("Script {} activated with {} triggers", scriptId, graph.findTriggerNodes().size());

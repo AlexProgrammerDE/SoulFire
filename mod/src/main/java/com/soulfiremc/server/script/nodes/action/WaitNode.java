@@ -18,10 +18,11 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /// Action node that delays execution for a specified duration.
 /// Input: durationMs (milliseconds to wait)
@@ -50,20 +51,18 @@ public final class WaitNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    // Delegate to reactive implementation
+    return executeReactive(runtime, inputs).toFuture();
+  }
+
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var durationMs = getLongInput(inputs, "durationMs", 1000L);
 
     if (durationMs <= 0) {
-      return completedEmpty();
+      return completedEmptyMono();
     }
 
-    var future = new CompletableFuture<Map<String, NodeValue>>();
-
-    runtime.scheduler().schedule(
-      () -> future.complete(emptyResult()),
-      durationMs,
-      TimeUnit.MILLISECONDS
-    );
-
-    return future;
+    return delayedEmptyMono(Duration.ofMillis(durationMs));
   }
 }

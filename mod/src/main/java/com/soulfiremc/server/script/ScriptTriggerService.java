@@ -24,6 +24,9 @@ import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,21 +38,30 @@ import java.util.function.Consumer;
 /// Service that manages event subscriptions for trigger nodes in scripts.
 /// When a script is started, this service registers appropriate event listeners
 /// for each trigger node and executes downstream nodes when events fire.
+///
+/// Uses Reactor Sinks with backpressure to prevent overwhelming the system
+/// when high-frequency events (like ticks) fire faster than they can be processed.
 @Slf4j
 public final class ScriptTriggerService {
+  /// Buffer size for backpressure (events beyond this are dropped).
+  private static final int TRIGGER_BUFFER_SIZE = 64;
+
   private final Map<UUID, List<Object>> scriptListeners = new ConcurrentHashMap<>();
+  private final Map<String, Sinks.Many<Map<String, NodeValue>>> triggerSinks = new ConcurrentHashMap<>();
+  private final Map<String, Disposable> triggerSubscriptions = new ConcurrentHashMap<>();
 
   /// Registers event listeners for all trigger nodes in the script.
+  /// Uses reactive sinks with backpressure for high-frequency triggers.
   ///
   /// @param scriptId the script ID
   /// @param graph    the script graph
-  /// @param context  the execution context
-  /// @param engine   the script engine
+  /// @param context  the reactive execution context
+  /// @param engine   the reactive script engine
   public void registerTriggers(
     UUID scriptId,
     ScriptGraph graph,
-    ScriptContext context,
-    ScriptEngine engine
+    ReactiveScriptContext context,
+    ReactiveScriptEngine engine
   ) {
     var listeners = new ArrayList<>();
 
@@ -57,14 +69,32 @@ public final class ScriptTriggerService {
       switch (node.type()) {
         case "trigger.on_tick" -> {
           var tickCount = new AtomicLong(0);
+          var sinkKey = scriptId + ":" + node.id();
+
+          // Create sink with backpressure buffer
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          // Subscribe to sink and execute trigger (sequential per trigger to avoid races)
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnTick trigger execution", e);
+                return Mono.empty();
+              }), 1)  // Sequential execution per trigger
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
+          // Register event handler that emits to sink
           Consumer<BotPreTickEvent> handler = event -> {
             if (context.isCancelled()) return;
 
-            // Pass bot as input - scripts decide what to do with it
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
-            engine.executeFromTrigger(graph, node.id(), context, inputs);
+
+            // tryEmitNext handles backpressure - drops if buffer full
+            sink.tryEmitNext(inputs);
           };
           SoulFireAPI.registerListener(BotPreTickEvent.class, handler);
           listeners.add(new EventListenerHolder<>(BotPreTickEvent.class, handler));
@@ -72,16 +102,30 @@ public final class ScriptTriggerService {
         }
 
         case "trigger.on_chat" -> {
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnChat trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
           Consumer<ChatMessageReceiveEvent> handler = event -> {
             if (context.isCancelled()) return;
 
-            // Pass bot as input - scripts decide what to do with it
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
-            inputs.put("message", NodeValue.ofString(event.parseToPlainText())); // Raw message as plain text
+            inputs.put("message", NodeValue.ofString(event.parseToPlainText()));
             inputs.put("messagePlainText", NodeValue.ofString(event.parseToPlainText()));
             inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
-            engine.executeFromTrigger(graph, node.id(), context, inputs);
+
+            sink.tryEmitNext(inputs);
           };
           SoulFireAPI.registerListener(ChatMessageReceiveEvent.class, handler);
           listeners.add(new EventListenerHolder<>(ChatMessageReceiveEvent.class, handler));
@@ -89,14 +133,28 @@ public final class ScriptTriggerService {
         }
 
         case "trigger.on_death" -> {
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnDeath trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
           Consumer<BotShouldRespawnEvent> handler = event -> {
             if (context.isCancelled()) return;
 
-            // Pass bot as input - scripts decide what to do with it
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("shouldRespawn", NodeValue.ofBoolean(event.shouldRespawn()));
-            engine.executeFromTrigger(graph, node.id(), context, inputs);
+
+            sink.tryEmitNext(inputs);
           };
           SoulFireAPI.registerListener(BotShouldRespawnEvent.class, handler);
           listeners.add(new EventListenerHolder<>(BotShouldRespawnEvent.class, handler));
@@ -104,14 +162,28 @@ public final class ScriptTriggerService {
         }
 
         case "trigger.on_join" -> {
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnJoin trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
           Consumer<BotConnectionInitEvent> handler = event -> {
             if (context.isCancelled()) return;
 
-            // Pass bot as input - scripts decide what to do with it
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("botName", NodeValue.ofString(event.connection().accountName()));
-            engine.executeFromTrigger(graph, node.id(), context, inputs);
+
+            sink.tryEmitNext(inputs);
           };
           SoulFireAPI.registerListener(BotConnectionInitEvent.class, handler);
           listeners.add(new EventListenerHolder<>(BotConnectionInitEvent.class, handler));
@@ -119,7 +191,7 @@ public final class ScriptTriggerService {
         }
 
         case "trigger.on_interval" -> {
-          var intervalMs = 1000L; // Default interval
+          var intervalMs = 1000L;
           if (node.defaultInputs() != null) {
             var intervalValue = node.defaultInputs().get("intervalMs");
             if (intervalValue instanceof Number num) {
@@ -130,25 +202,36 @@ public final class ScriptTriggerService {
           var executionCount = new AtomicLong(0);
           var finalIntervalMs = intervalMs;
           var cancelled = new AtomicBoolean(false);
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnInterval trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
 
           Runnable task = new Runnable() {
             @Override
             public void run() {
               if (context.isCancelled() || cancelled.get()) return;
 
-              // OnInterval doesn't have a specific bot context
               var inputs = new HashMap<String, NodeValue>();
               inputs.put("executionCount", NodeValue.ofNumber(executionCount.getAndIncrement()));
-              engine.executeFromTrigger(graph, node.id(), context, inputs);
 
-              // Reschedule if not cancelled
+              sink.tryEmitNext(inputs);
+
               if (!context.isCancelled() && !cancelled.get()) {
                 context.scheduler().schedule(this, finalIntervalMs, TimeUnit.MILLISECONDS);
               }
             }
           };
 
-          // Schedule first execution
           context.scheduler().schedule(task, intervalMs, TimeUnit.MILLISECONDS);
           listeners.add(new CancellableTask(cancelled));
           log.debug("Registered OnInterval trigger for script {} node {} with interval {}ms",
@@ -177,6 +260,22 @@ public final class ScriptTriggerService {
         task.cancel();
       } else if (listener instanceof EventListenerHolder<?> holder) {
         holder.unregister();
+      }
+    }
+
+    // Clean up sinks and subscriptions for this script
+    var keysToRemove = triggerSinks.keySet().stream()
+      .filter(key -> key.startsWith(scriptId + ":"))
+      .toList();
+
+    for (var key : keysToRemove) {
+      var subscription = triggerSubscriptions.remove(key);
+      if (subscription != null) {
+        subscription.dispose();
+      }
+      var sink = triggerSinks.remove(key);
+      if (sink != null) {
+        sink.tryEmitComplete();
       }
     }
 

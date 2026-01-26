@@ -21,7 +21,6 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -111,6 +110,17 @@ public final class ScriptGraph {
     return edges.stream()
       .filter(e -> e.edgeType == EdgeType.EXECUTION)
       .map(GraphEdge::targetNodeId)
+      .toList();
+  }
+
+  /// Gets all incoming DATA edges for a node.
+  /// Used by ReactiveScriptEngine to wait for upstream dependencies.
+  ///
+  /// @param nodeId the target node ID
+  /// @return list of DATA edges targeting this node
+  public List<GraphEdge> getIncomingDataEdges(String nodeId) {
+    return edges.stream()
+      .filter(e -> e.edgeType() == EdgeType.DATA && e.targetNodeId().equals(nodeId))
       .toList();
   }
 

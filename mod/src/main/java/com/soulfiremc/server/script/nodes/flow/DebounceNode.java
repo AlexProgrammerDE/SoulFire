@@ -18,10 +18,12 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /// Flow control node that rate-limits execution.
 /// Input: cooldownMs (milliseconds between allowed executions)
@@ -51,8 +53,8 @@ public final class DebounceNode extends AbstractScriptNode {
     .addKeywords("debounce", "rate limit", "cooldown", "throttle")
     .build();
 
-  // Track last execution time per key
-  private static final Map<String, Long> lastExecutionTimes = new ConcurrentHashMap<>();
+  // Track last execution time per key using AtomicLong for thread-safe compare-and-set
+  private static final Map<String, AtomicLong> lastExecutionTimes = new ConcurrentHashMap<>();
 
   @Override
   public NodeMetadata getMetadata() {
@@ -61,26 +63,40 @@ public final class DebounceNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    // Delegate to reactive implementation
+    return executeReactive(runtime, inputs).toFuture();
+  }
+
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var cooldownMs = getLongInput(inputs, "cooldownMs", 1000L);
     var key = getStringInput(inputs, "key", "default");
 
     var now = System.currentTimeMillis();
-    var lastExecution = lastExecutionTimes.getOrDefault(key, 0L);
-    var elapsed = now - lastExecution;
+    var lastExecutionTime = lastExecutionTimes.computeIfAbsent(key, k -> new AtomicLong(0));
 
-    if (elapsed >= cooldownMs) {
-      // Allow execution and update timestamp
-      lastExecutionTimes.put(key, now);
-      return completed(results(
-        "allowed", true,
-        "remainingMs", 0L
-      ));
-    } else {
-      // Deny execution
-      return completed(results(
-        "allowed", false,
-        "remainingMs", cooldownMs - elapsed
-      ));
+    // Atomic check-and-set to avoid race conditions
+    while (true) {
+      var lastExecution = lastExecutionTime.get();
+      var elapsed = now - lastExecution;
+
+      if (elapsed >= cooldownMs) {
+        // Try to update atomically
+        if (lastExecutionTime.compareAndSet(lastExecution, now)) {
+          // Successfully claimed the execution
+          return completedMono(results(
+            "allowed", true,
+            "remainingMs", 0L
+          ));
+        }
+        // Lost race, retry with new value
+      } else {
+        // Deny execution (no race condition possible here)
+        return completedMono(results(
+          "allowed", false,
+          "remainingMs", cooldownMs - elapsed
+        ));
+      }
     }
   }
 }

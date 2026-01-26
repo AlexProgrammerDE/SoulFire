@@ -24,7 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -32,12 +35,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /// Scripts are reactive state machines that activate (register listeners) and
 /// deactivate (unregister + cleanup). There is no concept of scripts "running"
 /// to completion - they simply listen for trigger events when active.
+///
+/// Uses ReactiveScriptEngine for proper fan-in synchronization and parallel execution.
 @Slf4j
 @RequiredArgsConstructor
 public final class ScriptManager {
   private final InstanceManager instanceManager;
   private final SessionFactory sessionFactory;
-  private final ScriptEngine engine;
+  private final ReactiveScriptEngine engine;
   private final ScriptTriggerService triggerService;
 
   /// Map of script ID to loaded script graph.
@@ -49,9 +54,9 @@ public final class ScriptManager {
   /// Global event listeners for all script executions.
   private final List<ScriptEventListener> globalListeners = new CopyOnWriteArrayList<>();
 
-  /// Creates a new ScriptManager with a new ScriptEngine and TriggerService.
+  /// Creates a new ScriptManager with a new ReactiveScriptEngine and TriggerService.
   public ScriptManager(InstanceManager instanceManager, SessionFactory sessionFactory) {
-    this(instanceManager, sessionFactory, new ScriptEngine(), new ScriptTriggerService());
+    this(instanceManager, sessionFactory, new ReactiveScriptEngine(), new ScriptTriggerService());
   }
 
   /// Registers a global event listener for all script executions.
@@ -131,10 +136,10 @@ public final class ScriptManager {
     // Create composite listener
     var compositeListener = new CompositeEventListener(scriptId, globalListeners, eventListener);
 
-    // Create context
-    var context = new ScriptContext(instanceManager, compositeListener);
+    // Create reactive context
+    var context = new ReactiveScriptContext(instanceManager, compositeListener);
 
-    // Register trigger listeners
+    // Register trigger listeners with reactive engine
     triggerService.registerTriggers(scriptId, graph, context, engine);
 
     // Store active script
@@ -158,7 +163,7 @@ public final class ScriptManager {
     // Unregister trigger listeners
     triggerService.unregisterTriggers(scriptId);
 
-    // Cancel pending operations
+    // Cancel pending operations via reactive context
     activeScript.context.cancel();
 
     log.info("Deactivated script: {}", scriptId);
@@ -192,15 +197,15 @@ public final class ScriptManager {
   /// @param scriptId the script ID
   /// @return the context, or null if not active
   @Nullable
-  public ScriptContext getActiveScriptContext(UUID scriptId) {
+  public ReactiveScriptContext getActiveScriptContext(UUID scriptId) {
     var activeScript = activeScripts.get(scriptId);
     return activeScript != null ? activeScript.context : null;
   }
 
-  /// Gets the script engine used by this manager.
+  /// Gets the reactive script engine used by this manager.
   ///
-  /// @return the script engine
-  public ScriptEngine getEngine() {
+  /// @return the reactive script engine
+  public ReactiveScriptEngine getEngine() {
     return engine;
   }
 
@@ -212,123 +217,119 @@ public final class ScriptManager {
   }
 
   /// Represents an active script with its context.
-  @Getter
-  private static final class ActiveScript {
-    private final UUID scriptId;
-    private final ScriptGraph graph;
-    private final ScriptContext context;
-    private final CompositeEventListener listener;
-
-    ActiveScript(UUID scriptId, ScriptGraph graph, ScriptContext context, CompositeEventListener listener) {
-      this.scriptId = scriptId;
-      this.graph = graph;
-      this.context = context;
-      this.listener = listener;
-    }
+    private record ActiveScript(UUID scriptId, ScriptGraph graph, ReactiveScriptContext context, CompositeEventListener listener) {
   }
 
   /// Composite listener that delegates to multiple listeners.
-  private static final class CompositeEventListener implements ScriptEventListener {
-    private final UUID scriptId;
-    private final List<ScriptEventListener> delegates;
-    @Nullable
-    private final ScriptEventListener customListener;
-
-    CompositeEventListener(UUID scriptId, List<ScriptEventListener> delegates, @Nullable ScriptEventListener customListener) {
-      this.scriptId = scriptId;
-      this.delegates = delegates;
-      this.customListener = customListener;
-    }
+    private record CompositeEventListener(UUID scriptId, List<ScriptEventListener> delegates, @Nullable ScriptEventListener customListener) implements ScriptEventListener {
 
     @Override
-    public void onNodeStarted(String nodeId) {
-      for (var delegate : delegates) {
-        try {
-          delegate.onNodeStarted(nodeId);
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
+      public void onNodeStarted(String nodeId) {
+        for (var delegate : delegates) {
+          try {
+            delegate.onNodeStarted(nodeId);
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onNodeStarted(nodeId);
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
-      if (customListener != null) {
-        try {
-          customListener.onNodeStarted(nodeId);
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
-        }
-      }
-    }
 
-    @Override
-    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-      for (var delegate : delegates) {
-        try {
-          delegate.onNodeCompleted(nodeId, outputs);
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
+      @Override
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+        for (var delegate : delegates) {
+          try {
+            delegate.onNodeCompleted(nodeId, outputs);
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onNodeCompleted(nodeId, outputs);
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
-      if (customListener != null) {
-        try {
-          customListener.onNodeCompleted(nodeId, outputs);
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
-        }
-      }
-    }
 
-    @Override
-    public void onNodeError(String nodeId, String error) {
-      for (var delegate : delegates) {
-        try {
-          delegate.onNodeError(nodeId, error);
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
+      @Override
+      public void onNodeError(String nodeId, String error) {
+        for (var delegate : delegates) {
+          try {
+            delegate.onNodeError(nodeId, error);
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onNodeError(nodeId, error);
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
-      if (customListener != null) {
-        try {
-          customListener.onNodeError(nodeId, error);
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
-        }
-      }
-    }
 
-    @Override
-    public void onScriptCompleted(boolean success) {
-      // Scripts don't "complete" in the activatable model, but we keep this for compatibility
-      for (var delegate : delegates) {
-        try {
-          delegate.onScriptCompleted(success);
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
+      @Override
+      public void onScriptCompleted(boolean success) {
+        // Scripts don't "complete" in the activatable model, but we keep this for compatibility
+        for (var delegate : delegates) {
+          try {
+            delegate.onScriptCompleted(success);
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onScriptCompleted(success);
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
-      if (customListener != null) {
-        try {
-          customListener.onScriptCompleted(success);
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
-        }
-      }
-    }
 
-    @Override
-    public void onScriptCancelled() {
-      for (var delegate : delegates) {
-        try {
-          delegate.onScriptCancelled();
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
+      @Override
+      public void onScriptCancelled() {
+        for (var delegate : delegates) {
+          try {
+            delegate.onScriptCancelled();
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onScriptCancelled();
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
-      if (customListener != null) {
-        try {
-          customListener.onScriptCancelled();
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
+
+      @Override
+      public void onLog(String level, String message) {
+        for (var delegate : delegates) {
+          try {
+            delegate.onLog(level, message);
+          } catch (Exception e) {
+            log.error("Error in script event listener", e);
+          }
+        }
+        if (customListener != null) {
+          try {
+            customListener.onLog(level, message);
+          } catch (Exception e) {
+            log.error("Error in custom event listener", e);
+          }
         }
       }
     }
-  }
 }
