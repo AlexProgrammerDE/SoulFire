@@ -32,7 +32,7 @@ public final class FindEntityNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_entity")
     .displayName("Find Entity")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
       PortDefinition.inputWithDefault("entityType", "Entity Type", PortType.STRING, "\"any\"", "Entity ID or 'any' for any entity"),

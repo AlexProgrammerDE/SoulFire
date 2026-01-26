@@ -31,7 +31,7 @@ public final class ReplaceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.replace")
     .displayName("Replace")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string"),
       PortDefinition.inputWithDefault("search", "Search", PortType.STRING, "\"\"", "Substring to search for"),

@@ -29,7 +29,7 @@ public final class ToStringNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.to_string")
     .displayName("To String")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.input("value", "Value", PortType.ANY, "Value to convert")
     )

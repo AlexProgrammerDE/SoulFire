@@ -35,7 +35,7 @@ public final class FormulaNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.formula")
     .displayName("Formula")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("expression", "Expression", PortType.STRING, "\"a + b\"", "Mathematical expression"),
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Variable a"),

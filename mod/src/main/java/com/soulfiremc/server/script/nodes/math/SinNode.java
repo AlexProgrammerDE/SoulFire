@@ -29,7 +29,7 @@ public final class SinNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.sin")
     .displayName("Sine")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("angle", "Angle", PortType.NUMBER, "0", "Angle in degrees")
     )

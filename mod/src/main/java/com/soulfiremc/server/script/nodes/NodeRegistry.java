@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes;
 
+import com.soulfiremc.server.script.CategoryRegistry;
 import com.soulfiremc.server.script.NodeCategory;
 import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.ScriptNode;
@@ -239,6 +240,6 @@ public final class NodeRegistry {
   /// Gets all categories sorted by sort order.
   /// @return sorted list of all NodeCategory values
   public static List<NodeCategory> getAllCategories() {
-    return NodeCategory.allSorted();
+    return CategoryRegistry.allSorted();
   }
 }

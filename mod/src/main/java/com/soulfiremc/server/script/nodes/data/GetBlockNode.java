@@ -31,7 +31,7 @@ public final class GetBlockNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_block")
     .displayName("Get Block")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to query world data from"),
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),

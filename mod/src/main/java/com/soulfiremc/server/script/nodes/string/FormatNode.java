@@ -30,7 +30,7 @@ public final class FormatNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.format")
     .displayName("Format")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("template", "Template", PortType.STRING, "\"\"", "Template string with {0}, {1}, etc. placeholders"),
       PortDefinition.listInput("args", "Arguments", PortType.ANY, "List of values to substitute into placeholders")

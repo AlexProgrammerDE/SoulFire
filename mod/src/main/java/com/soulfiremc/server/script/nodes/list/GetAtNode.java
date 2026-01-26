@@ -29,7 +29,7 @@ public final class GetAtNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.get_at")
     .displayName("Get At Index")
-    .category(NodeCategory.LIST)
+    .category(CategoryRegistry.LIST)
     .addInputs(
       PortDefinition.listInput("list", "List", PortType.ANY, "The input list"),
       PortDefinition.inputWithDefault("index", "Index", PortType.NUMBER, "0", "The index to retrieve (0-based)")

@@ -17,72 +17,45 @@
  */
 package com.soulfiremc.server.script;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.immutables.value.Value;
 
-/// Predefined categories for organizing script nodes.
-/// Each category has an id, display name, icon, and sort order.
-public enum NodeCategory {
-  TRIGGERS("triggers", "Triggers", "zap", "Event triggers that start script execution", 0),
-  ACTIONS("actions", "Actions", "play", "Nodes that perform bot actions", 1),
-  DATA("data", "Data", "database", "Nodes that read game data", 2),
-  FLOW("flow", "Flow Control", "git-branch", "Control execution flow and branching", 3),
-  LOGIC("logic", "Logic", "toggle-left", "Boolean logic operations", 4),
-  MATH("math", "Math", "calculator", "Mathematical operations", 5),
-  STRING("string", "String", "type", "Text manipulation operations", 6),
-  LIST("list", "List", "list", "List/array operations", 7),
-  CONSTANTS("constants", "Constants", "hash", "Constant value nodes", 8),
-  UTILITY("utility", "Utility", "tool", "Utility and conversion nodes", 9);
-
-  private final String id;
-  private final String displayName;
-  private final String icon;
-  private final String description;
-  private final int sortOrder;
-
-  private static final Map<String, NodeCategory> BY_ID = Arrays.stream(values())
-    .collect(Collectors.toMap(NodeCategory::id, Function.identity()));
-
-  NodeCategory(String id, String displayName, String icon, String description, int sortOrder) {
-    this.id = id;
-    this.displayName = displayName;
-    this.icon = icon;
-    this.description = description;
-    this.sortOrder = sortOrder;
+/// Definition of a node category for organizing nodes in the palette.
+@Value.Immutable
+public interface NodeCategory {
+  /// Convenience builder starting point.
+  static ImmutableNodeCategory.Builder builder() {
+    return ImmutableNodeCategory.builder();
   }
 
-  public String id() {
-    return id;
+  /// Creates a category with all required fields.
+  static NodeCategory of(String id, String displayName, String icon, String description, int sortOrder) {
+    return builder()
+      .id(id)
+      .displayName(displayName)
+      .icon(icon)
+      .description(description)
+      .sortOrder(sortOrder)
+      .build();
   }
 
-  public String displayName() {
-    return displayName;
+  /// The unique identifier for this category.
+  String id();
+
+  /// Human-readable name for display.
+  String displayName();
+
+  /// Icon identifier for the category.
+  String icon();
+
+  /// Description of what nodes in this category do.
+  @Value.Default
+  default String description() {
+    return "";
   }
 
-  public String icon() {
-    return icon;
-  }
-
-  public String description() {
-    return description;
-  }
-
-  public int sortOrder() {
-    return sortOrder;
-  }
-
-  /// Gets a category by its ID, or UTILITY as fallback.
-  public static NodeCategory fromId(String id) {
-    return BY_ID.getOrDefault(id, UTILITY);
-  }
-
-  /// Gets all categories sorted by sort order.
-  public static List<NodeCategory> allSorted() {
-    return Arrays.stream(values())
-      .sorted((a, b) -> Integer.compare(a.sortOrder, b.sortOrder))
-      .toList();
+  /// Sort order for display (lower numbers appear first).
+  @Value.Default
+  default int sortOrder() {
+    return 100;
   }
 }

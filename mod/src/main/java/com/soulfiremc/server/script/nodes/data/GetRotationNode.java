@@ -28,7 +28,7 @@ public final class GetRotationNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_rotation")
     .displayName("Get Rotation")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get rotation from")
     )

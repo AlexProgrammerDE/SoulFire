@@ -29,7 +29,7 @@ public final class OnIntervalNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_interval")
     .displayName("On Interval")
-    .category(NodeCategory.TRIGGERS)
+    .category(CategoryRegistry.TRIGGERS)
     .addInputs(
       PortDefinition.inputWithDefault("intervalMs", "Interval (ms)", PortType.NUMBER, "1000", "Interval in milliseconds between executions")
     )

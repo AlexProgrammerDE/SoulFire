@@ -29,7 +29,7 @@ public final class DivideNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.divide")
     .displayName("Divide")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Dividend"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "1", "Divisor")

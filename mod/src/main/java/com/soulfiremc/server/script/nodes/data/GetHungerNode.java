@@ -28,7 +28,7 @@ public final class GetHungerNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_hunger")
     .displayName("Get Hunger")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get hunger from")
     )

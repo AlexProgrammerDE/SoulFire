@@ -29,7 +29,7 @@ public final class TrimNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.trim")
     .displayName("Trim")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string")
     )

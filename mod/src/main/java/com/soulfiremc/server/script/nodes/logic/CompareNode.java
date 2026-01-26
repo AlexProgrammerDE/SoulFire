@@ -30,7 +30,7 @@ public final class CompareNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.compare")
     .displayName("Compare")
-    .category(NodeCategory.LOGIC)
+    .category(CategoryRegistry.LOGIC)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First value"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second value"),

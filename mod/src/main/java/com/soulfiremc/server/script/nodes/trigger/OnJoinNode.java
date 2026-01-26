@@ -28,7 +28,7 @@ public final class OnJoinNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_join")
     .displayName("On Join")
-    .category(NodeCategory.TRIGGERS)
+    .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),

@@ -34,7 +34,7 @@ public final class DebounceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.debounce")
     .displayName("Debounce")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("cooldownMs", "Cooldown (ms)", PortType.NUMBER, "1000", "Milliseconds between allowed executions"),

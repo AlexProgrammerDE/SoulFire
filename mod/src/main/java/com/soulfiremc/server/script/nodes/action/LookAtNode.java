@@ -31,7 +31,7 @@ public final class LookAtNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.look_at")
     .displayName("Look At")
-    .category(NodeCategory.ACTIONS)
+    .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),

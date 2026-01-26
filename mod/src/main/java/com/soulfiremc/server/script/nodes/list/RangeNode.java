@@ -31,7 +31,7 @@ public final class RangeNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.range")
     .displayName("Range")
-    .category(NodeCategory.LIST)
+    .category(CategoryRegistry.LIST)
     .addInputs(
       PortDefinition.inputWithDefault("start", "Start", PortType.NUMBER, "0", "Starting value (inclusive)"),
       PortDefinition.inputWithDefault("end", "End", PortType.NUMBER, "10", "Ending value (exclusive)"),

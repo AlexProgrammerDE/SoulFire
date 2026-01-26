@@ -29,7 +29,7 @@ public final class IndexOfNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.index_of")
     .displayName("Index Of")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to search in"),
       PortDefinition.inputWithDefault("search", "Search", PortType.STRING, "\"\"", "Substring to search for"),

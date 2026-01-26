@@ -32,7 +32,7 @@ public final class FilterBotsNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.filter_bots")
     .displayName("Filter Bots")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to filter"),
       PortDefinition.inputWithDefault("pattern", "Pattern", PortType.STRING, "\".*\"", "Regex pattern to match bot names")

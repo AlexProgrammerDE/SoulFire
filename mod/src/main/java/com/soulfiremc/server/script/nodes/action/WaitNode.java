@@ -29,7 +29,7 @@ public final class WaitNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.wait")
     .displayName("Wait")
-    .category(NodeCategory.ACTIONS)
+    .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("durationMs", "Duration (ms)", PortType.NUMBER, "1000", "Time to wait in milliseconds")

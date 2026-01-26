@@ -28,7 +28,7 @@ public final class OnChatNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_chat")
     .displayName("On Chat")
-    .category(NodeCategory.TRIGGERS)
+    .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),

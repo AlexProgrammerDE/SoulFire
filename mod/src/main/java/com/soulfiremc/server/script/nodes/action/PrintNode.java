@@ -28,7 +28,7 @@ public final class PrintNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.print")
     .displayName("Print")
-    .category(NodeCategory.ACTIONS)
+    .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("message", "Message", PortType.ANY, "The message to log"),

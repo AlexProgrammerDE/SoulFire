@@ -29,7 +29,7 @@ public final class ConcatNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.concat")
     .displayName("Concat")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.STRING, "\"\"", "First string"),
       PortDefinition.inputWithDefault("b", "B", PortType.STRING, "\"\"", "Second string")

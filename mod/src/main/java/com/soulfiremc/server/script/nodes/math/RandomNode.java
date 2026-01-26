@@ -30,7 +30,7 @@ public final class RandomNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.random")
     .displayName("Random")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("min", "Min", PortType.NUMBER, "0", "Minimum value"),
       PortDefinition.inputWithDefault("max", "Max", PortType.NUMBER, "1", "Maximum value")

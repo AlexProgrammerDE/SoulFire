@@ -29,7 +29,7 @@ public final class ToUpperCaseNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.to_upper_case")
     .displayName("To Upper Case")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string")
     )

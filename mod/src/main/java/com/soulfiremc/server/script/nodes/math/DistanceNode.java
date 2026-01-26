@@ -30,7 +30,7 @@ public final class DistanceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.distance")
     .displayName("Distance")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.input("a", "Point A", PortType.VECTOR3, "First 3D point"),
       PortDefinition.input("b", "Point B", PortType.VECTOR3, "Second 3D point")

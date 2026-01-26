@@ -29,7 +29,7 @@ public final class PowNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.pow")
     .displayName("Power")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("base", "Base", PortType.NUMBER, "0", "Base number"),
       PortDefinition.inputWithDefault("exponent", "Exponent", PortType.NUMBER, "1", "Exponent")

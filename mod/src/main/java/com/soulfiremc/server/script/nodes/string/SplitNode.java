@@ -32,7 +32,7 @@ public final class SplitNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.split")
     .displayName("Split")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to split"),
       PortDefinition.inputWithDefault("delimiter", "Delimiter", PortType.STRING, "\" \"", "Delimiter to split by")

@@ -32,7 +32,7 @@ public final class SwitchNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.switch")
     .displayName("Switch")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "\"\"", "Value to switch on"),

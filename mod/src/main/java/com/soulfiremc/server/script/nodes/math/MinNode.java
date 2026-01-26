@@ -29,7 +29,7 @@ public final class MinNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.min")
     .displayName("Minimum")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")

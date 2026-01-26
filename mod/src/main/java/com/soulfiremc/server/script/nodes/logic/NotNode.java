@@ -29,7 +29,7 @@ public final class NotNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.not")
     .displayName("Not")
-    .category(NodeCategory.LOGIC)
+    .category(CategoryRegistry.LOGIC)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.BOOLEAN, "false", "Boolean to negate")
     )

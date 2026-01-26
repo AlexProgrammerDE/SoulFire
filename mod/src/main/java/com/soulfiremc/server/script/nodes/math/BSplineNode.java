@@ -31,7 +31,7 @@ public final class BSplineNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.bspline")
     .displayName("B-Spline")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("p0", "P0", PortType.NUMBER, "0", "First control point"),
       PortDefinition.inputWithDefault("p1", "P1", PortType.NUMBER, "0", "Second control point"),

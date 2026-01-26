@@ -31,7 +31,7 @@ public final class BranchNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.branch")
     .displayName("Branch")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("condition", "Condition", PortType.BOOLEAN, "false", "Condition to evaluate")

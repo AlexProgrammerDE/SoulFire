@@ -29,7 +29,7 @@ public final class GetBotByNameNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_bot_by_name")
     .displayName("Get Bot By Name")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.inputWithDefault("name", "Name", PortType.STRING, "\"\"", "The bot's account name")
     )

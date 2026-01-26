@@ -29,7 +29,7 @@ public final class StartsWithNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.starts_with")
     .displayName("Starts With")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to check"),
       PortDefinition.inputWithDefault("prefix", "Prefix", PortType.STRING, "\"\"", "Prefix to check for"),

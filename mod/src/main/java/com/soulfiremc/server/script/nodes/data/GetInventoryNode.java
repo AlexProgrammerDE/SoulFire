@@ -29,7 +29,7 @@ public final class GetInventoryNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_inventory")
     .displayName("Get Inventory")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get inventory from"),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory slot (0-35 main, 36-39 armor, 40 offhand)")

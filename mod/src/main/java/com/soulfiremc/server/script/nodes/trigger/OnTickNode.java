@@ -28,7 +28,7 @@ public final class OnTickNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_tick")
     .displayName("On Tick")
-    .category(NodeCategory.TRIGGERS)
+    .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),

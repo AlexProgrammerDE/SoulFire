@@ -29,7 +29,7 @@ public final class LerpNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.lerp")
     .displayName("Lerp")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Start value"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "1", "End value"),

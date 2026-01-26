@@ -29,7 +29,7 @@ public final class ToNumberNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.to_number")
     .displayName("To Number")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "", "Value to parse as number"),
       PortDefinition.inputWithDefault("default", "Default", PortType.NUMBER, "0", "Default value if parsing fails")

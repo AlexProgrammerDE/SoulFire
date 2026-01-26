@@ -33,7 +33,7 @@ public final class ForEachNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach")
     .displayName("For Each")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate"),

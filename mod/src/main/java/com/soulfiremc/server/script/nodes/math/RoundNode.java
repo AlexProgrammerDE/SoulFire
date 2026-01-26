@@ -29,7 +29,7 @@ public final class RoundNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.round")
     .displayName("Round")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Input number")
     )

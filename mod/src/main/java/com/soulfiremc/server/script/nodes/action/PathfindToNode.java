@@ -34,7 +34,7 @@ public final class PathfindToNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.pathfind_to")
     .displayName("Pathfind To")
-    .category(NodeCategory.ACTIONS)
+    .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to move"),

@@ -30,7 +30,7 @@ public final class CreateVector3Node extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.create_vector3")
     .displayName("Create Vector3")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "X component"),
       PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "0", "Y component"),

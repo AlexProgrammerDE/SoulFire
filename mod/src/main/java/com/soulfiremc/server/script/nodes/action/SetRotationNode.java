@@ -29,7 +29,7 @@ public final class SetRotationNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.set_rotation")
     .displayName("Set Rotation")
-    .category(NodeCategory.ACTIONS)
+    .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),

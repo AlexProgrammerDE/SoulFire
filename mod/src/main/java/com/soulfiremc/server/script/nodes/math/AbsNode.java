@@ -29,7 +29,7 @@ public final class AbsNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.abs")
     .displayName("Absolute")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Input number")
     )

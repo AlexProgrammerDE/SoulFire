@@ -31,7 +31,7 @@ public final class SequenceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.sequence")
     .displayName("Sequence")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("branchCount", "Branch Count", PortType.NUMBER, "2", "Number of branches to execute")

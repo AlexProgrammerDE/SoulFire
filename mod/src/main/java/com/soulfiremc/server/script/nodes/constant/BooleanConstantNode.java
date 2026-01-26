@@ -28,7 +28,7 @@ public final class BooleanConstantNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.boolean")
     .displayName("Boolean")
-    .category(NodeCategory.CONSTANTS)
+    .category(CategoryRegistry.CONSTANTS)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.BOOLEAN, "false", "The constant value")
     )

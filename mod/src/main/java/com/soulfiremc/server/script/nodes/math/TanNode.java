@@ -29,7 +29,7 @@ public final class TanNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.tan")
     .displayName("Tangent")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("angle", "Angle", PortType.NUMBER, "0", "Angle in degrees")
     )

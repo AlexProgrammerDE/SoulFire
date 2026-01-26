@@ -29,7 +29,7 @@ public final class XorNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.xor")
     .displayName("Xor")
-    .category(NodeCategory.LOGIC)
+    .category(CategoryRegistry.LOGIC)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.BOOLEAN, "false", "First boolean"),
       PortDefinition.inputWithDefault("b", "B", PortType.BOOLEAN, "false", "Second boolean")

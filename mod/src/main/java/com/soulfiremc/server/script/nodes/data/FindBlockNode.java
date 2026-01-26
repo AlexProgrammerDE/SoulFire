@@ -33,7 +33,7 @@ public final class FindBlockNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_block")
     .displayName("Find Block")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
       PortDefinition.inputWithDefault("blockType", "Block Type", PortType.STRING, "\"minecraft:diamond_ore\"", "Block ID to search for"),

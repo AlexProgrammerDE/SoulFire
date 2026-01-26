@@ -30,7 +30,7 @@ public final class ClampNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.clamp")
     .displayName("Clamp")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Value to clamp"),
       PortDefinition.inputWithDefault("min", "Min", PortType.NUMBER, "0", "Minimum bound"),

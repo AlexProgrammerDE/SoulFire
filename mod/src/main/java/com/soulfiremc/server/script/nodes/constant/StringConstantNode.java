@@ -28,7 +28,7 @@ public final class StringConstantNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.string")
     .displayName("String")
-    .category(NodeCategory.CONSTANTS)
+    .category(CategoryRegistry.CONSTANTS)
     .addInputs(
       PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "", "The constant value")
     )

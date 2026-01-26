@@ -29,7 +29,7 @@ public final class GetBotsNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_bots")
     .displayName("Get Bots")
-    .category(NodeCategory.DATA)
+    .category(CategoryRegistry.DATA)
     .addInputs()
     .addOutputs(
       PortDefinition.listOutput("bots", "Bots", PortType.BOT, "List of all connected bots")

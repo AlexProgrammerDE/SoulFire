@@ -28,7 +28,7 @@ public final class OnDamageNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_damage")
     .displayName("On Damage")
-    .category(NodeCategory.TRIGGERS)
+    .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),

@@ -29,7 +29,7 @@ public final class SubstringNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.substring")
     .displayName("Substring")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string"),
       PortDefinition.inputWithDefault("start", "Start", PortType.NUMBER, "0", "Start index (inclusive)"),

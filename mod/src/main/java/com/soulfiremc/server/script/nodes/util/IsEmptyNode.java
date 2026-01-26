@@ -30,7 +30,7 @@ public final class IsEmptyNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.is_empty")
     .displayName("Is Empty")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.input("value", "Value", PortType.ANY, "Value to check for empty")
     )

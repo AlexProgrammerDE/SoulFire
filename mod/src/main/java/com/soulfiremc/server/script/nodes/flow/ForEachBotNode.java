@@ -31,7 +31,7 @@ public final class ForEachBotNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach_bot")
     .displayName("For Each Bot")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to iterate"),

@@ -28,7 +28,7 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.vector3")
     .displayName("Vector3")
-    .category(NodeCategory.CONSTANTS)
+    .category(CategoryRegistry.CONSTANTS)
     .addInputs(
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "X component"),
       PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "0", "Y component"),

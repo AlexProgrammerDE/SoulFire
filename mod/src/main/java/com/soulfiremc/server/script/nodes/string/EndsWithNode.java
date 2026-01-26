@@ -29,7 +29,7 @@ public final class EndsWithNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.ends_with")
     .displayName("Ends With")
-    .category(NodeCategory.STRING)
+    .category(CategoryRegistry.STRING)
     .addInputs(
       PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to check"),
       PortDefinition.inputWithDefault("suffix", "Suffix", PortType.STRING, "\"\"", "Suffix to check for"),

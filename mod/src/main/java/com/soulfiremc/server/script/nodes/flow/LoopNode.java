@@ -34,7 +34,7 @@ public final class LoopNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.loop")
     .displayName("Loop")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("count", "Count", PortType.NUMBER, "10", "Number of iterations"),

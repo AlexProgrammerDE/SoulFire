@@ -30,7 +30,7 @@ public final class SplitVector3Node extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.split_vector3")
     .displayName("Split Vector3")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.input("vector", "Vector", PortType.VECTOR3, "3D vector to split")
     )

@@ -29,7 +29,7 @@ public final class MultiplyNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.multiply")
     .displayName("Multiply")
-    .category(NodeCategory.MATH)
+    .category(CategoryRegistry.MATH)
     .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")

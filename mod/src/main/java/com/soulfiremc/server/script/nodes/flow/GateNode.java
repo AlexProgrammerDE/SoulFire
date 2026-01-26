@@ -33,7 +33,7 @@ public final class GateNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.gate")
     .displayName("Gate")
-    .category(NodeCategory.FLOW)
+    .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("condition", "Condition", PortType.BOOLEAN, "true", "Whether to allow pass-through"),

@@ -29,7 +29,7 @@ public final class ListContainsNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.contains")
     .displayName("List Contains")
-    .category(NodeCategory.LIST)
+    .category(CategoryRegistry.LIST)
     .addInputs(
       PortDefinition.listInput("list", "List", PortType.ANY, "The list to search in"),
       PortDefinition.input("item", "Item", PortType.ANY, "The item to search for")

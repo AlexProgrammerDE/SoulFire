@@ -29,7 +29,7 @@ public final class IsNullNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.is_null")
     .displayName("Is Null")
-    .category(NodeCategory.UTILITY)
+    .category(CategoryRegistry.UTILITY)
     .addInputs(
       PortDefinition.input("value", "Value", PortType.ANY, "Value to check for null")
     )
