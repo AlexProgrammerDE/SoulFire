@@ -21,6 +21,7 @@ import com.soulfiremc.server.script.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that finds the nearest block of a specific type.
 /// Input: blockType (string, e.g., "minecraft:diamond_ore")
 /// Input: maxDistance (int, maximum search radius in blocks)
-/// Outputs: found (boolean), x, y, z (position), distance (double)
+/// Outputs: found (boolean), position (Vec3), distance (double)
 public final class FindBlockNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_block")
@@ -41,9 +42,7 @@ public final class FindBlockNode extends AbstractScriptNode {
     )
     .addOutputs(
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether a block was found"),
-      PortDefinition.output("x", "X", PortType.NUMBER, "Block X coordinate"),
-      PortDefinition.output("y", "Y", PortType.NUMBER, "Block Y coordinate"),
-      PortDefinition.output("z", "Z", PortType.NUMBER, "Block Z coordinate"),
+      PortDefinition.output("position", "Position", PortType.VECTOR3, "Block position"),
       PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance to the block")
     )
     .description("Finds the nearest block of a specific type within range")
@@ -105,9 +104,7 @@ public final class FindBlockNode extends AbstractScriptNode {
 
     return completed(results(
       "found", true,
-      "x", nearestPos.getX(),
-      "y", nearestPos.getY(),
-      "z", nearestPos.getZ(),
+      "position", new Vec3(nearestPos.getX(), nearestPos.getY(), nearestPos.getZ()),
       "distance", Math.sqrt(nearestDistSq)
     ));
   }
@@ -115,9 +112,7 @@ public final class FindBlockNode extends AbstractScriptNode {
   private Map<String, NodeValue> notFoundResult() {
     return results(
       "found", false,
-      "x", 0,
-      "y", 0,
-      "z", 0,
+      "position", Vec3.ZERO,
       "distance", -1.0
     );
   }

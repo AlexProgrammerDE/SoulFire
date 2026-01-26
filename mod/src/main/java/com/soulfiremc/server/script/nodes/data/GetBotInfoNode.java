@@ -15,35 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.nodes.action;
+package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Action node that makes the bot look at a specific position.
-/// Inputs: target (Vec3 coordinates to look at)
-public final class LookAtNode extends AbstractScriptNode {
+/// Data node that gets basic information about the bot.
+/// Outputs: name, uuid
+public final class GetBotInfoNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.look_at")
-    .displayName("Look At")
-    .category(CategoryRegistry.ACTIONS)
+    .type("data.get_bot_info")
+    .displayName("Get Bot Info")
+    .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
-      PortDefinition.input("target", "Target", PortType.VECTOR3, "Position to look at")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get info from")
     )
     .addOutputs(
-      PortDefinition.execOut()
+      PortDefinition.output("name", "Name", PortType.STRING, "Bot's username"),
+      PortDefinition.output("uuid", "UUID", PortType.STRING, "Bot's unique identifier")
     )
-    .description("Makes the bot look at a specific position in the world")
-    .icon("eye")
-    .color("#FF9800")
-    .addKeywords("look", "face", "turn", "aim", "view")
+    .description("Gets basic information about the bot")
+    .icon("user")
+    .color("#9C27B0")
+    .addKeywords("name", "username", "uuid", "identity", "info")
     .build();
 
   @Override
@@ -54,15 +50,10 @@ public final class LookAtNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var target = getInput(inputs, "target", Vec3.ZERO);
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-      var player = bot.minecraft().player;
-      if (player != null) {
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, target);
-      }
-    }));
-
-    return completedEmpty();
+    return completed(results(
+      "name", bot.accountName(),
+      "uuid", bot.accountProfileId().toString()
+    ));
   }
 }

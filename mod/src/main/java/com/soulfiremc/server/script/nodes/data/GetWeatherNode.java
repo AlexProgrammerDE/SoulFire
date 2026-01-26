@@ -22,23 +22,26 @@ import com.soulfiremc.server.script.*;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Data node that gets the bot's current position.
-/// Outputs: position (Vec3)
-public final class GetPositionNode extends AbstractScriptNode {
+/// Data node that gets the current weather conditions.
+/// Outputs: isRaining, isThundering, rainLevel, thunderLevel
+public final class GetWeatherNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("data.get_position")
-    .displayName("Get Position")
+    .type("data.get_weather")
+    .displayName("Get Weather")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get position from")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get weather from")
     )
     .addOutputs(
-      PortDefinition.output("position", "Position", PortType.VECTOR3, "Current position")
+      PortDefinition.output("isRaining", "Is Raining", PortType.BOOLEAN, "True if raining"),
+      PortDefinition.output("isThundering", "Is Thundering", PortType.BOOLEAN, "True if thunderstorm"),
+      PortDefinition.output("rainLevel", "Rain Level", PortType.NUMBER, "Rain intensity (0-1)"),
+      PortDefinition.output("thunderLevel", "Thunder Level", PortType.NUMBER, "Thunder intensity (0-1)")
     )
-    .description("Gets the bot's current position in the world")
-    .icon("map-pin")
+    .description("Gets the current weather conditions")
+    .icon("cloud-rain")
     .color("#9C27B0")
-    .addKeywords("position", "location", "coordinates", "xyz")
+    .addKeywords("weather", "rain", "thunder", "storm", "clear")
     .build();
 
   @Override
@@ -49,12 +52,22 @@ public final class GetPositionNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var player = bot.minecraft().player;
+    var level = bot.minecraft().level;
 
-    if (player == null) {
-      return completed(result("position", net.minecraft.world.phys.Vec3.ZERO));
+    if (level == null) {
+      return completed(results(
+        "isRaining", false,
+        "isThundering", false,
+        "rainLevel", 0.0f,
+        "thunderLevel", 0.0f
+      ));
     }
 
-    return completed(result("position", player.position()));
+    return completed(results(
+      "isRaining", level.isRaining(),
+      "isThundering", level.isThundering(),
+      "rainLevel", level.getRainLevel(1.0f),
+      "thunderLevel", level.getThunderLevel(1.0f)
+    ));
   }
 }

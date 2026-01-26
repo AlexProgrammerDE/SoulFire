@@ -18,27 +18,30 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import net.minecraft.world.level.LightLayer;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Data node that gets the bot's current position.
-/// Outputs: position (Vec3)
-public final class GetPositionNode extends AbstractScriptNode {
+/// Data node that gets the light level at the bot's position.
+/// Outputs: blockLight, skyLight, combinedLight
+public final class GetLightLevelNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("data.get_position")
-    .displayName("Get Position")
+    .type("data.get_light_level")
+    .displayName("Get Light Level")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get position from")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get light level from")
     )
     .addOutputs(
-      PortDefinition.output("position", "Position", PortType.VECTOR3, "Current position")
+      PortDefinition.output("blockLight", "Block Light", PortType.NUMBER, "Light from blocks (0-15)"),
+      PortDefinition.output("skyLight", "Sky Light", PortType.NUMBER, "Light from sky (0-15)"),
+      PortDefinition.output("combinedLight", "Combined", PortType.NUMBER, "Maximum of block and sky light")
     )
-    .description("Gets the bot's current position in the world")
-    .icon("map-pin")
+    .description("Gets the light level at the bot's current position")
+    .icon("sun")
     .color("#9C27B0")
-    .addKeywords("position", "location", "coordinates", "xyz")
+    .addKeywords("light", "brightness", "dark", "spawn", "mob")
     .build();
 
   @Override
@@ -49,12 +52,22 @@ public final class GetPositionNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
+    var level = bot.minecraft().level;
     var player = bot.minecraft().player;
 
-    if (player == null) {
-      return completed(result("position", net.minecraft.world.phys.Vec3.ZERO));
+    if (level == null || player == null) {
+      return completed(results("blockLight", 0, "skyLight", 0, "combinedLight", 0));
     }
 
-    return completed(result("position", player.position()));
+    var pos = player.blockPosition();
+    var blockLight = level.getBrightness(LightLayer.BLOCK, pos);
+    var skyLight = level.getBrightness(LightLayer.SKY, pos);
+    var combinedLight = Math.max(blockLight, skyLight);
+
+    return completed(results(
+      "blockLight", blockLight,
+      "skyLight", skyLight,
+      "combinedLight", combinedLight
+    ));
   }
 }

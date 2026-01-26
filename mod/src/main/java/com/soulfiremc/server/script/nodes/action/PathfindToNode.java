@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 
 /// Action node that pathfinds the bot to a target position.
 /// This is an async operation that completes when the bot reaches the destination.
-/// Inputs: x, y, z (target coordinates)
+/// Inputs: destination (Vec3 target coordinates)
 /// Output: success (boolean)
 public final class PathfindToNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
@@ -38,9 +38,7 @@ public final class PathfindToNode extends AbstractScriptNode {
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to move"),
-      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Target X coordinate"),
-      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Target Y coordinate"),
-      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Target Z coordinate")
+      PortDefinition.input("destination", "Destination", PortType.VECTOR3, "Target position to pathfind to")
     )
     .addOutputs(
       PortDefinition.execOut(),
@@ -60,11 +58,9 @@ public final class PathfindToNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var x = getIntInput(inputs, "x", 0);
-    var y = getIntInput(inputs, "y", 64);
-    var z = getIntInput(inputs, "z", 0);
+    var destination = getInput(inputs, "destination", net.minecraft.world.phys.Vec3.ZERO);
 
-    var goal = new PosGoal(SFVec3i.from(x, y, z));
+    var goal = new PosGoal(SFVec3i.fromDouble(destination));
     var constraint = new PathConstraintImpl(bot);
 
     var future = PathExecutor.executePathfinding(bot, goal, constraint)

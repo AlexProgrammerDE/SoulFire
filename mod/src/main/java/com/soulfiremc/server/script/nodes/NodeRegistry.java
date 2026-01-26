@@ -146,6 +146,20 @@ public final class NodeRegistry {
     register(GetBotsNode::new);
     register(FilterBotsNode::new);
     register(GetBotByNameNode::new);
+    register(GetExperienceNode::new);
+    register(GetArmorNode::new);
+    register(GetVelocityNode::new);
+    register(GetGamemodeNode::new);
+    register(GetSelectedSlotNode::new);
+    register(GetBotStateNode::new);
+    register(GetDimensionNode::new);
+    register(GetTimeNode::new);
+    register(GetWeatherNode::new);
+    register(GetBiomeNode::new);
+    register(GetLightLevelNode::new);
+    register(GetBotInfoNode::new);
+    register(GetTargetBlockNode::new);
+    register(GetEffectsNode::new);
 
     // Constant Nodes
     register(NumberConstantNode::new);

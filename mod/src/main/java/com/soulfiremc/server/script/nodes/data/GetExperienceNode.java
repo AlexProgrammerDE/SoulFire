@@ -15,35 +15,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.nodes.action;
+package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Action node that makes the bot look at a specific position.
-/// Inputs: target (Vec3 coordinates to look at)
-public final class LookAtNode extends AbstractScriptNode {
+/// Data node that gets the bot's experience information.
+/// Outputs: level, totalXp, xpProgress (0-1 progress to next level)
+public final class GetExperienceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.look_at")
-    .displayName("Look At")
-    .category(CategoryRegistry.ACTIONS)
+    .type("data.get_experience")
+    .displayName("Get Experience")
+    .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
-      PortDefinition.input("target", "Target", PortType.VECTOR3, "Position to look at")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get experience from")
     )
     .addOutputs(
-      PortDefinition.execOut()
+      PortDefinition.output("level", "Level", PortType.NUMBER, "Current experience level"),
+      PortDefinition.output("totalXp", "Total XP", PortType.NUMBER, "Total experience points"),
+      PortDefinition.output("xpProgress", "XP Progress", PortType.NUMBER, "Progress to next level (0-1)")
     )
-    .description("Makes the bot look at a specific position in the world")
-    .icon("eye")
-    .color("#FF9800")
-    .addKeywords("look", "face", "turn", "aim", "view")
+    .description("Gets the bot's experience level and points")
+    .icon("sparkles")
+    .color("#9C27B0")
+    .addKeywords("experience", "xp", "level", "points")
     .build();
 
   @Override
@@ -54,15 +51,16 @@ public final class LookAtNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var target = getInput(inputs, "target", Vec3.ZERO);
+    var player = bot.minecraft().player;
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-      var player = bot.minecraft().player;
-      if (player != null) {
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, target);
-      }
-    }));
+    if (player == null) {
+      return completed(results("level", 0, "totalXp", 0, "xpProgress", 0.0f));
+    }
 
-    return completedEmpty();
+    return completed(results(
+      "level", player.experienceLevel,
+      "totalXp", player.totalExperience,
+      "xpProgress", player.experienceProgress
+    ));
   }
 }

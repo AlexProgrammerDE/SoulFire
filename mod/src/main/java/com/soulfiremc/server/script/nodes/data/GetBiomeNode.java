@@ -15,35 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.nodes.action;
+package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Action node that makes the bot look at a specific position.
-/// Inputs: target (Vec3 coordinates to look at)
-public final class LookAtNode extends AbstractScriptNode {
+/// Data node that gets the biome at the bot's current position.
+/// Outputs: biome (string identifier)
+public final class GetBiomeNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.look_at")
-    .displayName("Look At")
-    .category(CategoryRegistry.ACTIONS)
+    .type("data.get_biome")
+    .displayName("Get Biome")
+    .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
-      PortDefinition.input("target", "Target", PortType.VECTOR3, "Position to look at")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get biome from")
     )
     .addOutputs(
-      PortDefinition.execOut()
+      PortDefinition.output("biome", "Biome", PortType.STRING, "Current biome identifier")
     )
-    .description("Makes the bot look at a specific position in the world")
-    .icon("eye")
-    .color("#FF9800")
-    .addKeywords("look", "face", "turn", "aim", "view")
+    .description("Gets the biome at the bot's current position")
+    .icon("trees")
+    .color("#9C27B0")
+    .addKeywords("biome", "terrain", "environment", "forest", "desert", "ocean")
     .build();
 
   @Override
@@ -54,15 +49,17 @@ public final class LookAtNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var target = getInput(inputs, "target", Vec3.ZERO);
+    var level = bot.minecraft().level;
+    var player = bot.minecraft().player;
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-      var player = bot.minecraft().player;
-      if (player != null) {
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, target);
-      }
-    }));
+    if (level == null || player == null) {
+      return completed(result("biome", "unknown"));
+    }
 
-    return completedEmpty();
+    var biomeHolder = level.getBiome(player.blockPosition());
+    var biomeKey = biomeHolder.unwrapKey();
+    var biomeName = biomeKey.map(key -> key.location().toString()).orElse("unknown");
+
+    return completed(result("biome", biomeName));
   }
 }

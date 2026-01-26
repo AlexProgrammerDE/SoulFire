@@ -20,6 +20,7 @@ package com.soulfiremc.server.script.nodes.data;
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that finds the nearest entity of a specific type.
 /// Input: entityType (string, e.g., "minecraft:zombie", or "any" for any entity)
 /// Input: maxDistance (double, maximum search radius)
-/// Outputs: found (boolean), x, y, z (position), entityId (int), distance (double)
+/// Outputs: found (boolean), position (Vec3), entityId (int), distance (double)
 public final class FindEntityNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_entity")
@@ -40,9 +41,7 @@ public final class FindEntityNode extends AbstractScriptNode {
     )
     .addOutputs(
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether an entity was found"),
-      PortDefinition.output("x", "X", PortType.NUMBER, "Entity X coordinate"),
-      PortDefinition.output("y", "Y", PortType.NUMBER, "Entity Y coordinate"),
-      PortDefinition.output("z", "Z", PortType.NUMBER, "Entity Z coordinate"),
+      PortDefinition.output("position", "Position", PortType.VECTOR3, "Entity position"),
       PortDefinition.output("entityId", "Entity ID", PortType.NUMBER, "The entity's ID"),
       PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance to the entity")
     )
@@ -99,9 +98,7 @@ public final class FindEntityNode extends AbstractScriptNode {
 
     return completed(results(
       "found", true,
-      "x", nearestEntity.getX(),
-      "y", nearestEntity.getY(),
-      "z", nearestEntity.getZ(),
+      "position", nearestEntity.position(),
       "entityId", nearestEntity.getId(),
       "distance", Math.sqrt(nearestDistSq)
     ));
@@ -110,9 +107,7 @@ public final class FindEntityNode extends AbstractScriptNode {
   private Map<String, NodeValue> notFoundResult() {
     return results(
       "found", false,
-      "x", 0.0,
-      "y", 0.0,
-      "z", 0.0,
+      "position", Vec3.ZERO,
       "entityId", -1,
       "distance", -1.0
     );

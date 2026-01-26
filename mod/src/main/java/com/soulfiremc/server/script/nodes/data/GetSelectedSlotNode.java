@@ -18,27 +18,30 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Data node that gets the bot's current position.
-/// Outputs: position (Vec3)
-public final class GetPositionNode extends AbstractScriptNode {
+/// Data node that gets the bot's currently selected hotbar slot.
+/// Outputs: slot (0-8), itemId, itemCount
+public final class GetSelectedSlotNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("data.get_position")
-    .displayName("Get Position")
+    .type("data.get_selected_slot")
+    .displayName("Get Selected Slot")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get position from")
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get selected slot from")
     )
     .addOutputs(
-      PortDefinition.output("position", "Position", PortType.VECTOR3, "Current position")
+      PortDefinition.output("slot", "Slot", PortType.NUMBER, "Selected hotbar slot (0-8)"),
+      PortDefinition.output("itemId", "Item ID", PortType.STRING, "Item in selected slot"),
+      PortDefinition.output("itemCount", "Count", PortType.NUMBER, "Stack count in selected slot")
     )
-    .description("Gets the bot's current position in the world")
-    .icon("map-pin")
+    .description("Gets the bot's currently selected hotbar slot and item")
+    .icon("hand")
     .color("#9C27B0")
-    .addKeywords("position", "location", "coordinates", "xyz")
+    .addKeywords("slot", "hotbar", "selected", "hand", "held")
     .build();
 
   @Override
@@ -52,9 +55,18 @@ public final class GetPositionNode extends AbstractScriptNode {
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(result("position", net.minecraft.world.phys.Vec3.ZERO));
+      return completed(results("slot", 0, "itemId", "minecraft:air", "itemCount", 0));
     }
 
-    return completed(result("position", player.position()));
+    var inventory = player.getInventory();
+    var selectedSlot = inventory.selected;
+    var heldItem = inventory.getSelected();
+    var itemId = BuiltInRegistries.ITEM.getKey(heldItem.getItem()).toString();
+
+    return completed(results(
+      "slot", selectedSlot,
+      "itemId", itemId,
+      "itemCount", heldItem.getCount()
+    ));
   }
 }

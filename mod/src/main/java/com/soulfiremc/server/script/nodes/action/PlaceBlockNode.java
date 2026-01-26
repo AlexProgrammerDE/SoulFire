@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 
 /// Action node that places a block at a specified position.
 /// This is an async operation that pathfinds to the location and places a block.
-/// Inputs: x, y, z (target block coordinates)
+/// Inputs: position (Vec3 target block coordinates)
 /// Output: success (boolean)
 public final class PlaceBlockNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
@@ -38,9 +38,7 @@ public final class PlaceBlockNode extends AbstractScriptNode {
           .addInputs(
                   PortDefinition.execIn(),
                   PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
-                  PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),
-                  PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Block Y coordinate"),
-                  PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Block Z coordinate")
+                  PortDefinition.input("position", "Position", PortType.VECTOR3, "Block position to place at")
           )
           .addOutputs(
                   PortDefinition.execOut(),
@@ -60,11 +58,9 @@ public final class PlaceBlockNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var x = getIntInput(inputs, "x", 0);
-    var y = getIntInput(inputs, "y", 64);
-    var z = getIntInput(inputs, "z", 0);
+    var position = getInput(inputs, "position", net.minecraft.world.phys.Vec3.ZERO);
 
-    var goal = new PlaceBlockGoal(SFVec3i.from(x, y, z));
+    var goal = new PlaceBlockGoal(SFVec3i.fromDouble(position));
     var constraint = new PathConstraintImpl(bot);
 
     var future = PathExecutor.executePathfinding(bot, goal, constraint)

@@ -1,0 +1,79 @@
+/*
+ * SoulFire
+ * Copyright (C) 2026  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.script.nodes.data;
+
+import com.soulfiremc.server.script.*;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+/// Data node that gets various boolean states of the bot.
+/// Outputs: isOnGround, isInWater, isSwimming, isSprinting, isSneaking, isFallFlying
+public final class GetBotStateNode extends AbstractScriptNode {
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_bot_state")
+    .displayName("Get Bot State")
+    .category(CategoryRegistry.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get state from")
+    )
+    .addOutputs(
+      PortDefinition.output("isOnGround", "On Ground", PortType.BOOLEAN, "True if bot is on ground"),
+      PortDefinition.output("isInWater", "In Water", PortType.BOOLEAN, "True if bot is in water"),
+      PortDefinition.output("isSwimming", "Swimming", PortType.BOOLEAN, "True if bot is swimming"),
+      PortDefinition.output("isSprinting", "Sprinting", PortType.BOOLEAN, "True if bot is sprinting"),
+      PortDefinition.output("isSneaking", "Sneaking", PortType.BOOLEAN, "True if bot is sneaking"),
+      PortDefinition.output("isFallFlying", "Elytra Flying", PortType.BOOLEAN, "True if bot is elytra flying")
+    )
+    .description("Gets various movement and state flags of the bot")
+    .icon("user-check")
+    .color("#9C27B0")
+    .addKeywords("state", "ground", "water", "swimming", "sprinting", "sneaking", "flying", "elytra")
+    .build();
+
+  @Override
+  public NodeMetadata getMetadata() {
+    return METADATA;
+  }
+
+  @Override
+  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var bot = requireBot(inputs);
+    var player = bot.minecraft().player;
+
+    if (player == null) {
+      return completed(results(
+        "isOnGround", false,
+        "isInWater", false,
+        "isSwimming", false,
+        "isSprinting", false,
+        "isSneaking", false,
+        "isFallFlying", false
+      ));
+    }
+
+    return completed(results(
+      "isOnGround", player.onGround(),
+      "isInWater", player.isInWater(),
+      "isSwimming", player.isSwimming(),
+      "isSprinting", player.isSprinting(),
+      "isSneaking", player.isShiftKeyDown(),
+      "isFallFlying", player.isFallFlying()
+    ));
+  }
+}
