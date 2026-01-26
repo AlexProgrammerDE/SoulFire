@@ -26,6 +26,13 @@ import java.util.*;
 /// Contains nodes and edges that define the execution flow and data connections.
 @Getter
 public final class ScriptGraph {
+
+  /// Extracts the simple name from a port ID.
+  /// Port IDs have format "type-name" (e.g., "vector3-position" -> "position").
+  private static String extractPortName(String portId) {
+    var dashIndex = portId.indexOf('-');
+    return dashIndex >= 0 ? portId.substring(dashIndex + 1) : portId;
+  }
   private final String scriptId;
   private final String scriptName;
   private final Map<String, GraphNode> nodes;
@@ -142,12 +149,15 @@ public final class ScriptGraph {
     }
 
     // Then, override with values from connected data edges
+    // Port IDs have format "type-name" but nodes store outputs/lookup inputs by simple name
     for (var edge : edges) {
       if (edge.edgeType == EdgeType.DATA && edge.targetNodeId.equals(nodeId)) {
         var sourceOutputs = context.getNodeOutputs(edge.sourceNodeId);
-        var value = sourceOutputs.get(edge.sourceHandle);
+        var sourceKey = extractPortName(edge.sourceHandle);
+        var targetKey = extractPortName(edge.targetHandle);
+        var value = sourceOutputs.get(sourceKey);
         if (value != null) {
-          inputs.put(edge.targetHandle, value);
+          inputs.put(targetKey, value);
         }
       }
     }
