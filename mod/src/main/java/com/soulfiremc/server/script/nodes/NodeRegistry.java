@@ -22,9 +22,12 @@ import com.soulfiremc.server.script.nodes.action.*;
 import com.soulfiremc.server.script.nodes.constant.*;
 import com.soulfiremc.server.script.nodes.data.*;
 import com.soulfiremc.server.script.nodes.flow.*;
+import com.soulfiremc.server.script.nodes.list.*;
 import com.soulfiremc.server.script.nodes.logic.*;
 import com.soulfiremc.server.script.nodes.math.*;
+import com.soulfiremc.server.script.nodes.string.*;
 import com.soulfiremc.server.script.nodes.trigger.*;
+import com.soulfiremc.server.script.nodes.util.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,12 +59,57 @@ public final class NodeRegistry {
     register(ClampNode.TYPE, ClampNode::new);
     register(LerpNode.TYPE, LerpNode::new);
     register(BSplineNode.TYPE, BSplineNode::new);
+    register(AbsNode.TYPE, AbsNode::new);
+    register(FloorNode.TYPE, FloorNode::new);
+    register(CeilNode.TYPE, CeilNode::new);
+    register(RoundNode.TYPE, RoundNode::new);
+    register(MinNode.TYPE, MinNode::new);
+    register(MaxNode.TYPE, MaxNode::new);
+    register(PowNode.TYPE, PowNode::new);
+    register(SqrtNode.TYPE, SqrtNode::new);
+    register(SinNode.TYPE, SinNode::new);
+    register(CosNode.TYPE, CosNode::new);
+    register(TanNode.TYPE, TanNode::new);
+    register(DistanceNode.TYPE, DistanceNode::new);
 
     // Logic Nodes
     register(CompareNode.TYPE, CompareNode::new);
     register(AndNode.TYPE, AndNode::new);
     register(OrNode.TYPE, OrNode::new);
     register(NotNode.TYPE, NotNode::new);
+    register(XorNode.TYPE, XorNode::new);
+
+    // String Nodes
+    register(ConcatNode.TYPE, ConcatNode::new);
+    register(ReplaceNode.TYPE, ReplaceNode::new);
+    register(SplitNode.TYPE, SplitNode::new);
+    register(SubstringNode.TYPE, SubstringNode::new);
+    register(StringLengthNode.TYPE, StringLengthNode::new);
+    register(StartsWithNode.TYPE, StartsWithNode::new);
+    register(EndsWithNode.TYPE, EndsWithNode::new);
+    register(ToLowerCaseNode.TYPE, ToLowerCaseNode::new);
+    register(ToUpperCaseNode.TYPE, ToUpperCaseNode::new);
+    register(TrimNode.TYPE, TrimNode::new);
+    register(StringContainsNode.TYPE, StringContainsNode::new);
+    register(FormatNode.TYPE, FormatNode::new);
+    register(IndexOfNode.TYPE, IndexOfNode::new);
+
+    // List Nodes
+    register(ListLengthNode.TYPE, ListLengthNode::new);
+    register(GetAtNode.TYPE, GetAtNode::new);
+    register(FirstNode.TYPE, FirstNode::new);
+    register(LastNode.TYPE, LastNode::new);
+    register(ListContainsNode.TYPE, ListContainsNode::new);
+    register(RangeNode.TYPE, RangeNode::new);
+    register(JoinToStringNode.TYPE, JoinToStringNode::new);
+
+    // Utility Nodes
+    register(ToStringNode.TYPE, ToStringNode::new);
+    register(ToNumberNode.TYPE, ToNumberNode::new);
+    register(IsNullNode.TYPE, IsNullNode::new);
+    register(IsEmptyNode.TYPE, IsEmptyNode::new);
+    register(CreateVector3Node.TYPE, CreateVector3Node::new);
+    register(SplitVector3Node.TYPE, SplitVector3Node::new);
 
     // Action Nodes
     register(SetRotationNode.TYPE, SetRotationNode::new);
