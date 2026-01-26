@@ -28,7 +28,7 @@ public interface PortDefinition {
   /// Creates an execution input port.
   static PortDefinition execIn() {
     return ImmutablePortDefinition.builder()
-      .id("exec_in")
+      .id("exec-in")
       .displayName("In")
       .type(PortType.EXEC)
       .description("Execution input")
@@ -38,7 +38,7 @@ public interface PortDefinition {
   /// Creates an execution output port.
   static PortDefinition execOut() {
     return ImmutablePortDefinition.builder()
-      .id("exec_out")
+      .id("exec-out")
       .displayName("Out")
       .type(PortType.EXEC)
       .description("Execution output")
@@ -46,9 +46,10 @@ public interface PortDefinition {
   }
 
   /// Creates a required input port.
+  /// Port ID format: "type-name" (e.g., "number-interval", "bot-target")
   static PortDefinition input(String id, String displayName, PortType type, String description) {
     return ImmutablePortDefinition.builder()
-      .id(id)
+      .id(type.name().toLowerCase() + "-" + id)
       .displayName(displayName)
       .type(type)
       .required(true)
@@ -57,9 +58,10 @@ public interface PortDefinition {
   }
 
   /// Creates an optional input port with a default value.
+  /// Port ID format: "type-name" (e.g., "number-interval", "string-message")
   static PortDefinition inputWithDefault(String id, String displayName, PortType type, String defaultValue, String description) {
     return ImmutablePortDefinition.builder()
-      .id(id)
+      .id(type.name().toLowerCase() + "-" + id)
       .displayName(displayName)
       .type(type)
       .required(false)
@@ -69,9 +71,10 @@ public interface PortDefinition {
   }
 
   /// Creates an output port.
+  /// Port ID format: "type-name" (e.g., "boolean-success", "number-count")
   static PortDefinition output(String id, String displayName, PortType type, String description) {
     return ImmutablePortDefinition.builder()
-      .id(id)
+      .id(type.name().toLowerCase() + "-" + id)
       .displayName(displayName)
       .type(type)
       .description(description)
@@ -79,9 +82,10 @@ public interface PortDefinition {
   }
 
   /// Creates a list input port with element type.
+  /// Port ID format: "list-name" (e.g., "list-items", "list-targets")
   static PortDefinition listInput(String id, String displayName, PortType elementType, String description) {
     return ImmutablePortDefinition.builder()
-      .id(id)
+      .id("list-" + id)
       .displayName(displayName)
       .type(PortType.LIST)
       .required(true)
@@ -91,9 +95,10 @@ public interface PortDefinition {
   }
 
   /// Creates a list output port with element type.
+  /// Port ID format: "list-name" (e.g., "list-results", "list-bots")
   static PortDefinition listOutput(String id, String displayName, PortType elementType, String description) {
     return ImmutablePortDefinition.builder()
-      .id(id)
+      .id("list-" + id)
       .displayName(displayName)
       .type(PortType.LIST)
       .elementType(elementType)
