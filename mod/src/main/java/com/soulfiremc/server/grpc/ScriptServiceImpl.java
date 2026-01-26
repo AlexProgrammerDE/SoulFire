@@ -28,12 +28,15 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.NodeValue;
+import com.soulfiremc.server.script.PortDefinition;
 import com.soulfiremc.server.script.ScriptContext;
 import com.soulfiremc.server.script.ScriptEngine;
 import com.soulfiremc.server.script.ScriptEventListener;
 import com.soulfiremc.server.script.ScriptGraph;
 import com.soulfiremc.server.script.ScriptTriggerService;
+import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
@@ -474,6 +477,96 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       log.error("Error subscribing to script logs", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
+  }
+
+  @Override
+  public void getNodeTypes(GetNodeTypesRequest request, StreamObserver<GetNodeTypesResponse> responseObserver) {
+    // No authentication required - node types are public metadata
+    try {
+      var category = request.hasCategory() ? request.getCategory() : null;
+      var includeDeprecated = request.getIncludeDeprecated();
+
+      var metadata = NodeRegistry.getFilteredMetadata(category, includeDeprecated);
+      var categories = NodeRegistry.getAllCategories();
+
+      var responseBuilder = GetNodeTypesResponse.newBuilder();
+
+      for (var nodeMeta : metadata) {
+        responseBuilder.addNodeTypes(metadataToProto(nodeMeta));
+      }
+
+      responseBuilder.addAllCategories(categories);
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting node types", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  private NodeTypeDefinition metadataToProto(NodeMetadata metadata) {
+    var builder = NodeTypeDefinition.newBuilder()
+      .setType(metadata.type())
+      .setDisplayName(metadata.displayName())
+      .setDescription(metadata.description())
+      .setCategory(metadata.category())
+      .setIsTrigger(metadata.isTrigger())
+      .addAllKeywords(metadata.keywords())
+      .setDeprecated(metadata.deprecated());
+
+    if (metadata.icon() != null) {
+      builder.setIcon(metadata.icon());
+    }
+    if (metadata.color() != null) {
+      builder.setColor(metadata.color());
+    }
+    if (metadata.deprecationMessage() != null) {
+      builder.setDeprecationMessage(metadata.deprecationMessage());
+    }
+
+    for (var input : metadata.inputs()) {
+      builder.addInputs(portDefinitionToProto(input));
+    }
+    for (var output : metadata.outputs()) {
+      builder.addOutputs(portDefinitionToProto(output));
+    }
+
+    return builder.build();
+  }
+
+  private com.soulfiremc.grpc.generated.PortDefinition portDefinitionToProto(PortDefinition port) {
+    var builder = com.soulfiremc.grpc.generated.PortDefinition.newBuilder()
+      .setId(port.id())
+      .setDisplayName(port.displayName())
+      .setPortType(portTypeToProto(port.type()))
+      .setRequired(port.required())
+      .setDescription(port.description());
+
+    if (port.defaultValue() != null) {
+      builder.setDefaultValue(port.defaultValue());
+    }
+    if (port.elementType() != null) {
+      builder.setElementType(portTypeToProto(port.elementType()));
+    }
+
+    return builder.build();
+  }
+
+  private PortType portTypeToProto(com.soulfiremc.server.script.PortType type) {
+    return switch (type) {
+      case ANY -> PortType.PORT_TYPE_ANY;
+      case NUMBER -> PortType.PORT_TYPE_NUMBER;
+      case STRING -> PortType.PORT_TYPE_STRING;
+      case BOOLEAN -> PortType.PORT_TYPE_BOOLEAN;
+      case VECTOR3 -> PortType.PORT_TYPE_VECTOR3;
+      case BOT -> PortType.PORT_TYPE_BOT;
+      case LIST -> PortType.PORT_TYPE_LIST;
+      case EXEC -> PortType.PORT_TYPE_EXEC;
+      case BLOCK -> PortType.PORT_TYPE_BLOCK;
+      case ENTITY -> PortType.PORT_TYPE_ENTITY;
+      case ITEM -> PortType.PORT_TYPE_ITEM;
+    };
   }
 
   // ============================================================================
