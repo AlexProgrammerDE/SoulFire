@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.server.script;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.server.bot.BotConnection;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -29,84 +31,104 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractScriptNode implements ScriptNode {
 
   /// Helper method to get an input value with type casting.
+  /// For non-JSON types like Vec3, extracts from the underlying JsonElement if possible.
   @SuppressWarnings("unchecked")
-  protected <T> T getInput(Map<String, Object> inputs, String name, T defaultValue) {
+  protected <T> T getInput(Map<String, NodeValue> inputs, String name, T defaultValue) {
+    var value = inputs.get(name);
+    if (value == null || value.isNull()) {
+      return defaultValue;
+    }
+
+    // Special handling for Vec3 from JSON array
+    if (defaultValue instanceof Vec3) {
+      var list = value.asList();
+      if (list.size() >= 3) {
+        var x = list.get(0).asDouble(0.0);
+        var y = list.get(1).asDouble(0.0);
+        var z = list.get(2).asDouble(0.0);
+        return (T) new Vec3(x, y, z);
+      }
+      return defaultValue;
+    }
+
+    // For bot values
+    if (value instanceof NodeValue.Bot bot && defaultValue instanceof BotConnection) {
+      return (T) bot.bot();
+    }
+
+    return defaultValue;
+  }
+
+  /// Helper method to get a double input value.
+  protected double getDoubleInput(Map<String, NodeValue> inputs, String name, double defaultValue) {
     var value = inputs.get(name);
     if (value == null) {
       return defaultValue;
     }
-    try {
-      return (T) value;
-    } catch (ClassCastException e) {
-      return defaultValue;
-    }
-  }
-
-  /// Helper method to get a double input value.
-  protected double getDoubleInput(Map<String, Object> inputs, String name, double defaultValue) {
-    var value = inputs.get(name);
-    if (value instanceof Number n) {
-      return n.doubleValue();
-    }
-    return defaultValue;
+    return value.asDouble(defaultValue);
   }
 
   /// Helper method to get an int input value.
-  protected int getIntInput(Map<String, Object> inputs, String name, int defaultValue) {
+  protected int getIntInput(Map<String, NodeValue> inputs, String name, int defaultValue) {
     var value = inputs.get(name);
-    if (value instanceof Number n) {
-      return n.intValue();
+    if (value == null) {
+      return defaultValue;
     }
-    return defaultValue;
+    return value.asInt(defaultValue);
   }
 
   /// Helper method to get a long input value.
-  protected long getLongInput(Map<String, Object> inputs, String name, long defaultValue) {
+  protected long getLongInput(Map<String, NodeValue> inputs, String name, long defaultValue) {
     var value = inputs.get(name);
-    if (value instanceof Number n) {
-      return n.longValue();
+    if (value == null) {
+      return defaultValue;
     }
-    return defaultValue;
+    return value.asLong(defaultValue);
   }
 
   /// Helper method to get a float input value.
-  protected float getFloatInput(Map<String, Object> inputs, String name, float defaultValue) {
+  protected float getFloatInput(Map<String, NodeValue> inputs, String name, float defaultValue) {
     var value = inputs.get(name);
-    if (value instanceof Number n) {
-      return n.floatValue();
+    if (value == null) {
+      return defaultValue;
     }
-    return defaultValue;
+    return (float) value.asDouble(defaultValue);
   }
 
   /// Helper method to get a boolean input value.
-  protected boolean getBooleanInput(Map<String, Object> inputs, String name, boolean defaultValue) {
+  protected boolean getBooleanInput(Map<String, NodeValue> inputs, String name, boolean defaultValue) {
     var value = inputs.get(name);
-    if (value instanceof Boolean b) {
-      return b;
+    if (value == null) {
+      return defaultValue;
     }
-    return defaultValue;
+    return value.asBoolean(defaultValue);
   }
 
   /// Helper method to get a string input value.
-  protected String getStringInput(Map<String, Object> inputs, String name, String defaultValue) {
+  protected String getStringInput(Map<String, NodeValue> inputs, String name, String defaultValue) {
     var value = inputs.get(name);
-    if (value instanceof String s) {
-      return s;
+    if (value == null) {
+      return defaultValue;
     }
-    if (value != null) {
-      return value.toString();
-    }
-    return defaultValue;
+    return value.asString(defaultValue);
   }
 
-  /// Helper method to get a list input value.
-  @SuppressWarnings("unchecked")
-  protected <T> List<T> getListInput(Map<String, Object> inputs, String name, List<T> defaultValue) {
+  /// Helper method to get a list input value as NodeValues.
+  protected List<NodeValue> getListInput(Map<String, NodeValue> inputs, String name) {
     var value = inputs.get(name);
-    if (value instanceof List<?> list) {
-      return (List<T>) list;
+    if (value == null) {
+      return List.of();
     }
-    return defaultValue;
+    return value.asList();
+  }
+
+  /// Helper method to get a list of strings.
+  protected List<String> getStringListInput(Map<String, NodeValue> inputs, String name) {
+    var value = inputs.get(name);
+    if (value == null) {
+      return List.of();
+    }
+    return value.asStringList();
   }
 
   /// Helper method to get a bot from inputs.
@@ -115,12 +137,12 @@ public abstract class AbstractScriptNode implements ScriptNode {
   /// @param inputs the node inputs
   /// @return the bot connection, or null if not provided
   @Nullable
-  protected BotConnection getBotInput(Map<String, Object> inputs) {
+  protected BotConnection getBotInput(Map<String, NodeValue> inputs) {
     var value = inputs.get("bot");
-    if (value instanceof BotConnection bot) {
-      return bot;
+    if (value == null) {
+      return null;
     }
-    return null;
+    return value.asBot();
   }
 
   /// Helper method to get a bot from inputs, falling back to context's current bot.
@@ -130,7 +152,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
   /// @param context the script context
   /// @return the bot connection, or null if none available
   @Nullable
-  protected BotConnection getBotOrCurrent(Map<String, Object> inputs, ScriptContext context) {
+  protected BotConnection getBotOrCurrent(Map<String, NodeValue> inputs, ScriptContext context) {
     var bot = getBotInput(inputs);
     return bot != null ? bot : context.currentBot();
   }
@@ -142,7 +164,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
   /// @param context the script context
   /// @return the bot connection
   /// @throws IllegalStateException if no bot is available
-  protected BotConnection requireBot(Map<String, Object> inputs, ScriptContext context) {
+  protected BotConnection requireBot(Map<String, NodeValue> inputs, ScriptContext context) {
     var bot = getBotOrCurrent(inputs, context);
     if (bot == null) {
       throw new IllegalStateException("This node requires a bot input, but none was provided");
@@ -150,37 +172,47 @@ public abstract class AbstractScriptNode implements ScriptNode {
     return bot;
   }
 
+  /// Helper method to get a raw JsonElement from inputs.
+  @Nullable
+  protected JsonElement getJsonInput(Map<String, NodeValue> inputs, String name) {
+    var value = inputs.get(name);
+    if (value == null) {
+      return null;
+    }
+    return value.asJsonElement();
+  }
+
   /// Helper method to create a result map with a single value.
-  protected Map<String, Object> result(String key, Object value) {
-    var map = new HashMap<String, Object>();
-    map.put(key, value);
+  protected Map<String, NodeValue> result(String key, Object value) {
+    var map = new HashMap<String, NodeValue>();
+    map.put(key, NodeValue.of(value));
     return map;
   }
 
   /// Helper method to create a result map with multiple values.
-  protected Map<String, Object> results(Object... keyValuePairs) {
+  protected Map<String, NodeValue> results(Object... keyValuePairs) {
     if (keyValuePairs.length % 2 != 0) {
       throw new IllegalArgumentException("Must provide key-value pairs");
     }
-    var map = new HashMap<String, Object>();
+    var map = new HashMap<String, NodeValue>();
     for (int i = 0; i < keyValuePairs.length; i += 2) {
-      map.put((String) keyValuePairs[i], keyValuePairs[i + 1]);
+      map.put((String) keyValuePairs[i], NodeValue.of(keyValuePairs[i + 1]));
     }
     return map;
   }
 
   /// Helper method to create an empty result.
-  protected Map<String, Object> emptyResult() {
+  protected Map<String, NodeValue> emptyResult() {
     return Map.of();
   }
 
   /// Helper method to create a completed future with results.
-  protected CompletableFuture<Map<String, Object>> completed(Map<String, Object> results) {
+  protected CompletableFuture<Map<String, NodeValue>> completed(Map<String, NodeValue> results) {
     return CompletableFuture.completedFuture(results);
   }
 
   /// Helper method to create a completed future with empty results.
-  protected CompletableFuture<Map<String, Object>> completedEmpty() {
+  protected CompletableFuture<Map<String, NodeValue>> completedEmpty() {
     return CompletableFuture.completedFuture(Map.of());
   }
 }

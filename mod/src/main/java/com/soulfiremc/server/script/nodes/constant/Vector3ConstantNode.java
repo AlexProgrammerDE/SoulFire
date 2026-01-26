@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -34,12 +35,12 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("x", 0.0, "y", 0.0, "z", 0.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("x", NodeValue.ofNumber(0.0), "y", NodeValue.ofNumber(0.0), "z", NodeValue.ofNumber(0.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);

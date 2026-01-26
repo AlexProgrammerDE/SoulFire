@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -40,12 +41,12 @@ public final class LoopNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("count", 10, "currentIndex", 0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("count", NodeValue.ofNumber(10), "currentIndex", NodeValue.ofNumber(0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var count = getIntInput(inputs, "count", 10);
     var currentIndex = getIntInput(inputs, "currentIndex", 0);
 

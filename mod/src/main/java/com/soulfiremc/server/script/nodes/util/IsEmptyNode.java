@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Collection;
@@ -37,25 +38,27 @@ public final class IsEmptyNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
+  public Map<String, NodeValue> getDefaultInputs() {
     return Map.of();
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
 
     boolean isEmpty;
-    if (value == null) {
+    if (value == null || value.isNull()) {
       isEmpty = true;
-    } else if (value instanceof String s) {
-      isEmpty = s.isEmpty();
-    } else if (value instanceof Collection<?> c) {
-      isEmpty = c.isEmpty();
-    } else if (value instanceof Map<?, ?> m) {
-      isEmpty = m.isEmpty();
     } else {
-      isEmpty = false;
+      // Try as string
+      var str = value.asString(null);
+      if (str != null) {
+        isEmpty = str.isEmpty();
+      } else {
+        // Try as list
+        var list = value.asList();
+        isEmpty = list.isEmpty();
+      }
     }
 
     return completed(result("result", isEmpty));

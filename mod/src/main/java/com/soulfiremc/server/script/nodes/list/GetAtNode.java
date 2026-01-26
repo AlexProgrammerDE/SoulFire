@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -36,13 +37,13 @@ public final class GetAtNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("list", List.of(), "index", 0.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("list", NodeValue.ofList(List.of()), "index", NodeValue.ofNumber(0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var list = getListInput(inputs, "list", List.of());
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+    var list = getListInput(inputs, "list");
     var index = getIntInput(inputs, "index", 0);
 
     if (index >= 0 && index < list.size()) {

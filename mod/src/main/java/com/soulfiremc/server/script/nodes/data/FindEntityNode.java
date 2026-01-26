@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -39,12 +40,15 @@ public final class FindEntityNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("entityType", "any", "maxDistance", 32.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of(
+      "entityType", NodeValue.ofString("any"),
+      "maxDistance", NodeValue.ofNumber(32.0)
+    );
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
@@ -93,7 +97,7 @@ public final class FindEntityNode extends AbstractScriptNode {
     ));
   }
 
-  private Map<String, Object> notFoundResult() {
+  private Map<String, NodeValue> notFoundResult() {
     return results(
       "found", false,
       "x", 0.0,

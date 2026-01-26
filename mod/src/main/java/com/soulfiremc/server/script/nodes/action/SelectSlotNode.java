@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,12 @@ public final class SelectSlotNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("slot", 0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("slot", NodeValue.ofNumber(0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
     var slot = getIntInput(inputs, "slot", 0);
 

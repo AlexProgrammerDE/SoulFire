@@ -35,10 +35,10 @@ public interface ScriptNode {
   /// Executes this node with the given context and inputs.
   /// The execution can be asynchronous for operations like pathfinding or block breaking.
   ///
-  /// @param context the execution context providing access to instance, bot, and variables
+  /// @param context the execution context providing access to instance and variables
   /// @param inputs  the resolved input values from connected nodes or default values
   /// @return a future that completes with the node's output values
-  CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs);
+  CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs);
 
   /// Returns whether this node is a trigger node (entry point for script execution).
   /// Trigger nodes have no execution input and start script flows.
@@ -52,7 +52,7 @@ public interface ScriptNode {
   /// These are used when an input is not connected to another node.
   ///
   /// @return a map of input names to their default values
-  default Map<String, Object> getDefaultInputs() {
+  default Map<String, NodeValue> getDefaultInputs() {
     return Map.of();
   }
 }

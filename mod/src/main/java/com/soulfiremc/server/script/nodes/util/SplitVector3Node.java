@@ -18,9 +18,11 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,12 +38,15 @@ public final class SplitVector3Node extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("vector", Vec3.ZERO);
+  public Map<String, NodeValue> getDefaultInputs() {
+    // Vector as [x, y, z] list
+    return Map.of("vector", NodeValue.ofList(List.of(
+      NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0)
+    )));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var vector = getInput(inputs, "vector", Vec3.ZERO);
     return completed(results("x", vector.x(), "y", vector.y(), "z", vector.z()));
   }

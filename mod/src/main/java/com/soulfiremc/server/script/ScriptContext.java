@@ -40,8 +40,8 @@ import java.util.concurrent.Future;
 @Getter
 public final class ScriptContext {
   private final InstanceManager instance;
-  private final Map<String, Object> variables;
-  private final Map<String, Map<String, Object>> nodeOutputs;
+  private final Map<String, NodeValue> variables;
+  private final Map<String, Map<String, NodeValue>> nodeOutputs;
   private final ScriptEventListener eventListener;
   private final Set<Future<?>> pendingOperations;
   private volatile boolean cancelled;
@@ -99,29 +99,27 @@ public final class ScriptContext {
   /// Gets a variable value by name.
   ///
   /// @param name the variable name
-  /// @return the variable value, or null if not set
-  @Nullable
-  public Object getVariable(String name) {
-    return variables.get(name);
+  /// @return the variable value, or null NodeValue if not set
+  public NodeValue getVariable(String name) {
+    var value = variables.get(name);
+    return value != null ? value : NodeValue.ofNull();
   }
 
   /// Gets a variable value with a default if not set.
   ///
   /// @param name         the variable name
   /// @param defaultValue the default value if not set
-  /// @param <T>          the expected type
   /// @return the variable value or default
-  @SuppressWarnings("unchecked")
-  public <T> T getVariable(String name, T defaultValue) {
+  public NodeValue getVariable(String name, NodeValue defaultValue) {
     var value = variables.get(name);
-    return value != null ? (T) value : defaultValue;
+    return value != null ? value : defaultValue;
   }
 
   /// Sets a variable value.
   ///
   /// @param name  the variable name
   /// @param value the value to set
-  public void setVariable(String name, Object value) {
+  public void setVariable(String name, NodeValue value) {
     variables.put(name, value);
     eventListener.onVariableChanged(name, value);
   }
@@ -130,7 +128,7 @@ public final class ScriptContext {
   ///
   /// @param nodeId  the node identifier
   /// @param outputs the output values
-  public void storeNodeOutputs(String nodeId, Map<String, Object> outputs) {
+  public void storeNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
     nodeOutputs.put(nodeId, new ConcurrentHashMap<>(outputs));
   }
 
@@ -138,7 +136,7 @@ public final class ScriptContext {
   ///
   /// @param nodeId the node identifier
   /// @return the outputs, or empty map if not found
-  public Map<String, Object> getNodeOutputs(String nodeId) {
+  public Map<String, NodeValue> getNodeOutputs(String nodeId) {
     return nodeOutputs.getOrDefault(nodeId, Map.of());
   }
 
@@ -147,7 +145,7 @@ public final class ScriptContext {
   /// @param nodeId     the node identifier
   /// @param outputName the name of the output port
   /// @return the output value wrapped in Optional
-  public Optional<Object> getNodeOutput(String nodeId, String outputName) {
+  public Optional<NodeValue> getNodeOutput(String nodeId, String outputName) {
     var outputs = nodeOutputs.get(nodeId);
     if (outputs == null) {
       return Optional.empty();

@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import javax.script.ScriptEngine;
@@ -47,20 +48,20 @@ public final class FormulaNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
+  public Map<String, NodeValue> getDefaultInputs() {
     return Map.of(
-      "expression", "a + b",
-      "a", 0.0,
-      "b", 0.0,
-      "c", 0.0,
-      "d", 0.0,
-      "e", 0.0,
-      "f", 0.0
+      "expression", NodeValue.ofString("a + b"),
+      "a", NodeValue.ofNumber(0.0),
+      "b", NodeValue.ofNumber(0.0),
+      "c", NodeValue.ofNumber(0.0),
+      "d", NodeValue.ofNumber(0.0),
+      "e", NodeValue.ofNumber(0.0),
+      "f", NodeValue.ofNumber(0.0)
     );
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var expression = getStringInput(inputs, "expression", "0");
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 0.0);

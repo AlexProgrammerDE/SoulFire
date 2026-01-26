@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -43,12 +44,12 @@ public final class DebounceNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("cooldownMs", 1000L, "key", "default");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("cooldownMs", NodeValue.ofNumber(1000L), "key", NodeValue.ofString("default"));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var cooldownMs = getLongInput(inputs, "cooldownMs", 1000L);
     var key = getStringInput(inputs, "key", "default");
 

@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,22 +36,25 @@ public final class ToNumberNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("value", "", "default", 0.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("value", NodeValue.ofString(""), "default", NodeValue.ofNumber(0.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
     var defaultValue = getDoubleInput(inputs, "default", 0.0);
 
-    if (value instanceof Number n) {
-      return completed(results("result", n.doubleValue(), "success", true));
-    }
+    if (value != null && !value.isNull()) {
+      // Try to get as number directly
+      var asNum = value.asDouble(Double.NaN);
+      if (!Double.isNaN(asNum)) {
+        return completed(results("result", asNum, "success", true));
+      }
 
-    if (value != null) {
+      // Try to parse as string
       try {
-        var parsed = Double.parseDouble(value.toString().trim());
+        var parsed = Double.parseDouble(value.asString("").trim());
         return completed(results("result", parsed, "success", true));
       } catch (NumberFormatException ignored) {
         // Fall through to default

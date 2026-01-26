@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -39,13 +40,13 @@ public final class FilterBotsNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("pattern", ".*");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("pattern", NodeValue.ofString(".*"));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bots = getListInput(inputs, "bots", List.<BotConnection>of());
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+    var botValues = getListInput(inputs, "bots");
     var patternStr = getStringInput(inputs, "pattern", ".*");
 
     Pattern pattern;
@@ -56,8 +57,10 @@ public final class FilterBotsNode extends AbstractScriptNode {
       return completed(result("bots", List.of()));
     }
 
-    var filtered = bots.stream()
-      .filter(bot -> pattern.matcher(bot.accountName()).matches())
+    var filtered = botValues.stream()
+      .map(NodeValue::asBot)
+      .filter(bot -> bot != null && pattern.matcher(bot.accountName()).matches())
+      .map(NodeValue::ofBot)
       .toList();
 
     return completed(result("bots", filtered));

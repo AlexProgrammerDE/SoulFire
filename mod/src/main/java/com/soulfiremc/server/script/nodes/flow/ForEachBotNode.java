@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -41,23 +42,26 @@ public final class ForEachBotNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bots = getListInput(inputs, "bots", List.<BotConnection>of());
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+    var botValues = getListInput(inputs, "bots");
 
-    if (bots.isEmpty()) {
+    if (botValues.isEmpty()) {
       return completed(results("bot", null, "index", -1, "count", 0));
     }
 
     // This node works differently - it needs the ScriptEngine to handle iteration.
     // For now, we output the first bot and set it as current.
     // The actual iteration is handled by the engine following execution edges.
-    var firstBot = bots.getFirst();
-    context.setCurrentBot(firstBot);
+    var firstBotValue = botValues.getFirst();
+    var firstBot = firstBotValue.asBot();
+    if (firstBot != null) {
+      context.setCurrentBot(firstBot);
+    }
 
     return completed(results(
       "bot", firstBot,
       "index", 0,
-      "count", bots.size()
+      "count", botValues.size()
     ));
   }
 }

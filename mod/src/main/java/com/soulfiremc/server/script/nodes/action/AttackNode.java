@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import com.soulfiremc.server.util.MouseClickHelper;
 
@@ -36,7 +37,7 @@ public final class AttackNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
 
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {

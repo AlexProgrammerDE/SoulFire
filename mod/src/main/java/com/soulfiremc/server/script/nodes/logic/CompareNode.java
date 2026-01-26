@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -36,22 +37,24 @@ public final class CompareNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("a", 0.0, "b", 0.0, "operator", "==");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0), "operator", NodeValue.ofString("=="));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var a = inputs.get("a");
     var b = inputs.get("b");
     var operator = getStringInput(inputs, "operator", "==");
 
     boolean resultValue;
 
-    // Handle numeric comparisons
-    if (a instanceof Number na && b instanceof Number nb) {
-      var da = na.doubleValue();
-      var db = nb.doubleValue();
+    // Try numeric comparison first
+    var da = a != null ? a.asDouble(Double.NaN) : Double.NaN;
+    var db = b != null ? b.asDouble(Double.NaN) : Double.NaN;
+
+    if (!Double.isNaN(da) && !Double.isNaN(db)) {
+      // Handle numeric comparisons
       resultValue = switch (operator) {
         case "==" -> da == db;
         case "!=" -> da != db;
@@ -62,10 +65,12 @@ public final class CompareNode extends AbstractScriptNode {
         default -> false;
       };
     } else {
-      // Handle equality for non-numeric types
+      // Handle equality for non-numeric types (compare string representations)
+      var strA = a != null ? a.asString("") : "";
+      var strB = b != null ? b.asString("") : "";
       resultValue = switch (operator) {
-        case "==" -> Objects.equals(a, b);
-        case "!=" -> !Objects.equals(a, b);
+        case "==" -> Objects.equals(strA, strB);
+        case "!=" -> !Objects.equals(strA, strB);
         default -> false; // Other operators don't make sense for non-numeric types
       };
     }

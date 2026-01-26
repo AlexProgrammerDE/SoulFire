@@ -76,7 +76,7 @@ public final class ScriptEngine {
     ScriptGraph graph,
     String triggerNodeId,
     ScriptContext context,
-    Map<String, Object> eventInputs
+    Map<String, NodeValue> eventInputs
   ) {
     return CompletableFuture.runAsync(() -> {
       if (context.isCancelled()) {
@@ -99,7 +99,9 @@ public final class ScriptEngine {
       // Merge default inputs, event inputs, and resolved inputs
       var inputs = new HashMap<>(nodeImpl.getDefaultInputs());
       if (graphNode.defaultInputs() != null) {
-        inputs.putAll(graphNode.defaultInputs());
+        for (var entry : graphNode.defaultInputs().entrySet()) {
+          inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
+        }
       }
       inputs.putAll(eventInputs);
 

@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Arrays;
@@ -38,12 +39,12 @@ public final class SplitNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("text", "", "delimiter", " ");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("text", NodeValue.ofString(""), "delimiter", NodeValue.ofString(" "));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var delimiter = getStringInput(inputs, "delimiter", " ");
 

@@ -21,6 +21,7 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -119,13 +120,15 @@ public final class ScriptGraph {
   /// @param nodeId  the node to resolve inputs for
   /// @param context the execution context containing node outputs
   /// @return map of input handle names to resolved values
-  public Map<String, Object> resolveInputs(String nodeId, ScriptContext context) {
-    var inputs = new HashMap<String, Object>();
+  public Map<String, NodeValue> resolveInputs(String nodeId, ScriptContext context) {
+    var inputs = new HashMap<String, NodeValue>();
 
-    // First, apply default values from the node
+    // First, apply default values from the node (convert from Object to NodeValue)
     var node = nodes.get(nodeId);
     if (node != null && node.defaultInputs != null) {
-      inputs.putAll(node.defaultInputs);
+      for (var entry : node.defaultInputs.entrySet()) {
+        inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
+      }
     }
 
     // Then, override with values from connected data edges

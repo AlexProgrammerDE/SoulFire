@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,12 @@ public final class ClampNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("value", 0.0, "min", 0.0, "max", 1.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("value", NodeValue.ofNumber(0.0), "min", NodeValue.ofNumber(0.0), "max", NodeValue.ofNumber(1.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var value = getDoubleInput(inputs, "value", 0.0);
     var min = getDoubleInput(inputs, "min", 0.0);
     var max = getDoubleInput(inputs, "max", 1.0);

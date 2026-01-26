@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -36,12 +37,12 @@ public final class RandomNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("min", 0.0, "max", 1.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("min", NodeValue.ofNumber(0.0), "max", NodeValue.ofNumber(1.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var min = getDoubleInput(inputs, "min", 0.0);
     var max = getDoubleInput(inputs, "max", 1.0);
 

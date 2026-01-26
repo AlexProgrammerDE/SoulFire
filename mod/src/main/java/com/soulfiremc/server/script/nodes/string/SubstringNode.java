@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,16 @@ public final class SubstringNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("text", "", "start", 0.0, "end", -1.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of(
+      "text", NodeValue.ofString(""),
+      "start", NodeValue.ofNumber(0),
+      "end", NodeValue.ofNumber(-1)
+    );
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var start = getIntInput(inputs, "start", 0);
     var end = getIntInput(inputs, "end", -1);

@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,12 @@ public final class SetRotationNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("yaw", 0.0f, "pitch", 0.0f);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("yaw", NodeValue.ofNumber(0.0), "pitch", NodeValue.ofNumber(0.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
     var yaw = getFloatInput(inputs, "yaw", 0.0f);
     var pitch = getFloatInput(inputs, "pitch", 0.0f);

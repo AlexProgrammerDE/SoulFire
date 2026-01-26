@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -40,12 +41,12 @@ public final class OnIntervalNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("intervalMs", 1000L);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("intervalMs", NodeValue.ofNumber(1000L));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var executionCount = getLongInput(inputs, "executionCount", 1L);
     return completed(result("executionCount", executionCount));
   }

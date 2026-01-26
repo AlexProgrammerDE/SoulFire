@@ -24,6 +24,7 @@ import com.soulfiremc.server.script.nodes.trigger.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,10 +63,9 @@ public final class ScriptTriggerService {
             if (context.isCancelled()) return;
 
             // Pass bot as input - scripts decide what to do with it
-            var inputs = Map.<String, Object>of(
-              "bot", event.connection(),
-              "tickCount", tickCount.getAndIncrement()
-            );
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
             engine.executeFromTrigger(graph, node.id(), context, inputs);
           };
           SoulFireAPI.registerListener(BotPreTickEvent.class, handler);
@@ -78,12 +78,11 @@ public final class ScriptTriggerService {
             if (context.isCancelled()) return;
 
             // Pass bot as input - scripts decide what to do with it
-            var inputs = Map.<String, Object>of(
-              "bot", event.connection(),
-              "message", event.message(),
-              "messagePlainText", event.parseToPlainText(),
-              "timestamp", event.timestamp()
-            );
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("message", NodeValue.ofString(event.parseToPlainText())); // Raw message as plain text
+            inputs.put("messagePlainText", NodeValue.ofString(event.parseToPlainText()));
+            inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
             engine.executeFromTrigger(graph, node.id(), context, inputs);
           };
           SoulFireAPI.registerListener(ChatMessageReceiveEvent.class, handler);
@@ -96,10 +95,9 @@ public final class ScriptTriggerService {
             if (context.isCancelled()) return;
 
             // Pass bot as input - scripts decide what to do with it
-            var inputs = Map.<String, Object>of(
-              "bot", event.connection(),
-              "shouldRespawn", event.shouldRespawn()
-            );
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("shouldRespawn", NodeValue.ofBoolean(event.shouldRespawn()));
             engine.executeFromTrigger(graph, node.id(), context, inputs);
           };
           SoulFireAPI.registerListener(BotShouldRespawnEvent.class, handler);
@@ -112,10 +110,9 @@ public final class ScriptTriggerService {
             if (context.isCancelled()) return;
 
             // Pass bot as input - scripts decide what to do with it
-            var inputs = Map.<String, Object>of(
-              "bot", event.connection(),
-              "botName", event.connection().accountName()
-            );
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("botName", NodeValue.ofString(event.connection().accountName()));
             engine.executeFromTrigger(graph, node.id(), context, inputs);
           };
           SoulFireAPI.registerListener(BotConnectionInitEvent.class, handler);
@@ -142,9 +139,8 @@ public final class ScriptTriggerService {
               if (context.isCancelled() || cancelled.get()) return;
 
               // OnInterval doesn't have a specific bot context
-              var inputs = Map.<String, Object>of(
-                "executionCount", executionCount.getAndIncrement()
-              );
+              var inputs = new HashMap<String, NodeValue>();
+              inputs.put("executionCount", NodeValue.ofNumber(executionCount.getAndIncrement()));
               engine.executeFromTrigger(graph, node.id(), context, inputs);
 
               // Reschedule if not cancelled

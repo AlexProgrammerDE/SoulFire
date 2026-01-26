@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,12 @@ public final class OrNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("a", false, "b", false);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("a", NodeValue.ofBoolean(false), "b", NodeValue.ofBoolean(false));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var a = getBooleanInput(inputs, "a", false);
     var b = getBooleanInput(inputs, "b", false);
     return completed(result("result", a || b));

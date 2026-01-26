@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -37,14 +38,14 @@ public final class FormatNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("template", "", "args", List.of());
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("template", NodeValue.ofString(""), "args", NodeValue.ofList(List.of()));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var template = getStringInput(inputs, "template", "");
-    var args = getListInput(inputs, "args", List.of());
+    var args = getListInput(inputs, "args");
 
     var result = template;
     for (int i = 0; i < args.size(); i++) {

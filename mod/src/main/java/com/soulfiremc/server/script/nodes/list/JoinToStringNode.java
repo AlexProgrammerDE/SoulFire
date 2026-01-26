@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -37,13 +38,13 @@ public final class JoinToStringNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("list", List.of(), "separator", ", ");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("list", NodeValue.ofList(List.of()), "separator", NodeValue.ofString(", "));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var list = getListInput(inputs, "list", List.of());
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+    var list = getListInput(inputs, "list");
     var separator = getStringInput(inputs, "separator", ", ");
 
     var result = list.stream()

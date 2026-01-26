@@ -31,7 +31,7 @@ public interface ScriptEventListener {
   ///
   /// @param nodeId  the unique identifier of the node
   /// @param outputs the output values produced by the node
-  void onNodeCompleted(String nodeId, Map<String, Object> outputs);
+  void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs);
 
   /// Called when a node encounters an error during execution.
   ///
@@ -51,7 +51,7 @@ public interface ScriptEventListener {
   ///
   /// @param name  the name of the variable
   /// @param value the new value of the variable
-  default void onVariableChanged(String name, Object value) {
+  default void onVariableChanged(String name, NodeValue value) {
     // Default no-op implementation
   }
 
@@ -69,7 +69,7 @@ public interface ScriptEventListener {
     public void onNodeStarted(String nodeId) {}
 
     @Override
-    public void onNodeCompleted(String nodeId, Map<String, Object> outputs) {}
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {}
 
     @Override
     public void onNodeError(String nodeId, String error) {}

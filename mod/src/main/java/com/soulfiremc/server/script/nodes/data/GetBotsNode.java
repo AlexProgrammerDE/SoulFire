@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public final class GetBotsNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bots = new ArrayList<>(context.instance().botConnections().values());
     return completed(result("bots", bots));
   }

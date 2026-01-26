@@ -28,6 +28,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import com.soulfiremc.server.script.ScriptEngine;
 import com.soulfiremc.server.script.ScriptEventListener;
@@ -672,14 +673,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       }
 
       @Override
-      public void onNodeCompleted(String nodeId, Map<String, Object> outputs) {
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
         if (!observer.isCancelled()) {
           try {
             var builder = NodeCompleted.newBuilder()
               .setNodeId(nodeId)
               .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
             for (var entry : outputs.entrySet()) {
-              builder.putOutputs(entry.getKey(), objectToProtoValue(entry.getValue()));
+              builder.putOutputs(entry.getKey(), nodeValueToProtoValue(entry.getValue()));
             }
             observer.onNext(ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build());
           } catch (Exception e) {
@@ -775,5 +776,50 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return Value.newBuilder().setStructValue(structBuilder.build()).build();
     }
     return Value.newBuilder().setStringValue(value.toString()).build();
+  }
+
+  private Value nodeValueToProtoValue(NodeValue value) {
+    if (value == null || value.isNull()) {
+      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+    }
+    if (value instanceof NodeValue.Json json) {
+      return jsonElementToProtoValue(json.element());
+    }
+    if (value instanceof NodeValue.Bot bot) {
+      // Bot references are serialized as their account name
+      return Value.newBuilder().setStringValue(bot.bot().accountName()).build();
+    }
+    return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+  }
+
+  private Value jsonElementToProtoValue(com.google.gson.JsonElement element) {
+    if (element == null || element.isJsonNull()) {
+      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+    }
+    if (element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
+      if (primitive.isBoolean()) {
+        return Value.newBuilder().setBoolValue(primitive.getAsBoolean()).build();
+      }
+      if (primitive.isNumber()) {
+        return Value.newBuilder().setNumberValue(primitive.getAsDouble()).build();
+      }
+      return Value.newBuilder().setStringValue(primitive.getAsString()).build();
+    }
+    if (element.isJsonArray()) {
+      var listBuilder = com.google.protobuf.ListValue.newBuilder();
+      for (var item : element.getAsJsonArray()) {
+        listBuilder.addValues(jsonElementToProtoValue(item));
+      }
+      return Value.newBuilder().setListValue(listBuilder.build()).build();
+    }
+    if (element.isJsonObject()) {
+      var structBuilder = com.google.protobuf.Struct.newBuilder();
+      for (var entry : element.getAsJsonObject().entrySet()) {
+        structBuilder.putFields(entry.getKey(), jsonElementToProtoValue(entry.getValue()));
+      }
+      return Value.newBuilder().setStructValue(structBuilder.build()).build();
+    }
+    return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
   }
 }

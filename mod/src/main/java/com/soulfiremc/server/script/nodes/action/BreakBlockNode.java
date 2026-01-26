@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -40,12 +41,12 @@ public final class BreakBlockNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("x", 0, "y", 64, "z", 0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("x", NodeValue.ofNumber(0), "y", NodeValue.ofNumber(64), "z", NodeValue.ofNumber(0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
     var x = getIntInput(inputs, "x", 0);
     var y = getIntInput(inputs, "y", 64);

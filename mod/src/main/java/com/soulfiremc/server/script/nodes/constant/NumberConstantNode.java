@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -34,12 +35,12 @@ public final class NumberConstantNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("value", 0.0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("value", NodeValue.ofNumber(0.0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var value = getDoubleInput(inputs, "value", 0.0);
     return completed(result("value", value));
   }

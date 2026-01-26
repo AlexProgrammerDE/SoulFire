@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.List;
@@ -40,17 +41,17 @@ public final class ForEachNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("items", List.of(), "currentIndex", 0);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("items", NodeValue.ofList(List.of()), "currentIndex", NodeValue.ofNumber(0));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var items = getListInput(inputs, "items", List.of());
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
+    var items = getListInput(inputs, "items");
     var currentIndex = getIntInput(inputs, "currentIndex", 0);
 
     var isComplete = currentIndex >= items.size();
-    var currentItem = isComplete ? null : items.get(currentIndex);
+    var currentItem = isComplete ? NodeValue.ofNull() : items.get(currentIndex);
 
     return completed(results(
       "item", currentItem,

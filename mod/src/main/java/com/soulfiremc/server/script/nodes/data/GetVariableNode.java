@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 
 import java.util.Map;
@@ -35,12 +36,12 @@ public final class GetVariableNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("variableName", "myVar");
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of("variableName", NodeValue.ofString("myVar"));
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var varName = getStringInput(inputs, "variableName", "");
     var value = context.getVariable(varName);
     return completed(result("value", value));

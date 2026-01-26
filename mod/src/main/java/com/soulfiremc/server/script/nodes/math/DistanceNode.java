@@ -18,9 +18,11 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,12 +38,15 @@ public final class DistanceNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("a", Vec3.ZERO, "b", Vec3.ZERO);
+  public Map<String, NodeValue> getDefaultInputs() {
+    var zeroVec = NodeValue.ofList(List.of(
+      NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0)
+    ));
+    return Map.of("a", zeroVec, "b", zeroVec);
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var a = getInput(inputs, "a", Vec3.ZERO);
     var b = getInput(inputs, "b", Vec3.ZERO);
     var distance = a.distanceTo(b);

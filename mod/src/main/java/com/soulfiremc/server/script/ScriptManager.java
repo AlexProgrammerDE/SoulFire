@@ -259,7 +259,7 @@ public final class ScriptManager {
     }
 
     @Override
-    public void onNodeCompleted(String nodeId, Map<String, Object> outputs) {
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
       for (var delegate : delegates) {
         try {
           delegate.onNodeCompleted(nodeId, outputs);
@@ -332,7 +332,7 @@ public final class ScriptManager {
     }
 
     @Override
-    public void onVariableChanged(String name, Object value) {
+    public void onVariableChanged(String name, NodeValue value) {
       for (var delegate : delegates) {
         try {
           delegate.onVariableChanged(name, value);

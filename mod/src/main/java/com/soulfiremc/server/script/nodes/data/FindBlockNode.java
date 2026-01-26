@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,12 +40,15 @@ public final class FindBlockNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("blockType", "minecraft:diamond_ore", "maxDistance", 16);
+  public Map<String, NodeValue> getDefaultInputs() {
+    return Map.of(
+      "blockType", NodeValue.ofString("minecraft:diamond_ore"),
+      "maxDistance", NodeValue.ofNumber(16)
+    );
   }
 
   @Override
-  public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+  public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs, context);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
@@ -98,7 +102,7 @@ public final class FindBlockNode extends AbstractScriptNode {
     ));
   }
 
-  private Map<String, Object> notFoundResult() {
+  private Map<String, NodeValue> notFoundResult() {
     return results(
       "found", false,
       "x", 0,
