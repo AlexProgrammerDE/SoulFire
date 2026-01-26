@@ -39,6 +39,10 @@ dependencies {
   api(libs.reactor.core)
   testImplementation(libs.reactor.test)
 
+  // EvalEx for math expression evaluation in scripts
+  api(libs.evalex)
+  include(libs.evalex)
+
   annotationProcessor(libs.picoli.codegen)
 
   // For CLI support

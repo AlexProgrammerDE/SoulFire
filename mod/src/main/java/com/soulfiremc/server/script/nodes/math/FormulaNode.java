@@ -17,11 +17,11 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
+import com.ezylang.evalex.EvaluationException;
+import com.ezylang.evalex.Expression;
+import com.ezylang.evalex.parser.ParseException;
 import com.soulfiremc.server.script.*;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 /// Output: result (double)
 ///
 /// Supports basic math operators (+, -, *, /, %), parentheses,
-/// and Java Math functions (sin, cos, sqrt, abs, etc.) via JavaScript engine.
+/// and standard math functions (SIN, COS, SQRT, ABS, etc.) via EvalEx.
 public final class FormulaNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.formula")
@@ -55,13 +55,6 @@ public final class FormulaNode extends AbstractScriptNode {
     .addKeywords("formula", "expression", "evaluate", "math")
     .build();
 
-  private static final ScriptEngine ENGINE;
-
-  static {
-    var manager = new ScriptEngineManager();
-    ENGINE = manager.getEngineByName("JavaScript");
-  }
-
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
@@ -69,7 +62,7 @@ public final class FormulaNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var expression = getStringInput(inputs, "expression", "0");
+    var expressionStr = getStringInput(inputs, "expression", "0");
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 0.0);
     var c = getDoubleInput(inputs, "c", 0.0);
@@ -78,27 +71,19 @@ public final class FormulaNode extends AbstractScriptNode {
     var f = getDoubleInput(inputs, "f", 0.0);
 
     try {
-      // Build JavaScript with Math functions available
-      var script = String.format(
-        "var a=%f, b=%f, c=%f, d=%f, e=%f, f=%f; " +
-          "var sin=Math.sin, cos=Math.cos, tan=Math.tan, " +
-          "sqrt=Math.sqrt, abs=Math.abs, floor=Math.floor, ceil=Math.ceil, " +
-          "round=Math.round, pow=Math.pow, min=Math.min, max=Math.max, " +
-          "PI=Math.PI, E=Math.E, log=Math.log, exp=Math.exp; " +
-          "(%s)",
-        a, b, c, d, e, f, expression
-      );
+      var expression = new Expression(expressionStr)
+        .with("a", a)
+        .and("b", b)
+        .and("c", c)
+        .and("d", d)
+        .and("e", e)
+        .and("f", f);
 
-      var resultValue = ENGINE.eval(script);
-      double doubleResult;
-      if (resultValue instanceof Number n) {
-        doubleResult = n.doubleValue();
-      } else {
-        doubleResult = 0.0;
-      }
+      var result = expression.evaluate();
+      var doubleResult = result.getNumberValue().doubleValue();
+
       return completed(result("result", doubleResult));
-    } catch (ScriptException ex) {
-      // Return 0 on error
+    } catch (EvaluationException | ParseException ex) {
       return completed(results("result", 0.0, "error", ex.getMessage()));
     }
   }
