@@ -37,7 +37,7 @@ public final class JumpNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
 
     // Set jump for this tick
     bot.controlState().jump(true);

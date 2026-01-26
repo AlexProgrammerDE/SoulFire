@@ -44,9 +44,7 @@ public final class OnDeathNode extends AbstractScriptNode {
     var bot = getBotInput(inputs);
     var deathMessage = getStringInput(inputs, "deathMessage", "");
 
-    // Set current bot in context for downstream nodes
-    context.setCurrentBot(bot);
-
+    // Output data so it can be wired to downstream nodes
     return completed(results(
       "bot", bot,
       "deathMessage", deathMessage

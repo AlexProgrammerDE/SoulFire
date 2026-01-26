@@ -41,7 +41,7 @@ public final class SneakNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var enabled = getBooleanInput(inputs, "enabled", true);
 
     bot.controlState().shift(enabled);

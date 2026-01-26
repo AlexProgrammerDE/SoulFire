@@ -42,7 +42,7 @@ public final class GetInventoryNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var player = bot.minecraft().player;
     var slot = getIntInput(inputs, "slot", 0);
 

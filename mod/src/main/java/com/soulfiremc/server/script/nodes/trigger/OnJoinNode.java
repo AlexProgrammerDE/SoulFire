@@ -43,12 +43,10 @@ public final class OnJoinNode extends AbstractScriptNode {
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
 
-    // Set current bot in context for downstream nodes
-    context.setCurrentBot(bot);
-
     var serverAddress = bot != null ? bot.serverAddress().toString() : "";
     var username = bot != null ? bot.accountName() : "";
 
+    // Output data so it can be wired to downstream nodes
     return completed(results(
       "bot", bot,
       "serverAddress", serverAddress,

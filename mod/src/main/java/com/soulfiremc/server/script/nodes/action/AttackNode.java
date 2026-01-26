@@ -38,7 +38,7 @@ public final class AttackNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
 
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
       var minecraft = bot.minecraft();

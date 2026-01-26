@@ -44,7 +44,7 @@ public final class LookAtNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);

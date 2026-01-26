@@ -47,9 +47,7 @@ public final class OnChatNode extends AbstractScriptNode {
     var messagePlainText = getStringInput(inputs, "messagePlainText", "");
     var timestamp = getLongInput(inputs, "timestamp", System.currentTimeMillis());
 
-    // Set current bot in context for downstream nodes
-    context.setCurrentBot(bot);
-
+    // Output data so it can be wired to downstream nodes
     return completed(results(
       "bot", bot,
       "message", message,

@@ -42,7 +42,7 @@ public final class SelectSlotNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var slot = getIntInput(inputs, "slot", 0);
 
     // Clamp slot to valid range

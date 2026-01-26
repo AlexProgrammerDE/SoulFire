@@ -44,7 +44,7 @@ public final class GetBlockNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var x = getIntInput(inputs, "x", 0);
     var y = getIntInput(inputs, "y", 64);

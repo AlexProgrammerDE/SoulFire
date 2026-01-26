@@ -45,9 +45,7 @@ public final class OnTickNode extends AbstractScriptNode {
     var bot = getBotInput(inputs);
     var tickCount = getLongInput(inputs, "tickCount", 0L);
 
-    // Set current bot in context for downstream nodes
-    context.setCurrentBot(bot);
-
+    // Output bot so it can be wired to downstream nodes
     return completed(results(
       "bot", bot,
       "tickCount", tickCount

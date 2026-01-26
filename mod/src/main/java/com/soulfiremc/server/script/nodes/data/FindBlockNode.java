@@ -49,7 +49,7 @@ public final class FindBlockNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
     var blockTypeInput = getStringInput(inputs, "blockType", "minecraft:diamond_ore");

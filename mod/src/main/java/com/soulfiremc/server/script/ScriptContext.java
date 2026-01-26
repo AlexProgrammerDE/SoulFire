@@ -19,9 +19,7 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
-import com.soulfiremc.server.bot.BotConnection;
 import lombok.Getter;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -35,8 +33,7 @@ import java.util.concurrent.Future;
 /// This class is thread-safe for use in async node execution.
 ///
 /// Scripts run at instance level. Bot-specific operations receive the bot as an
-/// explicit input parameter. The currentBot field is set by flow nodes like ForEachBot
-/// to provide a default bot context within iteration scopes.
+/// explicit input parameter - nodes should be stateless and pure.
 @Getter
 public final class ScriptContext {
   private final InstanceManager instance;
@@ -45,9 +42,6 @@ public final class ScriptContext {
   private final ScriptEventListener eventListener;
   private final Set<Future<?>> pendingOperations;
   private volatile boolean cancelled;
-  /// Current bot set by ForEachBot or trigger nodes for use as default in action nodes.
-  @Nullable
-  private volatile BotConnection currentBot;
 
   /// Creates a new script context.
   ///
@@ -62,19 +56,10 @@ public final class ScriptContext {
   }
 
   /// Gets the scheduler for async operations.
-  /// Uses the current bot's scheduler if set, otherwise the instance scheduler.
   ///
-  /// @return the appropriate scheduler
+  /// @return the instance scheduler
   public SoulFireScheduler scheduler() {
-    var bot = currentBot;
-    return bot != null ? bot.scheduler() : instance.scheduler();
-  }
-
-  /// Sets the current bot context (used by ForEachBot and trigger nodes).
-  ///
-  /// @param bot the current bot, or null to clear
-  public void setCurrentBot(@Nullable BotConnection bot) {
-    this.currentBot = bot;
+    return instance.scheduler();
   }
 
   /// Registers a pending async operation for cleanup on deactivation.

@@ -42,7 +42,7 @@ public final class SetRotationNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(ScriptContext context, Map<String, NodeValue> inputs) {
-    var bot = requireBot(inputs, context);
+    var bot = requireBot(inputs);
     var yaw = getFloatInput(inputs, "yaw", 0.0f);
     var pitch = getFloatInput(inputs, "pitch", 0.0f);
 

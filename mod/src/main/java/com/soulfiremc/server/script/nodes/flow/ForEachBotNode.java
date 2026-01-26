@@ -27,12 +27,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that iterates over a list of bots.
-/// For each bot, sets it as the current bot in context and outputs it.
 /// Input: bots (List of BotConnection)
-/// Output: bot (current BotConnection in iteration), index (current index)
+/// Output: bot (current BotConnection in iteration), index (current index), count (total bots)
 ///
-/// Note: This node sets the currentBot in context, so downstream action nodes
-/// can access the bot without explicit wiring via requireBot(inputs, context).
+/// The bot output should be wired to downstream action nodes that need it.
 public final class ForEachBotNode extends AbstractScriptNode {
   public static final String TYPE = "flow.foreach_bot";
 
@@ -50,13 +48,10 @@ public final class ForEachBotNode extends AbstractScriptNode {
     }
 
     // This node works differently - it needs the ScriptEngine to handle iteration.
-    // For now, we output the first bot and set it as current.
+    // For now, we output the first bot.
     // The actual iteration is handled by the engine following execution edges.
     var firstBotValue = botValues.getFirst();
     var firstBot = firstBotValue.asBot();
-    if (firstBot != null) {
-      context.setCurrentBot(firstBot);
-    }
 
     return completed(results(
       "bot", firstBot,
