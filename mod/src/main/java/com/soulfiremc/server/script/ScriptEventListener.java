@@ -47,14 +47,6 @@ public interface ScriptEventListener {
   /// Called when the script execution is cancelled.
   void onScriptCancelled();
 
-  /// Called when a variable value changes during execution.
-  ///
-  /// @param name  the name of the variable
-  /// @param value the new value of the variable
-  default void onVariableChanged(String name, NodeValue value) {
-    // Default no-op implementation
-  }
-
   /// Called when a script logs a message (via Print node).
   ///
   /// @param level   the log level (debug, info, warn, error)

@@ -330,23 +330,5 @@ public final class ScriptManager {
         }
       }
     }
-
-    @Override
-    public void onVariableChanged(String name, NodeValue value) {
-      for (var delegate : delegates) {
-        try {
-          delegate.onVariableChanged(name, value);
-        } catch (Exception e) {
-          log.error("Error in script event listener", e);
-        }
-      }
-      if (customListener != null) {
-        try {
-          customListener.onVariableChanged(name, value);
-        } catch (Exception e) {
-          log.error("Error in custom event listener", e);
-        }
-      }
-    }
   }
 }

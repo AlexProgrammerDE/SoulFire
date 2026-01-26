@@ -126,7 +126,6 @@ public final class NodeRegistry {
     register(SendChatNode.TYPE, SendChatNode::new);
     register(WaitNode.TYPE, WaitNode::new);
     register(PrintNode.TYPE, PrintNode::new);
-    register(SetVariableNode.TYPE, SetVariableNode::new);
 
     // Data Nodes
     register(GetPositionNode.TYPE, GetPositionNode::new);
@@ -137,7 +136,6 @@ public final class NodeRegistry {
     register(GetBlockNode.TYPE, GetBlockNode::new);
     register(FindEntityNode.TYPE, FindEntityNode::new);
     register(FindBlockNode.TYPE, FindBlockNode::new);
-    register(GetVariableNode.TYPE, GetVariableNode::new);
     register(GetBotsNode.TYPE, GetBotsNode::new);
     register(FilterBotsNode.TYPE, FilterBotsNode::new);
     register(GetBotByNameNode.TYPE, GetBotByNameNode::new);

@@ -29,15 +29,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /// Execution context for script nodes.
-/// Provides access to the instance, variables, node outputs, and pending operations.
+/// Provides access to the instance, node outputs, and pending operations.
 /// This class is thread-safe for use in async node execution.
 ///
 /// Scripts run at instance level. Bot-specific operations receive the bot as an
 /// explicit input parameter - nodes should be stateless and pure.
+/// Data flows through node connections, not through mutable variables.
 @Getter
 public final class ScriptContext {
   private final InstanceManager instance;
-  private final Map<String, NodeValue> variables;
   private final Map<String, Map<String, NodeValue>> nodeOutputs;
   private final ScriptEventListener eventListener;
   private final Set<Future<?>> pendingOperations;
@@ -49,7 +49,6 @@ public final class ScriptContext {
   /// @param eventListener listener for script execution events
   public ScriptContext(InstanceManager instance, ScriptEventListener eventListener) {
     this.instance = instance;
-    this.variables = new ConcurrentHashMap<>();
     this.nodeOutputs = new ConcurrentHashMap<>();
     this.eventListener = eventListener;
     this.pendingOperations = ConcurrentHashMap.newKeySet();
@@ -79,34 +78,6 @@ public final class ScriptContext {
       future.cancel(true);
     }
     pendingOperations.clear();
-  }
-
-  /// Gets a variable value by name.
-  ///
-  /// @param name the variable name
-  /// @return the variable value, or null NodeValue if not set
-  public NodeValue getVariable(String name) {
-    var value = variables.get(name);
-    return value != null ? value : NodeValue.ofNull();
-  }
-
-  /// Gets a variable value with a default if not set.
-  ///
-  /// @param name         the variable name
-  /// @param defaultValue the default value if not set
-  /// @return the variable value or default
-  public NodeValue getVariable(String name, NodeValue defaultValue) {
-    var value = variables.get(name);
-    return value != null ? value : defaultValue;
-  }
-
-  /// Sets a variable value.
-  ///
-  /// @param name  the variable name
-  /// @param value the value to set
-  public void setVariable(String name, NodeValue value) {
-    variables.put(name, value);
-    eventListener.onVariableChanged(name, value);
   }
 
   /// Stores the outputs of a node for later retrieval by connected nodes.
