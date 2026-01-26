@@ -46,7 +46,7 @@ public final class PathfindToNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = context.requireBot();
+    var bot = requireBot(inputs, context);
     var x = getIntInput(inputs, "x", 0);
     var y = getIntInput(inputs, "y", 64);
     var z = getIntInput(inputs, "z", 0);
@@ -54,8 +54,12 @@ public final class PathfindToNode extends AbstractScriptNode {
     var goal = new PosGoal(SFVec3i.from(x, y, z));
     var constraint = new PathConstraintImpl(bot);
 
-    return PathExecutor.executePathfinding(bot, goal, constraint)
+    var future = PathExecutor.executePathfinding(bot, goal, constraint)
       .thenApply(v -> result("success", true))
       .exceptionally(e -> result("success", false));
+
+    // Track pending operation for cleanup on deactivation
+    context.addPendingOperation(future);
+    return future;
   }
 }

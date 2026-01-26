@@ -60,10 +60,10 @@ public final class ScriptTriggerService {
           var tickCount = new AtomicLong(0);
           Consumer<BotPreTickEvent> handler = event -> {
             if (context.isCancelled()) return;
-            // Only handle events for our bot (if in BOT scope) or any bot (if in INSTANCE scope)
-            if (context.bot() != null && context.bot() != event.connection()) return;
 
+            // Pass bot as input - scripts decide what to do with it
             var inputs = Map.<String, Object>of(
+              "bot", event.connection(),
               "tickCount", tickCount.getAndIncrement()
             );
             engine.executeFromTrigger(graph, node.id(), context, inputs);
@@ -76,9 +76,10 @@ public final class ScriptTriggerService {
         case OnChatNode.TYPE -> {
           Consumer<ChatMessageReceiveEvent> handler = event -> {
             if (context.isCancelled()) return;
-            if (context.bot() != null && context.bot() != event.connection()) return;
 
+            // Pass bot as input - scripts decide what to do with it
             var inputs = Map.<String, Object>of(
+              "bot", event.connection(),
               "message", event.message(),
               "messagePlainText", event.parseToPlainText(),
               "timestamp", event.timestamp()
@@ -93,9 +94,10 @@ public final class ScriptTriggerService {
         case OnDeathNode.TYPE -> {
           Consumer<BotShouldRespawnEvent> handler = event -> {
             if (context.isCancelled()) return;
-            if (context.bot() != null && context.bot() != event.connection()) return;
 
+            // Pass bot as input - scripts decide what to do with it
             var inputs = Map.<String, Object>of(
+              "bot", event.connection(),
               "shouldRespawn", event.shouldRespawn()
             );
             engine.executeFromTrigger(graph, node.id(), context, inputs);
@@ -108,9 +110,10 @@ public final class ScriptTriggerService {
         case OnJoinNode.TYPE -> {
           Consumer<BotConnectionInitEvent> handler = event -> {
             if (context.isCancelled()) return;
-            if (context.bot() != null && context.bot() != event.connection()) return;
 
+            // Pass bot as input - scripts decide what to do with it
             var inputs = Map.<String, Object>of(
+              "bot", event.connection(),
               "botName", event.connection().accountName()
             );
             engine.executeFromTrigger(graph, node.id(), context, inputs);
@@ -138,6 +141,7 @@ public final class ScriptTriggerService {
             public void run() {
               if (context.isCancelled() || cancelled.get()) return;
 
+              // OnInterval doesn't have a specific bot context
               var inputs = Map.<String, Object>of(
                 "executionCount", executionCount.getAndIncrement()
               );

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when a chat message is received.
-/// Outputs: message (Component), messagePlainText, timestamp
+/// Outputs: bot (the bot that received the message), message (Component), messagePlainText, timestamp
 public final class OnChatNode extends AbstractScriptNode {
   public static final String TYPE = "trigger.on_chat";
 
@@ -41,11 +41,16 @@ public final class OnChatNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
     // Event data is passed through inputs from the trigger system
+    var bot = getBotInput(inputs);
     var message = inputs.get("message");
     var messagePlainText = getStringInput(inputs, "messagePlainText", "");
     var timestamp = getLongInput(inputs, "timestamp", System.currentTimeMillis());
 
+    // Set current bot in context for downstream nodes
+    context.setCurrentBot(bot);
+
     return completed(results(
+      "bot", bot,
       "message", message,
       "messagePlainText", messagePlainText,
       "timestamp", timestamp

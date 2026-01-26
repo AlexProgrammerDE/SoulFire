@@ -35,7 +35,7 @@ public final class GetPositionNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = context.requireBot();
+    var bot = requireBot(inputs, context);
     var player = bot.minecraft().player;
 
     if (player == null) {

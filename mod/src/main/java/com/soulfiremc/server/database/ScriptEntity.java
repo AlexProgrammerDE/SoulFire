@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.database;
 
-import com.soulfiremc.grpc.generated.ScriptScope;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -59,11 +58,6 @@ public final class ScriptEntity {
   @ManyToOne
   @JoinColumn(nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
   private InstanceEntity instance;
-
-  @NotNull(message = "Scope cannot be null")
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private ScriptScope scope = ScriptScope.SCRIPT_SCOPE_INSTANCE;
 
   /**
    * JSON array of script nodes.

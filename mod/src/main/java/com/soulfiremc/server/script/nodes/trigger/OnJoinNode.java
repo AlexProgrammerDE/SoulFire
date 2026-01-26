@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot joins the server.
-/// Outputs: serverAddress, username
+/// Outputs: bot (the bot that joined), serverAddress, username
 public final class OnJoinNode extends AbstractScriptNode {
   public static final String TYPE = "trigger.on_join";
 
@@ -40,10 +40,18 @@ public final class OnJoinNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = context.requireBot();
+    var bot = getBotInput(inputs);
+
+    // Set current bot in context for downstream nodes
+    context.setCurrentBot(bot);
+
+    var serverAddress = bot != null ? bot.serverAddress().toString() : "";
+    var username = bot != null ? bot.accountName() : "";
+
     return completed(results(
-      "serverAddress", bot.serverAddress().toString(),
-      "username", bot.accountName()
+      "bot", bot,
+      "serverAddress", serverAddress,
+      "username", username
     ));
   }
 }

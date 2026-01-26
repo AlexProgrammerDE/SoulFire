@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires every game tick (20 times per second).
-/// Output: tickCount - the current tick count since the script started
+/// Outputs: bot (the bot that ticked), tickCount (ticks since script started)
 public final class OnTickNode extends AbstractScriptNode {
   public static final String TYPE = "trigger.on_tick";
 
@@ -40,8 +40,16 @@ public final class OnTickNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    // The tick count is passed through the inputs from the trigger system
+    // The bot and tick count are passed through the inputs from the trigger system
+    var bot = getBotInput(inputs);
     var tickCount = getLongInput(inputs, "tickCount", 0L);
-    return completed(result("tickCount", tickCount));
+
+    // Set current bot in context for downstream nodes
+    context.setCurrentBot(bot);
+
+    return completed(results(
+      "bot", bot,
+      "tickCount", tickCount
+    ));
   }
 }

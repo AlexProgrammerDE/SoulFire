@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.nodes.action;
+package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.ScriptContext;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Action node that makes the bot look at a specific position.
-/// Inputs: x, y, z (coordinates to look at)
-public final class LookAtNode extends AbstractScriptNode {
-  public static final String TYPE = "action.look_at";
+/// Data node that returns all connected bots in the instance.
+/// Output: bots (List of BotConnection)
+public final class GetBotsNode extends AbstractScriptNode {
+  public static final String TYPE = "data.get_bots";
 
   @Override
   public String getType() {
@@ -37,24 +35,8 @@ public final class LookAtNode extends AbstractScriptNode {
   }
 
   @Override
-  public Map<String, Object> getDefaultInputs() {
-    return Map.of("x", 0.0, "y", 0.0, "z", 0.0);
-  }
-
-  @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = requireBot(inputs, context);
-    var x = getDoubleInput(inputs, "x", 0.0);
-    var y = getDoubleInput(inputs, "y", 0.0);
-    var z = getDoubleInput(inputs, "z", 0.0);
-
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-      var player = bot.minecraft().player;
-      if (player != null) {
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(x, y, z));
-      }
-    }));
-
-    return completedEmpty();
+    var bots = new ArrayList<>(context.instance().botConnections().values());
+    return completed(result("bots", bots));
   }
 }

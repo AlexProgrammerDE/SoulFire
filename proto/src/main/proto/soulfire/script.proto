@@ -8,17 +8,6 @@ package soulfire.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
-// The scope at which a script operates.
-// Determines the execution context and what resources the script can access.
-enum ScriptScope {
-  // Script operates at the instance level, affecting all bots in the instance.
-  // Has access to instance-wide resources and can coordinate multiple bots.
-  SCRIPT_SCOPE_INSTANCE = 0;
-  // Script operates at the individual bot level.
-  // Runs independently for each bot and has access to bot-specific resources.
-  SCRIPT_SCOPE_BOT = 1;
-}
-
 // The type of connection between nodes in the visual script editor.
 // Determines how data and control flow between nodes.
 enum EdgeType {
@@ -120,8 +109,8 @@ message ScriptData {
   // The list of edges connecting nodes in this script.
   // Defines both execution flow and data transfer between nodes.
   repeated ScriptEdge edges = 5;
-  // The scope at which this script operates (instance or bot level).
-  ScriptScope scope = 6;
+  // Reserved field 6 was scope (removed - all scripts run at instance level)
+  reserved 6;
   // The instance this script belongs to.
   // Scripts are always associated with a specific instance.
   // Format: UUID string.
@@ -141,8 +130,8 @@ message ScriptInfo {
   string name = 2;
   // Optional description of what the script does.
   string description = 3;
-  // The scope at which this script operates.
-  ScriptScope scope = 4;
+  // Reserved field 4 was scope (removed - all scripts run at instance level)
+  reserved 4;
   // The instance this script belongs to.
   // Format: UUID string.
   string instance_id = 5;
@@ -155,19 +144,19 @@ message ScriptInfo {
 }
 
 // Runtime status information for a script.
-// Provides information about current execution state and statistics.
+// Provides information about current activation state and statistics.
 message ScriptStatus {
   // The script this status applies to.
   // Format: UUID string.
   string script_id = 1;
-  // Whether the script is currently executing.
-  bool is_running = 2;
+  // Whether the script is currently active (listening for triggers).
+  bool is_active = 2;
   // The ID of the currently executing node, if any.
-  // Only present when is_running is true and a node is actively executing.
+  // Only present when a node is actively executing.
   optional string active_node_id = 3;
-  // The total number of times this script has been executed.
-  // Incremented each time StartScript is called and execution begins.
-  int64 execution_count = 4;
+  // The total number of times this script has been activated.
+  // Incremented each time ActivateScript is called.
+  int64 activation_count = 4;
 }
 
 // A single log entry generated during script execution.
@@ -259,15 +248,15 @@ message CreateScriptRequest {
   string name = 2;
   // Optional description of what the script does.
   string description = 3;
-  // The scope at which this script operates.
-  ScriptScope scope = 4;
+  // Reserved field 4 was scope (removed - all scripts run at instance level)
+  reserved 4;
   // Initial nodes for the script graph.
   // Can be empty to create a blank script.
   repeated ScriptNode nodes = 5;
   // Initial edges for the script graph.
   // Can be empty to create a blank script.
   repeated ScriptEdge edges = 6;
-  // Whether the script should auto-start when the instance starts.
+  // Whether the script should auto-activate when the instance starts.
   bool auto_start = 7;
 }
 
@@ -307,9 +296,8 @@ message UpdateScriptRequest {
   // Updated description for the script.
   // If not set, the description remains unchanged.
   optional string description = 4;
-  // Updated scope for the script.
-  // If not set, the scope remains unchanged.
-  optional ScriptScope scope = 5;
+  // Reserved field 5 was scope (removed - all scripts run at instance level)
+  reserved 5;
   // Updated list of nodes.
   // If provided, replaces the entire node list.
   // If not provided, nodes remain unchanged.
@@ -362,32 +350,29 @@ message ListScriptsResponse {
   repeated ScriptInfo scripts = 1;
 }
 
-// Request to start executing a script.
-message StartScriptRequest {
+// Request to activate a script (register its event listeners).
+message ActivateScriptRequest {
   // The instance containing the script.
   // Format: UUID string.
   string instance_id = 1;
-  // The ID of the script to execute.
-  // Format: UUID string.
-  string script_id = 2;
-  // Optional initial input values for the script.
-  // Keys are input parameter names expected by trigger nodes.
-  map<string, google.protobuf.Value> inputs = 3;
-}
-
-// Request to stop a running script.
-message StopScriptRequest {
-  // The instance containing the script.
-  // Format: UUID string.
-  string instance_id = 1;
-  // The ID of the script to stop.
+  // The ID of the script to activate.
   // Format: UUID string.
   string script_id = 2;
 }
 
-// Response after successfully stopping a script.
+// Request to deactivate an active script.
+message DeactivateScriptRequest {
+  // The instance containing the script.
+  // Format: UUID string.
+  string instance_id = 1;
+  // The ID of the script to deactivate.
+  // Format: UUID string.
+  string script_id = 2;
+}
+
+// Response after successfully deactivating a script.
 // Empty response indicates success.
-message StopScriptResponse {
+message DeactivateScriptResponse {
 }
 
 // Request to get the execution status of a script.
@@ -429,16 +414,20 @@ message SubscribeScriptLogsRequest {
 // SCRIPT LIFECYCLE:
 // 1. Create a script using CreateScript with initial nodes/edges or empty graph
 // 2. Edit the script using UpdateScript to modify the node graph
-// 3. Execute the script using StartScript, which returns a stream of execution events
-// 4. Monitor execution via the ScriptEvent stream or GetScriptStatus
-// 5. Optionally stop early using StopScript
+// 3. Activate the script using ActivateScript to register event listeners
+// 4. Monitor execution via SubscribeScriptEvents or GetScriptStatus
+// 5. Deactivate using DeactivateScript when done
 // 6. Delete unused scripts with DeleteScript
+//
+// Scripts are reactive state machines - they don't "run" but rather listen for
+// trigger events and execute node chains in response. Activation registers the
+// listeners, deactivation removes them and cancels any pending async operations.
 //
 // PERMISSIONS: Script operations require appropriate instance permissions.
 // The specific permissions are TBD but will likely include:
 // - READ_SCRIPT: View script definitions and status
 // - UPDATE_SCRIPT: Create, modify, and delete scripts
-// - EXECUTE_SCRIPT: Start and stop script execution
+// - EXECUTE_SCRIPT: Activate and deactivate scripts
 //
 // LOGGING: Script execution logs can be streamed via SubscribeScriptLogs or
 // filtered using InstanceScriptLogScope in the LogsService (see logs.proto).
@@ -467,7 +456,7 @@ service ScriptService {
   rpc UpdateScript (UpdateScriptRequest) returns (UpdateScriptResponse) {}
 
   // Permanently deletes a script.
-  // If the script is currently running, it will be stopped first.
+  // If the script is currently active, it will be deactivated first.
   // This operation cannot be undone.
   // Errors: NOT_FOUND if instance or script does not exist
   // Errors: PERMISSION_DENIED if user lacks script delete permission
@@ -480,26 +469,25 @@ service ScriptService {
   // Errors: PERMISSION_DENIED if user lacks script read permission
   rpc ListScripts (ListScriptsRequest) returns (ListScriptsResponse) {}
 
-  // Starts executing a script and streams execution events.
-  // The stream provides real-time feedback about script execution including
-  // node start/complete events, errors, and final completion status.
-  // The stream remains open until the script completes or is stopped.
+  // Activates a script by registering its trigger event listeners.
+  // The script will begin responding to trigger events (tick, chat, etc.).
+  // Returns a stream of execution events as triggers fire and nodes execute.
+  // The stream remains open until the script is deactivated.
   // Errors: NOT_FOUND if instance or script does not exist
   // Errors: PERMISSION_DENIED if user lacks script execution permission
-  // Errors: FAILED_PRECONDITION if script is already running
+  // Errors: FAILED_PRECONDITION if script is already active
   // Errors: INVALID_ARGUMENT if script graph is invalid (e.g., no trigger nodes)
-  rpc StartScript (StartScriptRequest) returns (stream ScriptEvent) {}
+  rpc ActivateScript (ActivateScriptRequest) returns (stream ScriptEvent) {}
 
-  // Stops a currently running script.
-  // Execution is halted gracefully after the current node completes.
-  // A ScriptCompleted event with success=false will be emitted on the StartScript stream.
+  // Deactivates an active script.
+  // Unregisters all event listeners and cancels any pending async operations.
   // Errors: NOT_FOUND if instance or script does not exist
   // Errors: PERMISSION_DENIED if user lacks script execution permission
-  // Errors: FAILED_PRECONDITION if script is not running
-  rpc StopScript (StopScriptRequest) returns (StopScriptResponse) {}
+  // Errors: FAILED_PRECONDITION if script is not active
+  rpc DeactivateScript (DeactivateScriptRequest) returns (DeactivateScriptResponse) {}
 
-  // Gets the current execution status of a script.
-  // Returns whether the script is running, which node is active, and execution count.
+  // Gets the current status of a script.
+  // Returns whether the script is active, which node is executing, and activation count.
   // Errors: NOT_FOUND if instance or script does not exist
   // Errors: PERMISSION_DENIED if user lacks script read permission
   rpc GetScriptStatus (GetScriptStatusRequest) returns (GetScriptStatusResponse) {}

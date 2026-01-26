@@ -37,7 +37,7 @@ public final class UseItemNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = context.requireBot();
+    var bot = requireBot(inputs, context);
 
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
       var minecraft = bot.minecraft();

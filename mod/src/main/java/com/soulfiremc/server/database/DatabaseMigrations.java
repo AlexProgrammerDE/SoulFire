@@ -43,6 +43,7 @@ public final class DatabaseMigrations {
     try {
       migrateAttackToSession(connection, isSqlite);
       dropScriptsTable(connection, isSqlite);
+      dropScriptsScopeColumn(connection, isSqlite);
     } catch (SQLException e) {
       log.error("Failed to run database migrations", e);
       throw new RuntimeException("Database migration failed", e);
@@ -68,6 +69,66 @@ public final class DatabaseMigrations {
         }
         log.info("Successfully dropped old scripts table - new table will be created by Hibernate");
       }
+    }
+  }
+
+  /**
+   * Migration: Drop the scope column from scripts table.
+   * Scripts no longer have a scope (BOT/INSTANCE) - they all run at instance level
+   * and bot becomes an explicit input to nodes.
+   */
+  private static void dropScriptsScopeColumn(Connection connection, boolean isSqlite) throws SQLException {
+    if (tableExists(connection, "scripts", isSqlite) &&
+        columnExists(connection, "scripts", "scope", isSqlite)) {
+      log.info("Migrating database: dropping scope column from scripts table");
+
+      if (isSqlite) {
+        // SQLite 3.35.0+ supports DROP COLUMN, but for broader compatibility
+        // we'll use the table recreation approach
+        try (var stmt = connection.createStatement()) {
+          stmt.execute("PRAGMA foreign_keys=OFF");
+
+          // Create new table without scope column
+          stmt.execute("""
+            CREATE TABLE scripts_new (
+              id BLOB NOT NULL,
+              name VARCHAR(100) NOT NULL,
+              description VARCHAR(1000),
+              instance_id BLOB NOT NULL,
+              nodesJson TEXT NOT NULL,
+              edgesJson TEXT NOT NULL,
+              autoStart INTEGER NOT NULL DEFAULT 0,
+              createdAt TIMESTAMP NOT NULL,
+              updatedAt TIMESTAMP NOT NULL,
+              version BIGINT NOT NULL,
+              PRIMARY KEY (id),
+              FOREIGN KEY (instance_id) REFERENCES instances(id)
+            )
+            """);
+
+          // Copy data (excluding scope column)
+          stmt.execute("""
+            INSERT INTO scripts_new (id, name, description, instance_id, nodesJson, edgesJson, autoStart, createdAt, updatedAt, version)
+            SELECT id, name, description, instance_id, nodesJson, edgesJson, autoStart, createdAt, updatedAt, version
+            FROM scripts
+            """);
+
+          // Drop old table
+          stmt.execute("DROP TABLE scripts");
+
+          // Rename new table
+          stmt.execute("ALTER TABLE scripts_new RENAME TO scripts");
+
+          stmt.execute("PRAGMA foreign_keys=ON");
+        }
+      } else {
+        // MySQL/MariaDB supports DROP COLUMN directly
+        try (var stmt = connection.createStatement()) {
+          stmt.execute("ALTER TABLE scripts DROP COLUMN scope");
+        }
+      }
+
+      log.info("Successfully dropped scope column from scripts table");
     }
   }
 

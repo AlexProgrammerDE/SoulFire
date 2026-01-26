@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot dies.
-/// Output: deathMessage (string)
+/// Outputs: bot (the bot that died), deathMessage (string)
 public final class OnDeathNode extends AbstractScriptNode {
   public static final String TYPE = "trigger.on_death";
 
@@ -40,7 +40,15 @@ public final class OnDeathNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
+    var bot = getBotInput(inputs);
     var deathMessage = getStringInput(inputs, "deathMessage", "");
-    return completed(result("deathMessage", deathMessage));
+
+    // Set current bot in context for downstream nodes
+    context.setCurrentBot(bot);
+
+    return completed(results(
+      "bot", bot,
+      "deathMessage", deathMessage
+    ));
   }
 }

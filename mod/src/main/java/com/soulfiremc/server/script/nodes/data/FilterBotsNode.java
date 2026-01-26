@@ -15,21 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.server.script.nodes.action;
+package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.ControllingTask;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.AbstractScriptNode;
 import com.soulfiremc.server.script.ScriptContext;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
-/// Action node that makes the bot look at a specific position.
-/// Inputs: x, y, z (coordinates to look at)
-public final class LookAtNode extends AbstractScriptNode {
-  public static final String TYPE = "action.look_at";
+/// Data node that filters bots by name pattern.
+/// Input: bots (List of BotConnection), pattern (regex string)
+/// Output: bots (List of BotConnection matching pattern)
+public final class FilterBotsNode extends AbstractScriptNode {
+  public static final String TYPE = "data.filter_bots";
 
   @Override
   public String getType() {
@@ -38,23 +40,26 @@ public final class LookAtNode extends AbstractScriptNode {
 
   @Override
   public Map<String, Object> getDefaultInputs() {
-    return Map.of("x", 0.0, "y", 0.0, "z", 0.0);
+    return Map.of("pattern", ".*");
   }
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = requireBot(inputs, context);
-    var x = getDoubleInput(inputs, "x", 0.0);
-    var y = getDoubleInput(inputs, "y", 0.0);
-    var z = getDoubleInput(inputs, "z", 0.0);
+    var bots = getListInput(inputs, "bots", List.<BotConnection>of());
+    var patternStr = getStringInput(inputs, "pattern", ".*");
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-      var player = bot.minecraft().player;
-      if (player != null) {
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(x, y, z));
-      }
-    }));
+    Pattern pattern;
+    try {
+      pattern = Pattern.compile(patternStr);
+    } catch (PatternSyntaxException e) {
+      // If pattern is invalid, return empty list
+      return completed(result("bots", List.of()));
+    }
 
-    return completedEmpty();
+    var filtered = bots.stream()
+      .filter(bot -> pattern.matcher(bot.accountName()).matches())
+      .toList();
+
+    return completed(result("bots", filtered));
   }
 }

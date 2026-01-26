@@ -25,55 +25,75 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 /// Execution context for script nodes.
-/// Provides access to the instance, bot (if BOT scope), variables, and node outputs.
+/// Provides access to the instance, variables, node outputs, and pending operations.
 /// This class is thread-safe for use in async node execution.
+///
+/// Scripts run at instance level. Bot-specific operations receive the bot as an
+/// explicit input parameter. The currentBot field is set by flow nodes like ForEachBot
+/// to provide a default bot context within iteration scopes.
 @Getter
 public final class ScriptContext {
   private final InstanceManager instance;
-  @Nullable
-  private final BotConnection bot;
-  private final ScriptScope scope;
   private final Map<String, Object> variables;
   private final Map<String, Map<String, Object>> nodeOutputs;
   private final ScriptEventListener eventListener;
+  private final Set<Future<?>> pendingOperations;
   private volatile boolean cancelled;
+  /// Current bot set by ForEachBot or trigger nodes for use as default in action nodes.
+  @Nullable
+  private volatile BotConnection currentBot;
 
-  /// Creates a new script context for INSTANCE scope.
+  /// Creates a new script context.
   ///
   /// @param instance      the SoulFire instance
   /// @param eventListener listener for script execution events
   public ScriptContext(InstanceManager instance, ScriptEventListener eventListener) {
     this.instance = instance;
-    this.bot = null;
-    this.scope = ScriptScope.INSTANCE;
     this.variables = new ConcurrentHashMap<>();
     this.nodeOutputs = new ConcurrentHashMap<>();
     this.eventListener = eventListener;
-  }
-
-  /// Creates a new script context for BOT scope.
-  ///
-  /// @param instance      the SoulFire instance
-  /// @param bot           the bot connection
-  /// @param eventListener listener for script execution events
-  public ScriptContext(InstanceManager instance, BotConnection bot, ScriptEventListener eventListener) {
-    this.instance = instance;
-    this.bot = bot;
-    this.scope = ScriptScope.BOT;
-    this.variables = new ConcurrentHashMap<>();
-    this.nodeOutputs = new ConcurrentHashMap<>();
-    this.eventListener = eventListener;
+    this.pendingOperations = ConcurrentHashMap.newKeySet();
   }
 
   /// Gets the scheduler for async operations.
-  /// Uses the bot scheduler if in BOT scope, otherwise the instance scheduler.
+  /// Uses the current bot's scheduler if set, otherwise the instance scheduler.
   ///
   /// @return the appropriate scheduler
   public SoulFireScheduler scheduler() {
+    var bot = currentBot;
     return bot != null ? bot.scheduler() : instance.scheduler();
+  }
+
+  /// Sets the current bot context (used by ForEachBot and trigger nodes).
+  ///
+  /// @param bot the current bot, or null to clear
+  public void setCurrentBot(@Nullable BotConnection bot) {
+    this.currentBot = bot;
+  }
+
+  /// Registers a pending async operation for cleanup on deactivation.
+  ///
+  /// @param future the future to track
+  public void addPendingOperation(Future<?> future) {
+    pendingOperations.add(future);
+    // Auto-remove when complete
+    if (future instanceof CompletableFuture<?> cf) {
+      cf.whenComplete((_, _) -> pendingOperations.remove(future));
+    }
+  }
+
+  /// Cancels all pending async operations.
+  public void cancelPendingOperations() {
+    for (var future : pendingOperations) {
+      future.cancel(true);
+    }
+    pendingOperations.clear();
   }
 
   /// Gets a variable value by name.
@@ -142,28 +162,10 @@ public final class ScriptContext {
     return cancelled;
   }
 
-  /// Cancels the script execution.
+  /// Cancels the script execution and all pending operations.
   public void cancel() {
     this.cancelled = true;
+    cancelPendingOperations();
     eventListener.onScriptCancelled();
-  }
-
-  /// Requires the bot to be present (for BOT scope operations).
-  ///
-  /// @return the bot connection
-  /// @throws IllegalStateException if not in BOT scope
-  public BotConnection requireBot() {
-    if (bot == null) {
-      throw new IllegalStateException("This operation requires BOT scope but script is running in INSTANCE scope");
-    }
-    return bot;
-  }
-
-  /// The scope of script execution.
-  public enum ScriptScope {
-    /// Script runs at the instance level, affecting all bots.
-    INSTANCE,
-    /// Script runs for a specific bot.
-    BOT
   }
 }

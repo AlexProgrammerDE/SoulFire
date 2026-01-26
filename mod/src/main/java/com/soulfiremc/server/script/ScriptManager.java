@@ -18,7 +18,6 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.bot.BotConnection;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,34 +25,33 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.SessionFactory;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/// Manages script lifecycle including loading, saving, execution, and event tracking.
-/// Each InstanceManager has its own ScriptManager for instance-scoped scripts.
+/// Manages script lifecycle including loading, activation, and event tracking.
+/// Scripts are reactive state machines that activate (register listeners) and
+/// deactivate (unregister + cleanup). There is no concept of scripts "running"
+/// to completion - they simply listen for trigger events when active.
 @Slf4j
 @RequiredArgsConstructor
 public final class ScriptManager {
   private final InstanceManager instanceManager;
   private final SessionFactory sessionFactory;
   private final ScriptEngine engine;
+  private final ScriptTriggerService triggerService;
 
   /// Map of script ID to loaded script graph.
   private final Map<UUID, ScriptGraph> loadedScripts = new ConcurrentHashMap<>();
 
-  /// Map of script ID to running execution contexts (for instance scope).
-  private final Map<UUID, RunningScript> runningInstanceScripts = new ConcurrentHashMap<>();
-
-  /// Map of bot ID -> script ID -> running execution (for bot scope).
-  private final Map<UUID, Map<UUID, RunningScript>> runningBotScripts = new ConcurrentHashMap<>();
+  /// Map of script ID to active script context.
+  private final Map<UUID, ActiveScript> activeScripts = new ConcurrentHashMap<>();
 
   /// Global event listeners for all script executions.
   private final List<ScriptEventListener> globalListeners = new CopyOnWriteArrayList<>();
 
-  /// Creates a new ScriptManager with a new ScriptEngine.
+  /// Creates a new ScriptManager with a new ScriptEngine and TriggerService.
   public ScriptManager(InstanceManager instanceManager, SessionFactory sessionFactory) {
-    this(instanceManager, sessionFactory, new ScriptEngine());
+    this(instanceManager, sessionFactory, new ScriptEngine(), new ScriptTriggerService());
   }
 
   /// Registers a global event listener for all script executions.
@@ -70,7 +68,7 @@ public final class ScriptManager {
     globalListeners.remove(listener);
   }
 
-  /// Loads a script graph and stores it for execution.
+  /// Loads a script graph and stores it for activation.
   ///
   /// @param scriptId the unique script identifier
   /// @param graph    the script graph to load
@@ -79,12 +77,12 @@ public final class ScriptManager {
     log.info("Loaded script: {} ({})", graph.scriptName(), scriptId);
   }
 
-  /// Unloads a script and stops any running executions.
+  /// Unloads a script and deactivates it if active.
   ///
   /// @param scriptId the script to unload
   public void unloadScript(UUID scriptId) {
     loadedScripts.remove(scriptId);
-    stopScript(scriptId);
+    deactivateScript(scriptId);
     log.info("Unloaded script: {}", scriptId);
   }
 
@@ -104,175 +102,99 @@ public final class ScriptManager {
     return Set.copyOf(loadedScripts.keySet());
   }
 
-  /// Starts execution of a script in INSTANCE scope.
+  /// Activates a script by registering its trigger event listeners.
+  /// The script will begin responding to trigger events (tick, chat, etc.).
   ///
-  /// @param scriptId the script to execute
-  /// @return a future that completes when the script finishes, or empty if script not found
-  public Optional<CompletableFuture<Void>> startInstanceScript(UUID scriptId) {
+  /// @param scriptId the script to activate
+  /// @return true if activated successfully, false if script not found or already active
+  public boolean activateScript(UUID scriptId) {
+    return activateScript(scriptId, null);
+  }
+
+  /// Activates a script with a custom event listener.
+  ///
+  /// @param scriptId      the script to activate
+  /// @param eventListener optional custom event listener (in addition to global listeners)
+  /// @return true if activated successfully
+  public boolean activateScript(UUID scriptId, @Nullable ScriptEventListener eventListener) {
     var graph = loadedScripts.get(scriptId);
     if (graph == null) {
       log.warn("Script not found: {}", scriptId);
-      return Optional.empty();
+      return false;
     }
 
-    // Stop existing execution if running
-    stopInstanceScript(scriptId);
+    if (activeScripts.containsKey(scriptId)) {
+      log.warn("Script already active: {}", scriptId);
+      return false;
+    }
 
-    var compositeListener = new CompositeEventListener(scriptId, null, globalListeners);
-    var future = engine.execute(graph, instanceManager, compositeListener);
+    // Create composite listener
+    var compositeListener = new CompositeEventListener(scriptId, globalListeners, eventListener);
 
-    var runningScript = new RunningScript(scriptId, null, future, compositeListener);
-    runningInstanceScripts.put(scriptId, runningScript);
+    // Create context
+    var context = new ScriptContext(instanceManager, compositeListener);
 
-    future.whenComplete((_, _) -> runningInstanceScripts.remove(scriptId));
+    // Register trigger listeners
+    triggerService.registerTriggers(scriptId, graph, context, engine);
 
-    log.info("Started instance script: {} ({})", graph.scriptName(), scriptId);
-    return Optional.of(future);
+    // Store active script
+    var activeScript = new ActiveScript(scriptId, graph, context, compositeListener);
+    activeScripts.put(scriptId, activeScript);
+
+    log.info("Activated script: {} ({})", graph.scriptName(), scriptId);
+    return true;
   }
 
-  /// Starts execution of a script in BOT scope.
+  /// Deactivates an active script.
+  /// Unregisters all event listeners and cancels any pending async operations.
   ///
-  /// @param scriptId the script to execute
-  /// @param bot      the bot to run the script for
-  /// @return a future that completes when the script finishes, or empty if script not found
-  public Optional<CompletableFuture<Void>> startBotScript(UUID scriptId, BotConnection bot) {
-    var graph = loadedScripts.get(scriptId);
-    if (graph == null) {
-      log.warn("Script not found: {}", scriptId);
-      return Optional.empty();
+  /// @param scriptId the script to deactivate
+  public void deactivateScript(UUID scriptId) {
+    var activeScript = activeScripts.remove(scriptId);
+    if (activeScript == null) {
+      return;
     }
 
-    var botId = bot.accountProfileId();
+    // Unregister trigger listeners
+    triggerService.unregisterTriggers(scriptId);
 
-    // Stop existing execution if running
-    stopBotScript(scriptId, botId);
+    // Cancel pending operations
+    activeScript.context.cancel();
 
-    var compositeListener = new CompositeEventListener(scriptId, botId, globalListeners);
-    var future = engine.execute(graph, instanceManager, bot, compositeListener);
-
-    var botScripts = runningBotScripts.computeIfAbsent(botId, _ -> new ConcurrentHashMap<>());
-    var runningScript = new RunningScript(scriptId, botId, future, compositeListener);
-    botScripts.put(scriptId, runningScript);
-
-    future.whenComplete((_, _) -> {
-      var scripts = runningBotScripts.get(botId);
-      if (scripts != null) {
-        scripts.remove(scriptId);
-        if (scripts.isEmpty()) {
-          runningBotScripts.remove(botId);
-        }
-      }
-    });
-
-    log.info("Started bot script: {} ({}) for bot {}", graph.scriptName(), scriptId, bot.accountName());
-    return Optional.of(future);
+    log.info("Deactivated script: {}", scriptId);
   }
 
-  /// Stops a running instance script.
-  ///
-  /// @param scriptId the script to stop
-  public void stopInstanceScript(UUID scriptId) {
-    var running = runningInstanceScripts.remove(scriptId);
-    if (running != null) {
-      running.cancel();
-      log.info("Stopped instance script: {}", scriptId);
+  /// Deactivates all active scripts.
+  public void deactivateAllScripts() {
+    for (var scriptId : Set.copyOf(activeScripts.keySet())) {
+      deactivateScript(scriptId);
     }
+    log.info("Deactivated all scripts");
   }
 
-  /// Stops a running bot script.
-  ///
-  /// @param scriptId the script to stop
-  /// @param botId    the bot ID
-  public void stopBotScript(UUID scriptId, UUID botId) {
-    var botScripts = runningBotScripts.get(botId);
-    if (botScripts != null) {
-      var running = botScripts.remove(scriptId);
-      if (running != null) {
-        running.cancel();
-        log.info("Stopped bot script: {} for bot {}", scriptId, botId);
-      }
-      if (botScripts.isEmpty()) {
-        runningBotScripts.remove(botId);
-      }
-    }
-  }
-
-  /// Stops all running executions of a script (both instance and bot scope).
-  ///
-  /// @param scriptId the script to stop
-  public void stopScript(UUID scriptId) {
-    stopInstanceScript(scriptId);
-
-    for (var botScripts : runningBotScripts.values()) {
-      var running = botScripts.remove(scriptId);
-      if (running != null) {
-        running.cancel();
-      }
-    }
-  }
-
-  /// Stops all running scripts for a specific bot.
-  ///
-  /// @param botId the bot ID
-  public void stopAllBotScripts(UUID botId) {
-    var botScripts = runningBotScripts.remove(botId);
-    if (botScripts != null) {
-      for (var running : botScripts.values()) {
-        running.cancel();
-      }
-      log.info("Stopped all scripts for bot: {}", botId);
-    }
-  }
-
-  /// Stops all running scripts.
-  public void stopAllScripts() {
-    for (var running : runningInstanceScripts.values()) {
-      running.cancel();
-    }
-    runningInstanceScripts.clear();
-
-    for (var botScripts : runningBotScripts.values()) {
-      for (var running : botScripts.values()) {
-        running.cancel();
-      }
-    }
-    runningBotScripts.clear();
-
-    log.info("Stopped all running scripts");
-  }
-
-  /// Checks if a script is running in instance scope.
+  /// Checks if a script is active.
   ///
   /// @param scriptId the script ID
-  /// @return true if running
-  public boolean isInstanceScriptRunning(UUID scriptId) {
-    return runningInstanceScripts.containsKey(scriptId);
+  /// @return true if active
+  public boolean isScriptActive(UUID scriptId) {
+    return activeScripts.containsKey(scriptId);
   }
 
-  /// Checks if a script is running for a specific bot.
+  /// Gets all active script IDs.
+  ///
+  /// @return set of active script IDs
+  public Set<UUID> getActiveScripts() {
+    return Set.copyOf(activeScripts.keySet());
+  }
+
+  /// Gets the context for an active script.
   ///
   /// @param scriptId the script ID
-  /// @param botId    the bot ID
-  /// @return true if running
-  public boolean isBotScriptRunning(UUID scriptId, UUID botId) {
-    var botScripts = runningBotScripts.get(botId);
-    return botScripts != null && botScripts.containsKey(scriptId);
-  }
-
-  /// Gets all running instance script IDs.
-  ///
-  /// @return set of running script IDs
-  public Set<UUID> getRunningInstanceScripts() {
-    return Set.copyOf(runningInstanceScripts.keySet());
-  }
-
-  /// Gets all running bot script IDs for a specific bot.
-  ///
-  /// @param botId the bot ID
-  /// @return set of running script IDs
-  public Set<UUID> getRunningBotScripts(UUID botId) {
-    var botScripts = runningBotScripts.get(botId);
-    return botScripts != null ? Set.copyOf(botScripts.keySet()) : Set.of();
+  /// @return the context, or null if not active
+  @Nullable
+  public ScriptContext getActiveScriptContext(UUID scriptId) {
+    var activeScript = activeScripts.get(scriptId);
+    return activeScript != null ? activeScript.context : null;
   }
 
   /// Gets the script engine used by this manager.
@@ -282,39 +204,41 @@ public final class ScriptManager {
     return engine;
   }
 
-  /// Represents a running script execution.
+  /// Gets the trigger service used by this manager.
+  ///
+  /// @return the trigger service
+  public ScriptTriggerService getTriggerService() {
+    return triggerService;
+  }
+
+  /// Represents an active script with its context.
   @Getter
-  private static final class RunningScript {
+  private static final class ActiveScript {
     private final UUID scriptId;
-    @Nullable
-    private final UUID botId;
-    private final CompletableFuture<Void> future;
+    private final ScriptGraph graph;
+    private final ScriptContext context;
     private final CompositeEventListener listener;
 
-    RunningScript(
-      UUID scriptId,
-      @Nullable UUID botId,
-      CompletableFuture<Void> future,
-      CompositeEventListener listener
-    ) {
+    ActiveScript(UUID scriptId, ScriptGraph graph, ScriptContext context, CompositeEventListener listener) {
       this.scriptId = scriptId;
-      this.botId = botId;
-      this.future = future;
+      this.graph = graph;
+      this.context = context;
       this.listener = listener;
-    }
-
-    void cancel() {
-      future.cancel(true);
-      listener.onScriptCancelled();
     }
   }
 
   /// Composite listener that delegates to multiple listeners.
-  private record CompositeEventListener(
-    UUID scriptId,
-    @Nullable UUID botId,
-    List<ScriptEventListener> delegates
-  ) implements ScriptEventListener {
+  private static final class CompositeEventListener implements ScriptEventListener {
+    private final UUID scriptId;
+    private final List<ScriptEventListener> delegates;
+    @Nullable
+    private final ScriptEventListener customListener;
+
+    CompositeEventListener(UUID scriptId, List<ScriptEventListener> delegates, @Nullable ScriptEventListener customListener) {
+      this.scriptId = scriptId;
+      this.delegates = delegates;
+      this.customListener = customListener;
+    }
 
     @Override
     public void onNodeStarted(String nodeId) {
@@ -323,6 +247,13 @@ public final class ScriptManager {
           delegate.onNodeStarted(nodeId);
         } catch (Exception e) {
           log.error("Error in script event listener", e);
+        }
+      }
+      if (customListener != null) {
+        try {
+          customListener.onNodeStarted(nodeId);
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
         }
       }
     }
@@ -336,6 +267,13 @@ public final class ScriptManager {
           log.error("Error in script event listener", e);
         }
       }
+      if (customListener != null) {
+        try {
+          customListener.onNodeCompleted(nodeId, outputs);
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
+        }
+      }
     }
 
     @Override
@@ -347,15 +285,30 @@ public final class ScriptManager {
           log.error("Error in script event listener", e);
         }
       }
+      if (customListener != null) {
+        try {
+          customListener.onNodeError(nodeId, error);
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
+        }
+      }
     }
 
     @Override
     public void onScriptCompleted(boolean success) {
+      // Scripts don't "complete" in the activatable model, but we keep this for compatibility
       for (var delegate : delegates) {
         try {
           delegate.onScriptCompleted(success);
         } catch (Exception e) {
           log.error("Error in script event listener", e);
+        }
+      }
+      if (customListener != null) {
+        try {
+          customListener.onScriptCompleted(success);
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
         }
       }
     }
@@ -369,6 +322,13 @@ public final class ScriptManager {
           log.error("Error in script event listener", e);
         }
       }
+      if (customListener != null) {
+        try {
+          customListener.onScriptCancelled();
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
+        }
+      }
     }
 
     @Override
@@ -378,6 +338,13 @@ public final class ScriptManager {
           delegate.onVariableChanged(name, value);
         } catch (Exception e) {
           log.error("Error in script event listener", e);
+        }
+      }
+      if (customListener != null) {
+        try {
+          customListener.onVariableChanged(name, value);
+        } catch (Exception e) {
+          log.error("Error in custom event listener", e);
         }
       }
     }

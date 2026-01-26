@@ -90,6 +90,9 @@ public final class NodeRegistry {
     register(FindEntityNode.TYPE, FindEntityNode::new);
     register(FindBlockNode.TYPE, FindBlockNode::new);
     register(GetVariableNode.TYPE, GetVariableNode::new);
+    register(GetBotsNode.TYPE, GetBotsNode::new);
+    register(FilterBotsNode.TYPE, FilterBotsNode::new);
+    register(GetBotByNameNode.TYPE, GetBotByNameNode::new);
 
     // Constant Nodes
     register(NumberConstantNode.TYPE, NumberConstantNode::new);
@@ -102,6 +105,7 @@ public final class NodeRegistry {
     register(SwitchNode.TYPE, SwitchNode::new);
     register(LoopNode.TYPE, LoopNode::new);
     register(ForEachNode.TYPE, ForEachNode::new);
+    register(ForEachBotNode.TYPE, ForEachBotNode::new);
     register(SequenceNode.TYPE, SequenceNode::new);
     register(GateNode.TYPE, GateNode::new);
     register(DebounceNode.TYPE, DebounceNode::new);

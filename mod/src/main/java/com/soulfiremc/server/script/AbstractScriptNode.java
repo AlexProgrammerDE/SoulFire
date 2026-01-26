@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server.script;
 
+import com.soulfiremc.server.bot.BotConnection;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +107,47 @@ public abstract class AbstractScriptNode implements ScriptNode {
       return (List<T>) list;
     }
     return defaultValue;
+  }
+
+  /// Helper method to get a bot from inputs.
+  /// Returns null if the "bot" input is not set.
+  ///
+  /// @param inputs the node inputs
+  /// @return the bot connection, or null if not provided
+  @Nullable
+  protected BotConnection getBotInput(Map<String, Object> inputs) {
+    var value = inputs.get("bot");
+    if (value instanceof BotConnection bot) {
+      return bot;
+    }
+    return null;
+  }
+
+  /// Helper method to get a bot from inputs, falling back to context's current bot.
+  /// This is the preferred method for action nodes that need a bot.
+  ///
+  /// @param inputs  the node inputs
+  /// @param context the script context
+  /// @return the bot connection, or null if none available
+  @Nullable
+  protected BotConnection getBotOrCurrent(Map<String, Object> inputs, ScriptContext context) {
+    var bot = getBotInput(inputs);
+    return bot != null ? bot : context.currentBot();
+  }
+
+  /// Helper method to require a bot from inputs or context.
+  /// Throws an exception if no bot is available.
+  ///
+  /// @param inputs  the node inputs
+  /// @param context the script context
+  /// @return the bot connection
+  /// @throws IllegalStateException if no bot is available
+  protected BotConnection requireBot(Map<String, Object> inputs, ScriptContext context) {
+    var bot = getBotOrCurrent(inputs, context);
+    if (bot == null) {
+      throw new IllegalStateException("This node requires a bot input, but none was provided");
+    }
+    return bot;
   }
 
   /// Helper method to create a result map with a single value.

@@ -18,7 +18,6 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
-import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +47,9 @@ public final class ScriptEngine {
     return NodeRegistry.isRegistered(type) ? NodeRegistry.create(type) : null;
   }
 
-  /// Executes a script graph in INSTANCE scope.
+  /// Executes a script graph.
+  /// Note: This method is primarily used for testing or one-shot execution.
+  /// For activatable scripts, use executeFromTrigger() instead.
   ///
   /// @param graph         the script graph to execute
   /// @param instance      the SoulFire instance
@@ -60,23 +61,6 @@ public final class ScriptEngine {
     ScriptEventListener eventListener
   ) {
     var context = new ScriptContext(instance, eventListener);
-    return executeGraph(graph, context);
-  }
-
-  /// Executes a script graph in BOT scope.
-  ///
-  /// @param graph         the script graph to execute
-  /// @param instance      the SoulFire instance
-  /// @param bot           the bot connection
-  /// @param eventListener listener for execution events
-  /// @return a future that completes when the script finishes
-  public CompletableFuture<Void> execute(
-    ScriptGraph graph,
-    InstanceManager instance,
-    BotConnection bot,
-    ScriptEventListener eventListener
-  ) {
-    var context = new ScriptContext(instance, bot, eventListener);
     return executeGraph(graph, context);
   }
 

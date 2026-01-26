@@ -45,7 +45,7 @@ public final class FindEntityNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, Object>> execute(ScriptContext context, Map<String, Object> inputs) {
-    var bot = context.requireBot();
+    var bot = requireBot(inputs, context);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
     var entityTypeInput = getStringInput(inputs, "entityType", "any");
