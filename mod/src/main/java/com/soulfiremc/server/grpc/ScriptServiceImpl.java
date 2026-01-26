@@ -25,18 +25,13 @@ import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.grpc.generated.PortType;
+import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
-import com.soulfiremc.server.script.NodeCategory;
-import com.soulfiremc.server.script.NodeMetadata;
-import com.soulfiremc.server.script.NodeValue;
+import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.PortDefinition;
-import com.soulfiremc.server.script.ScriptContext;
-import com.soulfiremc.server.script.ScriptEngine;
-import com.soulfiremc.server.script.ScriptEventListener;
-import com.soulfiremc.server.script.ScriptGraph;
-import com.soulfiremc.server.script.ScriptTriggerService;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -226,6 +221,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         try {
           activationState.observer().onNext(ScriptEvent.newBuilder()
             .setScriptCompleted(ScriptCompleted.newBuilder()
+              .setScriptId(scriptId.toString())
               .setSuccess(false)
               .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
               .build())
@@ -386,6 +382,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         try {
           activationState.observer().onNext(ScriptEvent.newBuilder()
             .setScriptCompleted(ScriptCompleted.newBuilder()
+              .setScriptId(scriptId.toString())
               .setSuccess(true)
               .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
               .build())
@@ -816,6 +813,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           try {
             observer.onNext(ScriptEvent.newBuilder()
               .setScriptCompleted(ScriptCompleted.newBuilder()
+                .setScriptId(scriptId.toString())
                 .setSuccess(success)
                 .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
                 .build())
@@ -834,6 +832,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           try {
             observer.onNext(ScriptEvent.newBuilder()
               .setScriptCompleted(ScriptCompleted.newBuilder()
+                .setScriptId(scriptId.toString())
                 .setSuccess(false)
                 .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
                 .build())
@@ -886,12 +885,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     if (value == null || value.isNull()) {
       return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
     }
-    if (value instanceof NodeValue.Json json) {
-      return jsonElementToProtoValue(json.element());
+    if (value instanceof NodeValue.Json(JsonElement element)) {
+      return jsonElementToProtoValue(element);
     }
-    if (value instanceof NodeValue.Bot bot) {
+    if (value instanceof NodeValue.Bot(com.soulfiremc.server.bot.BotConnection bot1)) {
       // Bot references are serialized as their account name
-      return Value.newBuilder().setStringValue(bot.bot().accountName()).build();
+      return Value.newBuilder().setStringValue(bot1.accountName()).build();
     }
     return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
   }
