@@ -15,8 +15,6 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.ref }}
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # 5.0.0
       - name: Get version
         id: get-version
         run: |
@@ -43,6 +41,8 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            VERSION=${{ steps.get-version.outputs.version }}
           tags: |
             alexprogrammerde/soulfire:latest
             alexprogrammerde/soulfire:${{ steps.get-version.outputs.version }}
