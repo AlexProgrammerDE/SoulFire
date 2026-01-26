@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a * b
 public final class MultiplyNode extends AbstractScriptNode {
-  public static final String TYPE = "math.multiply";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.multiply")
+    .displayName("Multiply")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "A times B")
+    )
+    .description("Multiplies two numbers together")
+    .icon("x")
+    .color("#2196F3")
+    .addKeywords("multiply", "times", "product", "arithmetic")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

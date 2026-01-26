@@ -18,130 +18,86 @@
 package com.soulfiremc.server.script;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
 import java.util.List;
 
 /// Complete metadata for a node type.
 /// Contains all information needed to render the node in a client
 /// without hardcoded knowledge of specific node types.
-///
-/// @param type               the unique type identifier
-/// @param displayName        human-readable name for display
-/// @param description        description of what the node does
-/// @param category           category for organizing in the palette
-/// @param isTrigger          whether this is a trigger (entry point) node
-/// @param inputs             input port definitions
-/// @param outputs            output port definitions
-/// @param icon               icon identifier (required)
-/// @param color              optional color hint (hex code)
-/// @param keywords           search keywords
-/// @param deprecated         whether this node is deprecated
-/// @param deprecationMessage if deprecated, what to use instead
-public record NodeMetadata(
-  String type,
-  String displayName,
-  String description,
-  NodeCategory category,
-  boolean isTrigger,
-  List<PortDefinition> inputs,
-  List<PortDefinition> outputs,
-  String icon,
-  @Nullable String color,
-  List<String> keywords,
-  boolean deprecated,
-  @Nullable String deprecationMessage
-) {
-  /// Builder for creating NodeMetadata instances.
-  public static Builder builder(String type) {
-    return new Builder(type);
+@Value.Immutable
+public interface NodeMetadata {
+  /// Convenience builder starting point.
+  static ImmutableNodeMetadata.Builder builder() {
+    return ImmutableNodeMetadata.builder();
   }
 
-  public static final class Builder {
-    private final String type;
-    private String displayName;
-    private String description = "";
-    private NodeCategory category = NodeCategory.UTILITY;
-    private boolean isTrigger = false;
-    private List<PortDefinition> inputs = List.of();
-    private List<PortDefinition> outputs = List.of();
-    private String icon = "box"; // Default icon
-    private @Nullable String color;
-    private List<String> keywords = List.of();
-    private boolean deprecated = false;
-    private @Nullable String deprecationMessage;
-
-    private Builder(String type) {
-      this.type = type;
-      this.displayName = type; // Default to type if not set
-    }
-
-    public Builder displayName(String displayName) {
-      this.displayName = displayName;
-      return this;
-    }
-
-    public Builder description(String description) {
-      this.description = description;
-      return this;
-    }
-
-    public Builder category(NodeCategory category) {
-      this.category = category;
-      return this;
-    }
-
-    public Builder trigger() {
-      this.isTrigger = true;
-      this.category = NodeCategory.TRIGGERS;
-      return this;
-    }
-
-    public Builder inputs(PortDefinition... inputs) {
-      this.inputs = List.of(inputs);
-      return this;
-    }
-
-    public Builder inputs(List<PortDefinition> inputs) {
-      this.inputs = inputs;
-      return this;
-    }
-
-    public Builder outputs(PortDefinition... outputs) {
-      this.outputs = List.of(outputs);
-      return this;
-    }
-
-    public Builder outputs(List<PortDefinition> outputs) {
-      this.outputs = outputs;
-      return this;
-    }
-
-    public Builder icon(String icon) {
-      this.icon = icon;
-      return this;
-    }
-
-    public Builder color(String color) {
-      this.color = color;
-      return this;
-    }
-
-    public Builder keywords(String... keywords) {
-      this.keywords = List.of(keywords);
-      return this;
-    }
-
-    public Builder deprecated(String message) {
-      this.deprecated = true;
-      this.deprecationMessage = message;
-      return this;
-    }
-
-    public NodeMetadata build() {
-      return new NodeMetadata(
-        type, displayName, description, category, isTrigger,
-        inputs, outputs, icon, color, keywords, deprecated, deprecationMessage
-      );
-    }
+  /// Convenience method to create an input list from varargs.
+  static List<PortDefinition> inputs(PortDefinition... ports) {
+    return List.of(ports);
   }
+
+  /// Convenience method to create an output list from varargs.
+  static List<PortDefinition> outputs(PortDefinition... ports) {
+    return List.of(ports);
+  }
+
+  /// The unique type identifier for this node.
+  String type();
+
+  /// Human-readable name for display.
+  String displayName();
+
+  /// Description of what the node does.
+  @Value.Default
+  default String description() {
+    return "";
+  }
+
+  /// Category for organizing in the palette.
+  NodeCategory category();
+
+  /// Whether this is a trigger (entry point) node.
+  @Value.Default
+  default boolean isTrigger() {
+    return false;
+  }
+
+  /// Input port definitions.
+  @Value.Default
+  default List<PortDefinition> inputs() {
+    return List.of();
+  }
+
+  /// Output port definitions.
+  @Value.Default
+  default List<PortDefinition> outputs() {
+    return List.of();
+  }
+
+  /// Icon identifier (required).
+  @Value.Default
+  default String icon() {
+    return "box";
+  }
+
+  /// Optional color hint (hex code).
+  @Nullable
+  String color();
+
+  /// Search keywords.
+  @Value.Default
+  default List<String> keywords() {
+    return List.of();
+  }
+
+  /// Whether this node is deprecated.
+  @Value.Default
+  default boolean deprecated() {
+    return false;
+  }
+
+  /// If deprecated, what to use instead.
+  @Nullable
+  String deprecationMessage();
 }

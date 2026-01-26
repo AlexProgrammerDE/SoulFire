@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result (boolean)
 public final class IsNullNode extends AbstractScriptNode {
-  public static final String TYPE = "util.is_null";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.is_null")
+    .displayName("Is Null")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.input("value", "Value", PortType.ANY, "Value to check for null")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "True if value is null")
+    )
+    .description("Checks if a value is null")
+    .icon("help-circle")
+    .color("#795548")
+    .addKeywords("null", "check", "undefined", "missing", "validate")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of();
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

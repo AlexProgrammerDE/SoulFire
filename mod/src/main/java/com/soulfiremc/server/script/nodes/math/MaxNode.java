@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result
 public final class MaxNode extends AbstractScriptNode {
-  public static final String TYPE = "math.max";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.max")
+    .displayName("Maximum")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Larger of A and B")
+    )
+    .description("Returns the larger of two numbers")
+    .icon("arrow-up-to-line")
+    .color("#2196F3")
+    .addKeywords("max", "maximum", "larger", "greatest")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

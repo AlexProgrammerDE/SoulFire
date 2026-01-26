@@ -17,13 +17,10 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -32,19 +29,32 @@ import java.util.concurrent.CompletableFuture;
 /// Input: maxDistance (double, maximum search radius)
 /// Outputs: found (boolean), x, y, z (position), entityId (int), distance (double)
 public final class FindEntityNode extends AbstractScriptNode {
-  public static final String TYPE = "data.find_entity";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.find_entity")
+    .displayName("Find Entity")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
+      PortDefinition.inputWithDefault("entityType", "Entity Type", PortType.STRING, "\"any\"", "Entity ID or 'any' for any entity"),
+      PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "32", "Maximum search radius")
+    )
+    .addOutputs(
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether an entity was found"),
+      PortDefinition.output("x", "X", PortType.NUMBER, "Entity X coordinate"),
+      PortDefinition.output("y", "Y", PortType.NUMBER, "Entity Y coordinate"),
+      PortDefinition.output("z", "Z", PortType.NUMBER, "Entity Z coordinate"),
+      PortDefinition.output("entityId", "Entity ID", PortType.NUMBER, "The entity's ID"),
+      PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance to the entity")
+    )
+    .description("Finds the nearest entity of a specific type within range")
+    .icon("target")
+    .color("#9C27B0")
+    .addKeywords("find", "entity", "search", "nearest", "mob", "player", "locate")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "entityType", NodeValue.ofString("any"),
-      "maxDistance", NodeValue.ofNumber(32.0)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

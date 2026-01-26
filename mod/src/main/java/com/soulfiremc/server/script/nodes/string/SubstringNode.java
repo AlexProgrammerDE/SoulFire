@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,20 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: text, start (index), end (index, -1 for end of string)
 /// Output: result
 public final class SubstringNode extends AbstractScriptNode {
-  public static final String TYPE = "string.substring";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.substring")
+    .displayName("Substring")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string"),
+      PortDefinition.inputWithDefault("start", "Start", PortType.NUMBER, "0", "Start index (inclusive)"),
+      PortDefinition.inputWithDefault("end", "End", PortType.NUMBER, "-1", "End index (exclusive, -1 for end of string)")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "Extracted substring")
+    )
+    .description("Extracts a substring from start index to end index")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "substring", "slice", "extract", "sub")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "text", NodeValue.ofString(""),
-      "start", NodeValue.ofNumber(0),
-      "end", NodeValue.ofNumber(-1)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

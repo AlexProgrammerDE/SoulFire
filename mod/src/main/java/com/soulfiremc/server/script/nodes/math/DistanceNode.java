@@ -17,12 +17,9 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,19 +27,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a (Vec3), b (Vec3)
 /// Output: distance
 public final class DistanceNode extends AbstractScriptNode {
-  public static final String TYPE = "math.distance";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.distance")
+    .displayName("Distance")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.input("a", "Point A", PortType.VECTOR3, "First 3D point"),
+      PortDefinition.input("b", "Point B", PortType.VECTOR3, "Second 3D point")
+    )
+    .addOutputs(
+      PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance between points")
+    )
+    .description("Calculates the distance between two 3D points")
+    .icon("ruler")
+    .color("#2196F3")
+    .addKeywords("distance", "length", "measure", "vector")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    var zeroVec = NodeValue.ofList(List.of(
-      NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0)
-    ));
-    return Map.of("a", zeroVec, "b", zeroVec);
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

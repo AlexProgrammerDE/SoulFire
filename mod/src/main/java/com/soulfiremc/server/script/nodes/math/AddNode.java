@@ -26,36 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a + b
 public final class AddNode extends AbstractScriptNode {
-  public static final String TYPE = "math.add";
-  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.add")
     .displayName("Add")
-    .description("Adds two numbers together")
     .category(NodeCategory.MATH)
-    .inputs(
+    .addInputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")
     )
-    .outputs(
+    .addOutputs(
       PortDefinition.output("result", "Result", PortType.NUMBER, "Sum of A and B")
     )
+    .description("Adds two numbers together")
     .icon("plus")
     .color("#2196F3")
-    .keywords("add", "plus", "sum", "arithmetic")
+    .addKeywords("add", "plus", "sum", "arithmetic")
     .build();
-
-  @Override
-  public String getType() {
-    return TYPE;
-  }
 
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0));
   }
 
   @Override

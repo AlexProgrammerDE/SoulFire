@@ -17,12 +17,9 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,19 +27,27 @@ import java.util.concurrent.CompletableFuture;
 /// Input: vector
 /// Outputs: x, y, z
 public final class SplitVector3Node extends AbstractScriptNode {
-  public static final String TYPE = "util.split_vector3";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.split_vector3")
+    .displayName("Split Vector3")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.input("vector", "Vector", PortType.VECTOR3, "3D vector to split")
+    )
+    .addOutputs(
+      PortDefinition.output("x", "X", PortType.NUMBER, "X component"),
+      PortDefinition.output("y", "Y", PortType.NUMBER, "Y component"),
+      PortDefinition.output("z", "Z", PortType.NUMBER, "Z component")
+    )
+    .description("Splits a 3D vector into x, y, z components")
+    .icon("scissors")
+    .color("#9C27B0")
+    .addKeywords("vector", "vec3", "position", "coordinates", "xyz", "split", "decompose")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    // Vector as [x, y, z] list
-    return Map.of("vector", NodeValue.ofList(List.of(
-      NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0), NodeValue.ofNumber(0.0)
-    )));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

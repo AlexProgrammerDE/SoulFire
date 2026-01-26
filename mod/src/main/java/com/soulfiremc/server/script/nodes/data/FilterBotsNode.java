@@ -17,10 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.List;
 import java.util.Map;
@@ -32,16 +29,26 @@ import java.util.regex.PatternSyntaxException;
 /// Input: bots (List of BotConnection), pattern (regex string)
 /// Output: bots (List of BotConnection matching pattern)
 public final class FilterBotsNode extends AbstractScriptNode {
-  public static final String TYPE = "data.filter_bots";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.filter_bots")
+    .displayName("Filter Bots")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to filter"),
+      PortDefinition.inputWithDefault("pattern", "Pattern", PortType.STRING, "\".*\"", "Regex pattern to match bot names")
+    )
+    .addOutputs(
+      PortDefinition.listOutput("bots", "Bots", PortType.BOT, "Filtered list of bots")
+    )
+    .description("Filters a list of bots by name using a regex pattern")
+    .icon("filter")
+    .color("#9C27B0")
+    .addKeywords("filter", "bots", "regex", "match", "name")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("pattern", NodeValue.ofString(".*"));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

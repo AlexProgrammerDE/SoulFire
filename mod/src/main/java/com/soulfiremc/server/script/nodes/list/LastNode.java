@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Input: list
 /// Outputs: item, found (boolean)
 public final class LastNode extends AbstractScriptNode {
-  public static final String TYPE = "list.last";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.last")
+    .displayName("Last")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The input list")
+    )
+    .addOutputs(
+      PortDefinition.output("item", "Item", PortType.ANY, "The last item in the list"),
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the list was non-empty")
+    )
+    .description("Gets the last item in a list")
+    .icon("arrow-down-to-line")
+    .color("#00BCD4")
+    .addKeywords("list", "last", "tail", "back", "end")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

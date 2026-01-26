@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that sends a chat message or command.
 /// Input: message (string)
 public final class SendChatNode extends AbstractScriptNode {
-  public static final String TYPE = "action.send_chat";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.send_chat")
+    .displayName("Send Chat")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("message", "Message", PortType.STRING, "\"\"", "The message to send")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Sends a chat message or command")
+    .icon("message-square")
+    .color("#FF9800")
+    .addKeywords("chat", "message", "send", "say", "command")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("message", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,16 +30,33 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// The script executor is responsible for managing the iteration state.
 public final class ForEachNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.foreach";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.foreach")
+    .displayName("For Each")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate"),
+      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each item"),
+      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when iteration completes"),
+      PortDefinition.output("item", "Item", PortType.ANY, "Current item"),
+      PortDefinition.output("index", "Index", PortType.NUMBER, "Current index"),
+      PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
+      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index"),
+      PortDefinition.output("size", "Size", PortType.NUMBER, "Total items count")
+    )
+    .description("Iterates over each item in a list")
+    .icon("repeat")
+    .color("#607D8B")
+    .addKeywords("foreach", "loop", "iterate", "list", "array")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("items", NodeValue.ofList(List.of()), "currentIndex", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

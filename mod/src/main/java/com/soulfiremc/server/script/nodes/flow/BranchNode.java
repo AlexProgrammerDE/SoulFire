@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,16 +28,29 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// The script executor should use the output values to determine which branch to execute.
 public final class BranchNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.branch";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.branch")
+    .displayName("Branch")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("condition", "Condition", PortType.BOOLEAN, "false", "Condition to evaluate")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_true", "True", PortType.EXEC, "Executes if condition is true"),
+      PortDefinition.output("exec_false", "False", PortType.EXEC, "Executes if condition is false"),
+      PortDefinition.output("branch", "Branch", PortType.STRING, "Which branch was taken"),
+      PortDefinition.output("condition", "Condition", PortType.BOOLEAN, "The evaluated condition")
+    )
+    .description("Branches execution based on a boolean condition")
+    .icon("git-branch")
+    .color("#607D8B")
+    .addKeywords("branch", "if", "condition", "switch", "split")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("condition", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

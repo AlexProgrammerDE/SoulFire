@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Input: list
 /// Outputs: item, found (boolean)
 public final class FirstNode extends AbstractScriptNode {
-  public static final String TYPE = "list.first";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.first")
+    .displayName("First")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The input list")
+    )
+    .addOutputs(
+      PortDefinition.output("item", "Item", PortType.ANY, "The first item in the list"),
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the list was non-empty")
+    )
+    .description("Gets the first item in a list")
+    .icon("arrow-up-to-line")
+    .color("#00BCD4")
+    .addKeywords("list", "first", "head", "front", "start")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

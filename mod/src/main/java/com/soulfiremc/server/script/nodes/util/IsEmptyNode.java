@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,16 +27,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result (boolean)
 public final class IsEmptyNode extends AbstractScriptNode {
-  public static final String TYPE = "util.is_empty";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.is_empty")
+    .displayName("Is Empty")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.input("value", "Value", PortType.ANY, "Value to check for empty")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "True if value is null or empty")
+    )
+    .description("Checks if a value is null or empty (works with strings and lists)")
+    .icon("circle-slash")
+    .color("#795548")
+    .addKeywords("empty", "check", "null", "blank", "validate", "length")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of();
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

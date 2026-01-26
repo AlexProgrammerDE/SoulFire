@@ -18,9 +18,7 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.MouseClickHelper;
 
 import java.util.Map;
@@ -29,11 +27,26 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that uses the item in the bot's hand.
 /// Right-clicks to use items, interact with entities, or interact with blocks.
 public final class UseItemNode extends AbstractScriptNode {
-  public static final String TYPE = "action.use_item";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.use_item")
+    .displayName("Use Item")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Uses the item in the bot's hand (right click)")
+    .icon("mouse-pointer-click")
+    .color("#FF9800")
+    .addKeywords("use", "item", "right click", "interact", "eat", "drink")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

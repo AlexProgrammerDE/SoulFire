@@ -18,9 +18,7 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that selects a hotbar slot (0-8).
 /// Input: slot (0-8)
 public final class SelectSlotNode extends AbstractScriptNode {
-  public static final String TYPE = "action.select_slot";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.select_slot")
+    .displayName("Select Slot")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Hotbar slot (0-8)")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Selects a hotbar slot (0-8)")
+    .icon("hand")
+    .color("#FF9800")
+    .addKeywords("slot", "hotbar", "select", "inventory", "hand")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("slot", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

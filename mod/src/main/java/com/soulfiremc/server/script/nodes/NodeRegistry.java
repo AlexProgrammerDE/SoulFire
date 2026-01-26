@@ -21,7 +21,10 @@ import com.soulfiremc.server.script.NodeCategory;
 import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.ScriptNode;
 import com.soulfiremc.server.script.nodes.action.*;
-import com.soulfiremc.server.script.nodes.constant.*;
+import com.soulfiremc.server.script.nodes.constant.BooleanConstantNode;
+import com.soulfiremc.server.script.nodes.constant.NumberConstantNode;
+import com.soulfiremc.server.script.nodes.constant.StringConstantNode;
+import com.soulfiremc.server.script.nodes.constant.Vector3ConstantNode;
 import com.soulfiremc.server.script.nodes.data.*;
 import com.soulfiremc.server.script.nodes.flow.*;
 import com.soulfiremc.server.script.nodes.list.*;
@@ -31,9 +34,11 @@ import com.soulfiremc.server.script.nodes.string.*;
 import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /// Registry of all available script node types.
 /// Provides factory methods to create node instances by their type identifier.
@@ -42,120 +47,120 @@ public final class NodeRegistry {
 
   static {
     // Trigger Nodes
-    register(OnTickNode.TYPE, OnTickNode::new);
-    register(OnJoinNode.TYPE, OnJoinNode::new);
-    register(OnChatNode.TYPE, OnChatNode::new);
-    register(OnDamageNode.TYPE, OnDamageNode::new);
-    register(OnDeathNode.TYPE, OnDeathNode::new);
-    register(OnIntervalNode.TYPE, OnIntervalNode::new);
+    register(OnTickNode::new);
+    register(OnJoinNode::new);
+    register(OnChatNode::new);
+    register(OnDamageNode::new);
+    register(OnDeathNode::new);
+    register(OnIntervalNode::new);
 
     // Math Nodes
-    register(AddNode.TYPE, AddNode::new);
-    register(SubtractNode.TYPE, SubtractNode::new);
-    register(MultiplyNode.TYPE, MultiplyNode::new);
-    register(DivideNode.TYPE, DivideNode::new);
-    register(ModuloNode.TYPE, ModuloNode::new);
-    register(FormulaNode.TYPE, FormulaNode::new);
-    register(RandomNode.TYPE, RandomNode::new);
-    register(ClampNode.TYPE, ClampNode::new);
-    register(LerpNode.TYPE, LerpNode::new);
-    register(BSplineNode.TYPE, BSplineNode::new);
-    register(AbsNode.TYPE, AbsNode::new);
-    register(FloorNode.TYPE, FloorNode::new);
-    register(CeilNode.TYPE, CeilNode::new);
-    register(RoundNode.TYPE, RoundNode::new);
-    register(MinNode.TYPE, MinNode::new);
-    register(MaxNode.TYPE, MaxNode::new);
-    register(PowNode.TYPE, PowNode::new);
-    register(SqrtNode.TYPE, SqrtNode::new);
-    register(SinNode.TYPE, SinNode::new);
-    register(CosNode.TYPE, CosNode::new);
-    register(TanNode.TYPE, TanNode::new);
-    register(DistanceNode.TYPE, DistanceNode::new);
+    register(AddNode::new);
+    register(SubtractNode::new);
+    register(MultiplyNode::new);
+    register(DivideNode::new);
+    register(ModuloNode::new);
+    register(FormulaNode::new);
+    register(RandomNode::new);
+    register(ClampNode::new);
+    register(LerpNode::new);
+    register(BSplineNode::new);
+    register(AbsNode::new);
+    register(FloorNode::new);
+    register(CeilNode::new);
+    register(RoundNode::new);
+    register(MinNode::new);
+    register(MaxNode::new);
+    register(PowNode::new);
+    register(SqrtNode::new);
+    register(SinNode::new);
+    register(CosNode::new);
+    register(TanNode::new);
+    register(DistanceNode::new);
 
     // Logic Nodes
-    register(CompareNode.TYPE, CompareNode::new);
-    register(AndNode.TYPE, AndNode::new);
-    register(OrNode.TYPE, OrNode::new);
-    register(NotNode.TYPE, NotNode::new);
-    register(XorNode.TYPE, XorNode::new);
+    register(CompareNode::new);
+    register(AndNode::new);
+    register(OrNode::new);
+    register(NotNode::new);
+    register(XorNode::new);
 
     // String Nodes
-    register(ConcatNode.TYPE, ConcatNode::new);
-    register(ReplaceNode.TYPE, ReplaceNode::new);
-    register(SplitNode.TYPE, SplitNode::new);
-    register(SubstringNode.TYPE, SubstringNode::new);
-    register(StringLengthNode.TYPE, StringLengthNode::new);
-    register(StartsWithNode.TYPE, StartsWithNode::new);
-    register(EndsWithNode.TYPE, EndsWithNode::new);
-    register(ToLowerCaseNode.TYPE, ToLowerCaseNode::new);
-    register(ToUpperCaseNode.TYPE, ToUpperCaseNode::new);
-    register(TrimNode.TYPE, TrimNode::new);
-    register(StringContainsNode.TYPE, StringContainsNode::new);
-    register(FormatNode.TYPE, FormatNode::new);
-    register(IndexOfNode.TYPE, IndexOfNode::new);
+    register(ConcatNode::new);
+    register(ReplaceNode::new);
+    register(SplitNode::new);
+    register(SubstringNode::new);
+    register(StringLengthNode::new);
+    register(StartsWithNode::new);
+    register(EndsWithNode::new);
+    register(ToLowerCaseNode::new);
+    register(ToUpperCaseNode::new);
+    register(TrimNode::new);
+    register(StringContainsNode::new);
+    register(FormatNode::new);
+    register(IndexOfNode::new);
 
     // List Nodes
-    register(ListLengthNode.TYPE, ListLengthNode::new);
-    register(GetAtNode.TYPE, GetAtNode::new);
-    register(FirstNode.TYPE, FirstNode::new);
-    register(LastNode.TYPE, LastNode::new);
-    register(ListContainsNode.TYPE, ListContainsNode::new);
-    register(RangeNode.TYPE, RangeNode::new);
-    register(JoinToStringNode.TYPE, JoinToStringNode::new);
+    register(ListLengthNode::new);
+    register(GetAtNode::new);
+    register(FirstNode::new);
+    register(LastNode::new);
+    register(ListContainsNode::new);
+    register(RangeNode::new);
+    register(JoinToStringNode::new);
 
     // Utility Nodes
-    register(ToStringNode.TYPE, ToStringNode::new);
-    register(ToNumberNode.TYPE, ToNumberNode::new);
-    register(IsNullNode.TYPE, IsNullNode::new);
-    register(IsEmptyNode.TYPE, IsEmptyNode::new);
-    register(CreateVector3Node.TYPE, CreateVector3Node::new);
-    register(SplitVector3Node.TYPE, SplitVector3Node::new);
+    register(ToStringNode::new);
+    register(ToNumberNode::new);
+    register(IsNullNode::new);
+    register(IsEmptyNode::new);
+    register(CreateVector3Node::new);
+    register(SplitVector3Node::new);
 
     // Action Nodes
-    register(SetRotationNode.TYPE, SetRotationNode::new);
-    register(LookAtNode.TYPE, LookAtNode::new);
-    register(SneakNode.TYPE, SneakNode::new);
-    register(SprintNode.TYPE, SprintNode::new);
-    register(JumpNode.TYPE, JumpNode::new);
-    register(AttackNode.TYPE, AttackNode::new);
-    register(UseItemNode.TYPE, UseItemNode::new);
-    register(PathfindToNode.TYPE, PathfindToNode::new);
-    register(BreakBlockNode.TYPE, BreakBlockNode::new);
-    register(PlaceBlockNode.TYPE, PlaceBlockNode::new);
-    register(SelectSlotNode.TYPE, SelectSlotNode::new);
-    register(SendChatNode.TYPE, SendChatNode::new);
-    register(WaitNode.TYPE, WaitNode::new);
-    register(PrintNode.TYPE, PrintNode::new);
+    register(SetRotationNode::new);
+    register(LookAtNode::new);
+    register(SneakNode::new);
+    register(SprintNode::new);
+    register(JumpNode::new);
+    register(AttackNode::new);
+    register(UseItemNode::new);
+    register(PathfindToNode::new);
+    register(BreakBlockNode::new);
+    register(PlaceBlockNode::new);
+    register(SelectSlotNode::new);
+    register(SendChatNode::new);
+    register(WaitNode::new);
+    register(PrintNode::new);
 
     // Data Nodes
-    register(GetPositionNode.TYPE, GetPositionNode::new);
-    register(GetRotationNode.TYPE, GetRotationNode::new);
-    register(GetHealthNode.TYPE, GetHealthNode::new);
-    register(GetHungerNode.TYPE, GetHungerNode::new);
-    register(GetInventoryNode.TYPE, GetInventoryNode::new);
-    register(GetBlockNode.TYPE, GetBlockNode::new);
-    register(FindEntityNode.TYPE, FindEntityNode::new);
-    register(FindBlockNode.TYPE, FindBlockNode::new);
-    register(GetBotsNode.TYPE, GetBotsNode::new);
-    register(FilterBotsNode.TYPE, FilterBotsNode::new);
-    register(GetBotByNameNode.TYPE, GetBotByNameNode::new);
+    register(GetPositionNode::new);
+    register(GetRotationNode::new);
+    register(GetHealthNode::new);
+    register(GetHungerNode::new);
+    register(GetInventoryNode::new);
+    register(GetBlockNode::new);
+    register(FindEntityNode::new);
+    register(FindBlockNode::new);
+    register(GetBotsNode::new);
+    register(FilterBotsNode::new);
+    register(GetBotByNameNode::new);
 
     // Constant Nodes
-    register(NumberConstantNode.TYPE, NumberConstantNode::new);
-    register(StringConstantNode.TYPE, StringConstantNode::new);
-    register(BooleanConstantNode.TYPE, BooleanConstantNode::new);
-    register(Vector3ConstantNode.TYPE, Vector3ConstantNode::new);
+    register(NumberConstantNode::new);
+    register(StringConstantNode::new);
+    register(BooleanConstantNode::new);
+    register(Vector3ConstantNode::new);
 
     // Flow Control Nodes
-    register(BranchNode.TYPE, BranchNode::new);
-    register(SwitchNode.TYPE, SwitchNode::new);
-    register(LoopNode.TYPE, LoopNode::new);
-    register(ForEachNode.TYPE, ForEachNode::new);
-    register(ForEachBotNode.TYPE, ForEachBotNode::new);
-    register(SequenceNode.TYPE, SequenceNode::new);
-    register(GateNode.TYPE, GateNode::new);
-    register(DebounceNode.TYPE, DebounceNode::new);
+    register(BranchNode::new);
+    register(SwitchNode::new);
+    register(LoopNode::new);
+    register(ForEachNode::new);
+    register(ForEachBotNode::new);
+    register(SequenceNode::new);
+    register(GateNode::new);
+    register(DebounceNode::new);
   }
 
   private NodeRegistry() {
@@ -163,6 +168,15 @@ public final class NodeRegistry {
   }
 
   /// Registers a node type with its factory.
+  /// The type identifier is derived from the node's metadata.
+  /// @param factory the factory to create node instances
+  public static void register(Supplier<ScriptNode> factory) {
+    var node = factory.get();
+    var type = node.getId();
+    NODES.put(type, factory);
+  }
+
+  /// Registers a node type with an explicit type identifier.
   /// @param type the node type identifier
   /// @param factory the factory to create node instances
   public static void register(String type, Supplier<ScriptNode> factory) {

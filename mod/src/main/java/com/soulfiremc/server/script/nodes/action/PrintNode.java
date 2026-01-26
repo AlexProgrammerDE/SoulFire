@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that logs a message for debugging.
 /// Input: message (any), level (string)
 public final class PrintNode extends AbstractScriptNode {
-  public static final String TYPE = "action.print";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.print")
+    .displayName("Print")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("message", "Message", PortType.ANY, "The message to log"),
+      PortDefinition.inputWithDefault("level", "Level", PortType.STRING, "\"info\"", "Log level (debug, info, warn, error)")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Logs a message for debugging purposes")
+    .icon("terminal")
+    .color("#FF9800")
+    .addKeywords("print", "log", "debug", "console", "output", "message")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("level", NodeValue.ofString("info"));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

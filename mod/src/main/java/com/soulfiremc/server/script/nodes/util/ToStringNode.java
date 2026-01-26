@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result
 public final class ToStringNode extends AbstractScriptNode {
-  public static final String TYPE = "util.to_string";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.to_string")
+    .displayName("To String")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.input("value", "Value", PortType.ANY, "Value to convert")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "String representation")
+    )
+    .description("Converts any value to a string")
+    .icon("text-cursor")
+    .color("#795548")
+    .addKeywords("convert", "string", "text", "cast")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of();
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

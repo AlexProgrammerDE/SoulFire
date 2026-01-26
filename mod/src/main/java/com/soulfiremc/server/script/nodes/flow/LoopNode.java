@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,16 +31,31 @@ import java.util.concurrent.CompletableFuture;
 /// The script executor is responsible for managing the loop state and re-executing
 /// the connected nodes for each iteration.
 public final class LoopNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.loop";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.loop")
+    .displayName("Loop")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("count", "Count", PortType.NUMBER, "10", "Number of iterations"),
+      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each iteration"),
+      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when loop completes"),
+      PortDefinition.output("index", "Index", PortType.NUMBER, "Current iteration index"),
+      PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether loop is done"),
+      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index")
+    )
+    .description("Repeats execution a specified number of times")
+    .icon("rotate-cw")
+    .color("#607D8B")
+    .addKeywords("loop", "repeat", "for", "iterate", "count")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("count", NodeValue.ofNumber(10), "currentIndex", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

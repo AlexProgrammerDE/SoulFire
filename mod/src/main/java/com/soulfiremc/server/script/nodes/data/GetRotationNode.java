@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,11 +25,26 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that gets the bot's current rotation.
 /// Outputs: yaw, pitch (float, in degrees)
 public final class GetRotationNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_rotation";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_rotation")
+    .displayName("Get Rotation")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get rotation from")
+    )
+    .addOutputs(
+      PortDefinition.output("yaw", "Yaw", PortType.NUMBER, "Horizontal rotation (-180 to 180)"),
+      PortDefinition.output("pitch", "Pitch", PortType.NUMBER, "Vertical rotation (-90 to 90)")
+    )
+    .description("Gets the bot's current rotation (yaw and pitch)")
+    .icon("compass")
+    .color("#9C27B0")
+    .addKeywords("rotation", "yaw", "pitch", "angle", "direction")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

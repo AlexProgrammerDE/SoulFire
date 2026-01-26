@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value, default
 /// Outputs: result, success (boolean)
 public final class ToNumberNode extends AbstractScriptNode {
-  public static final String TYPE = "util.to_number";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.to_number")
+    .displayName("To Number")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "", "Value to parse as number"),
+      PortDefinition.inputWithDefault("default", "Default", PortType.NUMBER, "0", "Default value if parsing fails")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Parsed number or default"),
+      PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether parsing succeeded")
+    )
+    .description("Parses a string to a number")
+    .icon("hash")
+    .color("#795548")
+    .addKeywords("convert", "number", "parse", "cast", "integer", "float")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofString(""), "default", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

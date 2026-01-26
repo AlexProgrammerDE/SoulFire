@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result
 public final class CeilNode extends AbstractScriptNode {
-  public static final String TYPE = "math.ceil";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.ceil")
+    .displayName("Ceiling")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Input number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Rounded up value")
+    )
+    .description("Rounds a number up to the nearest integer")
+    .icon("arrow-up")
+    .color("#2196F3")
+    .addKeywords("ceil", "ceiling", "round", "up", "integer")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

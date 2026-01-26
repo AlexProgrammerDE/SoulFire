@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result
 public final class AbsNode extends AbstractScriptNode {
-  public static final String TYPE = "math.abs";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.abs")
+    .displayName("Absolute")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Input number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Absolute value")
+    )
+    .description("Returns the absolute value of a number")
+    .icon("bar-chart-2")
+    .color("#2196F3")
+    .addKeywords("abs", "absolute", "positive", "magnitude")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

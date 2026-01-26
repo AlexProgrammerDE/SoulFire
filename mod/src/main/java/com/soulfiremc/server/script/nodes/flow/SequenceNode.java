@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,16 +28,28 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// Output: out0, out1, out2, etc. (execution outputs for each branch)
 public final class SequenceNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.sequence";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.sequence")
+    .displayName("Sequence")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("branchCount", "Branch Count", PortType.NUMBER, "2", "Number of branches to execute")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_0", "Then 0", PortType.EXEC, "First branch"),
+      PortDefinition.output("exec_1", "Then 1", PortType.EXEC, "Second branch"),
+      PortDefinition.output("branchCount", "Branch Count", PortType.NUMBER, "Number of branches")
+    )
+    .description("Executes multiple branches in order")
+    .icon("list-ordered")
+    .color("#607D8B")
+    .addKeywords("sequence", "order", "steps", "then")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("branchCount", NodeValue.ofNumber(2));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

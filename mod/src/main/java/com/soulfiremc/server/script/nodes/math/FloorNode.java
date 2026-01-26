@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: value
 /// Output: result
 public final class FloorNode extends AbstractScriptNode {
-  public static final String TYPE = "math.floor";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.floor")
+    .displayName("Floor")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Input number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Rounded down value")
+    )
+    .description("Rounds a number down to the nearest integer")
+    .icon("arrow-down")
+    .color("#2196F3")
+    .addKeywords("floor", "round", "down", "integer")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

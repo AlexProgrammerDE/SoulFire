@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -32,19 +30,31 @@ import java.util.concurrent.CompletableFuture;
 /// Input: maxDistance (int, maximum search radius in blocks)
 /// Outputs: found (boolean), x, y, z (position), distance (double)
 public final class FindBlockNode extends AbstractScriptNode {
-  public static final String TYPE = "data.find_block";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.find_block")
+    .displayName("Find Block")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
+      PortDefinition.inputWithDefault("blockType", "Block Type", PortType.STRING, "\"minecraft:diamond_ore\"", "Block ID to search for"),
+      PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "16", "Maximum search radius")
+    )
+    .addOutputs(
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether a block was found"),
+      PortDefinition.output("x", "X", PortType.NUMBER, "Block X coordinate"),
+      PortDefinition.output("y", "Y", PortType.NUMBER, "Block Y coordinate"),
+      PortDefinition.output("z", "Z", PortType.NUMBER, "Block Z coordinate"),
+      PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance to the block")
+    )
+    .description("Finds the nearest block of a specific type within range")
+    .icon("cube")
+    .color("#9C27B0")
+    .addKeywords("find", "block", "search", "nearest", "ore", "locate")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "blockType", NodeValue.ofString("minecraft:diamond_ore"),
-      "maxDistance", NodeValue.ofNumber(16)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

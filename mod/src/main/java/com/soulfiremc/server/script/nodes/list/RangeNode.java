@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,16 +28,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: start, end, step
 /// Output: list
 public final class RangeNode extends AbstractScriptNode {
-  public static final String TYPE = "list.range";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.range")
+    .displayName("Range")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.inputWithDefault("start", "Start", PortType.NUMBER, "0", "Starting value (inclusive)"),
+      PortDefinition.inputWithDefault("end", "End", PortType.NUMBER, "10", "Ending value (exclusive)"),
+      PortDefinition.inputWithDefault("step", "Step", PortType.NUMBER, "1", "Step increment between values")
+    )
+    .addOutputs(
+      PortDefinition.listOutput("list", "List", PortType.NUMBER, "Generated list of numbers")
+    )
+    .description("Generates a list of numbers from start to end with a given step")
+    .icon("list-ordered")
+    .color("#00BCD4")
+    .addKeywords("list", "range", "sequence", "numbers", "generate", "create")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("start", NodeValue.ofNumber(0.0), "end", NodeValue.ofNumber(10.0), "step", NodeValue.ofNumber(1.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

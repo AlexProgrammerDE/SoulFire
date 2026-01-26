@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,19 +31,32 @@ import java.util.concurrent.ConcurrentHashMap;
 ///
 /// Uses a static map to track last execution times per key.
 public final class DebounceNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.debounce";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.debounce")
+    .displayName("Debounce")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("cooldownMs", "Cooldown (ms)", PortType.NUMBER, "1000", "Milliseconds between allowed executions"),
+      PortDefinition.inputWithDefault("key", "Key", PortType.STRING, "\"default\"", "Unique key for this debounce")
+    )
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("allowed", "Allowed", PortType.BOOLEAN, "Whether execution was allowed"),
+      PortDefinition.output("remainingMs", "Remaining (ms)", PortType.NUMBER, "Milliseconds until next allowed execution")
+    )
+    .description("Rate-limits execution by enforcing a cooldown period")
+    .icon("timer")
+    .color("#607D8B")
+    .addKeywords("debounce", "rate limit", "cooldown", "throttle")
+    .build();
 
   // Track last execution time per key
   private static final Map<String, Long> lastExecutionTimes = new ConcurrentHashMap<>();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("cooldownMs", NodeValue.ofNumber(1000L), "key", NodeValue.ofString("default"));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

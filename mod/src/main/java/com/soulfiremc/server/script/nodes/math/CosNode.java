@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: angle (in degrees)
 /// Output: result
 public final class CosNode extends AbstractScriptNode {
-  public static final String TYPE = "math.cos";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.cos")
+    .displayName("Cosine")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("angle", "Angle", PortType.NUMBER, "0", "Angle in degrees")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Cosine of angle")
+    )
+    .description("Calculates the cosine of an angle in degrees")
+    .icon("activity")
+    .color("#2196F3")
+    .addKeywords("cos", "cosine", "trig", "trigonometry")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("angle", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

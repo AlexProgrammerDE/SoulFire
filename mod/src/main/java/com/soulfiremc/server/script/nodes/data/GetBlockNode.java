@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -30,16 +28,30 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: x, y, z (block coordinates)
 /// Outputs: blockId (string), isAir (boolean), isSolid (boolean)
 public final class GetBlockNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_block";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_block")
+    .displayName("Get Block")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to query world data from"),
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Block Y coordinate"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Block Z coordinate")
+    )
+    .addOutputs(
+      PortDefinition.output("blockId", "Block ID", PortType.STRING, "The block's ID"),
+      PortDefinition.output("isAir", "Is Air", PortType.BOOLEAN, "Whether the block is air"),
+      PortDefinition.output("isSolid", "Is Solid", PortType.BOOLEAN, "Whether the block is solid")
+    )
+    .description("Gets information about a block at a specific position")
+    .icon("grid-3x3")
+    .color("#9C27B0")
+    .addKeywords("block", "get", "info", "type", "world")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0), "y", NodeValue.ofNumber(64), "z", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

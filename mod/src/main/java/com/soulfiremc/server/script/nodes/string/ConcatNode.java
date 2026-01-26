@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a + b
 public final class ConcatNode extends AbstractScriptNode {
-  public static final String TYPE = "string.concat";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.concat")
+    .displayName("Concat")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.STRING, "\"\"", "First string"),
+      PortDefinition.inputWithDefault("b", "B", PortType.STRING, "\"\"", "Second string")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "Concatenated string")
+    )
+    .description("Concatenates two strings together")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "concat", "concatenate", "join", "append", "combine")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofString(""), "b", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that toggles or sets the bot's sprinting state.
 /// Input: enabled (boolean) - whether to sprint
 public final class SprintNode extends AbstractScriptNode {
-  public static final String TYPE = "action.sprint";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.sprint")
+    .displayName("Sprint")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("enabled", "Enabled", PortType.BOOLEAN, "true", "Whether to sprint")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Sets the bot's sprinting state")
+    .icon("fast-forward")
+    .color("#FF9800")
+    .addKeywords("sprint", "run", "fast", "speed")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("enabled", NodeValue.ofBoolean(true));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

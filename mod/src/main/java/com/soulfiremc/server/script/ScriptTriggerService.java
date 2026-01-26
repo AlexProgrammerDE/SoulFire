@@ -19,15 +19,13 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.SoulFireEvent;
-import com.soulfiremc.server.api.event.bot.*;
-import com.soulfiremc.server.script.nodes.trigger.*;
+import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
+import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
+import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
+import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,7 +55,7 @@ public final class ScriptTriggerService {
 
     for (var node : graph.nodes().values()) {
       switch (node.type()) {
-        case OnTickNode.TYPE -> {
+        case "trigger.on_tick" -> {
           var tickCount = new AtomicLong(0);
           Consumer<BotPreTickEvent> handler = event -> {
             if (context.isCancelled()) return;
@@ -73,7 +71,7 @@ public final class ScriptTriggerService {
           log.debug("Registered OnTick trigger for script {} node {}", scriptId, node.id());
         }
 
-        case OnChatNode.TYPE -> {
+        case "trigger.on_chat" -> {
           Consumer<ChatMessageReceiveEvent> handler = event -> {
             if (context.isCancelled()) return;
 
@@ -90,7 +88,7 @@ public final class ScriptTriggerService {
           log.debug("Registered OnChat trigger for script {} node {}", scriptId, node.id());
         }
 
-        case OnDeathNode.TYPE -> {
+        case "trigger.on_death" -> {
           Consumer<BotShouldRespawnEvent> handler = event -> {
             if (context.isCancelled()) return;
 
@@ -105,7 +103,7 @@ public final class ScriptTriggerService {
           log.debug("Registered OnDeath trigger for script {} node {}", scriptId, node.id());
         }
 
-        case OnJoinNode.TYPE -> {
+        case "trigger.on_join" -> {
           Consumer<BotConnectionInitEvent> handler = event -> {
             if (context.isCancelled()) return;
 
@@ -120,7 +118,7 @@ public final class ScriptTriggerService {
           log.debug("Registered OnJoin trigger for script {} node {}", scriptId, node.id());
         }
 
-        case OnIntervalNode.TYPE -> {
+        case "trigger.on_interval" -> {
           var intervalMs = 1000L; // Default interval
           if (node.defaultInputs() != null) {
             var intervalValue = node.defaultInputs().get("intervalMs");

@@ -17,9 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
+import org.checkerframework.checker.units.qual.min;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +27,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: value, min, max
 /// Output: result = clamped value within [min, max]
 public final class ClampNode extends AbstractScriptNode {
-  public static final String TYPE = "math.clamp";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.clamp")
+    .displayName("Clamp")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.NUMBER, "0", "Value to clamp"),
+      PortDefinition.inputWithDefault("min", "Min", PortType.NUMBER, "0", "Minimum bound"),
+      PortDefinition.inputWithDefault("max", "Max", PortType.NUMBER, "1", "Maximum bound")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Clamped value")
+    )
+    .description("Constrains a value within a range")
+    .icon("git-commit")
+    .color("#2196F3")
+    .addKeywords("clamp", "constrain", "limit", "bound")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofNumber(0.0), "min", NodeValue.ofNumber(0.0), "max", NodeValue.ofNumber(1.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,22 +28,29 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// Uses cubic B-spline basis functions for smooth interpolation.
 public final class BSplineNode extends AbstractScriptNode {
-  public static final String TYPE = "math.bspline";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.bspline")
+    .displayName("B-Spline")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("p0", "P0", PortType.NUMBER, "0", "First control point"),
+      PortDefinition.inputWithDefault("p1", "P1", PortType.NUMBER, "0", "Second control point"),
+      PortDefinition.inputWithDefault("p2", "P2", PortType.NUMBER, "1", "Third control point"),
+      PortDefinition.inputWithDefault("p3", "P3", PortType.NUMBER, "1", "Fourth control point"),
+      PortDefinition.inputWithDefault("t", "T", PortType.NUMBER, "0.5", "Interpolation factor (0-1)")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Interpolated value")
+    )
+    .description("Performs cubic B-spline curve interpolation")
+    .icon("bezier-curve")
+    .color("#2196F3")
+    .addKeywords("bspline", "spline", "curve", "interpolate")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "p0", NodeValue.ofNumber(0.0),
-      "p1", NodeValue.ofNumber(0.0),
-      "p2", NodeValue.ofNumber(1.0),
-      "p3", NodeValue.ofNumber(1.0),
-      "t", NodeValue.ofNumber(0.5)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

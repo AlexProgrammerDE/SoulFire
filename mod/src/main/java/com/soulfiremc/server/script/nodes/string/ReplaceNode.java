@@ -17,32 +17,39 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /// String node that replaces occurrences of a substring.
 /// Inputs: text, search, replacement, replaceAll (boolean)
 /// Output: result
 public final class ReplaceNode extends AbstractScriptNode {
-  public static final String TYPE = "string.replace";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.replace")
+    .displayName("Replace")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string"),
+      PortDefinition.inputWithDefault("search", "Search", PortType.STRING, "\"\"", "Substring to search for"),
+      PortDefinition.inputWithDefault("replacement", "Replacement", PortType.STRING, "\"\"", "Replacement string"),
+      PortDefinition.inputWithDefault("replaceAll", "Replace All", PortType.BOOLEAN, "true", "Replace all occurrences or just the first")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "String with replacements made")
+    )
+    .description("Replaces occurrences of a substring with another string")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "replace", "substitute", "swap")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "text", NodeValue.ofString(""),
-      "search", NodeValue.ofString(""),
-      "replacement", NodeValue.ofString(""),
-      "replaceAll", NodeValue.ofBoolean(true)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override
@@ -58,7 +65,7 @@ public final class ReplaceNode extends AbstractScriptNode {
     } else if (replaceAll) {
       resultText = text.replace(search, replacement);
     } else {
-      resultText = text.replaceFirst(java.util.regex.Pattern.quote(search), java.util.regex.Matcher.quoteReplacement(replacement));
+      resultText = text.replaceFirst(Pattern.quote(search), Matcher.quoteReplacement(replacement));
     }
 
     return completed(result("result", resultText));

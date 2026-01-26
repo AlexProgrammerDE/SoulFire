@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Trigger node that fires when the bot joins the server.
 /// Outputs: bot (the bot that joined), serverAddress, username
 public final class OnJoinNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_join";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_join")
+    .displayName("On Join")
+    .category(NodeCategory.TRIGGERS)
+    .addInputs()
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that joined"),
+      PortDefinition.output("serverAddress", "Server Address", PortType.STRING, "The server address"),
+      PortDefinition.output("username", "Username", PortType.STRING, "The bot's username")
+    )
+    .isTrigger(true)
+    .description("Fires when the bot joins the server")
+    .icon("log-in")
+    .color("#4CAF50")
+    .addKeywords("join", "connect", "login", "server", "spawn")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public boolean isTrigger() {
-    return true;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

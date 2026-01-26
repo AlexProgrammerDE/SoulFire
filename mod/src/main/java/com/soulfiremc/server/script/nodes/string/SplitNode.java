@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,16 +29,26 @@ import java.util.regex.Pattern;
 /// Inputs: text, delimiter
 /// Output: result (List of strings)
 public final class SplitNode extends AbstractScriptNode {
-  public static final String TYPE = "string.split";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.split")
+    .displayName("Split")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to split"),
+      PortDefinition.inputWithDefault("delimiter", "Delimiter", PortType.STRING, "\" \"", "Delimiter to split by")
+    )
+    .addOutputs(
+      PortDefinition.listOutput("result", "Result", PortType.STRING, "List of split strings")
+    )
+    .description("Splits a string into a list by a delimiter")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "split", "divide", "separate", "tokenize")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""), "delimiter", NodeValue.ofString(" "));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

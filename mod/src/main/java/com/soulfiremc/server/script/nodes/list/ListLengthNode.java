@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: list
 /// Output: length
 public final class ListLengthNode extends AbstractScriptNode {
-  public static final String TYPE = "list.length";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.length")
+    .displayName("List Length")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The input list")
+    )
+    .addOutputs(
+      PortDefinition.output("length", "Length", PortType.NUMBER, "Number of items in the list")
+    )
+    .description("Returns the length of a list")
+    .icon("list")
+    .color("#00BCD4")
+    .addKeywords("list", "length", "count", "size")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

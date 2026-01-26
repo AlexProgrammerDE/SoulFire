@@ -18,9 +18,7 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.MouseClickHelper;
 
 import java.util.Map;
@@ -29,11 +27,26 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that makes the bot attack the entity it's looking at.
 /// Uses the bot's current view direction to determine the target.
 public final class AttackNode extends AbstractScriptNode {
-  public static final String TYPE = "action.attack";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.attack")
+    .displayName("Attack")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Makes the bot attack the entity it's looking at (left click)")
+    .icon("swords")
+    .color("#FF9800")
+    .addKeywords("attack", "hit", "fight", "damage", "combat", "left click")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

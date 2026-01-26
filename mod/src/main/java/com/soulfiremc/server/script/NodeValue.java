@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.script;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.soulfiremc.server.bot.BotConnection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -62,8 +58,8 @@ public sealed interface NodeValue {
       var array = new JsonArray();
       for (var item : list) {
         var itemValue = of(item);
-        if (itemValue instanceof Json json) {
-          array.add(json.element());
+        if (itemValue instanceof Json(JsonElement element)) {
+          array.add(element);
         } else {
           // Can't serialize non-JSON values in arrays, skip or convert to string
           array.add(item.toString());
@@ -75,8 +71,8 @@ public sealed interface NodeValue {
       var obj = new JsonObject();
       for (var entry : map.entrySet()) {
         var itemValue = of(entry.getValue());
-        if (itemValue instanceof Json json) {
-          obj.add(entry.getKey().toString(), json.element());
+        if (itemValue instanceof Json(JsonElement element)) {
+          obj.add(entry.getKey().toString(), element);
         }
       }
       return new Json(obj);
@@ -109,8 +105,8 @@ public sealed interface NodeValue {
   static NodeValue ofList(List<NodeValue> values) {
     var array = new JsonArray();
     for (var value : values) {
-      if (value instanceof Json json) {
-        array.add(json.element());
+      if (value instanceof Json(JsonElement element)) {
+        array.add(element);
       }
     }
     return new Json(array);
@@ -121,23 +117,28 @@ public sealed interface NodeValue {
     return new Bot(bot);
   }
 
+  /// Creates a NodeValue from a JsonElement.
+  static NodeValue fromJson(JsonElement element) {
+    return new Json(element);
+  }
+
   /// Checks if this value is null.
   default boolean isNull() {
-    return this instanceof Json json && json.element().isJsonNull();
+    return this instanceof Json(JsonElement element) && element.isJsonNull();
   }
 
   /// Gets this value as a string, or returns the default if not a string.
   default String asString(String defaultValue) {
-    if (this instanceof Json json && json.element().isJsonPrimitive()) {
-      return json.element().getAsString();
+    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
+      return element.getAsString();
     }
     return defaultValue;
   }
 
   /// Gets this value as a double, or returns the default if not a number.
   default double asDouble(double defaultValue) {
-    if (this instanceof Json json && json.element().isJsonPrimitive()) {
-      var primitive = json.element().getAsJsonPrimitive();
+    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
       if (primitive.isNumber()) {
         return primitive.getAsDouble();
       }
@@ -147,8 +148,8 @@ public sealed interface NodeValue {
 
   /// Gets this value as an int, or returns the default if not a number.
   default int asInt(int defaultValue) {
-    if (this instanceof Json json && json.element().isJsonPrimitive()) {
-      var primitive = json.element().getAsJsonPrimitive();
+    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
       if (primitive.isNumber()) {
         return primitive.getAsInt();
       }
@@ -158,8 +159,8 @@ public sealed interface NodeValue {
 
   /// Gets this value as a long, or returns the default if not a number.
   default long asLong(long defaultValue) {
-    if (this instanceof Json json && json.element().isJsonPrimitive()) {
-      var primitive = json.element().getAsJsonPrimitive();
+    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
       if (primitive.isNumber()) {
         return primitive.getAsLong();
       }
@@ -169,8 +170,8 @@ public sealed interface NodeValue {
 
   /// Gets this value as a boolean, or returns the default if not a boolean.
   default boolean asBoolean(boolean defaultValue) {
-    if (this instanceof Json json && json.element().isJsonPrimitive()) {
-      var primitive = json.element().getAsJsonPrimitive();
+    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
+      var primitive = element.getAsJsonPrimitive();
       if (primitive.isBoolean()) {
         return primitive.getAsBoolean();
       }
@@ -180,8 +181,8 @@ public sealed interface NodeValue {
 
   /// Gets this value as a list of NodeValues.
   default List<NodeValue> asList() {
-    if (this instanceof Json json && json.element().isJsonArray()) {
-      return StreamSupport.stream(json.element().getAsJsonArray().spliterator(), false)
+    if (this instanceof Json(JsonElement element) && element.isJsonArray()) {
+      return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
         .map(Json::new)
         .collect(Collectors.toList());
     }
@@ -190,9 +191,9 @@ public sealed interface NodeValue {
 
   /// Gets this value as a list of strings.
   default List<String> asStringList() {
-    if (this instanceof Json json && json.element().isJsonArray()) {
+    if (this instanceof Json(JsonElement element1) && element1.isJsonArray()) {
       var result = new ArrayList<String>();
-      for (var element : json.element().getAsJsonArray()) {
+      for (var element : element1.getAsJsonArray()) {
         if (element.isJsonPrimitive()) {
           result.add(element.getAsString());
         }
@@ -205,8 +206,8 @@ public sealed interface NodeValue {
   /// Gets this value as a BotConnection, or null if not a bot.
   @Nullable
   default BotConnection asBot() {
-    if (this instanceof Bot bot) {
-      return bot.bot();
+    if (this instanceof Bot(BotConnection bot1)) {
+      return bot1;
     }
     return null;
   }
@@ -214,8 +215,8 @@ public sealed interface NodeValue {
   /// Gets the raw JsonElement if this is a Json value.
   @Nullable
   default JsonElement asJsonElement() {
-    if (this instanceof Json json) {
-      return json.element();
+    if (this instanceof Json(JsonElement element)) {
+      return element;
     }
     return null;
   }

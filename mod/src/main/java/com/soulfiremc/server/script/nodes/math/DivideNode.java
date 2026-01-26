@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a / b (returns 0 if b is 0)
 public final class DivideNode extends AbstractScriptNode {
-  public static final String TYPE = "math.divide";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.divide")
+    .displayName("Divide")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Dividend"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "1", "Divisor")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "A divided by B")
+    )
+    .description("Divides A by B")
+    .icon("divide")
+    .color("#2196F3")
+    .addKeywords("divide", "quotient", "fraction", "arithmetic")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(1.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

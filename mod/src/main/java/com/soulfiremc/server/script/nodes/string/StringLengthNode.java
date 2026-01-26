@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: text
 /// Output: length
 public final class StringLengthNode extends AbstractScriptNode {
-  public static final String TYPE = "string.length";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.length")
+    .displayName("String Length")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string")
+    )
+    .addOutputs(
+      PortDefinition.output("length", "Length", PortType.NUMBER, "Length of the string")
+    )
+    .description("Returns the length of a string")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "length", "count", "size")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

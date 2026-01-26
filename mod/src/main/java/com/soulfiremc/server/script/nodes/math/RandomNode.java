@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -29,16 +27,26 @@ import java.util.concurrent.ThreadLocalRandom;
 /// Inputs: min (default 0), max (default 1)
 /// Output: result (random double between min and max)
 public final class RandomNode extends AbstractScriptNode {
-  public static final String TYPE = "math.random";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.random")
+    .displayName("Random")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("min", "Min", PortType.NUMBER, "0", "Minimum value"),
+      PortDefinition.inputWithDefault("max", "Max", PortType.NUMBER, "1", "Maximum value")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Random number between min and max")
+    )
+    .description("Generates a random number within a range")
+    .icon("shuffle")
+    .color("#2196F3")
+    .addKeywords("random", "rand", "chance", "dice")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("min", NodeValue.ofNumber(0.0), "max", NodeValue.ofNumber(1.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

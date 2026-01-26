@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.logic;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.Objects;
@@ -29,16 +27,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b, operator (one of: ==, !=, <, >, <=, >=)
 /// Output: result (boolean)
 public final class CompareNode extends AbstractScriptNode {
-  public static final String TYPE = "logic.compare";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("logic.compare")
+    .displayName("Compare")
+    .category(NodeCategory.LOGIC)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First value"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second value"),
+      PortDefinition.inputWithDefault("operator", "Operator", PortType.STRING, "\"==\"", "Comparison operator (==, !=, <, >, <=, >=)")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "Comparison result")
+    )
+    .description("Compares two values using a specified operator")
+    .icon("scale")
+    .color("#9C27B0")
+    .addKeywords("compare", "equal", "greater", "less", "equals")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0), "operator", NodeValue.ofString("=="));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

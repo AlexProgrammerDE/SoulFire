@@ -18,9 +18,7 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.phys.Vec3;
 
@@ -30,16 +28,29 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that makes the bot look at a specific position.
 /// Inputs: x, y, z (coordinates to look at)
 public final class LookAtNode extends AbstractScriptNode {
-  public static final String TYPE = "action.look_at";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.look_at")
+    .displayName("Look At")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "X coordinate to look at"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "0", "Y coordinate to look at"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Z coordinate to look at")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Makes the bot look at a specific position in the world")
+    .icon("eye")
+    .color("#FF9800")
+    .addKeywords("look", "face", "turn", "aim", "view")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0.0), "y", NodeValue.ofNumber(0.0), "z", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

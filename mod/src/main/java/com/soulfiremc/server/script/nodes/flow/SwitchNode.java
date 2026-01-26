@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -31,16 +29,33 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// The script executor should use the output to determine which branch to execute.
 public final class SwitchNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.switch";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.switch")
+    .displayName("Switch")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "\"\"", "Value to switch on"),
+      PortDefinition.inputWithDefault("cases", "Cases", PortType.STRING, "\"case1,case2,case3\"", "Comma-separated case values")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_default", "Default", PortType.EXEC, "Executes if no case matches"),
+      PortDefinition.output("exec_case0", "Case 0", PortType.EXEC, "Executes if first case matches"),
+      PortDefinition.output("exec_case1", "Case 1", PortType.EXEC, "Executes if second case matches"),
+      PortDefinition.output("exec_case2", "Case 2", PortType.EXEC, "Executes if third case matches"),
+      PortDefinition.output("branch", "Branch", PortType.STRING, "Which case matched"),
+      PortDefinition.output("caseIndex", "Case Index", PortType.NUMBER, "Index of matched case (-1 for default)"),
+      PortDefinition.output("matched", "Matched", PortType.BOOLEAN, "Whether any case matched")
+    )
+    .description("Performs a multi-way branch based on a value")
+    .icon("git-branch")
+    .color("#607D8B")
+    .addKeywords("switch", "case", "branch", "select")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofString(""), "cases", NodeValue.ofString("case1,case2,case3"));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

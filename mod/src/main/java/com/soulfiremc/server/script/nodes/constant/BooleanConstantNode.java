@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.constant;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,25 @@ import java.util.concurrent.CompletableFuture;
 /// Constant node that outputs a configurable boolean value.
 /// Output: value (boolean)
 public final class BooleanConstantNode extends AbstractScriptNode {
-  public static final String TYPE = "constant.boolean";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("constant.boolean")
+    .displayName("Boolean")
+    .category(NodeCategory.CONSTANTS)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.BOOLEAN, "false", "The constant value")
+    )
+    .addOutputs(
+      PortDefinition.output("value", "Value", PortType.BOOLEAN, "The constant value")
+    )
+    .description("Outputs a constant boolean value")
+    .icon("toggle-left")
+    .color("#FF9800")
+    .addKeywords("boolean", "bool", "true", "false", "constant", "value")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

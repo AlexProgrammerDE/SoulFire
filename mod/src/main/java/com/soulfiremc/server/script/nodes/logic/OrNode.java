@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.logic;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b (booleans)
 /// Output: result = a OR b
 public final class OrNode extends AbstractScriptNode {
-  public static final String TYPE = "logic.or";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("logic.or")
+    .displayName("Or")
+    .category(NodeCategory.LOGIC)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.BOOLEAN, "false", "First boolean"),
+      PortDefinition.inputWithDefault("b", "B", PortType.BOOLEAN, "false", "Second boolean")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "A OR B")
+    )
+    .description("Returns true if either input is true")
+    .icon("circle")
+    .color("#9C27B0")
+    .addKeywords("or", "either", "any", "logic")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofBoolean(false), "b", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

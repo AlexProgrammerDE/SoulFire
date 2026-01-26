@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: list, item
 /// Output: result (boolean)
 public final class ListContainsNode extends AbstractScriptNode {
-  public static final String TYPE = "list.contains";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.contains")
+    .displayName("List Contains")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The list to search in"),
+      PortDefinition.input("item", "Item", PortType.ANY, "The item to search for")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "Whether the list contains the item")
+    )
+    .description("Checks if a list contains a specific item")
+    .icon("search")
+    .color("#00BCD4")
+    .addKeywords("list", "contains", "includes", "has", "find", "search")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

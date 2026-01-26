@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,11 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that gets the bot's current position.
 /// Outputs: x, y, z (double coordinates)
 public final class GetPositionNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_position";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_position")
+    .displayName("Get Position")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get position from")
+    )
+    .addOutputs(
+      PortDefinition.output("x", "X", PortType.NUMBER, "X coordinate"),
+      PortDefinition.output("y", "Y", PortType.NUMBER, "Y coordinate"),
+      PortDefinition.output("z", "Z", PortType.NUMBER, "Z coordinate")
+    )
+    .description("Gets the bot's current position in the world")
+    .icon("map-pin")
+    .color("#9C27B0")
+    .addKeywords("position", "location", "coordinates", "xyz")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

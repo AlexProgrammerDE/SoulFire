@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: list, index
 /// Outputs: item, found (boolean)
 public final class GetAtNode extends AbstractScriptNode {
-  public static final String TYPE = "list.get_at";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.get_at")
+    .displayName("Get At Index")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The input list"),
+      PortDefinition.inputWithDefault("index", "Index", PortType.NUMBER, "0", "The index to retrieve (0-based)")
+    )
+    .addOutputs(
+      PortDefinition.output("item", "Item", PortType.ANY, "The item at the specified index"),
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the index was valid")
+    )
+    .description("Gets an item at a specific index in a list")
+    .icon("list-ordered")
+    .color("#00BCD4")
+    .addKeywords("list", "get", "index", "at", "element", "access")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()), "index", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,25 @@ import java.util.concurrent.CompletableFuture;
 /// Input: text
 /// Output: result
 public final class TrimNode extends AbstractScriptNode {
-  public static final String TYPE = "string.trim";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.trim")
+    .displayName("Trim")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "Trimmed string")
+    )
+    .description("Removes whitespace from both ends of a string")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "trim", "whitespace", "strip")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

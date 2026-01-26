@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,11 +26,23 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that returns all connected bots in the instance.
 /// Output: bots (List of BotConnection)
 public final class GetBotsNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_bots";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_bots")
+    .displayName("Get Bots")
+    .category(NodeCategory.DATA)
+    .addInputs()
+    .addOutputs(
+      PortDefinition.listOutput("bots", "Bots", PortType.BOT, "List of all connected bots")
+    )
+    .description("Returns all connected bots in the instance")
+    .icon("users")
+    .color("#9C27B0")
+    .addKeywords("bots", "all", "list", "connections")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

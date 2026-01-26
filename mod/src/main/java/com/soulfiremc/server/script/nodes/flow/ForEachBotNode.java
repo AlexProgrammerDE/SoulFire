@@ -17,12 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -32,31 +28,61 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// The bot output should be wired to downstream action nodes that need it.
 public final class ForEachBotNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.foreach_bot";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.foreach_bot")
+    .displayName("For Each Bot")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to iterate"),
+      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+    )
+    .addOutputs(
+      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each bot"),
+      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when iteration completes"),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "Current bot in iteration"),
+      PortDefinition.output("index", "Index", PortType.NUMBER, "Current bot index"),
+      PortDefinition.output("count", "Count", PortType.NUMBER, "Total number of bots"),
+      PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
+      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index")
+    )
+    .description("Iterates over each bot in a list")
+    .icon("users")
+    .color("#607D8B")
+    .addKeywords("foreach", "bot", "iterate", "loop")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var botValues = getListInput(inputs, "bots");
+    var currentIndex = getIntInput(inputs, "currentIndex", 0);
 
-    if (botValues.isEmpty()) {
-      return completed(results("bot", null, "index", -1, "count", 0));
+    var isComplete = currentIndex >= botValues.size();
+
+    if (isComplete) {
+      return completed(results(
+        "bot", null,
+        "index", currentIndex,
+        "count", botValues.size(),
+        "isComplete", true,
+        "nextIndex", currentIndex + 1
+      ));
     }
 
-    // This node works differently - it needs the ScriptEngine to handle iteration.
-    // For now, we output the first bot.
-    // The actual iteration is handled by the engine following execution edges.
-    var firstBotValue = botValues.getFirst();
-    var firstBot = firstBotValue.asBot();
+    var currentBotValue = botValues.get(currentIndex);
+    var currentBot = currentBotValue.asBot();
 
     return completed(results(
-      "bot", firstBot,
-      "index", 0,
-      "count", botValues.size()
+      "bot", currentBot,
+      "index", currentIndex,
+      "count", botValues.size(),
+      "isComplete", false,
+      "nextIndex", currentIndex + 1
     ));
   }
 }

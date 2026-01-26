@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Input: name (string, the bot's account name)
 /// Outputs: bot (BotConnection or null), found (boolean)
 public final class GetBotByNameNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_bot_by_name";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_bot_by_name")
+    .displayName("Get Bot By Name")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.inputWithDefault("name", "Name", PortType.STRING, "\"\"", "The bot's account name")
+    )
+    .addOutputs(
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The found bot (null if not found)"),
+      PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the bot was found")
+    )
+    .description("Finds a bot by its account name")
+    .icon("search")
+    .color("#9C27B0")
+    .addKeywords("bot", "name", "find", "get", "search")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("name", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

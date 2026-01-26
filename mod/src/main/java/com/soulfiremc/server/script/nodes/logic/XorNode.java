@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.logic;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a XOR b (true if exactly one is true)
 public final class XorNode extends AbstractScriptNode {
-  public static final String TYPE = "logic.xor";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("logic.xor")
+    .displayName("Xor")
+    .category(NodeCategory.LOGIC)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.BOOLEAN, "false", "First boolean"),
+      PortDefinition.inputWithDefault("b", "B", PortType.BOOLEAN, "false", "Second boolean")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "A XOR B")
+    )
+    .description("Returns true if exactly one input is true")
+    .icon("diff")
+    .color("#9C27B0")
+    .addKeywords("xor", "exclusive", "different", "logic")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofBoolean(false), "b", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

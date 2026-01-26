@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,28 @@ import java.util.concurrent.CompletableFuture;
 /// Input: slot (0-35 for main inventory, 36-39 for armor, 40 for offhand)
 /// Outputs: itemId (string), count (int), isEmpty (boolean)
 public final class GetInventoryNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_inventory";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_inventory")
+    .displayName("Get Inventory")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get inventory from"),
+      PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory slot (0-35 main, 36-39 armor, 40 offhand)")
+    )
+    .addOutputs(
+      PortDefinition.output("itemId", "Item ID", PortType.STRING, "The item's registry ID"),
+      PortDefinition.output("count", "Count", PortType.NUMBER, "Stack count"),
+      PortDefinition.output("isEmpty", "Is Empty", PortType.BOOLEAN, "Whether the slot is empty")
+    )
+    .description("Gets information about an item in a specific inventory slot")
+    .icon("backpack")
+    .color("#9C27B0")
+    .addKeywords("inventory", "item", "slot", "count", "stack")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("slot", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

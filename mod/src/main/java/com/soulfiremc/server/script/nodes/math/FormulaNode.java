@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -34,7 +32,29 @@ import java.util.concurrent.CompletableFuture;
 /// Supports basic math operators (+, -, *, /, %), parentheses,
 /// and Java Math functions (sin, cos, sqrt, abs, etc.) via JavaScript engine.
 public final class FormulaNode extends AbstractScriptNode {
-  public static final String TYPE = "math.formula";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.formula")
+    .displayName("Formula")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("expression", "Expression", PortType.STRING, "\"a + b\"", "Mathematical expression"),
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Variable a"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Variable b"),
+      PortDefinition.inputWithDefault("c", "C", PortType.NUMBER, "0", "Variable c"),
+      PortDefinition.inputWithDefault("d", "D", PortType.NUMBER, "0", "Variable d"),
+      PortDefinition.inputWithDefault("e", "E", PortType.NUMBER, "0", "Variable e"),
+      PortDefinition.inputWithDefault("f", "F", PortType.NUMBER, "0", "Variable f")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Expression result"),
+      PortDefinition.output("error", "Error", PortType.STRING, "Error message if any")
+    )
+    .description("Evaluates a custom mathematical expression")
+    .icon("function-square")
+    .color("#2196F3")
+    .addKeywords("formula", "expression", "evaluate", "math")
+    .build();
+
   private static final ScriptEngine ENGINE;
 
   static {
@@ -43,21 +63,8 @@ public final class FormulaNode extends AbstractScriptNode {
   }
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of(
-      "expression", NodeValue.ofString("a + b"),
-      "a", NodeValue.ofNumber(0.0),
-      "b", NodeValue.ofNumber(0.0),
-      "c", NodeValue.ofNumber(0.0),
-      "d", NodeValue.ofNumber(0.0),
-      "e", NodeValue.ofNumber(0.0),
-      "f", NodeValue.ofNumber(0.0)
-    );
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

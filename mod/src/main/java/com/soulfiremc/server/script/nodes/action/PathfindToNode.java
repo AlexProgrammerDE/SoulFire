@@ -31,40 +31,30 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: x, y, z (target coordinates)
 /// Output: success (boolean)
 public final class PathfindToNode extends AbstractScriptNode {
-  public static final String TYPE = "action.pathfind_to";
-  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.pathfind_to")
     .displayName("Pathfind To")
-    .description("Moves the bot to a target position using pathfinding. Completes when destination is reached.")
     .category(NodeCategory.ACTIONS)
-    .inputs(
+    .addInputs(
       PortDefinition.execIn(),
       PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to move"),
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Target X coordinate"),
       PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Target Y coordinate"),
       PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Target Z coordinate")
     )
-    .outputs(
+    .addOutputs(
       PortDefinition.execOut(),
       PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether pathfinding succeeded")
     )
+    .description("Moves the bot to a target position using pathfinding")
     .icon("route")
     .color("#FF9800")
-    .keywords("pathfind", "walk", "move", "goto", "navigate")
+    .addKeywords("pathfind", "walk", "move", "goto", "navigate")
     .build();
-
-  @Override
-  public String getType() {
-    return TYPE;
-  }
 
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0), "y", NodeValue.ofNumber(64), "z", NodeValue.ofNumber(0));
   }
 
   @Override

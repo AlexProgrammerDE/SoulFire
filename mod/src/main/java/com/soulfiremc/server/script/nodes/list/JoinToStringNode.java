@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.list;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -30,16 +27,26 @@ import java.util.stream.Collectors;
 /// Inputs: list, separator
 /// Output: result
 public final class JoinToStringNode extends AbstractScriptNode {
-  public static final String TYPE = "list.join";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("list.join")
+    .displayName("Join to String")
+    .category(NodeCategory.LIST)
+    .addInputs(
+      PortDefinition.listInput("list", "List", PortType.ANY, "The list to join"),
+      PortDefinition.inputWithDefault("separator", "Separator", PortType.STRING, "\", \"", "The separator between items")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "The joined string")
+    )
+    .description("Joins list items into a string with a separator")
+    .icon("text")
+    .color("#00BCD4")
+    .addKeywords("list", "join", "string", "concat", "combine", "separator")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("list", NodeValue.ofList(List.of()), "separator", NodeValue.ofString(", "));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

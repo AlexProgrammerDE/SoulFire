@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: text, prefix, ignoreCase
 /// Output: result (boolean)
 public final class StartsWithNode extends AbstractScriptNode {
-  public static final String TYPE = "string.starts_with";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.starts_with")
+    .displayName("Starts With")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to check"),
+      PortDefinition.inputWithDefault("prefix", "Prefix", PortType.STRING, "\"\"", "Prefix to check for"),
+      PortDefinition.inputWithDefault("ignoreCase", "Ignore Case", PortType.BOOLEAN, "false", "Whether to ignore case when checking")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "True if text starts with prefix")
+    )
+    .description("Checks if a string starts with a prefix")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "starts", "prefix", "begin")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""), "prefix", NodeValue.ofString(""), "ignoreCase", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

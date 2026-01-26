@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: base, exponent
 /// Output: result = base ^ exponent
 public final class PowNode extends AbstractScriptNode {
-  public static final String TYPE = "math.pow";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.pow")
+    .displayName("Power")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("base", "Base", PortType.NUMBER, "0", "Base number"),
+      PortDefinition.inputWithDefault("exponent", "Exponent", PortType.NUMBER, "1", "Exponent")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Base raised to exponent")
+    )
+    .description("Raises a number to a power")
+    .icon("superscript")
+    .color("#2196F3")
+    .addKeywords("pow", "power", "exponent", "raise")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("base", NodeValue.ofNumber(0.0), "exponent", NodeValue.ofNumber(1.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

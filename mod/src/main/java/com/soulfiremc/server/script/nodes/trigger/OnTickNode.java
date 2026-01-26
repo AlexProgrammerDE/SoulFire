@@ -25,25 +25,22 @@ import java.util.concurrent.CompletableFuture;
 /// Trigger node that fires every game tick (20 times per second).
 /// Outputs: bot (the bot that ticked), tickCount (ticks since script started)
 public final class OnTickNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_tick";
-  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_tick")
     .displayName("On Tick")
-    .description("Fires every game tick (20 times per second) for each bot")
-    .trigger()
-    .outputs(
+    .category(NodeCategory.TRIGGERS)
+    .addInputs()
+    .addOutputs(
       PortDefinition.execOut(),
       PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that ticked"),
       PortDefinition.output("tickCount", "Tick Count", PortType.NUMBER, "Ticks since script started")
     )
+    .isTrigger(true)
+    .description("Fires every game tick (20 times per second) for each bot")
     .icon("clock")
     .color("#4CAF50")
-    .keywords("tick", "update", "loop", "frame")
+    .addKeywords("tick", "update", "loop", "frame")
     .build();
-
-  @Override
-  public String getType() {
-    return TYPE;
-  }
 
   @Override
   public NodeMetadata getMetadata() {

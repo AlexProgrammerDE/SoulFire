@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a (start), b (end), t (interpolation factor 0-1)
 /// Output: result = a + (b - a) * t
 public final class LerpNode extends AbstractScriptNode {
-  public static final String TYPE = "math.lerp";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.lerp")
+    .displayName("Lerp")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "Start value"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "1", "End value"),
+      PortDefinition.inputWithDefault("t", "T", PortType.NUMBER, "0.5", "Interpolation factor (0-1)")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Interpolated value")
+    )
+    .description("Linearly interpolates between two values")
+    .icon("trending-up")
+    .color("#2196F3")
+    .addKeywords("lerp", "interpolate", "blend", "mix")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(1.0), "t", NodeValue.ofNumber(0.5));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

@@ -18,9 +18,7 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,28 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that sets the bot's rotation (yaw and pitch).
 /// Inputs: yaw (degrees, -180 to 180), pitch (degrees, -90 to 90)
 public final class SetRotationNode extends AbstractScriptNode {
-  public static final String TYPE = "action.set_rotation";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.set_rotation")
+    .displayName("Set Rotation")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("yaw", "Yaw", PortType.NUMBER, "0", "Horizontal rotation (-180 to 180)"),
+      PortDefinition.inputWithDefault("pitch", "Pitch", PortType.NUMBER, "0", "Vertical rotation (-90 to 90)")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Sets the bot's rotation (yaw and pitch in degrees)")
+    .icon("compass")
+    .color("#FF9800")
+    .addKeywords("rotation", "yaw", "pitch", "turn", "face", "angle")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("yaw", NodeValue.ofNumber(0.0), "pitch", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

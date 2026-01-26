@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,11 +25,26 @@ import java.util.concurrent.CompletableFuture;
 /// Data node that gets the bot's hunger/food information.
 /// Outputs: foodLevel (0-20), saturation (float)
 public final class GetHungerNode extends AbstractScriptNode {
-  public static final String TYPE = "data.get_hunger";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("data.get_hunger")
+    .displayName("Get Hunger")
+    .category(NodeCategory.DATA)
+    .addInputs(
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get hunger from")
+    )
+    .addOutputs(
+      PortDefinition.output("foodLevel", "Food Level", PortType.NUMBER, "Current food level (0-20)"),
+      PortDefinition.output("saturation", "Saturation", PortType.NUMBER, "Current saturation")
+    )
+    .description("Gets the bot's food level and saturation")
+    .icon("utensils")
+    .color("#9C27B0")
+    .addKeywords("hunger", "food", "saturation", "eat")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

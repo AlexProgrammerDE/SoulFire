@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: text, search, ignoreCase
 /// Output: result (boolean)
 public final class StringContainsNode extends AbstractScriptNode {
-  public static final String TYPE = "string.contains";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.contains")
+    .displayName("String Contains")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to search in"),
+      PortDefinition.inputWithDefault("search", "Search", PortType.STRING, "\"\"", "Substring to search for"),
+      PortDefinition.inputWithDefault("ignoreCase", "Ignore Case", PortType.BOOLEAN, "false", "Whether to ignore case when searching")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "True if text contains search string")
+    )
+    .description("Checks if a string contains a substring")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "contains", "includes", "has", "search", "find")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""), "search", NodeValue.ofString(""), "ignoreCase", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

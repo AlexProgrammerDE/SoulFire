@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.TimeUnit;
 /// Action node that delays execution for a specified duration.
 /// Input: durationMs (milliseconds to wait)
 public final class WaitNode extends AbstractScriptNode {
-  public static final String TYPE = "action.wait";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.wait")
+    .displayName("Wait")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("durationMs", "Duration (ms)", PortType.NUMBER, "1000", "Time to wait in milliseconds")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Delays execution for a specified duration in milliseconds")
+    .icon("clock")
+    .color("#FF9800")
+    .addKeywords("wait", "delay", "sleep", "pause", "timer")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("durationMs", NodeValue.ofNumber(1000L));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

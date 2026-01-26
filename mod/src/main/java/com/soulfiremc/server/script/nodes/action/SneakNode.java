@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,27 @@ import java.util.concurrent.CompletableFuture;
 /// Action node that toggles or sets the bot's sneaking state.
 /// Input: enabled (boolean) - whether to sneak
 public final class SneakNode extends AbstractScriptNode {
-  public static final String TYPE = "action.sneak";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.sneak")
+    .displayName("Sneak")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("enabled", "Enabled", PortType.BOOLEAN, "true", "Whether to sneak")
+    )
+    .addOutputs(
+      PortDefinition.execOut()
+    )
+    .description("Sets the bot's sneaking state")
+    .icon("chevron-down")
+    .color("#FF9800")
+    .addKeywords("sneak", "crouch", "shift", "stealth")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("enabled", NodeValue.ofBoolean(true));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

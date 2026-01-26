@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,21 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Input: intervalMs - the interval in milliseconds (default: 1000)
 /// Output: executionCount - number of times this trigger has fired
 public final class OnIntervalNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_interval";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_interval")
+    .displayName("On Interval")
+    .category(NodeCategory.TRIGGERS)
+    .addInputs(
+      PortDefinition.inputWithDefault("intervalMs", "Interval (ms)", PortType.NUMBER, "1000", "Interval in milliseconds between executions")
+    )
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("executionCount", "Execution Count", PortType.NUMBER, "Number of times this trigger has fired")
+    )
+    .isTrigger(true)
+    .description("Fires at a configurable interval")
+    .icon("timer")
+    .color("#4CAF50")
+    .addKeywords("interval", "timer", "repeat", "periodic", "schedule")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public boolean isTrigger() {
-    return true;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("intervalMs", NodeValue.ofNumber(1000L));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

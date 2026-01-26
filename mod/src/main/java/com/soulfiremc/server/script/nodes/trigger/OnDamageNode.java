@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,24 +25,37 @@ import java.util.concurrent.CompletableFuture;
 /// Trigger node that fires when the bot takes damage.
 /// Outputs: amount (float), source (string)
 public final class OnDamageNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_damage";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_damage")
+    .displayName("On Damage")
+    .category(NodeCategory.TRIGGERS)
+    .addInputs()
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that took damage"),
+      PortDefinition.output("amount", "Amount", PortType.NUMBER, "Amount of damage taken"),
+      PortDefinition.output("source", "Source", PortType.STRING, "Source of the damage")
+    )
+    .isTrigger(true)
+    .description("Fires when the bot takes damage")
+    .icon("heart-crack")
+    .color("#4CAF50")
+    .addKeywords("damage", "hurt", "health", "attack", "hit")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public boolean isTrigger() {
-    return true;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var bot = getBotInput(inputs);
     var amount = getFloatInput(inputs, "amount", 0f);
     var source = getStringInput(inputs, "source", "unknown");
 
     return completed(results(
+      "bot", bot,
       "amount", amount,
       "source", source
     ));

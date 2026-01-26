@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,28 @@ import java.util.concurrent.CompletableFuture;
 /// Trigger node that fires when a chat message is received.
 /// Outputs: bot (the bot that received the message), message (Component), messagePlainText, timestamp
 public final class OnChatNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_chat";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_chat")
+    .displayName("On Chat")
+    .category(NodeCategory.TRIGGERS)
+    .addInputs()
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that received the message"),
+      PortDefinition.output("message", "Message", PortType.ANY, "The chat message component"),
+      PortDefinition.output("messagePlainText", "Message (Plain Text)", PortType.STRING, "The chat message as plain text"),
+      PortDefinition.output("timestamp", "Timestamp", PortType.NUMBER, "Timestamp when the message was received")
+    )
+    .isTrigger(true)
+    .description("Fires when a chat message is received")
+    .icon("message-square")
+    .color("#4CAF50")
+    .addKeywords("chat", "message", "text", "say", "talk", "receive")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public boolean isTrigger() {
-    return true;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

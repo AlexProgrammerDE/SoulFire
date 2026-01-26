@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.util;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
@@ -29,16 +27,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: x, y, z
 /// Output: vector
 public final class CreateVector3Node extends AbstractScriptNode {
-  public static final String TYPE = "util.create_vector3";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("util.create_vector3")
+    .displayName("Create Vector3")
+    .category(NodeCategory.UTILITY)
+    .addInputs(
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "X component"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "0", "Y component"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Z component")
+    )
+    .addOutputs(
+      PortDefinition.output("vector", "Vector", PortType.VECTOR3, "Created 3D vector")
+    )
+    .description("Creates a 3D vector from x, y, z components")
+    .icon("box")
+    .color("#9C27B0")
+    .addKeywords("vector", "vec3", "position", "coordinates", "xyz", "create")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0.0), "y", NodeValue.ofNumber(0.0), "z", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

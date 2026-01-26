@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,26 @@ import java.util.concurrent.CompletableFuture;
 /// Trigger node that fires when the bot dies.
 /// Outputs: bot (the bot that died), deathMessage (string)
 public final class OnDeathNode extends AbstractScriptNode {
-  public static final String TYPE = "trigger.on_death";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("trigger.on_death")
+    .displayName("On Death")
+    .category(NodeCategory.TRIGGERS)
+    .addInputs()
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that died"),
+      PortDefinition.output("deathMessage", "Death Message", PortType.STRING, "The death message")
+    )
+    .isTrigger(true)
+    .description("Fires when the bot dies")
+    .icon("skull")
+    .color("#4CAF50")
+    .addKeywords("death", "die", "dead", "killed", "respawn")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public boolean isTrigger() {
-    return true;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

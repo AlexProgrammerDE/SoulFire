@@ -17,11 +17,8 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,16 +27,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: template, args (list of values)
 /// Output: result
 public final class FormatNode extends AbstractScriptNode {
-  public static final String TYPE = "string.format";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.format")
+    .displayName("Format")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("template", "Template", PortType.STRING, "\"\"", "Template string with {0}, {1}, etc. placeholders"),
+      PortDefinition.listInput("args", "Arguments", PortType.ANY, "List of values to substitute into placeholders")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.STRING, "Formatted string")
+    )
+    .description("Formats a template string by replacing {0}, {1}, etc. placeholders with arguments")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "format", "template", "placeholder", "interpolate")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("template", NodeValue.ofString(""), "args", NodeValue.ofList(List.of()));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

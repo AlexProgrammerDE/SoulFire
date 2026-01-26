@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.constant;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,29 @@ import java.util.concurrent.CompletableFuture;
 /// Constant node that outputs a configurable 3D vector (x, y, z).
 /// Outputs: x, y, z (number)
 public final class Vector3ConstantNode extends AbstractScriptNode {
-  public static final String TYPE = "constant.vector3";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("constant.vector3")
+    .displayName("Vector3")
+    .category(NodeCategory.CONSTANTS)
+    .addInputs(
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "X component"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "0", "Y component"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Z component")
+    )
+    .addOutputs(
+      PortDefinition.output("x", "X", PortType.NUMBER, "X component"),
+      PortDefinition.output("y", "Y", PortType.NUMBER, "Y component"),
+      PortDefinition.output("z", "Z", PortType.NUMBER, "Z component")
+    )
+    .description("Outputs a constant 3D vector with x, y, z components")
+    .icon("move-3d")
+    .color("#9C27B0")
+    .addKeywords("vector", "vector3", "xyz", "position", "coordinate", "constant")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0.0), "y", NodeValue.ofNumber(0.0), "z", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

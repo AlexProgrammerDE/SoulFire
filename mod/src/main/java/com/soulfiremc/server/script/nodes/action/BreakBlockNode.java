@@ -21,9 +21,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,16 +31,30 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: x, y, z (block coordinates)
 /// Output: success (boolean)
 public final class BreakBlockNode extends AbstractScriptNode {
-  public static final String TYPE = "action.break_block";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("action.break_block")
+    .displayName("Break Block")
+    .category(NodeCategory.ACTIONS)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Block Y coordinate"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Block Z coordinate")
+    )
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether the block was broken")
+    )
+    .description("Pathfinds to and breaks a block at the specified position")
+    .icon("pickaxe")
+    .color("#FF9800")
+    .addKeywords("break", "mine", "dig", "destroy", "block")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("x", NodeValue.ofNumber(0), "y", NodeValue.ofNumber(64), "z", NodeValue.ofNumber(0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

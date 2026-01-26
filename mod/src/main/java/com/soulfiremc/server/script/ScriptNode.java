@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.server.script;
 
+import com.google.gson.JsonParser;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,17 +30,20 @@ import java.util.concurrent.CompletableFuture;
 /// They have access to a minimal runtime API (instance, scheduler, pending ops)
 /// but not to execution machinery like output storage or cancellation state.
 public interface ScriptNode {
-  /// Returns the unique type identifier for this node.
-  /// This is used to match node definitions from the proto with their implementations.
-  ///
-  /// @return the node type identifier (e.g., "trigger.on_start", "action.pathfind")
-  String getType();
-
   /// Returns the complete metadata for this node type.
   /// Used by clients to render the node without hardcoded knowledge.
+  /// This method must be implemented by all nodes - there is no default.
   ///
   /// @return the node metadata including ports, display name, category, etc.
   NodeMetadata getMetadata();
+
+  /// Returns the unique type identifier for this node.
+  /// Derived from metadata - no need to override.
+  ///
+  /// @return the node type identifier (e.g., "trigger.on_start", "action.pathfind")
+  default String getId() {
+    return getMetadata().type();
+  }
 
   /// Executes this node with the given runtime and inputs.
   /// The execution can be asynchronous for operations like pathfinding or block breaking.
@@ -56,10 +62,32 @@ public interface ScriptNode {
   }
 
   /// Returns the default values for this node's inputs.
-  /// These are used when an input is not connected to another node.
+  /// Automatically derived from port definitions in metadata.
+  /// Override only if you need special default value handling.
   ///
   /// @return a map of input names to their default values
   default Map<String, NodeValue> getDefaultInputs() {
-    return Map.of();
+    var metadata = getMetadata();
+    var defaults = new HashMap<String, NodeValue>();
+
+    for (var input : metadata.inputs()) {
+      // Skip execution ports
+      if (input.type() == PortType.EXEC) {
+        continue;
+      }
+
+      var defaultValueStr = input.defaultValue();
+      if (defaultValueStr != null && !defaultValueStr.isEmpty()) {
+        try {
+          var jsonElement = JsonParser.parseString(defaultValueStr);
+          defaults.put(input.id(), NodeValue.fromJson(jsonElement));
+        } catch (Exception e) {
+          // If JSON parsing fails, treat as raw string
+          defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
+        }
+      }
+    }
+
+    return defaults;
   }
 }

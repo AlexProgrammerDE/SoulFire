@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.string;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,27 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: text, suffix, ignoreCase
 /// Output: result (boolean)
 public final class EndsWithNode extends AbstractScriptNode {
-  public static final String TYPE = "string.ends_with";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("string.ends_with")
+    .displayName("Ends With")
+    .category(NodeCategory.STRING)
+    .addInputs(
+      PortDefinition.inputWithDefault("text", "Text", PortType.STRING, "\"\"", "Input string to check"),
+      PortDefinition.inputWithDefault("suffix", "Suffix", PortType.STRING, "\"\"", "Suffix to check for"),
+      PortDefinition.inputWithDefault("ignoreCase", "Ignore Case", PortType.BOOLEAN, "false", "Whether to ignore case when checking")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.BOOLEAN, "True if text ends with suffix")
+    )
+    .description("Checks if a string ends with a suffix")
+    .icon("text")
+    .color("#8BC34A")
+    .addKeywords("string", "ends", "suffix", "end")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("text", NodeValue.ofString(""), "suffix", NodeValue.ofString(""), "ignoreCase", NodeValue.ofBoolean(false));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

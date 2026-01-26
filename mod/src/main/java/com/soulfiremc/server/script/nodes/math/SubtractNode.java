@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,16 +26,26 @@ import java.util.concurrent.CompletableFuture;
 /// Inputs: a, b
 /// Output: result = a - b
 public final class SubtractNode extends AbstractScriptNode {
-  public static final String TYPE = "math.subtract";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("math.subtract")
+    .displayName("Subtract")
+    .category(NodeCategory.MATH)
+    .addInputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")
+    )
+    .addOutputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "A minus B")
+    )
+    .description("Subtracts B from A")
+    .icon("minus")
+    .color("#2196F3")
+    .addKeywords("subtract", "minus", "difference", "arithmetic")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("a", NodeValue.ofNumber(0.0), "b", NodeValue.ofNumber(0.0));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

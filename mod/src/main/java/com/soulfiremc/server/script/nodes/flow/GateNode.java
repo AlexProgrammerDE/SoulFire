@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.flow;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -32,16 +30,29 @@ import java.util.concurrent.CompletableFuture;
 ///
 /// Acts as a conditional gate - if condition is false, the output stops here.
 public final class GateNode extends AbstractScriptNode {
-  public static final String TYPE = "flow.gate";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("flow.gate")
+    .displayName("Gate")
+    .category(NodeCategory.FLOW)
+    .addInputs(
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("condition", "Condition", PortType.BOOLEAN, "true", "Whether to allow pass-through"),
+      PortDefinition.input("value", "Value", PortType.ANY, "Value to pass through")
+    )
+    .addOutputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("passed", "Passed", PortType.BOOLEAN, "Whether execution was allowed"),
+      PortDefinition.output("value", "Value", PortType.ANY, "The passed-through value")
+    )
+    .description("Conditionally passes through execution and values")
+    .icon("toggle-right")
+    .color("#607D8B")
+    .addKeywords("gate", "filter", "pass", "block", "conditional")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("condition", NodeValue.ofBoolean(true), "value", NodeValue.ofNull());
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

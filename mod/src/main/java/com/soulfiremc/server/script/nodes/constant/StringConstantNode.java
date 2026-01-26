@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.constant;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +25,25 @@ import java.util.concurrent.CompletableFuture;
 /// Constant node that outputs a configurable string value.
 /// Output: value (string)
 public final class StringConstantNode extends AbstractScriptNode {
-  public static final String TYPE = "constant.string";
+  private static final NodeMetadata METADATA = NodeMetadata.builder()
+    .type("constant.string")
+    .displayName("String")
+    .category(NodeCategory.CONSTANTS)
+    .addInputs(
+      PortDefinition.inputWithDefault("value", "Value", PortType.STRING, "", "The constant value")
+    )
+    .addOutputs(
+      PortDefinition.output("value", "Value", PortType.STRING, "The constant value")
+    )
+    .description("Outputs a constant string value")
+    .icon("type")
+    .color("#4CAF50")
+    .addKeywords("string", "text", "constant", "value")
+    .build();
 
   @Override
-  public String getType() {
-    return TYPE;
-  }
-
-  @Override
-  public Map<String, NodeValue> getDefaultInputs() {
-    return Map.of("value", NodeValue.ofString(""));
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override
