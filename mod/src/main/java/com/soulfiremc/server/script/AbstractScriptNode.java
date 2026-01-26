@@ -30,6 +30,46 @@ import java.util.concurrent.CompletableFuture;
 /// Abstract base class for script nodes providing common utility methods.
 public abstract class AbstractScriptNode implements ScriptNode {
 
+  /// Default metadata implementation that derives info from the type.
+  /// Subclasses should override this with complete metadata.
+  @Override
+  public NodeMetadata getMetadata() {
+    var type = getType();
+    var parts = type.split("\\.");
+    var category = parts.length > 1 ? capitalize(parts[0]) : "Other";
+    var name = parts.length > 1 ? toDisplayName(parts[1]) : toDisplayName(type);
+
+    return NodeMetadata.builder(type)
+      .displayName(name)
+      .description("") // Subclass should provide
+      .category(category)
+      .build();
+  }
+
+  private static String capitalize(String s) {
+    if (s == null || s.isEmpty()) return s;
+    return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+  }
+
+  private static String toDisplayName(String s) {
+    if (s == null || s.isEmpty()) return s;
+    // Convert snake_case to Title Case
+    var result = new StringBuilder();
+    var capitalizeNext = true;
+    for (char c : s.toCharArray()) {
+      if (c == '_') {
+        result.append(' ');
+        capitalizeNext = true;
+      } else if (capitalizeNext) {
+        result.append(Character.toUpperCase(c));
+        capitalizeNext = false;
+      } else {
+        result.append(c);
+      }
+    }
+    return result.toString();
+  }
+
   /// Helper method to get an input value with type casting.
   /// For non-JSON types like Vec3, extracts from the underlying JsonElement if possible.
   @SuppressWarnings("unchecked")

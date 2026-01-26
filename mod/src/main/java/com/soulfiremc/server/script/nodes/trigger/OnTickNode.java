@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.trigger;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +26,20 @@ import java.util.concurrent.CompletableFuture;
 /// Outputs: bot (the bot that ticked), tickCount (ticks since script started)
 public final class OnTickNode extends AbstractScriptNode {
   public static final String TYPE = "trigger.on_tick";
+  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+    .displayName("On Tick")
+    .description("Fires every game tick (20 times per second) for each bot")
+    .category("Triggers")
+    .trigger()
+    .outputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that ticked"),
+      PortDefinition.output("tickCount", "Tick Count", PortType.NUMBER, "Ticks since script started")
+    )
+    .icon("clock")
+    .color("#4CAF50")
+    .keywords("tick", "update", "loop", "frame")
+    .build();
 
   @Override
   public String getType() {
@@ -35,8 +47,8 @@ public final class OnTickNode extends AbstractScriptNode {
   }
 
   @Override
-  public boolean isTrigger() {
-    return true;
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

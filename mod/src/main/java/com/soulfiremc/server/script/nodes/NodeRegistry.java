@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes;
 
+import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.ScriptNode;
 import com.soulfiremc.server.script.nodes.action.*;
 import com.soulfiremc.server.script.nodes.constant.*;
@@ -29,10 +30,9 @@ import com.soulfiremc.server.script.nodes.string.*;
 import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /// Registry of all available script node types.
 /// Provides factory methods to create node instances by their type identifier.
@@ -197,5 +197,39 @@ public final class NodeRegistry {
   /// @return the count of registered types
   public static int getRegisteredCount() {
     return NODES.size();
+  }
+
+  /// Gets metadata for all registered node types.
+  /// @return list of all node metadata
+  public static List<NodeMetadata> getAllMetadata() {
+    return NODES.values().stream()
+      .map(Supplier::get)
+      .map(ScriptNode::getMetadata)
+      .toList();
+  }
+
+  /// Gets metadata for all registered node types, optionally filtered.
+  /// @param category optional category filter (null for all)
+  /// @param includeDeprecated whether to include deprecated nodes
+  /// @return list of matching node metadata
+  public static List<NodeMetadata> getFilteredMetadata(String category, boolean includeDeprecated) {
+    return NODES.values().stream()
+      .map(Supplier::get)
+      .map(ScriptNode::getMetadata)
+      .filter(m -> category == null || category.isEmpty() || m.category().equals(category))
+      .filter(m -> includeDeprecated || !m.deprecated())
+      .toList();
+  }
+
+  /// Gets all distinct categories from registered nodes.
+  /// @return sorted list of category names
+  public static List<String> getAllCategories() {
+    return NODES.values().stream()
+      .map(Supplier::get)
+      .map(ScriptNode::getMetadata)
+      .map(NodeMetadata::category)
+      .distinct()
+      .sorted()
+      .toList();
   }
 }

@@ -33,6 +33,12 @@ public interface ScriptNode {
   /// @return the node type identifier (e.g., "trigger.on_start", "action.pathfind")
   String getType();
 
+  /// Returns the complete metadata for this node type.
+  /// Used by clients to render the node without hardcoded knowledge.
+  ///
+  /// @return the node metadata including ports, display name, category, etc.
+  NodeMetadata getMetadata();
+
   /// Executes this node with the given runtime and inputs.
   /// The execution can be asynchronous for operations like pathfinding or block breaking.
   ///
@@ -46,7 +52,7 @@ public interface ScriptNode {
   ///
   /// @return true if this is a trigger node
   default boolean isTrigger() {
-    return false;
+    return getMetadata().isTrigger();
   }
 
   /// Returns the default values for this node's inputs.

@@ -17,9 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.math;
 
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -29,10 +27,30 @@ import java.util.concurrent.CompletableFuture;
 /// Output: result = a + b
 public final class AddNode extends AbstractScriptNode {
   public static final String TYPE = "math.add";
+  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+    .displayName("Add")
+    .description("Adds two numbers together")
+    .category("Math")
+    .inputs(
+      PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
+      PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")
+    )
+    .outputs(
+      PortDefinition.output("result", "Result", PortType.NUMBER, "Sum of A and B")
+    )
+    .icon("plus")
+    .color("#2196F3")
+    .keywords("add", "plus", "sum", "arithmetic")
+    .build();
 
   @Override
   public String getType() {
     return TYPE;
+  }
+
+  @Override
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override

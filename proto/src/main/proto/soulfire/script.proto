@@ -19,6 +19,33 @@ enum EdgeType {
   EDGE_TYPE_DATA = 1;
 }
 
+// The data type of a node port.
+// Used for validation and UI rendering of connections.
+enum PortType {
+  // Any type - accepts all values. Used for generic nodes.
+  PORT_TYPE_ANY = 0;
+  // Numeric value (integer or floating point).
+  PORT_TYPE_NUMBER = 1;
+  // Text string value.
+  PORT_TYPE_STRING = 2;
+  // Boolean true/false value.
+  PORT_TYPE_BOOLEAN = 3;
+  // 3D vector with x, y, z components.
+  PORT_TYPE_VECTOR3 = 4;
+  // Reference to a bot connection.
+  PORT_TYPE_BOT = 5;
+  // List/array of values.
+  PORT_TYPE_LIST = 6;
+  // Execution flow port (not data).
+  PORT_TYPE_EXEC = 7;
+  // Block type identifier.
+  PORT_TYPE_BLOCK = 8;
+  // Entity reference.
+  PORT_TYPE_ENTITY = 9;
+  // Item stack reference.
+  PORT_TYPE_ITEM = 10;
+}
+
 // Log levels for script execution logging.
 // Maps to standard logging severity levels for filtering and display.
 enum LogLevel {
@@ -45,6 +72,70 @@ message Position {
   // The vertical position in canvas coordinates.
   // Positive values extend downward.
   double y = 2;
+}
+
+// Definition of a port (input or output) on a node type.
+// Describes the port's type, constraints, and display properties.
+message PortDefinition {
+  // The identifier for this port.
+  // Used in edge connections (source_handle/target_handle).
+  // Examples: "value", "target", "bot", "exec_in", "exec_out".
+  string id = 1;
+  // Human-readable name displayed in the UI.
+  // Examples: "Target Position", "Bot", "Message".
+  string display_name = 2;
+  // The data type this port accepts or produces.
+  PortType port_type = 3;
+  // Whether this input is required for the node to execute.
+  // Only applicable for input ports.
+  bool required = 4;
+  // Default value for this port when not connected (JSON-encoded).
+  // Only applicable for input ports.
+  optional string default_value = 5;
+  // Optional description explaining what this port is for.
+  string description = 6;
+  // For list ports, the type of elements in the list.
+  // Only applicable when port_type is PORT_TYPE_LIST.
+  optional PortType element_type = 7;
+}
+
+// Complete definition of a node type.
+// Contains all metadata needed to render the node in an editor
+// and validate its connections without hardcoded client knowledge.
+message NodeTypeDefinition {
+  // The unique type identifier for this node.
+  // Examples: "trigger.on_tick", "action.pathfind", "math.add".
+  string type = 1;
+  // Human-readable name displayed in the UI.
+  // Examples: "On Tick", "Pathfind To", "Add".
+  string display_name = 2;
+  // Description of what this node does.
+  // Displayed in tooltips and node palettes.
+  string description = 3;
+  // Category for organizing nodes in the palette.
+  // Examples: "Triggers", "Actions", "Math", "Logic", "Flow Control".
+  string category = 4;
+  // Whether this is a trigger node (entry point for execution).
+  // Trigger nodes have no execution input and start script flows.
+  bool is_trigger = 5;
+  // The input ports for this node type.
+  // Includes both data inputs and execution inputs.
+  repeated PortDefinition inputs = 6;
+  // The output ports for this node type.
+  // Includes both data outputs and execution outputs.
+  repeated PortDefinition outputs = 7;
+  // Optional icon identifier for rendering.
+  // Can be an icon name or emoji.
+  string icon = 8;
+  // Optional color hint for the node (hex color code).
+  // Used for visual distinction between node categories.
+  string color = 9;
+  // Keywords for searching/filtering nodes in the palette.
+  repeated string keywords = 10;
+  // Whether this node is deprecated and should be avoided.
+  bool deprecated = 11;
+  // If deprecated, message explaining what to use instead.
+  string deprecation_message = 12;
 }
 
 // Represents a single node in the visual script graph.
@@ -404,6 +495,27 @@ message SubscribeScriptLogsRequest {
   LogLevel min_level = 3;
 }
 
+// Request to get all available node types.
+// This enables clients to render nodes without hardcoded knowledge.
+message GetNodeTypesRequest {
+  // Optional filter by category.
+  // If empty, returns all node types.
+  optional string category = 1;
+  // Whether to include deprecated node types.
+  // Default is false.
+  bool include_deprecated = 2;
+}
+
+// Response containing all available node types.
+message GetNodeTypesResponse {
+  // List of all node type definitions.
+  // Clients can use this to render any node and validate connections.
+  repeated NodeTypeDefinition node_types = 1;
+  // List of distinct categories present in the node types.
+  // Useful for building category filters in the UI.
+  repeated string categories = 2;
+}
+
 // ScriptService provides management and execution capabilities for visual node-based
 // automation scripts within SoulFire.
 //
@@ -498,4 +610,11 @@ service ScriptService {
   // Errors: NOT_FOUND if instance or script does not exist
   // Errors: PERMISSION_DENIED if user lacks script log subscription permission
   rpc SubscribeScriptLogs (SubscribeScriptLogsRequest) returns (stream ScriptLogEntry) {}
+
+  // Gets all available node types with their metadata.
+  // This enables clients to render the node editor without hardcoded knowledge
+  // of specific node types. The response includes port definitions, categories,
+  // display names, and all other information needed to render and validate nodes.
+  // This endpoint is cacheable - node types only change between server versions.
+  rpc GetNodeTypes (GetNodeTypesRequest) returns (GetNodeTypesResponse) {}
 }

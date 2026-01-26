@@ -21,9 +21,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
-import com.soulfiremc.server.script.AbstractScriptNode;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -34,10 +32,34 @@ import java.util.concurrent.CompletableFuture;
 /// Output: success (boolean)
 public final class PathfindToNode extends AbstractScriptNode {
   public static final String TYPE = "action.pathfind_to";
+  private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
+    .displayName("Pathfind To")
+    .description("Moves the bot to a target position using pathfinding. Completes when destination is reached.")
+    .category("Actions")
+    .inputs(
+      PortDefinition.execIn(),
+      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to move"),
+      PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Target X coordinate"),
+      PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Target Y coordinate"),
+      PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Target Z coordinate")
+    )
+    .outputs(
+      PortDefinition.execOut(),
+      PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether pathfinding succeeded")
+    )
+    .icon("route")
+    .color("#FF9800")
+    .keywords("pathfind", "walk", "move", "goto", "navigate")
+    .build();
 
   @Override
   public String getType() {
     return TYPE;
+  }
+
+  @Override
+  public NodeMetadata getMetadata() {
+    return METADATA;
   }
 
   @Override
