@@ -28,6 +28,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.script.NodeCategory;
 import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.PortDefinition;
@@ -483,10 +484,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   public void getNodeTypes(GetNodeTypesRequest request, StreamObserver<GetNodeTypesResponse> responseObserver) {
     // No authentication required - node types are public metadata
     try {
-      var category = request.hasCategory() ? request.getCategory() : null;
+      var categoryId = request.hasCategory() ? request.getCategory() : null;
       var includeDeprecated = request.getIncludeDeprecated();
 
-      var metadata = NodeRegistry.getFilteredMetadata(category, includeDeprecated);
+      var metadata = NodeRegistry.getFilteredMetadata(categoryId, includeDeprecated);
       var categories = NodeRegistry.getAllCategories();
 
       var responseBuilder = GetNodeTypesResponse.newBuilder();
@@ -495,7 +496,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         responseBuilder.addNodeTypes(metadataToProto(nodeMeta));
       }
 
-      responseBuilder.addAllCategories(categories);
+      for (var category : categories) {
+        responseBuilder.addCategories(categoryToProto(category));
+      }
 
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
@@ -505,19 +508,27 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
   }
 
+  private CategoryDefinition categoryToProto(NodeCategory category) {
+    return CategoryDefinition.newBuilder()
+      .setId(category.id())
+      .setDisplayName(category.displayName())
+      .setIcon(category.icon())
+      .setDescription(category.description())
+      .setSortOrder(category.sortOrder())
+      .build();
+  }
+
   private NodeTypeDefinition metadataToProto(NodeMetadata metadata) {
     var builder = NodeTypeDefinition.newBuilder()
       .setType(metadata.type())
       .setDisplayName(metadata.displayName())
       .setDescription(metadata.description())
-      .setCategory(metadata.category())
+      .setCategory(metadata.category().id())
       .setIsTrigger(metadata.isTrigger())
       .addAllKeywords(metadata.keywords())
-      .setDeprecated(metadata.deprecated());
+      .setDeprecated(metadata.deprecated())
+      .setIcon(metadata.icon());
 
-    if (metadata.icon() != null) {
-      builder.setIcon(metadata.icon());
-    }
     if (metadata.color() != null) {
       builder.setColor(metadata.color());
     }

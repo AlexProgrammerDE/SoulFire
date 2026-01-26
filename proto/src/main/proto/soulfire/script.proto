@@ -506,14 +506,31 @@ message GetNodeTypesRequest {
   bool include_deprecated = 2;
 }
 
+// Definition of a node category for organizing the node palette.
+message CategoryDefinition {
+  // The unique identifier for this category.
+  // Examples: "triggers", "actions", "math", "logic".
+  string id = 1;
+  // Human-readable name displayed in the UI.
+  // Examples: "Triggers", "Actions", "Math", "Logic".
+  string display_name = 2;
+  // Icon identifier for the category.
+  // Examples: "zap", "play", "calculator", "git-branch".
+  string icon = 3;
+  // Optional description of this category.
+  string description = 4;
+  // Sort order for displaying categories (lower = earlier).
+  int32 sort_order = 5;
+}
+
 // Response containing all available node types.
 message GetNodeTypesResponse {
   // List of all node type definitions.
   // Clients can use this to render any node and validate connections.
   repeated NodeTypeDefinition node_types = 1;
-  // List of distinct categories present in the node types.
-  // Useful for building category filters in the UI.
-  repeated string categories = 2;
+  // List of all categories with their metadata.
+  // Useful for building category filters and palette sections in the UI.
+  repeated CategoryDefinition categories = 2;
 }
 
 // ScriptService provides management and execution capabilities for visual node-based

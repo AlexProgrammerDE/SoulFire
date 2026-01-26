@@ -36,19 +36,37 @@ public abstract class AbstractScriptNode implements ScriptNode {
   public NodeMetadata getMetadata() {
     var type = getType();
     var parts = type.split("\\.");
-    var category = parts.length > 1 ? capitalize(parts[0]) : "Other";
+    var categoryId = parts.length > 1 ? parts[0] : "utility";
+    var category = categoryFromId(categoryId);
     var name = parts.length > 1 ? toDisplayName(parts[1]) : toDisplayName(type);
+    var icon = iconForCategory(category);
 
     return NodeMetadata.builder(type)
       .displayName(name)
       .description("") // Subclass should provide
       .category(category)
+      .icon(icon)
       .build();
   }
 
-  private static String capitalize(String s) {
-    if (s == null || s.isEmpty()) return s;
-    return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+  private static NodeCategory categoryFromId(String id) {
+    return switch (id) {
+      case "trigger" -> NodeCategory.TRIGGERS;
+      case "action" -> NodeCategory.ACTIONS;
+      case "data" -> NodeCategory.DATA;
+      case "flow" -> NodeCategory.FLOW;
+      case "logic" -> NodeCategory.LOGIC;
+      case "math" -> NodeCategory.MATH;
+      case "string" -> NodeCategory.STRING;
+      case "list" -> NodeCategory.LIST;
+      case "constant" -> NodeCategory.CONSTANTS;
+      case "util" -> NodeCategory.UTILITY;
+      default -> NodeCategory.UTILITY;
+    };
+  }
+
+  private static String iconForCategory(NodeCategory category) {
+    return category.icon();
   }
 
   private static String toDisplayName(String s) {

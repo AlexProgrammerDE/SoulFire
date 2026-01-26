@@ -30,7 +30,7 @@ public final class AddNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
     .displayName("Add")
     .description("Adds two numbers together")
-    .category("Math")
+    .category(NodeCategory.MATH)
     .inputs(
       PortDefinition.inputWithDefault("a", "A", PortType.NUMBER, "0", "First number"),
       PortDefinition.inputWithDefault("b", "B", PortType.NUMBER, "0", "Second number")

@@ -29,7 +29,6 @@ public final class OnTickNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder(TYPE)
     .displayName("On Tick")
     .description("Fires every game tick (20 times per second) for each bot")
-    .category("Triggers")
     .trigger()
     .outputs(
       PortDefinition.execOut(),

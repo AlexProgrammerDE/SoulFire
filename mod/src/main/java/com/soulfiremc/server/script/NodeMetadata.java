@@ -32,7 +32,7 @@ import java.util.List;
 /// @param isTrigger          whether this is a trigger (entry point) node
 /// @param inputs             input port definitions
 /// @param outputs            output port definitions
-/// @param icon               optional icon identifier
+/// @param icon               icon identifier (required)
 /// @param color              optional color hint (hex code)
 /// @param keywords           search keywords
 /// @param deprecated         whether this node is deprecated
@@ -41,11 +41,11 @@ public record NodeMetadata(
   String type,
   String displayName,
   String description,
-  String category,
+  NodeCategory category,
   boolean isTrigger,
   List<PortDefinition> inputs,
   List<PortDefinition> outputs,
-  @Nullable String icon,
+  String icon,
   @Nullable String color,
   List<String> keywords,
   boolean deprecated,
@@ -60,11 +60,11 @@ public record NodeMetadata(
     private final String type;
     private String displayName;
     private String description = "";
-    private String category = "Other";
+    private NodeCategory category = NodeCategory.UTILITY;
     private boolean isTrigger = false;
     private List<PortDefinition> inputs = List.of();
     private List<PortDefinition> outputs = List.of();
-    private @Nullable String icon;
+    private String icon = "box"; // Default icon
     private @Nullable String color;
     private List<String> keywords = List.of();
     private boolean deprecated = false;
@@ -85,13 +85,14 @@ public record NodeMetadata(
       return this;
     }
 
-    public Builder category(String category) {
+    public Builder category(NodeCategory category) {
       this.category = category;
       return this;
     }
 
     public Builder trigger() {
       this.isTrigger = true;
+      this.category = NodeCategory.TRIGGERS;
       return this;
     }
 

@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes;
 
+import com.soulfiremc.server.script.NodeCategory;
 import com.soulfiremc.server.script.NodeMetadata;
 import com.soulfiremc.server.script.ScriptNode;
 import com.soulfiremc.server.script.nodes.action.*;
@@ -209,27 +210,21 @@ public final class NodeRegistry {
   }
 
   /// Gets metadata for all registered node types, optionally filtered.
-  /// @param category optional category filter (null for all)
+  /// @param categoryId optional category ID filter (null for all)
   /// @param includeDeprecated whether to include deprecated nodes
   /// @return list of matching node metadata
-  public static List<NodeMetadata> getFilteredMetadata(String category, boolean includeDeprecated) {
+  public static List<NodeMetadata> getFilteredMetadata(String categoryId, boolean includeDeprecated) {
     return NODES.values().stream()
       .map(Supplier::get)
       .map(ScriptNode::getMetadata)
-      .filter(m -> category == null || category.isEmpty() || m.category().equals(category))
+      .filter(m -> categoryId == null || categoryId.isEmpty() || m.category().id().equals(categoryId))
       .filter(m -> includeDeprecated || !m.deprecated())
       .toList();
   }
 
-  /// Gets all distinct categories from registered nodes.
-  /// @return sorted list of category names
-  public static List<String> getAllCategories() {
-    return NODES.values().stream()
-      .map(Supplier::get)
-      .map(ScriptNode::getMetadata)
-      .map(NodeMetadata::category)
-      .distinct()
-      .sorted()
-      .toList();
+  /// Gets all categories sorted by sort order.
+  /// @return sorted list of all NodeCategory values
+  public static List<NodeCategory> getAllCategories() {
+    return NodeCategory.allSorted();
   }
 }
