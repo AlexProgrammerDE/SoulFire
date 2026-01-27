@@ -594,6 +594,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setPortType(PortType.PORT_TYPE_EXEC)
         .setColor("#ffffff")
         .setDisplayName("Execution")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_SQUARE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_ANIMATED)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_NUMBER)
@@ -601,6 +603,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setDisplayName("Number")
         .addCompatibleFrom(PortType.PORT_TYPE_STRING)
         .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_BOOLEAN)
@@ -608,6 +612,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setDisplayName("Boolean")
         .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
         .addCompatibleFrom(PortType.PORT_TYPE_STRING)
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_STRING)
@@ -615,36 +621,50 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setDisplayName("String")
         .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
         .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_VECTOR3)
         .setColor("#3b82f6")
         .setDisplayName("Vector3")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_ENTITY)
         .setColor("#a855f7")
         .setDisplayName("Entity")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_BOT)
         .setColor("#f97316")
         .setDisplayName("Bot")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_BLOCK)
         .setColor("#06b6d4")
         .setDisplayName("Block")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_ITEM)
         .setColor("#ec4899")
         .setDisplayName("Item")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_LIST)
         .setColor("#8b5cf6")
         .setDisplayName("List")
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build(),
       PortTypeMetadata.newBuilder()
         .setPortType(PortType.PORT_TYPE_ANY)
@@ -659,6 +679,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .addCompatibleFrom(PortType.PORT_TYPE_BLOCK)
         .addCompatibleFrom(PortType.PORT_TYPE_ITEM)
         .addCompatibleFrom(PortType.PORT_TYPE_LIST)
+        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
+        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
         .build()
     );
   }

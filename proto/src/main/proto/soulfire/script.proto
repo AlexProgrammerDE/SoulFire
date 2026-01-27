@@ -586,6 +586,26 @@ message GetNodeTypesResponse {
   repeated PortTypeMetadata port_type_metadata = 3;
 }
 
+// Shape of the port handle in the visual editor.
+enum HandleShape {
+  // Circular handle, default for data ports.
+  HANDLE_SHAPE_CIRCLE = 0;
+  // Square handle, typically used for execution/flow ports.
+  HANDLE_SHAPE_SQUARE = 1;
+  // Diamond-shaped handle, for special port types.
+  HANDLE_SHAPE_DIAMOND = 2;
+}
+
+// Visual style for edges connected to this port type.
+enum EdgeStyle {
+  // Default bezier curve style.
+  EDGE_STYLE_DEFAULT = 0;
+  // Animated flow style with moving dashes, typically for execution edges.
+  EDGE_STYLE_ANIMATED = 1;
+  // Dashed line style.
+  EDGE_STYLE_DASHED = 2;
+}
+
 // Metadata for a port type, enabling data-driven port rendering.
 message PortTypeMetadata {
   // The port type this metadata applies to.
@@ -597,6 +617,10 @@ message PortTypeMetadata {
   // List of port types that can be implicitly converted to this type.
   // Used for connection validation. Empty means only exact matches allowed.
   repeated PortType compatible_from = 4;
+  // Shape of the handle for this port type in the visual editor.
+  HandleShape handle_shape = 5;
+  // Visual style for edges of this port type.
+  EdgeStyle edge_style = 6;
 }
 
 // Request to get Minecraft registry data for autocomplete and validation.
