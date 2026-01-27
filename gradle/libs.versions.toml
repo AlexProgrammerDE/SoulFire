@@ -17,7 +17,7 @@ gradle-plugin-shadow = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
 gradle-plugin-lombok = "io.freefair.gradle:lombok-plugin:9.2.0"
 gradle-plugin-indra-git = "net.kyori:indra-git:4.0.0"
 gradle-plugin-loom = "net.fabricmc:fabric-loom:1.15.3"
-gradle-plugin-spotless = "com.diffplug.spotless:spotless-plugin-gradle:8.2.0"
+gradle-plugin-spotless = "com.diffplug.spotless:spotless-plugin-gradle:8.2.1"
 gradle-plugin-freefair = "io.freefair.gradle:maven-plugin:9.2.0"
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
@@ -40,7 +40,7 @@ gson = "com.google.code.gson:gson:2.13.2"
 fastutil = "it.unimi.dsi:fastutil:8.5.18"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
 jetbrains-annotations = "org.jetbrains:annotations:26.0.2-1"
-reflect = "net.lenni0451:Reflect:1.6.1"
+reflect = "net.lenni0451:Reflect:1.6.2"
 lambdaevents = "net.lenni0451:LambdaEvents:2.4.2"
 minecraftauth = "net.raphimc:MinecraftAuth:5.0.1-SNAPSHOT"
 grpc-proto = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
