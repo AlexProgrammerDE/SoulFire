@@ -22,8 +22,8 @@ import com.soulfiremc.server.script.*;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Trigger node that fires when the bot takes damage.
-/// Outputs: amount (float), source (string)
+/// Trigger node that fires when the bot takes damage (health decreases).
+/// Outputs: bot, amount, previousHealth, newHealth
 public final class OnDamageNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_damage")
@@ -34,10 +34,11 @@ public final class OnDamageNode extends AbstractScriptNode {
       PortDefinition.execOut(),
       PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that took damage"),
       PortDefinition.output("amount", "Amount", PortType.NUMBER, "Amount of damage taken"),
-      PortDefinition.output("source", "Source", PortType.STRING, "Source of the damage")
+      PortDefinition.output("previousHealth", "Previous Health", PortType.NUMBER, "Health before damage"),
+      PortDefinition.output("newHealth", "New Health", PortType.NUMBER, "Health after damage")
     )
     .isTrigger(true)
-    .description("Fires when the bot takes damage")
+    .description("Fires when the bot takes damage (health decreases)")
     .icon("heart-crack")
     .color("#4CAF50")
     .addKeywords("damage", "hurt", "health", "attack", "hit")
@@ -50,14 +51,17 @@ public final class OnDamageNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    // Trigger nodes pass through inputs from the trigger service
     var bot = getBotInput(inputs);
     var amount = getFloatInput(inputs, "amount", 0f);
-    var source = getStringInput(inputs, "source", "unknown");
+    var previousHealth = getFloatInput(inputs, "previousHealth", 0f);
+    var newHealth = getFloatInput(inputs, "newHealth", 0f);
 
     return completed(results(
       "bot", bot,
       "amount", amount,
-      "source", source
+      "previousHealth", previousHealth,
+      "newHealth", newHealth
     ));
   }
 }

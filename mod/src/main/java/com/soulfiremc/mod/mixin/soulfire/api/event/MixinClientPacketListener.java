@@ -20,20 +20,54 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotDamageEvent;
 import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
 import com.soulfiremc.server.bot.BotConnection;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
+  @Shadow
+  @Final
+  private Minecraft minecraft;
+
   @WrapOperation(method = "handlePlayerCombatKill",
     at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;shouldShowDeathScreen()Z"))
   private boolean shouldRespawnEvent(LocalPlayer instance, Operation<Boolean> original) {
     var event = new BotShouldRespawnEvent(BotConnection.CURRENT.get(), !original.call(instance));
     SoulFireAPI.postEvent(event);
     return !event.shouldRespawn();
+  }
+
+  @Inject(method = "handleSetHealth", at = @At("HEAD"))
+  private void onSetHealth(ClientboundSetHealthPacket packet, CallbackInfo ci) {
+    var player = this.minecraft.player;
+    if (player == null) {
+      return;
+    }
+
+    var previousHealth = player.getHealth();
+    var newHealth = packet.getHealth();
+
+    // Only fire damage event if health decreased
+    if (newHealth < previousHealth) {
+      var damageAmount = previousHealth - newHealth;
+      var event = new BotDamageEvent(
+        BotConnection.CURRENT.get(),
+        previousHealth,
+        newHealth,
+        damageAmount
+      );
+      SoulFireAPI.postEvent(event);
+    }
   }
 }

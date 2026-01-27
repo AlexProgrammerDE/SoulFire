@@ -20,6 +20,7 @@ package com.soulfiremc.server.script;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.SoulFireEvent;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
+import com.soulfiremc.server.api.event.bot.BotDamageEvent;
 import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
 import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
@@ -188,6 +189,37 @@ public final class ScriptTriggerService {
           SoulFireAPI.registerListener(BotConnectionInitEvent.class, handler);
           listeners.add(new EventListenerHolder<>(BotConnectionInitEvent.class, handler));
           log.debug("Registered OnJoin trigger for script {} node {}", scriptId, node.id());
+        }
+
+        case "trigger.on_damage" -> {
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnDamage trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
+          Consumer<BotDamageEvent> handler = event -> {
+            if (context.isCancelled()) return;
+
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("amount", NodeValue.ofNumber(event.damageAmount()));
+            inputs.put("previousHealth", NodeValue.ofNumber(event.previousHealth()));
+            inputs.put("newHealth", NodeValue.ofNumber(event.newHealth()));
+
+            sink.tryEmitNext(inputs);
+          };
+          SoulFireAPI.registerListener(BotDamageEvent.class, handler);
+          listeners.add(new EventListenerHolder<>(BotDamageEvent.class, handler));
+          log.debug("Registered OnDamage trigger for script {} node {}", scriptId, node.id());
         }
 
         case "trigger.on_interval" -> {
