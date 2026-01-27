@@ -497,118 +497,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         responseBuilder.addCategories(categoryToProto(category));
       }
 
-      // Add type conversion rules (Blender-style)
-      for (var conversion : com.soulfiremc.server.script.PortType.getAllConversions()) {
-        responseBuilder.addImplicitConversions(TypeConversion.newBuilder()
-          .setFromType(portTypeToProto(conversion.from()))
-          .setToType(portTypeToProto(conversion.to()))
-          .setConversionHint(conversion.hint())
-          .build());
-      }
-
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting node types", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
-  }
-
-  @Override
-  public void validateScript(ValidateScriptRequest request, StreamObserver<ValidateScriptResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getInstanceId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
-      PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
-
-    try {
-      // Build the graph from the request
-      var scriptData = request.getScript();
-      var builder = ScriptGraph.builder(scriptData.getId(), scriptData.getName());
-
-      // Add nodes
-      for (var node : scriptData.getNodesList()) {
-        Map<String, Object> defaultInputs = new HashMap<>();
-        for (var entry : node.getDataMap().entrySet()) {
-          defaultInputs.put(entry.getKey(), protoValueToObject(entry.getValue()));
-        }
-        builder.addNode(node.getId(), node.getType(), defaultInputs);
-      }
-
-      // Add edges
-      for (var edge : scriptData.getEdgesList()) {
-        if (edge.getEdgeType() == EdgeType.EDGE_TYPE_EXECUTION) {
-          builder.addExecutionEdge(edge.getSource(), edge.getSourceHandle(), edge.getTarget(), edge.getTargetHandle());
-        } else {
-          builder.addDataEdge(edge.getSource(), edge.getSourceHandle(), edge.getTarget(), edge.getTargetHandle());
-        }
-      }
-
-      var graph = builder.build();
-
-      // Validate the graph
-      var result = ScriptValidator.validate(graph);
-
-      // Build the response
-      var responseBuilder = ValidateScriptResponse.newBuilder()
-        .setValid(result.valid())
-        .addAllEdgesToRemove(result.edgesToRemove());
-
-      for (var error : result.errors()) {
-        var errorBuilder = ValidationError.newBuilder()
-          .setErrorType(validationErrorTypeToProto(error.type()))
-          .setMessage(error.message());
-
-        if (error.edgeId() != null) {
-          errorBuilder.setEdgeId(error.edgeId());
-        }
-        if (error.nodeId() != null) {
-          errorBuilder.setNodeId(error.nodeId());
-        }
-        if (error.portId() != null) {
-          errorBuilder.setPortId(error.portId());
-        }
-
-        responseBuilder.addErrors(errorBuilder.build());
-      }
-
-      responseObserver.onNext(responseBuilder.build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error validating script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
-    }
-  }
-
-  private ValidationErrorType validationErrorTypeToProto(ScriptValidator.ErrorType type) {
-    return switch (type) {
-      case MULTIPLE_CONNECTIONS -> ValidationErrorType.VALIDATION_ERROR_TYPE_MULTIPLE_CONNECTIONS;
-      case TYPE_INCOMPATIBLE -> ValidationErrorType.VALIDATION_ERROR_TYPE_TYPE_INCOMPATIBLE;
-      case REQUIRED_UNCONNECTED -> ValidationErrorType.VALIDATION_ERROR_TYPE_REQUIRED_UNCONNECTED;
-      case CYCLE_DETECTED -> ValidationErrorType.VALIDATION_ERROR_TYPE_CYCLE_DETECTED;
-      case INVALID_NODE_TYPE -> ValidationErrorType.VALIDATION_ERROR_TYPE_INVALID_NODE_TYPE;
-    };
-  }
-
-  private Object protoValueToObject(Value value) {
-    return switch (value.getKindCase()) {
-      case NULL_VALUE -> null;
-      case NUMBER_VALUE -> value.getNumberValue();
-      case STRING_VALUE -> value.getStringValue();
-      case BOOL_VALUE -> value.getBoolValue();
-      case STRUCT_VALUE -> {
-        var map = new HashMap<String, Object>();
-        for (var entry : value.getStructValue().getFieldsMap().entrySet()) {
-          map.put(entry.getKey(), protoValueToObject(entry.getValue()));
-        }
-        yield map;
-      }
-      case LIST_VALUE -> value.getListValue().getValuesList().stream()
-        .map(this::protoValueToObject)
-        .toList();
-      case KIND_NOT_SET -> null;
-    };
   }
 
   private CategoryDefinition categoryToProto(NodeCategory category) {
@@ -630,17 +524,13 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setIsTrigger(metadata.isTrigger())
       .addAllKeywords(metadata.keywords())
       .setDeprecated(metadata.deprecated())
-      .setIcon(metadata.icon())
-      .setHasDynamicVisibility(metadata.hasDynamicVisibility());
+      .setIcon(metadata.icon());
 
     if (metadata.color() != null) {
       builder.setColor(metadata.color());
     }
     if (metadata.deprecationMessage() != null) {
       builder.setDeprecationMessage(metadata.deprecationMessage());
-    }
-    if (metadata.visibilityControlField() != null) {
-      builder.setVisibilityControlField(metadata.visibilityControlField());
     }
 
     for (var input : metadata.inputs()) {
@@ -650,23 +540,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       builder.addOutputs(portDefinitionToProto(output));
     }
 
-    // Add dynamic socket groups
-    for (var group : metadata.dynamicGroups()) {
-      builder.addDynamicGroups(dynamicSocketGroupToProto(group));
-    }
-
     return builder.build();
-  }
-
-  private com.soulfiremc.grpc.generated.DynamicSocketGroup dynamicSocketGroupToProto(com.soulfiremc.server.script.DynamicSocketGroup group) {
-    return com.soulfiremc.grpc.generated.DynamicSocketGroup.newBuilder()
-      .setId(group.id())
-      .setDisplayName(group.displayName())
-      .setSocketTemplate(portDefinitionToProto(group.socketTemplate()))
-      .setMinCount(group.minCount())
-      .setMaxCount(group.maxCount())
-      .setIsInput(group.isInput())
-      .build();
   }
 
   private com.soulfiremc.grpc.generated.PortDefinition portDefinitionToProto(PortDefinition port) {
@@ -675,22 +549,13 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setDisplayName(port.displayName())
       .setPortType(portTypeToProto(port.type()))
       .setRequired(port.required())
-      .setDescription(port.description())
-      .setMaxConnections(port.maxConnections())
-      .setMultiInput(port.multiInput())
-      .setSortOrder(port.sortOrder());
+      .setDescription(port.description());
 
     if (port.defaultValue() != null) {
       builder.setDefaultValue(port.defaultValue());
     }
     if (port.elementType() != null) {
       builder.setElementType(portTypeToProto(port.elementType()));
-    }
-    if (port.visibleWhen() != null) {
-      builder.setVisibleWhen(port.visibleWhen());
-    }
-    if (port.dynamicGroup() != null) {
-      builder.setDynamicGroup(port.dynamicGroup());
     }
 
     return builder.build();

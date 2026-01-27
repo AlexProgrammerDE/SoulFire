@@ -56,11 +56,28 @@ public final class NodeRegistry {
     register(OnIntervalNode::new);
 
     // Math Nodes
-    register(MathOperationNode::new);  // Combined node with mode-based visibility
-    register(FormulaNode::new);        // Expression evaluator with variables
-    register(RandomNode::new);         // Random number generation
-    register(BSplineNode::new);        // B-spline interpolation
-    register(DistanceNode::new);       // Vector distance calculation
+    register(AddNode::new);
+    register(SubtractNode::new);
+    register(MultiplyNode::new);
+    register(DivideNode::new);
+    register(ModuloNode::new);
+    register(FormulaNode::new);
+    register(RandomNode::new);
+    register(ClampNode::new);
+    register(LerpNode::new);
+    register(BSplineNode::new);
+    register(AbsNode::new);
+    register(FloorNode::new);
+    register(CeilNode::new);
+    register(RoundNode::new);
+    register(MinNode::new);
+    register(MaxNode::new);
+    register(PowNode::new);
+    register(SqrtNode::new);
+    register(SinNode::new);
+    register(CosNode::new);
+    register(TanNode::new);
+    register(DistanceNode::new);
 
     // Logic Nodes
     register(CompareNode::new);
@@ -92,7 +109,6 @@ public final class NodeRegistry {
     register(ListContainsNode::new);
     register(RangeNode::new);
     register(JoinToStringNode::new);
-    register(ConcatListsNode::new);
 
     // Utility Nodes
     register(ToStringNode::new);
